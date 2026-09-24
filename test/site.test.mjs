@@ -116,7 +116,7 @@ test('a build for another host is a noindex preview with no IndexNow key', async
   assert.match(html, /<link rel="canonical" href="https:\/\/x\.github\.io\/repo\/">/);
 });
 
-test('colour tokens: body text and --faint clear WCAG AA on every ground, in both themes', () => {
+test('colour tokens: text clears AA on every ground, and surfaces separate, in both themes', () => {
   const css = readFileSync('src/assets/site.css', 'utf8');
   const block = (sel) => css.slice(css.indexOf(sel)).split('}')[0];
   const tok = (b, name) => b.match(new RegExp(`--${name}:(#[0-9a-f]{6})`))[1];
@@ -132,6 +132,18 @@ test('colour tokens: body text and --faint clear WCAG AA on every ground, in bot
         const r = ratio(tok(b, fg), tok(b, ground));
         assert.ok(r >= 4.5, `${sel} --${fg} on --${ground} is ${r.toFixed(2)}:1`);
       }
+      for (const fg of ['accent', 'accent-ink', 'gold', 'ok']) {
+        const r = ratio(tok(b, fg), tok(b, ground));
+        assert.ok(r >= 4.5, `${sel} --${fg} on --${ground} is ${r.toFixed(2)}:1`);
+      }
     }
+    // Surfaces must separate (playbook: a card lifts off the page at about 1.25:1,
+    // a border reads against its card at about 1.40:1), and button text must be
+    // well clear of AA on the accent.
+    const sep = (x, y, min) => { const r = ratio(tok(b, x), tok(b, y)); assert.ok(r >= min, `${sel} --${x} against --${y} is ${r.toFixed(2)}:1, under ${min}`); };
+    sep('surface', 'bg', 1.25);
+    sep('surface-2', 'bg', 1.15);
+    sep('line', 'surface', 1.4);
+    sep('on-accent', 'accent', 5.5);
   }
 });
