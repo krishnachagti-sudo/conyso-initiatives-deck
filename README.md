@@ -55,16 +55,27 @@ Chromium for the PDF export (`CHROME_BIN`, or the preinstalled
 ```
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 npm run check                 # the card checker: a failure blocks release
-npm run build                 # every deck in decks/ → dist/decks/<slug>/, every format
+npm run build                 # decks/ → dist/: home page, dist/<slug>/ (page + every format), sitemap, llms.txt
+npm run preflight             # canonicals, JSON-LD, internal links and downloads, no private email
+npm run sources               # every card's source link answers
 npm test                      # the test suite
 node build/build.mjs --fixtures --only=csv,json   # the fictional test deck, some formats
 ```
 
+`dist/` is uploaded as-is to the address in `site.config.json` (working
+values: `https://conyso.com/decks/`). Each deck page sits in the same
+directory as its downloads. CI (`.github/workflows/ci.yml`) runs the tests,
+checker, build and preflight on every push, and the source-link check weekly.
+
 The layout:
 - `decks/<slug>/deck.json` and `decks/<slug>/notes/*.json` (one file per topic);
+  `pageBase` may be left out, and is then derived from `site.config.json`;
 - `concepts/<family>.json` (the concept registry);
 - the frozen card shape in `src/schema.mjs`, pinned by `src/schema.lock.json`;
-- the exporters in `src/exporters/`, one per format.
+- the exporters in `src/exporters/`, one per format;
+- the site in `src/site/` (layout, deck page, home page, shared identity) and
+  `src/assets/` (one stylesheet; `study.js` for the browser study mode and the
+  workload planner, which never schedules reviews).
 
 ## Roadmap
 

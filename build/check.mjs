@@ -156,9 +156,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const flag = (n, d) => process.argv.find((a) => a.startsWith(`--${n}=`))?.split('=')[1] || d;
   const root = flag('decks', 'decks');
   const conceptsDir = flag('concepts', 'concepts');
+  const { readFileSync } = await import('node:fs');
+  const cfg = JSON.parse(readFileSync('site.config.json', 'utf8'));
   let total = 0;
   for (const dir of deckDirs(root)) {
     const deck = loadDeck(dir);
+    deck.meta.pageBase ||= `${cfg.origin}${cfg.base}${deck.meta.slug}/`; // as build.mjs does
     const problems = checkDeck(deck, { concepts: loadConcepts(conceptsDir, deck.meta.family) });
     total += problems.length;
     for (const p of problems) console.log(`${deck.meta.slug}  ${p.id}  [${p.rule}]  ${p.message}`);
