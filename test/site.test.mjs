@@ -1,7 +1,7 @@
 // The deck page, the shared identity, and the preflight gate.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, cpSync, rmSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
@@ -27,17 +27,27 @@ test('identity is byte-identical to the other Conyso properties', () => {
   assert.equal(FOUNDER.sameAs[0], FOUNDER.url);
 });
 
-test('deck page: sections in the §8 order, every card, and an anchor per topic', () => {
+test('deck page: the answer box first, then question sections in order, every card, an anchor per topic', () => {
   const html = deckPage(cfg, deck(), manifest);
-  const order = ['start-here', 'study', 'download', 'can-and-cannot', 'import', 'settings', 'how-to', 'behind', 'exam', 'cards', 'made', 'sources', 'licence'];
-  const at = order.map((id) => html.indexOf(`<section id="${id}"`));
+  assert.ok(html.indexOf('id="answer"') < html.indexOf('<section class="sec" id="path"'), 'the one question is answered before any section');
+  assert.match(html, /Will this deck teach me Example deck \(test fixture\) from zero\?/);
+  const order = ['path', 'try', 'download', 'time', 'import', 'method', 'limits', 'cards', 'sources', 'about'];
+  const at = order.map((id) => html.indexOf(`id="${id}" aria-labelledby`));
   assert.ok(at.every((i) => i > 0), 'every section present');
   assert.deepEqual(at, [...at].sort((a, b) => a - b), 'in order');
+  for (const id of order.filter((x) => x !== 'about')) assert.match(html, new RegExp(`<h2 id="${id}-h">[^<]*\\?</h2>`), `${id} heading is a question`);
   for (const n of deck().notes) assert.match(html, new RegExp(`id="${n.id.replace(/\./g, '\\.')}"`));
-  assert.match(html, /<section class="topic" id="widgets">/);
+  assert.match(html, /<details class="topic" id="t-widgets"/);
   assert.match(html, /<a href="example-0\.1\.0\.csv" download>/);
   assert.match(html, /<link rel="canonical" href="https:\/\/conyso\.com\/decks\/example\/">/);
-  assert.match(html, /noindex/, 'fixture decks are never indexed');
+  assert.match(html, /noindex/, 'unreleased decks are never indexed');
+});
+
+test('deck page: the answer box states counts the deck proves', () => {
+  const html = deckPage(cfg, deck(), manifest);
+  const primers = deck().notes.filter((n) => n.kind === 'primer').length;
+  assert.match(html, new RegExp(`${primers} primer cards explain every one of the ${primers} terms`));
+  assert.match(html, /you will have seen all 7 in 1 day\./);
 });
 
 test('deck page: study data parses and cannot close its script tag', () => {
@@ -48,7 +58,8 @@ test('deck page: study data parses and cannot close its script tag', () => {
   assert.ok(!raw.includes('<'));
   const data = JSON.parse(raw);
   assert.equal(data.length, 7);
-  assert.deepEqual(Object.keys(data[0]), ['id', 'kind', 'core', 'front', 'back']);
+  assert.deepEqual(Object.keys(data[0]).slice(0, 5), ['id', 'topic', 'kind', 'core', 'front']);
+  assert.ok(data.every((c) => c.answer && c.sourceURL));
 });
 
 test('deck page: LearningResource with publisher, author and downloads', () => {
@@ -63,22 +74,23 @@ test('deck page: LearningResource with publisher, author and downloads', () => {
   assert.equal(org.parentOrganization['@id'], CONYSO_ID);
 });
 
-test('home page lists decks by family and links each deck page', () => {
+test('home page lists every deck and links its page', () => {
   const html = homePage(cfg, [deck()]);
-  assert.match(html, /<a href="\/decks\/example\/">Example deck/);
-  assert.match(html, /7 cards/);
+  assert.match(html, /<a class="deck-card" href="\/decks\/example\/">/);
+  assert.match(html, /7 cards · 3 primers/);
 });
 
-test('preflight: passes a clean build, catches broken links, bad canonicals and a blocked email', () => {
+test('preflight: passes a clean build, catches broken links, bad canonicals and a blocked email', async () => {
   const dist = mkdtempSync(join(tmpdir(), 'dist-'));
   mkdirSync(join(dist, 'example'));
-  mkdirSync(join(dist, 'assets'));
-  writeFileSync(join(dist, 'assets', 'site.css'), '');
   writeFileSync(join(dist, 'example', 'example-0.1.0.csv'), 'Front,Back\r\n');
   writeFileSync(join(dist, 'example', 'index.html'), deckPage(cfg, deck(), manifest));
   writeFileSync(join(dist, 'index.html'), homePage(cfg, [deck()]));
-  const clean = preflight(dist, cfg).filter((p) => !p.message.includes('study.js'));
-  assert.deepEqual(clean, []);
+  const { methodPage, formatsPage } = await import('../src/site/hubs.mjs');
+  for (const [p, f] of [['method', methodPage], ['formats', formatsPage]]) { mkdirSync(join(dist, p)); writeFileSync(join(dist, p, 'index.html'), f(cfg, [deck()])); }
+  cpSync('src/assets', join(dist, 'assets'), { recursive: true });
+  assert.deepEqual(preflight(dist, cfg), []);
+  rmSync(join(dist, 'assets', 'study.js'));
   assert.ok(preflight(dist, cfg).some((p) => p.message === 'broken link /decks/assets/study.js'));
 
   const fake = 'someone@example.net';
@@ -102,4 +114,24 @@ test('a build for another host is a noindex preview with no IndexNow key', async
   const html = homePage(pv, [deck()]);
   assert.match(html, /<meta name="robots" content="noindex, nofollow">/);
   assert.match(html, /<link rel="canonical" href="https:\/\/x\.github\.io\/repo\/">/);
+});
+
+test('colour tokens: body text and --faint clear WCAG AA on every ground, in both themes', () => {
+  const css = readFileSync('src/assets/site.css', 'utf8');
+  const block = (sel) => css.slice(css.indexOf(sel)).split('}')[0];
+  const tok = (b, name) => b.match(new RegExp(`--${name}:(#[0-9a-f]{6})`))[1];
+  const lum = (hex) => {
+    const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  for (const sel of [':root{', 'html[data-theme="dark"]{']) {
+    const b = block(sel);
+    for (const ground of ['bg', 'surface', 'surface-2']) {
+      for (const fg of ['ink', 'read', 'muted', 'faint']) {
+        const r = ratio(tok(b, fg), tok(b, ground));
+        assert.ok(r >= 4.5, `${sel} --${fg} on --${ground} is ${r.toFixed(2)}:1`);
+      }
+    }
+  }
 });

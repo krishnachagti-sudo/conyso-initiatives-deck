@@ -16,7 +16,7 @@
 // (.apkg) and Chromium (PDF); if either is missing the build fails, so a
 // release never ships with a format silently absent.
 
-import { mkdirSync, writeFileSync, readFileSync, statSync, readdirSync, copyFileSync, rmSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, statSync, cpSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 
@@ -25,6 +25,7 @@ import { checkDeck } from './check.mjs';
 import { FORMATS } from '../src/exporters/index.mjs';
 import { deckPage } from '../src/site/deck-page.mjs';
 import { homePage } from '../src/site/home.mjs';
+import { methodPage, formatsPage } from '../src/site/hubs.mjs';
 import { loadConfig } from '../src/site/config.mjs';
 
 const arg = (n) => process.argv.find((a) => a.startsWith(`--${n}=`))?.split('=')[1];
@@ -65,20 +66,23 @@ for (const src of sources) {
     }
     const manifest = { deck: slug, version, cards: deck.notes.length, files };
     writeFileSync(join(target, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
-    writeFileSync(join(target, 'index.html'), deckPage(cfg, deck, manifest));
-    built.push(deck);
+    built.push({ deck, manifest, target });
     console.log(`✓ ${slug} ${version}: ${deck.notes.length} cards, ${files.length} formats → ${target}`);
   }
 }
 
-// Site-wide pages and files.
-writeFileSync(join(out, 'index.html'), homePage(cfg, built));
-mkdirSync(join(out, 'assets'), { recursive: true });
-for (const f of readdirSync('src/assets')) copyFileSync(join('src/assets', f), join(out, 'assets', f));
+// Pages. Deck pages are written after every deck is built, so each page's
+// footer can list all of them.
+const deckList = built.map((b) => b.deck);
+const nav = deckList.map((d) => ({ slug: d.meta.slug, title: d.meta.shortTitle || d.meta.title }));
+for (const b of built) writeFileSync(join(b.target, 'index.html'), deckPage(cfg, b.deck, b.manifest, { decks: nav }));
+const pages = { '': homePage(cfg, deckList), 'method/': methodPage(cfg, deckList), 'formats/': formatsPage(cfg, deckList) };
+for (const [p, html] of Object.entries(pages)) { mkdirSync(join(out, p), { recursive: true }); writeFileSync(join(out, p, 'index.html'), html); }
+cpSync('src/assets', join(out, 'assets'), { recursive: true }); // fonts travel with their OFL licence files
 
-const listed = built.filter((d) => d.meta.status === 'released'); // sitemap and llms.txt: released decks only
+const listed = deckList.filter((d) => d.meta.status === 'released'); // sitemap and llms.txt: released decks only
 const root = `${cfg.origin}${cfg.base}`;
-const urls = [{ loc: root }, ...listed.map((d) => ({ loc: `${root}${d.meta.slug}/`, lastmod: d.meta.updated }))];
+const urls = [{ loc: root }, { loc: `${root}method/` }, { loc: `${root}formats/` }, ...listed.map((d) => ({ loc: `${root}${d.meta.slug}/`, lastmod: d.meta.updated }))];
 writeFileSync(join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}</url>`).join('\n')}

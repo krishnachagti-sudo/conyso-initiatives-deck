@@ -15,6 +15,13 @@
     if (text != null) n.textContent = text;
     return n;
   };
+  var lines = function (p, text) {
+    String(text).split('\n').forEach(function (line, i) {
+      if (i) p.appendChild(el('br'));
+      p.appendChild(document.createTextNode(line));
+    });
+    return p;
+  };
   var paras = function (parent, text) {
     String(text).split('\n\n').forEach(function (block) {
       var p = el('p');
@@ -36,22 +43,24 @@
     try { saved = JSON.parse(store.get(key) || '{}'); } catch (e) { saved = {}; }
     var state = { coreOnly: !!saved.coreOnly, skipPrimers: !!saved.skipPrimers, id: saved.id || null, shown: false };
 
-    var bar = el('div', { class: 'bar' });
+    var bar = el('div', { class: 'bar2' });
     var pos = el('span', { 'aria-live': 'polite' });
+    var prog = el('div', { class: 'progress', 'aria-hidden': 'true' });
+    var progFill = el('i'); prog.appendChild(progFill);
     var coreBox = el('input', { type: 'checkbox' });
     var primerBox = el('input', { type: 'checkbox' });
-    var coreLabel = el('label'); coreLabel.append(coreBox, ' Core cards only');
-    var primerLabel = el('label'); primerLabel.append(primerBox, ' Skip primers');
-    bar.append(pos, coreLabel, primerLabel);
+    var coreLabel = el('label'); coreLabel.append(coreBox, 'Core only');
+    var primerLabel = el('label'); primerLabel.append(primerBox, 'Skip primers');
+    bar.append(pos, prog, coreLabel, primerLabel);
 
-    var face = el('div', { class: 'face', tabindex: '-1' });
+    var card = el('div', { class: 'icard', tabindex: '-1' });
     var controls = el('div', { class: 'controls' });
-    var prev = el('button', { type: 'button' }, '← Previous');
-    var flip = el('button', { type: 'button', class: 'primary' }, 'Show answer');
-    var next = el('button', { type: 'button' }, 'Next →');
+    var prev = el('button', { type: 'button', class: 'btn' }, '← Back');
+    var flip = el('button', { type: 'button', class: 'btn btn-primary' }, 'Turn the card');
+    var next = el('button', { type: 'button', class: 'btn' }, 'Next →');
     controls.append(prev, flip, next);
-    var hint = el('p', { class: 'tag' }, 'Keys: space shows the answer, arrows move between cards.');
-    app.append(bar, face, controls, hint);
+    var hint = el('p', { class: 'keys' }, 'Space turns the card · ← → move between cards');
+    app.append(bar, card, controls, hint);
     app.hidden = false;
     coreBox.checked = state.coreOnly;
     primerBox.checked = state.skipPrimers;
@@ -65,16 +74,32 @@
 
     var render = function () {
       var cards = list();
-      face.textContent = '';
+      card.textContent = '';
       if (!cards.length) { pos.textContent = 'No cards match these filters.'; flip.disabled = prev.disabled = next.disabled = true; return; }
       var i = Math.max(0, cards.findIndex(function (c) { return c.id === state.id; }));
       var c = cards[i];
       state.id = c.id;
-      pos.textContent = 'Card ' + (i + 1) + ' of ' + cards.length;
-      face.appendChild(el('div', { class: 'tag' }, c.kind + (c.core ? ' · core' : '')));
-      var front = el('div', { class: 'front' }); paras(front, c.front); face.appendChild(front);
-      if (state.shown) { var back = el('div', { class: 'back' }); paras(back, c.back); face.appendChild(back); }
-      flip.textContent = state.shown ? 'Hide answer' : 'Show answer';
+      pos.textContent = (i + 1) + ' / ' + cards.length;
+      progFill.style.width = ((i + 1) / cards.length * 100) + '%';
+      var top = el('div', { class: 'ic-top' });
+      top.append(el('span', null, c.topic), el('b', null, c.kind + (c.core ? ' · core' : '')));
+      card.appendChild(top);
+      var q = el('div', { class: 'ic-q' });
+      q.appendChild(lines(el('p'), c.front));
+      if (c.choices) q.appendChild(lines(el('p', { class: 'ic-choices' }), c.choices));
+      card.appendChild(q);
+      if (state.shown) {
+        card.appendChild(el('div', { class: 'ic-rule' }));
+        var a = el('div', { class: 'ic-a' });
+        a.appendChild(lines(el('p', { class: 'ic-ans' }), c.answer));
+        [['Why', c.why], ['Why not the others', c.whyNot], ['Example', c.example], ['Not to confuse', c.contrast], ['Valid as of', c.validAsOf]].forEach(function (r) {
+          if (!r[1]) return;
+          var p = el('p', { class: 'ic-x' }); p.append(el('b', null, r[0]), ' '); a.appendChild(lines(p, r[1]));
+        });
+        if (c.sourceURL) { var sp = el('p', { class: 'ic-src' }); sp.appendChild(el('a', { href: c.sourceURL }, 'Source: ' + c.source + ' ↗')); a.appendChild(sp); }
+        card.appendChild(a);
+      }
+      flip.textContent = state.shown ? 'Hide the answer' : 'Turn the card';
       flip.disabled = false;
       prev.disabled = i === 0;
       next.disabled = i === cards.length - 1;
@@ -109,34 +134,34 @@
     var total = Number(planner.dataset.cards);
     var core = Number(planner.dataset.core);
     var BUFFER = 7; // the last week is for weak cards and practice questions, no new cards
-    var h = el('h3', null, 'Plan your daily load');
-    var dateLabel = el('label'); var date = el('input', { type: 'date' });
-    dateLabel.append('Exam date ', date);
-    var out = el('output', { 'aria-live': 'polite' });
-    planner.append(h, dateLabel, out);
+    var left = el('div');
+    var dateLabel = el('label', { for: 'exam-date' }, 'Your exam date');
+    var date = el('input', { type: 'date', id: 'exam-date' });
+    left.append(dateLabel, date);
+    var out = el('output', { 'aria-live': 'polite', for: 'exam-date' });
+    planner.append(left, out);
     planner.hidden = false;
     var savedDate = store.get('exam-date:' + location.pathname);
     if (savedDate) date.value = savedDate;
+    var num = function (n) { return el('span', { class: 'num' }, String(n)); };
+    var line = function (parts) { var p = el('p'); parts.forEach(function (x) { p.append(x); }); return p; };
 
     var plan = function () {
       out.textContent = '';
-      if (!date.value) { out.textContent = 'Enter your exam date to see how many new cards a day you need.'; return; }
+      if (!date.value) { out.appendChild(line(['Enter your exam date to see how many new cards a day you need.'])); return; }
       store.set('exam-date:' + location.pathname, date.value);
       var today = new Date(); today.setHours(0, 0, 0, 0);
       var days = Math.round((new Date(date.value + 'T00:00:00') - today) / 86400000);
       var study = days - BUFFER;
       if (study < 1) {
-        out.textContent = 'With ' + Math.max(days, 0) + ' day(s) left, there is not enough time to learn the full deck with spacing. Study the core cards (' + core + ') in the web mode above and put the rest of your time into practice questions.';
+        out.appendChild(line([num(Math.max(days, 0)), ' days left is not enough to learn the whole deck with spacing. Go through the ', num(core), ' core cards here in the browser, and spend the rest of your time on practice questions.']));
         return;
       }
       var perDay = Math.ceil(total / study);
       var corePerDay = Math.ceil(core / study);
-      var lines = [
-        days + ' days to go. Learning all ' + total + ' cards by a week before the exam means about ' + perDay + ' new card' + (perDay === 1 ? '' : 's') + ' a day.',
-        'At that pace, expect roughly ' + perDay * 10 + ' reviews a day once you are under way (the Anki manual: 20 new cards a day leads to about 200 reviews a day).',
-      ];
-      if (perDay > 20 && core < total) lines.push('That is a heavy load. The ' + core + ' core cards alone need about ' + corePerDay + ' new cards a day: set New cards/day to that and study the core subset first.');
-      lines.forEach(function (t) { out.appendChild(el('p', null, t)); });
+      out.appendChild(line([num(days), ' days to go. To see all ', num(total), ' cards a week before the exam: ', num(perDay), ' new card' + (perDay === 1 ? '' : 's') + ' a day.']));
+      out.appendChild(line(['Expect about ', num(perDay * 10), ' reviews a day once you are under way (the Anki manual: 20 new cards a day leads to about 200 reviews a day).']));
+      if (perDay > 20 && core < total) out.appendChild(line(['That is heavy. The ', num(core), ' core cards alone need ', num(corePerDay), ' a day: start with those.']));
     };
     date.addEventListener('change', plan);
     plan();
