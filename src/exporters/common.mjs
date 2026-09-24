@@ -103,4 +103,4 @@ export const inOrder = (deck) => deck.notes.slice().sort((a, b) => a.order - b.o
 
 /** Deck-level attribution line, required by CC BY-SA 4.0. */
 export const attribution = (deck) =>
-  `${deck.meta.title}, version ${deck.meta.version}. Licence: ${deck.meta.licence}. ${deck.meta.pageBase}`;
+  `${deck.meta.title}, version ${deck.meta.version}. Licence: ${deck.meta.licence}. ${deck.meta.pageBase}${deck.meta.notice ? ` ${deck.meta.notice}` : ''}`;

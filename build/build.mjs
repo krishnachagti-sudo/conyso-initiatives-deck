@@ -1,7 +1,10 @@
 // Build every deck and the site around it (CARD-STANDARD.md §5, §8, §10).
 //
 //   node build/build.mjs                 decks/ → dist/<slug>/ (page + every format)
-//   node build/build.mjs --fixtures      also build the test fixtures (noindex, not in the sitemap)
+//   node build/build.mjs --fixtures      also build the test fixtures
+//
+// Only decks with status "released" are indexed and listed in the sitemap and
+// llms.txt; drafts and fixtures get pages marked noindex.
 //   node build/build.mjs --only=csv,json only some formats
 //   node build/build.mjs --out=dir       write somewhere other than dist/
 //
@@ -70,7 +73,7 @@ writeFileSync(join(out, 'index.html'), homePage(cfg, built));
 mkdirSync(join(out, 'assets'), { recursive: true });
 for (const f of readdirSync('src/assets')) copyFileSync(join('src/assets', f), join(out, 'assets', f));
 
-const listed = built.filter((d) => d.meta.status !== 'fixture');
+const listed = built.filter((d) => d.meta.status === 'released'); // sitemap and llms.txt: released decks only
 const root = `${cfg.origin}${cfg.base}`;
 const urls = [{ loc: root }, ...listed.map((d) => ({ loc: `${root}${d.meta.slug}/`, lastmod: d.meta.updated }))];
 writeFileSync(join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>

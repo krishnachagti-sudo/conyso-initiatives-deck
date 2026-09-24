@@ -11,7 +11,7 @@ export function homePage(cfg, decks) {
   }
   const total = decks.reduce((s, d) => s + d.notes.length, 0);
   const groups = [...byFamily.entries()].map(([f, ds]) => `<section><h2>${esc(f)}</h2><ul class="deck-list">${ds.map((d) =>
-    `<li><a href="${cfg.base}${esc(d.meta.slug)}/">${esc(d.meta.title)}</a> <span class="count">${d.notes.length} cards</span><br><span class="desc">${esc(d.meta.description || '')}</span></li>`).join('')}</ul></section>`).join('\n');
+    `<li><a href="${cfg.base}${esc(d.meta.slug)}/">${esc(d.meta.title)}</a> <span class="count">${d.notes.length} cards${d.meta.status === 'released' ? '' : ' · draft'}</span><br><span class="desc">${esc(d.meta.description || '')}</span></li>`).join('')}</ul></section>`).join('\n');
   const body = `<h1>Free flashcard decks for certification exams</h1>
 <p class="kicker">${decks.length} deck${decks.length === 1 ? '' : 's'} · ${total} cards</p>
 <p class="lede">Every card is written from public sources and cites them. Every deck teaches each idea before it tests it, and downloads for Anki, Quizlet, Brainscape, Mochi, RemNote, Obsidian, Logseq, spreadsheets and paper.</p>

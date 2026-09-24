@@ -52,6 +52,7 @@ export function deckPage(cfg, deck, manifest) {
 <nav class="crumbs" aria-label="Breadcrumb"><a href="${cfg.base}">All decks</a> › <span aria-current="page">${esc(m.title)}</span></nav>
 <article class="deck">
 <h1>${esc(m.title)}</h1>
+${m.status === 'released' ? '' : `<p class="status" role="note"><strong>Draft.</strong> This deck has not finished review. Cards may still change.</p>`}
 <p class="kicker">${notes.length} cards · ${core} core · version ${esc(m.version)}${m.updated ? ` · updated ${esc(m.updated)}` : ''}</p>
 <p class="lede">${esc(m.description || '')}</p>
 
@@ -59,7 +60,7 @@ export function deckPage(cfg, deck, manifest) {
 ${start.what ? `<p><strong>What it is.</strong> ${esc(start.what)}</p>` : ''}
 ${start.problem ? `<p><strong>What problem it solves.</strong> ${esc(start.problem)}</p>` : ''}
 ${start.scenario ? `<p><strong>A worked example.</strong> ${esc(start.scenario)}</p>` : ''}
-<p><strong>What you need first.</strong> ${(m.prerequisites || []).length ? esc(m.prerequisites.join(', ')) : 'Nothing: every term is introduced by a primer card before any card tests it.'}</p>
+<p><strong>What you need first.</strong> ${(m.prerequisites || []).length ? esc(m.prerequisites.join(', ')) : 'Nothing: every term is introduced by a primer card before any card tests it.'}${(m.assumedTerms || []).length ? ` The only words used without a card of their own are everyday ones: ${esc(m.assumedTerms.join(', '))}.` : ''}</p>
 </section>
 
 <section id="study"><h2>Study in your browser</h2>
@@ -132,7 +133,6 @@ ${changelog ? `<section id="changelog"><h2>Changelog</h2><ul>${changelog}</ul></
 
 <section id="licence"><h2>Licence and notices</h2>
 <p>${esc(attribution(deck))}</p>
-${m.notice ? `<p>${esc(m.notice)}</p>` : ''}
 </section>
 </article>`;
 
@@ -170,6 +170,7 @@ ${m.notice ? `<p>${esc(m.notice)}</p>` : ''}
     body,
     graph,
     scripts: `<script src="${cfg.base}assets/study.js" defer></script>`,
-    ...(m.status === 'fixture' ? { robots: 'noindex, nofollow' } : {}),
+    // Only released decks are indexed: drafts and fixtures are reachable but not searchable.
+    ...(m.status === 'released' ? {} : { robots: 'noindex, follow' }),
   });
 }
