@@ -46,6 +46,53 @@ could not read is marked "not verified".
 - **Hosting:** a conyso.com subpath (decided 24 September 2026).
 - **Master list:** `MASTER-LIST.md` and `master-list.csv` rank every scored exam from both passes (first pass in `candidates/`, long tail in `candidates-longtail/`). `CANDIDATES.md` is the first-pass ranking, kept for its reasoning.
 
+## Building
+
+Requirements: Node 22 or later; Python 3 with genanki for the `.apkg` export;
+Chromium for the PDF export (`CHROME_BIN`, or the preinstalled
+`/opt/pw-browsers/chromium`).
+
+```
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+npm run check                 # the card checker: a failure blocks release
+npm run build                 # every deck in decks/ → dist/decks/<slug>/, every format
+npm test                      # the test suite
+node build/build.mjs --fixtures --only=csv,json   # the fictional test deck, some formats
+```
+
+The layout:
+- `decks/<slug>/deck.json` and `decks/<slug>/notes/*.json` (one file per topic);
+- `concepts/<family>.json` (the concept registry);
+- the frozen card shape in `src/schema.mjs`, pinned by `src/schema.lock.json`;
+- the exporters in `src/exporters/`, one per format.
+
+## Roadmap
+
+1. **The engine.** A fork of the Law Tome's build: note types, the card
+   checker, the deck page, and exports in every popular format from one
+   source. That covers Anki `.apkg` and Anki text, CSV and TSV for Brainscape,
+   Mochi, Mnemosyne, Knowt and spreadsheets, Markdown for Obsidian, Logseq and
+   Mochi, JSON, printable PDF cards and a study sheet, and a web study mode.
+   The product is format-neutral, not another AnkiHub (`CARD-STANDARD.md`
+   §10). In progress on branch `claude/deck-engine`.
+2. **The first family: Scrum and Kanban.** Built on the open guides.
+3. **The Tier A and B families** from `MASTER-LIST.md`, family by family.
+4. **Sibling: a practice-question index.** Thousands of original, sourced
+   questions per exam. Every question explains every wrong option and links
+   to its concept's cards and page through the shared `ConceptIDs`. Three
+   things make it harder than the decks:
+   - A multi-exam question site looks exactly like the dump sites
+     certifying bodies hunt. CompTIA flags sites that "only" provide
+     questions and answers, and sites covering "a wide variety of exams".
+     So it must be visibly the opposite: sourced, explained and linked to
+     teaching.
+   - Good distractors are expensive to write, and bad ones plant false
+     knowledge.
+   - Thousands of near-identical question pages read as mass-generated
+     pages to search engines.
+
+   Before building it, research item-writing and the question-bank market.
+
 ## About the raw evidence
 
 Each report cites a source URL or DOI for every claim. The raw pages the

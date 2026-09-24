@@ -3,7 +3,7 @@
 How every card and deck is written, structured, checked and released. A deck
 that does not meet it does not ship.
 
-Draft 3, 24 September 2026. It is rebuilt on the learning-science research:
+Draft 3.1, 24 September 2026 (adds `ConceptIDs` and `NotePrompt`). It is rebuilt on the learning-science research:
 `LEARNING-SCIENCE.md` is the synthesis, and the six reports in
 `learning-science/` hold the evidence. The earlier sources are
 `flashcards-general/legal-design.md` §5 and `flashcards-general/tech.md`.
@@ -224,6 +224,8 @@ So every field that might ever be needed exists from version 1, even if empty.
 | `MyNote` | yes | Empty, for the learner. Primer and concept templates prompt for a paraphrase. |
 | `PageURL` | yes | The deck page section this card drills |
 | `ReportURL` | yes | A link to report an error or a card that keeps failing |
+| `ConceptIDs` | yes | Permanent IDs of the concepts this card teaches or tests, primary first (e.g. `scrum.events.sprint`), from the family's concept registry. Shared with the planned practice-question sibling, so a missed question can link to its cards. |
+| `NotePrompt` | set by the build | The paraphrase prompt, filled in on primer and classification cards only. Anki templates cannot show text conditionally on a field's value, so the build writes it. |
 
 **Structure:**
 
@@ -320,7 +322,8 @@ prerequisites and the few terms the deck assumes.
   new term;
 - a fact, application, classification or contrast card placed before its
   topic's primers;
-- a missing, duplicate or non-increasing `Order`;
+- a missing or duplicate `Order` value;
+- no `ConceptIDs`, or a concept ID that is not in the family's concept registry;
 - a note type whose fields changed since the last release;
 - an image without a licence or text equivalent.
 
@@ -436,6 +439,43 @@ outcomes don't differ **[S]**. So:
 
 This would be the first evidence for these exams, and it is still
 observational.
+
+## 10. Exports: every format, from one source
+
+The product is format-neutral: Anki is the main audience, not the only one. Every export is generated from the same deck source, and cards are never edited per format. Adding a format means adding one exporter (`src/exporters/`), never changing the cards. Formats in other apps lose some structure, so each exporter documents what it keeps and what it drops.
+
+**How cards map outside Anki:**
+- **Front:** the topic context, then the prompt.
+- **Back:** the answer, then the explanation, then one source line.
+- **Cloze cards:** become question-and-answer cards with a blank (`_____`) where the app has no cloze.
+- **Scenario cards:** carry their options on the front and the explanations of wrong options on the back.
+
+**Verified targets.** These are from `flashcards-general/tech.md`; each source is cited there.
+
+| Export | For | What survives |
+|---|---|---|
+| `.apkg` | Anki desktop, AnkiDroid, AnkiMobile; also imports into RemNote (with history), Mochi and Noji | Everything in Anki. RemNote drops custom CSS and JavaScript; Mochi strips CSS and JavaScript and converts HTML to Markdown. |
+| Anki text (TSV with `#` headers) | Anki users who prefer text import | All fields, tags, deck, note type |
+| CSV, 2-column and full | Brainscape (CSV, TSV, XLSX), Mochi (headers map to template fields), spreadsheets | Front and back; the full CSV keeps every field |
+| TSV, 2-column | Mnemosyne (tab-separated, UTF-8, one question and answer per line), Knowt and paste-in importers | Front and back |
+| Markdown: Obsidian | The Obsidian Spaced Repetition plugin: `#flashcards` tag, multi-line `?` cards, cloze via `==…==` | Front, back and cloze |
+| Markdown: Logseq | Blocks tagged `#card` with the answer in a child block; cloze via `{{cloze …}}` (source: the unofficial docs) | Front, back and cloze |
+| Markdown: Mochi | One file per card, or one file split on a delimiter | Front and back |
+| JSON | Developers, the future practice-question sibling, open data | Everything |
+| PDF | Anyone who studies on paper: printable cards and a study sheet | Front and back, explanations on the sheet |
+| Web study mode | Anyone without an app: flip cards in the browser on the deck page | Everything, readable |
+
+**To verify before building.** The import-format research is running:
+- Quizlet's import separators and limits;
+- SuperMemo's import format;
+- Mochi's native `.mochi` format, a ZIP of JSON, which can update an existing deck;
+- RemNote's text syntax;
+- Noji's CSV import;
+- good layouts for printable, double-sided PDF cards.
+
+A format enters the list above only once its import rules are read in the app's own documentation.
+
+**Updates outside Anki.** Only Anki (by GUID) and, per its documentation, Mochi's native format update cards in place. For every other format, a new version means a re-import, and the deck page says so.
 
 ## Open questions
 
