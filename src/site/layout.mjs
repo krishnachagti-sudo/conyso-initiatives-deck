@@ -130,6 +130,7 @@ export function page(cfg, { title, description, path, body, graph = [], scripts 
 <meta name="theme-color" content="#ebe4d4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14161b" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="${asset('icon.svg')}" type="image/svg+xml">
+<link rel="preload" href="${asset('fonts/atkinson-hyperlegible-latin-400-normal.woff2')}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="${asset('fonts/fraunces-latin-wght-normal.woff2')}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="${asset('fonts/jetbrains-mono-latin-400-normal.woff2')}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="${asset('site.css')}">
