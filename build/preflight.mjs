@@ -12,6 +12,8 @@ import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname, relative, posix } from 'node:path';
 import { createHash } from 'node:crypto';
 
+import { loadConfig } from '../src/site/config.mjs';
+
 const BLOCKED_EMAIL_SHA256 = ['a2be92ec35247c87b4c5be8ae113136df7f34b1f4b7ea6712a6108970fb837a4'];
 
 const walk = (d) => readdirSync(d).flatMap((f) => {
@@ -32,6 +34,8 @@ export function preflight(dist, cfg, blocked = BLOCKED_EMAIL_SHA256) {
       if (blocked.includes(sha(m[0]))) add(file, 'contains a private email address');
     }
     if (!file.endsWith('.html')) continue;
+
+    if (cfg.preview && !/<meta name="robots" content="noindex/.test(text)) add(file, 'a preview build must be noindex on every page');
 
     const canon = [...text.matchAll(/<link rel="canonical" href="([^"]+)"/g)].map((x) => x[1]);
     if (canon.length !== 1) add(file, `has ${canon.length} canonical links, not 1`);
@@ -63,8 +67,8 @@ export function preflight(dist, cfg, blocked = BLOCKED_EMAIL_SHA256) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const dist = process.argv[2] || 'dist';
-  const cfg = JSON.parse(readFileSync('site.config.json', 'utf8'));
+  const dist = process.argv.slice(2).find((a) => !a.startsWith('--')) || 'dist';
+  const cfg = loadConfig();
   const problems = preflight(dist, cfg);
   for (const p of problems) console.error(`✗ ${p.file}: ${p.message}`);
   if (problems.length) process.exit(1);

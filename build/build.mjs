@@ -7,6 +7,8 @@
 // llms.txt; drafts and fixtures get pages marked noindex.
 //   node build/build.mjs --only=csv,json only some formats
 //   node build/build.mjs --out=dir       write somewhere other than dist/
+//   node build/build.mjs --origin=https://x.github.io --base=/repo/
+//                                        build for another host: a noindex preview (src/site/config.mjs)
 //
 // dist/ is uploaded as-is to <origin><base> (site.config.json). Each deck's
 // page and its downloads share one directory, so download links are relative.
@@ -23,11 +25,12 @@ import { checkDeck } from './check.mjs';
 import { FORMATS } from '../src/exporters/index.mjs';
 import { deckPage } from '../src/site/deck-page.mjs';
 import { homePage } from '../src/site/home.mjs';
+import { loadConfig } from '../src/site/config.mjs';
 
 const arg = (n) => process.argv.find((a) => a.startsWith(`--${n}=`))?.split('=')[1];
 const only = arg('only')?.split(',');
 const out = arg('out') || 'dist';
-const cfg = JSON.parse(readFileSync('site.config.json', 'utf8'));
+const cfg = loadConfig();
 const sources = [{ decks: 'decks', concepts: 'concepts' }];
 if (process.argv.includes('--fixtures')) sources.push({ decks: 'test/fixtures/decks', concepts: 'test/fixtures/concepts' });
 
@@ -93,6 +96,7 @@ ${listed.map((d) => `- [${d.meta.title}](${root}${d.meta.slug}/): ${d.notes.leng
 `);
 
 if (cfg.indexNowKey) writeFileSync(join(out, `${cfg.indexNowKey}.txt`), cfg.indexNowKey);
+writeFileSync(join(out, '.nojekyll'), ''); // GitHub Pages: serve files as they are
 
-console.log(`✓ site: ${built.length} deck page(s), home, sitemap (${urls.length} URLs), llms.txt → ${out}`);
+console.log(`✓ site${cfg.preview ? ` (noindex preview for ${cfg.origin}${cfg.base})` : ''}: ${built.length} deck page(s), home, sitemap (${urls.length} URLs), llms.txt → ${out}`);
 if (failed) process.exit(1);

@@ -64,7 +64,10 @@ node build/build.mjs --fixtures --only=csv,json   # the fictional test deck, som
 
 `dist/` is uploaded as-is to the address in `site.config.json` (working
 values: `https://conyso.com/decks/`). Each deck page sits in the same
-directory as its downloads. CI (`.github/workflows/ci.yml`) runs the tests,
+directory as its downloads. The same site is also published to GitHub Pages at
+https://krishnachagti-sudo.github.io/conyso-initiatives-deck/ by
+`.github/workflows/pages.yml`, as a noindex preview (`--origin=` and `--base=`
+build it for another host; see `src/site/config.mjs`). CI (`.github/workflows/ci.yml`) runs the tests,
 checker, build and preflight on every push, and the source-link check weekly.
 
 The layout:

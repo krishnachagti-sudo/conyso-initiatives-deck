@@ -89,3 +89,17 @@ test('preflight: passes a clean build, catches broken links, bad canonicals and 
   assert.ok(msgs.some((m) => m.startsWith('canonical https://elsewhere.test/')));
   assert.ok(msgs.includes('broken link /decks/nope/'));
 });
+
+test('a build for another host is a noindex preview with no IndexNow key', async () => {
+  const { loadConfig } = await import('../src/site/config.mjs');
+  const real = loadConfig([]);
+  assert.equal(real.preview, false);
+  const pv = loadConfig(['--origin=https://x.github.io/', '--base=repo']);
+  assert.equal(pv.origin, 'https://x.github.io');
+  assert.equal(pv.base, '/repo/');
+  assert.equal(pv.preview, true);
+  assert.equal(pv.indexNowKey, undefined);
+  const html = homePage(pv, [deck()]);
+  assert.match(html, /<meta name="robots" content="noindex, nofollow">/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/x\.github\.io\/repo\/">/);
+});

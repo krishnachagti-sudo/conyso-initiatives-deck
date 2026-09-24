@@ -19,6 +19,7 @@ const jsonLd = (graph) =>
 
 export function page(cfg, { title, description, path, body, graph = [], scripts = '', robots = 'index, follow, max-snippet:-1, max-image-preview:large' }) {
   const url = `${cfg.origin}${cfg.base}${path}`;
+  if (cfg.preview) robots = 'noindex, nofollow'; // never let a preview host compete with the real one
   const asset = (p) => `${cfg.base}assets/${p}`;
   return `<!doctype html>
 <html lang="en">
