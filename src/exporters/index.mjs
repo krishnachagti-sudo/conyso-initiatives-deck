@@ -3,10 +3,11 @@
 // it everywhere. `apps` lists only apps whose import rules were read in their
 // own documentation (flashcards-general/tech.md §4).
 
-import { ankiText, csvSimple, csvFull, tsvSimple, json } from './text.mjs';
-import { obsidian, logseq } from './markdown.mjs';
+import { ankiText, csvSimple, csvFull, tsvSimple, json, brainscapeCsv } from './text.mjs';
+import { obsidian, logseq, remnote, mochiMarkdown, MOCHI_CARD_DELIMITER } from './markdown.mjs';
 import { writeApkg } from './anki.mjs';
-import { writeStudySheet } from './pdf.mjs';
+import { writeMochi } from './mochi.mjs';
+import { writeStudySheet, writeCardsLetter, writeCardsA4 } from './pdf.mjs';
 
 export const FORMATS = [
   {
@@ -31,9 +32,19 @@ export const FORMATS = [
     kind: 'text', render: csvFull,
   },
   {
-    key: 'tsv', suffix: '.tsv', label: 'Tab-separated, front and back',
-    apps: ['Mnemosyne', 'Knowt'], note: 'One card per line; line breaks inside a card become “ / ”.',
+    key: 'tsv', suffix: '.tsv', label: 'Tab-separated, front and back (paste import)',
+    apps: ['Quizlet (paste import)', 'Mnemosyne', 'Knowt'], note: 'One card per line, a tab between the sides; line breaks inside a card become “ / ”. In Quizlet, choose Tab between term and definition and New line between rows.',
     kind: 'text', render: tsvSimple,
+  },
+  {
+    key: 'brainscape', suffix: '.brainscape.csv', label: 'CSV for Brainscape',
+    apps: ['Brainscape'], note: 'Labelled columns: topic as the prompt, the answer, the explanation as the clarifier and the source as the footnote.',
+    kind: 'text', render: brainscapeCsv,
+  },
+  {
+    key: 'mochi', suffix: '.mochi', label: 'Mochi deck',
+    apps: ['Mochi'], note: 'Mochi’s own format, keeping the teaching order. Re-importing a new version is not documented to update cards in place.',
+    kind: 'binary', write: writeMochi,
   },
   {
     key: 'obsidian', suffix: '.obsidian.md', label: 'Markdown for Obsidian',
@@ -46,6 +57,16 @@ export const FORMATS = [
     kind: 'text', render: logseq,
   },
   {
+    key: 'remnote', suffix: '.remnote.md', label: 'Markdown for RemNote',
+    apps: ['RemNote'], note: 'Multi-line flashcards (>>>) and clozes. Re-importing adds changed cards beside the old ones, so import a new version into a fresh document.',
+    kind: 'text', render: remnote,
+  },
+  {
+    key: 'mochi-md', suffix: '.mochi.md', label: 'Markdown for Mochi',
+    apps: ['Mochi'], note: `One file; enter ${MOCHI_CARD_DELIMITER} as the card delimiter at import. Sides are split by ---.`,
+    kind: 'text', render: mochiMarkdown,
+  },
+  {
     key: 'json', suffix: '.json', label: 'JSON',
     apps: ['Developers'], note: 'Every field and the attribution, as open data.',
     kind: 'text', render: json,
@@ -54,5 +75,15 @@ export const FORMATS = [
     key: 'study-sheet', suffix: '.study-sheet.pdf', label: 'Study sheet (PDF)',
     apps: ['Print', 'Any PDF reader'], note: 'Every card with its answer and explanation, in teaching order.',
     kind: 'binary', write: writeStudySheet,
+  },
+  {
+    key: 'cards-letter', suffix: '.cards-letter.pdf', label: 'Printable cards, US Letter (PDF)',
+    apps: ['Print'], note: '8 cards a sheet, fronts then mirrored backs for long-edge double-sided printing. Print the alignment test page first.',
+    kind: 'binary', write: writeCardsLetter,
+  },
+  {
+    key: 'cards-a4', suffix: '.cards-a4.pdf', label: 'Printable cards, A4 (PDF)',
+    apps: ['Print'], note: '8 cards a sheet, fronts then mirrored backs for long-edge double-sided printing. Print the alignment test page first.',
+    kind: 'binary', write: writeCardsA4,
   },
 ];

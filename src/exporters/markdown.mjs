@@ -1,26 +1,33 @@
-// Markdown exports for note-taking apps (CARD-STANDARD.md §10).
-//
-// Obsidian Spaced Repetition plugin syntax (flashcards-general/tech.md §4,
-// from the plugin README): notes tagged #flashcards; multi-line cards with the
-// question, a line holding "?", then the answer; cloze via ==highlight==.
-// Logseq (unofficial docs, same table): a block tagged #card with the answer
-// in a child block; cloze via {{cloze …}}.
+// Markdown exports for note-taking and flashcard apps (CARD-STANDARD.md §10).
+// Every syntax below is from the app's own documentation, as recorded in
+// flashcards-general/import-formats.md:
+//   Obsidian Spaced Repetition: `#flashcards/<deck>` tag; multi-line cards
+//     with a line holding only "?"; both sides must touch the separator; a
+//     BLANK LINE ENDS A CARD; cloze via ==highlight==.
+//   Logseq: a block with #card; answer as a child block; {{cloze x}}.
+//   RemNote: `Question >> Answer`; multi-line answers with `>>>` on the front
+//     bullet and the lines as child bullets; cloze {{text}}.
+//   Mochi: a line of `---` splits the sides of a card; one file split into
+//     cards on a delimiter chosen at import; cloze {{text}}.
 
-import { twoSided, inOrder, attribution, clozeAnswer, plain } from './common.mjs';
+import { twoSided, inOrder, attribution, plain } from './common.mjs';
 
-/** Obsidian: one file per deck, one multi-line card per section. */
+const CLOZE = /\{\{c\d+::(.*?)(?:::.*?)?\}\}/g;
+const oneLine = (s) => String(s).replace(/\s*\n+\s*/g, ' ').trim();
+const lines = (s) => String(s).split('\n').map((l) => l.trim()).filter(Boolean);
+
+/** Obsidian: one file per deck. No blank line inside a card, one between cards. */
 export function obsidian(deck) {
   const out = [`#flashcards/${deck.meta.slug}`, '', `> ${attribution(deck)}`, ''];
   let topic = null;
   for (const n of inOrder(deck)) {
     if (n.topic !== topic) { topic = n.topic; out.push(`## ${topic}`, ''); }
+    const c = twoSided(n, { withContext: false, sep: '\n' });
     if (n.type === 'cloze') {
-      const hl = plain(String(n.front).replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g, '==$1=='));
-      const c = twoSided(n, { withContext: false });
-      out.push(hl, '', c.back.split('\n\n').slice(1).join('\n\n'), '');
+      const hl = oneLine(plain(String(n.front).replace(CLOZE, '==$1==')));
+      out.push(hl, ...lines(c.extra.join('\n')), '');
     } else {
-      const c = twoSided(n, { withContext: false });
-      out.push(c.front, '?', c.back, '');
+      out.push(...lines(c.front), '?', ...lines(c.back), '');
     }
   }
   return out.join('\n');
@@ -30,21 +37,49 @@ export function obsidian(deck) {
 export function logseq(deck) {
   const out = [`- ${attribution(deck)}`];
   let topic = null;
-  const indent = (s, pad) => s.split('\n').filter((l) => l.trim()).map((l) => pad + l).join('\n');
   for (const n of inOrder(deck)) {
     if (n.topic !== topic) { topic = n.topic; out.push(`- ## ${topic}`); }
+    const c = twoSided(n, { withContext: false, sep: '\n' });
     if (n.type === 'cloze') {
-      const cz = plain(String(n.front).replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g, '{{cloze $1}}'));
-      out.push(`\t- ${cz} #card`);
-      const extra = twoSided(n, { withContext: false }).back.split('\n\n').slice(1).join('\n');
-      if (extra) out.push(indent(extra, '\t\t- '));
+      out.push(`\t- ${oneLine(plain(String(n.front).replace(CLOZE, '{{cloze $1}}')))} #card`);
+      for (const l of lines(c.extra.join('\n'))) out.push(`\t\t- ${l}`);
     } else {
-      const c = twoSided(n, { withContext: false });
-      out.push(`\t- ${c.front.replace(/\n+/g, ' ')} #card`);
-      out.push(indent(c.back, '\t\t- '));
+      out.push(`\t- ${oneLine(c.front)} #card`);
+      for (const l of lines(c.back)) out.push(`\t\t- ${l}`);
     }
   }
   return out.join('\n') + '\n';
 }
 
-export { clozeAnswer };
+/** RemNote: `Q >>> ` with the answer lines as child bullets; cloze as {{text}}. */
+export function remnote(deck) {
+  const out = [`- ${attribution(deck)}`];
+  let topic = null;
+  for (const n of inOrder(deck)) {
+    if (n.topic !== topic) { topic = n.topic; out.push(`- ${topic}`); }
+    const c = twoSided(n, { withContext: false, sep: '\n' });
+    if (n.type === 'cloze') {
+      out.push(`  - ${oneLine(plain(String(n.front).replace(CLOZE, '{{$1}}')))}`);
+    } else {
+      out.push(`  - ${oneLine(c.front)} >>>`);
+      for (const l of lines(c.back)) out.push(`    - ${l}`);
+    }
+  }
+  return out.join('\n') + '\n';
+}
+
+/** Card separator for the Mochi Markdown file, entered at import. */
+export const MOCHI_CARD_DELIMITER = '===';
+
+/** Mochi Markdown: sides split by `---`, cards split by the delimiter above. */
+export function mochiMarkdown(deck) {
+  const cards = inOrder(deck).map((n) => {
+    const c = twoSided(n, { withContext: true, sep: '\n\n' });
+    if (n.type === 'cloze') {
+      const cz = `${n.topic} › ${oneLine(plain(String(n.front).replace(CLOZE, '{{$1}}')))}`;
+      return [cz, '---', c.extra.join('\n\n')].join('\n');
+    }
+    return [c.front, '---', c.back].join('\n');
+  });
+  return cards.join(`\n${MOCHI_CARD_DELIMITER}\n`) + '\n';
+}

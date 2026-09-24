@@ -70,11 +70,20 @@ The layout:
 
 1. **The engine.** A fork of the Law Tome's build: note types, the card
    checker, the deck page, and exports in every popular format from one
-   source. That covers Anki `.apkg` and Anki text, CSV and TSV for Brainscape,
-   Mochi, Mnemosyne, Knowt and spreadsheets, Markdown for Obsidian, Logseq and
-   Mochi, JSON, printable PDF cards and a study sheet, and a web study mode.
-   The product is format-neutral, not another AnkiHub (`CARD-STANDARD.md`
-   §10). In progress on branch `claude/deck-engine`.
+   source (15 today):
+   - Anki `.apkg` and Anki text;
+   - CSV for Mochi, spreadsheets and Brainscape, and full CSV;
+   - a tab-separated file for Quizlet paste import, Mnemosyne and Knowt;
+   - Mochi's `.mochi`;
+   - Markdown for Obsidian, Logseq, RemNote and Mochi;
+   - JSON;
+   - a PDF study sheet;
+   - printable double-sided cards in US Letter and A4.
+
+   Every format's rules are from the app's own documentation
+   (`flashcards-general/import-formats.md`). The product is format-neutral,
+   not another AnkiHub (`CARD-STANDARD.md` §10). In progress on branch
+   `claude/deck-engine`; the deck page and web study mode come next.
 2. **The first family: Scrum and Kanban.** Built on the open guides.
 3. **The Tier A and B families** from `MASTER-LIST.md`, family by family.
 4. **Sibling: a practice-question index.** Thousands of original, sourced

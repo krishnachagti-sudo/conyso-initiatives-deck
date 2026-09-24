@@ -450,32 +450,34 @@ The product is format-neutral: Anki is the main audience, not the only one. Ever
 - **Cloze cards:** become question-and-answer cards with a blank (`_____`) where the app has no cloze.
 - **Scenario cards:** carry their options on the front and the explanations of wrong options on the back.
 
-**Verified targets.** These are from `flashcards-general/tech.md`; each source is cited there.
+**Verified targets.** Import rules come from each app's own documentation, recorded with sources in `flashcards-general/import-formats.md` and `flashcards-general/tech.md`.
 
 | Export | For | What survives |
 |---|---|---|
-| `.apkg` | Anki desktop, AnkiDroid, AnkiMobile; also imports into RemNote (with history), Mochi and Noji | Everything in Anki. RemNote drops custom CSS and JavaScript; Mochi strips CSS and JavaScript and converts HTML to Markdown. |
-| Anki text (TSV with `#` headers) | Anki users who prefer text import | All fields, tags, deck, note type |
-| CSV, 2-column and full | Brainscape (CSV, TSV, XLSX), Mochi (headers map to template fields), spreadsheets | Front and back; the full CSV keeps every field |
-| TSV, 2-column | Mnemosyne (tab-separated, UTF-8, one question and answer per line), Knowt and paste-in importers | Front and back |
-| Markdown: Obsidian | The Obsidian Spaced Repetition plugin: `#flashcards` tag, multi-line `?` cards, cloze via `==…==` | Front, back and cloze |
-| Markdown: Logseq | Blocks tagged `#card` with the answer in a child block; cloze via `{{cloze …}}` (source: the unofficial docs) | Front, back and cloze |
-| Markdown: Mochi | One file per card, or one file split on a delimiter | Front and back |
-| JSON | Developers, the future practice-question sibling, open data | Everything |
-| PDF | Anyone who studies on paper: printable cards and a study sheet | Front and back, explanations on the sheet |
-| Web study mode | Anyone without an app: flip cards in the browser on the deck page | Everything, readable |
+| `.apkg` | Anki desktop, AnkiDroid, AnkiMobile; also RemNote (with history), Mochi and Noji | Everything in Anki. RemNote and Mochi drop CSS and JavaScript, and Mochi converts HTML to Markdown. |
+| Anki text (TSV with `#` headers) | Anki's text importer | All fields, tags, deck and note type |
+| CSV, 2-column | Mochi, Excel, Google Sheets | Front and back |
+| CSV, every field | Spreadsheets and tools | Everything |
+| CSV for Brainscape | Brainscape (`Q. Prompt`, `Q. Body`, `A. Body`, `A. Clarifier`, `A. Footnote`) | Topic, prompt, answer, explanation, source |
+| TSV, 2-column (paste import) | Quizlet (tab between term and definition, new line between rows), Mnemosyne (tab-separated, UTF-8), Knowt | Front and back, plain text |
+| `.mochi` | Mochi (a ZIP holding `data.edn`, version 2) | Front and back, plus the teaching order (`:pos`) |
+| Markdown: Obsidian | Obsidian Spaced Repetition: `#flashcards/<deck>`, `?` cards, `==cloze==`; a blank line ends a card | Front, back and cloze |
+| Markdown: Logseq | `#card` blocks with child answers; `{{cloze …}}` | Front, back and cloze |
+| Markdown: RemNote | `Q >>>` with child bullets; `{{cloze}}` | Front, back and cloze |
+| Markdown: Mochi | `---` between sides; cards split on `===` (entered at import) | Front, back and cloze |
+| JSON | Developers, the practice-question sibling, open data | Everything |
+| PDF study sheet | Paper and PDF readers | Every card with its answer and explanation |
+| PDF cards, US Letter and A4 | Printing and cutting: 8 per sheet, backs mirrored for long-edge duplex, and an alignment test page first | Front; answer and first explanation line on the back |
+| Web study mode | Anyone without an app: the deck page | Everything |
 
-**To verify before building.** The import-format research is running:
-- Quizlet's import separators and limits;
-- SuperMemo's import format;
-- Mochi's native `.mochi` format, a ZIP of JSON, which can update an existing deck;
-- RemNote's text syntax;
-- Noji's CSV import;
-- good layouts for printable, double-sided PDF cards.
+**What we don't claim:**
+- **Quizlet:** its custom separator and set limits.
+- **SuperMemo:** its desktop import format.
+- **Noji, Cram and StudyStack:** their delimiters.
+- **Avery card-sheet margins:** unpublished, so no Avery layout is claimed.
+- **Duplex mirroring:** mirroring the backs for long-edge duplex is our own reasoning, which is why the alignment test page exists.
 
-A format enters the list above only once its import rules are read in the app's own documentation.
-
-**Updates outside Anki.** Only Anki (by GUID) and, per its documentation, Mochi's native format update cards in place. For every other format, a new version means a re-import, and the deck page says so.
+**Updates outside Anki.** Only Anki updates cards in place (by GUID). Mochi documents an update path for its native format, but not whether a card with the same `:id` is overwritten or copied. RemNote keeps the old version beside a changed card. For every other format, a new version means a re-import, and the deck page says so.
 
 ## Open questions
 

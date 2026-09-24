@@ -75,7 +75,7 @@ export const clozeHidden = (s) => [...String(s).matchAll(CLOZE)].map((m) => m[1]
  * A two-sided view of any card, for formats without Anki's templates.
  * `withContext` prefixes the topic, as the Anki front does.
  */
-export function twoSided(note, { withContext = true, withSource = true } = {}) {
+export function twoSided(note, { withContext = true, withSource = true, sep = '\n\n' } = {}) {
   const ctx = withContext ? `${note.topic} › ` : '';
   let front;
   let answer;
@@ -94,8 +94,8 @@ export function twoSided(note, { withContext = true, withSource = true } = {}) {
   if (note.contrast) extra.push(`Contrast: ${plain(note.contrast)}`);
   if (withSource && note.source) extra.push(`Source: ${plain(note.source)} (${note.sourceURL})`);
   if (note.volatile && note.validAsOf) extra.push(`Valid as of ${note.validAsOf}`);
-  const back = [answer, ...extra].filter(Boolean).join('\n\n');
-  return { front, answer, back };
+  const back = [answer, ...extra].filter(Boolean).join(sep);
+  return { front, answer, extra, back };
 }
 
 /** Notes in teaching order. Every export uses this order. */

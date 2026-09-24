@@ -73,3 +73,19 @@ export function json(deck) {
     notes: inOrder(deck).map((n) => ({ ...n, tags: tagsFor(deck, n), deckPath: deckPath(deck, n) })),
   }, null, 2) + '\n';
 }
+
+/**
+ * Brainscape CSV with labelled columns (flashcards-general/import-formats.md,
+ * Brainscape: "Q. Prompt", "Q. Body", "A. Body", "A. Clarifier",
+ * "A. Footnote"; the multi-field import works only from CSV or Google Sheets).
+ */
+export function brainscapeCsv(deck) {
+  const lines = [row(['Q. Prompt', 'Q. Body', 'A. Body', 'A. Clarifier', 'A. Footnote'], ',')];
+  for (const n of inOrder(deck)) {
+    const c = twoSided(n, { withContext: false, withSource: false, sep: '\n' });
+    const clarifier = c.extra.join('\n');
+    const footnote = [n.source ? `Source: ${n.source} (${n.sourceURL})` : '', n.volatile && n.validAsOf ? `Valid as of ${n.validAsOf}` : ''].filter(Boolean).join('\n');
+    lines.push(row([n.topic, c.front, c.answer, clarifier, footnote], ','));
+  }
+  return lines.join('\r\n') + '\r\n';
+}
