@@ -133,3 +133,35 @@ test('abbreviations: an untaught all-capitals token is flagged unless glossed', 
   d.meta.glossary = { WSX: 'Widget Standards Exchange' };
   assert.equal(flagged().length, 0);
 });
+
+test('explanations must say why, not repeat the answer', () => {
+  const d = loadDeck('test/fixtures/decks/example');
+  const n = d.notes.find((x) => x.id === 'example.widgets.which-part');
+  n.explanation = 'The toothed wheel is the sprocket.';
+  const rules = checkDeck(d, { concepts: loadConcepts('test/fixtures/concepts', 'example') }).map((p) => p.rule);
+  assert.ok(rules.includes('explanation'));
+});
+
+test('Wikipedia alone needs sourceFallback; co-citing a primary source is fine', () => {
+  const d = loadDeck('test/fixtures/decks/example');
+  const n = d.notes.find((x) => x.id === 'example.widgets.which-part');
+  const check = () => checkDeck(d, { concepts: loadConcepts('test/fixtures/concepts', 'example') }).filter((p) => /Wikipedia/.test(p.message));
+  n.source = 'Wikipedia, “Sprocket”'; n.sourceURL = 'https://en.wikipedia.org/wiki/Sprocket';
+  assert.equal(check().length, 1);
+  n.sourceFallback = true;
+  assert.equal(check().length, 0);
+});
+
+test('registry: a term owned by an earlier topic counts as taught while writing in parallel', () => {
+  const d = loadDeck('test/fixtures/decks/example');
+  const t2 = d.topics[1];
+  const primer = t2.notes.find((x) => x.kind === 'primer');
+  const later = { ...t2.notes.find((x) => x.kind !== 'primer'), id: 'example.assembly.uses-gear', order: 125, uses: ['gear'] };
+  t2.notes.push(later); d.notes.push(later);
+  const concepts = loadConcepts('test/fixtures/concepts', 'example');
+  const undef = (ctx) => checkDeck(d, { concepts, ...ctx }).filter((p) => p.rule === 'undefined-term' && p.id === later.id);
+  assert.equal(undef({}).length, 1);
+  assert.equal(undef({ registry: [{ term: 'gear', topic: 1 }] }).length, 0);
+  assert.equal(undef({ registry: [{ term: 'gear', topic: 2 }] }).length, 1, 'same-topic terms need a primer in the file');
+  void primer;
+});

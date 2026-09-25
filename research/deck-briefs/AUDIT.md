@@ -10,6 +10,11 @@ User-Agent, header, query string or body. If a site asks for contact details in 
 User-Agent, use a generic one such as "Mozilla/5.0 (compatible; research)" or skip
 that site.
 
+The checker already enforces the mechanical rules (undefined terms and
+abbreviations, back length, restating explanations, Wikipedia-only sources,
+missing fields) and build/sources.mjs checks links. Do not report those; spend
+your attention on truth and clarity.
+
 ## Pass 1: correct and sourced
 For every card:
 - Every claim in front, back, explanation, example, contrast, choices and

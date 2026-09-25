@@ -51,6 +51,15 @@ written from memory: they are not evidence, and some may be wrong.
    circulating, differences between editions, and rules that recently changed.
 8. Naming: the owner's trademark or naming terms, fetched from its own site, and
    how CONTENT-POLICY.md §4 applies.
+8b. Term registry: also write research/deck-briefs/<slug>-terms.json, an array of
+   {"term": "<exact spelling writers must use>", "abbr": "<abbreviation or empty>",
+   "topic": <number of the topic whose primer introduces it>, "concept":
+   "<conceptID>", "source": "<URL of the defining passage>"}. One entry per term,
+   covering every term in the concept inventory, in teaching order. Save the
+   primary sources that define basic terms (so writers never need Wikipedia).
+8c. Card budget: for each topic, a target card count derived from the outline's
+   weights and the number of concepts (roughly: one primer per term, one fact per
+   rule or number, one application per core concept). State the deck total.
 9. Languages: every language the exam is offered in, and every official or
    openly licensed translation of the main sources (with its licence), each with
    a quote and URL. One short section; do not research further than that.

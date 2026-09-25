@@ -1,7 +1,8 @@
 # Card writer brief (given to every writer agent)
 
 You write the cards for ONE topic of ONE deck. Read, in order:
-1. CARD-STANDARD.md (all of it) and CONTENT-POLICY.md, in /home/user/conyso-initiatives-deck.
+1. research/deck-briefs/DIGEST.md (the one-page standard; open CARD-STANDARD.md only
+   for a question the digest does not answer).
 2. The deck's research brief: research/deck-briefs/<slug>.md. It is your map, not
    your evidence: every card is written from the source itself, which you fetch.
 3. The exemplar: decks/scrum-guide/notes/*.json, for the shape and tone of cards.
@@ -63,6 +64,8 @@ public domain or open. Never use a figure as decoration.
   Still add the primers and fact cards that teach what the question tests.
 
 ## Before you finish
+Run the two commands at the foot of DIGEST.md; your files must be clean.
+
 Run `node build/check.mjs --decks=decks --concepts=concepts` after merging your
 concepts into a temporary copy if needed, or simply check that your file parses
 (`node -e "JSON.parse(require('fs').readFileSync(process.argv[1]))" <file>`).

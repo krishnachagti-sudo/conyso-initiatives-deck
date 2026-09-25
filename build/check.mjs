@@ -71,8 +71,16 @@ export function checkDeck(deck, ctx = {}) {
     }
     if (listItems(n.back) > LIMITS.listItems) add(id, 'list', `a list answer has more than ${LIMITS.listItems} items; split it`);
 
-    // Feedback: every card explains.
+    // Feedback: every card explains, and says why rather than repeating the answer.
     if (!nonEmpty(n.explanation)) add(id, 'explanation', 'every card needs an explanation');
+    else {
+      const W = (s) => new Set(String(s || '').toLowerCase().replace(/\{\{c\d+::|\}\}/g, ' ').match(/[a-z0-9]+/g)?.filter((w) => w.length > 3) || []);
+      const E = W(n.explanation);
+      const B = W(n.type === 'cloze' ? n.front : `${n.front} ${n.back}`);
+      if (E.size && E.size <= 12 && [...E].filter((w) => B.has(w)).length / E.size >= 0.85) {
+        add(id, 'explanation', 'the explanation repeats the question or answer; say why');
+      }
+    }
 
     // Choices must be explained.
     if (nonEmpty(n.choices) && !nonEmpty(n.choicesExplained)) add(id, 'choices', 'choices need choicesExplained (why each wrong option is wrong)');
@@ -82,6 +90,11 @@ export function checkDeck(deck, ctx = {}) {
     if (!nonEmpty(n.source)) add(id, 'source', 'source is missing');
     if (!nonEmpty(n.sourceURL)) add(id, 'source', 'sourceURL is missing');
     else if (!/^https?:\/\//.test(n.sourceURL)) add(id, 'source', 'sourceURL must be an http(s) link');
+    // Wikipedia is a finding aid (research protocol): it may co-cite, but a card
+    // resting on it alone must say so with sourceFallback: true.
+    if (/wikipedia\.org/i.test(n.sourceURL || '') && !n.sourceFallback && !/(Pool|CFR|Guide|Handbook|AIM|docs|NIST|NOAA|NEETS|FM |TM |AC |manual)/.test(n.source || '')) {
+      add(id, 'source', 'rests on Wikipedia alone: cite a primary source, or set sourceFallback: true if none exists');
+    }
     if (!nonEmpty(n.sourceLicence)) add(id, 'source', 'sourceLicence is missing');
     else if (!Object.keys(LICENCE_TIERS).includes(String(n.sourceLicence).trim().charAt(0))) {
       add(id, 'source', `sourceLicence must start with a tier letter (${Object.keys(LICENCE_TIERS).join(', ')}); tier D is never allowed`);
@@ -133,10 +146,15 @@ export function checkDeck(deck, ctx = {}) {
   const byOrder = notes.filter((n) => Number.isInteger(n.order)).slice().sort((a, b) => a.order - b.order);
   const known = new Set([...(meta.assumedTerms || []), ...(ctx.prerequisiteTerms || [])].map(norm));
   const glossary = new Set(Object.keys(meta.glossary || {}).map(norm));
+  // Writing in parallel (ctx.registry): a term the registry assigns to an EARLIER
+  // topic counts as taught, so a writer's own check is meaningful before the
+  // other topics exist. The final check runs without it.
+  const topicNo = new Map(deck.topics.map((t) => [t.topic, parseInt(t.file, 10) || 0]));
+  const registered = (term, topic) => (ctx.registry || []).some((r) => norm(r.term) === norm(term) && Number(r.topic) < (topicNo.get(topic) || 0));
   for (const n of byOrder) {
     for (const t of n.uses || []) {
       const introducedHere = n.kind === 'primer' && (n.introduces || []).map(norm).includes(norm(t));
-      if (!known.has(norm(t)) && !introducedHere) add(n.id, 'undefined-term', `uses "${t}" before any primer introduces it`);
+      if (!known.has(norm(t)) && !introducedHere && !registered(t, n.topic)) add(n.id, 'undefined-term', `uses "${t}" before any primer introduces it`);
     }
     for (const t of n.introduces || []) known.add(norm(t));
 
@@ -184,13 +202,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const flag = (n, d) => process.argv.find((a) => a.startsWith(`--${n}=`))?.split('=')[1] || d;
   const root = flag('decks', 'decks');
   const conceptsDir = flag('concepts', 'concepts');
+  const { readFileSync: rf } = await import('node:fs');
+  const registry = flag('registry', '') ? JSON.parse(rf(flag('registry', ''), 'utf8')) : undefined;
   const { readFileSync } = await import('node:fs');
   const cfg = JSON.parse(readFileSync('site.config.json', 'utf8'));
   let total = 0;
   for (const dir of deckDirs(root)) {
     const deck = loadDeck(dir);
     deck.meta.pageBase ||= `${cfg.origin}${cfg.base}${deck.meta.slug}/`; // as build.mjs does
-    const problems = checkDeck(deck, { concepts: loadConcepts(conceptsDir, deck.meta.family) });
+    const problems = checkDeck(deck, { concepts: loadConcepts(conceptsDir, deck.meta.family), registry });
     total += problems.length;
     for (const p of problems) console.log(`${deck.meta.slug}  ${p.id}  [${p.rule}]  ${p.message}`);
   }
