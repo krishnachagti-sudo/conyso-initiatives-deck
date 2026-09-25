@@ -117,3 +117,10 @@ export function deckDirs(root) {
 /** URL-safe slug for topic anchors and subdeck ordering. */
 export const slugify = (s) =>
   String(s).toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+/** True for a host whose terms forbid automated requests (src/no-fetch.json). */
+export function noFetch(url, base = '.') {
+  let host; try { host = new URL(url).hostname.replace(/^www\./, ''); } catch { return false; }
+  const { hosts } = JSON.parse(readFileSync(join(base, 'src/no-fetch.json'), 'utf8'));
+  return hosts.some((h) => host === h || host.endsWith(`.${h}`));
+}

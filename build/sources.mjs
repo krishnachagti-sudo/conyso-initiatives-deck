@@ -13,7 +13,7 @@ import { createHash } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { deckDirs, loadDeck } from '../src/decks.mjs';
+import { deckDirs, loadDeck, noFetch } from '../src/decks.mjs';
 
 const arg = (n) => process.argv.find((a) => a.startsWith(`--${n}=`))?.split('=')[1];
 const roots = [arg('decks') || 'decks'];
@@ -67,6 +67,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const tmp = mkdtempSync(join(tmpdir(), 'pdfs-'));
   let bad = 0;
   for (const [url, { ids, pages }] of docs) {
+    if (noFetch(url)) { console.warn(`? ${url} (site terms forbid automated requests; open it by hand) — ${ids.length} card(s)`); continue; }
     const s = status(url);
     if (s >= 200 && s < 300) console.log(`✓ ${s} ${url}`);
     else if (s === 403 || s === 429) { console.warn(`? ${s} ${url} (blocks automated checks; open it by hand) — ${ids.length} card(s)`); continue; }

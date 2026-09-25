@@ -19,7 +19,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, mkdtempSync, rmSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { tmpdir } from 'node:os';
-import { deckDirs, loadDeck } from '../src/decks.mjs';
+import { deckDirs, loadDeck, noFetch } from '../src/decks.mjs';
 import { rawGitHub } from './sources.mjs';
 
 const arg = (n) => process.argv.find((a) => a.startsWith(`--${n}=`))?.slice(n.length + 3);
@@ -47,6 +47,7 @@ const nameFor = (url) => {
 };
 
 function fetchTo(url, file) {
+  if (noFetch(url)) return 0; // site terms forbid automated requests
   try {
     const code = execFileSync('curl', ['-sS', '-L', '--max-time', '120', '-A', UA, '-o', file, '-w', '%{http_code}', url], { stdio: ['ignore', 'pipe', 'ignore'] }).toString();
     return Number(code);

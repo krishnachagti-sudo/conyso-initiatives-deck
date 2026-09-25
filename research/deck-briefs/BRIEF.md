@@ -76,6 +76,8 @@ source. The Markdown brief stays under 5,000 words.
    more than 3 members, one application or classification per core concept,
    and one contrast per contrast concept. Decks are comprehensive: extra
    concepts get cards too.
+   Then add 10% to each topic: across batch 1, writers covering every concept
+   landed 8–15% above counts made this way.
 6. **If the exam uses a public question pool**, give each concept a `"pool"`
    array of the question IDs it covers. Run `python3 build/pool-skeleton.py
    <pool.txt> <slug>-concepts.json <slug>-skeleton` and fix the concept list
