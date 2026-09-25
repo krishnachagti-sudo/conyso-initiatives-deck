@@ -5,6 +5,9 @@ truth and clarity. You do not edit cards: you write a report and a patch
 file, and a script applies the patches. Work from the saved text in
 `research/sources/<slug>/` (see its manifest.json); fetch only what is
 missing, never mirroring a site. Grep; don't read whole documents.
+You may run the repository's own tools in `build/` (for example
+`node build/cache-sources.mjs --only=<slug>` to cache a new source you cite in
+a patch); never run another agent's scratch scripts.
 
 **Privacy.** No email, name or personal detail in any request. Use a generic
 User-Agent.
