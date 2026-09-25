@@ -44,7 +44,7 @@ flow, with its evidence, the fix and the order of work. The target is about
 | D1 | Auditors on the strong model spend time on mechanical faults. | About 120 wrong page links, 28 pool cards in the wrong format, about 70 shared fronts, and wrong licence labels. | Checker rules, written before writing starts: pool cards verbatim against the skeleton (question, choices, key, ID, source format); licence label against the source host (`src/licences.json`); a "name two" card must give two answers; `#page=` within the PDF's page count (in sources.mjs). The shared-front rule is already in. |
 | D2 | Audit reports are free text, so fixers re-read whole files and re-check sources. | Fixers used 2.88M tokens against the auditors' 2.40M. | Auditors write a patch file (`<slug>-fixes.jsonl`: card ID, field, new value, reason) for every finding whose fix they know. `build/apply-fixes.mjs` applies them and runs the checker. Fixer agents get only the findings marked "needs research". |
 | D3 | Minor findings are about half of all findings, and all were fixed at full agent cost. | Civics: 177 of 265 findings were minor. | A minor finding without a patch is logged and skipped. |
-| D4 | Fixes are never checked. | Wrong-answer cards were rewritten by the smaller model and never re-read (for example the new FEMA ICS "Type 4" scenario). | A verify pass on the strong model, covering only the cards whose finding was "wrong": about 100 a wave. |
+| D4 | Fixes are never checked. | Wrong-answer cards were rewritten by the strong model and never re-read (for example the new FEMA ICS "Type 4" scenario). | A verify pass on the strong model, covering only the cards whose finding was "wrong": about 100 a wave. |
 | D5 | Prompts paraphrased policy and got it wrong. | I told the KCSA auditors to allow only tier A and B sources; the policy allows tier C. | Prompts cite the policy section instead of restating it. |
 | D6 | Systematic problems are found only after all writing is done. | Copied course scenarios, found in audit across several FEMA ICS writers. | Audit the pilot topic (C2) before the other writers start. |
 
@@ -102,16 +102,18 @@ flow, with its evidence, the fix and the order of work. The target is about
 
 ## 5. Runbook: one deck
 
+Every agent runs on the strong model (owner's decision, 25 September 2026).
+
 | Step | Who | What |
 |---|---|---|
 | 1. Research | one agent, strong model | Follows research/deck-briefs/BRIEF.md. Writes `<slug>.md`, `-sources.json`, `-terms.json`, `-concepts.json` and `-budget.json`. |
 | 2. Set up | main session | Writes deck.json with `"evidence": true` (plus `pool` if the exam has one) and `<slug>-writers.md` from WRITERS-TEMPLATE.md. Runs `node build/cache-sources.mjs --research=<slug>`, so writers are checked against the text, and `node build/pool-cards.mjs <slug>` if there is a pool. |
-| 3. Pilot | one writer, smaller model | Writes one topic, following DIGEST.md. The main session runs `node build/status.mjs <slug> --registry` and reads 15 cards; what it finds corrects `<slug>-writers.md`. A separate pilot audit runs only for decks budgeted over 800 cards; on a smaller deck it cost 250 tokens a card, so the pilot waits for the main audit. |
-| 4. Fan out | writers, smaller model | The remaining topics, in groups of 4 to 6. |
+| 3. Pilot | one writer, strong model | Writes one topic, following DIGEST.md. The main session runs `node build/status.mjs <slug> --registry` and reads 15 cards; what it finds corrects `<slug>-writers.md`. A separate pilot audit runs only for decks budgeted over 800 cards; on a smaller deck it cost 250 tokens a card, so the pilot waits for the main audit. |
+| 4. Fan out | writers, strong model | The remaining topics, in groups of 4 to 6. |
 | 5. Merge | main session | `node build/merge.mjs <slug>`. Topics more than 15% off budget go back to the same writer. Then `node build/check.mjs --only=<slug> --summary` must be clean. |
 | 6. Audit | auditors, strong model | Follow AUDIT.md: one per 400 to 600 cards, each writing a report and a patch file. |
 | 7. Patch | main session | `node build/apply-fixes.mjs <slug> <fixes.jsonl>`, then the checker. |
-| 8. Fix | fixer, smaller model | Only findings marked `"needs": "research"`, following DIGEST.md. |
+| 8. Fix | fixer, strong model | Only findings marked `"needs": "research"`, following DIGEST.md. |
 | 9. Verify | one agent, strong model | Follows VERIFY.md, for the cards whose finding was "wrong". Its patches are applied. |
 | 10. Figures | main session | Renders every figure and checks it against its source. |
 | 11. Sources | main session | `node build/cache-sources.mjs --only=<slug> --saved=<scratch sources>` and `node build/sources.mjs --only=<slug>`. |

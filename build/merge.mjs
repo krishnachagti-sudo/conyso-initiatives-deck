@@ -60,7 +60,10 @@ export function merge(slug, { dry = false, briefs = 'research/deck-briefs', deck
       // with a capital ("(optional)", "(a, b, c)") is a gloss and is dropped.
       n.introduces = [...new Set(n.introduces.flatMap((t) => { const m = t.match(PAREN); if (!m) return [t]; report.split++; return ABBR.test(m[2]) && /[A-Z]/.test(m[2]) ? [m[1], m[2]] : [m[1]]; }))];
       if (n.kind === 'primer') for (const r of registry) {
-        if (n.introduces.some((t) => norm(t) === norm(r.term)) && !n.introduces.includes(r.abbr)) { n.introduces.push(r.abbr); report.abbreviations++; }
+        if (n.introduces.some((t) => norm(t) === norm(r.term)) && !n.introduces.includes(r.abbr)) {
+          // The registry's abbreviation replaces a writer's own ("ESA" → "Coverdell ESA").
+          n.introduces = [...n.introduces.filter((t) => norm(t) === norm(r.term)), r.abbr]; report.abbreviations++;
+        }
       }
     }
   }

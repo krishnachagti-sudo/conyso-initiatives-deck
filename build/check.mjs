@@ -160,7 +160,10 @@ export function checkDeck(deck, ctx = {}) {
       // "ICS") is one idea: the abbreviation does not count against the limit.
       // An abbreviation here is any short form (up to 12 characters, two words)
       // taught beside a longer term: "ICS", "X", "mH", "op-amp", "Planning P".
-      const isAbbr = (t) => t.length <= 12 && t.split(/\s+/).length <= 2 && intro.some((o) => o !== t && o.length > t.length);
+      // Or up to three words, each either in the full term or in capitals ("Coverdell ESA").
+      const shortForm = (t, o) => t.length <= 12 && t.split(/\s+/).length <= 2
+        || (t.split(/\s+/).length <= 3 && t.split(/\s+/).every((x) => o.toLowerCase().split(/\s+/).includes(x.toLowerCase()) || /^[A-Z0-9&/.-]{2,}$/.test(x)));
+      const isAbbr = (t) => intro.some((o) => o !== t && o.length > t.length && shortForm(t, o));
       const terms = intro.filter((t) => !isAbbr(t));
       if (terms.length > LIMITS.primerNewTerms || intro.length > LIMITS.primerNewTerms + 1) add(id, 'primer', `a primer introduces at most ${LIMITS.primerNewTerms} new term`);
     } else if (nonEmpty(n.introduces)) add(id, 'primer', 'only primers introduce terms');
