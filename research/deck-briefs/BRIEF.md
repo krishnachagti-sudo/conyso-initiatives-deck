@@ -59,6 +59,11 @@ source. The Markdown brief stays under 5,000 words.
    figure is the content>", "note": "<≤ 15 words, only if needed>"}]`.
    - Concept ids are `<family>.<slug>`: lowercase, hyphens only, and the
      deck's own family prefix.
+   - **One concept is one testable thing:** one rule, one number, one
+     procedure, one term or one set. Never bundle ("Stock options: ISO, ESPP
+     and nonstatutory" is three concepts, each with its own rules). The
+     budget counts cards per concept, so a bundled concept silently drops
+     cards and the deck stops being comprehensive.
    - Every outline item maps to at least one concept.
    - `#page=N` is the PDF page: count the form feeds in pdftotext output,
      not the printed page number.
