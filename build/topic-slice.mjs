@@ -26,7 +26,7 @@ export function slice(slug, topics) {
     const tag = new RegExp(`\\[T${t}\\]`);
     out.push(`## Topic ${t}${cs[0]?.topicName ? `: ${cs[0].topicName}` : ''}`, `Budget: ${budget[t] ?? '?'} cards (±15%). Card ids: <family>.<topic-slug>.<card-slug>; order ${t * 1000}–${t * 1000 + 999}.`, '',
       '### Terms this topic teaches (one primer each; spell them exactly so; teach the abbreviation in the same primer)');
-    for (const r of terms.filter((r) => Number(r.topic) === t)) out.push(`- ${r.term}${r.abbr ? ` (${r.abbr})` : ''}: ${r.source}`);
+    for (const r of terms.filter((r) => Number(r.topic) === t)) out.push(`- "${r.term}"${r.abbr ? ` + abbreviation "${r.abbr}"` : ''}: ${r.source}`);
     out.push('', '### Concepts (id | kind | priority | source | note)');
     for (const c of cs) out.push(`- ${c.id} | ${c.kind} | ${c.priority} | ${c.source || ''}${c.figure ? ` | figure: ${c.figure}` : ''}${c.note ? ` | ${c.note}` : ''}`);
     const traps = brief.split('\n').filter((l) => tag.test(l));
@@ -36,7 +36,7 @@ export function slice(slug, topics) {
   const used = new Set(concepts.filter((c) => topics.includes(Number(c.topic))).flatMap((c) => String(c.source || '').split(/\s*;\s*/)).map((u) => u.split('#')[0]));
   const srcs = sources.filter((s) => [...used].some((u) => u && (u.startsWith(s.url.split('#')[0]) || s.url.startsWith(u))));
   out.push('## Sources to read (saved text first; fetch only what is missing)');
-  for (const s of srcs.length ? srcs : sources) out.push(`- ${s.title}: ${s.url} | ${s.licence} | ${s.path || 'not saved'}`);
+  for (const s of srcs.length ? srcs : sources) out.push(`- ${s.title}: ${s.url} | tier ${s.tier} | ${s.path || 'not saved'}`);
   return out.join('\n');
 }
 

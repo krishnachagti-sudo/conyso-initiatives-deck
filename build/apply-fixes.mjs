@@ -15,6 +15,8 @@
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { loadDeck, checkContext } from '../src/decks.mjs';
+import { checkDeck } from './check.mjs';
 
 const write = (p, v) => writeFileSync(p, JSON.stringify(v, null, 2) + '\n');
 
@@ -71,5 +73,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const r = applyFixes(join('decks', slug), lines, { dry: process.argv.includes('--dry') });
     console.log(`${r.applied} fix(es) applied (${Object.entries(r.bySeverity).map(([k, v]) => `${k} ${v}`).join(', ') || 'none'})${r.version ? `; deck is now v${r.version}` : ''}`);
     if (r.unmatched.length) { console.log(`${r.unmatched.length} line(s) matched no card: ${r.unmatched.slice(0, 10).join(', ')}`); process.exitCode = 1; }
+    // A patch must not break a rule: check the patched cards now, so the next
+    // step starts from a clean deck (writers' concept files count as merged).
+    const deck = loadDeck(join('decks', slug));
+    const ctx = checkContext(deck.meta);
+    const briefs = 'research/deck-briefs';
+    for (const f of readdirSync(briefs).filter((x) => x.startsWith(`${slug}-concepts`) && x.endsWith('.json'))) for (const c of JSON.parse(readFileSync(join(briefs, f), 'utf8'))) if (!ctx.concepts.has(c.id)) ctx.concepts.set(c.id, c);
+    const patched = new Set(lines.map((l) => l.id || l.card?.id));
+    const broke = checkDeck(deck, ctx).filter((p) => patched.has(p.id));
+    for (const p of broke) console.log(`! ${p.id}  [${p.rule}]  ${p.message}`);
+    if (broke.length) { console.log(`${broke.length} patched card(s) now break a checker rule: fix them before moving on`); process.exitCode = 1; }
   }
 }

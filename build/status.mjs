@@ -17,6 +17,8 @@ const readJSON = (p) => JSON.parse(readFileSync(p, 'utf8'));
 export function status(slug, { briefs = 'research/deck-briefs', registry = false } = {}) {
   const dir = join('decks', slug);
   const deck = loadDeck(dir);
+  const cfg = readJSON('site.config.json');
+  deck.meta.pageBase ||= `${cfg.origin}${cfg.base}${slug}/`; // as check.mjs and build.mjs do
   const budget = existsSync(join(briefs, `${slug}-budget.json`)) ? readJSON(join(briefs, `${slug}-budget.json`)) : {};
   const ctx = checkContext(deck.meta);
   if (registry) {

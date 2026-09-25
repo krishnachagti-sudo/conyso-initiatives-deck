@@ -74,6 +74,25 @@ sourceLicence; uses; conceptIDs.
 - "Name two" questions give two answers.
 - Scenarios are your own: never copy a course's activities or worked examples.
 
+## Habits the audits keep finding (fix them as you write)
+- **No invented "why".** An explanation may restate, apply or connect what
+  the cited section says. A reason ("which is why", "mainly because") must
+  be in the source. About half the pilot audit's findings were invented
+  reasons.
+- **Keep the source's hedges.** "Usually", "not necessarily", "almost
+  certainly" stay as written; never harden them into "always", "not" or
+  "means".
+- **Open lists stay open.** If the source lists more items than you ask for,
+  write "What are two…?" and accept any two; say "among others" when a list
+  is partial. Never cloze the last item of a partial list.
+- **Tier C means your own words and your own example.** Write the fact from
+  scratch. Rewording the source's sentence lightly is copying.
+- **The anchor must hold the claim.** Cite the section the claim comes from,
+  not a nearby one.
+- **An example never gives away a later card.** A primer's `example` must not
+  be the same scenario a later card asks about. Two cards that ask the same
+  thing: keep one.
+
 ## Figures
 A concept whose slice names a figure gets that figure on one card, where the
 figure is the content: a chart, a schematic, an organisation chart. Add it as
