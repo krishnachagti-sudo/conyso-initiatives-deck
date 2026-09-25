@@ -209,11 +209,15 @@ export function checkDeck(deck, ctx = {}) {
     // an earlier primer (or this card's own), listed in its uses, assumed, or
     // expanded in the deck's glossary. This catches jargon a writer never listed
     // in `uses`, which the term check cannot see.
-    const text = ['front', 'back', 'explanation', 'example', 'contrast', 'choices', 'choicesExplained'].map((f) => n[f] || '').join(' ').replace(/\{\{c\d+::|\}\}/g, ' ').replace(/`[^`]*`/g, ' '); // `code` (PromQL, regexes) is not prose
+    // A verbatim pool question's front, choices and key cannot be reworded, so
+    // their abbreviations are the pool's, not ours; our explanations still count.
+    const verbatim = ctx.pool && /^[a-z]\d[a-z]\d{2}$/.test(String(n.id).split('.').pop()) ? ['front', 'back', 'choices'] : [];
+    const text = ['front', 'back', 'explanation', 'example', 'contrast', 'choices', 'choicesExplained'].filter((f) => !verbatim.includes(f)).map((f) => n[f] || '').join(' ').replace(/\{\{c\d+::|\}\}/g, ' ').replace(/`[^`]*`/g, ' '); // `code` (PromQL, regexes) is not prose
     const has = (list, a) => [...list].some((k) => new RegExp(`(^|[^a-z0-9])${a}([^a-z0-9]|$)`).test(norm(k)));
     for (const tok of new Set(text.match(/\b[A-Z][A-Z0-9]{1,5}\b/g) || [])) {
       const a = tok.toLowerCase();
       if (/^(?:I{2,3}|IV|VI{0,3}|IX|XI{0,3})$/.test(tok)) continue; // Roman numerals: World War II
+      if (verbatim.length && new RegExp(`\\b${tok}\\b`).test(`${n.front} ${n.choices}`)) continue; // naming the pool's own option
       if (glossary.has(a) || has(known, a) || has(n.uses || [], a)) continue;
       add(n.id, 'abbreviation', `"${tok}" is not taught, used, assumed or in the deck glossary`);
     }

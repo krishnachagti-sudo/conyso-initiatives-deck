@@ -41,9 +41,11 @@ export function loadDeck(dir) {
  * Terms taught by the decks this deck builds on (deck.json "prerequisiteDecks":
  * slugs under the same decks/ root). They count as known to the checker.
  */
-export function prerequisiteTerms(root, meta) {
+export function prerequisiteTerms(root, meta, seen = new Set()) {
   const out = [];
   for (const slug of meta.prerequisiteDecks || []) {
+    if (seen.has(slug)) continue;
+    seen.add(slug);
     const dir = join(root, slug);
     if (!existsSync(join(dir, 'deck.json'))) throw new Error(`prerequisite deck "${slug}" not found under ${root}`);
     const d = loadDeck(dir);
@@ -53,6 +55,9 @@ export function prerequisiteTerms(root, meta) {
     const abbr = (x) => /^[A-Za-z0-9./&-]{1,12}$/.test(x) && /[A-Z]/.test(x);
     const split = (t) => { const m = String(t).match(/^(.*\S) \(([^)]+)\)$/); return m ? [t, m[1], ...(abbr(m[2]) ? [m[2]] : [])] : [t]; };
     out.push(...d.notes.flatMap((n) => n.introduces || []).flatMap(split), ...(d.meta.assumedTerms || []));
+    // A prerequisite's own prerequisites are taught too (FCC Extra builds on
+    // General, which builds on Technician).
+    out.push(...prerequisiteTerms(root, d.meta, seen));
   }
   return out;
 }

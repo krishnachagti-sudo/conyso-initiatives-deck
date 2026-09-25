@@ -64,3 +64,25 @@ test('a pool card must quote its question, choices and key word for word', () =>
   assert.match(messages(d, 'pool', { pool: [] }).join(), /not in the live pool/);
   assert.match(messages(d, 'pool', { pool: [...pool, { ...pool[0], poolId: 'T1A02' }] }).join(), /T1A02 has no card/);
 });
+
+test('sites whose terms rule us out are refused, whatever the label', () => {
+  const d = fresh();
+  const n = plain(d);
+  for (const url of ['https://www.finra.org/rules-guidance/rulebooks/finra-rules/2111', 'https://www.msrb.org/Rules-and-Interpretations/MSRB-Rules/General/Rule-G-37']) {
+    n.sourceURL = url;
+    n.sourceLicence = 'C · facts only, in our own words';
+    assert.equal(messages(d, 'licence').length, 1, url);
+  }
+});
+
+test("a pool question's own wording may carry abbreviations; our explanation may not", () => {
+  const d = fresh();
+  const n = plain(d);
+  n.id = 'example.widgets.e1a01';
+  n.front = 'Which mode is QZXW?';
+  n.explanation = 'The pool names QZXW; QZXW is one option among four.';
+  n.choices = 'A) QZXW\nB) RTTY-like\nC) none\nD) all';
+  assert.equal(messages(d, 'abbreviation', { pool: [] }).length, 0, 'a label from the question and choices');
+  n.explanation = 'Unlike PLVQ, it sends one tone.';
+  assert.equal(messages(d, 'abbreviation', { pool: [] }).length, 1, 'a new abbreviation in our own words');
+});
