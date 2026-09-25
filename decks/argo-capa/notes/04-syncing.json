@@ -1,0 +1,1388 @@
+{
+  "topic": "Argo CD: syncing and the Application",
+  "notes": [
+    {
+      "id": "argo.syncing.what-is-automated-sync",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4010,
+      "front": "What does an automated sync policy let Argo CD do?",
+      "back": "Sync an application automatically when it detects differences between the desired manifests in Git and the live state in the cluster.",
+      "explanation": "Without it, a sync waits for someone to start it.",
+      "introduces": [
+        "automated sync policy"
+      ],
+      "example": "Like a thermostat set to “auto” rather than a heater you switch on by hand.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automated Sync Policy”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automated-sync-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Argo CD has the ability to automatically sync an application when it detects differences between the desired manifests in Git, and the live state in the cluster.",
+      "uses": [
+        "automated sync policy",
+        "sync",
+        "live state"
+      ],
+      "conceptIDs": [
+        "argo.automated-sync"
+      ]
+    },
+    {
+      "id": "argo.syncing.what-are-sync-options",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4020,
+      "front": "What are sync options in Argo CD?",
+      "back": "Settings that customise some aspects of how Argo CD syncs the desired state into the target cluster.",
+      "explanation": "Most are set in the Application’s `spec.syncPolicy.syncOptions`; some can be set as annotations on a single resource.",
+      "introduces": [
+        "sync options"
+      ],
+      "example": "Like the settings on a copier: the same job, but single- or double-sided.",
+      "source": "Argo CD documentation, “Sync Options”, “Sync Options”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#sync-options",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Argo CD allows users to customize some aspects of how it syncs the desired state in the target cluster. Some Sync Options can be defined as annotations in a specific resource. Most of the Sync Options are configured in the Application resource `spec.syncPolicy.syncOptions` attribute.",
+      "uses": [
+        "sync options",
+        "sync",
+        "annotation",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.sync-options"
+      ]
+    },
+    {
+      "id": "argo.syncing.what-is-a-resource-hook",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4030,
+      "front": "In Argo CD, what is a resource hook, and how is a resource made into one?",
+      "back": "A resource assigned to a sync phase with the `argocd.argoproj.io/hook` annotation, so it is applied at a set point, such as before the main sync.",
+      "explanation": "During a sync, Argo CD applies the resource in the phase the annotation names.",
+      "introduces": [
+        "resource hook"
+      ],
+      "example": "Like a pre-flight checklist: a step that must happen at a fixed point before take-off.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “Sync Phases and Waves”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-phases-work",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Adding the argocd.argoproj.io/hook annotation to a resource will assign it to a specific phase. During a Sync operation, Argo CD will apply the resource during the appropriate phase of the deployment.",
+      "uses": [
+        "resource hook",
+        "sync",
+        "annotation"
+      ],
+      "conceptIDs": [
+        "argo.resource-hook"
+      ]
+    },
+    {
+      "id": "argo.syncing.what-are-predelete-postdelete",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4040,
+      "front": "What are PreDelete and PostDelete hooks?",
+      "back": "Hooks that run when an Application is deleted: PreDelete before its resources are deleted, PostDelete after all of them are deleted.",
+      "explanation": "They belong to deleting the Application, not to its syncs.",
+      "introduces": [
+        "PreDelete and PostDelete hooks"
+      ],
+      "example": "Like backing up a room before it is cleared, and sending a “done” note once it is empty.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, hook types table; “PreDelete and PostDelete Hooks”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#predelete-and-postdelete-hooks",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Executes before Application resources are deleted.",
+      "uses": [
+        "PreDelete and PostDelete hooks",
+        "resource hook",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.predelete-postdelete"
+      ]
+    },
+    {
+      "id": "argo.syncing.what-is-a-sync-wave",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4050,
+      "front": "What is a sync wave in Argo CD?",
+      "back": "An integer set with the `argocd.argoproj.io/sync-wave` annotation that orders resources: Argo CD deploys from the lowest number to the highest.",
+      "explanation": "It is another way of changing the sync order, besides phases.",
+      "introduces": [
+        "sync wave"
+      ],
+      "example": "Like boarding groups on a plane: group 1 boards before group 2.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “How sync waves work?”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-sync-waves-work",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "They are defined by the argocd.argoproj.io/sync-wave annotation. The value is an integer that defines the ordering (ArgoCD will start deploying from the lowest number and finish with the highest number).",
+      "uses": [
+        "sync wave",
+        "annotation",
+        "sync"
+      ],
+      "conceptIDs": [
+        "argo.sync-wave"
+      ]
+    },
+    {
+      "id": "argo.syncing.what-is-selective-sync",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4060,
+      "front": "What is a selective sync (also called a partial sync)?",
+      "back": "A sync in which only some of the application’s resources are synced.",
+      "explanation": "You choose which resources in the web interface or the command-line tool.",
+      "introduces": [
+        "selective sync"
+      ],
+      "example": "Like saving only the pages you changed rather than the whole document.",
+      "source": "Argo CD documentation, “Selective Sync”, “Selective Sync”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/selective_sync/#selective-sync",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "is one where only some resources are sync'd. You can choose which resources from the UI or the CLI:",
+      "uses": [
+        "selective sync",
+        "sync"
+      ],
+      "conceptIDs": [
+        "argo.selective-sync"
+      ]
+    },
+    {
+      "id": "argo.syncing.what-are-sync-windows",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4070,
+      "front": "What are sync windows in Argo CD?",
+      "back": "Configurable windows of time in which syncs are either blocked or allowed.",
+      "explanation": "A window has a kind (allow or deny), a cron-format schedule and a duration.",
+      "introduces": [
+        "sync windows"
+      ],
+      "example": "Like a shop’s opening hours for deployments.",
+      "source": "Argo CD documentation, “Sync Windows”, “Sync Windows”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/#sync-windows",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Sync windows are configurable windows of time where syncs will either be blocked or allowed. These are defined by a kind, which can be either `allow` or `deny`, a `schedule` in cron format and a duration",
+      "uses": [
+        "sync windows",
+        "sync"
+      ],
+      "conceptIDs": [
+        "argo.sync-windows"
+      ]
+    },
+    {
+      "id": "argo.syncing.what-is-commit-pinning",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4080,
+      "front": "What is commit pinning in Argo CD?",
+      "back": "Giving a Git commit hash as the revision, so the app is pinned to the manifests at that commit.",
+      "explanation": "The documentation calls it the most restrictive tracking technique.",
+      "introduces": [
+        "commit pinning"
+      ],
+      "example": "Like citing a book by its exact edition rather than “the latest printing”.",
+      "source": "Argo CD documentation, “Tracking and Deployment Strategies”, “Commit Pinning”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/tracking_strategies/#commit-pinning",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If a Git commit SHA is specified, the app is effectively pinned to the manifests defined at the specified commit. This is the most restrictive of the techniques",
+      "uses": [
+        "commit pinning"
+      ],
+      "conceptIDs": [
+        "argo.commit-pinning"
+      ]
+    },
+    {
+      "id": "argo.syncing.app-source",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4090,
+      "front": "In an Application spec, what does `source` refer to?",
+      "back": "The desired state in Git: repository, revision, path and environment.",
+      "explanation": "It is one of the two key pieces of information that define an Application.",
+      "source": "Argo CD documentation, “Declarative Setup”, “Applications”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#applications",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "`source` reference to the desired state in Git (repository, revision, path, environment)",
+      "uses": [
+        "Application",
+        "desired state"
+      ],
+      "conceptIDs": [
+        "argo.application-manifest"
+      ]
+    },
+    {
+      "id": "argo.syncing.app-destination",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4100,
+      "front": "In an Application spec, what does `destination` refer to?",
+      "back": "The target cluster and namespace.",
+      "explanation": "Source says what to deploy; destination says where.",
+      "source": "Argo CD documentation, “Declarative Setup”, “Applications”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#applications",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "`destination` reference to the target cluster and namespace.",
+      "uses": [
+        "Application",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "argo.application-manifest"
+      ]
+    },
+    {
+      "id": "argo.syncing.scenario-server-and-name",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4110,
+      "front": "An Application’s `destination` sets both `server: https://kubernetes.default.svc` and `name: in-cluster`. What happens?",
+      "back": "B: it results in an error.",
+      "choices": "A) Argo CD uses `server` and ignores `name`\nB) It results in an error\nC) Argo CD deploys to both",
+      "choicesExplained": "A and C: the cluster may be given by server or by name, but not both.",
+      "explanation": "Setting both is not allowed.",
+      "source": "Argo CD documentation, “Declarative Setup”, “Applications”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#applications",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For the cluster one of server or name can be used, but not both (which will result in an error).",
+      "uses": [
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.application-manifest"
+      ]
+    },
+    {
+      "id": "argo.syncing.auto-sync-benefit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4120,
+      "front": "With automated sync, how does a CI/CD pipeline deploy, and what access does it no longer need?",
+      "back": "It commits and pushes manifest changes to the tracked Git repository; it no longer needs direct access to the Argo CD API server.",
+      "explanation": "The documentation names this as a benefit of automatic sync.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automated Sync Policy”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automated-sync-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A benefit of automatic sync is that CI/CD pipelines no longer need direct access to the Argo CD API server to perform the deployment. Instead, the pipeline makes a commit and push to the Git repository with the changes to the manifests in the tracking Git repo.",
+      "uses": [
+        "automated sync policy",
+        "Argo CD API server",
+        "CI"
+      ],
+      "conceptIDs": [
+        "argo.automated-sync"
+      ]
+    },
+    {
+      "id": "argo.syncing.scenario-pipeline-auto",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4130,
+      "front": "Your security team wants the build pipeline to have no access to Argo CD at all; it may only push to Git. Which setting lets deployments still happen?",
+      "back": "An automated sync policy on the Application.",
+      "explanation": "With automatic sync, the pipeline makes a commit and push and Argo CD deploys the change.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automated Sync Policy”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automated-sync-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "CI/CD pipelines no longer need direct access to the Argo CD API server to perform the deployment.",
+      "uses": [
+        "automated sync policy",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.automated-sync"
+      ]
+    },
+    {
+      "id": "argo.syncing.manual-vs-automated",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4140,
+      "front": "What is the difference between manual and automated sync?",
+      "back": "Manual: someone starts each sync. Automated: Argo CD syncs by itself when it detects differences between Git and the live state.",
+      "explanation": "Automated sync is switched on with `argocd app set <APPNAME> --sync-policy automated` or an `automated` sync policy.",
+      "contrast": "Who starts the sync: a person, or Argo CD on detecting a difference.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automated Sync Policy”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automated-sync-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Argo CD has the ability to automatically sync an application when it detects differences between the desired manifests in Git, and the live state in the cluster.",
+      "uses": [
+        "automated sync policy",
+        "sync",
+        "live state"
+      ],
+      "conceptIDs": [
+        "argo.manual-vs-automated-sync"
+      ]
+    },
+    {
+      "id": "argo.syncing.auto-no-prune-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4150,
+      "front": "By default, does automated sync delete a resource that is no longer defined in Git?",
+      "back": "No. Set `prune: true` in the automated policy (or `--auto-prune`), or run a manual sync with pruning.",
+      "explanation": "The documentation calls the default a safety mechanism.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automatic Pruning”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automatic-pruning",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default (and as a safety mechanism), automated sync will not delete resources when Argo CD detects the resource is no longer defined in Git. To prune the resources, a manual sync can always be performed (with pruning checked).",
+      "uses": [
+        "automated sync policy",
+        "sync"
+      ],
+      "conceptIDs": [
+        "argo.auto-prune"
+      ]
+    },
+    {
+      "id": "argo.syncing.scenario-removed-from-git",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4160,
+      "front": "An app has automated sync with default settings. You delete `old-worker.yaml` from Git. The Deployment it defined is still running an hour later. Why?",
+      "back": "C: automated sync does not prune by default.",
+      "choices": "A) Automated sync only runs once a day\nB) The Deployment is Degraded\nC) Automated sync does not prune by default",
+      "choicesExplained": "A: the interval is minutes, not a day. B: health has nothing to do with pruning.",
+      "explanation": "Pruning needs the prune option in the automated sync policy, or a manual sync with pruning checked.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automatic Pruning”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automatic-pruning",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Pruning can also be enabled to happen automatically as part of the automated sync by running:",
+      "uses": [
+        "automated sync policy",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "argo.auto-prune"
+      ]
+    },
+    {
+      "id": "argo.syncing.allow-empty",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4170,
+      "front": "With automated sync and prune on, what does Argo CD protect against by default, and which option removes that protection?",
+      "back": "It prevents an application from having no target resources (an empty application). `allowEmpty: true` (or `--allow-empty`) allows it.",
+      "explanation": "The protection is against automation or human errors.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automatic Pruning with Allow-Empty (v1.8)”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automatic-pruning-with-allow-empty-v18",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default (and as a safety mechanism), automated sync with prune have a protection from any automation/human errors when there are no target resources. It prevents application from having empty resources.",
+      "uses": [
+        "automated sync policy"
+      ],
+      "conceptIDs": [
+        "argo.allow-empty"
+      ]
+    },
+    {
+      "id": "argo.syncing.self-heal-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4180,
+      "front": "By default, do changes made directly to the live cluster trigger an automated sync?",
+      "back": "No. They do only if `selfHeal` is set to true (or `--self-heal`).",
+      "explanation": "Self-heal enables automatic sync when the live state deviates from the state in Git.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automatic Self-Healing”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automatic-self-healing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, changes that are made to the live cluster will not trigger automated sync. To enable automatic sync when the live cluster's state deviates from the state defined in Git, run:",
+      "uses": [
+        "automated sync policy",
+        "live state"
+      ],
+      "conceptIDs": [
+        "argo.self-heal"
+      ]
+    },
+    {
+      "id": "argo.syncing.scenario-self-heal",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4190,
+      "front": "Automated sync is on (no other options). Someone edits a ConfigMap in the cluster by hand. Git has not changed. What does Argo CD do automatically?",
+      "back": "B: nothing. The app shows OutOfSync, but no automated sync runs unless `selfHeal` is true.",
+      "choices": "A) Reverts the change at once\nB) Nothing; it needs `selfHeal: true` to sync on live changes\nC) Deletes the ConfigMap",
+      "choicesExplained": "A would need self-heal. C: nothing here deletes resources.",
+      "explanation": "Changes made to the live cluster do not trigger automated sync by default.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automatic Self-Healing”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automatic-self-healing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, changes that are made to the live cluster will not trigger automated sync.",
+      "uses": [
+        "automated sync policy",
+        "ConfigMap",
+        "sync status"
+      ],
+      "conceptIDs": [
+        "argo.self-heal"
+      ]
+    },
+    {
+      "id": "argo.syncing.self-heal-timeout",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4200,
+      "front": "With `selfHeal` set to true, a sync is attempted again after the self-heal timeout, which is {{c1::5 seconds}} by default.",
+      "explanation": "The timeout is set by the `--self-heal-timeout-seconds` flag of the application controller.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automated Sync Semantics”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automated-sync-semantics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If the `selfHeal` flag is set to true, then the sync will be attempted again after self-heal timeout (5 seconds by default) which is controlled by `--self-heal-timeout-seconds` flag of `argocd-application-controller` deployment.",
+      "uses": [
+        "application controller"
+      ],
+      "conceptIDs": [
+        "argo.self-heal-timeout"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Argo docs as of that date"
+    },
+    {
+      "id": "argo.syncing.only-outofsync",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4210,
+      "front": "When will an automated sync be performed?",
+      "back": "Only if the application is OutOfSync. Synced applications, or applications in an error state, will not attempt it.",
+      "explanation": "The first rule of the automated sync semantics.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automated Sync Semantics”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automated-sync-semantics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "An automated sync will only be performed if the application is OutOfSync. Applications in a Synced or error state will not attempt automated sync.",
+      "uses": [
+        "automated sync policy",
+        "sync status"
+      ],
+      "conceptIDs": [
+        "argo.auto-sync-only-outofsync"
+      ]
+    },
+    {
+      "id": "argo.syncing.scenario-synced-no-autosync",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4220,
+      "front": "An app with automated sync shows Synced but Degraded. Will automated sync run to fix the health?",
+      "back": "No. Automated sync runs only when the app is OutOfSync.",
+      "explanation": "Automated sync reacts to sync status, not health: an app that is Synced is left alone even while it is Degraded.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automated Sync Semantics”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automated-sync-semantics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "An automated sync will only be performed if the application is OutOfSync.",
+      "uses": [
+        "automated sync policy",
+        "sync status",
+        "health"
+      ],
+      "conceptIDs": [
+        "argo.auto-sync-only-outofsync"
+      ]
+    },
+    {
+      "id": "argo.syncing.once-per-commit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4230,
+      "front": "How many automated sync attempts does Argo CD make per commit?",
+      "back": "One per unique combination of commit and application parameters (unless `selfHeal` is true).",
+      "explanation": "If the most recent successful sync already used that commit and those parameters, no second sync is attempted.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automated Sync Semantics”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automated-sync-semantics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Automated sync will only attempt one synchronization per unique combination of commit SHA1 and application parameters.",
+      "uses": [
+        "automated sync policy"
+      ],
+      "conceptIDs": [
+        "argo.auto-sync-once-per-commit"
+      ]
+    },
+    {
+      "id": "argo.syncing.scenario-failed-sync-no-retry",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4240,
+      "front": "An automated sync against commit `a1b2c3` failed. Nothing has changed since, and no retry is configured. Will Argo CD try that sync again?",
+      "back": "No. Automatic sync does not reattempt after a failed attempt against the same commit and parameters.",
+      "explanation": "A new commit, or new parameters, would allow a fresh attempt.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automated Sync Semantics”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automated-sync-semantics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Automatic sync will not reattempt a sync if the previous sync attempt against the same commit-SHA and parameters had failed.",
+      "uses": [
+        "automated sync policy"
+      ],
+      "conceptIDs": [
+        "argo.auto-sync-once-per-commit"
+      ]
+    },
+    {
+      "id": "argo.syncing.reconciliation-timeout",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4250,
+      "front": "The automatic sync interval comes from `timeout.reconciliation` in the `argocd-cm` ConfigMap, which defaults to {{c1::`120s`}}, with added jitter of `60s`.",
+      "explanation": "With the jitter, the maximum period is 3 minutes.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automated Sync Semantics”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automated-sync-semantics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "which defaults to `120s` with added jitter of `60s` for a maximum period of 3 minutes.",
+      "uses": [
+        "ConfigMap"
+      ],
+      "conceptIDs": [
+        "argo.reconciliation-timeout"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Argo docs as of that date"
+    },
+    {
+      "id": "argo.syncing.scenario-how-long",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4260,
+      "front": "You push a commit to an app with automated sync and default settings, and no webhook is set up. At most, how long before the automatic sync check comes round?",
+      "back": "About 3 minutes: 120 seconds plus up to 60 seconds of jitter.",
+      "explanation": "The interval is `timeout.reconciliation`, whose default gives a maximum period of 3 minutes.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automated Sync Semantics”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automated-sync-semantics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The automatic sync interval is determined by the timeout.reconciliation value in the argocd-cm ConfigMap , which defaults to `120s` with added jitter of `60s` for a maximum period of 3 minutes.",
+      "uses": [
+        "automated sync policy",
+        "ConfigMap"
+      ],
+      "conceptIDs": [
+        "argo.reconciliation-timeout"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Argo docs as of that date"
+    },
+    {
+      "id": "argo.syncing.retry",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4270,
+      "front": "How can Argo CD retry a failed sync, and what `limit` value gives unlimited retries?",
+      "back": "With the `retry` field of the sync policy, using exponential backoff; `-1` means unlimited.",
+      "explanation": "`backoff.factor` multiplies the wait after each failed attempt.",
+      "source": "Argo CD documentation, “Automated Sync Policy”, “Automatic Retry with a limit”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/#automatic-retry-with-a-limit",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Argo CD can automatically retry a failed sync operation using exponential backoff. To enable, configure the `retry` field in the sync policy:",
+      "uses": [
+        "sync"
+      ],
+      "conceptIDs": [
+        "argo.automated-retry"
+      ]
+    },
+    {
+      "id": "argo.syncing.sync-options-annotation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4280,
+      "front": "How do you give one resource several sync options through its annotation?",
+      "back": "Join them with a comma in the `argocd.argoproj.io/sync-options` annotation value.",
+      "explanation": "White space around the comma is trimmed.",
+      "source": "Argo CD documentation, “Sync Options”, “Sync Options”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#sync-options",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Multiple Sync Options which are configured with the `argocd.argoproj.io/sync-options` annotation can be concatenated with a `,` in the annotation value; white-space will be trimmed.",
+      "uses": [
+        "sync options",
+        "annotation"
+      ],
+      "conceptIDs": [
+        "argo.sync-options"
+      ]
+    },
+    {
+      "id": "argo.syncing.prune-false",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4290,
+      "front": "A resource carries the sync option `Prune=false`, but the Application’s sync policy prunes. Which wins?",
+      "back": "The resource’s `Prune=false`: a Prune option on the resource always overrides the Application’s policy.",
+      "explanation": "The app will show out of sync if Argo CD expects the resource to be pruned.",
+      "source": "Argo CD documentation, “Sync Options”, “No Prune Resources”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#no-prune-resources",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note that setting a Prune sync option on the resource will always override a Prune sync policy defined in the Application.",
+      "uses": [
+        "sync options",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.prune-false"
+      ]
+    },
+    {
+      "id": "argo.syncing.apply-outofsync-vs-selective",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 4300,
+      "front": "Both `ApplyOutOfSyncOnly=true` and a selective sync apply only some resources. What is the difference?",
+      "back": "With `ApplyOutOfSyncOnly`, sync hooks still run and the sync is recorded in history. A selective sync does neither.",
+      "explanation": "By default a sync applies every object, which is slow for applications with thousands of objects.",
+      "contrast": "History and hooks: kept with ApplyOutOfSyncOnly, lost with selective sync.",
+      "source": "Argo CD documentation, “Sync Options”, “Apply Resources OutOfSync Only”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#apply-resources-outofsync-only",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Unlike Selective Sync , when `ApplyOutOfSyncOnly` is enabled, Sync Hooks will still run and the sync will be recorded in the history.",
+      "uses": [
+        "sync options",
+        "selective sync",
+        "resource hook"
+      ],
+      "conceptIDs": [
+        "argo.apply-outofsync-only",
+        "argo.selective-sync"
+      ]
+    },
+    {
+      "id": "argo.syncing.prune-last",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4310,
+      "front": "What does the `PruneLast=true` sync option do?",
+      "back": "Makes pruning a final, implicit wave of the sync, after other resources are deployed and healthy and all other waves have succeeded.",
+      "explanation": "It can be set for the whole Application or on a single resource.",
+      "source": "Argo CD documentation, “Sync Options”, “Prune Last”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#prune-last",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This feature is to allow the ability for resource pruning to happen as a final, implicit wave of a sync operation, after the other resources have been deployed and become healthy, and after all other waves completed successfully.",
+      "uses": [
+        "sync options",
+        "sync wave"
+      ],
+      "conceptIDs": [
+        "argo.prune-last"
+      ]
+    },
+    {
+      "id": "argo.syncing.replace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4320,
+      "front": "With `Replace=true`, which commands does Argo CD use to apply changes, and what is the risk?",
+      "back": "`kubectl replace` or `kubectl create`. It can be destructive: resources may be recreated, which could cause an outage.",
+      "explanation": "The default is `kubectl apply`.",
+      "source": "Argo CD documentation, “Sync Options”, “Replace Resource Instead Of Applying Changes”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#replace-resource-instead-of-applying-changes",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This sync option has the potential to be destructive and might lead to resources having to be recreated, which could cause an outage for your application.",
+      "uses": [
+        "sync options",
+        "kubectl apply"
+      ],
+      "conceptIDs": [
+        "argo.replace-sync"
+      ]
+    },
+    {
+      "id": "argo.syncing.server-side-apply",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4330,
+      "front": "A resource is too big for the 262144-byte annotation limit that client-side `kubectl apply` relies on. Which sync option avoids this?",
+      "back": "`ServerSideApply=true`.",
+      "explanation": "Server-side apply does not use the annotation.",
+      "source": "Argo CD documentation, “Sync Options”, “Server-Side Apply”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#server-side-apply",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Resource is too big to fit in 262144 bytes allowed annotation size. In this case server-side apply can be used to avoid this issue as the annotation is not used in this case.",
+      "uses": [
+        "sync options",
+        "kubectl apply",
+        "annotation"
+      ],
+      "conceptIDs": [
+        "argo.server-side-apply"
+      ]
+    },
+    {
+      "id": "argo.syncing.create-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4340,
+      "front": "Without `CreateNamespace=true`, what happens if an Application’s destination namespace does not exist?",
+      "back": "The Application fails to sync.",
+      "explanation": "With the option, Argo CD creates the namespace named in `spec.destination.namespace`.",
+      "source": "Argo CD documentation, “Sync Options”, “Create Namespace”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#create-namespace",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Without this either declared in the Application manifest or passed in the CLI via `--sync-option CreateNamespace=true`, the Application will fail to sync if the namespace doesn't exist.",
+      "uses": [
+        "sync options",
+        "Application",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "argo.create-namespace"
+      ]
+    },
+    {
+      "id": "argo.syncing.scenario-create-namespace",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4350,
+      "front": "A new Application targets the `billing` namespace, which nobody has created. What should you add so the first sync succeeds?",
+      "back": "The sync option `CreateNamespace=true`.",
+      "explanation": "It makes Argo CD create the namespace in `spec.destination.namespace` if it does not already exist.",
+      "source": "Argo CD documentation, “Sync Options”, “Create Namespace”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/#create-namespace",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The example above shows how an Argo CD Application can be configured so it will create the namespace specified in `spec.destination.namespace` if it doesn't exist already.",
+      "uses": [
+        "sync options",
+        "Application",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "argo.create-namespace",
+        "argo.sync-options"
+      ]
+    },
+    {
+      "id": "argo.syncing.hook-kinds",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4360,
+      "front": "What kinds of Kubernetes resources can be hooks?",
+      "back": "Any kind, but they tend to be Pods, Jobs or Argo Workflows.",
+      "explanation": "Several hook types can be given as a comma-separated list.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “Sync Phases and Waves”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#sync-phases-and-waves",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Hooks can be any type of Kubernetes resource kind, but tend to be Pod, Job or Argo Workflows. Multiple hooks can be specified as a comma separated list.",
+      "uses": [
+        "resource hook",
+        "Pod",
+        "Job",
+        "Argo Workflows"
+      ],
+      "conceptIDs": [
+        "argo.resource-hook"
+      ]
+    },
+    {
+      "id": "argo.syncing.hook-presync",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4370,
+      "front": "Which hook type executes before the manifests are applied?",
+      "back": "`PreSync`.",
+      "explanation": "If any PreSync hook fails, the whole sync stops and is marked as failed.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, hook types table",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-phases-work",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Executes prior to the application of the manifests.",
+      "uses": [
+        "resource hook"
+      ],
+      "conceptIDs": [
+        "argo.sync-phases"
+      ]
+    },
+    {
+      "id": "argo.syncing.hook-sync",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4380,
+      "front": "Which hook type executes after all PreSync hooks have succeeded, at the same time as the manifests are applied?",
+      "back": "`Sync`.",
+      "explanation": "It runs alongside the main application of the manifests.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, hook types table",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-phases-work",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Executes after all `PreSync` hooks completed and were successful, at the same time as the application of the manifests.",
+      "uses": [
+        "resource hook"
+      ],
+      "conceptIDs": [
+        "argo.sync-phases"
+      ]
+    },
+    {
+      "id": "argo.syncing.hook-skip",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4390,
+      "front": "Which hook type tells Argo CD not to apply the manifest at all?",
+      "back": "`Skip`.",
+      "explanation": "Resources marked Skip are not applied.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, hook types table",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-phases-work",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Indicates to Argo CD to skip the application of the manifest.",
+      "uses": [
+        "resource hook"
+      ],
+      "conceptIDs": [
+        "argo.sync-phases"
+      ]
+    },
+    {
+      "id": "argo.syncing.hook-postsync",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4400,
+      "front": "Which hook type executes after all Sync hooks succeed, the application succeeds and all resources are Healthy?",
+      "back": "`PostSync`.",
+      "explanation": "It waits for health as well as for the Sync hooks.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, hook types table",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-phases-work",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Executes after all `Sync` hooks completed and were successful, a successful application, and all resources in a `Healthy` state.",
+      "uses": [
+        "resource hook",
+        "health"
+      ],
+      "conceptIDs": [
+        "argo.sync-phases"
+      ]
+    },
+    {
+      "id": "argo.syncing.hook-syncfail",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4410,
+      "front": "Which hook type executes when the sync operation fails?",
+      "back": "`SyncFail`.",
+      "explanation": "SyncFail hooks can be used for clean-up and other housekeeping; if one fails, Argo CD only marks the operation as failed.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, hook types table",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-phases-work",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Executes when the sync operation fails.",
+      "uses": [
+        "resource hook"
+      ],
+      "conceptIDs": [
+        "argo.sync-phases"
+      ]
+    },
+    {
+      "id": "argo.syncing.scenario-hook-type",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4420,
+      "front": "Before each deployment you must confirm the database is reachable, and stop the deployment if it is not. Which hook type fits?",
+      "back": "A: `PreSync`.",
+      "choices": "A) PreSync\nB) PostSync\nC) SyncFail",
+      "choicesExplained": "B runs after the manifests are applied, too late to stop them. C runs only once a sync has already failed.",
+      "explanation": "If a PreSync hook fails, the whole sync stops and is marked as failed.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “How phases work?”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-phases-work",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Apply all the resources marked as PreSync hooks. If any of them fails the whole sync process will stop and will be marked as failed",
+      "uses": [
+        "resource hook",
+        "sync"
+      ],
+      "conceptIDs": [
+        "argo.sync-phases",
+        "argo.resource-hook"
+      ]
+    },
+    {
+      "id": "argo.syncing.predelete-only-on-delete",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4430,
+      "front": "Does a PreDelete hook run when a sync prunes resources?",
+      "back": "No. It runs only when the Application itself is being deleted.",
+      "explanation": "Normal sync operations do not run it, even when pruning is enabled.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “PreDelete Hooks”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#predelete-hooks",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "They run only during Application deletion (e.g., `kubectl delete application` or `argocd app delete`), not during normal sync operations, even when pruning is enabled.",
+      "uses": [
+        "PreDelete and PostDelete hooks",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.predelete-postdelete"
+      ]
+    },
+    {
+      "id": "argo.syncing.predelete-fails",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4440,
+      "front": "What happens to an Application’s deletion if its PreDelete hook fails?",
+      "back": "Deletion is blocked: the Application stays deleting with a `DeletionError` condition, and its resources are not deleted.",
+      "explanation": "Fixing the hook in Git, or deleting the failing hook resource, lets the deletion go ahead.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “PreDelete Hooks”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#predelete-hooks",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If a PreDelete hook fails (e.g., a Job fails or a Pod crashes), the Application deletion is blocked:",
+      "uses": [
+        "PreDelete and PostDelete hooks",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.predelete-postdelete"
+      ]
+    },
+    {
+      "id": "argo.syncing.delete-policy-succeeded",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4450,
+      "front": "Which hook deletion policy deletes the hook resource when the sync succeeds?",
+      "back": "`HookSucceeded`.",
+      "explanation": "The policy is set with the `argocd.argoproj.io/hook-delete-policy` annotation.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “Hook lifecycle and cleanup”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#hook-lifecycle-and-cleanup",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The hook resource is deleted when the sync succeeds.",
+      "uses": [
+        "resource hook",
+        "annotation"
+      ],
+      "conceptIDs": [
+        "argo.hook-delete-policies"
+      ]
+    },
+    {
+      "id": "argo.syncing.delete-policy-failed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4460,
+      "front": "Which hook deletion policy deletes the hook resource after the hook failed?",
+      "back": "`HookFailed`.",
+      "explanation": "It is the counterpart of HookSucceeded.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “Hook lifecycle and cleanup”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#hook-lifecycle-and-cleanup",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The hook resource is deleted after the hook failed.",
+      "uses": [
+        "resource hook"
+      ],
+      "conceptIDs": [
+        "argo.hook-delete-policies"
+      ]
+    },
+    {
+      "id": "argo.syncing.delete-policy-before-creation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4470,
+      "front": "Which hook deletion policy deletes any existing hook resource before the new one is created, and is assumed when none is set?",
+      "back": "`BeforeHookCreation`.",
+      "explanation": "It is meant to be used with a fixed `/metadata/name`.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “Hook lifecycle and cleanup”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#hook-lifecycle-and-cleanup",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note that if no deletion policy is specified, Argo CD will automatically assume `BeforeHookCreation` rules.",
+      "uses": [
+        "resource hook"
+      ],
+      "conceptIDs": [
+        "argo.hook-delete-policies",
+        "argo.default-hook-delete-policy"
+      ]
+    },
+    {
+      "id": "argo.syncing.scenario-keep-failed-hook",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4480,
+      "front": "You want a migration hook Job removed when the sync succeeds, but kept for debugging when it fails. Which deletion policy do you set?",
+      "back": "`HookSucceeded`.",
+      "explanation": "It deletes the hook only when the sync succeeds; HookFailed would do the opposite.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “Hook lifecycle and cleanup”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#hook-lifecycle-and-cleanup",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The hook resource is deleted when the sync succeeds.",
+      "uses": [
+        "resource hook",
+        "Job"
+      ],
+      "conceptIDs": [
+        "argo.hook-delete-policies"
+      ]
+    },
+    {
+      "id": "argo.syncing.wave-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4490,
+      "front": "What sync wave are hooks and resources in by default, and can a wave be negative?",
+      "back": "Wave 0. Yes, a wave can be negative, to run before all other resources.",
+      "explanation": "A negative wave comes before the default wave 0.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “How sync waves work?”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-sync-waves-work",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Hooks and resources are assigned to wave 0 by default. The wave can be negative, so you can create a wave that runs before all other resources.",
+      "uses": [
+        "sync wave",
+        "resource hook"
+      ],
+      "conceptIDs": [
+        "argo.sync-wave-default"
+      ]
+    },
+    {
+      "id": "argo.syncing.sync-order",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4500,
+      "front": "When a sync starts, Argo CD orders resources by phase, then by wave, then by {{c1::kind}}, then by name.",
+      "explanation": "Kind puts namespaces first, then other Kubernetes resources, then custom resources.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “Combining Sync waves and hooks”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#combining-sync-waves-and-hooks",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By kind (e.g. namespaces first and then other Kubernetes resources, followed by custom resources)",
+      "uses": [
+        "sync wave",
+        "namespace",
+        "custom resource"
+      ],
+      "conceptIDs": [
+        "argo.sync-order"
+      ]
+    },
+    {
+      "id": "argo.syncing.scenario-wave-order",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4510,
+      "front": "In one sync phase: a Secret with no wave annotation, a Deployment at wave `2`, and a Job at wave `-1`. In what order are they applied?",
+      "back": "The Job (−1), then the Secret (0), then the Deployment (2).",
+      "explanation": "Waves go from lowest to highest, and a resource with no annotation is in wave 0.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “How sync waves work?”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-sync-waves-work",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Order all resources according to their wave (lowest to highest)",
+      "uses": [
+        "sync wave",
+        "Secret",
+        "Deployment",
+        "Job"
+      ],
+      "conceptIDs": [
+        "argo.sync-wave",
+        "argo.sync-wave-default",
+        "argo.sync-order"
+      ]
+    },
+    {
+      "id": "argo.syncing.prune-reverse",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4520,
+      "front": "In what wave order does Argo CD prune resources?",
+      "back": "In reverse: resources in higher waves are pruned first.",
+      "explanation": "If pruning in a wave fails, lower waves are not processed.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “How phases work?”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-phases-work",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "During pruning, the wave order is reversed from the creation order. Resources in higher waves are pruned first.",
+      "uses": [
+        "sync wave"
+      ],
+      "conceptIDs": [
+        "argo.prune-reverse-wave"
+      ]
+    },
+    {
+      "id": "argo.syncing.selective-no-history",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4530,
+      "front": "After a selective sync, can you roll back to it?",
+      "back": "No. A selective sync is not recorded in the history, so rollback is not possible.",
+      "explanation": "Rollback works from the sync history.",
+      "source": "Argo CD documentation, “Selective Sync”, “Selective Sync”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/selective_sync/#selective-sync",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Your sync is **not** recorded in the history, and so rollback is not possible.",
+      "uses": [
+        "selective sync",
+        "rollback"
+      ],
+      "conceptIDs": [
+        "argo.selective-sync"
+      ]
+    },
+    {
+      "id": "argo.syncing.selective-no-hooks",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4540,
+      "front": "Do resource hooks run during a selective sync?",
+      "back": "No.",
+      "explanation": "The selective sync page gives the same warning.",
+      "source": "Argo CD documentation, “Sync Phases and Waves”, “How phases work?”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#how-phases-work",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Hooks do not run during a selective sync operation.",
+      "uses": [
+        "resource hook",
+        "selective sync"
+      ],
+      "conceptIDs": [
+        "argo.no-hooks-in-selective-sync"
+      ]
+    },
+    {
+      "id": "argo.syncing.windows-many-to-many",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4550,
+      "front": "Can one Application be affected by several sync windows, and one window apply to several Applications?",
+      "back": "Yes to both: the relationship is many-to-many.",
+      "explanation": "A window selects Applications by name, cluster or namespace.",
+      "source": "Argo CD documentation, “Sync Windows”, “Relationship between Sync Windows and Applications”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/sync_windows/#relationship-between-sync-windows-and-applications",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The relationship between Sync Windows and Application resources is many-to-many. This means that an Application resource may be affected by multiple Sync Windows, and that a single Sync Window definition may apply to multiple Application resources.",
+      "uses": [
+        "sync windows",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.sync-windows"
+      ]
+    },
+    {
+      "id": "argo.syncing.finalizer-cascade",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4560,
+      "front": "Which finalizer makes deleting an Application also delete its resources (a cascading delete)?",
+      "back": "`resources-finalizer.argocd.argoproj.io`.",
+      "explanation": "With it, the application controller performs the cascading delete.",
+      "source": "Argo CD documentation, “App Deletion”, “About The Deletion Finalizer”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/app_deletion/#about-the-deletion-finalizer",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When deleting an Application with this finalizer, the Argo CD application controller will perform a cascading delete of the Application's resources.",
+      "uses": [
+        "finalizer",
+        "Application",
+        "application controller"
+      ],
+      "conceptIDs": [
+        "argo.deletion-finalizer"
+      ]
+    },
+    {
+      "id": "argo.syncing.finalizer-missing",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4570,
+      "front": "Without the `resources-finalizer.argocd.argoproj.io` finalizer, what happens to managed resources when you delete the Application?",
+      "back": "They are not deleted; only the Application goes.",
+      "explanation": "A cascading delete needs the finalizer.",
+      "source": "Argo CD documentation, “Declarative Setup”, “Applications”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#applications",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Without the `resources-finalizer.argocd.argoproj.io` finalizer, deleting an application will not delete the resources it manages. To perform a cascading delete, you must add the finalizer.",
+      "uses": [
+        "finalizer",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.deletion-finalizer"
+      ]
+    },
+    {
+      "id": "argo.syncing.scenario-cascade-kubectl",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4580,
+      "front": "You will delete an Application with `kubectl delete app`, and you want its Deployments and Services removed too. What must be set first?",
+      "back": "The `resources-finalizer.argocd.argoproj.io` finalizer on the Application.",
+      "explanation": "For a cascade delete with kubectl, set the finalizer, for example with `kubectl patch`.",
+      "source": "Argo CD documentation, “App Deletion”, “Deletion Using kubectl”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/app_deletion/#deletion-using-kubectl",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To perform a cascade delete set the finalizer, e.g. using `kubectl patch`:",
+      "uses": [
+        "finalizer",
+        "Application",
+        "Deployment",
+        "Service"
+      ],
+      "conceptIDs": [
+        "argo.deletion-finalizer"
+      ]
+    },
+    {
+      "id": "argo.syncing.cascade-vs-non-cascade",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4590,
+      "front": "What is the difference between a cascade and a non-cascade delete of an Application?",
+      "back": "A cascade delete removes the app and its resources. A non-cascade delete (`--cascade=false`) removes only the app.",
+      "explanation": "`argocd app delete APPNAME` without flags performs a cascade delete.",
+      "contrast": "Cascade takes the resources with it; non-cascade leaves them running.",
+      "source": "Argo CD documentation, “App Deletion”, “App Deletion”; “Deletion Using argocd”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/app_deletion/#app-deletion",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Apps can be deleted with or without a cascade option. A **cascade delete**, deletes both the app and its resources, rather than only the app.",
+      "uses": [
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.non-cascade-delete"
+      ]
+    },
+    {
+      "id": "argo.syncing.propagation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4600,
+      "front": "What is the default propagation policy for a cascading Application delete, and which finalizer gives the alternative?",
+      "back": "Foreground. `resources-finalizer.argocd.argoproj.io/background` gives background cascading deletion.",
+      "explanation": "The policy can also be set with `--propagation-policy`.",
+      "source": "Argo CD documentation, “App Deletion”, “About The Deletion Finalizer”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/app_deletion/#about-the-deletion-finalizer",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Argo CD performs background cascading deletion when `resources-finalizer.argocd.argoproj.io/background` is set.",
+      "uses": [
+        "finalizer",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.deletion-propagation"
+      ]
+    },
+    {
+      "id": "argo.syncing.branch-tracking",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4610,
+      "front": "If an Application tracks a branch, what does Argo CD compare the live state against?",
+      "back": "The manifests at the tip of that branch.",
+      "explanation": "To redeploy, commit and push a manifest change to the tracked branch.",
+      "source": "Argo CD documentation, “Tracking and Deployment Strategies”, “HEAD or branch tracking”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/tracking_strategies/#head-or-branch-tracking",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If a branch name or a symbolic reference (like HEAD) is specified, Argo CD will continually compare live state against the resource manifests defined at the tip of the specified branch",
+      "uses": [
+        "live state"
+      ],
+      "conceptIDs": [
+        "argo.tracking-strategies"
+      ]
+    },
+    {
+      "id": "argo.syncing.tag-tracking",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4620,
+      "front": "An Application tracks a Git tag. How do you redeploy it with different manifests?",
+      "back": "Retag: move the tag to a different commit.",
+      "explanation": "A tag is generally considered more stable than a branch, and less frequently updated.",
+      "source": "Argo CD documentation, “Tracking and Deployment Strategies”, “Tag Tracking”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/tracking_strategies/#tag-tracking",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To redeploy an app, the user uses Git to change the meaning of a tag by retagging it to a different commit SHA.",
+      "uses": [
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.tracking-strategies"
+      ]
+    },
+    {
+      "id": "argo.syncing.scenario-pinned",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 4630,
+      "front": "Production is pinned to a commit. A fix is merged to `main`. What must happen for production to get it?",
+      "back": "C: update the Application’s tracked revision to a commit containing the fix.",
+      "choices": "A) Nothing; Argo CD picks up the new commit on its own\nB) Retag the pinned commit\nC) Update the Application’s revision to a commit containing the fix",
+      "choicesExplained": "A: a pinned app does not follow the branch. B: commits cannot change meaning, unlike tags.",
+      "explanation": "Updating the tracked revision is the only way to change a pinned app’s live state.",
+      "source": "Argo CD documentation, “Tracking and Deployment Strategies”, “Commit Pinning”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/tracking_strategies/#commit-pinning",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Since commit SHAs cannot change meaning, the only way to change the live state of an app which is pinned to a commit, is by updating the tracking revision in the application to a different commit containing the new manifests.",
+      "uses": [
+        "commit pinning",
+        "Application",
+        "live state"
+      ],
+      "conceptIDs": [
+        "argo.commit-pinning",
+        "argo.tracking-strategies"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,605 @@
+Skip to content
+
+Argo Rollouts - Kubernetes Progressive Delivery Controller
+
+Rollback Window
+
+Initializing search
+
+GitHub
+
+Argo Rollouts - Kubernetes Progressive Delivery Controller
+
+GitHub
+
+-
+
+Overview
+
+-
+
+Installation
+
+-
+
+Concepts
+
+-
+
+Architecture
+
+-
+
+Getting Started
+
+Getting Started
+
+-
+
+Basic Usage
+
+-
+
+Ambassador
+
+-
+
+AWS ALB
+
+-
+
+AWS App Mesh
+
+-
+
+Istio
+
+-
+
+NGINX
+
+-
+
+SMI
+
+-
+
+Multiple Providers
+
+-
+
+Dashboard
+
+-
+
+Rollout
+
+Rollout
+
+-
+
+Deployment Strategies
+
+Deployment Strategies
+
+-
+
+BlueGreen
+
+-
+
+Canary
+
+-
+
+Rollout Spec
+
+-
+
+Canary Step Plugin
+
+-
+
+HPA
+
+-
+
+VPA
+
+-
+
+Ephemeral Metadata
+
+-
+
+Restarting Rollouts
+
+-
+
+Scaledown Aborted Rollouts
+
+-
+
+Rollback Window
+
+-
+
+Anti Affinity
+
+-
+
+Helm
+
+-
+
+Kustomize
+
+-
+
+Controller Metrics
+
+-
+
+Traffic Management
+
+Traffic Management
+
+-
+
+Overview
+
+-
+
+Ambassador
+
+-
+
+APISIX
+
+-
+
+AWS ALB
+
+-
+
+Google Cloud
+
+-
+
+Istio
+
+-
+
+Kong
+
+-
+
+NGINX
+
+-
+
+Plugins
+
+-
+
+SMI
+
+-
+
+Traefik
+
+-
+
+Analysis
+
+Analysis
+
+-
+
+Overview
+
+-
+
+Plugins
+
+-
+
+Prometheus
+
+-
+
+Datadog
+
+-
+
+NewRelic
+
+-
+
+Wavefront
+
+-
+
+Job
+
+-
+
+Web
+
+-
+
+Kayenta
+
+-
+
+CloudWatch
+
+-
+
+Graphite
+
+-
+
+InfluxDB
+
+-
+
+Apache SkyWalking
+
+-
+
+Experiments
+
+-
+
+Notifications
+
+Notifications
+
+-
+
+Overview
+
+-
+
+Services
+
+Services
+
+-
+
+Alertmanager
+
+-
+
+AWS SQS
+
+-
+
+Email
+
+-
+
+GCP Pub/Sub
+
+-
+
+GitHub
+
+-
+
+Google Chat
+
+-
+
+Grafana
+
+-
+
+Mattermost
+
+-
+
+Nats
+
+-
+
+NewRelic
+
+-
+
+Opsgenie
+
+-
+
+Overview
+
+-
+
+PagerDuty
+
+-
+
+PagerDuty V2
+
+-
+
+Pushover
+
+-
+
+Rocket.Chat
+
+-
+
+Slack
+
+-
+
+Teams Workflows
+
+-
+
+Teams (Office 365 Connectors)
+
+-
+
+Telegram
+
+-
+
+Webex Teams
+
+-
+
+Webhook
+
+-
+
+Kubectl Plugin
+
+Kubectl Plugin
+
+-
+
+Overview
+
+-
+
+Commands
+
+Commands
+
+-
+
+Rollouts
+
+-
+
+Rollouts Abort
+
+-
+
+Rollouts Completion
+
+-
+
+Rollouts Create
+
+-
+
+Rollouts Create Analysisrun
+
+-
+
+Rollouts Dashboard
+
+-
+
+Rollouts Get
+
+-
+
+Rollouts Get Experiment
+
+-
+
+Rollouts Get Rollout
+
+-
+
+Rollouts Lint
+
+-
+
+Rollouts List
+
+-
+
+Rollouts List Experiments
+
+-
+
+Rollouts List Rollouts
+
+-
+
+Rollouts Notifications
+
+-
+
+Rollouts Notifications Template
+
+-
+
+Rollouts Notifications Template Get
+
+-
+
+Rollouts Notifications Template Notify
+
+-
+
+Rollouts Notifications Trigger
+
+-
+
+Rollouts Notifications Trigger Get
+
+-
+
+Rollouts Notifications Trigger Run
+
+-
+
+Rollouts Pause
+
+-
+
+Rollouts Promote
+
+-
+
+Rollouts Restart
+
+-
+
+Rollouts Retry
+
+-
+
+Rollouts Retry Experiment
+
+-
+
+Rollouts Retry Rollout
+
+-
+
+Rollouts Set
+
+-
+
+Rollouts Set Image
+
+-
+
+Rollouts Status
+
+-
+
+Rollouts Terminate
+
+-
+
+Rollouts Terminate Analysisrun
+
+-
+
+Rollouts Terminate Experiment
+
+-
+
+Rollouts Undo
+
+-
+
+Rollouts Version
+
+-
+
+Best Practices
+
+-
+
+Migrating
+
+-
+
+FAQ
+
+-
+
+Security
+
+Security
+
+-
+
+Security Policy
+
+-
+
+Verify Release Artifacts
+
+-
+
+Contributing
+
+Contributing
+
+-
+
+Contribution Guide
+
+-
+
+Environment Setup
+
+-
+
+Releasing
+
+-
+
+Backporting Fixes
+
+-
+
+Plugins
+
+-
+
+Releases ⧉
+
+-
+
+Roadmap
+
+-
+
+Blog ⧉
+
+Rollback Windows &para;
+
+Important
+
+Available for blue-green and canary rollouts since v1.4
+
+By default, when an older Rollout manifest is re-applied, the controller treats it the same as a spec change, and will execute the full list of steps, and perform analysis too. There are two exceptions to this rule:
+1. the controller detects if it is moving back to a blue-green ReplicaSet which exists and is still scaled up (within its scaleDownDelay )
+2. the controller detects it is moving back to the canary's "stable" ReplicaSet, and the upgrade had not yet completed.
+
+It is often undesirable to re-run analysis and steps for a rollout, when the desired behavior is to rollback as soon as possible. To help with this, a rollback window feature allows users to indicate that the promotion to the ReplicaSet within the window will skip all steps.
+
+Example:
+
+spec :
+rollbackWindow :
+revisions : 3
+
+revisionHistoryLimit : 5
+
+Assume a linear revision history: 1 , 2 , 3 , 4 , 5 (current) . A rollback from revision 5 back to 4 or 3 will fall within the window, so it will be fast tracked.
+
+Previous
+
+Scaledown Aborted Rollouts
+
+Next
+
+Anti Affinity
+
+Made with
+
+Material for MkDocs

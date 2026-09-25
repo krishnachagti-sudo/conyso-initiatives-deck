@@ -1,0 +1,792 @@
+Skip to content
+
+Argo Rollouts - Kubernetes Progressive Delivery Controller
+
+Migrating
+
+Initializing search
+
+GitHub
+
+Argo Rollouts - Kubernetes Progressive Delivery Controller
+
+GitHub
+
+-
+
+Overview
+
+-
+
+Installation
+
+-
+
+Concepts
+
+-
+
+Architecture
+
+-
+
+Getting Started
+
+Getting Started
+
+-
+
+Basic Usage
+
+-
+
+Ambassador
+
+-
+
+AWS ALB
+
+-
+
+AWS App Mesh
+
+-
+
+Istio
+
+-
+
+NGINX
+
+-
+
+SMI
+
+-
+
+Multiple Providers
+
+-
+
+Dashboard
+
+-
+
+Rollout
+
+Rollout
+
+-
+
+Deployment Strategies
+
+Deployment Strategies
+
+-
+
+BlueGreen
+
+-
+
+Canary
+
+-
+
+Rollout Spec
+
+-
+
+Canary Step Plugin
+
+-
+
+HPA
+
+-
+
+VPA
+
+-
+
+Ephemeral Metadata
+
+-
+
+Restarting Rollouts
+
+-
+
+Scaledown Aborted Rollouts
+
+-
+
+Rollback Window
+
+-
+
+Anti Affinity
+
+-
+
+Helm
+
+-
+
+Kustomize
+
+-
+
+Controller Metrics
+
+-
+
+Traffic Management
+
+Traffic Management
+
+-
+
+Overview
+
+-
+
+Ambassador
+
+-
+
+APISIX
+
+-
+
+AWS ALB
+
+-
+
+Google Cloud
+
+-
+
+Istio
+
+-
+
+Kong
+
+-
+
+NGINX
+
+-
+
+Plugins
+
+-
+
+SMI
+
+-
+
+Traefik
+
+-
+
+Analysis
+
+Analysis
+
+-
+
+Overview
+
+-
+
+Plugins
+
+-
+
+Prometheus
+
+-
+
+Datadog
+
+-
+
+NewRelic
+
+-
+
+Wavefront
+
+-
+
+Job
+
+-
+
+Web
+
+-
+
+Kayenta
+
+-
+
+CloudWatch
+
+-
+
+Graphite
+
+-
+
+InfluxDB
+
+-
+
+Apache SkyWalking
+
+-
+
+Experiments
+
+-
+
+Notifications
+
+Notifications
+
+-
+
+Overview
+
+-
+
+Services
+
+Services
+
+-
+
+Alertmanager
+
+-
+
+AWS SQS
+
+-
+
+Email
+
+-
+
+GCP Pub/Sub
+
+-
+
+GitHub
+
+-
+
+Google Chat
+
+-
+
+Grafana
+
+-
+
+Mattermost
+
+-
+
+Nats
+
+-
+
+NewRelic
+
+-
+
+Opsgenie
+
+-
+
+Overview
+
+-
+
+PagerDuty
+
+-
+
+PagerDuty V2
+
+-
+
+Pushover
+
+-
+
+Rocket.Chat
+
+-
+
+Slack
+
+-
+
+Teams Workflows
+
+-
+
+Teams (Office 365 Connectors)
+
+-
+
+Telegram
+
+-
+
+Webex Teams
+
+-
+
+Webhook
+
+-
+
+Kubectl Plugin
+
+Kubectl Plugin
+
+-
+
+Overview
+
+-
+
+Commands
+
+Commands
+
+-
+
+Rollouts
+
+-
+
+Rollouts Abort
+
+-
+
+Rollouts Completion
+
+-
+
+Rollouts Create
+
+-
+
+Rollouts Create Analysisrun
+
+-
+
+Rollouts Dashboard
+
+-
+
+Rollouts Get
+
+-
+
+Rollouts Get Experiment
+
+-
+
+Rollouts Get Rollout
+
+-
+
+Rollouts Lint
+
+-
+
+Rollouts List
+
+-
+
+Rollouts List Experiments
+
+-
+
+Rollouts List Rollouts
+
+-
+
+Rollouts Notifications
+
+-
+
+Rollouts Notifications Template
+
+-
+
+Rollouts Notifications Template Get
+
+-
+
+Rollouts Notifications Template Notify
+
+-
+
+Rollouts Notifications Trigger
+
+-
+
+Rollouts Notifications Trigger Get
+
+-
+
+Rollouts Notifications Trigger Run
+
+-
+
+Rollouts Pause
+
+-
+
+Rollouts Promote
+
+-
+
+Rollouts Restart
+
+-
+
+Rollouts Retry
+
+-
+
+Rollouts Retry Experiment
+
+-
+
+Rollouts Retry Rollout
+
+-
+
+Rollouts Set
+
+-
+
+Rollouts Set Image
+
+-
+
+Rollouts Status
+
+-
+
+Rollouts Terminate
+
+-
+
+Rollouts Terminate Analysisrun
+
+-
+
+Rollouts Terminate Experiment
+
+-
+
+Rollouts Undo
+
+-
+
+Rollouts Version
+
+-
+
+Best Practices
+
+-
+
+Migrating
+
+Migrating
+
+Table of contents
+
+-
+
+Convert Deployment to Rollout
+
+-
+
+Reference Deployment From Rollout
+
+-
+
+Running Rollout and Deployment side-by-side
+
+-
+
+Traffic Management During Migration
+
+-
+
+FAQ
+
+-
+
+Security
+
+Security
+
+-
+
+Security Policy
+
+-
+
+Verify Release Artifacts
+
+-
+
+Contributing
+
+Contributing
+
+-
+
+Contribution Guide
+
+-
+
+Environment Setup
+
+-
+
+Releasing
+
+-
+
+Backporting Fixes
+
+-
+
+Plugins
+
+-
+
+Releases ⧉
+
+-
+
+Roadmap
+
+-
+
+Blog ⧉
+
+Table of contents
+
+-
+
+Convert Deployment to Rollout
+
+-
+
+Reference Deployment From Rollout
+
+-
+
+Running Rollout and Deployment side-by-side
+
+-
+
+Traffic Management During Migration
+
+Migrating to Rollouts &para;
+
+There are ways to migrate to a Rollout:
+
+- Convert an existing Deployment resource to a Rollout resource.
+
+- Reference an existing Deployment from a Rollout using workloadRef field.
+
+Convert Deployment to Rollout &para;
+
+When converting a Deployment to a Rollout, it involves changing three fields:
+
+- Replacing the apiVersion from apps/v1 to argoproj.io/v1alpha1
+
+- Replacing the kind from Deployment to Rollout
+
+- Replacing the deployment strategy with a blue-green or canary strategy
+
+Below is an example of a Rollout resource using the canary strategy.
+
+apiVersion : argoproj.io/v1alpha1 # Changed from apps/v1
+kind : Rollout # Changed from Deployment
+metadata :
+name : rollouts-demo
+spec :
+selector :
+matchLabels :
+app : rollouts-demo
+template :
+metadata :
+labels :
+app : rollouts-demo
+spec :
+containers :
+- name : rollouts-demo
+image : argoproj/rollouts-demo:blue
+ports :
+- containerPort : 8080
+strategy :
+canary : # Changed from rollingUpdate or recreate
+steps :
+- setWeight : 20
+- pause : {}
+
+Warning
+
+When migrating a Deployment which is already serving live production traffic, a Rollout should
+run next to the Deployment before deleting the Deployment or scaling down the Deployment.
+Not following this approach might result in downtime . It also allows for the Rollout to be
+tested before deleting the original Deployment.
+
+Reference Deployment From Rollout &para;
+
+Instead of removing Deployment you can scale it down to zero and reference it from the Rollout resource:
+
+- Create a Rollout resource.
+
+- Reference an existing Deployment using workloadRef field.
+
+- In the workloadRef field set the scaleDown attribute, which specifies how the Deployment should be scaled down. There are three options available:
+
+- never : the Deployment is not scaled down
+
+- onsuccess : the Deployment is scaled down after the Rollout becomes healthy
+
+- progressively : as the Rollout is scaled up the Deployment is scaled down.
+
+Alternatively, manually scale down an existing Deployment by changing replicas field of an existing Deployment to zero.
+1. To perform an update, the change should be made to the Pod template field of the Deployment.
+
+Below is an example of a Rollout resource referencing a Deployment.
+
+apiVersion : argoproj.io/v1alpha1 # Create a rollout resource
+kind : Rollout
+metadata :
+name : rollout-ref-deployment
+spec :
+replicas : 5
+selector :
+matchLabels :
+app : rollout-ref-deployment
+workloadRef : # Reference an existing Deployment using workloadRef field
+apiVersion : apps/v1
+kind : Deployment
+name : rollout-ref-deployment
+scaleDown : onsuccess
+strategy :
+canary :
+steps :
+- setWeight : 20
+- pause : { duration : 10s }
+---
+apiVersion : apps/v1
+kind : Deployment
+metadata :
+labels :
+app.kubernetes.io/instance : rollout-canary
+name : rollout-ref-deployment
+spec :
+replicas : 0 # Scale down existing deployment
+selector :
+matchLabels :
+app : rollout-ref-deployment
+template :
+metadata :
+labels :
+app : rollout-ref-deployment
+spec :
+containers :
+- name : rollouts-demo
+image : argoproj/rollouts-demo:blue
+imagePullPolicy : Always
+ports :
+- containerPort : 8080
+
+Consider following if your Deployment runs in production:
+
+Running Rollout and Deployment side-by-side &para;
+
+After creation, the Rollout will spin up the required number of Pods side-by-side with the Deployment Pods. The Rollout won't try to manage existing Deployment Pods. That means you can safely add the Rollout to the production environment without any interruption, but you are going to run twice as many Pods during migration.
+
+Argo-rollouts controller patches the spec of rollout object with an annotation of rollout.argoproj.io/workload-generation , which equals the generation of referenced deployment. Users can detect if the rollout matches desired generation of deployment by checking the workloadObservedGeneration in the rollout status.
+
+Traffic Management During Migration &para;
+
+The Rollout offers traffic management functionality that manages routing rules and flows the traffic to different
+versions of an application. For example Blue-Green deployment strategy manipulates
+Kubernetes Service selector and direct production traffic to "green" instances only.
+
+If you are using this feature then Rollout switches production traffic to Pods that it manages. The switch happens
+only when the required number of Pod is running and healthy so it is safe in production as well. However, if you
+want to be extra careful then consider creating a temporal Service or Ingress object to validate Rollout behavior.
+Once testing is done delete temporal Service/Ingress and switch rollout to production one.
+
+Migrating to Deployments &para;
+
+In case users want to rollback to the deployment kinds from rollouts, there are two scenarios aligned with those in Migrating to Rollouts .
+
+- Convert a Rollout resource to a Deployment resource.
+
+- Reference an existing Deployment from a Rollout using workloadRef field.
+
+Convert Rollout to Deployment &para;
+
+When converting a Rollout to a Deployment, it involves changing three fields:
+
+- Changing the apiVersion from argoproj.io/v1alpha1 to apps/v1
+
+- Changing the kind from Rollout to Deployment
+
+- Remove the rollout strategy in spec.strategy.canary or spec.strategy.blueGreen
+
+Warning
+
+When migrating a Rollout which is already serving live production traffic, a Deployment should
+run next to the rollout before deleting the rollout or scaling down the rollout.
+Not following this approach might result in downtime . It also allows for the Deployment to be
+tested before deleting the original Rollout.
+
+Reference Deployment From Rollout &para;
+
+When a rollout is referencing to a deployment:
+
+- Scale-up an existing Deployment by changing its replicas field to a desired number of pods.
+
+- Wait for the Deployment pods to become Ready.
+
+- Scale-down an existing Rollout by changing its replicas field to zero.
+
+Please refer to Running Rollout and Deployment side-by-side and Traffic Management During Migration for caveats.
+
+Previous
+
+Best Practices
+
+Next
+
+FAQ
+
+Made with
+
+Material for MkDocs

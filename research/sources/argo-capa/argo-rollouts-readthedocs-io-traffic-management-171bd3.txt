@@ -1,0 +1,838 @@
+Skip to content
+
+Argo Rollouts - Kubernetes Progressive Delivery Controller
+
+Overview
+
+Initializing search
+
+GitHub
+
+Argo Rollouts - Kubernetes Progressive Delivery Controller
+
+GitHub
+
+-
+
+Overview
+
+-
+
+Installation
+
+-
+
+Concepts
+
+-
+
+Architecture
+
+-
+
+Getting Started
+
+Getting Started
+
+-
+
+Basic Usage
+
+-
+
+Ambassador
+
+-
+
+AWS ALB
+
+-
+
+AWS App Mesh
+
+-
+
+Istio
+
+-
+
+NGINX
+
+-
+
+SMI
+
+-
+
+Multiple Providers
+
+-
+
+Dashboard
+
+-
+
+Rollout
+
+Rollout
+
+-
+
+Deployment Strategies
+
+Deployment Strategies
+
+-
+
+BlueGreen
+
+-
+
+Canary
+
+-
+
+Rollout Spec
+
+-
+
+Canary Step Plugin
+
+-
+
+HPA
+
+-
+
+VPA
+
+-
+
+Ephemeral Metadata
+
+-
+
+Restarting Rollouts
+
+-
+
+Scaledown Aborted Rollouts
+
+-
+
+Rollback Window
+
+-
+
+Anti Affinity
+
+-
+
+Helm
+
+-
+
+Kustomize
+
+-
+
+Controller Metrics
+
+-
+
+Traffic Management
+
+Traffic Management
+
+-
+
+Overview
+
+Overview
+
+Table of contents
+
+-
+
+Traffic Management Tools in Kubernetes
+
+-
+
+How does Argo Rollouts enable traffic management?
+
+-
+
+Traffic Routing with Managed Routes and Route Precedence
+
+-
+
+Traffic Routing Based on Header Values for Canary
+
+-
+
+Traffic Mirroring to Canary
+
+-
+
+Ambassador
+
+-
+
+APISIX
+
+-
+
+AWS ALB
+
+-
+
+Google Cloud
+
+-
+
+Istio
+
+-
+
+Kong
+
+-
+
+NGINX
+
+-
+
+Plugins
+
+-
+
+SMI
+
+-
+
+Traefik
+
+-
+
+Analysis
+
+Analysis
+
+-
+
+Overview
+
+-
+
+Plugins
+
+-
+
+Prometheus
+
+-
+
+Datadog
+
+-
+
+NewRelic
+
+-
+
+Wavefront
+
+-
+
+Job
+
+-
+
+Web
+
+-
+
+Kayenta
+
+-
+
+CloudWatch
+
+-
+
+Graphite
+
+-
+
+InfluxDB
+
+-
+
+Apache SkyWalking
+
+-
+
+Experiments
+
+-
+
+Notifications
+
+Notifications
+
+-
+
+Overview
+
+-
+
+Services
+
+Services
+
+-
+
+Alertmanager
+
+-
+
+AWS SQS
+
+-
+
+Email
+
+-
+
+GCP Pub/Sub
+
+-
+
+GitHub
+
+-
+
+Google Chat
+
+-
+
+Grafana
+
+-
+
+Mattermost
+
+-
+
+Nats
+
+-
+
+NewRelic
+
+-
+
+Opsgenie
+
+-
+
+Overview
+
+-
+
+PagerDuty
+
+-
+
+PagerDuty V2
+
+-
+
+Pushover
+
+-
+
+Rocket.Chat
+
+-
+
+Slack
+
+-
+
+Teams Workflows
+
+-
+
+Teams (Office 365 Connectors)
+
+-
+
+Telegram
+
+-
+
+Webex Teams
+
+-
+
+Webhook
+
+-
+
+Kubectl Plugin
+
+Kubectl Plugin
+
+-
+
+Overview
+
+-
+
+Commands
+
+Commands
+
+-
+
+Rollouts
+
+-
+
+Rollouts Abort
+
+-
+
+Rollouts Completion
+
+-
+
+Rollouts Create
+
+-
+
+Rollouts Create Analysisrun
+
+-
+
+Rollouts Dashboard
+
+-
+
+Rollouts Get
+
+-
+
+Rollouts Get Experiment
+
+-
+
+Rollouts Get Rollout
+
+-
+
+Rollouts Lint
+
+-
+
+Rollouts List
+
+-
+
+Rollouts List Experiments
+
+-
+
+Rollouts List Rollouts
+
+-
+
+Rollouts Notifications
+
+-
+
+Rollouts Notifications Template
+
+-
+
+Rollouts Notifications Template Get
+
+-
+
+Rollouts Notifications Template Notify
+
+-
+
+Rollouts Notifications Trigger
+
+-
+
+Rollouts Notifications Trigger Get
+
+-
+
+Rollouts Notifications Trigger Run
+
+-
+
+Rollouts Pause
+
+-
+
+Rollouts Promote
+
+-
+
+Rollouts Restart
+
+-
+
+Rollouts Retry
+
+-
+
+Rollouts Retry Experiment
+
+-
+
+Rollouts Retry Rollout
+
+-
+
+Rollouts Set
+
+-
+
+Rollouts Set Image
+
+-
+
+Rollouts Status
+
+-
+
+Rollouts Terminate
+
+-
+
+Rollouts Terminate Analysisrun
+
+-
+
+Rollouts Terminate Experiment
+
+-
+
+Rollouts Undo
+
+-
+
+Rollouts Version
+
+-
+
+Best Practices
+
+-
+
+Migrating
+
+-
+
+FAQ
+
+-
+
+Security
+
+Security
+
+-
+
+Security Policy
+
+-
+
+Verify Release Artifacts
+
+-
+
+Contributing
+
+Contributing
+
+-
+
+Contribution Guide
+
+-
+
+Environment Setup
+
+-
+
+Releasing
+
+-
+
+Backporting Fixes
+
+-
+
+Plugins
+
+-
+
+Releases ⧉
+
+-
+
+Roadmap
+
+-
+
+Blog ⧉
+
+Table of contents
+
+-
+
+Traffic Management Tools in Kubernetes
+
+-
+
+How does Argo Rollouts enable traffic management?
+
+-
+
+Traffic Routing with Managed Routes and Route Precedence
+
+-
+
+Traffic Routing Based on Header Values for Canary
+
+-
+
+Traffic Mirroring to Canary
+
+Traffic Management &para;
+
+Traffic management refers to controlling the data plane through intelligent routing rules for an application. These routing rules manipulate traffic flow between different versions of an application, enabling Progressive Delivery. By ensuring that only a small percentage of users receive a new version while it's being verified, these controls help limit the potential impact (blast radius) of a new release.
+
+There are various techniques to achieve traffic management:
+
+- Raw percentages (i.e., 5% of traffic should go to the new version while the rest goes to the stable version)
+
+- Header-based routing (i.e., send requests with a specific header to the new version)
+
+- Mirrored traffic where all the traffic is copied and sent to the new version in parallel (but the response is ignored)
+
+Traffic Management Tools in Kubernetes &para;
+
+Core Kubernetes objects lack the fine-grained tools necessary for comprehensive traffic management. Kubernetes primarily offers native load balancing through the Service object, which provides an endpoint that routes traffic to pods based on the Service's selector. However, advanced features such as traffic mirroring or header-based routing are not possible with the default Service object. The only way to control traffic distribution between different versions of an application is by adjusting their replica counts.
+
+Service Meshes fill this missing functionality in Kubernetes. They introduce new concepts and functionality to control the data plane through the use of CRDs and other core Kubernetes resources.
+
+No new traffic managers are accepted in the core controller
+
+If you want to use a brand new traffic manager you must create a Plugin . Argo Rollouts is moving to a plugin-based architecture where we want to keep the core code stable and minimal and all extensions should come in the form of plugins ( metrics , traffic , steps ). We will only accept minor contributions and fixes for the existing traffic managers that are already part of Argo Rollouts core.
+
+How does Argo Rollouts enable traffic management? &para;
+
+Argo Rollouts enables traffic management by manipulating the Service Mesh resources to match the intent of the Rollout. Argo Rollouts currently supports the following traffic providers:
+
+- AWS ALB Ingress Controller
+
+- Ambassador Edge Stack
+
+- Apache APISIX
+
+- Google Cloud
+
+- Gateway API
+
+- Istio
+
+- Kong Ingress
+
+- Nginx Ingress Controller
+
+- Service Mesh Interface (SMI)
+
+- Traefik Proxy
+
+- Multiple Providers
+
+- Create a Traffic Manager Plugin if you would like to use another implementation
+
+Regardless of the Service Mesh used, the Rollout object has to set a canary Service and a stable Service in its spec. Here is an example with those fields set:
+
+apiVersion : argoproj.io/v1alpha1
+kind : Rollout
+spec :
+strategy :
+canary :
+canaryService : canary-service
+stableService : stable-service
+trafficRouting : {}
+
+The controller modifies these Services to route traffic to the appropriate canary and stable ReplicaSets as the Rollout progresses. These Services are used by the Service Mesh to define what group of pods should receive the canary and stable traffic.
+
+Additionally, the Argo Rollouts controller needs to treat the Rollout object differently when using traffic management. In particular, the Stable ReplicaSet owned by the Rollout remains fully scaled up as the Rollout progresses through the Canary steps.
+
+Since the traffic is controlled independently by the Service Mesh resources, the controller needs to make a best effort to ensure that the Stable and New ReplicaSets are not overwhelmed by the traffic sent to them. By leaving the Stable ReplicaSet scaled up, the controller is ensuring that the Stable ReplicaSet can handle 100% of the traffic at any time 1 . The New ReplicaSet follows the same behavior as without traffic management. The new ReplicaSet's replica count is equal to the latest SetWeight step percentage multiplied by the total replica count of the Rollout. This calculation ensures that the canary version does not receive more traffic than it can handle.
+
+Traffic Routing with Managed Routes and Route Precedence &para;
+
+Traffic Router Support: Istio
+
+When traffic routing is enabled, Argo Rollouts can add and manage additional routes beyond just controlling the traffic weight
+to the canary. These include header-based and mirror-based routes. When using these routes, you must set route precedence
+with the upstream traffic router using the spec.strategy.canary.trafficRouting.managedRoutes field. This field accepts an
+array where the order of items determines their precedence. These managed routes will be placed in the specified order above
+any manually defined routes.
+
+Warning
+
+All routes listed in managed routes will be removed at the end of a rollout or on an abort. Do not put any manually created routes in the list.
+
+Here is an example:
+
+apiVersion : argoproj.io/v1alpha1
+kind : Rollout
+spec :
+strategy :
+canary :
+trafficRouting :
+managedRoutes :
+- name : priority-route-1
+- name : priority-route-2
+- name : priority-route-3
+
+Traffic Routing Based on Header Values for Canary &para;
+
+Traffic Router Support: Istio
+
+Argo Rollouts can route all traffic to the canary service based on HTTP request header values.
+Header-based traffic routing is configured using the setHeaderRoute step, which contains a list of header matchers.
+
+name - The name of the header route.
+
+match - An array of headerName, headerValue pairs defining the header matching rules.
+
+headerName - The name of the header to match.
+
+headerValue - Must contain exactly one of the following:
+
+- exact : Specifies an exact header value to match
+
+- regex : Specifies a regular expression pattern to match
+
+- prefix : Specifies a prefix value to match
+
+Note: Not all traffic routers support all match types.
+
+To disable header based traffic routing just need to specify empty setHeaderRoute with only the name of the route.
+
+Example:
+
+apiVersion : argoproj.io/v1alpha1
+kind : Rollout
+spec :
+strategy :
+canary :
+canaryService : canary-service
+stableService : stable-service
+trafficRouting :
+managedRoutes :
+- name : set-header-1
+istio :
+virtualService :
+name : rollouts-demo-vsvc
+steps :
+- setWeight : 20
+- setHeaderRoute : # enable header based traffic routing where
+name : 'set-header-1'
+match :
+- headerName : Custom-Header1 # Custom-Header1=Mozilla
+headerValue :
+exact : Mozilla
+- headerName : Custom-Header2 # or Custom-Header2 has a prefix Mozilla
+headerValue :
+prefix : Mozilla
+- headerName : Custom-Header3 # or Custom-Header3 value match regex: Mozilla(.*)
+headerValue :
+regex : Mozilla(.*)
+- pause : {}
+- setHeaderRoute :
+name : 'set-header-1' # disable header based traffic routing
+
+Traffic Mirroring to Canary &para;
+
+Traffic Router Support: Istio
+
+Argo Rollouts can mirror traffic to the canary service based on various matching rules.
+Traffic mirroring is configured using the setMirrorRoute step, which includes header matchers.
+
+name - The name of the mirror route.
+
+percentage - The percentage of matched traffic to mirror.
+
+match - Defines the matching rules for the header route. If omitted, the route will be removed.
+
+- Multiple conditions within a single match block use AND logic
+
+- Multiple match blocks use OR logic
+
+- Each match type (method, path, headers) must specify exactly one match style (exact, regex, or prefix)
+
+Note: Not all traffic routers support all match types (exact, regex, prefix).
+
+To disable mirror based traffic route you just need to specify a setMirrorRoute with only the name of the route.
+
+This example will mirror 35% of HTTP traffic that matches a GET requests and with the url prefix of /
+
+apiVersion : argoproj.io/v1alpha1
+kind : Rollout
+spec :
+strategy :
+canary :
+canaryService : canary-service
+stableService : stable-service
+trafficRouting :
+managedRoutes :
+- name : mirror-route
+istio :
+virtualService :
+name : rollouts-demo-vsvc
+steps :
+- setCanaryScale :
+weight : 25
+- setMirrorRoute :
+name : mirror-route
+percentage : 35
+match :
+- method :
+exact : GET
+path :
+prefix : /
+- pause :
+duration : 10m
+- setMirrorRoute :
+name : 'mirror-route' # removes mirror based traffic route
+
+-
+The Rollout has to assume that the application can handle 100% of traffic if it is fully scaled up. It should outsource to the HPA to detect if the Rollout needs to more replicas if 100% isn't enough.  ↩
+
+Previous
+
+Controller Metrics
+
+Next
+
+Ambassador
+
+Made with
+
+Material for MkDocs

@@ -1,0 +1,1260 @@
+{
+  "topic": "Argo CD: Helm, Kustomize and reconciliation patterns",
+  "notes": [
+    {
+      "id": "argo.cd-patterns.what-is-directory-application",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5010,
+      "front": "In Argo CD, what is a directory application?",
+      "back": "An Application whose path holds plain manifests; Argo CD assumes this type when it detects no other tool.",
+      "explanation": "Tool detection looks for Helm and Kustomize files first; a directory application is what is left when neither is found.",
+      "introduces": [
+        "directory application"
+      ],
+      "example": "Like a folder of YAML files you might pass to kubectl apply, except that Argo CD syncs it for you.",
+      "source": "Argo CD documentation, “Tool Detection”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/tool_detection/#tool-detection",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Otherwise it is assumed to be a plain directory application.",
+      "uses": [
+        "directory application",
+        "Application",
+        "manifest",
+        "tool"
+      ],
+      "conceptIDs": [
+        "argo.directory-app",
+        "argo.tool-detection"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.what-is-helm-valuefiles",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 5020,
+      "front": "In an Argo CD Helm Application, what is valueFiles?",
+      "back": "The list of values files an Argo CD Helm Application passes to Helm; the declarative form of the repeatable `--values` flag of `argocd app set`.",
+      "explanation": "Helm can take its parameters from a different values file, or several; `valueFiles` records that choice in the Application instead of on a command line.",
+      "introduces": [
+        "Helm valueFiles"
+      ],
+      "example": "Like running `argocd app set helm-guestbook --values values-production.yaml`, but written into the Application spec.",
+      "source": "Argo CD documentation, “Helm”, “Values Files”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/helm/#values-files",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Alternate or multiple values file(s), can be specified using the --values flag. The flag can be repeated to support multiple values files",
+      "uses": [
+        "Helm valueFiles",
+        "Helm chart",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.helm-values-files"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.what-is-valuesobject",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 5030,
+      "front": "In an Argo CD Helm Application, what is valuesObject?",
+      "back": "A key under source.helm that holds Helm values inline in the Application manifest, as a values file would.",
+      "explanation": "It carries the same content as a values file; the difference is that it lives inside the Application rather than in a separate file.",
+      "introduces": [
+        "valuesObject"
+      ],
+      "example": "Like a small values.yaml that sets controller.replicaCount: 2, pasted under source.helm.valuesObject.",
+      "source": "Argo CD documentation, “Helm”, “Values”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/helm/#values",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Argo CD supports the equivalent of a values file directly in the Application manifest using the source.helm.valuesObject key.",
+      "uses": [
+        "valuesObject",
+        "Helm chart",
+        "Application",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "argo.helm-values-object"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.what-is-kustomize-application",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5040,
+      "front": "In Argo CD, what is a Kustomize application?",
+      "back": "An Application whose repoURL and path point at a kustomization.yaml, so Argo CD renders its manifests with Kustomize.",
+      "explanation": "This is the same file tool detection looks for, so no tool needs to be named in the Application.",
+      "introduces": [
+        "Kustomize application"
+      ],
+      "example": "Like running kustomize build on a folder yourself, except that Argo CD builds it and syncs the result.",
+      "source": "Argo CD documentation, “Kustomize”, “Declarative”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/#kustomize",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If the kustomization.yaml file exists at the location pointed to by repoURL and path , Argo CD will render the manifests using Kustomize.",
+      "uses": [
+        "Kustomize application",
+        "Kustomize",
+        "Application",
+        "manifest",
+        "tool"
+      ],
+      "conceptIDs": [
+        "argo.kustomize-app"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.what-are-kustomize-components",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 5050,
+      "front": "What are Kustomize components, as an Argo CD Application can use them?",
+      "back": "Units that bundle resources and patches together, which an Application can list under kustomize.components.",
+      "explanation": "Bundling resources with their patches is what lets one piece of configuration be modularised and reused.",
+      "introduces": [
+        "Kustomize components"
+      ],
+      "example": "Like an optional add-on folder of settings that some environments switch on and others leave out.",
+      "source": "Argo CD documentation, “Kustomize”, “Components”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/#components",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Kustomize components encapsulate both resources and patches together. They provide a powerful way to modularize and reuse configuration in Kubernetes applications.",
+      "uses": [
+        "Kustomize components",
+        "Kustomize",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.kustomize-components"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.what-are-multiple-sources",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5060,
+      "front": "What are multiple sources for an Application in Argo CD?",
+      "back": "One Application built from files in several locations, instead of the default single source.",
+      "explanation": "By default an Application links one source to one cluster; this feature lifts the one-source limit.",
+      "introduces": [
+        "multiple sources for an Application"
+      ],
+      "example": "Like building one app from a folder of manifests in one repository plus a few extra manifests kept in another.",
+      "source": "Argo CD documentation, “Multiple Sources for an Application”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#multiple-sources-for-an-application",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default an Argo CD application is a link between a single source and a cluster. Sometimes however, you want to combine files from multiple locations to form a single Application. Argo CD has the ability to specify multiple sources for a single Application.",
+      "uses": [
+        "multiple sources for an Application",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.multiple-sources"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.what-is-app-of-apps",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5070,
+      "front": "What is the app of apps pattern in Argo CD?",
+      "back": "Declaratively defining one parent Argo CD Application whose manifests are only other Applications.",
+      "explanation": "The parent is an ordinary Application; what makes it special is that everything it deploys is itself an Application.",
+      "introduces": [
+        "app of apps pattern"
+      ],
+      "example": "Like a playlist made only of other playlists: add the one entry and all the others come with it.",
+      "source": "Argo CD documentation, “Cluster Bootstrapping”, “App Of Apps Pattern (Alternative)”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern-alternative",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Declaratively specify one Argo CD app that consists only of other apps.",
+      "uses": [
+        "app of apps pattern",
+        "Application",
+        "declarative vs imperative"
+      ],
+      "conceptIDs": [
+        "argo.app-of-apps"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.what-is-applicationset",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5080,
+      "front": "What is an ApplicationSet?",
+      "back": "A CRD, handled by the ApplicationSet controller, for managing many Argo CD Applications across clusters and monorepos.",
+      "explanation": "The docs stress automation and flexibility when there are many clusters, or many Applications in one repository.",
+      "introduces": [
+        "ApplicationSet"
+      ],
+      "example": "Like a mail merge: one template letter and a list of names give one letter per name.",
+      "source": "Argo CD documentation, “Introduction to ApplicationSet controller”, “Introduction”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/#introduction",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The ApplicationSet controller is a Kubernetes controller that adds support for an ApplicationSet CustomResourceDefinition (CRD). This controller/CRD enables both automation and greater flexibility managing Argo CD Applications across a large number of clusters and within monorepos",
+      "uses": [
+        "ApplicationSet",
+        "CustomResourceDefinition",
+        "controller / control loop",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.applicationset"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.what-is-ignoredifferences",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5090,
+      "front": "In an Argo CD Application, what does ignoreDifferences do?",
+      "back": "It makes Argo CD ignore differences at given JSON paths, jq path expressions or field managers when it diffs resources.",
+      "explanation": "Only the named fields drop out of the comparison; the rest of each resource is still compared.",
+      "introduces": [
+        "ignoreDifferences"
+      ],
+      "example": "Like telling a spell-checker to skip one word it keeps flagging, but for a field in a manifest.",
+      "source": "Argo CD documentation, “Diffing Customization”, “Application Level Configuration”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/diffing/#application-level-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Argo CD allows ignoring differences at a specific JSON path, using RFC6902 JSON patches and JQ path expressions . It is also possible to ignore differences from fields owned by specific managers defined in metadata.managedFields in live resources.",
+      "uses": [
+        "ignoreDifferences",
+        "Application",
+        "live state",
+        "sync status"
+      ],
+      "conceptIDs": [
+        "argo.ignore-differences"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.what-is-reconcile-optimization",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 5100,
+      "front": "What is reconcile optimization in Argo CD?",
+      "back": "Ignoring resource updates on chosen fields of tracked resources, so routine controller updates stop triggering reconciles.",
+      "explanation": "Controllers that update what they watch keep an Application reconciling and push up CPU use on the application controller.",
+      "introduces": [
+        "reconcile optimization"
+      ],
+      "example": "Like muting a group chat’s ‘seen’ receipts: messages still arrive, but the noise stops waking you.",
+      "source": "Argo CD documentation, “Reconcile Optimization”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/reconcile/#reconcile-optimization",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Kubernetes controllers often update the resources they watch periodically, causing continuous reconcile operation on the Application and a high CPU usage on the argocd-application-controller . Argo CD allows you to optionally ignore resource updates on specific fields for tracked resources .",
+      "uses": [
+        "reconcile optimization",
+        "application controller",
+        "controller / control loop",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.reconcile-optimization"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.what-is-orphaned-resources-monitoring",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 5110,
+      "front": "What is orphaned resources monitoring in Argo CD?",
+      "back": "A feature that detects top-level namespaced resources belonging to no Argo CD Application, shows them in the user interface and warns.",
+      "explanation": "An orphaned resource is one that no Application claims, so Argo CD would otherwise not show it at all.",
+      "introduces": [
+        "orphaned resources monitoring"
+      ],
+      "example": "Like a lost-property office for a namespace: anything nobody has claimed is listed there.",
+      "source": "Argo CD documentation, “Orphaned Resources Monitoring”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/orphaned-resources/#orphaned-resources-monitoring",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "An orphaned Kubernetes resource is a top-level namespaced resource that does not belong to any Argo CD Application. The Orphaned Resources Monitoring feature allows detecting orphaned resources, inspecting/removing resources using the Argo CD UI, and generating a warning.",
+      "uses": [
+        "orphaned resources monitoring",
+        "Application",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "argo.orphaned-resources"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.tool-detection-explicit-first",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5120,
+      "front": "When Argo CD works out which tool builds an Application’s manifests, what does it check first?",
+      "back": "Whether a tool is explicitly configured in the Application; if so, that tool is used.",
+      "explanation": "Only when no tool is set does Argo CD look for tool-specific files in the path.",
+      "source": "Argo CD documentation, “Tool Detection”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/tool_detection/#tool-detection",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If a specific tool is explicitly configured, then that tool is selected to create your application's manifests.",
+      "uses": [
+        "tool",
+        "Application",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "argo.tool-detection"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.tool-detection-chart-yaml",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5130,
+      "front": "An Application’s path holds Chart.yaml, a templates folder and values.yaml, and no tool is set in the spec. Which tool will Argo CD use?",
+      "back": "B) Helm.",
+      "choices": "A) Kustomize\nB) Helm\nC) A plain directory application\nD) A configuration management plugin",
+      "choicesExplained": "A needs a kustomization file, which the path lacks. C is only the fallback when neither Helm nor Kustomize is detected. D: the detection order in the docs names only Helm, Kustomize and the directory fallback.",
+      "explanation": "With no explicit tool, a file matching Chart.yaml is the signal for Helm.",
+      "source": "Argo CD documentation, “Tool Detection”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/tool_detection/#tool-detection",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Helm if there's a file matching Chart.yaml",
+      "uses": [
+        "tool",
+        "Helm chart",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.tool-detection"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.tool-detection-kustomization-names",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5140,
+      "front": "Which file names make Argo CD detect a Kustomize application?",
+      "back": "kustomization.yaml, kustomization.yml or Kustomization.",
+      "explanation": "This check comes after the Helm check in the detection order; a path with none of these files becomes a directory application.",
+      "source": "Argo CD documentation, “Tool Detection”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/tool_detection/#tool-detection",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Kustomize if there's a kustomization.yaml , kustomization.yml , or Kustomization",
+      "uses": [
+        "Kustomize application",
+        "directory application",
+        "tool"
+      ],
+      "conceptIDs": [
+        "argo.tool-detection"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.disable-builtin-tools-how",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5150,
+      "front": "How do you disable a built-in config management tool in Argo CD, and what does Argo CD then assume?",
+      "back": "Set kustomize.enable, helm.enable or jsonnet.enable to false in argocd-cm; it then treats the target directory as plain Kubernetes YAML.",
+      "explanation": "A disabled tool’s files no longer change how the app is built, so the app is handled like a directory application.",
+      "source": "Argo CD documentation, “Tool Detection”, “Disable built-in tools”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/tool_detection/#disable-built-in-tools",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Built-in config management tools can be optionally disabled by setting one of the following keys, in the argocd-cm ConfigMap, to false : kustomize.enable , helm.enable or jsonnet.enable . Once the tool is disabled, Argo CD will assume the application target directory contains plain Kubernetes YAML manifests.",
+      "uses": [
+        "tool",
+        "ConfigMap",
+        "directory application",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "argo.disable-builtin-tools"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.disable-builtin-tools-why",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5160,
+      "front": "Why do the Argo CD docs suggest disabling config management tools you do not use?",
+      "back": "It limits the tools available to attackers, since vulnerabilities or misconfigurations can be specific to one tool.",
+      "explanation": "Even with no known vulnerability, an unused tool could be used to exploit a misconfigured instance.",
+      "source": "Argo CD documentation, “Tool Detection”, “Disable built-in tools”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/tool_detection/#disable-built-in-tools",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Vulnerabilities are sometimes limited to certain config management tools. Even if there is no vulnerability, an attacker may use a certain tool to take advantage of a misconfiguration in an Argo CD instance. Disabling unused config management tools limits the tools available to malicious actors.",
+      "uses": [
+        "tool",
+        "Argo CD"
+      ],
+      "conceptIDs": [
+        "argo.disable-builtin-tools"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.supported-tools-plugin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5170,
+      "front": "Beyond its built-in tools, how can Argo CD build manifests with any custom config management tool?",
+      "back": "By configuring that tool as a config management plugin.",
+      "explanation": "The built-in list is Kustomize, Helm charts, OCI images and directories of YAML, JSON or Jsonnet manifests; a plugin covers anything else.",
+      "source": "Argo CD documentation, “Tools”, “Production”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/application_sources/#production",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Any custom config management tool configured as a config management plugin",
+      "uses": [
+        "configuration management plugin",
+        "tool",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "argo.supported-tools"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.helm-template-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5180,
+      "front": "How does Argo CD use Helm when it deploys a chart?",
+      "back": "Only to inflate the chart with helm template; Argo CD, not Helm, handles the application’s lifecycle.",
+      "explanation": "Helm renders the manifests; applying and tracking them is Argo CD’s job.",
+      "source": "Argo CD documentation, “Helm”, “Declarative”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/helm/#helm",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Helm is only used to inflate charts with helm template . The lifecycle of the application is handled by Argo CD instead of Helm.",
+      "uses": [
+        "Helm chart",
+        "Argo CD",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "argo.helm-template-only"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.helm-ls-empty",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5190,
+      "front": "After Argo CD deploys a Helm chart, an engineer runs helm ls in the target namespace and sees nothing. What is the explanation?",
+      "back": "A) Argo CD uses Helm only to render the chart with helm template; Argo CD, not Helm, manages the app.",
+      "choices": "A) Argo CD uses Helm only to render the chart with helm template\nB) The sync failed without reporting an error\nC) Argo CD installed the release in the argocd namespace instead\nD) helm ls needs an extra flag to show Argo CD releases",
+      "choicesExplained": "B: an empty helm ls is expected even after a good sync. C and D assume a Helm release exists somewhere, but Argo CD never hands the lifecycle to Helm.",
+      "explanation": "Helm only renders the manifests; Argo CD applies and tracks them, so there is no Helm release for `helm ls` to list.",
+      "source": "Argo CD documentation, “Helm”, “Declarative”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/helm/#helm",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Helm is only used to inflate charts with helm template . The lifecycle of the application is handled by Argo CD instead of Helm.",
+      "uses": [
+        "Helm chart",
+        "Argo CD",
+        "sync"
+      ],
+      "conceptIDs": [
+        "argo.helm-template-only"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.helm-precedence-highest",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5200,
+      "front": "In an Argo CD Helm Application, which source of values has the highest precedence?",
+      "back": "parameters. They override valuesObject, values, valueFiles and the chart’s values.yaml.",
+      "explanation": "The chart’s own values.yaml is at the bottom of the order, below everything set in the Application.",
+      "source": "Argo CD documentation, “Helm”, “Helm Value Precedence”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/helm/#helm-value-precedence",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Values injections have the following order of precedence parameters > valuesObject > values > valueFiles > helm repository values.yaml",
+      "uses": [
+        "valuesObject",
+        "Helm valueFiles",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "argo.helm-value-precedence"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.helm-valuesobject-beats-values",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5210,
+      "front": "An Application sets both values and valuesObject under source.helm. Which is used?",
+      "back": "valuesObject; values is then ignored.",
+      "explanation": "Both of them outrank valueFiles, so a key set in either beats the same key in a values file.",
+      "source": "Argo CD documentation, “Helm”, “Helm Value Precedence”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/helm/#helm-value-precedence",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "So valuesObject trumps values - therefore values will be ignored, and both valuesObject and values trump valueFiles.",
+      "uses": [
+        "valuesObject",
+        "Helm valueFiles"
+      ],
+      "conceptIDs": [
+        "argo.helm-value-precedence"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.helm-precedence-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5220,
+      "front": "A chart’s values.yaml sets replicaCount: 1, a file in valueFiles sets 2, and valuesObject sets 3. No parameters are set. Which value does Argo CD render?",
+      "back": "C) 3.",
+      "choices": "A) 1\nB) 2\nC) 3\nD) The sync fails because the values conflict",
+      "choicesExplained": "A: the chart’s values.yaml has the lowest precedence. B: valueFiles is below valuesObject. D: overlapping keys are normal; precedence settles them.",
+      "explanation": "Precedence climbs from the chart’s own defaults up to parameters, and the higher layer wins wherever keys collide.",
+      "source": "Argo CD documentation, “Helm”, “Helm Value Precedence”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/helm/#helm-value-precedence",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Values injections have the following order of precedence parameters > valuesObject > values > valueFiles > helm repository values.yaml",
+      "uses": [
+        "valuesObject",
+        "Helm valueFiles",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "argo.helm-value-precedence"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.helm-missing-values-file",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5230,
+      "front": "What happens if a file listed in valueFiles does not exist, and how can Argo CD skip it?",
+      "back": "Helm errors out; setting ignoreMissingValueFiles: true leaves missing files out instead of passing them to Helm.",
+      "explanation": "Ignoring missing files lets an optional override file exist in some places and not others.",
+      "source": "Argo CD documentation, “Helm”, “Values Files”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/helm/#values-files",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If Helm is passed a non-existing value file during template expansion, it will error out. Missing values files can be ignored (meaning, not passed to Helm) using the --ignore-missing-value-files .",
+      "uses": [
+        "Helm valueFiles"
+      ],
+      "conceptIDs": [
+        "argo.helm-values-files"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.helm-hooks-mapped",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5240,
+      "front": "How does Argo CD support Helm hooks in a chart?",
+      "back": "By mapping Helm hook annotations onto its own hook annotations. That is annotation compatibility, not identical lifecycle behaviour.",
+      "explanation": "The annotations carry over, but when a hook runs is decided by Argo CD’s semantics, not Helm’s.",
+      "source": "Argo CD documentation, “Helm”, “Helm Hooks”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/helm/#helm-hooks",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Argo CD supports many (most?) Helm hooks by mapping the Helm annotations onto Argo CD's own hook annotations. This is annotation compatibility, not a guarantee that hook lifecycle semantics are identical to Helm's",
+      "uses": [
+        "Helm chart",
+        "resource hook",
+        "annotation"
+      ],
+      "conceptIDs": [
+        "argo.helm-template-only"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.kustomize-overlay-path",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5250,
+      "front": "A repository has kustomize/base and kustomize/overlays/prod. To deploy the prod variant with Argo CD, where should the Application’s path point?",
+      "back": "At kustomize/overlays/prod, the overlay.",
+      "explanation": "The path decides which kustomization Argo CD renders, so pointing at the overlay renders the prod variant.",
+      "source": "Argo CD documentation, “Kustomize”, “Declarative”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/#kustomize",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To use Kustomize with an overlay, point your path to the overlay.",
+      "uses": [
+        "Kustomize application",
+        "Kustomize",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.kustomize-app"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.kustomize-inline-patches",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5260,
+      "front": "An Application sets kustomize.patches, and the kustomization it targets already has patches. What happens?",
+      "back": "They are merged; inline patches follow the same logic as patches in a Kustomization.",
+      "explanation": "So a patch can live in the Application instead of being another file in the repository.",
+      "source": "Argo CD documentation, “Kustomize”, “Patches”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/#patches",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Patches are a way to kustomize resources using inline configurations in Argo CD applications. patches follow the same logic as the corresponding Kustomization. Any patches that target existing Kustomization file will be merged.",
+      "uses": [
+        "Kustomize application",
+        "Kustomize",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.kustomize-patches"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.kustomize-missing-components",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5270,
+      "front": "What happens if Kustomize is given a component directory that does not exist, and which Application setting avoids it?",
+      "back": "Kustomize errors out; ignoreMissingComponents leaves missing components out instead of passing them to Kustomize.",
+      "explanation": "Missing directories are simply left out, so the build can go on without them.",
+      "source": "Argo CD documentation, “Kustomize”, “Components”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/#components",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If Kustomize is passed a non-existing component directory, it will error out. Missing component directories can be ignored (meaning, not passed to Kustomize) using ignoreMissingComponents .",
+      "uses": [
+        "Kustomize components",
+        "Kustomize"
+      ],
+      "conceptIDs": [
+        "argo.kustomize-components"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.kustomize-enable-helm",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5280,
+      "front": "Kustomize needs the --enable-helm flag to render Helm charts. How can an Argo CD Kustomize application get it?",
+      "back": "Through a custom plugin, or by adding the flag in the argocd-cm ConfigMap for all Kustomize applications.",
+      "explanation": "The argocd-cm route is global, so it changes how every Kustomize application is built.",
+      "source": "Argo CD documentation, “Kustomize”, “Kustomizing Helm charts”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize/#kustomizing-helm-charts",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You can either create a custom plugin , or modify the argocd-cm ConfigMap to include the --enable-helm flag globally for all Kustomize applications",
+      "uses": [
+        "Kustomize application",
+        "Helm chart",
+        "ConfigMap",
+        "configuration management plugin"
+      ],
+      "conceptIDs": [
+        "argo.kustomize-helm"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.multiple-sources-field",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5290,
+      "front": "An Application has both a sources field and a source field. Which does Argo CD use?",
+      "back": "sources; the singular source field is ignored.",
+      "explanation": "Once sources is set, all of the Application’s input comes from that list.",
+      "source": "Argo CD documentation, “Multiple Sources for an Application”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#multiple-sources-for-an-application",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When you specify the sources field, Argo CD will ignore the source (singular) field.",
+      "uses": [
+        "multiple sources for an Application",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.multiple-sources"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.multiple-sources-same-resource",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5300,
+      "front": "Two sources of one Application produce the same resource (same group, kind, name and namespace). What does Argo CD do?",
+      "back": "The last source to produce it wins; Argo CD raises a RepeatedResourceWarning but still syncs.",
+      "explanation": "The docs note this gives a convenient way to override a chart’s resource with one from a Git repository.",
+      "source": "Argo CD documentation, “Multiple Sources for an Application”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#multiple-sources-for-an-application",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the last source to produce the resource will take precedence. Argo CD will produce a RepeatedResourceWarning in this case, but it will sync the resources. This provides a convenient way to override a resource from a chart with a resource from a Git repo.",
+      "uses": [
+        "multiple sources for an Application",
+        "sync",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "argo.multiple-sources"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.multiple-sources-abuse",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5310,
+      "front": "The docs warn against using many entries in an Application’s sources. Past how many are you ‘almost certainly abusing’ the feature?",
+      "back": "More than 2–3; the docs say you then need to rethink how you group applications.",
+      "explanation": "The warning is about grouping: many entries usually means several applications are being forced into one.",
+      "source": "Argo CD documentation, “Multiple Sources for an Application”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#multiple-sources-for-an-application",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If you find yourself using more than 2-3 items in the sources array then you are almost certainly abusing this feature and you need to rethink your application grouping strategy.",
+      "uses": [
+        "multiple sources for an Application",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.multiple-sources"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.multiple-sources-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5320,
+      "front": "A team wants a third-party Helm chart from a public repository, with its own values kept in the team’s Git repository and without copying the chart. Which Argo CD feature fits?",
+      "back": "B) Multiple sources for an Application: the chart as one source, the Git repository of values as another.",
+      "choices": "A) The app of apps pattern\nB) Multiple sources for an Application\nC) ignoreDifferences\nD) A Kustomize component",
+      "choicesExplained": "A groups many Applications; it does not combine a chart with outside values. C only hides diffs. D bundles Kustomize resources and patches, not Helm values.",
+      "explanation": "A Helm source can reference value files from a Git source, which is exactly the chart-plus-own-values case.",
+      "source": "Argo CD documentation, “Multiple Sources for an Application”, “Helm value files from external Git repository”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#helm-value-files-from-external-git-repository",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Helm sources can reference value files from git sources. This allows you to use a third-party Helm chart with custom, git-hosted values.",
+      "uses": [
+        "multiple sources for an Application",
+        "Helm chart",
+        "Helm valueFiles"
+      ],
+      "conceptIDs": [
+        "argo.multiple-sources"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.app-of-apps-admin-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5330,
+      "front": "Why do the Argo CD docs call app of apps an admin-only tool?",
+      "back": "It can create Applications in any Project, which is an admin-level capability; only admins should push to the parent’s repository.",
+      "explanation": "Reviewers should watch the project field of each child Application in pull requests.",
+      "source": "Argo CD documentation, “Cluster Bootstrapping”, “App Of Apps Pattern (Alternative)”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern-alternative",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The ability to create Applications in arbitrary Projects is an admin-level capability. Only admins should have push access to the parent Application's source repository. Admins should review pull requests to that repository, paying particular attention to the project field in each Application.",
+      "uses": [
+        "app of apps pattern",
+        "AppProject",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.app-of-apps"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.app-of-apps-first-sync",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5340,
+      "front": "You create the parent Application of an app of apps and sync it for the first time. The parent shows Synced, but every child Application shows OutOfSync. What does this mean?",
+      "back": "A) Nothing is wrong: the children are separate Applications that still need their own sync.",
+      "choices": "A) Nothing is wrong: each child still needs its own sync\nB) The parent’s sync failed and must be retried\nC) The child Applications are orphaned resources\nD) The children must be deleted and recreated",
+      "choicesExplained": "B: the parent really is in sync; it has created the child Applications. C: the children belong to the parent Application, so they are not orphaned. D: syncing the children is enough.",
+      "explanation": "The docs describe exactly this state after the first sync of the parent; each child has its own sync status.",
+      "source": "Argo CD documentation, “Cluster Bootstrapping”, “App Of Apps Pattern (Alternative)”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern-alternative",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The parent app will appear as in-sync but the child apps will be out of sync",
+      "uses": [
+        "app of apps pattern",
+        "sync status",
+        "sync",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.app-of-apps"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.app-of-apps-cascading-delete",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5350,
+      "front": "In an app of apps, what makes deleting the parent also delete the child apps and all their resources?",
+      "back": "Adding the resources-finalizer.argocd.argoproj.io finalizer to the Application definitions.",
+      "explanation": "The docs’ example puts it in metadata.finalizers of the Application.",
+      "source": "Argo CD documentation, “Cluster Bootstrapping”, “Cascading deletion”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#cascading-deletion",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If you want to ensure that child-apps and all of their resources are deleted when the parent-app is deleted make sure to add the appropriate finalizer to your Application definition",
+      "uses": [
+        "app of apps pattern",
+        "finalizer",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.cascading-deletion-app-of-apps"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.applicationset-bundled",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5360,
+      "front": "Since which Argo CD version has the ApplicationSet controller been bundled with Argo CD?",
+      "back": "v2.3.",
+      "explanation": "It works alongside an existing Argo CD installation, adding features for cluster-administrator scenarios.",
+      "source": "Argo CD documentation, “Introduction to ApplicationSet controller”, “Introduction”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/#introduction",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Starting with Argo CD v2.3, the ApplicationSet controller is bundled with Argo CD.",
+      "uses": [
+        "ApplicationSet",
+        "Argo CD"
+      ],
+      "conceptIDs": [
+        "argo.applicationset"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.applicationset-generators-parameters",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5370,
+      "front": "In an ApplicationSet, what do generators produce, and where does it go?",
+      "back": "Parameters (key-value pairs), which are substituted into the template section during rendering.",
+      "explanation": "The generator supplies the data; the template supplies the shape of each Application.",
+      "source": "Argo CD documentation, “Introduction to ApplicationSet controller”, “The ApplicationSet resource”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/#the-applicationset-resource",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Generators, such as the List generator, are responsible for generating parameters . Parameters are key-values pairs that are substituted into the template: section of the ApplicationSet resource during template rendering.",
+      "uses": [
+        "ApplicationSet",
+        "template",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.appset-generators",
+        "argo.appset-template-params"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.applicationset-rendered-template",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5380,
+      "front": "What happens to each rendered template of an ApplicationSet?",
+      "back": "It becomes an Argo CD Application, created or updated in the Argo CD namespace; the Argo CD controller then handles it.",
+      "explanation": "What the ApplicationSet produces are ordinary Application resources, which Argo CD then manages like any other.",
+      "source": "Argo CD documentation, “Introduction to ApplicationSet controller”, “Parameter substitution into templates”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/#parameter-substitution-into-templates",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Each rendered template is converted into an Argo CD Application resource, which is then created (or updated) within the Argo CD namespace.",
+      "uses": [
+        "ApplicationSet",
+        "Application",
+        "namespace",
+        "application controller"
+      ],
+      "conceptIDs": [
+        "argo.appset-template-params"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.generator-list",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5390,
+      "front": "Which ApplicationSet generator targets clusters from a fixed list of key/value elements you write yourself?",
+      "back": "The List generator.",
+      "explanation": "Nothing is discovered: every element is written into the ApplicationSet.",
+      "source": "Argo CD documentation, “Generators”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators/#generators",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The List generator allows you to target Argo CD Applications to clusters based on a fixed list of any chosen key/value element pairs.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Argo docs as of that date",
+      "uses": [
+        "ApplicationSet",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.appset-generators"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.generator-cluster",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5400,
+      "front": "Which ApplicationSet generator uses the clusters defined in Argo CD, responding when clusters are added or removed?",
+      "back": "The Cluster generator.",
+      "explanation": "Its data source is Argo CD’s own cluster list, so a cluster added to Argo CD is picked up automatically.",
+      "source": "Argo CD documentation, “Generators”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators/#generators",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Cluster generator allows you to target Argo CD Applications to clusters, based on the list of clusters defined within (and managed by) Argo CD (which includes automatically responding to cluster addition/removal events from Argo CD).",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Argo docs as of that date",
+      "uses": [
+        "ApplicationSet",
+        "Argo CD"
+      ],
+      "conceptIDs": [
+        "argo.appset-generators"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.generator-git",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5410,
+      "front": "Which ApplicationSet generator creates Applications from files in a Git repository, or from its directory structure?",
+      "back": "The Git generator.",
+      "explanation": "The repository itself is the data source for the parameters.",
+      "source": "Argo CD documentation, “Generators”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators/#generators",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Git generator allows you to create Applications based on files within a Git repository, or based on the directory structure of a Git repository.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Argo docs as of that date",
+      "uses": [
+        "ApplicationSet",
+        "Application"
+      ],
+      "conceptIDs": [
+        "argo.appset-generators"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.generator-matrix",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5420,
+      "front": "Which ApplicationSet generator combines the parameters of two separate generators?",
+      "back": "The Matrix generator.",
+      "explanation": "It builds on two other generators rather than reading a data source of its own.",
+      "source": "Argo CD documentation, “Generators”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators/#generators",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Matrix generator may be used to combine the generated parameters of two separate generators.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Argo docs as of that date",
+      "uses": [
+        "ApplicationSet"
+      ],
+      "conceptIDs": [
+        "argo.appset-generators"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.generator-pull-request",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5430,
+      "front": "Which ApplicationSet generator uses a Git hosting provider’s API to discover open pull requests in a repository?",
+      "back": "The Pull Request generator.",
+      "explanation": "Its data source is the provider’s list of open pull requests, not files in the repository.",
+      "source": "Argo CD documentation, “Generators”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators/#generators",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Pull Request generator uses the API of an SCMaaS provider (eg GitHub) to automatically discover open pull requests within an repository.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Argo docs as of that date",
+      "uses": [
+        "ApplicationSet"
+      ],
+      "conceptIDs": [
+        "argo.appset-generators"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.generator-scenario-new-clusters",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5440,
+      "front": "A platform team wants the same monitoring app on every cluster registered in Argo CD, including ones added next month, without editing the ApplicationSet. Which generator fits?",
+      "back": "B) The Cluster generator.",
+      "choices": "A) The List generator\nB) The Cluster generator\nC) The Pull Request generator\nD) The Git generator",
+      "choicesExplained": "A needs each new cluster written into the list by hand. C discovers pull requests, not clusters. D reads files or folders in a repository, not Argo CD’s cluster list.",
+      "explanation": "Once a cluster is added to Argo CD, an ApplicationSet that selects it deploys the applications to it.",
+      "source": "Argo CD documentation, “Cluster Bootstrapping”, “Application Sets and cluster labels (recommended)”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#application-sets-and-cluster-labels-recommended",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Then as soon as you add the cluster to Argo CD, any application set that uses these labels will deploy the respective applications.",
+      "uses": [
+        "ApplicationSet",
+        "Argo CD",
+        "label"
+      ],
+      "conceptIDs": [
+        "argo.appset-generators",
+        "argo.applicationset"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.bootstrap-recommended-vs-alternative",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 5450,
+      "front": "For installing many apps on a new cluster, which approach do the Argo CD docs recommend, and which do they list as the alternative?",
+      "back": "ApplicationSets with cluster labels are recommended; the app of apps pattern is the alternative.",
+      "explanation": "The docs say the cluster generator can handle most typical scenarios.",
+      "source": "Argo CD documentation, “Cluster Bootstrapping”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#cluster-bootstrapping",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Our recommendation is to look at ApplicationSets and more specifically the cluster generator which can handle most typical scenarios.",
+      "uses": [
+        "ApplicationSet",
+        "app of apps pattern",
+        "label"
+      ],
+      "conceptIDs": [
+        "argo.appset-vs-app-of-apps"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.outofsync-hpa-metrics",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5460,
+      "front": "Why can an HPA object show OutOfSync straight after a successful sync?",
+      "back": "The HPA controller is known to reorder spec.metrics, so the live object no longer matches the manifest.",
+      "explanation": "A change made in the cluster after the sync makes live state differ from target state, even if nobody edited Git.",
+      "source": "Argo CD documentation, “Diffing Customization”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/diffing/#diffing-customization",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For Horizontal Pod Autoscaling (HPA) objects, the HPA controller is known to reorder spec.metrics",
+      "uses": [
+        "HorizontalPodAutoscaler",
+        "HPA",
+        "sync status",
+        "live state",
+        "target state"
+      ],
+      "conceptIDs": [
+        "argo.ignore-differences"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.ignoredifferences-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5470,
+      "front": "An HPA scales a Deployment that Argo CD manages, and the app keeps showing OutOfSync on spec.replicas. The replicas field must stay in Git. What fits best?",
+      "back": "A) An ignoreDifferences entry for group apps, kind Deployment, with the JSON pointer /spec/replicas.",
+      "choices": "A) An ignoreDifferences entry for /spec/replicas on Deployments\nB) The IgnoreExtraneous compare option on the Deployment\nC) Orphaned resources monitoring on the project\nD) Deleting the HPA",
+      "choicesExplained": "B would drop the whole Deployment from the sync status, not one field. C finds resources no Application owns; this Deployment is owned. D removes the autoscaling the team wants.",
+      "explanation": "Ignoring that one path removes the HPA’s changes from the diff without touching anything else.",
+      "source": "Argo CD documentation, “Diffing Customization”, “Application Level Configuration”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/diffing/#application-level-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The following sample application is configured to ignore differences in spec.replicas for all deployments",
+      "uses": [
+        "ignoreDifferences",
+        "HorizontalPodAutoscaler",
+        "Deployment",
+        "sync status"
+      ],
+      "conceptIDs": [
+        "argo.ignore-differences"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.ignoredifferences-system-level",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5480,
+      "front": "Where do you configure ignored differences for a resource group and kind across a whole Argo CD instance?",
+      "back": "In the resource.customizations key of the argocd-cm ConfigMap.",
+      "explanation": "The docs’ example ignores the caBundle field of MutatingWebhookConfiguration webhooks.",
+      "source": "Argo CD documentation, “Diffing Customization”, “System-Level Configuration”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/diffing/#system-level-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Ignored differences can be configured for a specified group and kind in resource.customizations key of argocd-cm ConfigMap. Following is an example of a customization which ignores the caBundle field of a MutatingWebhookConfiguration webhooks",
+      "uses": [
+        "ignoreDifferences",
+        "ConfigMap"
+      ],
+      "conceptIDs": [
+        "argo.system-level-diffing"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.reconcile-default-refresh",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5490,
+      "front": "By default, when is an Argo CD Application refreshed with respect to its resources?",
+      "back": "Every time a resource that belongs to it changes.",
+      "explanation": "That default is why frequent updates from other controllers turn into constant reconciling.",
+      "source": "Argo CD documentation, “Reconcile Optimization”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/reconcile/#reconcile-optimization",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, an Argo CD Application is refreshed every time a resource that belongs to it changes.",
+      "uses": [
+        "refresh",
+        "Application",
+        "reconcile optimization"
+      ],
+      "conceptIDs": [
+        "argo.reconcile-optimization"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.reconcile-ignore-updates-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5500,
+      "front": "What is the default value of resource.ignoreResourceUpdatesEnabled in argocd-cm?",
+      "back": "true, so Argo CD ignores the configured resource updates.",
+      "explanation": "Leaving it on keeps performance sustainable by cutting needless reconciles; you can set it to false.",
+      "source": "Argo CD documentation, “Reconcile Optimization”, “System-Level Configuration”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/reconcile/#system-level-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, resource.ignoreResourceUpdatesEnabled is set to true , enabling Argo CD to ignore resource updates. This default setting ensures that Argo CD maintains sustainable performance by reducing unnecessary reconcile operations.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Argo docs as of that date",
+      "uses": [
+        "reconcile optimization",
+        "ConfigMap"
+      ],
+      "conceptIDs": [
+        "argo.reconcile-optimization"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.orphaned-enabled-in-project",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5510,
+      "front": "Where is orphaned resources monitoring switched on?",
+      "back": "In the Project (AppProject) settings.",
+      "explanation": "It is scoped by project, so each project decides whether its namespaces are watched.",
+      "source": "Argo CD documentation, “Orphaned Resources Monitoring”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/orphaned-resources/#orphaned-resources-monitoring",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Orphaned Resources monitoring is enabled in the Project settings.",
+      "uses": [
+        "orphaned resources monitoring",
+        "AppProject"
+      ],
+      "conceptIDs": [
+        "argo.orphaned-resources"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.orphaned-performance",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5520,
+      "front": "Why should orphaned resources monitoring be enabled only on projects with well-scoped namespaces?",
+      "back": "It has performance implications; a namespace full of resources Argo CD does not manage, such as kube-system, can significantly impact Argo CD.",
+      "explanation": "The cost grows with the number of unmanaged resources in the watched namespaces.",
+      "source": "Argo CD documentation, “Orphaned Resources Monitoring”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/orphaned-resources/#orphaned-resources-monitoring",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Enabling orphaned resource monitoring has performance implications. If an AppProject monitors a namespace containing many resources not managed by Argo CD (e.g. kube-system ), it can significantly impact your Argo CD instance.",
+      "uses": [
+        "orphaned resources monitoring",
+        "AppProject",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "argo.orphaned-resources"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.ignore-extraneous-what",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5530,
+      "front": "What does the annotation argocd.argoproj.io/compare-options: IgnoreExtraneous do to a resource?",
+      "back": "It excludes that resource from the app’s overall sync status, for example when a tool generated it.",
+      "explanation": "The resource stays in the cluster; it just stops counting towards the sync status.",
+      "source": "Argo CD documentation, “Compare Options”, “Ignoring Resources That Are Extraneous”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/compare-options/#ignoring-resources-that-are-extraneous",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You may wish to exclude resources from the app's overall sync status under certain circumstances, e.g. if they are generated by a tool. This can be done by adding this annotation on the resource you wish to exclude",
+      "uses": [
+        "sync status",
+        "annotation",
+        "tool"
+      ],
+      "conceptIDs": [
+        "argo.ignore-extraneous"
+      ]
+    },
+    {
+      "id": "argo.cd-patterns.ignore-extraneous-vs-health",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 5540,
+      "front": "A resource marked IgnoreExtraneous becomes Degraded. What happens to the app’s health?",
+      "back": "The app is Degraded too; IgnoreExtraneous affects only the sync status.",
+      "explanation": "Sync status and health are separate, and the option touches only the first.",
+      "source": "Argo CD documentation, “Compare Options”, “Ignoring Resources That Are Extraneous”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/compare-options/#ignoring-resources-that-are-extraneous",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This only affects the sync status. If the resource's health is degraded, then the app will also be degraded.",
+      "uses": [
+        "sync status",
+        "health"
+      ],
+      "conceptIDs": [
+        "argo.ignore-extraneous"
+      ]
+    }
+  ]
+}
