@@ -37,3 +37,8 @@ test('the evidence rule: required, found, and on the cited page', () => {
   n.sourceLicence = 'C · facts only, in our own words';
   assert.equal(ev(), '', 'tier C sources are not quoted');
 });
+
+test('a hyphen that really ends a line survives, and a PDF line-break hyphen is joined', () => {
+  assert.equal(locate('kubectl taint nodes n1 k=v:NoSchedule-\nThen check', 'k=v:NoSchedule- then check').found, true);
+  assert.equal(locate('a hyphen-\nated word', 'hyphenated word').found, true);
+});

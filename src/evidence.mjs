@@ -8,7 +8,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 /** Text reduced so formatting differences don't matter: markdown, quotes, dashes, ligatures, hyphenated line breaks, case, whitespace. */
-export function flatten(s) {
+export function flatten(s, { joinHyphens = true } = {}) {
   return String(s ?? '')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')          // [text](link) → text
     .replace(/[*_`#>|]/g, ' ')                         // markdown emphasis, code, headings, tables
@@ -16,7 +16,7 @@ export function flatten(s) {
     .replace(/[‐‑‒–—―−]/g, '-')
     .replace(/ﬁ/g, 'fi').replace(/ﬂ/g, 'fl').replace(/ﬀ/g, 'ff').replace(/ﬃ/g, 'ffi').replace(/ﬄ/g, 'ffl')
     .replace(/­/g, '')
-    .replace(/(\w)-\s*\n\s*(\w)/g, '$1$2')            // hyphen at a PDF line end
+    .replace(joinHyphens ? /(\w)-\s*\n\s*(\w)/g : /$^/g, '$1$2') // hyphen at a PDF line end
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase();
@@ -27,14 +27,21 @@ export function flatten(s) {
  * (form feeds) that hold it; pages is empty for a text without page breaks.
  */
 export function locate(text, quote) {
-  const q = flatten(quote);
+  const found = locateIn(text, quote, {});
+  // A hyphen that really ends a line, like `kubectl taint … NoSchedule-`, must survive.
+  return found.found ? found : locateIn(text, quote, { joinHyphens: false });
+}
+
+function locateIn(text, quote, opts) {
+  const flatten_ = (s) => flatten(s, opts);
+  const q = flatten_(quote);
   if (!q) return { found: false, pages: [] };
   const parts = String(text).split('\f');
-  if (parts.length === 1) return { found: flatten(text).includes(q), pages: [] };
+  if (parts.length === 1) return { found: flatten_(text).includes(q), pages: [] };
   const pages = [];
-  parts.forEach((p, i) => { if (flatten(p).includes(q)) pages.push(i + 1); });
+  parts.forEach((p, i) => { if (flatten_(p).includes(q)) pages.push(i + 1); });
   // A quote may run across a page break.
-  if (!pages.length && flatten(parts.join(' ')).includes(q)) return { found: true, pages: [] };
+  if (!pages.length && flatten_(parts.join(' ')).includes(q)) return { found: true, pages: [] };
   return { found: pages.length > 0, pages };
 }
 
