@@ -74,6 +74,7 @@ export const LIMITS = {
   backWords: 25,
   listItems: 3,
   primerNewTerms: 1,
+  imageBytes: 400 * 1024,
 };
 
 /** The JSON key on a note for each Anki field. Keys are camelCase in the

@@ -65,7 +65,9 @@ export const CSS = `.card {
 .meta { margin-top: 16px; font-size: 14px; color: #5a5a5a; }
 .meta a { color: inherit; }
 hr#answer { border: 0; border-top: 1px solid #c8c8c8; margin: 14px 0; }
+.fig img { display: block; max-width: 100%; height: auto; margin: 12px auto; }
 .card.nightMode { color: #e8e8e8; background: #1e1e1e; }
+.nightMode .fig img { background: #ffffff; padding: 6px; border-radius: 4px; }
 .nightMode .ctx, .nightMode .meta { color: #b0b0b0; }
 .nightMode hr#answer { border-top-color: #555555; }
 `;

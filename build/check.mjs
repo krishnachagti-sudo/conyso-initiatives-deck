@@ -5,6 +5,8 @@
 // problem. The network check (every source URL answering 200) will be a
 // separate command, so this file and its tests never touch the network.
 
+import { existsSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import { NOTE_TYPES, KINDS, AFTER_PRIMERS, PRIORITIES, LICENCE_TIERS, LIMITS } from '../src/schema.mjs';
 
 const ID_RE = /^[a-z0-9]+(?:[.-][a-z0-9]+)*(?:\.[a-z0-9-]+)+$/;
@@ -105,6 +107,19 @@ export function checkDeck(deck, ctx = {}) {
       if (intro.length === 0) add(id, 'primer', 'a primer must introduce a term');
       if (intro.length > LIMITS.primerNewTerms) add(id, 'primer', `a primer introduces at most ${LIMITS.primerNewTerms} new term`);
     } else if (nonEmpty(n.introduces)) add(id, 'primer', 'only primers introduce terms');
+
+    // A card's figure: a real file, alt text, a credit and a licence tier.
+    if (n.image) {
+      const im = n.image;
+      if (!nonEmpty(im.file)) add(id, 'image', 'image.file is missing');
+      else if (!/\.(png|jpe?g|svg|webp|gif)$/i.test(im.file)) add(id, 'image', 'image.file must be png, jpg, svg, webp or gif');
+      else if (deck.dir && !existsSync(join(deck.dir, im.file))) add(id, 'image', `image file ${im.file} does not exist`);
+      else if (deck.dir && statSync(join(deck.dir, im.file)).size > LIMITS.imageBytes) add(id, 'image', `image file is over ${LIMITS.imageBytes / 1024} KB`);
+      if (String(im.alt || '').trim().length < 12) add(id, 'image', 'image.alt must describe the figure (12 characters or more)');
+      if (!nonEmpty(im.credit)) add(id, 'image', 'image.credit is missing');
+      if (!nonEmpty(im.licence) || !Object.keys(LICENCE_TIERS).includes(String(im.licence).trim().charAt(0))) add(id, 'image', 'image.licence must start with a tier letter (A, B or C)');
+      if (im.side && !['front', 'back'].includes(im.side)) add(id, 'image', 'image.side must be front or back');
+    }
 
     // Images: a text equivalent is required.
     for (const f of ['front', 'back', 'explanation', 'example']) {

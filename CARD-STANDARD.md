@@ -210,6 +210,7 @@ So every field that might ever be needed exists from version 1, even if empty.
 | `Example` | concept cards | A concrete, ideally comparative, case ("like X, but…") |
 | `Contrast` | where relevant | What it is confused with, and the difference |
 | `Links` | where relevant | How it relates to its set ("one of the five Scrum events") |
+| `image` (JSON only) | where the figure is the content | `{file, alt, credit, licence, side}`. The file lives in `decks/<slug>/media/`. In Anki it goes into `Front` (or the head of `Explanation` when `side` is `back`) and its credit into `Source`; Markdown formats link it, text formats give a labelled link, PDFs embed it. The checker requires the file, alt text of 12 characters or more, a credit and a licence tier. |
 | `Source` | yes | Citation: title, section, publisher |
 | `SourceURL` | yes | Link to the exact section |
 | `SourceLicence` | yes | The content-policy tier and licence |

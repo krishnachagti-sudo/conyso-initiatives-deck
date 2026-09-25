@@ -23,6 +23,7 @@ import { createHash } from 'node:crypto';
 import { deckDirs, loadDeck, loadConcepts } from '../src/decks.mjs';
 import { checkDeck } from './check.mjs';
 import { FORMATS } from '../src/exporters/index.mjs';
+import { mediaName } from '../src/exporters/common.mjs';
 import { deckPage } from '../src/site/deck-page.mjs';
 import { homePage } from '../src/site/home.mjs';
 import { methodPage, formatsPage } from '../src/site/hubs.mjs';
@@ -63,6 +64,11 @@ for (const src of sources) {
       else f.write(deck, path);
       const buf = readFileSync(path);
       files.push({ format: f.key, label: f.label, file: name, bytes: statSync(path).size, sha256: createHash('sha256').update(buf).digest('hex') });
+    }
+    // The deck's figures, under their published media names (common.mjs, mediaName).
+    for (const n of deck.notes.filter((x) => x.image)) {
+      mkdirSync(join(target, 'media'), { recursive: true });
+      cpSync(join(deck.dir, n.image.file), join(target, 'media', mediaName(deck, n.image.file)));
     }
     const manifest = { deck: slug, version, cards: deck.notes.length, files };
     writeFileSync(join(target, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');

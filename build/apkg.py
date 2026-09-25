@@ -12,7 +12,10 @@ learning-science/algorithms-mechanics.md):
 Model (note-type) IDs come from src/schema.mjs and never change.
 """
 import json
+import os
+import shutil
 import sys
+import tempfile
 
 try:
     import genanki
@@ -48,7 +51,16 @@ def main(manifest_path, out_path):
         )
         decks[n['deckIndex']].add_note(note)
 
-    genanki.Package(decks).write_to_file(out_path)
+    # Media: genanki names each file by its basename, so copy every file under
+    # its deck-prefixed media name first (src/exporters/common.mjs, mediaName).
+    media_dir = tempfile.mkdtemp(prefix='apkg-media-')
+    media = []
+    for item in m.get('media', []):
+        dest = os.path.join(media_dir, item['name'])
+        shutil.copyfile(item['path'], dest)
+        media.append(dest)
+
+    genanki.Package(decks, media_files=media).write_to_file(out_path)
 
 
 if __name__ == '__main__':

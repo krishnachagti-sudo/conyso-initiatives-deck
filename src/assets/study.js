@@ -86,11 +86,19 @@
       card.appendChild(top);
       var q = el('div', { class: 'ic-q' });
       q.appendChild(lines(el('p'), c.front));
+      var figure = function () {
+        var f = el('figure', { class: 'ic-fig' });
+        f.appendChild(el('img', { src: c.image.src, alt: c.image.alt }));
+        f.appendChild(el('figcaption', null, c.image.credit));
+        return f;
+      };
+      if (c.image && c.image.side === 'front') q.appendChild(figure());
       if (c.choices) q.appendChild(lines(el('p', { class: 'ic-choices' }), c.choices));
       card.appendChild(q);
       if (state.shown) {
         card.appendChild(el('div', { class: 'ic-rule' }));
         var a = el('div', { class: 'ic-a' });
+        if (c.image && c.image.side === 'back') a.appendChild(figure());
         a.appendChild(lines(el('p', { class: 'ic-ans' }), c.answer));
         [['Why', c.why], ['Why not the others', c.whyNot], ['Example', c.example], ['Not to confuse', c.contrast], ['Valid as of', c.validAsOf]].forEach(function (r) {
           if (!r[1]) return;

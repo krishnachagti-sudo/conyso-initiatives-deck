@@ -84,6 +84,8 @@ test('preflight: passes a clean build, catches broken links, bad canonicals and 
   const dist = mkdtempSync(join(tmpdir(), 'dist-'));
   mkdirSync(join(dist, 'example'));
   writeFileSync(join(dist, 'example', 'example-0.1.0.csv'), 'Front,Back\r\n');
+  mkdirSync(join(dist, 'example', 'media'));
+  cpSync('test/fixtures/decks/example/media/sprocket.svg', join(dist, 'example', 'media', 'example-sprocket.svg'));
   writeFileSync(join(dist, 'example', 'index.html'), deckPage(cfg, deck(), manifest));
   writeFileSync(join(dist, 'index.html'), homePage(cfg, [deck()]));
   const { methodPage, formatsPage } = await import('../src/site/hubs.mjs');

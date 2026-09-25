@@ -139,3 +139,28 @@ test('the .apkg keeps positions, fixed note types, and GUIDs that survive edits'
   writeApkg(d2, b);
   assert.deepEqual(inspect(b).map((r) => r[1]), rows.map((r) => r[1]));
 });
+
+test('figures: every format carries the image or a labelled link, and its credit', () => {
+  const d = deck();
+  d.meta.pageBase = 'https://example.org/decks/example/';
+  const md = obsidian(d);
+  assert.match(md, /!\[A toothed wheel with a hole in its centre\]\(https:\/\/example\.org\/decks\/example\/media\/example-sprocket\.svg\)/);
+  assert.match(csvSimple(d), /\[Figure: A toothed wheel with a hole in its centre\] https:\/\/example\.org\/decks\/example\/media\/example-sprocket\.svg/);
+  assert.match(csvSimple(d), /Figure: Drawn for the test fixture \(CC BY-SA 4\.0\)/);
+  const m = ankiManifest(d);
+  assert.deepEqual(m.media.map((x) => x.name), ['example-sprocket.svg']);
+  const note = m.notes.find((n) => n.id === 'example.widgets.which-part');
+  assert.match(note.fields[FIELDS.indexOf('Front')], /<img src="example-sprocket\.svg" alt="A toothed wheel/);
+  const j = JSON.parse(json(d)).notes.find((n) => n.id === 'example.widgets.which-part');
+  assert.equal(j.image.file, 'media/sprocket.svg');
+  assert.equal(j._fig, undefined, 'the resolved figure never leaks into the JSON export');
+  assert.match(cardsHTML(d, 'a4'), /<img class="cimg" src="file:\/\/[^"]+sprocket\.svg"/);
+});
+
+test('the .apkg bundles the deck\'s media', { skip: !py && 'genanki not installed' }, () => {
+  const dir = mkdtempSync(join(tmpdir(), 'apkg-media-'));
+  const a = join(dir, 'a.apkg');
+  writeApkg(deck(), a);
+  const media = JSON.parse(execFileSync('unzip', ['-p', a, 'media']).toString());
+  assert.deepEqual(Object.values(media), ['example-sprocket.svg']);
+});

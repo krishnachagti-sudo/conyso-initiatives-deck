@@ -22,7 +22,7 @@ export function obsidian(deck) {
   let topic = null;
   for (const n of inOrder(deck)) {
     if (n.topic !== topic) { topic = n.topic; out.push(`## ${topic}`, ''); }
-    const c = twoSided(n, { withContext: false, sep: '\n' });
+    const c = twoSided(n, { withContext: false, sep: '\n', figure: 'md' });
     if (n.type === 'cloze') {
       const hl = oneLine(plain(String(n.front).replace(CLOZE, '==$1==')));
       out.push(hl, ...lines(c.extra.join('\n')), '');
@@ -39,7 +39,7 @@ export function logseq(deck) {
   let topic = null;
   for (const n of inOrder(deck)) {
     if (n.topic !== topic) { topic = n.topic; out.push(`- ## ${topic}`); }
-    const c = twoSided(n, { withContext: false, sep: '\n' });
+    const c = twoSided(n, { withContext: false, sep: '\n', figure: 'md' });
     if (n.type === 'cloze') {
       out.push(`\t- ${oneLine(plain(String(n.front).replace(CLOZE, '{{cloze $1}}')))} #card`);
       for (const l of lines(c.extra.join('\n'))) out.push(`\t\t- ${l}`);
@@ -57,7 +57,7 @@ export function remnote(deck) {
   let topic = null;
   for (const n of inOrder(deck)) {
     if (n.topic !== topic) { topic = n.topic; out.push(`- ${topic}`); }
-    const c = twoSided(n, { withContext: false, sep: '\n' });
+    const c = twoSided(n, { withContext: false, sep: '\n', figure: 'md' });
     if (n.type === 'cloze') {
       out.push(`  - ${oneLine(plain(String(n.front).replace(CLOZE, '{{$1}}')))}`);
     } else {
@@ -74,7 +74,7 @@ export const MOCHI_CARD_DELIMITER = '===';
 /** Mochi Markdown: sides split by `---`, cards split by the delimiter above. */
 export function mochiMarkdown(deck) {
   const cards = inOrder(deck).map((n) => {
-    const c = twoSided(n, { withContext: true, sep: '\n\n' });
+    const c = twoSided(n, { withContext: true, sep: '\n\n', figure: 'md' });
     if (n.type === 'cloze') {
       const cz = `${n.topic} › ${oneLine(plain(String(n.front).replace(CLOZE, '{{$1}}')))}`;
       return [cz, '---', c.extra.join('\n\n')].join('\n');

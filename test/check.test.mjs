@@ -112,3 +112,14 @@ test('an image without alt text fails', () => {
   card(d, 'example.widgets.which-part').explanation = 'See <img src="x.png">';
   assert.ok(rules(d).includes('image'));
 });
+
+test('images: the file must exist, with alt text, a credit and a licence tier', () => {
+  const d = loadDeck('test/fixtures/decks/example');
+  const n = d.notes.find((x) => x.id === 'example.widgets.which-part');
+  n.image = { file: 'media/missing.png', alt: 'x', credit: '', licence: 'D · no' };
+  const rules = checkDeck(d, { concepts: loadConcepts('test/fixtures/concepts', 'example') }).filter((p) => p.rule === 'image').map((p) => p.message);
+  assert.ok(rules.some((m) => /does not exist/.test(m)));
+  assert.ok(rules.some((m) => /alt must describe/.test(m)));
+  assert.ok(rules.some((m) => /credit is missing/.test(m)));
+  assert.ok(rules.some((m) => /tier letter/.test(m)));
+});

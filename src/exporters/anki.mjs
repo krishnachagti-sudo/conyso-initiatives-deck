@@ -37,6 +37,7 @@ export function ankiManifest(deck) {
       name: p,
       description: i === 0 ? `${deck.meta.description || ''}<br><br>${attribution(deck)}` : '',
     })),
+    media: [...new Map(inOrder(deck).filter((n) => n._fig).map((n) => [n._fig.name, { name: n._fig.name, path: n._fig.path }])).values()],
     notes: inOrder(deck).map((n) => ({
       id: n.id,
       type: n.type,

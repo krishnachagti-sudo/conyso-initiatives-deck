@@ -8,7 +8,8 @@
 // not built on a guess.
 
 import { writeFileSync, existsSync, mkdtempSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 
@@ -25,9 +26,10 @@ export function studySheetHTML(deck) {
   for (const n of inOrder(deck)) {
     if (n.topic !== topic) { topic = n.topic; rows.push(`<h2>${esc(topic)}</h2>`); }
     i += 1;
-    const c = twoSided(n, { withContext: false });
+    const c = twoSided(n, { withContext: false, figure: 'none' });
+    const img = n._fig ? `<figure><img src="${pathToFileURL(resolve(n._fig.path)).href}" alt="${esc(n._fig.alt)}"></figure>` : '';
     rows.push(`<section class="card${n.kind === 'primer' ? ' primer' : ''}">
-<div class="q"><span class="n">${i}.</span> ${para(c.front)}</div>
+<div class="q"><span class="n">${i}.</span> ${para(c.front)}${n._fig?.side === 'front' ? img : ''}</div>${n._fig?.side === 'back' ? img : ''}
 <div class="a">${para(c.back)}</div>
 </section>`);
   }
@@ -43,6 +45,7 @@ h2 { font-size: 13pt; border-bottom: 1px solid #999; padding-bottom: 2pt; margin
 .q { font-weight: 600; }
 .a { margin-top: 4pt; }
 .n { color: #555; }
+figure { margin: 4pt 0; } figure img { max-width: 100%; max-height: 70mm; }
 p { margin: 0 0 4pt; }
 </style></head><body>
 <h1>${esc(deck.meta.title)}</h1>
@@ -114,13 +117,14 @@ export function cardsHTML(deck, sheet = 'letter') {
     const backs = [];
     for (let i = 0; i < per; i += 1) {
       const n = chunk[i];
-      const c = n && twoSided(n, { withContext: false, withSource: false, sep: '\n\n' });
-      fronts.push(n ? `<div class="cell"><div class="ctx">${esc(n.topic)} · ${p + i + 1}</div>${cardText(c.front, 160)}</div>` : '<div class="cell empty"></div>');
+      const c = n && twoSided(n, { withContext: false, withSource: false, sep: '\n\n', figure: 'none' });
+      const fimg = n && n._fig && n._fig.side === 'front' ? `<img class="cimg" src="${pathToFileURL(resolve(n._fig.path)).href}" alt="${esc(n._fig.alt)}">` : '';
+      fronts.push(n ? `<div class="cell"><div class="ctx">${esc(n.topic)} · ${p + i + 1}</div>${cardText(c.front, 160)}${fimg}</div>` : '<div class="cell empty"></div>');
     }
     for (let i = 0; i < per; i += 1) {
       const r = Math.floor(i / COLS); const col = i % COLS; const src = r * COLS + (COLS - 1 - col);
       const n = chunk[src];
-      const c = n && twoSided(n, { withContext: false, withSource: false, sep: '\n\n' });
+      const c = n && twoSided(n, { withContext: false, withSource: false, sep: '\n\n', figure: 'none' });
       const back = n ? [c.answer, c.extra[0] || ''].filter(Boolean).join('\n\n') : '';
       backs.push(n ? `<div class="cell"><div class="ctx">${p + src + 1}</div>${cardText(back, 220)}</div>` : '<div class="cell empty"></div>');
     }
@@ -138,6 +142,7 @@ body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-se
 .ctx { font-size: 7.5pt; color: #555; margin-bottom: 4pt; }
 .t { font-size: 10.5pt; line-height: 1.35; }
 .t.small { font-size: 8.5pt; }
+.cimg { max-width: 100%; max-height: 45%; object-fit: contain; margin-top: 4pt; }
 .t.big { font-size: 20pt; margin: auto; }
 </style></head><body>${pages.join('\n')}</body></html>`;
 }

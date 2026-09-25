@@ -31,7 +31,7 @@ const str = (s) => JSON.stringify(String(s)); // JSON string escapes are valid E
 export function mochiEdn(deck) {
   const deckId = mochiId('deck', String(deck.meta.id));
   const cards = inOrder(deck).map((n, i) => {
-    const c = twoSided(n, { withContext: true, sep: '\n\n' });
+    const c = twoSided(n, { withContext: true, sep: '\n\n', figure: 'md' });
     const content = n.type === 'cloze'
       ? `${n.topic} › ${plain(String(n.front).replace(CLOZE, '{{$1}}'))}\n---\n${c.extra.join('\n\n')}`
       : `${c.front}\n---\n${c.back}`;

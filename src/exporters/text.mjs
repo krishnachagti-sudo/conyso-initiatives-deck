@@ -29,7 +29,7 @@ export function ankiText(deck) {
     `#columns:${['Notetype', 'Deck', ...FIELDS, 'Tags'].join('\t')}`,
   ];
   const lines = inOrder(deck).map((n) =>
-    row([NOTE_TYPES[n.type].name, deckPath(deck, n), ...fieldValues(deck, n, { html: true }), tagsFor(deck, n).join(' ')], sep),
+    row([NOTE_TYPES[n.type].name, deckPath(deck, n), ...fieldValues(deck, n, { html: true, imgSrc: 'url' }), tagsFor(deck, n).join(' ')], sep),
   );
   return [...head, ...lines].join('\n') + '\n';
 }
