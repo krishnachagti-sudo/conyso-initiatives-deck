@@ -118,7 +118,11 @@ export function checkDeck(deck, ctx = {}) {
       if (!nonEmpty(n.example)) add(id, 'primer', 'a primer needs an example');
       const intro = n.introduces || [];
       if (intro.length === 0) add(id, 'primer', 'a primer must introduce a term');
-      if (intro.length > LIMITS.primerNewTerms) add(id, 'primer', `a primer introduces at most ${LIMITS.primerNewTerms} new term`);
+      // A term taught with its own abbreviation ("Incident Command System" and
+      // "ICS") is one idea: the abbreviation does not count against the limit.
+      const isAbbr = (t) => /^[A-Z][A-Z0-9/&-]*[A-Z0-9](?: \S+)?$/.test(t) && intro.some((o) => o !== t && o.length > t.length);
+      const terms = intro.filter((t) => !isAbbr(t));
+      if (terms.length > LIMITS.primerNewTerms || intro.length > LIMITS.primerNewTerms + 1) add(id, 'primer', `a primer introduces at most ${LIMITS.primerNewTerms} new term`);
     } else if (nonEmpty(n.introduces)) add(id, 'primer', 'only primers introduce terms');
 
     // A card's figure: a real file, alt text, a credit and a licence tier.
@@ -166,6 +170,7 @@ export function checkDeck(deck, ctx = {}) {
     const has = (list, a) => [...list].some((k) => new RegExp(`(^|[^a-z0-9])${a}([^a-z0-9]|$)`).test(norm(k)));
     for (const tok of new Set(text.match(/\b[A-Z][A-Z0-9]{1,5}\b/g) || [])) {
       const a = tok.toLowerCase();
+      if (/^(?:I{2,3}|IV|VI{0,3}|IX|XI{0,3})$/.test(tok)) continue; // Roman numerals: World War II
       if (glossary.has(a) || has(known, a) || has(n.uses || [], a)) continue;
       add(n.id, 'abbreviation', `"${tok}" is not taught, used, assumed or in the deck glossary`);
     }
@@ -198,7 +203,7 @@ export function checkDeck(deck, ctx = {}) {
 
 // ── CLI ────────────────────────────────────────────────────────────────────
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const { deckDirs, loadDeck, loadConcepts, prerequisiteTerms } = await import('../src/decks.mjs');
+  const { deckDirs, loadDeck, deckConcepts, prerequisiteTerms } = await import('../src/decks.mjs');
   const flag = (n, d) => process.argv.find((a) => a.startsWith(`--${n}=`))?.split('=')[1] || d;
   const root = flag('decks', 'decks');
   const conceptsDir = flag('concepts', 'concepts');
@@ -210,7 +215,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   for (const dir of deckDirs(root)) {
     const deck = loadDeck(dir);
     deck.meta.pageBase ||= `${cfg.origin}${cfg.base}${deck.meta.slug}/`; // as build.mjs does
-    const problems = checkDeck(deck, { concepts: loadConcepts(conceptsDir, deck.meta.family), registry, prerequisiteTerms: prerequisiteTerms(root, deck.meta) });
+    const problems = checkDeck(deck, { concepts: deckConcepts(conceptsDir, root, deck.meta), registry, prerequisiteTerms: prerequisiteTerms(root, deck.meta) });
     total += problems.length;
     for (const p of problems) console.log(`${deck.meta.slug}  ${p.id}  [${p.rule}]  ${p.message}`);
   }

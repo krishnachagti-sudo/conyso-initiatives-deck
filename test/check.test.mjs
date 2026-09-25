@@ -43,6 +43,18 @@ test('a primer needs an example and exactly one new term', () => {
   assert.match(r, /at most 1 new term/);
 });
 
+test('a primer may teach one term together with its abbreviation', () => {
+  const d = fresh();
+  const p = card(d, 'example.widgets.what-is-a-widget');
+  const count = () => run(d).filter((x) => x.message.includes('at most 1 new term')).length;
+  p.introduces = ['widget', 'WGT'];
+  assert.equal(count(), 0);
+  p.introduces = ['widget', 'WGT', 'WX'];
+  assert.equal(count(), 1, 'two abbreviations are two ideas');
+  p.introduces = ['widget', 'Handle'];
+  assert.equal(count(), 1, 'two words are two terms');
+});
+
 test('every card explains, and choices explain every wrong option', () => {
   const d = fresh();
   delete card(d, 'example.widgets.which-part').explanation;

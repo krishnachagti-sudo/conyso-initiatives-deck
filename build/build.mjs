@@ -20,7 +20,7 @@ import { mkdirSync, writeFileSync, readFileSync, statSync, cpSync, rmSync } from
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 
-import { deckDirs, loadDeck, loadConcepts, prerequisiteTerms } from '../src/decks.mjs';
+import { deckDirs, loadDeck, deckConcepts, prerequisiteTerms } from '../src/decks.mjs';
 import { checkDeck } from './check.mjs';
 import { FORMATS } from '../src/exporters/index.mjs';
 import { mediaName } from '../src/exporters/common.mjs';
@@ -48,7 +48,7 @@ for (const src of sources) {
     // Real decks take their page address from the site config; a deck.json
     // value (the fixtures have one) is kept so tests stay independent of it.
     deck.meta.pageBase ||= `${cfg.origin}${cfg.base}${slug}/`;
-    const problems = checkDeck(deck, { concepts: loadConcepts(src.concepts, deck.meta.family), prerequisiteTerms: prerequisiteTerms(src.decks, deck.meta) });
+    const problems = checkDeck(deck, { concepts: deckConcepts(src.concepts, src.decks, deck.meta), prerequisiteTerms: prerequisiteTerms(src.decks, deck.meta) });
     if (problems.length) {
       failed += 1;
       console.error(`✗ ${slug}: ${problems.length} checker problem(s); not exported. Run npm run check.`);

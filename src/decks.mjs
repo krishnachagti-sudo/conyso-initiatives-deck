@@ -58,6 +58,16 @@ export function loadConcepts(conceptsDir, family) {
   return new Map(readJSON(p).map((c) => [c.id, c]));
 }
 
+/**
+ * The concepts a deck may cite: its own family's, plus those of the families of
+ * the decks it builds on (a KCSA card may reuse a KCNA concept).
+ * @returns {Map<string, object>}
+ */
+export function deckConcepts(conceptsDir, root, meta) {
+  const families = [meta.family, ...(meta.prerequisiteDecks || []).map((slug) => readJSON(join(root, slug, 'deck.json')).family)];
+  return new Map([...new Set(families)].flatMap((f) => [...loadConcepts(conceptsDir, f)]));
+}
+
 /** Every deck directory under a root. */
 export function deckDirs(root) {
   if (!existsSync(root)) return [];
