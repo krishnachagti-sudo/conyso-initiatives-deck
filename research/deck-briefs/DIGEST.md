@@ -103,6 +103,20 @@ never seals, logos or photos of people) or draw a plain SVG from the sourced
 facts, credited "Drawn for this deck from <source>". Figures are part of the
 budget, not an extra.
 
+## Working lean (every tool call re-sends everything you have read)
+- **Grep, don't read.** Find the passage you need with `grep -n -A8
+  '<phrase>' <file>` and read only that. Open a whole page only when the
+  card is about the whole page.
+- **One write per topic.** Plan the topic's cards, then write the file in a
+  single Write. Don't build it up through many small Edits.
+- **Check once per topic.** Run the checks when the topic file is complete,
+  fix everything they list in one pass, and run them once more.
+
+## Last pass, before the checks
+Reread every explanation beside its cited passage, and ask of each: is
+every reason in it stated in that passage? Delete the ones that are not.
+This is the single most common audit finding.
+
 ## Before you reply
 From /home/user/conyso-initiatives-deck, all three must be clean for your
 topics:
