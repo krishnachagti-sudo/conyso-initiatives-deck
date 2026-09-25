@@ -37,5 +37,5 @@ beyond the exam's scope is priority "extra".
 
 **Before you reply**, from /home/user/conyso-initiatives-deck:
 `node build/check.mjs --registry=research/deck-briefs/<slug>-terms.json` (your
-files must be clean) and `node build/sources.mjs` (your links must answer).
+files must be clean) and `node build/sources.mjs --only=<slug>` (your deck's links must answer).
 Never run git. Never edit another writer's files.

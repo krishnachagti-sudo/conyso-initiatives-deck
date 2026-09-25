@@ -1,7 +1,7 @@
 // Every source link must answer (CARD-STANDARD.md §5). Checks each distinct
 // sourceURL across all decks once, following redirects.
 //
-//   node build/sources.mjs [--decks=decks] [--fixtures]
+//   node build/sources.mjs [--decks=decks] [--fixtures] [--only=slug,slug]
 //
 // Uses curl rather than fetch so it goes through the same proxy settings as
 // everything else on the machine. A site that blocks automated requests (403,
@@ -13,6 +13,7 @@ import { deckDirs, loadDeck } from '../src/decks.mjs';
 const arg = (n) => process.argv.find((a) => a.startsWith(`--${n}=`))?.split('=')[1];
 const roots = [arg('decks') || 'decks'];
 if (process.argv.includes('--fixtures')) roots.push('test/fixtures/decks');
+const only = arg('only')?.split(','); // one writer's deck, not the whole repository
 
 export function status(url) {
   const run = (extra) => {
@@ -29,6 +30,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const urls = new Map();
   for (const root of roots) for (const dir of deckDirs(root)) {
     const deck = loadDeck(dir);
+    if (only && !only.includes(deck.meta.slug)) continue;
     for (const n of deck.notes) if (n.sourceURL) {
       if (!urls.has(n.sourceURL)) urls.set(n.sourceURL, []);
       urls.get(n.sourceURL).push(n.id);
