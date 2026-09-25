@@ -1,0 +1,1584 @@
+{
+  "topic": "Container and workload isolation",
+  "notes": [
+    {
+      "id": "k8ssec.workload-isolation.linux-namespaces",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3000,
+      "front": "What are \"Linux namespaces\" (the kernel feature), in one sentence?",
+      "back": "A kernel feature that limits which resources, such as files, network, interprocess communication, hostnames and processes, a container can see.",
+      "explanation": "Namespace isolation is why a process inside one container cannot see another container's processes when it lists them, even though both share the same host kernel.",
+      "example": "Like giving each office in a shared building its own numbered phone extension, so no one overhears another office's calls.",
+      "source": "NIST SP 800-190, Application Container Security Guide, §2.2 \"Containers and the Host Operating System\"",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf",
+      "sourceLicence": "B · public domain (US Government work)",
+      "introduces": [
+        "Linux namespaces (kernel)"
+      ],
+      "uses": [
+        "Linux namespaces (kernel)"
+      ],
+      "conceptIDs": [
+        "k8ssec.linux-namespaces"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.host-namespaces",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3010,
+      "front": "What does sharing a \"host namespace\" mean, in one sentence?",
+      "back": "A Pod using `hostNetwork`, `hostPID` or `hostIPC` shares the node's own network, process or interprocess-communication namespace instead of getting its own.",
+      "explanation": "This removes exactly the isolation namespaces normally provide, which is why the Baseline Pod Security Standard disallows it.",
+      "example": "Like letting one office plug straight into the building's main switchboard instead of using its own extension.",
+      "source": "Kubernetes documentation, \"Pod Security Standards: Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "host namespaces"
+      ],
+      "uses": [
+        "host namespaces",
+        "Linux namespaces (kernel)"
+      ],
+      "conceptIDs": [
+        "k8ssec.host-namespaces"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.linux-capabilities",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3020,
+      "front": "What are \"Linux capabilities\", in one sentence?",
+      "back": "Divisions of root's privileges into separate categories, so a process can be granted some of them without being granted all of them.",
+      "explanation": "Each capability governs a set of system calls; granting only the capabilities a process actually needs is a direct application of least privilege.",
+      "example": "Like giving a locksmith a master key that opens only the locks their job needs, not every door in the building.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: seccomp\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#seccomp",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Linux capabilities"
+      ],
+      "uses": [
+        "Linux capabilities",
+        "least privilege"
+      ],
+      "conceptIDs": [
+        "k8ssec.linux-capabilities"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.cap-sys-admin",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 3030,
+      "front": "What is CAP_SYS_ADMIN, in one sentence?",
+      "back": "A broad Linux capability that grants many administrative powers; in a privileged container it can be used to bypass seccomp and other restrictions.",
+      "explanation": "It is singled out because, alongside CAP_NET_ADMIN, it is what a privileged container's root user can use to bypass the runtime's seccomp configuration.",
+      "example": "Like a single master key that happens to also open the building's security control room.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: privileged containers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#privileged-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "CAP_SYS_ADMIN"
+      ],
+      "uses": [
+        "CAP_SYS_ADMIN",
+        "Linux capabilities"
+      ],
+      "conceptIDs": [
+        "k8ssec.cap-sys-admin"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.privileged-container",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3040,
+      "front": "What is a \"privileged container\", in one sentence?",
+      "back": "A container run with `privileged: true`, which is given every Linux capability and overrides the applied seccomp profile, AppArmor profile and SELinux constraints.",
+      "explanation": "Privileged mode exists for containers that genuinely need administrative access to the host, such as manipulating the network stack, but it removes nearly every other hardening control at once.",
+      "example": "Like handing someone every key in the building rather than working out which single door they actually need.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: privileged containers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#privileged-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "privileged container"
+      ],
+      "uses": [
+        "privileged container",
+        "Linux capabilities"
+      ],
+      "conceptIDs": [
+        "k8ssec.privileged-container"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.allow-privilege-escalation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3050,
+      "front": "What does the `allowPrivilegeEscalation` field control, in one sentence?",
+      "back": "Whether a process can gain more privileges than its parent; it sets the kernel's `no_new_privs` flag when false.",
+      "explanation": "It defaults to true if left unset, which is a well-known secure-defaults gap that the Restricted Pod Security Standard closes by requiring it to be false.",
+      "example": "Like a rule that stops an employee borrowing a colleague's badge to open doors their own badge cannot.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "introduces": [
+        "allowPrivilegeEscalation"
+      ],
+      "uses": [
+        "allowPrivilegeEscalation"
+      ],
+      "conceptIDs": [
+        "k8ssec.allow-privilege-escalation"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.setuid",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 3060,
+      "front": "What is a \"setuid binary\", in one sentence?",
+      "back": "A file whose set-user-id mode lets a process run with the file's owner privileges rather than whoever launched it: an example of privilege escalation.",
+      "explanation": "It is the standing example `allowPrivilegeEscalation: false` is meant to stop: without that setting, a process could execute a setuid binary to gain more privilege than its parent had.",
+      "example": "Like a coat that automatically grants whoever wears it the previous owner's access badge.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "setuid binary"
+      ],
+      "uses": [
+        "setuid binary",
+        "allowPrivilegeEscalation"
+      ],
+      "conceptIDs": [
+        "k8ssec.setuid"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.run-as-non-root",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3070,
+      "front": "What do `runAsNonRoot` and `runAsUser` do, in one sentence?",
+      "back": "`runAsNonRoot` requires that a container not run as root; `runAsUser` sets the specific user id a container runs as, overriding the image.",
+      "explanation": "Setting these in the Pod manifest takes precedence over whatever the container image specifies, which matters when running images you do not control.",
+      "example": "Like requiring staff to badge in as themselves, no matter what name is printed on the uniform they are wearing.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: run without root\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#run-without-root",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "runAsNonRoot / runAsUser"
+      ],
+      "uses": [
+        "runAsNonRoot / runAsUser"
+      ],
+      "conceptIDs": [
+        "k8ssec.run-as-non-root"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.read-only-root-filesystem",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3080,
+      "front": "What does `readOnlyRootFilesystem` do, in one sentence?",
+      "back": "It mounts a container's root filesystem read-only, limiting what an attacker who gets code execution inside it can tamper with or persist.",
+      "explanation": "It does not stop an attacker running code, but it does stop them writing new files to disk, which blocks many common persistence techniques.",
+      "example": "Like a hotel room where the furniture is bolted down: you can still use it, but you cannot rearrange it.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "readOnlyRootFilesystem"
+      ],
+      "uses": [
+        "readOnlyRootFilesystem"
+      ],
+      "conceptIDs": [
+        "k8ssec.read-only-root-filesystem"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.fsgroup",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 3090,
+      "front": "What does `fsGroup` do, in one sentence?",
+      "back": "A Pod-level security context field that gives a specified group id ownership of the Pod's supporting volumes.",
+      "explanation": "It is what lets a non-root container still read and write files on a mounted volume, without the volume being world-writable.",
+      "example": "Like issuing a shared storeroom key to one named team, rather than leaving the storeroom unlocked for everyone.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container: discussion\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#discussion",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "fsGroup"
+      ],
+      "uses": [
+        "fsGroup"
+      ],
+      "conceptIDs": [
+        "k8ssec.fsgroup"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.seccomp",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3100,
+      "front": "What is \"seccomp\" (secure computing mode), in one sentence?",
+      "back": "A Linux kernel feature, present since kernel 2.6.12, that filters which system calls a process is allowed to make.",
+      "explanation": "It reduces the syscall attack surface available inside a container: even a compromised process can only make the calls its profile allows.",
+      "example": "Like restricting a new employee to only the specific building doors their job needs, out of every door that exists.",
+      "source": "Kubernetes documentation, \"Security Checklist: Enabling Seccomp\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#enabling-seccomp",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "seccomp"
+      ],
+      "uses": [
+        "seccomp"
+      ],
+      "conceptIDs": [
+        "k8ssec.seccomp"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.system-call",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 3110,
+      "front": "What is a \"system call\" (syscall), in one sentence?",
+      "back": "A request a user-space process makes to the kernel to perform a privileged operation on its behalf.",
+      "explanation": "seccomp works by filtering exactly these requests, so understanding what a syscall is explains what seccomp is actually restricting.",
+      "example": "Like a form a tenant fills in to ask the building superintendent to do something only the superintendent is allowed to do.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: seccomp\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#seccomp",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "system call"
+      ],
+      "uses": [
+        "system call",
+        "seccomp"
+      ],
+      "conceptIDs": [
+        "k8ssec.system-call"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.seccomp-profile-types",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3120,
+      "front": "What are the three seccomp profile types Kubernetes supports?",
+      "back": "RuntimeDefault (the container runtime's own default profile), Unconfined (no filtering) and Localhost (a custom profile file stored on the node).",
+      "explanation": "The Restricted Pod Security Standard only allows RuntimeDefault or Localhost, since Unconfined provides no filtering at all.",
+      "example": "Like choosing between the building's standard door list, no restrictions at all, or a custom list drawn up just for one office.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container: set the seccomp profile\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "seccomp profile types"
+      ],
+      "uses": [
+        "seccomp profile types",
+        "seccomp"
+      ],
+      "conceptIDs": [
+        "k8ssec.seccomp-profile-types"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.linux-security-module",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3130,
+      "front": "What is a \"Linux security module\", in one sentence?",
+      "back": "A kernel module, such as AppArmor or SELinux, that provides mandatory access control on top of standard Linux permissions.",
+      "explanation": "Unlike seccomp, which restricts which syscalls can be made at all, a Linux security module restricts what a syscall's target may be, such as which files a program may touch.",
+      "example": "Like a policy-based security guard, as opposed to a simple locked-door list.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: policy-based MAC\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#policy-based-mac",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Linux security module"
+      ],
+      "uses": [
+        "Linux security module",
+        "mandatory access control (MAC)"
+      ],
+      "conceptIDs": [
+        "k8ssec.linux-security-module"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.apparmor",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3140,
+      "front": "What is \"AppArmor\", in one sentence?",
+      "back": "A Linux security module that confines a program to a limited set of resources using profiles tuned to a specific program or container.",
+      "explanation": "AppArmor profiles are defined using file paths and are set per container with the `appArmorProfile` field in its securityContext.",
+      "example": "Like giving one particular tenant a written list of exactly which rooms and equipment they may use.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container: Set the AppArmor Profile for a Container\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-apparmor-profile-for-a-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "introduces": [
+        "AppArmor"
+      ],
+      "uses": [
+        "AppArmor",
+        "Linux security module"
+      ],
+      "conceptIDs": [
+        "k8ssec.apparmor"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.apparmor-modes",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3150,
+      "front": "What is the difference between AppArmor's \"enforce\" and \"complain\" modes, in one sentence?",
+      "back": "Enforcing mode blocks access to any disallowed resource; complain mode only reports the violation without blocking it.",
+      "explanation": "Complain mode is useful for testing a new profile safely before switching it to enforcing mode in production.",
+      "example": "Like a guard who either physically stops you at a locked door, or just writes your name down and lets you through anyway.",
+      "source": "Kubernetes documentation, \"Security Checklist: AppArmor\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#apparmor",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "enforce vs complain mode"
+      ],
+      "uses": [
+        "enforce vs complain mode",
+        "AppArmor"
+      ],
+      "conceptIDs": [
+        "k8ssec.apparmor-modes"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.selinux",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3160,
+      "front": "What is \"SELinux\", in one sentence?",
+      "back": "A Linux security module that restricts a process's access to files using security labels, rather than file paths.",
+      "explanation": "Where AppArmor matches on a file's path, SELinux matches on a file's inode via its label, which is the key structural difference between the two.",
+      "example": "Like tagging every room with a security clearance level, instead of listing specific room names on a pass.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: SELinux\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#selinux",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "SELinux"
+      ],
+      "uses": [
+        "SELinux",
+        "Linux security module"
+      ],
+      "conceptIDs": [
+        "k8ssec.selinux"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.sandboxed-runtime",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3170,
+      "front": "What is a \"sandboxed runtime\", in one sentence?",
+      "back": "A container runtime that runs each Pod in its own execution environment, such as a virtual machine or a userspace kernel, for stronger isolation.",
+      "explanation": "Because ordinary containers share the host kernel, a sandboxed runtime is recommended specifically for untrusted workloads, where a container escape would otherwise reach the whole host.",
+      "example": "Like giving each risky tenant their own self-contained cabin, instead of a room inside the shared building.",
+      "source": "Kubernetes documentation, \"Multi-tenancy: Sandboxing containers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#sandboxing-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "sandboxed runtime"
+      ],
+      "uses": [
+        "sandboxed runtime",
+        "container escape"
+      ],
+      "conceptIDs": [
+        "k8ssec.sandboxed-runtime"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.gvisor",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 3180,
+      "front": "What is gVisor, in one sentence?",
+      "back": "A sandboxed runtime that provides isolation through a userspace kernel, named as an example in the Kubernetes docs.",
+      "explanation": "The Application Security Checklist names it as a kernel emulation tool for sensitive workloads needing a different isolation level.",
+      "example": "Like an interpreter who checks every request before passing it on to the real building manager.",
+      "source": "Kubernetes documentation, \"Application Security Checklist: Runtime classes\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/application-security-checklist/#runtime-classes",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "gVisor"
+      ],
+      "uses": [
+        "gVisor",
+        "sandboxed runtime"
+      ],
+      "conceptIDs": [
+        "k8ssec.gvisor"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.kata-containers",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 3190,
+      "front": "What are Kata Containers, in one sentence?",
+      "back": "A sandboxed runtime that provides virtualized isolation, named as an example in the Kubernetes docs.",
+      "explanation": "The Application Security Checklist names it alongside gVisor as an option for workloads needing a different isolation level.",
+      "example": "Like giving each risky tenant their own small, fully separate building rather than a locked room in a shared one.",
+      "source": "Kubernetes documentation, \"Application Security Checklist: Runtime classes\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/application-security-checklist/#runtime-classes",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Kata Containers"
+      ],
+      "uses": [
+        "Kata Containers",
+        "sandboxed runtime"
+      ],
+      "conceptIDs": [
+        "k8ssec.kata-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.rootless-containers",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3200,
+      "front": "What are \"rootless containers\", in one sentence?",
+      "back": "Running containers without root on the host, so a container escape does not by itself hand an attacker host root.",
+      "explanation": "This is a direct application of least privilege: it does not prevent every attack, but it shrinks the blast radius of a successful one.",
+      "example": "Like a delivery worker who never holds the building's master key, even while inside.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Least Privilege\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#least-privilege",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "rootless containers"
+      ],
+      "uses": [
+        "rootless containers",
+        "least privilege",
+        "container escape"
+      ],
+      "conceptIDs": [
+        "k8ssec.rootless-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.host-users-false",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3210,
+      "front": "What does `hostUsers: false` do, in one sentence?",
+      "back": "It runs a Pod in a Linux user namespace: a process can be root inside the container but maps to a non-root host user.",
+      "explanation": "It gives much of the benefit of rootless containers without changing how the application inside the container behaves, since it still sees itself as root.",
+      "example": "Like a guest who is treated as an owner inside their own rented room, but as an ordinary visitor everywhere else in the building.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: recommendations and best practices\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#recommendations-best-practices",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "hostUsers: false"
+      ],
+      "uses": [
+        "hostUsers: false",
+        "Linux namespaces (kernel)"
+      ],
+      "conceptIDs": [
+        "k8ssec.host-users-false"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs (feature still described as early-stage)"
+    },
+    {
+      "id": "k8ssec.workload-isolation.hostprocess",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 3220,
+      "front": "What is a Windows HostProcess container, in one sentence?",
+      "back": "A Windows Pod feature (`windowsOptions.hostProcess`) that enables privileged access to the Windows host machine, and which the Baseline Pod Security Standard disallows.",
+      "explanation": "It is the Windows equivalent of the concern that privileged mode and host namespaces raise on Linux: direct, unrestricted access to the host.",
+      "example": "Like a Windows-only master key that the standard security policy simply refuses to issue.",
+      "source": "Kubernetes documentation, \"Pod Security Standards: Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Windows HostProcess container"
+      ],
+      "uses": [
+        "Windows HostProcess container",
+        "privileged container"
+      ],
+      "conceptIDs": [
+        "k8ssec.hostprocess"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.security-profiles-operator",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 3230,
+      "front": "What is the Security Profiles Operator, in one sentence?",
+      "back": "A Kubernetes project that helps manage and distribute seccomp, AppArmor and SELinux profiles at scale across a cluster.",
+      "explanation": "Managing three separate kinds of custom profile by hand across many nodes is hard; this project exists specifically to make that manageable.",
+      "example": "Like a facilities team that maintains every office's custom door list centrally, rather than leaving each office to manage its own.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: considerations for custom configurations\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#considerations-custom-configurations",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Security Profiles Operator"
+      ],
+      "uses": [
+        "Security Profiles Operator",
+        "seccomp"
+      ],
+      "conceptIDs": [
+        "k8ssec.security-profiles-operator"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.kernel-module-autoload",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 3240,
+      "front": "Why does \"kernel module auto-loading\" matter for container security, in one sentence?",
+      "back": "An unprivileged process can cause the Linux kernel to automatically load network-protocol kernel modules just by creating the right kind of socket.",
+      "explanation": "Blocking unneeded modules, such as `dccp` or `sctp`, closes a route an administrator might have assumed was already closed simply because the module was not in active use.",
+      "example": "Like a door that unlocks itself automatically whenever anyone nearby asks, whether or not the building manager meant to leave it usable.",
+      "source": "Kubernetes documentation, \"Securing a Cluster: preventing containers from loading unwanted kernel modules\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "kernel module auto-loading"
+      ],
+      "uses": [
+        "kernel module auto-loading"
+      ],
+      "conceptIDs": [
+        "k8ssec.kernel-module-autoload"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.privileged-overrides-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3550,
+      "front": "When a container runs as `privileged: true`, what happens to its seccomp, AppArmor and SELinux protections?",
+      "back": "They are all overridden: seccomp runs as Unconfined, AppArmor profiles are ignored, and SELinux runs as the unconfined_t domain.",
+      "explanation": "This is exactly why privileged mode should be a last resort: it does not add one hole, it removes nearly every other kernel-level control at once.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: privileged containers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#privileged-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privileged container",
+        "seccomp",
+        "AppArmor",
+        "SELinux"
+      ],
+      "conceptIDs": [
+        "k8ssec.privileged-container"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.privileged-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3558,
+      "front": "A container is set to `privileged: true` and separately given a custom seccomp profile that blocks the `unshare` syscall. Does the seccomp profile still apply?",
+      "back": "No: a privileged container always runs with the Unconfined seccomp profile, which overrides any profile named in the manifest.",
+      "explanation": "Setting a seccomp profile alongside `privileged: true` gives a false sense of security, since privileged mode silently overrides it.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: privileged containers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#privileged-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privileged container",
+        "seccomp"
+      ],
+      "conceptIDs": [
+        "k8ssec.privileged-container"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.apparmor-selinux-contrast",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 3566,
+      "front": "What is the key structural difference between AppArmor and SELinux?",
+      "back": "AppArmor uses profiles that define access by file path; SELinux uses policies that apply to labels, matched by a file's inode rather than its path.",
+      "explanation": "Both are Linux security modules providing mandatory access control, but the way each identifies \"which resource\" differs, which affects how their profiles are written.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: differences between AppArmor and SELinux\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#apparmor-selinux-diff",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "AppArmor",
+        "SELinux",
+        "Linux security module"
+      ],
+      "conceptIDs": [
+        "k8ssec.apparmor",
+        "k8ssec.selinux"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.seccomp-default-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3574,
+      "front": "What is seccomp's default behaviour if a Pod sets no seccomp profile at all, and what changed in Kubernetes 1.27?",
+      "back": "By default it stays Unconfined; since Kubernetes 1.27, a cluster can enable RuntimeDefault as the default seccomp profile for all workloads via the kubelet.",
+      "explanation": "Without that opt-in, an unset profile still leaves containers effectively unfiltered, which is a common secure-defaults trap.",
+      "source": "Kubernetes documentation, \"Restrict a Container's Syscalls with seccomp: Enable the use of RuntimeDefault as the default seccomp profile for all workloads\"",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "seccomp",
+        "seccomp profile types"
+      ],
+      "conceptIDs": [
+        "k8ssec.seccomp"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37 (seccompDefault since v1.27)"
+    },
+    {
+      "id": "k8ssec.workload-isolation.seccomp-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3582,
+      "front": "A namespace requires the Restricted Pod Security Standard. A Pod is submitted with `seccompProfile.type: Unconfined`. Is this accepted?",
+      "back": "No: Restricted requires seccomp to be explicitly set to RuntimeDefault or Localhost; an explicit Unconfined, or no profile at all, is rejected.",
+      "explanation": "This is stricter than the cluster-wide default: even if RuntimeDefault is the kubelet's default, Restricted still demands the field be set explicitly.",
+      "source": "Kubernetes documentation, \"Pod Security Standards: Restricted\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "seccomp profile types",
+        "seccomp"
+      ],
+      "conceptIDs": [
+        "k8ssec.seccomp-profile-types",
+        "k8ssec.seccomp"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.escalation-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3590,
+      "front": "A Pod sets `allowPrivilegeEscalation: false` but also sets `privileged: true`. Is this combination valid?",
+      "back": "No: `allowPrivilegeEscalation: false` cannot be combined with running as privileged, or with the CAP_SYS_ADMIN capability, since both already grant broader escalation.",
+      "explanation": "The Kubernetes docs call this combination inconsistent, so a manifest attempting it is invalid.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "allowPrivilegeEscalation",
+        "privileged container",
+        "CAP_SYS_ADMIN"
+      ],
+      "conceptIDs": [
+        "k8ssec.allow-privilege-escalation"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.sandbox-pss-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3598,
+      "front": "A team runs an untrusted, multi-tenant workload inside a sandboxed runtime like gVisor, and assumes the Restricted Pod Security Standard is unnecessary on top of it. Is that assumption correct?",
+      "back": "It depends: the docs say sandboxing lessens the need to restrict privileges, but which protections are needed depends on the sandboxing method.",
+      "explanation": "Sandboxing and Pod Security Standards address different layers, so the docs recommend no single profile for all sandboxed workloads.",
+      "source": "Kubernetes documentation, \"Pod Security Standards: what about sandboxed Pods?\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#what-about-sandboxed-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "sandboxed runtime"
+      ],
+      "conceptIDs": [
+        "k8ssec.sandboxed-runtime"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.gvisor-kata-classification",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 3606,
+      "front": "The Application Security Checklist names gVisor as a \"kernel emulation tool\" and Kata Containers as \"virtualized isolation\". Which does each provide?",
+      "back": "gVisor: kernel emulation. Kata Containers: virtualized isolation.",
+      "explanation": "Both give each Pod a separate execution environment for sensitive workloads needing a different isolation level.",
+      "source": "Kubernetes documentation, \"Application Security Checklist: Runtime classes\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/application-security-checklist/#runtime-classes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "gVisor",
+        "Kata Containers",
+        "sandboxed runtime"
+      ],
+      "conceptIDs": [
+        "k8ssec.gvisor",
+        "k8ssec.kata-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.rootless-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3614,
+      "front": "A rootless container is compromised, and the attacker manages a container escape onto the host. What is the practical benefit of running rootless in this scenario?",
+      "back": "The attacker lands on the host as an unprivileged user, not root, limiting what they can do next even though the escape was not prevented.",
+      "explanation": "Rootless does not stop an escape; it reduces the blast radius once one has already happened.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Least Privilege\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#least-privilege",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "rootless containers",
+        "container escape",
+        "blast radius"
+      ],
+      "conceptIDs": [
+        "k8ssec.rootless-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.hostusers-rootless-contrast",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 3622,
+      "front": "How does `hostUsers: false` differ from running a fully rootless container?",
+      "back": "`hostUsers: false` is a Pod setting that maps container root to an unprivileged host user; \"rootless\" describes running containers without host root in general.",
+      "explanation": "hostUsers uses a Linux user namespace at the Pod level; rootless is the broader goal, which can be achieved by other means too.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: recommendations and best practices\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#recommendations-best-practices",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "hostUsers: false",
+        "rootless containers"
+      ],
+      "conceptIDs": [
+        "k8ssec.host-users-false",
+        "k8ssec.rootless-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.hostnamespaces-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3630,
+      "front": "A Pod sets `hostPID: true` so its container can see every process running on the node, including those of other Pods. Which Pod Security Standard rejects this, and why?",
+      "back": "The Baseline standard: sharing host namespaces removes the process isolation namespaces are meant to give, letting one Pod observe processes it should not reach.",
+      "explanation": "hostPID is one of three host-namespace fields (with hostNetwork and hostIPC) that Baseline requires to be left unset or false.",
+      "source": "Kubernetes documentation, \"Pod Security Standards: Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "host namespaces",
+        "Linux namespaces (kernel)"
+      ],
+      "conceptIDs": [
+        "k8ssec.host-namespaces"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.kernel-module-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3638,
+      "front": "A cluster has never explicitly loaded the `dccp` kernel module, so an administrator assumes it is unavailable to containers. Is that assumption safe?",
+      "back": "No: an unprivileged process can still trigger the kernel to auto-load `dccp` by creating a socket of that type, unless it is blocked or uninstalled.",
+      "explanation": "Auto-loading happens regardless of whether the administrator has deliberately loaded the module, which is exactly the gap the securing-a-cluster guidance addresses.",
+      "source": "Kubernetes documentation, \"Securing a Cluster: preventing containers from loading unwanted kernel modules\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kernel module auto-loading"
+      ],
+      "conceptIDs": [
+        "k8ssec.kernel-module-autoload"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.readonly-fsgroup-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3646,
+      "front": "A Pod sets `readOnlyRootFilesystem: true`, but its application still needs to write to a volume it mounts. What field lets an unprivileged, non-root container still own that volume's files?",
+      "back": "`fsGroup`, which assigns a group id that owns the Pod's supporting volumes.",
+      "explanation": "A read-only root filesystem and a writable, group-owned volume are not in conflict: the first hardens the container image; the second gives it exactly the write access it needs.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container: discussion\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#discussion",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "readOnlyRootFilesystem",
+        "fsGroup"
+      ],
+      "conceptIDs": [
+        "k8ssec.read-only-root-filesystem"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.linux-namespaces-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3654,
+      "front": "Inside a container running Apache on a shared host, an operator runs `ps -A` and sees only the container's own httpd process, not the dozens of other processes running on the node. What kernel feature is responsible?",
+      "back": "Linux namespace isolation, specifically the process namespace.",
+      "explanation": "Namespace isolation gives each container a filtered view of the host's resources, so `ps` inside the container reflects only what that namespace can see.",
+      "source": "NIST SP 800-190, Application Container Security Guide, §2.2 \"Containers and the Host Operating System\"",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "Linux namespaces (kernel)"
+      ],
+      "conceptIDs": [
+        "k8ssec.linux-namespaces"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.namespace-list-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3662,
+      "front": "What six kinds of resource does Linux namespace isolation cover?",
+      "back": "File systems, network interfaces, interprocess communications, host names, user information and processes.",
+      "explanation": "Each is a separate namespace type, and a Pod field such as hostNetwork or hostPID opts out of the network or process namespace specifically, not all of them at once.",
+      "source": "NIST SP 800-190, Application Container Security Guide, §2.2 \"Containers and the Host Operating System\"",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "Linux namespaces (kernel)"
+      ],
+      "conceptIDs": [
+        "k8ssec.linux-namespaces"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.host-namespaces-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3670,
+      "front": "Which three fields does the Baseline Pod Security Standard restrict under \"Host Namespaces\"?",
+      "back": "`hostNetwork`, `hostPID` and `hostIPC`, which must all be undefined or false.",
+      "explanation": "Each corresponds to sharing one specific host namespace: the network stack, the process table, or interprocess communication.",
+      "source": "Kubernetes documentation, \"Pod Security Standards: Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "host namespaces"
+      ],
+      "conceptIDs": [
+        "k8ssec.host-namespaces"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.capabilities-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3678,
+      "front": "A container needs to bind to a low-numbered network port but should not otherwise gain any root privilege. Which Linux feature lets it get exactly that one privilege, and nothing more?",
+      "back": "Linux capabilities: granting only NET_BIND_SERVICE, rather than making the container privileged or giving it full root.",
+      "explanation": "This is least privilege applied at the kernel level: one narrow capability instead of the whole set root would otherwise carry.",
+      "source": "Kubernetes documentation, \"Pod Security Standards: Restricted\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Linux capabilities",
+        "least privilege"
+      ],
+      "conceptIDs": [
+        "k8ssec.linux-capabilities"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.cap-sys-admin-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3686,
+      "front": "A privileged container's root user uses CAP_SYS_ADMIN together with CAP_NET_ADMIN to bypass the runtime's seccomp restrictions entirely. What does this show about privileged mode?",
+      "back": "That privileged mode grants capabilities broad enough to undo other hardening controls, not just extra permissions on top of them.",
+      "explanation": "This is exactly why CAP_SYS_ADMIN is singled out: a root user in a privileged container can use it, alongside CAP_NET_ADMIN, to bypass the runtime seccomp configuration and other restrictions.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: privileged containers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#privileged-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CAP_SYS_ADMIN",
+        "privileged container"
+      ],
+      "conceptIDs": [
+        "k8ssec.cap-sys-admin"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.allowprivesc-default-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3694,
+      "front": "What does `allowPrivilegeEscalation` default to if a container's manifest leaves it unset?",
+      "back": "True, meaning privilege escalation is allowed by default unless a manifest explicitly sets it to false.",
+      "explanation": "This default is a well-known secure-defaults gap: the field has to be actively hardened rather than relied on to be safe out of the box.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "uses": [
+        "allowPrivilegeEscalation",
+        "secure defaults"
+      ],
+      "conceptIDs": [
+        "k8ssec.allow-privilege-escalation"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.run-as-non-root-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3702,
+      "front": "A container image's Dockerfile sets its default user to root, but the Pod manifest sets `runAsUser: 1000`. Which one wins when the container actually runs?",
+      "back": "The Pod manifest: setting these values there takes precedence over whatever the container image specifies.",
+      "explanation": "This is what makes `runAsUser` useful for images you do not control: you can force a non-root user even if the image itself defaults to root.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: run without root\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#run-without-root",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "runAsNonRoot / runAsUser"
+      ],
+      "conceptIDs": [
+        "k8ssec.run-as-non-root"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.readonly-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3710,
+      "front": "An attacker gets remote code execution inside a container with `readOnlyRootFilesystem: true`, and tries to write a persistence script to the container's own filesystem. What happens?",
+      "back": "The write fails: the root filesystem is mounted read-only, so the attacker cannot persist a file there even with code execution.",
+      "explanation": "It does not stop the code execution itself, but it removes one of the most common ways an attacker would try to persist inside the container.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "readOnlyRootFilesystem"
+      ],
+      "conceptIDs": [
+        "k8ssec.read-only-root-filesystem"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.linux-security-module-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3718,
+      "front": "A cluster wants to enforce mandatory access control on Linux nodes, on top of the standard user and group permissions already in place. What kind of mechanism does it need?",
+      "back": "A Linux security module, such as AppArmor or SELinux.",
+      "explanation": "Standard Linux permissions are discretionary; a Linux security module is what actually adds a mandatory layer on top of them.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: policy-based MAC\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#policy-based-mac",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Linux security module",
+        "mandatory access control (MAC)"
+      ],
+      "conceptIDs": [
+        "k8ssec.linux-security-module"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.apparmor-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3726,
+      "front": "A team writes a custom AppArmor profile for a new program and wants to check what it would block, without yet risking breaking the program in production. What mode should they run the profile in first?",
+      "back": "Complain mode: it reports violations without blocking them, letting the team observe safely before switching to enforcing mode.",
+      "explanation": "Testing a new profile in complain mode first avoids a hard outage from an overly strict profile going straight into enforcing mode.",
+      "source": "Kubernetes documentation, \"Security Checklist: AppArmor\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#apparmor",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "enforce vs complain mode",
+        "AppArmor"
+      ],
+      "conceptIDs": [
+        "k8ssec.apparmor"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.selinux-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3734,
+      "front": "Two containers on the same host are each labelled so that only processes carrying a matching label can access the same files. What Linux security module is being used, and what does it match on?",
+      "back": "SELinux, matching by security label rather than by file path.",
+      "explanation": "This is SELinux's defining trait: enforcement follows a resource's label and inode, not the human-readable path used to reach it.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: SELinux\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#selinux",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "SELinux"
+      ],
+      "conceptIDs": [
+        "k8ssec.selinux"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.sandboxed-runtime-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3742,
+      "front": "What are the two popular approaches to sandboxing named in the Kubernetes docs?",
+      "back": "Running each Pod in a separate virtual machine, or in a separate userspace kernel.",
+      "explanation": "The Application Security Checklist separately names gVisor as a kernel emulation tool and Kata Containers for virtualized isolation.",
+      "source": "Kubernetes documentation, \"Multi-tenancy: Sandboxing containers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#sandboxing-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "sandboxed runtime"
+      ],
+      "conceptIDs": [
+        "k8ssec.sandboxed-runtime"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.gvisor-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3750,
+      "front": "A cluster runs sensitive, untrusted workloads and wants a kernel emulation tool for a stronger isolation level than the default runtime, accepting a performance cost. Which named tool fits this?",
+      "back": "gVisor.",
+      "explanation": "gVisor is specifically the Application Security Checklist's named example of a kernel emulation tool for sensitive workloads.",
+      "source": "Kubernetes documentation, \"Application Security Checklist: Runtime classes\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/application-security-checklist/#runtime-classes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "gVisor",
+        "sandboxed runtime"
+      ],
+      "conceptIDs": [
+        "k8ssec.gvisor"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.kata-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3758,
+      "front": "A cluster wants Pod isolation close to that of a virtual machine, without redesigning workloads to run directly on VMs. Which named sandboxed runtime fits this?",
+      "back": "Kata Containers.",
+      "explanation": "Kata Containers gives each Pod a lightweight VM, close to VM-level isolation while still fitting Kubernetes' normal container workflow.",
+      "source": "Kubernetes documentation, \"Pod Security Standards: what about sandboxed Pods?\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#what-about-sandboxed-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Kata Containers",
+        "sandboxed runtime"
+      ],
+      "conceptIDs": [
+        "k8ssec.kata-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.rootless-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3766,
+      "front": "What does the whitepaper say rootless services and containers are \"vital\" to preventing?",
+      "back": "An attacker who gains access to one container easily traversing between it and the underlying host, or containers on other hosts.",
+      "explanation": "It is framed as protection against lateral movement and privilege escalation specifically, not as a way to stop the initial compromise.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Least Privilege\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#least-privilege",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "rootless containers",
+        "lateral movement"
+      ],
+      "conceptIDs": [
+        "k8ssec.rootless-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.hostprocess-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3774,
+      "front": "A Windows Pod sets `windowsOptions.hostProcess: true` to gain privileged access to the host machine. Does the Baseline Pod Security Standard allow this?",
+      "back": "No: Baseline disallows privileged access to the host, so HostProcess containers are rejected.",
+      "explanation": "It is the Windows counterpart to the Linux concern over privileged containers and host namespaces: direct host access is what Baseline exists to block.",
+      "source": "Kubernetes documentation, \"Pod Security Standards: Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Windows HostProcess container"
+      ],
+      "conceptIDs": [
+        "k8ssec.hostprocess"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.spo-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3782,
+      "front": "A large cluster needs seccomp, AppArmor and SELinux profiles distributed and kept consistent across hundreds of nodes, by hand. What project exists specifically to make this manageable?",
+      "back": "The Security Profiles Operator.",
+      "explanation": "Manually keeping three different kinds of profile synchronised at that scale is exactly the operational problem this project addresses.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: considerations for custom configurations\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#considerations-custom-configurations",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Security Profiles Operator"
+      ],
+      "conceptIDs": [
+        "k8ssec.security-profiles-operator"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.setuid-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3790,
+      "front": "A container runs a setuid binary that would normally let a process gain the file owner's elevated privileges. With `allowPrivilegeEscalation: false` set, does this still work?",
+      "back": "No: that setting sets the kernel's `no_new_privs` flag, blocking a process from gaining more privilege than its parent, such as via a setuid binary.",
+      "explanation": "This is the concrete mechanism behind the field: it is not abstract, it directly targets exactly this kind of escalation route.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "setuid binary",
+        "allowPrivilegeEscalation"
+      ],
+      "conceptIDs": [
+        "k8ssec.setuid"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.fsgroup-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3798,
+      "front": "A Pod's containers run as a non-root user, but still need write access to a shared volume that would otherwise be owned only by root. What field solves this without loosening the container's own user?",
+      "back": "`fsGroup`, which gives a chosen group id ownership of the Pod's supporting volumes.",
+      "explanation": "It changes ownership of the volume, not the identity the container itself runs as, so the two settings work together rather than conflicting.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container: discussion\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#discussion",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "fsGroup"
+      ],
+      "conceptIDs": [
+        "k8ssec.fsgroup"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.system-call-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3806,
+      "front": "Why does filtering system calls with seccomp reduce risk, rather than filtering, say, application-level function calls?",
+      "back": "A syscall is the actual boundary between a user-space process and the kernel; blocking a dangerous syscall blocks it however the application tries.",
+      "explanation": "This is why seccomp is described as reducing the kernel syscall attack surface specifically, not the application's general attack surface.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: seccomp\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#seccomp",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "system call",
+        "seccomp"
+      ],
+      "conceptIDs": [
+        "k8ssec.system-call"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.security-profiles-operator-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3814,
+      "front": "What three kinds of profile does the Security Profiles Operator help manage?",
+      "back": "seccomp, AppArmor and SELinux profiles.",
+      "explanation": "It centralises exactly the three custom-configuration mechanisms this topic covers, rather than adding a new one of its own.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: considerations for custom configurations\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#considerations-custom-configurations",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Security Profiles Operator"
+      ],
+      "conceptIDs": [
+        "k8ssec.security-profiles-operator"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.kernel-module-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3822,
+      "front": "What two example modules does the Kubernetes docs example configuration block, and why those two?",
+      "back": "`dccp` (unlikely to be needed, several serious vulnerabilities, poorly maintained) and `sctp` (unused in most clusters, past vulnerabilities).",
+      "explanation": "They are the docs' own worked example, chosen because blocking rarely-used, historically vulnerable modules is low-cost and high-value.",
+      "source": "Kubernetes documentation, \"Securing a Cluster: preventing containers from loading unwanted kernel modules\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kernel module auto-loading"
+      ],
+      "conceptIDs": [
+        "k8ssec.kernel-module-autoload"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.hostusers-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3830,
+      "front": "A Pod sets `hostUsers: false` and its process runs as UID 0 inside the container. What UID does that same process appear as on the host?",
+      "back": "A non-root, unprivileged UID: the user namespace maps the container's root to an unprivileged host user.",
+      "explanation": "This is exactly the trade-off `hostUsers: false` offers: the application inside still behaves as if it were root, while the host stays protected.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: recommendations and best practices\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#recommendations-best-practices",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "hostUsers: false"
+      ],
+      "conceptIDs": [
+        "k8ssec.host-users-false"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.seccomp-types-classification",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 3838,
+      "front": "Classify each seccomp setting: (a) no filtering of syscalls at all, (b) the container runtime's own bundled default profile, (c) a custom profile file stored on the node. Which type is each?",
+      "back": "(a) Unconfined, (b) RuntimeDefault, (c) Localhost.",
+      "explanation": "These are the three seccomp profile types Kubernetes recognises, and each maps to a different level and source of restriction.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container: set the seccomp profile\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "seccomp profile types"
+      ],
+      "conceptIDs": [
+        "k8ssec.seccomp-profile-types"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.privileged-selinux-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3846,
+      "front": "What SELinux domain does a privileged container run as?",
+      "back": "The `unconfined_t` domain, meaning SELinux confinement is effectively turned off for it.",
+      "explanation": "This is the SELinux-specific instance of the general rule that privileged mode overrides every kernel-level hardening control at once.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: privileged containers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#privileged-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privileged container",
+        "SELinux"
+      ],
+      "conceptIDs": [
+        "k8ssec.privileged-container"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.recommendations-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3854,
+      "front": "What does the Kubernetes docs' \"recommendations and best practices\" section suggest doing before configuring kernel-level security capabilities at all?",
+      "back": "Consider implementing network-level isolation first.",
+      "explanation": "Kernel-level hardening and network isolation are complementary layers, and the docs suggest addressing the network layer as an earlier step.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: recommendations and best practices\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#recommendations-best-practices",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "seccomp",
+        "AppArmor",
+        "SELinux"
+      ],
+      "conceptIDs": [
+        "k8ssec.seccomp"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.capabilities-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3862,
+      "front": "Why does the Kubernetes docs page describe Linux capabilities as dividing root's privileges into \"categories\"?",
+      "back": "So a process can be granted the specific privileges it needs to perform an action, without granting every privilege root normally has.",
+      "explanation": "This is the mechanism behind least privilege at the kernel level: capabilities are the actual unit permissions are divided into.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: seccomp\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#seccomp",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Linux capabilities"
+      ],
+      "conceptIDs": [
+        "k8ssec.linux-capabilities"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.privileged-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3870,
+      "front": "What field, set to what value, marks a container as privileged?",
+      "back": "`privileged: true`, in the container's security context.",
+      "explanation": "Setting this single boolean is what triggers every one of privileged mode's overrides at once: capabilities, seccomp, AppArmor and SELinux.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: privileged containers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#privileged-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privileged container"
+      ],
+      "conceptIDs": [
+        "k8ssec.privileged-container"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.privileged-recommendation-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3878,
+      "front": "What does the Kubernetes documentation recommend instead of using privileged mode, wherever possible?",
+      "back": "Granting only the specific capabilities a container actually needs through the `capabilities` field, and reserving privileged mode for cases with no other option.",
+      "explanation": "This is the practical version of least privilege applied to container security contexts: name only what is genuinely needed.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: privileged containers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#privileged-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privileged container",
+        "Linux capabilities"
+      ],
+      "conceptIDs": [
+        "k8ssec.privileged-container"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.run-as-non-root-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3886,
+      "front": "What is the difference between `runAsNonRoot` and `runAsUser`?",
+      "back": "`runAsNonRoot` only requires that the container not run as root; `runAsUser` sets the exact user id the container runs as.",
+      "explanation": "`runAsNonRoot: true` alone does not pin down which non-root user is used; `runAsUser` is needed for that level of control.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: run without root\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#run-without-root",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "runAsNonRoot / runAsUser"
+      ],
+      "conceptIDs": [
+        "k8ssec.run-as-non-root"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.apparmor-selinux-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3894,
+      "front": "A team migrating a workload from an SELinux-enforcing host to an AppArmor-only host has to rewrite its access rules from label-based policies to profiles keyed on file paths. Why is this rewrite necessary?",
+      "back": "Because AppArmor and SELinux use fundamentally different mechanisms: SELinux matches by label and inode, AppArmor matches by file path.",
+      "explanation": "The two are not interchangeable configuration formats for the same idea; they enforce mandatory access control through different underlying models.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: differences between AppArmor and SELinux\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#apparmor-selinux-diff",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "AppArmor",
+        "SELinux"
+      ],
+      "conceptIDs": [
+        "k8ssec.apparmor",
+        "k8ssec.selinux"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.sandboxed-escape-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3902,
+      "front": "An attacker who compromises a Pod running under Kata Containers manages a container escape. What do they reach next?",
+      "back": "Normally only its own lightweight VM; reaching the host would need a second escape, out of the VM.",
+      "explanation": "Sandboxing helps insulate the host from container escapes; an escape still lands inside an isolated VM rather than directly on the shared host.",
+      "source": "Kubernetes documentation, \"Multi-tenancy: Sandboxing containers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#sandboxing-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "sandboxed runtime",
+        "container escape",
+        "Kata Containers"
+      ],
+      "conceptIDs": [
+        "k8ssec.sandboxed-runtime"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.rootless-hostusers-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3910,
+      "front": "Besides running rootless, what Pod setting keeps container root from being root on the host?",
+      "back": "`hostUsers: false`, which uses a Linux user namespace to map a container's root to a non-root host user.",
+      "explanation": "Both approaches share the same goal, keeping host root out of reach, but achieve it through different mechanisms.",
+      "source": "Kubernetes documentation, \"Linux kernel security constraints: recommendations and best practices\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/linux-kernel-security-constraints/#recommendations-best-practices",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "rootless containers",
+        "hostUsers: false"
+      ],
+      "conceptIDs": [
+        "k8ssec.rootless-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.readonly-fsgroup-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3918,
+      "front": "Do `readOnlyRootFilesystem` and `fsGroup` conflict with each other?",
+      "back": "No: `readOnlyRootFilesystem` hardens the container's own root filesystem, while `fsGroup` grants group ownership of separate mounted volumes, which can still be writable.",
+      "explanation": "A container can have an entirely read-only root filesystem and still write freely to a volume whose ownership `fsGroup` grants it.",
+      "source": "Kubernetes documentation, \"Configure a Security Context for a Pod or Container: discussion\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#discussion",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "readOnlyRootFilesystem",
+        "fsGroup"
+      ],
+      "conceptIDs": [
+        "k8ssec.read-only-root-filesystem",
+        "k8ssec.fsgroup"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.kata-gvisor-contrast",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 3926,
+      "front": "How does the Application Security Checklist describe the difference between gVisor and Kata Containers?",
+      "back": "gVisor as a kernel emulation tool; Kata Containers as virtualized isolation.",
+      "explanation": "Both are sandboxed runtimes named for workloads needing a different isolation level from the cluster's default runtime.",
+      "source": "Kubernetes documentation, \"Application Security Checklist: Runtime classes\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/application-security-checklist/#runtime-classes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "gVisor",
+        "Kata Containers"
+      ],
+      "conceptIDs": [
+        "k8ssec.gvisor",
+        "k8ssec.kata-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.workload-isolation.namespace-kernel-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3934,
+      "front": "A process inside a container runs `ps -A` and sees only its own container's processes, not every process on the shared node. Which of the six namespace types is responsible?",
+      "back": "The process namespace, one of the six kinds of resource Linux namespace isolation limits a container's view of.",
+      "explanation": "Each namespace type limits a different resource; here it is specifically process visibility that is being filtered.",
+      "source": "NIST SP 800-190, Application Container Security Guide, §2.2 \"Containers and the Host Operating System\"",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "Linux namespaces (kernel)"
+      ],
+      "conceptIDs": [
+        "k8ssec.linux-namespaces"
+      ]
+    }
+  ]
+}

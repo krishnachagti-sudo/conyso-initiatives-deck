@@ -1,0 +1,1192 @@
+{
+  "topic": "Network security and service mesh",
+  "notes": [
+    {
+      "id": "k8ssec.network-security-service-mesh.pod-isolation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 13000,
+      "front": "What does it mean for a Pod to be \"isolated\" for a traffic direction, in NetworkPolicy terms?",
+      "back": "Some restrictions apply to that direction; \"non-isolated\" means no restrictions apply at all.",
+      "explanation": "A Pod becomes isolated for a direction only once some NetworkPolicy both selects it and applies to that direction.",
+      "example": "Like a room that is open to everyone until the first lock is fitted on its door.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"The two sorts of pod isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "isolated vs non-isolated Pod"
+      ],
+      "uses": [
+        "isolated vs non-isolated Pod",
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8ssec.pod-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.default-deny-policy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 13010,
+      "front": "What is a default deny policy?",
+      "back": "A NetworkPolicy that selects all Pods in a namespace but allows no traffic, so nothing is missed by an allow list.",
+      "explanation": "Separate policies are needed for ingress, egress, or both, since these directions isolate independently.",
+      "example": "Like locking every door in a building first, then handing out keys only where they're needed.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Default policies\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#default-policies",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "default deny policy"
+      ],
+      "uses": [
+        "default deny policy",
+        "isolated vs non-isolated Pod",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.default-deny"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.netpol-selectors",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 13020,
+      "front": "What three kinds of selector can a NetworkPolicy's ingress from or egress to entries use?",
+      "back": "podSelector, namespaceSelector (alone or together), and ipBlock.",
+      "explanation": "podSelector and namespaceSelector together in one entry narrow to particular Pods within particular namespaces; listed separately, they act as alternatives.",
+      "example": "Like allowing visitors by badge, by department, or by postcode \u2014 and being careful whether you mean all three together or any one of them.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Behavior of to and from selectors\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "NetworkPolicy selectors"
+      ],
+      "uses": [
+        "NetworkPolicy selectors",
+        "NetworkPolicy",
+        "selector",
+        "label"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-selectors"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.netpol-additive",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 13030,
+      "front": "How do multiple NetworkPolicies that apply to the same Pod and direction combine?",
+      "back": "Additively; the allowed connections are the union of what every applicable policy allows.",
+      "explanation": "Because they never conflict, the order the policies were created in makes no difference to the result.",
+      "example": "Like several separate guest lists for the same door: anyone on any list gets in.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"The two sorts of pod isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "NetworkPolicy rules are additive"
+      ],
+      "uses": [
+        "NetworkPolicy rules are additive",
+        "NetworkPolicy",
+        "isolated vs non-isolated Pod"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-additive"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.netpol-limits",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 13040,
+      "front": "What is one thing NetworkPolicy cannot yet do, according to the Kubernetes documentation?",
+      "back": "Any of: log blocked or accepted connections, explicitly deny traffic, target a Service by name, or target a node by its Kubernetes identity.",
+      "explanation": "The model is deny-by-default plus allow rules; it has no explicit deny.",
+      "example": "Like a guest list: you can add names, but there is no \"banned\" list.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"What you can't do with network policies (at least, not yet)\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#what-you-can-t-do-with-network-policies-at-least-not-yet",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "NetworkPolicy limits"
+      ],
+      "uses": [
+        "NetworkPolicy limits",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-limits"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.cni-netpol-support",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 13050,
+      "front": "What happens if you create a NetworkPolicy without a network plugin that implements it?",
+      "back": "It has no effect at all.",
+      "explanation": "NetworkPolicy is a resource definition; enforcement is entirely down to the CNI plugin in use.",
+      "example": "Like posting a house rule on a noticeboard nobody is required to read.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Prerequisites\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#prerequisites",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "CNI support for NetworkPolicy"
+      ],
+      "uses": [
+        "CNI support for NetworkPolicy",
+        "NetworkPolicy",
+        "CNI"
+      ],
+      "conceptIDs": [
+        "k8ssec.cni-netpol-support"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.east-west-traffic",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 13060,
+      "front": "What is east-west traffic?",
+      "back": "Traffic between services inside a deployment, which should be limited to only authorised pairs.",
+      "explanation": "For a microservice architecture, the perimeter is the microservice itself, not just the edge of the cluster.",
+      "example": "Like restricting who can move between departments inside a building, not just who can enter the front door.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Microservices and Eliminating Implicit Trust\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#microservices-and-eliminating-implicit-trust",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "east-west traffic"
+      ],
+      "uses": [
+        "east-west traffic",
+        "microservices architecture",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.east-west-traffic"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.micro-segmentation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 13070,
+      "front": "What is micro-segmentation?",
+      "back": "Fine-grained segmentation into micro-perimeters, one part of a zero trust defence against lateral movement.",
+      "explanation": "It works at a finer scale than segmenting the network by whole namespace or subnet.",
+      "example": "Like dividing an open-plan office into individually locked booths, rather than a few large locked rooms.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Zero Trust Architecture\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#zero-trust-architecture",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "micro-segmentation"
+      ],
+      "uses": [
+        "micro-segmentation",
+        "zero trust"
+      ],
+      "conceptIDs": [
+        "k8ssec.micro-segmentation"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.cluster-network-encryption",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 13080,
+      "front": "How can traffic between Pods on the cluster network be encrypted?",
+      "back": "Some CNI plugins encrypt it themselves, for example using a VPN overlay; otherwise a service mesh can.",
+      "explanation": "Unless you turn on encryption in the plugin or a mesh, Pod-to-Pod traffic is unencrypted by default.",
+      "example": "Like an office intercom system that is not encrypted unless someone deliberately adds that feature.",
+      "source": "Kubernetes documentation, \"Cloud Native Security and Kubernetes\", \"Networking and security\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/cloud-native-security/#networking-and-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "encryption in cluster network"
+      ],
+      "uses": [
+        "encryption in cluster network",
+        "CNI",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "k8ssec.cluster-network-encryption"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.service-mesh-security",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 13090,
+      "front": "What security benefits does a service mesh add to microservice communication?",
+      "back": "Encryption between services, workload identity and authorization, removing implicit trust.",
+      "explanation": "It also resolves an identity problem: IP addresses no longer cleanly map to short-lived, dynamic workloads.",
+      "example": "Like a building where every internal door checks both people's badges and logs who passed, instead of trusting anyone already inside.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Service Mesh\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#service-mesh",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "service mesh security"
+      ],
+      "uses": [
+        "service mesh security",
+        "service mesh",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-mesh-security"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.spiffe",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 13100,
+      "front": "What does SPIFFE provide, and what is its reference implementation called?",
+      "back": "SPIFFE is a standard for workload identity documents called SPIFFE Verifiable Identity Documents (SVIDs); SPIRE is its reference implementation.",
+      "explanation": "It exists because network-based identity, such as an IP address, does not scale to dynamic, heterogeneous environments.",
+      "example": "Like a passport standard that any country's issuing office (SPIRE, or another implementation) can print to.",
+      "source": "SPIFFE documentation, \"SPIFFE Overview\"",
+      "sourceURL": "https://github.com/spiffe/spiffe.io/blob/master/content/docs/latest/spiffe-about/overview.md",
+      "sourceLicence": "C \u00b7 facts only, in our own words",
+      "introduces": [
+        "SPIFFE / SPIRE (SVID)"
+      ],
+      "uses": [
+        "SPIFFE / SPIRE (SVID)",
+        "identity",
+        "service identity"
+      ],
+      "conceptIDs": [
+        "k8ssec.spiffe"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.ingress-tls",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 13110,
+      "front": "What is Ingress TLS?",
+      "back": "Terminating TLS for external traffic at the Ingress.",
+      "explanation": "It is listed as a recommendation for securing the Cluster layer's workloads, alongside Network Policies and RBAC.",
+      "example": "Like a building's single reception desk checking every visitor's ID, rather than every internal office doing it separately.",
+      "source": "Kubernetes documentation, \"Overview of Cloud Native Security\", workload security table",
+      "sourceURL": "https://github.com/kubernetes/website/blob/release-1.28/content/en/docs/concepts/security/overview.md",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs up to v1.28 (page removed after)",
+      "introduces": [
+        "Ingress TLS"
+      ],
+      "uses": [
+        "Ingress TLS",
+        "Ingress",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "k8ssec.ingress-tls"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.externalips-restriction",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 13120,
+      "front": "Why does the security checklist say to restrict use of LoadBalancer and ExternalIPs?",
+      "back": "It mitigates a published Common Vulnerabilities and Exposures record, 2020-8554, a man-in-the-middle risk from these Service features.",
+      "explanation": "The DenyServiceExternalIPs admission controller can enforce this restriction.",
+      "example": "Like restricting who can redirect a building's mail, since a bad redirect can intercept things meant for someone else.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Network security\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#network-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "LoadBalancer and ExternalIPs restriction"
+      ],
+      "uses": [
+        "LoadBalancer and ExternalIPs restriction",
+        "Service"
+      ],
+      "conceptIDs": [
+        "k8ssec.externalips-restriction"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.egress-control",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 13130,
+      "front": "What is egress control?",
+      "back": "Limiting containers' outbound network access to what they need, including denying traffic to malicious domains.",
+      "explanation": "The runtime environment's configuration should restrict both ingress and egress to only what is required to operate.",
+      "example": "Like a company phone line that can only dial approved numbers, not the whole world.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Runtime\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#runtime",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "egress control"
+      ],
+      "uses": [
+        "egress control",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.egress-control"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.default-egress-non-isolated",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13140,
+      "front": "Is a Pod isolated for egress by default, before any NetworkPolicy is created?",
+      "back": "No; all outbound connections are allowed by default.",
+      "explanation": "It becomes isolated for egress only once a NetworkPolicy that selects it has Egress in its policyTypes.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"The two sorts of pod isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "isolated vs non-isolated Pod"
+      ],
+      "conceptIDs": [
+        "k8ssec.pod-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.own-node-always-allowed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13150,
+      "front": "Even under a strict ingress-isolating NetworkPolicy, what traffic to a Pod is always allowed?",
+      "back": "Traffic from the Pod's own node.",
+      "explanation": "A Pod cannot currently block loopback or incoming host traffic from the node it runs on.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"The two sorts of pod isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "isolated vs non-isolated Pod",
+        "NetworkPolicy limits"
+      ],
+      "conceptIDs": [
+        "k8ssec.pod-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.deny-egress-blocks-dns",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13160,
+      "front": "What does a default deny-all egress policy also block, that workloads may not expect?",
+      "back": "DNS traffic, unless a separate NetworkPolicy allows egress to the cluster's DNS service.",
+      "explanation": "This is called out as a caution in the documentation because it is a common cause of broken workloads.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Default deny all egress traffic\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#default-deny-all-egress-traffic",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "default deny policy"
+      ],
+      "conceptIDs": [
+        "k8ssec.default-deny"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.podselector-and-vs-or",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13170,
+      "front": "One from entry combining namespaceSelector and podSelector selects Pods matching both; two separate entries, one with each selector, select Pods matching {{c1::either}}.",
+      "explanation": "Getting this wrong is one of the most common NetworkPolicy authoring mistakes.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Behavior of to and from selectors\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy selectors"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-selectors"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.ipblock-external-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13180,
+      "front": "What kind of IP ranges should an ipBlock selector use?",
+      "back": "Cluster-external IPs, since Pod IPs are ephemeral and unpredictable.",
+      "explanation": "This is why ipBlock is treated as a separate tool from podSelector and namespaceSelector, not a substitute for them.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Behavior of to and from selectors\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-ipblock-selectors",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy selectors"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-selectors"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.netpol-layer4-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13190,
+      "front": "At which OSI layer does NetworkPolicy filter traffic?",
+      "back": "Layer 4: TCP, UDP and optionally SCTP.",
+      "explanation": "For other protocols, such as ICMP, behaviour is undefined and varies by network plugin.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Network traffic filtering\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#network-traffic-filtering",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy limits",
+        "CNI support for NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-limits"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.endport-field-since",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 13200,
+      "front": "Since which Kubernetes version has the endPort field, for targeting a range of ports, been stable?",
+      "back": "v1.25.",
+      "explanation": "Its CNI plugin must also support endPort, or a wider range collapses back to the single port field.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Targeting a range of ports\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#targeting-a-range-of-ports",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs as of that date",
+      "uses": [
+        "NetworkPolicy selectors"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-selectors"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.namespace-name-label",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13210,
+      "front": "Can a NetworkPolicy target a namespace directly by its name?",
+      "back": "No, but it can select on the immutable label kubernetes.io/metadata.name, which the control plane sets on every namespace.",
+      "explanation": "There is no object field for a bare namespace name in a NetworkPolicy.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Targeting a Namespace by its name\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#targeting-a-namespace-by-its-name",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy selectors",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-selectors"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.pod-lifecycle-gap",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13220,
+      "front": "Can a newly created Pod ever be briefly running with no NetworkPolicy protection at all?",
+      "back": "Yes; if it starts before the network plugin has finished handling the relevant policy, it may run unprotected until isolation catches up.",
+      "explanation": "In the worst case, it may instead have no connectivity at all if isolation rules land before allow rules do.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Pod lifecycle\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#pod-lifecycle",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy limits",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-limits"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.hostnetwork-pod-behaviour",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 13230,
+      "front": "Is NetworkPolicy's behaviour toward hostNetwork Pods clearly defined?",
+      "back": "No; it is undefined, and limited to two possible implementations depending on the network plugin.",
+      "explanation": "hostNetwork Pods share the node's own IP, so most plugins treat their traffic as ordinary node traffic instead.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"NetworkPolicy and hostNetwork pods\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#networkpolicy-and-hostnetwork-pods",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy limits",
+        "host namespaces"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-limits"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.zero-trust-microservices",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13240,
+      "front": "How does zero trust reduce blast radius in a microservice architecture?",
+      "back": "By preventing lateral movement, if one compromised microservice cannot freely reach the others.",
+      "explanation": "This is achieved by restricting communication to only sanctioned microservice pairs.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Microservices and Eliminating Implicit Trust\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#microservices-and-eliminating-implicit-trust",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "east-west traffic",
+        "zero trust",
+        "lateral movement"
+      ],
+      "conceptIDs": [
+        "k8ssec.east-west-traffic"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.nist-800-204-pointer",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 13250,
+      "front": "Which NIST publication does the whitepaper point to for microservices security strategies?",
+      "back": "NIST SP 800-204.",
+      "explanation": "The whitepaper describes it as offering a guide for implementing secure microservice architectures.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Microservices and Eliminating Implicit Trust\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#microservices-and-eliminating-implicit-trust",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "east-west traffic"
+      ],
+      "conceptIDs": [
+        "k8ssec.east-west-traffic"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.service-mesh-extras",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13260,
+      "front": "Besides security, what other capabilities does a service mesh typically offload from application code?",
+      "back": "Traffic control, service discovery, load balancing, resilience and observability.",
+      "explanation": "This lets developers focus on business logic rather than rebuilding these capabilities into every service.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Service Mesh\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#service-mesh",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "service mesh security",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-mesh-security"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.service-mesh-attack-surface",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13270,
+      "front": "What does the whitepaper say a service mesh can do for a deployment's attack surface?",
+      "back": "Help reduce it, and provide a key framework for building zero trust application networks.",
+      "explanation": "This complements, rather than replaces, other network controls such as NetworkPolicy.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Service Mesh\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#service-mesh",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "service mesh security",
+        "attack surface"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-mesh-security"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.spiffe-svid-short-lived",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 13280,
+      "front": "How do workloads use a SPIFFE Verifiable Identity Document (SVID)?",
+      "back": "To prove their identity to another workload, such as during a TLS handshake or when checking a JWT.",
+      "explanation": "SVIDs are short-lived cryptographic identity documents, issued through the SPIFFE Workload API.",
+      "source": "SPIFFE documentation, \"SPIFFE Overview\"",
+      "sourceURL": "https://github.com/spiffe/spiffe.io/blob/master/content/docs/latest/spiffe-about/overview.md",
+      "sourceLicence": "C \u00b7 facts only, in our own words",
+      "uses": [
+        "SPIFFE / SPIRE (SVID)",
+        "tls / mtls",
+        "JSON Web Token (JWT)"
+      ],
+      "conceptIDs": [
+        "k8ssec.spiffe"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.spiffe-vs-ip-identity",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 13290,
+      "front": "Why does modern production infrastructure need something more than IP-based security rules?",
+      "back": "Microservices, orchestrators and cloud platforms move and reassign workloads constantly, so a rule tied to an IP address soon points at the wrong thing.",
+      "explanation": "This is the motivation for a first-class workload identity framework, rather than relying on network location alone.",
+      "source": "SPIFFE documentation, \"SPIFFE Overview\"",
+      "sourceURL": "https://github.com/spiffe/spiffe.io/blob/master/content/docs/latest/spiffe-about/overview.md",
+      "sourceLicence": "C \u00b7 facts only, in our own words",
+      "uses": [
+        "SPIFFE / SPIRE (SVID)"
+      ],
+      "conceptIDs": [
+        "k8ssec.spiffe"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.image-trust-content-protection",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 13300,
+      "front": "What does encrypting containers protect, according to the whitepaper?",
+      "back": "Sensitive sources, methods or data that exist within the container.",
+      "explanation": "This is listed alongside policy-agent enforcement of signed images, under image trust and content protection.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Image Trust & Content Protection\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#image-trust--content-protection",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "service mesh security",
+        "image encryption"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-mesh-security"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.cve-2020-8554-name",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13310,
+      "front": "What is the Common Vulnerabilities and Exposures record numbered 2020-8554?",
+      "back": "A man-in-the-middle vulnerability from unrestricted use of LoadBalancer or ExternalIPs Service features.",
+      "explanation": "The DenyServiceExternalIPs admission controller mitigates it, at the cost of rejecting all new use of externalIPs.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Network security\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#network-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "LoadBalancer and ExternalIPs restriction",
+        "Service"
+      ],
+      "conceptIDs": [
+        "k8ssec.externalips-restriction"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.cloud-metadata-api-recap",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13320,
+      "front": "Which fixed address does the checklist say workload access should be filtered from, if the cluster runs on a cloud platform?",
+      "back": "169.254.169.254, the cloud metadata API.",
+      "explanation": "That endpoint may leak node credentials or provisioning data to any Pod that can reach it.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Network security\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#network-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "cloud metadata API",
+        "egress control"
+      ],
+      "conceptIDs": [
+        "k8ssec.egress-control"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.runtime-egress-monitoring",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13330,
+      "front": "What should be detected and denied on a container's egress network traffic, at runtime?",
+      "back": "Traffic to malicious domains.",
+      "explanation": "The runtime configuration should also prevent ingress and egress to anything beyond what the container needs to operate.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Runtime\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#runtime",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "egress control"
+      ],
+      "conceptIDs": [
+        "k8ssec.egress-control"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.multitenant-default-deny",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 13340,
+      "front": "In a multi-tenant environment that needs strict network isolation, what is recommended as the starting policy?",
+      "back": "A default policy that denies communication between Pods, plus a rule allowing all Pods to query DNS.",
+      "explanation": "More permissive rules can then be added on top, allowing communication within a namespace as needed.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Network isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#network-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "default deny policy",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.default-deny"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.empty-namespaceselector-caution",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 13350,
+      "front": "What does the multi-tenancy guide caution against using for a NetworkPolicy's namespaceSelector field?",
+      "back": "An empty label selector ({}), when allowing traffic from other namespaces, since {} would allow every namespace.",
+      "explanation": "The guide advises against it specifically for this in-case-you-need-to-allow-traffic scenario.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Network isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#network-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy selectors",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-selectors"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.mesh-crosses-virtual-control-planes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 13360,
+      "front": "Can Pods that belong to two separate tenants' own, isolated control planes talk to each other via ordinary Kubernetes networking?",
+      "back": "No. Kubernetes networking only connects Pods under one control plane; Pods under different virtual control planes cannot reach each other.",
+      "explanation": "A service mesh spanning dedicated or virtual clusters is one of the tools listed as working across that boundary.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Network isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#network-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "service mesh security"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-mesh-security"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.identify-non-isolated-pod",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 13370,
+      "front": "A namespace has never had a NetworkPolicy created in it. Is a Pod in that namespace isolated for ingress, egress, both, or neither?",
+      "back": "Neither; it is non-isolated in both directions.",
+      "choices": "A) Neither direction is isolated\nB) Isolated for ingress only\nC) Isolated for both directions by default",
+      "choicesExplained": "B and C are both wrong: without any NetworkPolicy selecting the Pod, no restrictions apply in either direction, so it stays non-isolated for both.",
+      "explanation": "Isolation is opt-in per direction, triggered only once a NetworkPolicy applies to that Pod for that direction.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"The two sorts of pod isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "isolated vs non-isolated Pod"
+      ],
+      "conceptIDs": [
+        "k8ssec.pod-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.egress-both-sides-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 13380,
+      "front": "Pod A's egress policy allows a connection to Pod B, but Pod B's ingress policy does not allow it from Pod A. Does the connection succeed?",
+      "back": "No; both the source's egress policy and the destination's ingress policy must allow the connection.",
+      "choices": "A) No, both sides must allow it\nB) Yes, since egress is checked first\nC) Yes, because NetworkPolicies combine additively across Pods",
+      "choicesExplained": "B: there is no such precedence; both checks apply together. C: additive combination applies to multiple policies on the same Pod and direction, not across the two different Pods in a connection.",
+      "explanation": "This two-sided requirement is a common source of connectivity surprises when teams manage ingress and egress policies separately.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"The two sorts of pod isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy rules are additive",
+        "isolated vs non-isolated Pod"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-additive"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.no-cni-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 13390,
+      "front": "A team writes a strict default-deny NetworkPolicy, but their cluster's CNI plugin does not implement NetworkPolicy. What is the actual security outcome?",
+      "back": "No restriction at all: the policy object exists, but traffic flows exactly as if it had never been created.",
+      "choices": "A) No restriction takes effect\nB) Partial enforcement, at the DNS layer only\nC) The API server rejects the policy at creation",
+      "choicesExplained": "B: there is no partial fallback; enforcement is entirely down to the plugin, all or nothing. C: the API server accepts the object regardless of whether anything enforces it.",
+      "explanation": "This is a dangerous silent failure mode: the team may believe they are protected when they are not.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Prerequisites\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#prerequisites",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "CNI support for NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.cni-netpol-support"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.dns-broken-by-default-deny",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 13400,
+      "front": "After applying a default-deny-all-egress policy to a namespace, workloads there start failing to resolve service names. What is the likely cause, and the fix?",
+      "back": "DNS egress was blocked too; add a NetworkPolicy allowing egress to the cluster's DNS service.",
+      "choices": "A) DNS was blocked by the default-deny policy; add an explicit allow rule for it\nB) The default-deny policy never affects DNS, so this is unrelated\nC) The CNI plugin must be reinstalled",
+      "choicesExplained": "B: a default deny-all egress policy does block DNS traffic, which is exactly why the documentation flags it as a caution. C: nothing about this scenario points to a broken plugin installation.",
+      "explanation": "This is one of the most common operational surprises after adopting a default-deny egress posture.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Default deny all egress traffic\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#default-deny-all-egress-traffic",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "default deny policy",
+        "egress control"
+      ],
+      "conceptIDs": [
+        "k8ssec.default-deny"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.attempt-to-block-node-traffic",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 13410,
+      "front": "A team wants a Pod to reject connections from its own node, even under a strict ingress policy. Can NetworkPolicy do this?",
+      "back": "No; traffic from a Pod's own node is always allowed, regardless of any policy.",
+      "choices": "A) No, this cannot be done with NetworkPolicy\nB) Yes, with a strict enough podSelector\nC) Yes, but only using an ipBlock rule",
+      "choicesExplained": "B and C: neither selector type can override this specific exception; it is a documented limitation of the NetworkPolicy model itself.",
+      "explanation": "This is one of the explicit user stories the documentation lists as impossible with NetworkPolicy alone.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"What you can't do with network policies (at least, not yet)\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#what-you-can-t-do-with-network-policies-at-least-not-yet",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy limits"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-limits"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.tls-requirement-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 13420,
+      "front": "A team wants to force all internal traffic between two microservices through TLS, and to log every blocked connection. Can a NetworkPolicy alone do both?",
+      "back": "No; TLS enforcement and connection logging are both listed as things NetworkPolicy cannot do.",
+      "choices": "A) No, both requirements are outside NetworkPolicy's scope\nB) Yes, TLS enforcement only\nC) Yes, connection logging only",
+      "choicesExplained": "B and C are each half right but incomplete: the documentation lists both \"anything TLS related\" and \"the ability to log network security events\" among what NetworkPolicy cannot do.",
+      "explanation": "A service mesh or Ingress controller is the documented alternative for TLS; logging needs a different tool entirely.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"What you can't do with network policies (at least, not yet)\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#what-you-can-t-do-with-network-policies-at-least-not-yet",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy limits",
+        "service mesh security"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-limits"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.workload-identity-choice",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 13430,
+      "front": "A platform team wants workloads to mutually authenticate using short-lived cryptographic identity documents rather than static IP-based rules. Which standard fits?",
+      "back": "SPIFFE, implemented for example by SPIRE.",
+      "choices": "A) SPIFFE / SPIRE\nB) NetworkPolicy, since it already restricts by identity\nC) ipBlock selectors",
+      "choicesExplained": "B: NetworkPolicy selects by label or CIDR, not by a portable cryptographic workload identity. C: ipBlock is explicitly meant for external, stable IPs, the opposite of what dynamic workload identity needs.",
+      "explanation": "SPIFFE's design goal is exactly this: identity that survives across heterogeneous, dynamic environments.",
+      "source": "SPIFFE documentation, \"SPIFFE Overview\"",
+      "sourceURL": "https://github.com/spiffe/spiffe.io/blob/master/content/docs/latest/spiffe-about/overview.md",
+      "sourceLicence": "C \u00b7 facts only, in our own words",
+      "uses": [
+        "SPIFFE / SPIRE (SVID)"
+      ],
+      "conceptIDs": [
+        "k8ssec.spiffe"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.externalip-cve-mitigation-choice",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 13440,
+      "front": "Which admission plugin, if enabled, rejects all net-new use of a Service's externalIPs field?",
+      "back": "DenyServiceExternalIPs.",
+      "explanation": "It mitigates the Common Vulnerabilities and Exposures record 2020-8554, without necessarily removing externalIPs uses that already existed before it was enabled.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Network security\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#network-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "LoadBalancer and ExternalIPs restriction",
+        "admission controller"
+      ],
+      "conceptIDs": [
+        "k8ssec.externalips-restriction"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.service-mesh-vs-cni-encryption",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 13450,
+      "front": "The chosen CNI plugin does not encrypt Pod-to-Pod traffic. What is one documented alternative that can still provide it?",
+      "back": "A service mesh.",
+      "choices": "A) A service mesh\nB) A NetworkPolicy default deny rule\nC) Increasing the CNI plugin's MTU",
+      "choicesExplained": "B: NetworkPolicy controls which connections are allowed, not whether allowed traffic is encrypted. C: MTU is unrelated to confidentiality of traffic.",
+      "explanation": "This mirrors the checklist's own advice: if a CNI plugin lacks encryption in transit, a service mesh is the suggested alternative.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Network security\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#network-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "encryption in cluster network",
+        "service mesh security"
+      ],
+      "conceptIDs": [
+        "k8ssec.cluster-network-encryption"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.identify-server-mesh-vs-netpol-task",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 13460,
+      "front": "A team needs to stop Pods in the \"billing\" namespace from ever being reached by Pods outside it. Which tool is the natural fit?",
+      "back": "NetworkPolicy: select all Pods in billing and allow ingress only from Pods in billing.",
+      "choices": "A) NetworkPolicy\nB) A service mesh, since it is more feature-rich\nC) SPIFFE, since it governs identity",
+      "choicesExplained": "B: a mesh can do this too, but it is heavier machinery than the task needs, and NetworkPolicy is the documented, native tool. C: SPIFFE issues identity documents; it does not, by itself, block connections.",
+      "explanation": "Reach for the simplest tool that meets the requirement; NetworkPolicy already covers namespace-scoped allow/deny at layer 4.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Default policies\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#default-policies",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "default deny policy",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.default-deny"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.node-selector-vs-ipblock-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 13470,
+      "front": "A NetworkPolicy needs to allow traffic only from a fixed, cluster-external partner IP range. Which selector should it use?",
+      "back": "ipBlock.",
+      "choices": "A) ipBlock\nB) podSelector\nC) namespaceSelector",
+      "choicesExplained": "B and C: both select Kubernetes objects inside the cluster; neither can express an external CIDR range.",
+      "explanation": "podSelector and namespaceSelector are for in-cluster peers; ipBlock is specifically for cluster-external ranges.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Behavior of to and from selectors\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-ipblock-selectors",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy selectors"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-selectors"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.additive-union-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 13480,
+      "front": "Two separate NetworkPolicies both apply to the same Pod for ingress: one allows traffic from namespace A, the other from namespace B. What traffic is actually allowed?",
+      "back": "Traffic from both namespace A and namespace B, since the policies' effects combine additively.",
+      "choices": "A) From both A and B\nB) Only from A, since it was created first\nC) From neither, since two policies on one Pod conflict",
+      "choicesExplained": "B: NetworkPolicies do not have an order of precedence; creation order is irrelevant. C: NetworkPolicies never conflict \u2014 that is one of their defining properties.",
+      "explanation": "This additive behaviour is deliberate, so teams can each manage their own policy without needing to coordinate on a single shared one.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"The two sorts of pod isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy rules are additive"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-additive"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.metadata-api-in-egress-policy",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 13490,
+      "front": "How would you use NetworkPolicy to enforce the checklist's advice about the cloud metadata API?",
+      "back": "Write an egress policy that excludes 169.254.169.254 from what Pods are allowed to reach.",
+      "explanation": "This is a concrete application of egress control to a specific, well-known risky address.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Restricting cloud metadata API access\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-cloud-metadata-api-access",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "cloud metadata API",
+        "egress control",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.egress-control"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.classify-endport-support",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 13500,
+      "front": "A NetworkPolicy sets port and endPort, but the cluster's CNI plugin does not support endPort. What actually gets enforced?",
+      "back": "Only the single port field; the policy is applied as if endPort were not set.",
+      "explanation": "This is a silent partial failure similar to the no-CNI-support case, so it is worth checking plugin support before relying on port ranges.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"Targeting a range of ports\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#targeting-a-range-of-ports",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy selectors",
+        "CNI support for NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-selectors"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.netpol-vs-mesh-contrast",
+      "type": "scenario",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 13560,
+      "front": "NetworkPolicy and a service mesh both restrict east-west traffic. What can a service mesh enforce that NetworkPolicy, by itself, cannot?",
+      "back": "Mutual TLS and workload identity, since NetworkPolicy has no TLS enforcement or identity-based controls of its own.",
+      "choices": "A) mTLS and workload identity\nB) Layer 4 allow rules, since only a mesh can filter TCP/UDP\nC) Nothing; the two provide identical guarantees",
+      "choicesExplained": "B: layer 4 filtering is exactly what NetworkPolicy already does natively. C: the documentation is explicit that NetworkPolicy cannot do anything TLS related, which a mesh is built to handle.",
+      "explanation": "The two are often used together: NetworkPolicy for coarse allow/deny at layer 4, a mesh for identity and encryption on top.",
+      "source": "Kubernetes documentation, \"Network Policies\", \"What you can't do with network policies (at least, not yet)\"; CNCF Cloud Native Security Whitepaper v2, \"Service Mesh\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#what-you-can-t-do-with-network-policies-at-least-not-yet",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "NetworkPolicy limits",
+        "service mesh security"
+      ],
+      "conceptIDs": [
+        "k8ssec.netpol-limits",
+        "k8ssec.service-mesh-security"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.east-west-vs-ingress-contrast",
+      "type": "scenario",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 13570,
+      "front": "A cluster secures its Ingress with TLS but has no internal NetworkPolicies. What kind of traffic is left unprotected, and why does this matter?",
+      "back": "East-west traffic between internal services, since Ingress TLS only protects traffic crossing the cluster's edge.",
+      "choices": "A) East-west traffic between internal services\nB) North-south traffic entering through the Ingress\nC) Nothing; Ingress TLS protects all cluster traffic",
+      "choicesExplained": "B: that is exactly what Ingress TLS does protect. C: Ingress TLS terminates at the edge; it says nothing about traffic once it is inside the cluster.",
+      "explanation": "This is why the security checklist asks for both ingress and egress network policies applied to all workloads, not Ingress TLS alone.",
+      "source": "Kubernetes documentation, \"Overview of Cloud Native Security\", workload security table; \"Security Checklist\", \"Network security\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#network-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "Ingress TLS",
+        "east-west traffic"
+      ],
+      "conceptIDs": [
+        "k8ssec.ingress-tls",
+        "k8ssec.east-west-traffic"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.app-compromised-service-lateral-move",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 13580,
+      "front": "One microservice in a cluster is compromised, and no NetworkPolicy restricts its outbound east-west traffic. What does zero trust design aim to prevent here?",
+      "back": "Lateral movement: the compromised service reaching other microservices freely, which a zero-trust network would block by default.",
+      "explanation": "This is exactly the blast-radius reduction zero trust is meant to provide in a microservice architecture.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Microservices and Eliminating Implicit Trust\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#microservices-and-eliminating-implicit-trust",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "east-west traffic",
+        "zero trust",
+        "lateral movement"
+      ],
+      "conceptIDs": [
+        "k8ssec.east-west-traffic"
+      ]
+    },
+    {
+      "id": "k8ssec.network-security-service-mesh.app-mesh-covers-three-needs",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 13590,
+      "front": "A platform team wants mTLS between microservices, plus traffic control and observability, without changing application code. Which tool covers all three needs?",
+      "back": "A service mesh: it offloads security, traffic control, service discovery, load balancing, resilience and observability from application code.",
+      "explanation": "This is exactly the bundle of capabilities the whitepaper lists a service mesh as typically providing.",
+      "source": "CNCF Cloud Native Security Whitepaper v2, \"Service Mesh\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#service-mesh",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "service mesh security",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-mesh-security"
+      ]
+    }
+  ]
+}

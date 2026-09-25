@@ -1,0 +1,1796 @@
+{
+  "topic": "Cluster component security",
+  "notes": [
+    {
+      "id": "k8ssec.cluster-component-security.api-server-exposure",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12000,
+      "front": "What does the security checklist say about exposing the Kubernetes API server?",
+      "back": "It should not be exposed publicly on the internet, though many managed distributions do this by default.",
+      "explanation": "A bastion host is one recommended way to reach a non-public API server.",
+      "example": "Like keeping a company's admin console off the open internet, reachable only through a jump box.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Network security\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#network-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "API server exposure"
+      ],
+      "uses": [
+        "API server exposure",
+        "kube-apiserver",
+        "bastion host"
+      ],
+      "conceptIDs": [
+        "k8ssec.api-server-exposure"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.anonymous-auth-flag",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12010,
+      "front": "What does the --anonymous-auth=false flag do?",
+      "back": "Disables anonymous requests, so unauthenticated calls get a 401 response instead of being treated as system:anonymous.",
+      "explanation": "It can be set on both the API server and the kubelet.",
+      "example": "Like a receptionist who now turns away anyone without an appointment, instead of waving them through as a guest.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Anonymous requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "--anonymous-auth=false"
+      ],
+      "uses": [
+        "--anonymous-auth=false",
+        "anonymous request"
+      ],
+      "conceptIDs": [
+        "k8ssec.anonymous-auth-flag"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.what-is-kubelet-api",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12020,
+      "front": "What does the kubelet API expose, and on which port?",
+      "back": "An HTTP API, typically on TCP port 10250, giving Pod data, logs and the ability to run commands in every container on the node.",
+      "explanation": "Direct access to it bypasses the API server's own audit logging and admission control; its HTTPS endpoint is described on the kubelet authn/authz page.",
+      "example": "Like a node's own back door: useful for maintenance, but dangerous if left unguarded.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"The kubelet API\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#kubelet-api",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "kubelet API"
+      ],
+      "uses": [
+        "kubelet API",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-api"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.kubelet-authn-authz",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12030,
+      "front": "What are the kubelet's default authentication and authorization settings (command-line defaults, with no --config file)?",
+      "back": "Unauthenticated requests are treated as anonymous, and the default authorization mode is AlwaysAllow.",
+      "explanation": "Production clusters are expected to switch these to certificate or webhook authentication and Webhook authorization, delegating to the API server.",
+      "example": "Like a door that, out of the box, lets anyone in and grants them free run of the building.",
+      "source": "Kubernetes documentation, \"Kubelet authentication/authorization\", \"Overview\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs as of that date",
+      "introduces": [
+        "kubelet authentication and authorization"
+      ],
+      "uses": [
+        "kubelet authentication and authorization",
+        "kubelet API",
+        "anonymous request",
+        "authorization mode"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-authn-authz"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.kubelet-read-only-port",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 12040,
+      "front": "What is the kubelet's read-only port, from a security point of view?",
+      "back": "An unauthenticated kubelet port that the docs say should not be enabled.",
+      "explanation": "It offers no authentication at all, unlike the main HTTPS kubelet API.",
+      "example": "Like leaving a spare, unlocked entrance next to the main guarded one.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"The kubelet API\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#kubelet-api",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "kubelet read-only port"
+      ],
+      "uses": [
+        "kubelet read-only port",
+        "kubelet API"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-read-only-port"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.apiserver-kubelet-verification",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12050,
+      "front": "Does the API server verify the kubelet's serving certificate by default?",
+      "back": "No. Set --kubelet-certificate-authority on the API server to verify it.",
+      "explanation": "Without that flag, the connection is subject to man-in-the-middle attacks.",
+      "example": "Like accepting a delivery without checking the courier's ID, unless told to check it.",
+      "source": "Kubernetes documentation, \"Communication between Nodes and the Control Plane\", \"API server to kubelet\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/architecture/control-plane-node-communication/#api-server-to-kubelet",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "API server to kubelet verification"
+      ],
+      "uses": [
+        "API server to kubelet verification",
+        "kubelet API",
+        "digital certificate"
+      ],
+      "conceptIDs": [
+        "k8ssec.apiserver-kubelet-verification"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.hub-and-spoke",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12060,
+      "front": "What is the \"hub-and-spoke\" API pattern?",
+      "back": "All API use from nodes terminates at the API server; none of the other control plane components expose remote services.",
+      "explanation": "This concentrates the cluster's attack surface at one component, which is why securing the API server matters so much.",
+      "example": "Like a call centre where every enquiry goes through the switchboard, and no other desk takes calls directly.",
+      "source": "Kubernetes documentation, \"Communication between Nodes and the Control Plane\", \"Node to Control Plane\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/architecture/control-plane-node-communication/#node-to-control-plane",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "hub-and-spoke API pattern"
+      ],
+      "uses": [
+        "hub-and-spoke API pattern",
+        "kube-apiserver",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "k8ssec.hub-and-spoke"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.konnectivity",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 12070,
+      "front": "What is the Konnectivity service?",
+      "back": "A TCP-level proxy for control plane to node traffic, replacing the deprecated SSH tunnels.",
+      "explanation": "It consists of a Konnectivity server in the control plane and agents on the nodes, which initiate and maintain the connections.",
+      "example": "Like the nodes calling out to a switchboard, rather than the control plane having to dial in to each node directly.",
+      "source": "Kubernetes documentation, \"Communication between Nodes and the Control Plane\", \"Konnectivity service\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/architecture/control-plane-node-communication/#konnectivity-service",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs v1.37",
+      "introduces": [
+        "Konnectivity service"
+      ],
+      "uses": [
+        "Konnectivity service",
+        "hub-and-spoke API pattern"
+      ],
+      "conceptIDs": [
+        "k8ssec.konnectivity"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.etcd-access",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12080,
+      "front": "How should access to the etcd API be secured?",
+      "back": "With mutual TLS, an etcd-only CA, and network restriction, since etcd has no meaningful authorization model.",
+      "explanation": "Any certificate trusted by etcd's CA gets full read and write access, so that CA must be dedicated to etcd alone.",
+      "example": "Like a vault that checks a key is genuine, but not who is holding it or what they came for.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"The etcd API\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#the-etcd-api",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "etcd access"
+      ],
+      "uses": [
+        "etcd access",
+        "etcd",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "k8ssec.etcd-access"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.etcd-root",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12090,
+      "front": "How does write access to etcd compare to cluster admin rights?",
+      "back": "Write access to etcd is equivalent to root on the entire cluster; read access can escalate quickly too.",
+      "explanation": "Any Kubernetes object, including Secrets, is stored in etcd, so writing to it can change or fabricate anything.",
+      "example": "Like being able to edit the master ledger directly, bypassing every rule that governs the front counter.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Restrict access to etcd\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restrict-access-to-etcd",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "etcd write equals cluster root"
+      ],
+      "uses": [
+        "etcd write equals cluster root",
+        "etcd access"
+      ],
+      "conceptIDs": [
+        "k8ssec.etcd-root"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.etcd-peer-tls",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12100,
+      "front": "What is etcd peer TLS?",
+      "back": "Encrypted, authenticated communication between etcd members, configured with --peer-key-file and --peer-cert-file.",
+      "explanation": "It is separate from etcd's client TLS, which protects the connection from the API server.",
+      "example": "Like guards checking each other's badges when passing messages between posts, not just checking visitors at the gate.",
+      "source": "Kubernetes documentation, \"Operating etcd clusters for Kubernetes\", \"Securing communication\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#securing-communication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "etcd peer TLS"
+      ],
+      "uses": [
+        "etcd peer TLS",
+        "etcd access"
+      ],
+      "conceptIDs": [
+        "k8ssec.etcd-peer-tls"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.etcd-backup-protection",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12110,
+      "front": "What does good etcd backup and retirement practice look like?",
+      "back": "Encrypt backups, and wipe or shred etcd's durable storage once it is no longer in use.",
+      "explanation": "A discarded disk can otherwise still hold a full copy of the cluster's Secrets.",
+      "example": "Like shredding old bank statements rather than just throwing them in the bin.",
+      "source": "Kubernetes documentation, \"Good practices for Kubernetes Secrets\", \"Improve etcd management policies\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/secrets-good-practices/#improve-etcd-management-policies",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "etcd backup protection"
+      ],
+      "uses": [
+        "etcd backup protection",
+        "etcd"
+      ],
+      "conceptIDs": [
+        "k8ssec.etcd-backup-protection"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.use-sa-credentials",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12120,
+      "front": "What does the --use-service-account-credentials flag on kube-controller-manager do?",
+      "back": "Makes each individual controller use its own, distinct service account instead of one powerful shared identity.",
+      "explanation": "Without it, kube-controller-manager runs all control loops using its own credential, which must then be granted every relevant role.",
+      "example": "Like giving each department its own staff badge, instead of one master key shared by everyone.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Authentication & Authorization\"; RBAC, \"Roles for built-in controllers\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#controller-roles",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "--use-service-account-credentials"
+      ],
+      "uses": [
+        "--use-service-account-credentials",
+        "kube-controller-manager",
+        "ServiceAccount"
+      ],
+      "conceptIDs": [
+        "k8ssec.use-sa-credentials"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.scheduler-hardening",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12130,
+      "front": "What is scheduler hardening?",
+      "back": "Steps such as binding kube-scheduler to localhost, disabling profiling, and protecting its kubeconfig and any custom plugins.",
+      "explanation": "A misconfigured scheduler can target specific nodes and evict co-located workloads, aiding attacks such as a Yo-Yo attack on an autoscaler.",
+      "example": "Like keeping a building's traffic-control panel behind a locked door with no public dial-in.",
+      "source": "Kubernetes documentation, \"Hardening Guide - Scheduler Configuration\", overview",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/scheduler/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "scheduler hardening"
+      ],
+      "uses": [
+        "scheduler hardening",
+        "kube-scheduler"
+      ],
+      "conceptIDs": [
+        "k8ssec.scheduler-hardening"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.control-plane-ports",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12140,
+      "front": "What are the main control plane ports a firewall needs to account for?",
+      "back": "6443 (API server), 2379-2380 (etcd), 10250 (kubelet), 10259 (scheduler) and 10257 (controller manager).",
+      "explanation": "Worker nodes add 10256 (kube-proxy) and the 30000-32767 NodePort range.",
+      "example": "Like a building's own list of which doors lead where, so security knows exactly what to watch.",
+      "source": "Kubernetes documentation, \"Ports and Protocols\", \"Control plane\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "control plane ports"
+      ],
+      "uses": [
+        "control plane ports",
+        "control plane",
+        "kube-apiserver",
+        "etcd",
+        "kubelet",
+        "kube-scheduler",
+        "kube-controller-manager"
+      ],
+      "conceptIDs": [
+        "k8ssec.control-plane-ports"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.runtime-socket",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12150,
+      "front": "What is the container runtime socket, and why is it security-sensitive?",
+      "back": "The runtime's Unix socket; anyone with access to it can launch or interact with containers on the node.",
+      "explanation": "Never mount it into a Pod via hostPath, since that would hand a container the same power.",
+      "example": "Like a master switch for every appliance in the building, left within reach of anyone who walks past.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"Container runtime socket\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#runtime-socket",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "container runtime socket"
+      ],
+      "uses": [
+        "container runtime socket",
+        "container runtime",
+        "hostPath"
+      ],
+      "conceptIDs": [
+        "k8ssec.runtime-socket"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.static-pod-bypass",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12160,
+      "front": "How can static Pods bypass the API server's controls?",
+      "back": "Admission control cannot stop them: if a static Pod fails admission, the kubelet just doesn't register it with the API server, and it still runs.",
+      "explanation": "The kubelet loads them directly from a local directory or URL, outside the usual API-server workflow.",
+      "example": "Like a manager who can post notices straight on a department noticeboard, skipping the usual sign-off desk.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"Static Pods\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#static-pods",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "static Pod bypass"
+      ],
+      "uses": [
+        "static Pod bypass",
+        "static Pod / mirror Pod",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "k8ssec.static-pod-bypass"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.api-server-bypass",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12170,
+      "front": "What is meant by \"API server bypass risks\"?",
+      "back": "Paths that skip the API server's audit logging and admission control: static Pods, the kubelet API, the etcd API and the runtime socket.",
+      "explanation": "Each is a separate entry point that an attacker with the right access could use instead of going through the API server.",
+      "example": "Like a shop with several unmonitored side doors, in addition to the till at the front.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", overview",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "API server bypass risks"
+      ],
+      "uses": [
+        "API server bypass risks",
+        "kube-apiserver",
+        "static Pod bypass",
+        "kubelet API",
+        "etcd access",
+        "container runtime socket"
+      ],
+      "conceptIDs": [
+        "k8ssec.api-server-bypass"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.pv-hostpath-risk",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12180,
+      "front": "Why is unrestricted permission to create PersistentVolumes a risk?",
+      "back": "It includes creating hostPath volumes, which give a Pod access to the underlying node's filesystem.",
+      "explanation": "Only trusted administrators, or the control plane's own automatic provisioning, should be able to create PersistentVolumes directly.",
+      "example": "Like a storage-request form that, unchecked, could also be used to request the keys to the whole building.",
+      "source": "Kubernetes documentation, \"Role Based Access Control Good Practices\", \"Persistent volume creation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#persistent-volume-creation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "PersistentVolume and hostPath risk"
+      ],
+      "uses": [
+        "PersistentVolume and hostPath risk",
+        "PersistentVolume (PV)",
+        "hostPath"
+      ],
+      "conceptIDs": [
+        "k8ssec.pv-hostpath-risk"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.storage-protection",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12190,
+      "front": "What does the Kubernetes documentation recommend for protecting storage at runtime?",
+      "back": "Encrypt volumes via storage plugins, back up and test restores, and authenticate node-to-storage connections.",
+      "explanation": "This is one of the three critical areas of the Runtime lifecycle phase, alongside access and compute.",
+      "example": "Like insuring, locking and periodically testing the recovery of a warehouse's contents, not just its front door.",
+      "source": "Kubernetes documentation, \"Cloud Native Security and Kubernetes\", \"Runtime protection: storage\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/cloud-native-security/#protection-runtime-storage",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "storage encryption and backups"
+      ],
+      "uses": [
+        "storage encryption and backups",
+        "volume",
+        "Runtime phase"
+      ],
+      "conceptIDs": [
+        "k8ssec.storage-protection"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.kube-proxy-security",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 12200,
+      "front": "Where does kube-proxy sit in a trust-zone view of the cluster, and what does it do?",
+      "back": "It runs on each node, at the Worker trust zone, and helps route traffic so Pods and Nodes can reach each other without visible NAT.",
+      "explanation": "Its health port, 10256, is listed separately from the kubelet's own port.",
+      "example": "Like the internal signposting of a campus, rather than its front gate.",
+      "source": "Kubernetes documentation, \"Ports and Protocols\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "kube-proxy security"
+      ],
+      "uses": [
+        "kube-proxy security",
+        "kube-proxy (optional)"
+      ],
+      "conceptIDs": [
+        "k8ssec.kube-proxy-security"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.alpha-beta-risk",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12210,
+      "front": "Why does the Securing a Cluster guide advise caution with alpha and beta Kubernetes features?",
+      "back": "They are in active development and may have limitations or bugs that create security vulnerabilities.",
+      "explanation": "The advice is to disable features you do not use, weighing their value against the risk.",
+      "example": "Like being wary of a building extension still under construction: useful eventually, but not yet load-tested.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Restrict access to alpha or beta features\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restrict-access-to-alpha-or-beta-features",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "alpha and beta feature risk"
+      ],
+      "uses": [
+        "alpha and beta feature risk",
+        "feature gate"
+      ],
+      "conceptIDs": [
+        "k8ssec.alpha-beta-risk"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.integration-review",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12220,
+      "front": "What should you check before enabling a third-party integration in your cluster?",
+      "back": "The permissions it requests; access to all Secrets effectively makes an extension a cluster admin.",
+      "explanation": "Components that can create Pods in sensitive namespaces such as kube-system can also be unexpectedly powerful.",
+      "example": "Like reading the permissions a new app asks for before installing it, not just tapping accept.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Review third party integrations before enabling them\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#review-third-party-integrations-before-enabling-them",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "third-party integration review"
+      ],
+      "uses": [
+        "third-party integration review",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.integration-review"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.api-server-default-port",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12230,
+      "front": "By default the API server listens on port {{c1::6443}}, though a typical production cluster often serves on 443 instead.",
+      "explanation": "The port can be changed with the --secure-port flag.",
+      "source": "Kubernetes documentation, \"Controlling Access to the Kubernetes API\", \"Transport security\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/controlling-access/#transport-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs as of that date",
+      "uses": [
+        "API server exposure",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "k8ssec.api-server-exposure"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.401-vs-403",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12240,
+      "front": "What is the difference between a 401 and a 403 response from the API server?",
+      "back": "401 means the request could not be authenticated; 403 means authorization was denied.",
+      "explanation": "A request with no token is not a 401: it is treated as anonymous, unless --anonymous-auth=false is set.",
+      "source": "Kubernetes documentation, \"Controlling Access to the Kubernetes API\"; \"Authenticating\", \"Anonymous requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "authentication",
+        "authorization"
+      ],
+      "conceptIDs": [
+        "k8ssec.anonymous-auth-flag"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.anonymous-enabled-when",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12250,
+      "front": "When is anonymous access enabled by default on the API server?",
+      "back": "When an authorization mode other than AlwaysAllow is used.",
+      "explanation": "An unauthenticated caller is then given the user system:anonymous and group system:unauthenticated.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Anonymous requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "--anonymous-auth=false",
+        "anonymous request",
+        "authorization mode"
+      ],
+      "conceptIDs": [
+        "k8ssec.anonymous-auth-flag"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.kubelet-api-endpoints",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12260,
+      "front": "What can direct access to the kubelet API disclose or do?",
+      "back": "Reveal Pod data and logs, and execute commands in any container running on that node.",
+      "explanation": "Some of these endpoints use Websocket over an HTTP GET, so they are authorised with only the get verb.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"The kubelet API\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#kubelet-api",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubelet API"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-api"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.nodes-proxy-not-readonly",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12270,
+      "front": "Is get access to the nodes/proxy subresource a read-only permission?",
+      "back": "No; it authorises executing commands in any container running on the node.",
+      "explanation": "This access also bypasses audit logging and admission control entirely.",
+      "source": "Kubernetes documentation, \"Kubelet authentication/authorization\", warning",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/#get-nodes-proxy-warning",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubelet API",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-api"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.kubelet-authn-mechanisms",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12280,
+      "front": "Most Kubernetes providers change the kubelet's default authentication to {{c1::webhook and certificate}} authentication.",
+      "explanation": "This lets the control plane confirm the caller is authorised to access the nodes API resource, which default anonymous access cannot do.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"The kubelet API\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#kubelet-api",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubelet authentication and authorization"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-authn-authz"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.kubelet-authz-webhook-mode",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12290,
+      "front": "How does a kubelet subdivide access to its API, instead of using AlwaysAllow?",
+      "back": "By delegating authorization: start it with --authorization-mode=Webhook, so it calls SubjectAccessReview on the API server.",
+      "explanation": "This lets RBAC, rather than an all-or-nothing default, decide who can call the kubelet API.",
+      "source": "Kubernetes documentation, \"Kubelet authentication/authorization\", \"Kubelet authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubelet authentication and authorization",
+        "SubjectAccessReview"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-authn-authz"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.kubelet-verbs-from-http",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12300,
+      "front": "How does the kubelet determine the authorization verb for an incoming HTTP request?",
+      "back": "From the HTTP method: POST becomes create, GET or HEAD becomes get, PUT becomes update, and so on.",
+      "explanation": "This mirrors the same request-attribute approach the API server itself uses.",
+      "source": "Kubernetes documentation, \"Kubelet authentication/authorization\", \"Kubelet authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubelet authentication and authorization",
+        "request verbs"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-authn-authz"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.static-pod-control-plane-to-node",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12310,
+      "front": "By default, connections from the API server to a node, Pod or service through its proxy functionality are plain {{c1::HTTP}}, so they are neither authenticated nor encrypted.",
+      "explanation": "Prefixing https: encrypts the traffic but still does not validate the endpoint's certificate or provide client credentials.",
+      "source": "Kubernetes documentation, \"Communication between Nodes and the Control Plane\", \"API server to nodes, pods, and services\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/architecture/control-plane-node-communication/#api-server-to-nodes-pods-and-services",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "hub-and-spoke API pattern",
+        "Pod",
+        "Service"
+      ],
+      "conceptIDs": [
+        "k8ssec.hub-and-spoke"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.ssh-tunnels-deprecated",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12320,
+      "front": "What replaces the deprecated SSH tunnels for control-plane-to-node traffic?",
+      "back": "The Konnectivity service.",
+      "explanation": "SSH tunnels are still supported but no longer the recommended option.",
+      "source": "Kubernetes documentation, \"Communication between Nodes and the Control Plane\", \"SSH tunnels\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/architecture/control-plane-node-communication/#ssh-tunnels",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs as of that date",
+      "uses": [
+        "Konnectivity service"
+      ],
+      "conceptIDs": [
+        "k8ssec.konnectivity"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.node-to-control-plane-default-secure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12330,
+      "front": "Is the default connection from nodes and their Pods to the control plane secure enough to run over an untrusted network?",
+      "back": "Yes: it goes over HTTPS with client authentication, so it is secured by default.",
+      "explanation": "This is the opposite of the API server's own connections outward to nodes, Pods and services, which default to plain HTTP.",
+      "source": "Kubernetes documentation, \"Communication between Nodes and the Control Plane\", \"Node to Control Plane\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/architecture/control-plane-node-communication/#node-to-control-plane",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "hub-and-spoke API pattern"
+      ],
+      "conceptIDs": [
+        "k8ssec.hub-and-spoke"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.etcd-client-port",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12340,
+      "front": "Which port does the etcd service listen on for its client API, and who should be the only clients?",
+      "back": "TCP 2379; only the API server and any backup tooling should have access.",
+      "explanation": "The peer port, 2380, is separate and used between etcd members.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"The etcd API\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#the-etcd-api",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "etcd access"
+      ],
+      "conceptIDs": [
+        "k8ssec.etcd-access"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.etcd-healthcheck-cert-full-access",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12350,
+      "front": "Can an etcd client certificate issued only for health checking still read and write all of etcd's data?",
+      "back": "Yes, typically, since etcd has no widely accepted authorization model beyond certificate trust.",
+      "explanation": "This is exactly why the certificate authority etcd trusts should be used for nothing else.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"The etcd API\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#the-etcd-api",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "etcd access"
+      ],
+      "conceptIDs": [
+        "k8ssec.etcd-access"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.etcd-multiple-instances-tls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12360,
+      "front": "What should you configure if you run multiple etcd instances to hold Secret data?",
+      "back": "Encrypted SSL/TLS communication between the instances.",
+      "explanation": "This protects Secret data in transit between etcd members, not just at rest.",
+      "source": "Kubernetes documentation, \"Good practices for Kubernetes Secrets\", \"Improve etcd management policies\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/secrets-good-practices/#improve-etcd-management-policies",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "etcd backup protection"
+      ],
+      "conceptIDs": [
+        "k8ssec.etcd-backup-protection"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.scheduler-bind-address",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12370,
+      "front": "What is a secure practice for the scheduler's --bind-address setting?",
+      "back": "Set it to localhost, since the scheduler usually does not need to be externally accessible.",
+      "explanation": "The scheduler also has a --profiling flag that should be disabled in production, since it can leak information or invite denial of service.",
+      "source": "Kubernetes documentation, \"Hardening Guide - Scheduler Configuration\", \"Scheduler networking command line options\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/scheduler/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "scheduler hardening"
+      ],
+      "conceptIDs": [
+        "k8ssec.scheduler-hardening"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.scheduler-disallow-node-labels",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12380,
+      "front": "Why should cluster users be prevented from labelling nodes?",
+      "back": "A malicious actor could use nodeSelector to schedule workloads onto nodes where they should not be present.",
+      "explanation": "This is listed as one of the scheduler's own hardening steps, even though labelling is an API-server-side control.",
+      "source": "Kubernetes documentation, \"Hardening Guide - Scheduler Configuration\", \"Disallow labeling nodes\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/scheduler/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "scheduler hardening",
+        "nodeSelector"
+      ],
+      "conceptIDs": [
+        "k8ssec.scheduler-hardening"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.scheduler-extension-points-risk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12390,
+      "front": "Which custom scheduler extension point can prevent or delay the binding of a Pod?",
+      "back": "The permit extension point.",
+      "explanation": "Plugins on the queueSort, prefilter or filter extension points carry their own risks, such as halting scheduling for new Pods entirely.",
+      "source": "Kubernetes documentation, \"Hardening Guide - Scheduler Configuration\", \"Key considerations\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/scheduler/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "scheduler hardening"
+      ],
+      "conceptIDs": [
+        "k8ssec.scheduler-hardening"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.control-plane-ports-list",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12400,
+      "front": "kube-scheduler listens on 10259 and kube-controller-manager listens on {{c1::10257}}.",
+      "explanation": "Both are on the control plane, marked as self-only in the ports table.",
+      "source": "Kubernetes documentation, \"Ports and Protocols\", \"Control plane\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs as of that date",
+      "uses": [
+        "control plane ports"
+      ],
+      "conceptIDs": [
+        "k8ssec.control-plane-ports"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.nodeport-range",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12410,
+      "front": "What is the default port range for NodePort Services?",
+      "back": "30000-32767, for both TCP and UDP.",
+      "explanation": "These ports are inbound on every worker node, so they belong in the same firewall review as the control plane ports.",
+      "source": "Kubernetes documentation, \"Ports and Protocols\", \"Worker node(s)\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs as of that date",
+      "uses": [
+        "control plane ports",
+        "Service"
+      ],
+      "conceptIDs": [
+        "k8ssec.control-plane-ports"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.runtime-socket-hostpath-block",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12420,
+      "front": "What should you do if a hostPath mount does end up including the container runtime socket?",
+      "back": "Forbid it: no Pod should mount the runtime socket. (Separately, any hostPath mount should be read-only.)",
+      "explanation": "A read-only mount does not stop a container connecting to the socket; restricting or forbidding the mount is the real fix.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"Container runtime socket\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#runtime-socket",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "container runtime socket",
+        "hostPath"
+      ],
+      "conceptIDs": [
+        "k8ssec.runtime-socket"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.static-pod-no-secrets",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12430,
+      "front": "Can a static Pod mount a Secret from the cluster?",
+      "back": "No; static Pods are restricted from accessing other objects in the Kubernetes API.",
+      "explanation": "They can still take other security-sensitive actions, such as using a hostPath mount from the node.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"Static Pods\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#static-pods",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "static Pod bypass",
+        "static Pod / mirror Pod",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.static-pod-bypass"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.static-pod-fails-admission",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12440,
+      "front": "What happens if a static Pod fails admission control?",
+      "back": "The kubelet does not register it with the API server, but the Pod still runs on the node.",
+      "explanation": "This is another way a static Pod can end up invisible to cluster-level tooling while still doing real work.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"Static Pods\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#static-pods",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "static Pod bypass",
+        "admission controller"
+      ],
+      "conceptIDs": [
+        "k8ssec.static-pod-bypass"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.pv-cluster-wide-resource",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12450,
+      "front": "Is a PersistentVolume a namespaced object?",
+      "back": "No; a PersistentVolume is cluster-wide, with a lifecycle independent of any workload or namespace.",
+      "explanation": "This is exactly why unrestricted rights to create them are so dangerous: their effect is not contained by namespace boundaries.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Storage isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#storage-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "PersistentVolume and hostPath risk",
+        "PersistentVolume (PV)",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "k8ssec.pv-hostpath-risk"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.pv-who-should-create",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12460,
+      "front": "Who should be allowed to create PersistentVolume objects directly?",
+      "back": "Trusted cluster operators, and the control plane's own automatic provisioning from PersistentVolumeClaims.",
+      "explanation": "Ordinary users should instead be constrained to PersistentVolumeClaims, which request storage without granting hostPath access.",
+      "source": "Kubernetes documentation, \"Role Based Access Control Good Practices\", \"Persistent volume creation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#persistent-volume-creation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "PersistentVolume and hostPath risk",
+        "PersistentVolumeClaim (PVC)"
+      ],
+      "conceptIDs": [
+        "k8ssec.pv-hostpath-risk"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.storage-hsm",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12470,
+      "front": "Which device offers the strongest protection for encryption keys used in storage protection?",
+      "back": "A hardware security module (HSM), which performs cryptographic operations without letting the key be copied out.",
+      "explanation": "This is listed as the best-protected option for generating keys, compared to storing them in ordinary files.",
+      "source": "Kubernetes documentation, \"Cloud Native Security and Kubernetes\", \"Runtime protection: storage\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/cloud-native-security/#protection-runtime-storage",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "storage encryption and backups",
+        "hardware security module (HSM)"
+      ],
+      "conceptIDs": [
+        "k8ssec.storage-protection"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.kernel-modules-blacklist",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12480,
+      "front": "Which two kernel modules does the documentation name as candidates to block from auto-loading?",
+      "back": "dccp and sctp, network-protocol modules with a history of vulnerabilities.",
+      "explanation": "Even an unprivileged process can trigger such a module to load, just by creating a socket of that type.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Preventing containers from loading unwanted kernel modules\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "alpha and beta feature risk"
+      ],
+      "conceptIDs": [
+        "k8ssec.alpha-beta-risk"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.rotate-credentials-example",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12490,
+      "front": "Once the bootstrap phase of setting up a node is complete, what should happen to the bootstrap token that was used?",
+      "back": "It should be revoked, or its authorization removed.",
+      "explanation": "This is a specific example of the general advice to rotate infrastructure credentials frequently.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Rotate infrastructure credentials frequently\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#rotate-infrastructure-credentials-frequently",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "alpha and beta feature risk",
+        "bootstrap token"
+      ],
+      "conceptIDs": [
+        "k8ssec.integration-review"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.integration-namespace-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12500,
+      "front": "When you are unsure about a third-party integration's permissions, what does the documentation recommend?",
+      "back": "Restrict the integration to functioning in a single namespace, if possible.",
+      "explanation": "This limits how much damage an over-permissioned integration can do.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Review third party integrations before enabling them\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#review-third-party-integrations-before-enabling-them",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "third-party integration review",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "k8ssec.integration-review"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.controlling-nodes-podnodeselector",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12510,
+      "front": "By default, are there restrictions on which nodes a Pod may run on?",
+      "back": "No; an administrator can use the beta PodNodeSelector admission plugin to force or default a node selector per namespace.",
+      "explanation": "Without such a control, an authorised Pod creator can place workloads on any schedulable node.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Controlling which nodes pods may access\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#controlling-which-nodes-pods-may-access",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs as of that date",
+      "uses": [
+        "scheduler hardening",
+        "nodeSelector",
+        "admission controller"
+      ],
+      "conceptIDs": [
+        "k8ssec.scheduler-hardening"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.no-caution-checklist-not-enough",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12520,
+      "front": "Does passing every item on the Kubernetes security checklist guarantee good cluster security?",
+      "back": "No, the checklist itself says it is not sufficient on its own; security requires constant attention.",
+      "explanation": "This caution applies to every section of the checklist, including the component-security items covered in this topic.",
+      "source": "Kubernetes documentation, \"Security Checklist\", caution note",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "security posture"
+      ],
+      "conceptIDs": [
+        "k8ssec.api-server-exposure"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.tls-for-all-api-traffic",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12530,
+      "front": "What does Kubernetes expect for API traffic within the cluster by default?",
+      "back": "That all of it is encrypted with TLS.",
+      "explanation": "Some components or installation methods can still enable local ports over plain HTTP, so this is not automatic in every case.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Use Transport Layer Security (TLS) for all API traffic\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#use-transport-layer-security-tls-for-all-api-traffic",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "API server exposure",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "k8ssec.api-server-exposure"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.node-authorizer-with-restriction",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12540,
+      "front": "Which two authorizers does the documentation recommend using together, alongside the NodeRestriction admission plugin?",
+      "back": "The Node and RBAC authorizers.",
+      "explanation": "Node authorization alone only covers what kubelets may do; RBAC covers everyone else.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"API Authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#api-authorization",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "Node authorization",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-authn-authz"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.etcd-encryption-recap",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12550,
+      "front": "Why does the 4C's infrastructure security table single out etcd encryption specifically?",
+      "back": "Because etcd holds the state of the entire cluster, including Secrets, so it especially should be encrypted at rest.",
+      "explanation": "Other stores may hold less sensitive data, but etcd is a single point that concentrates nearly everything.",
+      "source": "Kubernetes documentation, \"Overview of Cloud Native Security\", \"Infrastructure security\"",
+      "sourceURL": "https://github.com/kubernetes/website/blob/release-1.28/content/en/docs/concepts/security/overview.md#infrastructure-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs up to v1.28 (page removed after)",
+      "uses": [
+        "etcd write equals cluster root",
+        "etcd access"
+      ],
+      "conceptIDs": [
+        "k8ssec.etcd-access"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.cloud-api-least-privilege",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12560,
+      "front": "What principle should guide the permissions granted to the Kubernetes control plane's own cloud provider API access?",
+      "back": "The principle of least privilege: grant only what the cluster needs to administer its resources.",
+      "explanation": "Each cloud provider grants a different set of permissions to the control plane and nodes, so this has to be reviewed per provider.",
+      "source": "Kubernetes documentation, \"Overview of Cloud Native Security\", \"Infrastructure security\"",
+      "sourceURL": "https://github.com/kubernetes/website/blob/release-1.28/content/en/docs/concepts/security/overview.md#infrastructure-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs up to v1.28 (page removed after)",
+      "uses": [
+        "least privilege"
+      ],
+      "conceptIDs": [
+        "k8ssec.api-server-exposure"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.node-network-acl",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12570,
+      "front": "What connections should a node be configured to accept, per the infrastructure security table?",
+      "back": "Only from the control plane on specified ports, plus connections for NodePort and LoadBalancer Services.",
+      "explanation": "Where possible, nodes should not be exposed on the public internet at all.",
+      "source": "Kubernetes documentation, \"Overview of Cloud Native Security\", \"Infrastructure security\"",
+      "sourceURL": "https://github.com/kubernetes/website/blob/release-1.28/content/en/docs/concepts/security/overview.md#infrastructure-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs up to v1.28 (page removed after)",
+      "uses": [
+        "control plane ports",
+        "Service"
+      ],
+      "conceptIDs": [
+        "k8ssec.control-plane-ports"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.bootstrap-token-kubeconfig-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12580,
+      "front": "How specific can a bootstrap token's RBAC scoping be?",
+      "back": "It can be bound to a Role Based Access Control policy limiting it strictly to certificate-provisioning client requests.",
+      "explanation": "Scoping tokens to a group also lets an administrator disable a particular bootstrap group once provisioning is done.",
+      "source": "Kubernetes documentation, \"TLS bootstrapping\", \"Initial bootstrap authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubelet TLS bootstrapping",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-authn-authz"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.access-to-etcd-vs-api",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12590,
+      "front": "Even without elevating their Kubernetes RBAC privileges, what can an attacker who can modify etcd directly do?",
+      "back": "Retrieve any API object, or create new workloads inside the cluster.",
+      "explanation": "This is why RBAC alone cannot protect a cluster whose etcd access is not equally restricted.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"The etcd API\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#the-etcd-api",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "etcd write equals cluster root",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.etcd-root"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.limit-ranges-vs-nodes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12600,
+      "front": "Which two policy objects can stop users requesting NodePort or LoadBalancer Services, and so keep their apps inside the cluster?",
+      "back": "Resource quotas and limit ranges.",
+      "explanation": "Restricting network access this way is a further control listed alongside node placement.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Restricting network access\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-network-access",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "control plane ports",
+        "Service"
+      ],
+      "conceptIDs": [
+        "k8ssec.control-plane-ports"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.identify-server-endpoint",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12650,
+      "front": "A managed Kubernetes provider exposes the API server on the public internet by default, with no bastion host in front of it. What does the checklist say about this configuration?",
+      "back": "It falls short: the API server, kubelet API and etcd should not be publicly exposed on the internet.",
+      "choices": "A) It is fine, since the API server uses TLS regardless\nB) It falls short of the checklist's network security guidance\nC) It is only a problem if etcd is exposed too",
+      "choicesExplained": "A: TLS protects traffic in transit, but does not restrict who can reach the endpoint at all. C: the checklist names the API server, kubelet API and etcd together, not etcd alone.",
+      "explanation": "The checklist calls out managed distributions by name, since many expose the API server publicly by default.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Network security\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#network-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "API server exposure"
+      ],
+      "conceptIDs": [
+        "k8ssec.api-server-exposure"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.mitigate-kubelet-bypass",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12660,
+      "front": "You want to stop cluster users from having a nodes/proxy get permission that lets them run commands in any container on a node. What should you avoid granting?",
+      "back": "The nodes/proxy catch-all permission, even with only the get verb; grant granular kubelet sub-resource permissions instead.",
+      "choices": "A) Avoid granting the nodes/proxy catch-all permission\nB) It is safe as long as only get, never other verbs, is granted\nC) Restrict it to the delete verb instead",
+      "choicesExplained": "B: get on nodes/proxy authorises command execution over Websocket, so it is never read-only. C: delete is unrelated to this risk; the danger is specifically in the catch-all proxy access.",
+      "explanation": "Fine-grained sub-resources such as nodes/log or nodes/stats let you grant only what monitoring tooling actually needs.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"The kubelet API\", Mitigations",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#kubelet-api",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubelet API",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-api"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.control-plane-node-mitm",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12670,
+      "front": "Your API server fetches Pod logs from kubelets over an untrusted network, without --kubelet-certificate-authority set. What risk does this leave open?",
+      "back": "A man-in-the-middle attack, since the API server does not verify the kubelet's serving certificate by default.",
+      "choices": "A) A man-in-the-middle attack on the API server to kubelet connection\nB) No risk, since the connection always uses TLS regardless\nC) Only a risk if anonymous auth is also enabled on the kubelet",
+      "choicesExplained": "B: the connection uses TLS, but without certificate verification that TLS session offers no assurance the other end is genuine. C: certificate verification and anonymous auth are separate settings; the man-in-the-middle risk exists independently of anonymous auth.",
+      "explanation": "Setting --kubelet-certificate-authority gives the API server a root bundle to check the kubelet's serving certificate against.",
+      "source": "Kubernetes documentation, \"Communication between Nodes and the Control Plane\", \"API server to kubelet\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/architecture/control-plane-node-communication/#api-server-to-kubelet",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "API server to kubelet verification"
+      ],
+      "conceptIDs": [
+        "k8ssec.apiserver-kubelet-verification"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.etcd-firewall-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12680,
+      "front": "A monitoring tool asks for direct network access to etcd's client port \"just to check cluster health\". Should you grant it?",
+      "back": "No; only the API server and backup tooling should have network access to etcd.",
+      "choices": "A) No\nB) Yes, since health checks are read-only and therefore safe\nC) Yes, but only over an unauthenticated connection",
+      "choicesExplained": "B: any trusted client certificate, even a health-check one, typically gets full read and write access, so \"read-only intent\" offers no real protection. C: an unauthenticated connection to etcd is worse, not better.",
+      "explanation": "The safer approach is to isolate etcd behind a firewall that only the API servers can reach.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Restrict access to etcd\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restrict-access-to-etcd",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "etcd write equals cluster root",
+        "etcd access"
+      ],
+      "conceptIDs": [
+        "k8ssec.etcd-root"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.controller-manager-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12690,
+      "front": "kube-controller-manager is running without --use-service-account-credentials. What is the resulting risk?",
+      "back": "Every controller shares one powerful identity, instead of each having its own least-privilege service account.",
+      "choices": "A) Every controller shares one powerful identity\nB) Controllers stop working entirely without this flag\nC) Only the CSR-signing controller is affected",
+      "choicesExplained": "B: without the flag, kube-controller-manager runs all control loops on its own credential instead; the controllers still run. C: the flag affects every controller inside kube-controller-manager, not just one.",
+      "explanation": "Corresponding system:controller: roles exist for each built-in controller once the flag is set.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Authentication & Authorization\"; RBAC, \"Roles for built-in controllers\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#controller-roles",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "--use-service-account-credentials"
+      ],
+      "conceptIDs": [
+        "k8ssec.use-sa-credentials"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.runtime-socket-root-only",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 12700,
+      "front": "Who should be able to access a node's container runtime socket, if possible?",
+      "back": "Only the root user.",
+      "explanation": "Isolating the kubelet from other components on the node, with kernel namespaces, is a further mitigation.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"Container runtime socket\", Mitigations",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#runtime-socket-mitigations",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "container runtime socket"
+      ],
+      "conceptIDs": [
+        "k8ssec.runtime-socket"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.static-pod-restrict-manifest-dir",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 12710,
+      "front": "If a node uses the static Pod manifest directory feature, who should be able to write to it?",
+      "back": "Only users who need that access, with filesystem access restricted accordingly.",
+      "explanation": "Regularly auditing access to this directory is a further recommended mitigation.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"Static Pods\", Mitigations",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#static-pods-mitigations",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "static Pod bypass",
+        "static Pod / mirror Pod"
+      ],
+      "conceptIDs": [
+        "k8ssec.static-pod-bypass"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.identify-bypass-path",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 12720,
+      "front": "An attacker executes a command in a container by calling the kubelet API directly, instead of going through kubectl exec. Which API server bypass path did they use?",
+      "back": "The kubelet API.",
+      "choices": "A) The kubelet API\nB) The etcd API\nC) The container runtime socket",
+      "choicesExplained": "B: the etcd API bypass involves reading or writing objects directly in the datastore, not container execution. C: the runtime socket bypass involves talking to the container runtime directly on the node, not the kubelet's HTTPS endpoint.",
+      "explanation": "All three are API server bypass risks, but each has a distinct entry point and distinct mitigations.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "API server bypass risks",
+        "kubelet API"
+      ],
+      "conceptIDs": [
+        "k8ssec.api-server-bypass"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.pv-vs-pvc-who-creates",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12730,
+      "front": "A developer needs storage for their Pod, but should not be able to create hostPath volumes directly. What should they be given rights to instead?",
+      "back": "PersistentVolumeClaim, not PersistentVolume.",
+      "choices": "A) PersistentVolumeClaim\nB) PersistentVolume, since it is more explicit\nC) StorageClass, since it controls the underlying disk type",
+      "choicesExplained": "B: unrestricted PersistentVolume creation includes creating hostPath volumes, a security risk. C: StorageClass describes classes of storage but does not, by itself, grant or prevent hostPath access.",
+      "explanation": "The control plane, or a trusted administrator, then creates the matching PersistentVolume automatically.",
+      "source": "Kubernetes documentation, \"Role Based Access Control Good Practices\", \"Persistent volume creation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#persistent-volume-creation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "PersistentVolume and hostPath risk",
+        "PersistentVolumeClaim (PVC)"
+      ],
+      "conceptIDs": [
+        "k8ssec.pv-hostpath-risk"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.scheduler-permit-plugin-review",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 12740,
+      "front": "A cluster admin is about to enable a third-party scheduler plugin that uses the permit extension point. What should happen first?",
+      "back": "A thorough review by the cluster administrator, since permit plugins can prevent or delay Pod binding.",
+      "explanation": "queueSort plugins deserve the same scrutiny, since only one can be active at a time.",
+      "source": "Kubernetes documentation, \"Hardening Guide - Scheduler Configuration\", \"Key considerations\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/scheduler/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "scheduler hardening"
+      ],
+      "conceptIDs": [
+        "k8ssec.scheduler-hardening"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.storage-authenticate-node-connections",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 12750,
+      "front": "Besides encrypting volumes, what should be authenticated in a cluster's storage setup?",
+      "back": "The connections between cluster nodes and any network storage they rely upon.",
+      "explanation": "An unauthenticated storage connection could let a compromised node read or tamper with another tenant's data.",
+      "source": "Kubernetes documentation, \"Cloud Native Security and Kubernetes\", \"Runtime protection: storage\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/cloud-native-security/#protection-runtime-storage",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "storage encryption and backups"
+      ],
+      "conceptIDs": [
+        "k8ssec.storage-protection"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.audit-alpha-beta",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12760,
+      "front": "A cluster has several alpha features enabled that nobody currently uses. What does the Securing a Cluster guide advise?",
+      "back": "Disable them, since alpha and beta features may have limitations or bugs that result in security vulnerabilities.",
+      "choices": "A) Disable the unused alpha features\nB) Leave them, since alpha features cannot be enabled without extra flags anyway\nC) Only disable them if they touch networking",
+      "choicesExplained": "B: being alpha does not make a feature inert once enabled; it is fully active and can be exploited. C: the advice applies to any unused alpha or beta feature, not only networking ones.",
+      "explanation": "The general rule is: weigh the value a feature provides against the possible risk, and disable what you do not use.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Restrict access to alpha or beta features\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restrict-access-to-alpha-or-beta-features",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "alpha and beta feature risk"
+      ],
+      "conceptIDs": [
+        "k8ssec.alpha-beta-risk"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.integration-kube-system-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12770,
+      "front": "A monitoring integration asks for permission to create Pods inside the kube-system namespace. Why is that more dangerous than creating Pods in an ordinary namespace?",
+      "back": "Pods there can use powerful service account Secrets, and, where the namespace allows privileged Pods, escape their containers.",
+      "choices": "A) Pods there can use powerful Secrets and, if the namespace allows privileged Pods, escape their containers\nB) It is no more dangerous; namespaces do not affect Pod creation risk\nC) It only matters if the integration also requests cluster-admin explicitly",
+      "choicesExplained": "B: which namespace a Pod is created in changes what Secrets, ConfigMaps and service accounts it can implicitly reach. C: the risk exists even without an explicit cluster-admin request, because of what already lives in kube-system.",
+      "explanation": "This is a specific case of the general workload-creation risk: creating Pods implicitly grants access to much of that namespace's other resources.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Review third party integrations before enabling them\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#review-third-party-integrations-before-enabling-them",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "third-party integration review",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "k8ssec.integration-review"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.kubeproxy-vs-kubeapiserver-trust",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 12780,
+      "front": "Is kube-proxy part of the control plane or the worker node components?",
+      "back": "The worker node components; it runs on each node.",
+      "explanation": "This is why kube-proxy's health port, 10256, is listed under worker node ports, not control plane ports.",
+      "source": "Kubernetes documentation, \"Ports and Protocols\", \"Worker node(s)\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kube-proxy security",
+        "kube-proxy (optional)"
+      ],
+      "conceptIDs": [
+        "k8ssec.kube-proxy-security"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.classify-bypass-each",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 12790,
+      "front": "For each of the kubelet API and the etcd API: are these normally subject to Kubernetes audit logging?",
+      "back": "No; both are documented as not subject to admission control and not logged by Kubernetes audit logging.",
+      "explanation": "Static Pods also bypass the API server's controls, but by a different mechanism: the kubelet never registers them there at all.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "API server bypass risks"
+      ],
+      "conceptIDs": [
+        "k8ssec.api-server-bypass"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.control-plane-vs-worker-ports",
+      "type": "scenario",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 12800,
+      "front": "Port 10250 appears in both the control plane and worker node port tables. What does this tell you, versus a port like 10257 that appears only in the control plane table?",
+      "back": "10250 is used by both node and control plane, since every node runs a kubelet; 10257 exists only on the control plane.",
+      "choices": "A) 10250 is used by both node and control plane; 10257 is control-plane-only\nB) Both ports are worker-only\nC) Both ports are control-plane-only",
+      "choicesExplained": "B: 10257 (kube-controller-manager) is listed only in the control plane table. C: 10250 is listed in both tables, since kubelets run on every node, control plane included in some topologies.",
+      "explanation": "This distinction matters for firewall design: a rule scoped only to the control plane would miss the kubelet ports every worker node also opens.",
+      "source": "Kubernetes documentation, \"Ports and Protocols\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "control plane ports"
+      ],
+      "conceptIDs": [
+        "k8ssec.control-plane-ports"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.etcd-vs-runtime-socket-contrast",
+      "type": "scenario",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 12810,
+      "front": "Both the etcd API bypass and the container runtime socket bypass skip the API server. What is the key difference in what each one hands an attacker?",
+      "back": "Etcd access reaches every object in the whole cluster; runtime socket access only reaches containers on that one node.",
+      "choices": "A) Etcd is cluster-wide; the runtime socket is node-local\nB) Both give exactly the same level of access\nC) The runtime socket is cluster-wide; etcd is node-local",
+      "choicesExplained": "B: etcd holds every object for the whole cluster, while a node's container runtime only controls what runs on that node. C: this reverses the two; etcd is the cluster-wide datastore, and the runtime socket is scoped to a single node.",
+      "explanation": "This is why etcd write access is described as equivalent to cluster root, while a compromised runtime socket is contained to the blast radius of that node \u2014 unless the containers there hold cluster-wide credentials.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "etcd write equals cluster root",
+        "container runtime socket"
+      ],
+      "conceptIDs": [
+        "k8ssec.api-server-bypass"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.app-expired-token-outcome",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 12820,
+      "front": "A request to the API server carries an expired bearer token, and anonymous access is enabled. Is it authenticated as system:anonymous, or rejected?",
+      "back": "Rejected, with a 401 Unauthorized error; only a request with no token at all is treated as anonymous, not one with a bad token.",
+      "explanation": "Anonymous access covers a missing credential, not a failed one.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Anonymous requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "anonymous request"
+      ],
+      "conceptIDs": [
+        "k8ssec.anonymous-auth-flag"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.app-kubelet-alwaysallow-risk",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 12830,
+      "front": "A kubelet is left on AlwaysAllow (the kubelet's command-line default). What risk does switching it to Webhook mode remove?",
+      "back": "Any authenticated caller being able to run any kubelet API action; Webhook mode instead checks each request with a SubjectAccessReview.",
+      "explanation": "AlwaysAllow performs no per-request check at all, once a caller is authenticated.",
+      "source": "Kubernetes documentation, \"Kubelet authentication/authorization\", \"Kubelet authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "uses": [
+        "kubelet authentication and authorization",
+        "SubjectAccessReview"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-authn-authz"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.app-review-direction-focus",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 12840,
+      "front": "Which default connection is plain, unauthenticated HTTP?",
+      "back": "API server to node, Pod or service via proxy: it is plain, unauthenticated HTTP by default, unlike the node-to-control-plane direction.",
+      "explanation": "The API-server-to-kubelet path is also unsafe by default, but that one is HTTPS without certificate verification, not plain HTTP.",
+      "source": "Kubernetes documentation, \"Communication between Nodes and the Control Plane\", \"Control plane to node\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/architecture/control-plane-node-communication/#control-plane-to-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "hub-and-spoke API pattern"
+      ],
+      "conceptIDs": [
+        "k8ssec.hub-and-spoke"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.app-leaked-healthcheck-cert",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 12850,
+      "front": "A monitoring tool's etcd client certificate was issued solely to call the health-check endpoint, and it leaks. What else could that certificate do?",
+      "back": "Likely read and write all of etcd's data: etcd typically has no authorization model finer than certificate trust.",
+      "explanation": "A certificate scoped by name for one purpose is not actually scoped by etcd itself to that purpose.",
+      "source": "Kubernetes documentation, \"Kubernetes API Server Bypass Risks\", \"The etcd API\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/#the-etcd-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "etcd access"
+      ],
+      "conceptIDs": [
+        "k8ssec.etcd-access"
+      ]
+    },
+    {
+      "id": "k8ssec.cluster-component-security.app-firewall-blocks-etcd",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 12860,
+      "front": "A firewall rule allows inbound traffic to ports 10257 and 30000-32767, but blocks 2379. Which control-plane component's traffic does this block?",
+      "back": "etcd's client API, which listens on 2379; 10257 is kube-controller-manager, and 30000-32767 is the NodePort range.",
+      "explanation": "Blocking 2379 cuts off the API server itself from etcd, since the API server is meant to be etcd's only ordinary client.",
+      "source": "Kubernetes documentation, \"Ports and Protocols\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "control plane ports"
+      ],
+      "conceptIDs": [
+        "k8ssec.control-plane-ports"
+      ]
+    }
+  ]
+}

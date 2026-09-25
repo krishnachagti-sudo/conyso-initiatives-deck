@@ -1,0 +1,926 @@
+{
+  "topic": "PKI and certificates",
+  "notes": [
+    {
+      "id": "k8ssec.pki-certificates.what-is-pki",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 11000,
+      "front": "What is a public key infrastructure (PKI), in one sentence?",
+      "back": "A framework to issue, maintain and revoke public key certificates.",
+      "explanation": "Kubernetes needs PKI so its own components can prove their identity to each other over TLS.",
+      "example": "Like a passport office: it issues, checks and can revoke the documents that prove who someone is.",
+      "source": "NIST CSRC Glossary, \"public_key_infrastructure\"; Kubernetes documentation, \"PKI certificates and requirements\"",
+      "sourceURL": "https://csrc.nist.gov/glossary/term/public_key_infrastructure",
+      "sourceLicence": "B \u00b7 public domain (US Government work)",
+      "introduces": [
+        "public key infrastructure (PKI)"
+      ],
+      "uses": [
+        "public key infrastructure (PKI)",
+        "digital certificate",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "k8ssec.pki"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.server-vs-client-cert",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 11010,
+      "front": "What is the difference between a server certificate and a client certificate in a Kubernetes cluster?",
+      "back": "A server certificate proves a server's identity to clients; a client certificate proves a client's identity to a server.",
+      "explanation": "The API server holds a server certificate; the scheduler holds a client certificate to authenticate to it.",
+      "example": "Like a shop's signage (server) versus your membership card (client): one proves who the shop is, the other proves who you are.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"How certificates are used by your cluster\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#how-certificates-are-used-by-your-cluster",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "server vs client certificate"
+      ],
+      "uses": [
+        "server vs client certificate",
+        "digital certificate",
+        "kube-apiserver",
+        "kube-scheduler"
+      ],
+      "conceptIDs": [
+        "k8ssec.server-client-cert"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.cluster-cas",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 11020,
+      "front": "What are the three cluster CAs Kubernetes uses when it manages its own certificates?",
+      "back": "kubernetes-ca (general), etcd-ca (etcd) and kubernetes-front-proxy-ca (the front proxy).",
+      "explanation": "Each CA covers one area: general, etcd, or the aggregation front proxy.",
+      "example": "Like separate keys for the front door, the server room and the loading bay of the same building.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"Single root CA\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#single-root-ca",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "cluster CAs"
+      ],
+      "uses": [
+        "cluster CAs",
+        "certificate authority (CA)",
+        "etcd"
+      ],
+      "conceptIDs": [
+        "k8ssec.cluster-cas"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.sa-key-pair",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 11030,
+      "front": "What is the service account key pair, and what is it for?",
+      "back": "sa.key and sa.pub: the key pair used to sign and verify service account tokens.",
+      "explanation": "It is separate from the cluster CAs, because it signs tokens rather than X.509 certificates.",
+      "example": "Like a stamp (private key) and the reference image of that stamp (public key) used to check a document is genuine.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"Single root CA\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#single-root-ca",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "service account key pair"
+      ],
+      "uses": [
+        "service account key pair",
+        "service account token",
+        "ServiceAccount"
+      ],
+      "conceptIDs": [
+        "k8ssec.sa-key-pair"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.pki-directory",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 11040,
+      "front": "Where does kubeadm store most of a cluster's certificates?",
+      "back": "/etc/kubernetes/pki.",
+      "explanation": "kubeconfig files holding user-account certificates, such as admin.conf and kubelet.conf, are the exception: kubeadm places those directly under /etc/kubernetes.",
+      "example": "Like a filing cabinet just for the building's own machine keys, separate from the folder of staff ID cards.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"Where certificates are stored\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#where-certificates-are-stored",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "/etc/kubernetes/pki"
+      ],
+      "uses": [
+        "/etc/kubernetes/pki",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "k8ssec.pki-directory"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.what-is-csr",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 11050,
+      "front": "What does a CertificateSigningRequest (CSR) let a client do?",
+      "back": "Ask that a certificate be signed by a named signer; the CSR is approved or denied before it is signed.",
+      "explanation": "A CSR's approval and signing are two distinct steps, and often two distinct sets of permissions.",
+      "example": "Like submitting a passport application: it is approved first, and only then printed.",
+      "source": "Kubernetes documentation, \"Certificates and Certificate Signing Requests\", \"Certificate signing requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "CertificateSigningRequest (CSR)"
+      ],
+      "uses": [
+        "CertificateSigningRequest (CSR)",
+        "digital certificate"
+      ],
+      "conceptIDs": [
+        "k8ssec.csr"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.what-is-tls-bootstrapping",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 11060,
+      "front": "What is kubelet TLS bootstrapping?",
+      "back": "Automated provisioning of a kubelet's client certificate when it joins the cluster.",
+      "explanation": "Without it, an administrator would have to create and distribute a unique certificate for every node by hand.",
+      "example": "Like a new employee getting their ID badge printed automatically once their starter paperwork is approved, rather than a manager cutting one by hand.",
+      "source": "Kubernetes documentation, \"TLS bootstrapping\", overview",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "kubelet TLS bootstrapping"
+      ],
+      "uses": [
+        "kubelet TLS bootstrapping",
+        "kubelet",
+        "CertificateSigningRequest (CSR)",
+        "bootstrap token"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-tls-bootstrapping"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.cert-rotation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 11070,
+      "front": "What does the Kubernetes security checklist recommend about certificate expiry and rotation?",
+      "back": "Keep intermediate and leaf certificates to at most 3 years; \"Securing a Cluster\" separately advises short lifetimes and automated rotation.",
+      "explanation": "A shorter lifetime shrinks the window in which a stolen certificate is still useful to an attacker.",
+      "example": "Like changing a building's door codes on a schedule, instead of leaving the same code in place for years.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Authentication & Authorization\"; \"Securing a Cluster\", \"Rotate infrastructure credentials frequently\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#authentication-authorization",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "certificate expiry and rotation"
+      ],
+      "uses": [
+        "certificate expiry and rotation",
+        "digital certificate"
+      ],
+      "conceptIDs": [
+        "k8ssec.cert-rotation"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.offline-root-ca",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 11080,
+      "front": "How does the security checklist say a cluster's root certificate should be protected?",
+      "back": "With an offline CA, or a managed online CA that has effective access controls.",
+      "explanation": "The root certificate underwrites every certificate the cluster trusts, so its private key deserves the strongest protection.",
+      "example": "Like keeping a master key in a safe rather than on the same keyring used every day.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Authentication & Authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#authentication-authorization",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "offline root CA"
+      ],
+      "uses": [
+        "offline root CA",
+        "certificate authority (CA)"
+      ],
+      "conceptIDs": [
+        "k8ssec.offline-root-ca"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.client-cert-limitations",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 11090,
+      "front": "What is one limitation of X.509 client certificate authentication?",
+      "back": "A client certificate cannot be individually revoked before it expires.",
+      "explanation": "This is why the hardening guide recommends short certificate lifetimes rather than relying on revocation.",
+      "example": "Like a printed visitor pass with no barcode to deactivate: it stays valid until its printed expiry date.",
+      "source": "Kubernetes documentation, \"Hardening Guide - Authentication Mechanisms\", \"X509 Client Certificate Authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/authentication-mechanisms/#x509-client-certificate-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "client certificate limitations"
+      ],
+      "uses": [
+        "client certificate limitations",
+        "X.509 client certificate authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.client-cert-limitations"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.what-is-cert-manager",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 11100,
+      "front": "What does cert-manager do?",
+      "back": "Creates TLS certificates for workloads and renews them before they expire, from issuers such as Let's Encrypt, Vault or a private PKI.",
+      "explanation": "It is a third-party tool, not part of Kubernetes itself, aimed at automating certificate lifecycle for applications rather than the control plane.",
+      "example": "Like a subscription that reorders a supply before it runs out, instead of someone remembering to reorder it manually.",
+      "source": "cert-manager website repository, docs README",
+      "sourceURL": "https://github.com/cert-manager/website/blob/master/content/docs/README.md",
+      "sourceLicence": "B \u00b7 Apache 2.0",
+      "introduces": [
+        "cert-manager"
+      ],
+      "uses": [
+        "cert-manager",
+        "public key infrastructure (PKI)",
+        "digital certificate"
+      ],
+      "conceptIDs": [
+        "k8ssec.cert-manager"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.server-certs-needed",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11110,
+      "front": "Kubernetes needs server certificates for the API server endpoint, the etcd server, {{c1::each kubelet}} and, optionally, the front-proxy.",
+      "explanation": "Every server certificate covers an endpoint that other components connect to.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"Server certificates\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#how-certificates-are-used-by-your-cluster",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "server vs client certificate",
+        "kube-apiserver",
+        "etcd",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "k8ssec.server-client-cert"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.client-certs-needed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11120,
+      "front": "Which three components hold client certificates to authenticate to the API server?",
+      "back": "Any three of: kubelet, kube-controller-manager, kube-scheduler, kube-proxy, or cluster administrators.",
+      "explanation": "The API server itself also holds a client certificate, to authenticate to etcd.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"Client certificates\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#how-certificates-are-used-by-your-cluster",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "server vs client certificate",
+        "kube-controller-manager",
+        "kube-scheduler",
+        "kube-proxy (optional)"
+      ],
+      "conceptIDs": [
+        "k8ssec.server-client-cert"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.etcd-mtls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11130,
+      "front": "How does etcd authenticate the API server and its peers?",
+      "back": "It implements mutual TLS (mTLS) to authenticate clients and peers.",
+      "explanation": "Both sides present a certificate, rather than only the server proving itself.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"Kubelet's server and client certificates\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#how-certificates-are-used-by-your-cluster",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "etcd",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "k8ssec.pki"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.sa-key-flags",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11140,
+      "front": "sa.key is provided to kube-controller-manager with --service-account-private-key-file; sa.pub is provided to {{c1::kube-apiserver}} with --service-account-key-file.",
+      "explanation": "The controller manager signs tokens with the private key; the API server only ever needs the public key to verify them.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"Certificate paths\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#certificate-paths",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "service account key pair",
+        "kube-apiserver",
+        "kube-controller-manager"
+      ],
+      "conceptIDs": [
+        "k8ssec.sa-key-pair"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.csr-request-fields",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11150,
+      "front": "What does a CertificateSigningRequest's spec.request field hold?",
+      "back": "A PEM-encoded PKCS#10 signing request.",
+      "explanation": "spec.signerName says which signer the request is addressed to, and is a required field.",
+      "source": "Kubernetes documentation, \"Certificates and Certificate Signing Requests\", \"Request signing process\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "CertificateSigningRequest (CSR)"
+      ],
+      "conceptIDs": [
+        "k8ssec.csr"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.csr-min-expiration",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11160,
+      "front": "What is the minimum value a client may request for a CSR's spec.expirationSeconds field?",
+      "back": "600 seconds (ten minutes), and only from Kubernetes v1.22 onward.",
+      "explanation": "Earlier API servers silently drop the field, and fall back to the signer's own default duration.",
+      "source": "Kubernetes documentation, \"Certificates and Certificate Signing Requests\", \"Request signing process\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs as of that date",
+      "uses": [
+        "CertificateSigningRequest (CSR)"
+      ],
+      "conceptIDs": [
+        "k8ssec.csr"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.csr-garbage-collection",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11170,
+      "front": "How long does a garbage collection controller keep a pending CertificateSigningRequest before deleting it?",
+      "back": "24 hours; approved, denied and failed requests are deleted after 1 hour.",
+      "explanation": "This keeps stale requests from building up in the cluster.",
+      "source": "Kubernetes documentation, \"Certificates and Certificate Signing Requests\", \"Request signing process\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "CertificateSigningRequest (CSR)"
+      ],
+      "conceptIDs": [
+        "k8ssec.csr"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.csr-approval-vs-signing-verbs",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11180,
+      "front": "Approving a CertificateSigningRequest needs update on its approval subresource and approve on the named signer; signing it needs the {{c1::sign}} verb on the named signer.",
+      "explanation": "Splitting these into separate permissions means a user who can approve a request cannot necessarily sign it.",
+      "source": "Kubernetes documentation, \"Certificates and Certificate Signing Requests\", \"Certificate signing authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#authorization",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "CertificateSigningRequest (CSR)",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.csr"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.subject-restriction-recap",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11190,
+      "front": "Which built-in signer never auto-approves its certificates, and additionally has extra scrutiny for cluster-admin-level subjects?",
+      "back": "kubernetes.io/kube-apiserver-client, the signer for general client certificates.",
+      "explanation": "The CertificateSubjectRestriction admission plugin is enabled by default to restrict system:masters for this signer, though other cluster-admin groups may exist.",
+      "source": "Kubernetes documentation, \"Certificates and Certificate Signing Requests\", \"Kubernetes signers\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#kubernetes-signers",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "CertificateSigningRequest (CSR)",
+        "system:masters"
+      ],
+      "conceptIDs": [
+        "k8ssec.csr"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.default-signing-duration",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11200,
+      "front": "When a CSR sets no spec.expirationSeconds, what lifetime does a built-in Kubernetes signer give the certificate by default?",
+      "back": "The kube-controller-manager's ClusterSigningDuration, which defaults to 1 year.",
+      "explanation": "The flag --cluster-signing-duration configures this default.",
+      "source": "Kubernetes documentation, \"Certificates and Certificate Signing Requests\", \"Signers\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "CertificateSigningRequest (CSR)",
+        "kube-controller-manager"
+      ],
+      "conceptIDs": [
+        "k8ssec.csr"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.bootstrap-token-group",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11210,
+      "front": "A kubelet authenticating with a bootstrap token is treated as a member of the {{c1::system:bootstrappers}} group.",
+      "explanation": "That group membership is what lets the kubelet be authorised, next, to create its own CSR.",
+      "source": "Kubernetes documentation, \"TLS bootstrapping\", \"Bootstrap tokens\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubelet TLS bootstrapping",
+        "bootstrap token"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-tls-bootstrapping"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.node-bootstrapper-role",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11220,
+      "front": "Which built-in ClusterRole grants exactly the rights to create and retrieve a CSR, for bootstrapping nodes?",
+      "back": "system:node-bootstrapper.",
+      "explanation": "A ClusterRoleBinding ties this role to the system:bootstrappers group.",
+      "source": "Kubernetes documentation, \"TLS bootstrapping\", \"Authorize kubelet to create CSR\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubelet TLS bootstrapping",
+        "ClusterRole",
+        "ClusterRoleBinding"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-tls-bootstrapping"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.kubelet-client-signer",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11230,
+      "front": "Which signer name does a bootstrapping kubelet request its own client certificate from?",
+      "back": "kubernetes.io/kube-apiserver-client-kubelet.",
+      "explanation": "Unlike the general client signer, this one may be auto-approved by the kube-controller-manager.",
+      "source": "Kubernetes documentation, \"TLS bootstrapping\", \"Bootstrap initialization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubelet TLS bootstrapping",
+        "CertificateSigningRequest (CSR)"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-tls-bootstrapping"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.serving-cert-rotation-beta",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11240,
+      "front": "What feature must be enabled on the kubelet for it to rotate its own serving certificate, and what state is it in?",
+      "back": "RotateKubeletServerCertificate, a beta feature (enabled by default).",
+      "explanation": "Client certificate rotation is a separate, older feature, configured with rotateCertificates.",
+      "source": "Kubernetes documentation, \"TLS bootstrapping\", \"Certificate rotation\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs v1.37",
+      "uses": [
+        "kubelet TLS bootstrapping",
+        "kubelet",
+        "feature gate"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-tls-bootstrapping"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.no-core-approver-for-serving-certs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11250,
+      "front": "Does Kubernetes' built-in CSR approving controller automatically approve kubelet serving certificates?",
+      "back": "No, for security reasons; a custom approving controller or manual approval is required.",
+      "explanation": "Auto-approving a serving certificate would let any node vouch for its own network identity unchecked.",
+      "source": "Kubernetes documentation, \"TLS bootstrapping\", \"Certificate rotation\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubelet TLS bootstrapping",
+        "server vs client certificate"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-tls-bootstrapping"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.checklist-thresholds",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11260,
+      "front": "The security checklist says intermediate and leaf certificates should expire no more than {{c1::3 years}} in the future.",
+      "explanation": "The checklist also asks for periodic access reviews no more than 24 months apart.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Authentication & Authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#authentication-authorization",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs as of that date",
+      "uses": [
+        "certificate expiry and rotation"
+      ],
+      "conceptIDs": [
+        "k8ssec.cert-rotation"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.o-field-fixed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11270,
+      "front": "Once an X.509 client certificate is issued, can its group membership (the O field) be changed?",
+      "back": "No, group membership is fixed for the life of that certificate.",
+      "explanation": "A new certificate must be issued to change a subject's groups.",
+      "source": "Kubernetes documentation, \"Hardening Guide - Authentication Mechanisms\", \"X509 Client Certificate Authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/authentication-mechanisms/#x509-client-certificate-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "client certificate limitations"
+      ],
+      "conceptIDs": [
+        "k8ssec.client-cert-limitations"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.password-protect-key",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 11280,
+      "front": "Can an X.509 client certificate's private key be password-protected in the usual Kubernetes client flow?",
+      "back": "No, this is listed as one of its limitations.",
+      "explanation": "Anyone who obtains the key file can use it without a further secret.",
+      "source": "Kubernetes documentation, \"Hardening Guide - Authentication Mechanisms\", \"X509 Client Certificate Authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/authentication-mechanisms/#x509-client-certificate-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "client certificate limitations"
+      ],
+      "conceptIDs": [
+        "k8ssec.client-cert-limitations"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.identify-etcd-cert-kind",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 11290,
+      "front": "The kube-etcd certificate is used both to accept connections from clients and to talk to etcd peers. Is it a server certificate, a client certificate, or both?",
+      "back": "Both: its kind is listed as \"server, client\".",
+      "explanation": "Most certificates in the all-certificates table are one kind only; kube-etcd and kube-etcd-peer are the exceptions.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"All certificates\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#all-certificates",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "server vs client certificate",
+        "etcd"
+      ],
+      "conceptIDs": [
+        "k8ssec.server-client-cert"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.scheduler-cert-identity",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 11300,
+      "front": "kube-scheduler needs to authenticate to the API server. What kind of certificate does it present, and with what Common Name?",
+      "back": "A client certificate, with CN system:kube-scheduler.",
+      "choices": "A) A client certificate with CN system:kube-scheduler\nB) A server certificate, since the scheduler exposes an endpoint too\nC) No certificate: the scheduler only uses a bearer token",
+      "choicesExplained": "B: the scheduler's own listening endpoint uses TLS separately, but authenticating *to* the API server needs a client certificate, not a server one. C: kubeadm's default-scheduler credential is a client certificate, not a token.",
+      "explanation": "scheduler.conf pairs this CN with an empty O, since the scheduler is not part of a broader group like system:nodes.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"Configure certificates for user accounts\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#configure-certificates-for-user-accounts",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "server vs client certificate",
+        "kube-scheduler"
+      ],
+      "conceptIDs": [
+        "k8ssec.server-client-cert"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.expiration-below-minimum",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 11310,
+      "front": "A client submits a CSR with spec.expirationSeconds set to 300. What happens?",
+      "back": "The API server rejects the CSR: 300 is below the 600-second minimum, so it's invalid and refused.",
+      "choices": "A) The API server rejects the CSR as invalid\nB) The certificate is issued for the signer's default duration instead\nC) The request is silently converted to 600 seconds",
+      "choicesExplained": "B: falling back to the signer's default only happens on API servers before v1.22, which silently drop the field; today's servers validate it. C: the field is not clamped upward; an out-of-range value is simply rejected.",
+      "explanation": "Ten minutes is a deliberate floor, low enough for short-lived workload certificates but high enough to avoid churn.",
+      "source": "Kubernetes documentation, \"Certificates and Certificate Signing Requests\", \"Request signing process\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs as of that date",
+      "uses": [
+        "CertificateSigningRequest (CSR)"
+      ],
+      "conceptIDs": [
+        "k8ssec.csr"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.approver-permission-needed",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 11320,
+      "front": "Which subresource must a user have update rights on, to approve a CertificateSigningRequest?",
+      "back": "certificatesigningrequests/approval.",
+      "explanation": "Signing the request afterwards needs a separate sign right on the named signer.",
+      "source": "Kubernetes documentation, \"Certificates and Certificate Signing Requests\", \"Certificate signing authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#authorization",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "CertificateSigningRequest (CSR)",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.csr"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.external-ca-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 11330,
+      "front": "A kubeadm cluster generates admin.conf and super-admin.conf. Which one carries a certificate in the break-glass system:masters group?",
+      "back": "super-admin.conf.",
+      "choices": "A) admin.conf, which uses the custom group kubeadm:cluster-admins instead\nB) super-admin.conf\nC) Both files use system:masters",
+      "choicesExplained": "A: admin.conf is bound to kubeadm:cluster-admins, a ClusterRole binding to cluster-admin, not to the break-glass group. C: only super-admin.conf, generated solely on the node where kubeadm init ran, uses system:masters.",
+      "explanation": "Splitting the two keeps day-to-day administration off the group that bypasses RBAC entirely.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"Configure certificates for user accounts\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#configure-certificates-for-user-accounts",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "server vs client certificate",
+        "system:masters",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "k8ssec.server-client-cert"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.stale-pending-csr",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 11340,
+      "front": "A CSR has sat Pending, unapproved, for 30 hours. What has happened to it?",
+      "back": "It has been garbage collected: pending requests are deleted after 24 hours.",
+      "explanation": "This keeps abandoned requests from accumulating, without needing an administrator to clean them up.",
+      "source": "Kubernetes documentation, \"Certificates and Certificate Signing Requests\", \"Request signing process\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "CertificateSigningRequest (CSR)"
+      ],
+      "conceptIDs": [
+        "k8ssec.csr"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.compromised-client-cert",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 11350,
+      "front": "An attacker steals a node's client certificate. Can the cluster administrator revoke that one certificate immediately?",
+      "back": "No; client certificates cannot be individually revoked before they expire.",
+      "choices": "A) Yes, by deleting the corresponding CSR object\nB) No\nC) Yes, by removing the node's ClusterRoleBinding",
+      "choicesExplained": "A: deleting a CSR does not affect an already-issued certificate. C: removing a binding changes what the certificate's group is authorised to do, but does not stop the certificate from authenticating.",
+      "explanation": "The only remedies are letting the certificate expire, or re-keying the CA that issued it \u2014 which is why the hardening guide recommends short lifetimes.",
+      "source": "Kubernetes documentation, \"Hardening Guide - Authentication Mechanisms\", \"X509 Client Certificate Authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/authentication-mechanisms/#x509-client-certificate-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "client certificate limitations"
+      ],
+      "conceptIDs": [
+        "k8ssec.client-cert-limitations"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.choose-cert-manager",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 11360,
+      "front": "A team wants their application's TLS certificates issued from Let's Encrypt and renewed automatically, without hand-editing Kubernetes certificates. Which tool fits?",
+      "back": "cert-manager.",
+      "explanation": "cert-manager watches for certificates that are due to expire and requests replacements from the configured issuer.",
+      "source": "cert-manager website repository, docs README",
+      "sourceURL": "https://github.com/cert-manager/website/blob/master/content/docs/README.md",
+      "sourceLicence": "B \u00b7 Apache 2.0",
+      "uses": [
+        "cert-manager"
+      ],
+      "conceptIDs": [
+        "k8ssec.cert-manager"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.admin-conf-not-in-pki-dir",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 11370,
+      "front": "Is kubeadm's admin.conf file stored under /etc/kubernetes/pki?",
+      "back": "No; user account certificates such as admin.conf sit directly under /etc/kubernetes.",
+      "explanation": "The pki subdirectory is reserved for the cluster's own component and CA certificates.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"Where certificates are stored\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#where-certificates-are-stored",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "/etc/kubernetes/pki",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "k8ssec.pki-directory"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.kubelet-cert-vs-serving-approver",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 11380,
+      "front": "A kubelet's client certificate renews automatically without a custom controller, but its serving certificate does not. Why the difference?",
+      "back": "The core approving controller never auto-approves serving certificates, for security reasons; only the client-kubelet signer may be auto-approved.",
+      "explanation": "Auto-approving a serving certificate would let any node vouch for its own network identity unchecked.",
+      "source": "Kubernetes documentation, \"TLS bootstrapping\", \"Certificate rotation\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-tls-bootstrapping/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubelet TLS bootstrapping",
+        "server vs client certificate"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubelet-tls-bootstrapping"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.cert-vs-token-revocation",
+      "type": "scenario",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 11390,
+      "front": "A bootstrap token and an X.509 client certificate are both compromised. Which one can be revoked immediately, and which cannot?",
+      "back": "The bootstrap token can be revoked by deleting its Secret; the client certificate cannot be revoked individually.",
+      "choices": "A) The token can be revoked; the certificate cannot\nB) The certificate can be revoked; the token cannot\nC) Neither can be revoked before expiry",
+      "choicesExplained": "B and C are both wrong: a bootstrap token is just a Kubernetes Secret, deleted like any other object, while a client certificate has no such off-switch short of rotating the CA.",
+      "explanation": "\"Securing a Cluster\" says a bootstrap token \"should be revoked or its authorization removed\" once the bootstrap phase is complete.",
+      "source": "Kubernetes documentation, \"Hardening Guide - Authentication Mechanisms\", \"X509 Client Certificate Authentication\"; \"Securing a Cluster\", \"Rotate infrastructure credentials frequently\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/authentication-mechanisms/#x509-client-certificate-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "client certificate limitations",
+        "bootstrap token"
+      ],
+      "conceptIDs": [
+        "k8ssec.client-cert-limitations"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.app-etcd-trust-without-public-ca",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 11940,
+      "front": "etcd and the API server must each trust the other's identity over TLS, with no public certificate authority involved. What supplies that trust?",
+      "back": "The cluster's own public key infrastructure (PKI): its own CAs issue the certificates both sides check.",
+      "explanation": "This is why Kubernetes runs its own dedicated CAs rather than relying on publicly trusted ones for internal traffic.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"How certificates are used by your cluster\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#how-certificates-are-used-by-your-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "public key infrastructure (PKI)",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "k8ssec.pki"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.app-sa-key-mismatch",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 11950,
+      "front": "kube-controller-manager is restarted with a new --service-account-private-key-file, but kube-apiserver still points --service-account-key-file at the old public key. What breaks?",
+      "back": "Newly signed service account tokens fail verification: the API server checks signatures against a public key that no longer matches.",
+      "explanation": "Both flags must be updated together, since the pair only works when the API server's public key matches the signer's private key.",
+      "source": "Kubernetes documentation, \"PKI certificates and requirements\", \"Certificate paths\"",
+      "sourceURL": "https://kubernetes.io/docs/setup/best-practices/certificates/#certificate-paths",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "service account key pair"
+      ],
+      "conceptIDs": [
+        "k8ssec.sa-key-pair"
+      ]
+    },
+    {
+      "id": "k8ssec.pki-certificates.app-five-year-intermediate",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 11960,
+      "front": "A team issues intermediate certificates with a five-year lifetime, reasoning that it cuts down on renewal work. Does this follow the security checklist's guidance?",
+      "back": "No. The checklist caps intermediate and leaf certificates at 3 years.",
+      "explanation": "A longer lifetime widens the window in which a stolen certificate stays useful to an attacker.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Authentication & Authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#authentication-authorization",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "certificate expiry and rotation"
+      ],
+      "conceptIDs": [
+        "k8ssec.cert-rotation"
+      ]
+    }
+  ]
+}

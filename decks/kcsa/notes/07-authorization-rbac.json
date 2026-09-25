@@ -1,0 +1,1518 @@
+{
+  "topic": "Authorization and RBAC",
+  "notes": [
+    {
+      "id": "k8ssec.authorization-rbac.authorization-mode",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7000,
+      "front": "What is an authorization mode in Kubernetes?",
+      "back": "A way the API server decides whether an authenticated request is allowed: AlwaysAllow, AlwaysDeny, ABAC, RBAC, Node or Webhook.",
+      "explanation": "Several modes can be chained; each is consulted in the order the cluster administrator configures.",
+      "example": "Like several checkpoints a request passes through, each able to wave it through, turn it away, or shrug.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization modes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "authorization mode"
+      ],
+      "uses": [
+        "authorization mode"
+      ],
+      "conceptIDs": [
+        "k8ssec.authorization-mode"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.authorization-verdict",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7010,
+      "front": "What are the three possible authorization verdicts?",
+      "back": "Allow, deny, or no opinion; the first module to allow or deny wins, and if all give no opinion the request is denied.",
+      "explanation": "Access is denied by default: staying silent is not the same as approving.",
+      "example": "Like a panel of judges: the moment one clearly votes yes or no, the vote is decided.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization verdicts\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#determine-whether-a-request-is-allowed-or-denied",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "authorization verdict (allow, deny, no opinion)"
+      ],
+      "uses": [
+        "authorization mode",
+        "authorization verdict (allow, deny, no opinion)"
+      ],
+      "conceptIDs": [
+        "k8ssec.authorization-verdict"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.always-allow",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7020,
+      "front": "What does the AlwaysAllow authorization mode do?",
+      "back": "It allows every request, bypassing authorization entirely; the docs warn never to use it on a publicly reachable API server.",
+      "explanation": "It is meant only for testing, since it removes the one check standing between an authenticated request and full access.",
+      "example": "Like a door with no lock at all, left open for convenience during setup.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization modes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#warning-always-allow",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "AlwaysAllow mode"
+      ],
+      "uses": [
+        "authorization mode",
+        "AlwaysAllow mode"
+      ],
+      "conceptIDs": [
+        "k8ssec.always-allow"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.node-authorization",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7030,
+      "front": "What is Node authorization?",
+      "back": "A special-purpose authorization mode that grants a kubelet permissions based on the Pods scheduled to run on its node.",
+      "explanation": "It limits a kubelet's permissions to what the Pods on its own node need.",
+      "example": "Like giving a site foreman keys only to the buildings on their own site.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization modes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Node authorization"
+      ],
+      "uses": [
+        "authorization mode",
+        "Node authorization"
+      ],
+      "conceptIDs": [
+        "k8ssec.node-authorization"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.abac-mode",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 7040,
+      "front": "What is the ABAC authorization mode?",
+      "back": "Attribute-based access control: access rights come from policies that combine attributes of the user, resource and environment.",
+      "explanation": "Its attributes still describe the same requests RBAC reasons about.",
+      "example": "Like a rule that checks several conditions at once: who you are, what you're touching, and when.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization modes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "ABAC authorization mode"
+      ],
+      "uses": [
+        "authorization mode",
+        "ABAC authorization mode"
+      ],
+      "conceptIDs": [
+        "k8ssec.abac-mode"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.webhook-authorization",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7050,
+      "front": "What is Webhook authorization?",
+      "back": "A synchronous HTTP callout that blocks the request until a remote service replies with a decision.",
+      "explanation": "It lets an organisation plug its own custom policy engine into the authorization chain.",
+      "example": "Like pausing at a gate while a call is made to confirm you're allowed through.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization modes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Webhook authorization"
+      ],
+      "uses": [
+        "authorization mode",
+        "Webhook authorization"
+      ],
+      "conceptIDs": [
+        "k8ssec.webhook-authorization"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.request-verbs",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7060,
+      "front": "What are request verbs?",
+      "back": "The action names Kubernetes maps HTTP methods to for authorization: get, list, watch, create, update, patch, delete, deletecollection.",
+      "explanation": "RBAC rules are written against these verbs, not against raw HTTP methods.",
+      "example": "Like translating \"knock\", \"peek\", or \"open\" into the single word a rulebook actually checks.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Request verbs and authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#determine-the-request-verb",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "request verbs"
+      ],
+      "uses": [
+        "request verbs"
+      ],
+      "conceptIDs": [
+        "k8ssec.request-verbs"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.get-list-watch",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7070,
+      "front": "Why are get, list and watch treated as equivalent in terms of data exposure?",
+      "back": "All three can return the full details of a resource; list on Secrets reveals the data of every matched Secret.",
+      "explanation": "Granting only list access to Secrets is not a safe half-measure: it still discloses their contents.",
+      "example": "Like assuming a \"browse the shelf\" permission is safer than \"read one book\", when browsing shows every page anyway.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Request verbs and authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#determine-the-request-verb",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "get, list and watch equivalence"
+      ],
+      "uses": [
+        "request verbs",
+        "get, list and watch equivalence",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.get-list-watch"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.system-masters",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7080,
+      "front": "What is the system:masters group?",
+      "back": "A built-in group that grants unrestricted access, bypassing RBAC and Webhook authorizers entirely.",
+      "explanation": "Because it bypasses those authorizers, removing a RoleBinding can never take this access away from a member.",
+      "example": "Like a master key that opens every lock in the building, issued outside the normal key-tracking system.",
+      "source": "Kubernetes documentation, \"Authorization\", \"The system:masters group\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#the-system-masters-group",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "system:masters"
+      ],
+      "uses": [
+        "system:masters"
+      ],
+      "conceptIDs": [
+        "k8ssec.system-masters"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.user-facing-roles",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7090,
+      "front": "What are the default user-facing ClusterRoles?",
+      "back": "cluster-admin, admin, edit and view: not system:-prefixed, and meant to be bound to real users or groups.",
+      "explanation": "Custom resources can be added to admin, edit or view by aggregation labels, without editing the built-in ClusterRole.",
+      "example": "Like a standard set of job titles (owner, editor, viewer) any organisation can hand out.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"User-facing roles\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "user-facing ClusterRoles"
+      ],
+      "uses": [
+        "ClusterRole",
+        "user-facing ClusterRoles"
+      ],
+      "conceptIDs": [
+        "k8ssec.user-facing-roles"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.system-prefix",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 7100,
+      "front": "What does the system: prefix on a ClusterRole or ClusterRoleBinding mean?",
+      "back": "It marks a resource directly managed by the control plane; modifying it can leave the cluster non-functional.",
+      "explanation": "The API server auto-reconciles these on every start-up, restoring any permissions that go missing.",
+      "example": "Like factory-fitted wiring in a building: technically editable, but not something you touch casually.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Default roles and role bindings\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#default-roles-and-role-bindings",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "system: prefix"
+      ],
+      "uses": [
+        "ClusterRole",
+        "system: prefix"
+      ],
+      "conceptIDs": [
+        "k8ssec.system-prefix"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.escalate-verb",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7110,
+      "front": "What does the escalate verb let a user do?",
+      "back": "Create or update Roles and ClusterRoles with permissions the user does not themselves hold.",
+      "explanation": "It is the one deliberate exception to RBAC's rule that you can't grant permissions you don't already have.",
+      "example": "Like a manager who can hand out job titles carrying more authority than their own.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Escalate verb\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#escalate-verb",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "escalate verb"
+      ],
+      "uses": [
+        "Role",
+        "escalate verb"
+      ],
+      "conceptIDs": [
+        "k8ssec.escalate-verb"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.bind-verb",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7120,
+      "front": "What does the bind verb let a user do?",
+      "back": "Create bindings to Roles or ClusterRoles that carry permissions the user does not already have.",
+      "explanation": "Like escalate, it bypasses Kubernetes' built-in protection against handing out more access than you hold.",
+      "example": "Like being allowed to assign any job title to a new hire, even one you don't hold yourself.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Bind verb\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#bind-verb",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "bind verb"
+      ],
+      "uses": [
+        "RoleBinding",
+        "bind verb"
+      ],
+      "conceptIDs": [
+        "k8ssec.bind-verb"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.impersonate-verb",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7130,
+      "front": "What does the impersonate verb control?",
+      "back": "Whether a user can act as, and gain the rights of, another user, group or service account.",
+      "explanation": "Care is needed granting it, since it can be combined with an impersonated account to reach excessive permissions.",
+      "example": "Like a pass that lets its holder wear anyone else's badge for the day.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Impersonate verb\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#impersonate-verb",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "impersonate verb"
+      ],
+      "uses": [
+        "user impersonation",
+        "impersonate verb"
+      ],
+      "conceptIDs": [
+        "k8ssec.impersonate-verb"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.rbac-escalation-prevention",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7140,
+      "front": "What is RBAC privilege escalation prevention?",
+      "back": "You can only create or update a Role or ClusterRole with permissions you already hold at the same scope, unless you have escalate or bind.",
+      "explanation": "It is enforced at the API level, so it applies even when the RBAC authorizer is not in use.",
+      "example": "Like being unable to write a permission slip granting access you don't hold yourself.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Privilege escalation prevention and bootstrapping\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#privilege-escalation-prevention-and-bootstrapping",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "RBAC privilege escalation prevention"
+      ],
+      "uses": [
+        "Role",
+        "ClusterRole",
+        "escalate verb",
+        "RBAC privilege escalation prevention"
+      ],
+      "conceptIDs": [
+        "k8ssec.rbac-escalation-prevention"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.wildcard-permissions",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7150,
+      "front": "Why should wildcard permissions be avoided in RBAC rules?",
+      "back": "A rule using * grants access to every current resource type, and to every resource type created in the future.",
+      "explanation": "Because Kubernetes is extensible, a wildcard rule written today can silently cover new CRDs installed tomorrow.",
+      "example": "Like a permission slip that says \"anything, ever\" instead of naming what's actually needed.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Least privilege\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#least-privilege",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "wildcard permissions"
+      ],
+      "uses": [
+        "Role",
+        "wildcard permissions"
+      ],
+      "conceptIDs": [
+        "k8ssec.wildcard-permissions"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.escalation-via-pod-creation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7160,
+      "front": "How does permission to create Pods lead to privilege escalation?",
+      "back": "Anyone who can create Pods in a namespace can mount its Secrets, ConfigMaps and volumes, and run as any ServiceAccount there.",
+      "explanation": "This is why workload-creation rights should be treated as far more powerful than they look at first glance.",
+      "example": "Like giving someone a master key to a floor because they only asked to open one office door.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Privilege escalation via workload creation or edits\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#privilege-escalation-via-pod-creation",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "privilege escalation via workload creation"
+      ],
+      "uses": [
+        "Pod",
+        "ServiceAccount",
+        "Secret",
+        "privilege escalation via workload creation"
+      ],
+      "conceptIDs": [
+        "k8ssec.escalation-via-pod-creation"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.nodes-proxy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7170,
+      "front": "What does the nodes/proxy permission give access to?",
+      "back": "The kubelet API, letting the holder run commands in any Pod on the node, bypassing audit logging and admission control.",
+      "explanation": "Even just get on nodes/proxy is enough, so it is not a read-only permission despite the verb name.",
+      "example": "Like a permission called \"view only\" that secretly also lets you flip switches.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Access to proxy subresource of Nodes\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#access-to-proxy-subresource-of-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "nodes/proxy permission"
+      ],
+      "uses": [
+        "kubelet",
+        "nodes/proxy permission"
+      ],
+      "conceptIDs": [
+        "k8ssec.nodes-proxy"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.rbac-other-risks",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7180,
+      "front": "What are other RBAC privilege escalation risks besides Pod creation and nodes/proxy?",
+      "back": "PersistentVolume creation (hostPath), approving CertificateSigningRequests, creating service account tokens, and controlling admission webhooks.",
+      "explanation": "Each turns a narrow-looking permission into a path to far broader access, so all deserve the same caution as Pod creation.",
+      "example": "Like several different side doors into the same building, each easy to overlook.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Kubernetes RBAC: privilege escalation risks\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#privilege-escalation-risks",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "RBAC escalation risks (other)"
+      ],
+      "uses": [
+        "PersistentVolume (PV)",
+        "hostPath",
+        "RBAC escalation risks (other)"
+      ],
+      "conceptIDs": [
+        "k8ssec.rbac-other-risks"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.access-review",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7190,
+      "front": "Why is periodic access review important for RBAC?",
+      "back": "To catch redundant entries and possible privilege escalations that have built up over time.",
+      "explanation": "If an attacker recreates a deleted user's account under the same name, they can inherit that user's old bindings automatically.",
+      "example": "Like periodically auditing who still holds a key to a building, not just who was ever issued one.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Periodic review\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#periodic-review",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "periodic access review"
+      ],
+      "uses": [
+        "RBAC",
+        "periodic access review"
+      ],
+      "conceptIDs": [
+        "k8ssec.access-review"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.subject-access-review",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 7200,
+      "front": "What is a SubjectAccessReview?",
+      "back": "An API object asking whether a given user may perform a given action.",
+      "explanation": "kubectl auth can-i uses the related SelfSubjectAccessReview to answer the same question for the current user.",
+      "example": "Like submitting a formal request asking \"would this badge open this door?\" without actually trying it.",
+      "source": "Kubernetes documentation, \"Authorization: Checking API access\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "SubjectAccessReview"
+      ],
+      "uses": [
+        "authorization mode",
+        "SubjectAccessReview"
+      ],
+      "conceptIDs": [
+        "k8ssec.subject-access-review"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.deny-by-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7300,
+      "front": "What happens to an API request if every configured authorizer returns \"no opinion\"?",
+      "back": "It is denied. Access is denied by default.",
+      "explanation": "An authorizer chain needs at least one module to actively allow a request; silence never grants access.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization verdicts\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#determine-whether-a-request-is-allowed-or-denied",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authorization verdict (allow, deny, no opinion)"
+      ],
+      "conceptIDs": [
+        "k8ssec.authorization-verdict"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.forbidden-status-code",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7310,
+      "front": "What HTTP status does a denied API request return?",
+      "back": "403 Forbidden.",
+      "explanation": "This is distinct from the 401 Unauthorized a failed authentication returns.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization verdicts\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#determine-whether-a-request-is-allowed-or-denied",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authorization verdict (allow, deny, no opinion)"
+      ],
+      "conceptIDs": [
+        "k8ssec.authorization-verdict"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.alwaysallow-rbac-combo",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7320,
+      "front": "What does --authorization-mode=AlwaysAllow,RBAC effectively behave as?",
+      "back": "The same as AlwaysAllow alone, since RBAC has no deny rules and can never override an earlier allow-everything mode.",
+      "explanation": "AlwaysAllow grants every request that reaches it, so RBAC never gets a chance to refuse anything.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization modes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#warning-always-allow",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "AlwaysAllow mode",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.always-allow"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.impersonate-verb-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7330,
+      "front": "In authorization, what resources can the impersonate verb apply to?",
+      "back": "users, groups and serviceaccounts in the core API group, and userextras in authentication.k8s.io.",
+      "explanation": "Knowing the exact resource names matters for writing an RBAC rule that grants only the impersonation you intend.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Request verbs and authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#determine-the-request-verb",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "impersonate verb"
+      ],
+      "conceptIDs": [
+        "k8ssec.impersonate-verb"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.system-masters-bypasses-webhook",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7340,
+      "front": "Does membership in system:masters bypass a Webhook authorizer, not just RBAC?",
+      "back": "Yes. Requests from system:masters members are never even sent to the webhook.",
+      "explanation": "This makes system:masters strictly stronger than any ClusterRole binding, no matter how permissive.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Least privilege\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#least-privilege",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "system:masters",
+        "Webhook authorization"
+      ],
+      "conceptIDs": [
+        "k8ssec.system-masters"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.cluster-admin-binding",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7350,
+      "front": "How should you grant someone cluster administrator rights, rather than adding them to system:masters?",
+      "back": "Create a ClusterRoleBinding to the built-in cluster-admin ClusterRole.",
+      "explanation": "Unlike system:masters, a ClusterRoleBinding can be reviewed, audited and removed through the normal RBAC objects.",
+      "source": "Kubernetes documentation, \"Authorization\", \"The system:masters group\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#the-system-masters-group",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "system:masters",
+        "user-facing ClusterRoles"
+      ],
+      "conceptIDs": [
+        "k8ssec.user-facing-roles"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.aggregation-labels",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7360,
+      "front": "How can you add custom-resource permissions to the default admin, edit or view ClusterRoles without editing them directly?",
+      "back": "Label a new ClusterRole with rbac.authorization.k8s.io/aggregate-to-admin, -edit or -view: \"true\".",
+      "explanation": "Aggregation keeps the built-in roles under control-plane management while still letting administrators extend them.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"User-facing roles\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "user-facing ClusterRoles"
+      ],
+      "conceptIDs": [
+        "k8ssec.user-facing-roles"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.escalate-bind-same-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7370,
+      "front": "Without escalate or bind, at what scope must you already hold a permission to grant it in a new Role or ClusterRole?",
+      "back": "The same scope as the object being modified: cluster-wide for a ClusterRole, or within the same namespace (or cluster-wide) for a Role.",
+      "explanation": "This scoping rule is what forces the exception via escalate or bind to be explicit and deliberate.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Restrictions on role creation or update\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#restrictions-on-role-creation-or-update",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RBAC privilege escalation prevention",
+        "escalate verb"
+      ],
+      "conceptIDs": [
+        "k8ssec.rbac-escalation-prevention"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.namespace-minimize-clusterrolebinding",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7380,
+      "front": "What general good practice reduces the scope of RBAC rights whenever possible?",
+      "back": "Assign permissions at the namespace level with RoleBindings, rather than cluster-wide with ClusterRoleBindings.",
+      "explanation": "A RoleBinding limits the blast radius of a mistaken or compromised grant to one namespace.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Least privilege\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#least-privilege",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RoleBinding",
+        "ClusterRoleBinding",
+        "wildcard permissions"
+      ],
+      "conceptIDs": [
+        "k8ssec.wildcard-permissions"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.pv-hostpath-fact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7390,
+      "front": "Why is unrestricted permission to create PersistentVolume objects a privilege-escalation risk?",
+      "back": "It includes the ability to create hostPath volumes, giving a Pod access to the node's host filesystem.",
+      "explanation": "Only trusted cluster operators, or the control plane's own provisioning process, should be able to create PersistentVolumes.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Persistent volume creation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#persistent-volume-creation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RBAC escalation risks (other)",
+        "PersistentVolume (PV)",
+        "hostPath"
+      ],
+      "conceptIDs": [
+        "k8ssec.rbac-other-risks"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.csr-approval-risk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7400,
+      "front": "How can create rights on CertificateSigningRequests lead to privilege escalation?",
+      "back": "Combined with approval rights, they let a user mint client certificates with arbitrary names, including names of system components.",
+      "explanation": "Kubernetes trusts a certificate's identity claims once it is signed and approved, whatever name was requested.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"CSRs and certificate issuing\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#csrs-and-certificate-issuing",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RBAC escalation risks (other)"
+      ],
+      "conceptIDs": [
+        "k8ssec.rbac-other-risks"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.object-creation-dos",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7410,
+      "front": "How can rights to create objects lead to a denial-of-service condition?",
+      "back": "Users can create enough or large enough objects to overload etcd, especially in multi-tenant clusters.",
+      "explanation": "Resource quotas on object counts are one mitigation for semi-trusted or untrusted users.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Kubernetes RBAC: denial of service risks\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#object-creation-dos",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.rbac-other-risks"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.can-i-mechanism",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7420,
+      "front": "What does kubectl auth can-i use to determine if a user can perform an action?",
+      "back": "The SelfSubjectAccessReview API, so it works regardless of which authorization mode is configured.",
+      "explanation": "Combined with --as, it can also answer the question for an impersonated user.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Checking API access\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "SubjectAccessReview"
+      ],
+      "conceptIDs": [
+        "k8ssec.subject-access-review"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-list-secrets-grant",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 7600,
+      "front": "A team asks for \"list\" access to Secrets, reasoning that only \"get\" reveals contents. Should this request be granted as harmless?",
+      "back": "No. list on Secrets returns the full data of every matched Secret, so it is just as sensitive as get.",
+      "explanation": "kubectl get secrets -A -o yaml is exactly this kind of list request, and it prints every Secret's contents.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Listing secrets\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#listing-secrets",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "get, list and watch equivalence",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.get-list-watch"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-nodes-proxy-get",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 7610,
+      "front": "A monitoring tool is granted only \"get\" on nodes/proxy for read-only metrics. Is this actually read-only?",
+      "back": "No. get on nodes/proxy can retrieve container logs and execute or attach to Pod processes over the kubelet API.",
+      "explanation": "The verb name suggests a safe read, but the underlying kubelet API it reaches is far more powerful.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Access to proxy subresource of Nodes\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#access-to-proxy-subresource-of-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "nodes/proxy permission"
+      ],
+      "conceptIDs": [
+        "k8ssec.nodes-proxy"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-pod-creation-namespace",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 7620,
+      "front": "A contractor is given rights to create Pods in the billing namespace, but no other permissions there. What can they now effectively reach?",
+      "back": "Every Secret, ConfigMap and mountable volume in that namespace, and the API access of any ServiceAccount in it.",
+      "explanation": "This is why creating Pods should be treated as namespace-wide access, not a narrow workload permission.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Privilege escalation via workload creation or edits\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#privilege-escalation-via-pod-creation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privilege escalation via workload creation"
+      ],
+      "conceptIDs": [
+        "k8ssec.escalation-via-pod-creation"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-escalate-verb-grant",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7630,
+      "front": "A user with no Secret-reading rights is given the escalate verb on clusterroles. Can they now create a ClusterRole that reads all Secrets?",
+      "back": "Yes. escalate is the specific exception that lets them grant permissions they don't already hold.",
+      "explanation": "This is exactly why escalate and bind should be handed out as carefully as cluster-admin itself.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Escalate verb\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#escalate-verb",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "escalate verb"
+      ],
+      "conceptIDs": [
+        "k8ssec.escalate-verb"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-wildcard-crd",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 7640,
+      "front": "A Role grants get,list,watch on resources: [\"*\"] in a namespace. Six months later a new CRD is installed there. What happens to that Role's reach?",
+      "back": "It automatically covers the new custom resource too, without anyone editing the Role.",
+      "explanation": "This silent expansion is exactly why wildcard rules are discouraged in favour of naming resource types explicitly.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Least privilege\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#least-privilege",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "wildcard permissions"
+      ],
+      "conceptIDs": [
+        "k8ssec.wildcard-permissions"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-alwaysallow-choice",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7650,
+      "front": "A team wants a quick way to skip authorization while load-testing a local, non-networked test cluster. Is AlwaysAllow acceptable here?",
+      "back": "Only for testing on a cluster with no untrusted clients; it must never be used where the API server is reachable from the internet.",
+      "explanation": "The docs single out public reachability as the specific line AlwaysAllow must never cross.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization modes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#warning-always-allow",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "AlwaysAllow mode"
+      ],
+      "conceptIDs": [
+        "k8ssec.always-allow"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-stale-user-review",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 7660,
+      "front": "An employee named 'jsmith' leaves, and a year later a new hire is also given the username 'jsmith' without a review of old bindings. What risk does this create?",
+      "back": "The new account can automatically inherit any RoleBindings still pointing at the old, deleted user's name.",
+      "explanation": "This is exactly the scenario periodic access review is meant to catch before it becomes a real escalation.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Periodic review\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#periodic-review",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "periodic access review"
+      ],
+      "conceptIDs": [
+        "k8ssec.access-review"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-impersonate-scope",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 7670,
+      "front": "A support engineer is given impersonate rights on all ServiceAccounts, to debug their permissions. What extra care does this need?",
+      "back": "Confirming that impersonating any one of those ServiceAccounts cannot itself grant excessive permissions.",
+      "explanation": "The impersonate verb inherits whatever the impersonated identity can do, so the risk scales with the most powerful account in scope.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Impersonate verb\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#impersonate-verb",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "impersonate verb"
+      ],
+      "conceptIDs": [
+        "k8ssec.impersonate-verb"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-node-auth-fit",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7680,
+      "front": "A cluster wants kubelets to only manage the Pods scheduled to their own node, using an identity-based rule rather than a hand-written RBAC policy. Which mode fits?",
+      "back": "Node authorization, the special-purpose mode built for exactly this kubelet-to-node relationship.",
+      "explanation": "It reads the same Pod-to-node bindings the scheduler creates, rather than requiring a custom policy per node.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization modes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Node authorization"
+      ],
+      "conceptIDs": [
+        "k8ssec.node-authorization"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.contrast-escalate-vs-bind",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7900,
+      "front": "What is the difference between the escalate and bind verbs?",
+      "back": "escalate lets you create or update a Role or ClusterRole with rights you don't hold; bind lets you attach an existing one to a subject.",
+      "explanation": "Both bypass the usual \"you can only grant what you have\" rule, but at different steps: writing the role versus binding it.",
+      "contrast": "escalate is about authoring extra rights; bind is about handing out rights that already exist.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Escalate verb\" and \"Bind verb\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#escalate-verb",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "escalate verb",
+        "bind verb"
+      ],
+      "conceptIDs": [
+        "k8ssec.escalate-verb",
+        "k8ssec.bind-verb"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.contrast-system-masters-vs-cluster-admin",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7910,
+      "front": "What is the difference between system:masters and cluster-admin?",
+      "back": "system:masters is a group that bypasses RBAC and webhook checks entirely; cluster-admin is an ordinary ClusterRole bound to that group by default.",
+      "explanation": "Removing the default ClusterRoleBinding doesn't help, because system:masters members skip authorization checks regardless of any binding.",
+      "contrast": "cluster-admin can be reviewed and unbound like any role; system:masters membership cannot be revoked that way.",
+      "source": "Kubernetes documentation, \"Authorization\", \"The system:masters group\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#the-system-masters-group",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "system:masters",
+        "user-facing ClusterRoles"
+      ],
+      "conceptIDs": [
+        "k8ssec.system-masters",
+        "k8ssec.user-facing-roles"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.contrast-get-vs-list-watch",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7920,
+      "front": "Is there a meaningful data-exposure difference between get, list and watch on Secrets?",
+      "back": "No. All three can return the full data of a Secret; they differ only in whether you're fetching one, many, or a live stream.",
+      "explanation": "Treating list as \"lighter\" than get is a common but incorrect assumption when scoping RBAC rules.",
+      "contrast": "get names one object; list and watch return or stream many, but every one exposes full contents.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Request verbs and authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#determine-the-request-verb",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "get, list and watch equivalence"
+      ],
+      "conceptIDs": [
+        "k8ssec.get-list-watch"
+      ]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.authz-context-attributes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7430,
+      "front": "What request attributes does Kubernetes authorization actually look at?",
+      "back": "User, group, extra, whether it is a resource request, request path, verb (API or HTTP), resource, subresource, namespace and API group.",
+      "explanation": "Because only these attributes are considered, authorization policy can never depend on, say, the request body's contents.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Request attributes used in authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["authorization mode", "request verbs"],
+      "conceptIDs": ["k8ssec.authorization-mode"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.non-resource-verb",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7440,
+      "front": "What verb does a GET request to /healthz use for authorization, given it isn't a resource endpoint?",
+      "back": "get: non-resource requests use the lower-cased HTTP method itself as the verb.",
+      "explanation": "This differs from resource requests, where GET maps to get, list or watch depending on what's being fetched.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Non-resource requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#request-verb-non-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["request verbs"],
+      "conceptIDs": ["k8ssec.request-verbs"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.http-to-verb-mapping",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7450,
+      "front": "How does Kubernetes map HTTP methods to resource request verbs?",
+      "back": "POST is create; GET/HEAD is get, list or watch; PUT is update; PATCH is patch; DELETE is delete or deletecollection.",
+      "explanation": "This mapping is what lets RBAC rules be written in terms of Kubernetes verbs rather than raw HTTP methods.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Resource requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#request-verb-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["request verbs"],
+      "conceptIDs": ["k8ssec.request-verbs"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.special-verbs-list",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7460,
+      "front": "Besides the standard CRUD verbs, what special-purpose verbs does Kubernetes check for authorization?",
+      "back": "impersonate (on users, groups, serviceaccounts), approve (on CertificateSigningRequests), and escalate and bind (on roles and clusterroles).",
+      "explanation": "Each of these checks a narrower, more powerful action than the resource's ordinary verbs.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Resource requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#request-verb-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["request verbs", "impersonate verb", "escalate verb", "bind verb"],
+      "conceptIDs": ["k8ssec.request-verbs"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.authz-config-vs-flags",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7470,
+      "front": "Can --authorization-config and --authorization-mode be set on the API server at the same time?",
+      "back": "No. Setting both is not allowed; the API server reports an error and exits immediately at start-up.",
+      "explanation": "You must pick one configuration approach: the file-based authorizer chain, or the older flag-based one.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization mode configuration\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#choice-of-authz-config",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["authorization mode"],
+      "conceptIDs": ["k8ssec.authorization-mode"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.cmdline-mode-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7480,
+      "front": "When several authorization modes are listed on the command line, such as --authorization-mode=Node,RBAC,Webhook, what determines priority?",
+      "back": "The order they're listed in: an earlier module has higher priority to allow or deny the request.",
+      "explanation": "This ordering is why placing AlwaysAllow first, even alongside RBAC, effectively disables RBAC's checks.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Command line authorization mode configuration\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#using-flags-for-your-authorization-module",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["authorization mode"],
+      "conceptIDs": ["k8ssec.authorization-mode"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.authz-config-reload",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7490,
+      "front": "How often does the API server reload the authorization configuration file if no change is observed?",
+      "back": "Every 60 seconds, in addition to reloading immediately whenever the file does change.",
+      "explanation": "This gives near-live updates without needing to restart the API server for most authorizer changes.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization configuration and reloads\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-configuration-and-reloads",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "uses": ["authorization mode"],
+      "conceptIDs": ["k8ssec.authorization-mode"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.authz-config-reload-restriction",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7500,
+      "front": "What must stay unchanged when the authorization configuration file is reloaded?",
+      "back": "Every non-webhook authorizer type: a reload must not add or remove Node or RBAC authorizers, though they can be reordered.",
+      "explanation": "This keeps a live reload from silently turning a core authorizer on or off.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization configuration and reloads\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-configuration-and-reloads",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["authorization mode", "Node authorization", "RBAC"],
+      "conceptIDs": ["k8ssec.authorization-mode", "k8ssec.node-authorization"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.subresource-syntax",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7510,
+      "front": "How does an RBAC rule refer to a subresource, such as a Pod's logs?",
+      "back": "With a slash, as in resources: [\"pods\", \"pods/log\"]; access to pods does not itself grant access to pods/log.",
+      "explanation": "Subresources are authorized separately, so each one that's needed must be listed explicitly.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Referring to resources\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Role", "request verbs"],
+      "conceptIDs": ["k8ssec.request-verbs"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.resourcenames-restrict",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7520,
+      "front": "What does the resourceNames field on an RBAC rule let you do?",
+      "back": "Restrict get, update, patch or delete to specific named instances of a resource, rather than every object of that type.",
+      "explanation": "It narrows an otherwise type-wide grant down to one or a few named objects.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Referring to resources\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Role"],
+      "conceptIDs": ["k8ssec.wildcard-permissions"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.resourcenames-create-exception",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7530,
+      "front": "Can resourceNames restrict a top-level create or a deletecollection request?",
+      "back": "No. Top-level create can't be named yet at authorization time, and deletecollection can never be restricted by name.",
+      "explanation": "The create exception does not apply to subresources: resourceNames can still restrict something like pods/exec.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Referring to resources\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Role"],
+      "conceptIDs": ["k8ssec.wildcard-permissions"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.resourcenames-list-watch",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7540,
+      "front": "If list or watch is restricted by resourceName, what must the client's request include to be authorized?",
+      "back": "A metadata.name field selector matching that resourceName, such as --field-selector=metadata.name=my-configmap.",
+      "explanation": "Without that field selector, the request doesn't match the narrowed rule and is denied.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Referring to resources\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Role"],
+      "conceptIDs": ["k8ssec.wildcard-permissions"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.cluster-admin-binding-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7550,
+      "front": "Does cluster-admin always give cluster-wide control, no matter how it's bound?",
+      "back": "No. Bound with a ClusterRoleBinding it controls the whole cluster; bound with a RoleBinding it controls only that one namespace, including the namespace object itself.",
+      "explanation": "The same ClusterRole can carry very different real-world scope depending on which kind of binding uses it.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Default roles and role bindings\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#default-roles-and-role-bindings",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["user-facing ClusterRoles", "RoleBinding", "ClusterRoleBinding"],
+      "conceptIDs": ["k8ssec.user-facing-roles"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.admin-role-limits",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7560,
+      "front": "What can the default admin ClusterRole not do, even inside its own namespace?",
+      "back": "Write to resource quota, write to the namespace object itself, or write to EndpointSlices, in clusters created with v1.22 or later.",
+      "explanation": "It still allows creating Roles and RoleBindings in the namespace, which is more than edit is allowed to do.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"User-facing roles\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "uses": ["user-facing ClusterRoles"],
+      "conceptIDs": ["k8ssec.user-facing-roles"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.edit-role-escalation-risk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7570,
+      "front": "Why does the default edit ClusterRole carry a privilege-escalation risk?",
+      "back": "It allows accessing Secrets and running Pods as any ServiceAccount in the namespace, gaining that ServiceAccount's API access.",
+      "explanation": "This is the same privilege-escalation-via-workload-creation risk, now tied specifically to a commonly granted default role.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"User-facing roles\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["user-facing ClusterRoles", "privilege escalation via workload creation"],
+      "conceptIDs": ["k8ssec.user-facing-roles", "k8ssec.escalation-via-pod-creation"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.view-role-no-secrets",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7580,
+      "front": "Why does the default view ClusterRole deliberately exclude Secrets?",
+      "back": "Reading Secret contents would expose ServiceAccount credentials in the namespace, letting the viewer act as any ServiceAccount there.",
+      "explanation": "This is a rare case where even a strictly read-only default role withholds one resource type entirely, for exactly this escalation reason.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"User-facing roles\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["user-facing ClusterRoles", "Secret"],
+      "conceptIDs": ["k8ssec.user-facing-roles"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-pods-log-subresource",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7690,
+      "front": "A Role grants get and list on pods only. Can its subject run kubectl logs on those Pods?",
+      "back": "No. Reading logs needs the pods/log subresource listed separately; access to pods alone doesn't cover it.",
+      "explanation": "Subresources are authorized independently of their parent resource, however closely related they seem.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Referring to resources\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["request verbs", "Role"],
+      "conceptIDs": ["k8ssec.request-verbs"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-restrict-named-configmap",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 7700,
+      "front": "A Role should let a subject update only the ConfigMap named my-configmap, not every ConfigMap in the namespace. Which field makes this possible?",
+      "back": "resourceNames: [\"my-configmap\"], combined with resources: [\"configmaps\"] and the needed verbs.",
+      "explanation": "This narrows a type-wide rule to one specific object, without needing a separate namespace just for that ConfigMap.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Referring to resources\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Role"],
+      "conceptIDs": ["k8ssec.wildcard-permissions"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-resourcename-create-fail",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 7710,
+      "front": "An administrator tries to write a Role rule that allows create only for a ConfigMap named my-configmap, using resourceNames. Will this work as intended?",
+      "back": "No. Top-level create can't be restricted by resourceNames, since the new object's name isn't known at authorization time.",
+      "explanation": "This limitation applies only to top-level create, not to subresource actions like pods/exec.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Referring to resources\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Role"],
+      "conceptIDs": ["k8ssec.wildcard-permissions"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-list-fieldselector",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 7720,
+      "front": "A user is authorized to list configmaps only when resourceName my-configmap matches. What must their kubectl command include to succeed?",
+      "back": "A metadata.name field selector for that name, e.g. kubectl get configmaps --field-selector=metadata.name=my-configmap.",
+      "explanation": "Without that selector, the request doesn't match the narrowed rule and is denied, even though list is otherwise permitted.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Referring to resources\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Role"],
+      "conceptIDs": ["k8ssec.wildcard-permissions"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-pick-admin-for-role-mgmt",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 7730,
+      "front": "A namespace lead needs to manage Roles and RoleBindings within their own namespace, on top of ordinary read/write access. Which default ClusterRole, bound with a RoleBinding, fits?",
+      "back": "admin, since edit is explicitly not allowed to view or modify roles or role bindings.",
+      "explanation": "admin still can't touch resource quota or the namespace object itself, which stays reserved for cluster administrators.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"User-facing roles\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["user-facing ClusterRoles"],
+      "conceptIDs": ["k8ssec.user-facing-roles"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-view-cant-read-secrets",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7740,
+      "front": "Someone bound to the default view ClusterRole runs kubectl get secrets in that namespace. Does it succeed?",
+      "back": "No. view deliberately excludes Secrets, to stop a read-only viewer from reaching ServiceAccount credentials and escalating.",
+      "explanation": "It's a useful reminder that \"read-only\" defaults still withhold specific resources for security reasons.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"User-facing roles\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["user-facing ClusterRoles", "Secret"],
+      "conceptIDs": ["k8ssec.user-facing-roles"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-edit-role-pod-escalation",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 7750,
+      "front": "A contractor is granted the default edit ClusterRole in one namespace, meant only for deploying application code. What unintended access does this actually give them?",
+      "back": "Access to that namespace's Secrets, and the ability to run Pods as any of its ServiceAccounts.",
+      "explanation": "This is why edit, despite sounding narrow, should be treated as carrying real privilege-escalation risk.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"User-facing roles\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["user-facing ClusterRoles", "privilege escalation via workload creation"],
+      "conceptIDs": ["k8ssec.escalation-via-pod-creation"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-authz-mode-order-outcome",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 7760,
+      "front": "A cluster is started with --authorization-mode=Webhook,RBAC. If the webhook returns \"deny\" for a request that RBAC would have allowed, what is the final verdict?",
+      "back": "Denied. The first module to give a clear allow or deny wins; RBAC is never even consulted.",
+      "explanation": "This is exactly why the order authorizers are listed in matters as much as which ones are enabled.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Command line authorization mode configuration\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#using-flags-for-your-authorization-module",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["authorization verdict (allow, deny, no opinion)"],
+      "conceptIDs": ["k8ssec.authorization-verdict"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-csr-approve-verb",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 7770,
+      "front": "A user can update the certificatesigningrequests/approval subresource but lacks the approve verb for the signer. Can they approve a pending CertificateSigningRequest?",
+      "back": "No. Approving requires both update rights on the approval subresource and the approve verb for the relevant signer.",
+      "explanation": "This narrow verb is what keeps approval from being an accidental side effect of broader CertificateSigningRequest management rights.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Resource requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#request-verb-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["request verbs"],
+      "conceptIDs": ["k8ssec.request-verbs"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-abac-vs-rbac-choice",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 7780,
+      "front": "A team wants permission changes to take effect immediately through the API, without editing a file on every control-plane node and restarting it. Should they use ABAC or RBAC?",
+      "back": "RBAC. ABAC's policies live in a file the API server reads only at start-up, so changes need a restart.",
+      "explanation": "The apiserver will need to be restarted to pick up new ABAC policy lines, unlike RBAC rules made through the API.",
+      "source": "Kubernetes documentation, \"Using ABAC Authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/abac/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["ABAC authorization mode", "RBAC"],
+      "conceptIDs": ["k8ssec.abac-mode"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-node-mode-not-for-users",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 7790,
+      "front": "Can a normal user rely on Node authorization to gain access to the Pods they personally created?",
+      "back": "No. Node authorization is a special-purpose mode that grants access only to kubelets, based on the Pods scheduled to their node.",
+      "explanation": "A human user's access is decided by RBAC, ABAC or Webhook, never by the Node mode.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization modes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Node authorization"],
+      "conceptIDs": ["k8ssec.node-authorization"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-sar-custom-ui",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 7800,
+      "front": "A team is building a custom UI that needs to check, for arbitrary users, whether they can perform an action, without duplicating RBAC logic in the UI itself. What API should it call?",
+      "back": "SubjectAccessReview, which asks the API server directly whether a given user may perform a given action.",
+      "explanation": "This keeps the authorization decision in one place, the API server, instead of re-implementing RBAC rules elsewhere.",
+      "source": "Kubernetes documentation, \"Controlling Access to the Kubernetes API\", \"Authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/controlling-access/#authorization",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["SubjectAccessReview"],
+      "conceptIDs": ["k8ssec.subject-access-review"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.contrast-edit-vs-view",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7930,
+      "front": "What is the difference between the default edit and view ClusterRoles?",
+      "back": "edit allows read/write on most objects, including Secrets and running Pods as any ServiceAccount; view is read-only and explicitly excludes Secrets.",
+      "explanation": "view's exclusion of Secrets is deliberate, to avoid the same escalation risk that makes edit powerful.",
+      "contrast": "edit can act as the namespace's ServiceAccounts; view can only read, and cannot read Secrets.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"User-facing roles\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["user-facing ClusterRoles", "Secret"],
+      "conceptIDs": ["k8ssec.user-facing-roles"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.wildcard-verb-scenario",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 7810,
+      "front": "A Role grants verbs: [\"*\"] on configmaps because the author only wanted get and list. Does this also grant delete?",
+      "back": "Yes. The verb wildcard grants every current and future verb on that resource, including delete, patch and update.",
+      "explanation": "This is the same caution the docs give for wildcards in resources: it applies equally to the verbs field.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Referring to resources\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["wildcard permissions"],
+      "conceptIDs": ["k8ssec.wildcard-permissions"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-bind-without-verb",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 7820,
+      "front": "A user already holds every permission listed in a new ClusterRole they want to create, but they don't have the escalate verb. Can they still create it?",
+      "back": "Yes. escalate is only needed when granting permissions you don't already hold; holding them yourself is enough.",
+      "explanation": "This is the ordinary path the restriction allows: escalate is the exception, not a requirement for every role change.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Restrictions on role creation or update\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#restrictions-on-role-creation-or-update",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["RBAC privilege escalation prevention", "escalate verb"],
+      "conceptIDs": ["k8ssec.rbac-escalation-prevention"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-system-masters-binding-removed",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7830,
+      "front": "An administrator removes a user's ClusterRoleBinding to cluster-admin, but forgets the user is also in the system:masters group. Can RBAC now restrict them?",
+      "back": "No. system:masters bypasses all RBAC rights checks, and this cannot be revoked by removing RoleBindings or ClusterRoleBindings.",
+      "explanation": "The only fix is removing the user from system:masters itself, not adjusting any RoleBinding or ClusterRoleBinding.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices: Least privilege\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#least-privilege",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["system:masters"],
+      "conceptIDs": ["k8ssec.system-masters"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-self-provision-hostpath",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 7840,
+      "front": "A team is granted broad create rights on PersistentVolumes so it can self-provision storage. What escalation risk does this overlook?",
+      "back": "Creating a hostPath PersistentVolume gives a Pod access to the node's filesystem: a privilege-escalation risk, not just a storage convenience.",
+      "explanation": "This is why PersistentVolume creation is listed alongside Pod creation and certificate approval as an RBAC escalation risk.",
+      "source": "Kubernetes documentation, \"RBAC Good Practices\", \"Persistent volume creation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#persistent-volume-creation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["RBAC escalation risks (other)", "PersistentVolume (PV)"],
+      "conceptIDs": ["k8ssec.rbac-other-risks"]
+    },
+    {
+      "id": "k8ssec.authorization-rbac.app-conflicting-authz-flags",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7850,
+      "front": "A cluster already runs with --authorization-mode=Node,RBAC. An administrator adds --authorization-config to also configure a Webhook authorizer. Can the API server start with both set?",
+      "back": "No. Setting --authorization-config and --authorization-mode together makes the API server report an error and exit immediately.",
+      "explanation": "An administrator must pick one configuration approach: the file-based authorizer chain, or the older flag-based one.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization mode configuration\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#choice-of-authz-config",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["authorization mode"],
+      "conceptIDs": ["k8ssec.authorization-mode"]
+    }
+  ]
+}

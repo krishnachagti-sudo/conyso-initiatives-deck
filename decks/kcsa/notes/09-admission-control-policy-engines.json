@@ -1,0 +1,1089 @@
+{
+  "topic": "Admission control and policy engines",
+  "notes": [
+    {
+      "id": "k8ssec.admission-control-policy-engines.mutating-validating",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9000,
+      "front": "What is the difference between mutating and validating admission?",
+      "back": "Mutating admission controllers may change the object being created; validating ones may only accept or reject it.",
+      "explanation": "Mutating controllers run first, so a validating controller always sees the already-mutated object.",
+      "example": "Like an editor who can rewrite a draft, followed by a proofreader who can only approve or reject it.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"Admission control phases\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#admission-control-phases",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "mutating vs validating admission"
+      ],
+      "uses": [
+        "admission controller",
+        "mutating vs validating admission"
+      ],
+      "conceptIDs": [
+        "k8ssec.mutating-validating"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.admission-webhook",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9010,
+      "front": "What is an admission webhook?",
+      "back": "An HTTP callback (MutatingAdmissionWebhook or ValidatingAdmissionWebhook) that runs your own custom admission logic.",
+      "explanation": "It is one of the extension points that let organisations plug custom policy checks into the built-in admission chain.",
+      "example": "Like inviting an outside inspector to sign off on a request before it proceeds.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"Admission control extension points\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#admission-control-extension-points",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "admission webhook"
+      ],
+      "uses": [
+        "admission controller",
+        "admission webhook"
+      ],
+      "conceptIDs": [
+        "k8ssec.admission-webhook"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.validating-admission-policy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9025,
+      "front": "What is a ValidatingAdmissionPolicy (VAP)?",
+      "back": "A declarative, in-process alternative to validating admission webhooks, written in CEL; stable since v1.30.",
+      "explanation": "Because it runs inside the API server, it avoids the network round trip and availability risk of an external webhook.",
+      "example": "Like a rule baked directly into the checkpoint, rather than phoning an outside office for every decision.",
+      "source": "Kubernetes documentation, \"Validating Admission Policy\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "introduces": [
+        "ValidatingAdmissionPolicy (VAP)"
+      ],
+      "uses": [
+        "admission webhook",
+        "ValidatingAdmissionPolicy (VAP)"
+      ],
+      "conceptIDs": [
+        "k8ssec.validating-admission-policy"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.mutating-admission-policy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9030,
+      "front": "What is MutatingAdmissionPolicy?",
+      "back": "The declarative, in-process mutating counterpart to ValidatingAdmissionPolicy; enabled when its feature gate and API version are both on.",
+      "explanation": "It can apply mutations either as a server-side-apply merge or as a JSON patch, without an external webhook.",
+      "example": "Like the editor from before, but now working from a fixed rulebook instead of freehand judgement.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"MutatingAdmissionPolicy\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionpolicy",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "introduces": [
+        "MutatingAdmissionPolicy"
+      ],
+      "uses": [
+        "ValidatingAdmissionPolicy (VAP)",
+        "MutatingAdmissionPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.mutating-admission-policy"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.cel",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9015,
+      "front": "What is the Common Expression Language (CEL)?",
+      "back": "The expression language behind Kubernetes' newer declarative policy features, such as ValidatingAdmissionPolicy.",
+      "explanation": "CEL expressions are evaluated in-process, which is what lets these policies avoid an external webhook call.",
+      "example": "Like a small, purpose-built formula language, rather than a full programming language, for writing pass/fail rules.",
+      "source": "Kubernetes documentation, \"Validating Admission Policy\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Common Expression Language (CEL)"
+      ],
+      "uses": [
+        "admission webhook",
+        "Common Expression Language (CEL)"
+      ],
+      "conceptIDs": [
+        "k8ssec.cel"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.default-admission-plugins",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9050,
+      "front": "What are default admission plugins?",
+      "back": "The admission plugins enabled by default, including CertificateApproval, LimitRanger, PodSecurity, ResourceQuota, ServiceAccount, ValidatingAdmissionPolicy and the webhook plugins.",
+      "explanation": "A cluster missing the recommended default set is considered an incomplete server that won't support all expected features.",
+      "example": "Like the standard checks a building already runs at every entrance, before any custom rule is added.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"Which plugins are enabled by default?\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#which-plugins-are-enabled-by-default",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "introduces": [
+        "default admission plugins"
+      ],
+      "uses": [
+        "admission controller",
+        "default admission plugins"
+      ],
+      "conceptIDs": [
+        "k8ssec.default-admission-plugins"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.noderestriction",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9060,
+      "front": "What does the NodeRestriction admission plugin limit?",
+      "back": "It limits a kubelet (in the system:nodes group) to modifying only its own Node object and Pods bound to it.",
+      "explanation": "It also blocks kubelets from removing taints on their Node, or setting labels under the reserved node-restriction.kubernetes.io/ prefix.",
+      "example": "Like a badge that only opens the one office assigned to its holder, not the whole floor.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"NodeRestriction\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "NodeRestriction"
+      ],
+      "uses": [
+        "kubelet",
+        "Node authorization",
+        "NodeRestriction"
+      ],
+      "conceptIDs": [
+        "k8ssec.noderestriction"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.alwayspullimages",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9070,
+      "front": "What does the AlwaysPullImages admission plugin do?",
+      "back": "It forces every new Pod's imagePullPolicy to Always, so private images can only be used by clients holding valid pull credentials.",
+      "explanation": "Without it, once an image is cached on a node, any Pod scheduled there could reuse it by name, bypassing that check.",
+      "example": "Like re-checking ID at the door every time, rather than trusting whoever is already inside.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"AlwaysPullImages\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#alwayspullimages",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "AlwaysPullImages"
+      ],
+      "uses": [
+        "imagePullSecrets",
+        "private registry",
+        "AlwaysPullImages"
+      ],
+      "conceptIDs": [
+        "k8ssec.alwayspullimages"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.imagepolicywebhook",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9080,
+      "front": "What does the ImagePolicyWebhook admission plugin do?",
+      "back": "It asks an external webhook whether a Pod's images are allowed, before the Pod is admitted.",
+      "explanation": "It is the admission-time hook that lets organisations enforce their own image-vetting policy, such as requiring signed images.",
+      "example": "Like a delivery gate that phones the warehouse to check each package is on the approved list.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"ImagePolicyWebhook\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagepolicywebhook",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "ImagePolicyWebhook"
+      ],
+      "uses": [
+        "admission webhook",
+        "ImagePolicyWebhook"
+      ],
+      "conceptIDs": [
+        "k8ssec.imagepolicywebhook"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.denyserviceexternalips",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9090,
+      "front": "What does the DenyServiceExternalIPs admission plugin do?",
+      "back": "It rejects any new use of the Service externalIPs field, which can be used to intercept traffic. The plugin itself is off by default.",
+      "explanation": "Existing uses are left alone, but no new Service can start using externalIPs once this plugin is enabled.",
+      "example": "Like closing a rarely used, risky side door for new traffic while leaving existing traffic through it alone.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"DenyServiceExternalIPs\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#denyserviceexternalips",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "introduces": [
+        "DenyServiceExternalIPs"
+      ],
+      "uses": [
+        "Service",
+        "DenyServiceExternalIPs"
+      ],
+      "conceptIDs": [
+        "k8ssec.denyserviceexternalips"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.certificatesubjectrestriction",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9100,
+      "front": "What does the CertificateSubjectRestriction admission plugin do?",
+      "back": "It rejects any CertificateSigningRequest that requests the group system:masters, when the signer is kubernetes.io/kube-apiserver-client.",
+      "explanation": "It closes off a certificate-issuing route to the group that bypasses RBAC and webhook authorizers entirely.",
+      "example": "Like refusing to print any ID card that claims to be a master key, no matter who requests it.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"CertificateSubjectRestriction\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#certificatesubjectrestriction",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "CertificateSubjectRestriction"
+      ],
+      "uses": [
+        "system:masters",
+        "CertificateSubjectRestriction"
+      ],
+      "conceptIDs": [
+        "k8ssec.certificatesubjectrestriction"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.podnodeselector",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9110,
+      "front": "What do PodNodeSelector and PodTolerationRestriction do?",
+      "back": "PodNodeSelector forces node selectors per namespace; PodTolerationRestriction limits which tolerations a namespace's Pods may use.",
+      "explanation": "Both are ways to keep workloads in one namespace confined to a chosen set of nodes.",
+      "example": "Like assigning each department to specific floors, and restricting which restricted areas their badges can bypass.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Pod placement\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#pod-placement",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "PodNodeSelector"
+      ],
+      "uses": [
+        "nodeSelector",
+        "toleration",
+        "PodNodeSelector"
+      ],
+      "conceptIDs": [
+        "k8ssec.podnodeselector"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.eventratelimit",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9120,
+      "front": "What does the EventRateLimit admission plugin do?",
+      "back": "It mitigates the API server being flooded by Event creation requests, by rate-limiting per server, namespace, user, or source and object.",
+      "explanation": "It is an alpha, disabled-by-default plugin, so it needs explicit configuration to protect against this kind of overload.",
+      "example": "Like a turnstile that caps how many times per minute any one person can swipe through.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"EventRateLimit\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#eventratelimit",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "introduces": [
+        "EventRateLimit"
+      ],
+      "uses": [
+        "admission controller",
+        "EventRateLimit"
+      ],
+      "conceptIDs": [
+        "k8ssec.eventratelimit"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.policy-engine",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9130,
+      "front": "What is a policy engine, in the Kubernetes context?",
+      "back": "A tool that evaluates policy as code, typically deployed as an admission webhook, such as Gatekeeper, Kyverno or Kubewarden.",
+      "explanation": "Policy engines let teams write and manage cluster-wide rules as ordinary, reviewable code rather than scattered manual checks.",
+      "example": "Like a rulebook a checkpoint consults automatically, instead of a guard improvising each decision.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Alternatives\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#alternatives",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "policy engine"
+      ],
+      "uses": [
+        "admission webhook",
+        "policy engine"
+      ],
+      "conceptIDs": [
+        "k8ssec.policy-engine"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.opa",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9140,
+      "front": "What is Open Policy Agent (OPA)?",
+      "back": "A CNCF-graduated, general-purpose policy engine with a declarative policy language (Rego), used across microservices, Kubernetes and CI/CD.",
+      "explanation": "OPA decouples the policy decision from how it is enforced: software queries OPA and supplies structured data as input.",
+      "example": "Like a shared rules office any system can ask \"is this allowed?\", instead of each system writing its own rules.",
+      "source": "Open Policy Agent documentation, \"Introduction\"",
+      "sourceURL": "https://github.com/open-policy-agent/opa/blob/main/docs/docs/index.md",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "Open Policy Agent (OPA)"
+      ],
+      "uses": [
+        "policy engine",
+        "Open Policy Agent (OPA)"
+      ],
+      "conceptIDs": [
+        "k8ssec.opa"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.gatekeeper",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9150,
+      "front": "What is Gatekeeper?",
+      "back": "A validating and mutating admission webhook that enforces CRD-based policies executed by OPA, plus an audit function for existing violations.",
+      "explanation": "Its ConstraintTemplate and Constraint CRDs let policies be instantiated as native Kubernetes objects, unlike raw OPA alone.",
+      "example": "Like OPA's rules office, but now wired directly into the checkpoint with native paperwork the cluster understands.",
+      "source": "OPA Gatekeeper documentation, \"Introduction\"",
+      "sourceURL": "https://github.com/open-policy-agent/gatekeeper/blob/master/website/docs/intro.md",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "Gatekeeper"
+      ],
+      "uses": [
+        "Open Policy Agent (OPA)",
+        "admission webhook",
+        "Gatekeeper"
+      ],
+      "conceptIDs": [
+        "k8ssec.gatekeeper"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.kyverno",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9160,
+      "front": "What is Kyverno?",
+      "back": "A cloud native policy engine, originally built for Kubernetes, whose policies are written as declarative YAML and CEL Kubernetes resources.",
+      "explanation": "Unlike Gatekeeper, it needs no separate policy language: its policies use the same YAML and CEL Kubernetes users already know.",
+      "example": "Like writing checkpoint rules in the same paperwork format the rest of the building already uses.",
+      "source": "Kyverno documentation, \"Introduction\"",
+      "sourceURL": "https://github.com/kyverno/website/blob/main/src/content/docs/docs/introduction/index.md",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "Kyverno"
+      ],
+      "uses": [
+        "policy engine",
+        "Common Expression Language (CEL)",
+        "Kyverno"
+      ],
+      "conceptIDs": [
+        "k8ssec.kyverno"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.kubewarden",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9170,
+      "front": "What is Kubewarden?",
+      "back": "A third-party policy engine listed in the Kubernetes documentation as an alternative to the built-in Pod Security Standards enforcement.",
+      "explanation": "It's named alongside Kyverno and OPA Gatekeeper as another way to enforce policy through admission control.",
+      "example": "Like a third vendor offering the same kind of rules office as OPA or Kyverno.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Alternatives\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#alternatives",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Kubewarden"
+      ],
+      "uses": [
+        "policy engine",
+        "Kubewarden"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubewarden"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.two-phase-admission",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9300,
+      "front": "In what order do the two admission phases run?",
+      "back": "Mutating admission controllers run first, then validating ones; if either phase rejects the request, the whole request fails immediately.",
+      "explanation": "This ordering means validating controllers always see the object after every mutation has already been applied.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"Admission control phases\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#admission-control-phases",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "mutating vs validating admission"
+      ],
+      "conceptIDs": [
+        "k8ssec.mutating-validating"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.no-reads-blocked",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9310,
+      "front": "Can an admission controller block a get, watch or list request?",
+      "back": "No. Admission controllers only apply to requests that create, delete or modify objects; reads bypass admission entirely.",
+      "explanation": "This is why a validating webhook can never stop kubectl get secrets from returning data it would otherwise reject on write.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"What are they?\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "admission controller"
+      ],
+      "conceptIDs": [
+        "k8ssec.mutating-validating"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.mutating-webhooks-serial",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9320,
+      "front": "Do matching mutating webhooks run serially or in parallel, and why does it matter?",
+      "back": "Serially, each able to modify the object. A change re-runs built-in mutating plugins, and webhooks opted in with reinvocationPolicy: IfNeeded.",
+      "explanation": "Validating webhooks, by contrast, run in parallel and cannot mutate the object.",
+      "source": "Kubernetes documentation, \"Dynamic Admission Control\", \"Reinvocation policy\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#reinvocation-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "admission webhook",
+        "mutating vs validating admission"
+      ],
+      "conceptIDs": [
+        "k8ssec.admission-webhook"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.webhook-reconciliation-needed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9330,
+      "front": "Why must a webhook with side effects, such as decrementing quota, have its own reconciliation system?",
+      "back": "Because it is not guaranteed that later admission controllers will still let the overall request finish.",
+      "explanation": "A side effect made early on can be left orphaned if a later controller rejects the request.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"MutatingAdmissionWebhook\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "admission webhook"
+      ],
+      "conceptIDs": [
+        "k8ssec.admission-webhook"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.turn-on-off-plugins",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9340,
+      "front": "What flags enable and disable admission plugins on the API server?",
+      "back": "--enable-admission-plugins to add plugins, --disable-admission-plugins to remove them, even ones enabled by default.",
+      "explanation": "Both take a comma-delimited list, so multiple plugins can be adjusted in a single flag.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"How do I turn on/off an admission controller?\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#how-do-i-turn-on-an-admission-controller",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "default admission plugins"
+      ],
+      "conceptIDs": [
+        "k8ssec.default-admission-plugins"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.noderestriction-not-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9350,
+      "front": "Is NodeRestriction among the admission plugins enabled by default?",
+      "back": "No. It must be explicitly enabled, unlike ValidatingAdmissionPolicy, ServiceAccount and PodSecurity.",
+      "explanation": "Leaving it out unintentionally removes one of the boundaries between a kubelet and the rest of the cluster's API objects.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"Which plugins are enabled by default?\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#which-plugins-are-enabled-by-default",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "uses": [
+        "NodeRestriction",
+        "default admission plugins"
+      ],
+      "conceptIDs": [
+        "k8ssec.noderestriction"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.vap-cel-basis",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9360,
+      "front": "What language do ValidatingAdmissionPolicy rules use to declare validation logic?",
+      "back": "CEL, the Common Expression Language.",
+      "explanation": "CEL expressions run inside the API server, avoiding the network call and availability risk of a validating webhook.",
+      "source": "Kubernetes documentation, \"Validating Admission Policy\", \"What is Validating Admission Policy?\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ValidatingAdmissionPolicy (VAP)",
+        "Common Expression Language (CEL)"
+      ],
+      "conceptIDs": [
+        "k8ssec.validating-admission-policy"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-choose-image-control",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 9600,
+      "front": "A cluster wants to reject any Pod whose image isn't cryptographically signed, calling out to an external decision service. Which built-in admission plugin fits directly?",
+      "back": "ImagePolicyWebhook, which asks an external webhook whether a Pod's images are allowed.",
+      "explanation": "AlwaysPullImages forces images to be freshly pulled, but it doesn't itself check signatures; that decision belongs to ImagePolicyWebhook.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"ImagePolicyWebhook\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagepolicywebhook",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ImagePolicyWebhook"
+      ],
+      "conceptIDs": [
+        "k8ssec.imagepolicywebhook"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-multitenant-image-reuse",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 9610,
+      "front": "In a multi-tenant cluster, one tenant's Pod pulled a private image that is now cached on a node. Without AlwaysPullImages, what could another tenant's Pod do?",
+      "back": "Reuse that cached image by name on the same node, without any authorization check against it.",
+      "explanation": "AlwaysPullImages closes this gap by forcing a fresh pull, which re-triggers the credential check, for every Pod.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"AlwaysPullImages\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#alwayspullimages",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "AlwaysPullImages"
+      ],
+      "conceptIDs": [
+        "k8ssec.alwayspullimages"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-node-tries-edit-others-pod",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9620,
+      "front": "A compromised kubelet, authenticated as system:node:worker-1, tries to modify a Pod scheduled on a different node. Does NodeRestriction allow this?",
+      "back": "No. NodeRestriction only lets a kubelet modify Pods bound to its own Node object.",
+      "explanation": "This limits the blast radius of a single compromised node to the workloads actually running on it.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"NodeRestriction\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NodeRestriction"
+      ],
+      "conceptIDs": [
+        "k8ssec.noderestriction"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-csr-system-masters",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9630,
+      "front": "A user submits a CertificateSigningRequest with organization field system:masters, signed by kubernetes.io/kube-apiserver-client. Is it accepted?",
+      "back": "No, if CertificateSubjectRestriction is enabled; it explicitly rejects requests for that group under that signer.",
+      "explanation": "Without this plugin, a certificate could grant its holder the same unrestricted access as manual system:masters membership.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"CertificateSubjectRestriction\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#certificatesubjectrestriction",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CertificateSubjectRestriction",
+        "system:masters"
+      ],
+      "conceptIDs": [
+        "k8ssec.certificatesubjectrestriction"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-choose-policy-tool",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 9640,
+      "front": "A platform team wants to write cluster policies entirely as native Kubernetes YAML resources, using CEL, with no separate policy language to learn. Which policy engine best fits this?",
+      "back": "Kyverno, whose policies are declarative Kubernetes resources written in YAML and CEL.",
+      "explanation": "OPA Gatekeeper, by contrast, uses Rego, a separate policy language, inside its ConstraintTemplate objects.",
+      "source": "Kyverno documentation, \"Introduction\"",
+      "sourceURL": "https://github.com/kyverno/website/blob/main/src/content/docs/docs/introduction/index.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kyverno",
+        "Open Policy Agent (OPA)"
+      ],
+      "conceptIDs": [
+        "k8ssec.kyverno"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-webhook-vs-vap-choice",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 9650,
+      "front": "A team wants a simple, self-contained admission rule that never depends on an external service being reachable. Should they reach for a validating webhook or a ValidatingAdmissionPolicy?",
+      "back": "A ValidatingAdmissionPolicy, since it runs its CEL expressions inside the API server, with no external HTTP dependency.",
+      "explanation": "A validating webhook's decision depends on a remote service actually responding; a CEL policy has no such dependency.",
+      "source": "Kubernetes documentation, \"Validating Admission Policy\", \"What is Validating Admission Policy?\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ValidatingAdmissionPolicy (VAP)",
+        "admission webhook"
+      ],
+      "conceptIDs": [
+        "k8ssec.validating-admission-policy"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.contrast-webhook-vs-vap",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 9900,
+      "front": "What is the difference between a validating admission webhook and a ValidatingAdmissionPolicy?",
+      "back": "A webhook makes an external HTTP call for a decision; a ValidatingAdmissionPolicy evaluates CEL expressions inside the API server itself.",
+      "explanation": "The in-process policy avoids the network dependency and latency a webhook always carries.",
+      "contrast": "A webhook asks an outside service; a policy decides on its own.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"Admission control extension points\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#admission-control-extension-points",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "admission webhook",
+        "ValidatingAdmissionPolicy (VAP)"
+      ],
+      "conceptIDs": [
+        "k8ssec.admission-webhook",
+        "k8ssec.validating-admission-policy"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.contrast-mutating-vs-validating",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 9910,
+      "front": "What is the difference between mutating and validating admission controllers?",
+      "back": "Mutating controllers may rewrite the incoming object; validating controllers can only accept or reject it as it stands.",
+      "explanation": "Mutating controllers always run first, so their changes are what validating controllers actually check.",
+      "contrast": "One edits the request; the other only judges it.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"Admission control phases\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#admission-control-phases",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "mutating vs validating admission"
+      ],
+      "conceptIDs": [
+        "k8ssec.mutating-validating"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.contrast-opa-vs-gatekeeper",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 9920,
+      "front": "What is the difference between OPA and Gatekeeper?",
+      "back": "OPA is a general-purpose policy engine usable anywhere; Gatekeeper wraps it as a Kubernetes admission webhook, with native CRD policies and an audit function.",
+      "explanation": "Gatekeeper adds Kubernetes-native ConstraintTemplate and Constraint objects on top of what plain OPA provides.",
+      "contrast": "OPA is the engine; Gatekeeper is its Kubernetes-shaped packaging.",
+      "source": "OPA Gatekeeper documentation, \"Introduction\", \"How is Gatekeeper different from OPA?\"",
+      "sourceURL": "https://github.com/open-policy-agent/gatekeeper/blob/master/website/docs/intro.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Open Policy Agent (OPA)",
+        "Gatekeeper"
+      ],
+      "conceptIDs": [
+        "k8ssec.opa",
+        "k8ssec.gatekeeper"
+      ]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.imagepolicywebhook-disabled-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9365,
+      "front": "Is ImagePolicyWebhook a validating or mutating plugin, and is it on by default?",
+      "back": "Validating only, and it is disabled by default; it must be explicitly enabled and configured.",
+      "explanation": "Being validating-only, it can reject a Pod's images but never alter what the Pod requests.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"ImagePolicyWebhook\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagepolicywebhook",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "uses": ["ImagePolicyWebhook"],
+      "conceptIDs": ["k8ssec.imagepolicywebhook"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.imagepolicywebhook-config-format",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9375,
+      "front": "What format does ImagePolicyWebhook's configuration file use to describe its backend, and what else can it set?",
+      "back": "A kubeconfig-style file naming the backend service, plus a cache time in seconds for how long an approval is trusted.",
+      "explanation": "Reusing the kubeconfig format keeps its configuration consistent with other webhook-based extension points.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"Configuration file format\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagereview-config-file-format",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["ImagePolicyWebhook"],
+      "conceptIDs": ["k8ssec.imagepolicywebhook"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.four-extension-points",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9385,
+      "front": "What are the four special admission control extension points?",
+      "back": "MutatingAdmissionWebhook, MutatingAdmissionPolicy, ValidatingAdmissionWebhook, and ValidatingAdmissionPolicy.",
+      "explanation": "The webhook pair calls out to external HTTP services; the policy pair evaluates CEL in-process instead.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"Admission control extension points\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#admission-control-extension-points",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["admission webhook", "ValidatingAdmissionPolicy (VAP)", "MutatingAdmissionPolicy"],
+      "conceptIDs": ["k8ssec.admission-webhook"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.eventratelimit-limit-types",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9395,
+      "front": "What are the four bucket types EventRateLimit can apply its limits by?",
+      "back": "Server (one shared bucket for all Events), Namespace, User, and SourceAndObject.",
+      "explanation": "Choosing the right bucket type controls whose Event traffic is throttled together versus separately.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"EventRateLimit\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#eventratelimit",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["EventRateLimit"],
+      "conceptIDs": ["k8ssec.eventratelimit"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.opa-rego",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9405,
+      "front": "What is OPA's declarative policy language called?",
+      "back": "Rego, the high-level language OPA uses to write policy as code.",
+      "explanation": "Rego is what separates OPA's own policies from Kyverno's, which instead uses ordinary YAML and CEL.",
+      "source": "Open Policy Agent documentation, \"Introduction\"",
+      "sourceURL": "https://github.com/open-policy-agent/opa/blob/main/docs/docs/index.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": ["Open Policy Agent (OPA)"],
+      "conceptIDs": ["k8ssec.opa"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.gatekeeper-two-resource-areas",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9415,
+      "front": "What two policy areas does Gatekeeper support, and which resources configure each?",
+      "back": "Validation, using ConstraintTemplate and Constraint resources, and mutation, using AssignMetadata, Assign, ModifySet and AssignImage.",
+      "explanation": "Validation can only judge a resource; mutation can actually change it during admission, before validation runs.",
+      "source": "OPA Gatekeeper documentation, \"Introduction\", \"Validation and mutation\"",
+      "sourceURL": "https://github.com/open-policy-agent/gatekeeper/blob/master/website/docs/intro.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": ["Gatekeeper"],
+      "conceptIDs": ["k8ssec.gatekeeper"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.gatekeeper-audit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9425,
+      "front": "What does Gatekeeper's audit functionality do that admission alone can't?",
+      "back": "It lets administrators see which already-existing resources currently violate a given policy, not just block new violations at admission time.",
+      "explanation": "This catches resources that predate a policy, or that changed through a route admission never saw.",
+      "source": "OPA Gatekeeper documentation, \"Introduction\"",
+      "sourceURL": "https://github.com/open-policy-agent/gatekeeper/blob/master/website/docs/intro.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": ["Gatekeeper"],
+      "conceptIDs": ["k8ssec.gatekeeper"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.kyverno-actions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9435,
+      "front": "What can a Kyverno policy do to a Kubernetes resource?",
+      "back": "Validate, mutate, generate, or cleanup (remove) it.",
+      "explanation": "This is broader than a typical validating or mutating webhook alone, which usually covers only one or two of these actions.",
+      "source": "Kyverno documentation, \"Introduction\", \"About Kyverno\"",
+      "sourceURL": "https://github.com/kyverno/website/blob/main/src/content/docs/docs/introduction/index.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": ["Kyverno"],
+      "conceptIDs": ["k8ssec.kyverno"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.alwayspullimages-both-types",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9445,
+      "front": "Is AlwaysPullImages a mutating or a validating admission plugin?",
+      "back": "Both: it mutates the Pod's imagePullPolicy to Always, and enforces that change so pulls always require valid credentials.",
+      "explanation": "It is one of the plugins that acts in both phases; it is not enabled by default.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"AlwaysPullImages\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#alwayspullimages",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["AlwaysPullImages", "mutating vs validating admission"],
+      "conceptIDs": ["k8ssec.alwayspullimages"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.noderestriction-label-prefixes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9455,
+      "front": "Which label prefixes does NodeRestriction block a kubelet from setting on its own Node object?",
+      "back": "node-restriction.kubernetes.io/ and node-role.kubernetes.io/.",
+      "explanation": "The first is reserved for administrator workload-isolation labels; the second stops an unprivileged node self-declaring a cluster role.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"NodeRestriction\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["NodeRestriction"],
+      "conceptIDs": ["k8ssec.noderestriction"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-noderestriction-label-attempt",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9655,
+      "front": "A compromised kubelet tries to label its own Node object node-role.kubernetes.io/control-plane: \"true\", hoping to claim control-plane status. Does NodeRestriction allow this?",
+      "back": "No. Labels under the node-role.kubernetes.io/ prefix are forbidden for a kubelet to set on itself.",
+      "explanation": "This stops a compromised worker node from self-promoting into a more trusted role through its own Node labels.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"NodeRestriction\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["NodeRestriction"],
+      "conceptIDs": ["k8ssec.noderestriction"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-eventratelimit-per-namespace",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 9662,
+      "front": "A cluster wants noisy Event creation in one tenant's namespace to never crowd out another tenant's Events. Which EventRateLimit bucket type fits?",
+      "back": "Namespace, which gives each namespace its own dedicated bucket.",
+      "explanation": "The Server type would instead share one bucket across the whole cluster, letting one namespace still starve the rest.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"EventRateLimit\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#eventratelimit",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["EventRateLimit"],
+      "conceptIDs": ["k8ssec.eventratelimit"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-mutating-policy-default-labels",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 9664,
+      "front": "A platform team wants to add a default label to every new Pod declaratively, in-process, without standing up an external webhook service. Which admission mechanism fits?",
+      "back": "MutatingAdmissionPolicy, the declarative, in-process mutating counterpart to ValidatingAdmissionPolicy.",
+      "explanation": "It applies its mutation as a server-side-apply merge or a JSON patch, entirely inside the API server.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"MutatingAdmissionPolicy\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionpolicy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["MutatingAdmissionPolicy"],
+      "conceptIDs": ["k8ssec.mutating-admission-policy"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-audit-existing-violations",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 9666,
+      "front": "A security team inherits a cluster and wants to find every currently running resource that would violate a new policy, not just block future ones. Which Gatekeeper feature covers this?",
+      "back": "Gatekeeper's audit functionality, which checks existing resources against a policy independently of admission.",
+      "explanation": "A validating webhook or admission policy alone only ever sees new or updated requests, never resources already sitting in the cluster.",
+      "source": "OPA Gatekeeper documentation, \"Introduction\"",
+      "sourceURL": "https://github.com/open-policy-agent/gatekeeper/blob/master/website/docs/intro.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": ["Gatekeeper"],
+      "conceptIDs": ["k8ssec.gatekeeper"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-cleanup-stale-resources",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 9668,
+      "front": "A team wants a single policy engine that can also generate companion resources and clean up stale ones, not just validate or mutate. Which engine's documented feature set covers this directly?",
+      "back": "Kyverno, whose policies can validate, mutate, generate or cleanup (remove) any Kubernetes resource.",
+      "explanation": "This is a broader remit than a typical admission webhook, which usually only validates or mutates the one incoming request.",
+      "source": "Kyverno documentation, \"Introduction\"",
+      "sourceURL": "https://github.com/kyverno/website/blob/main/src/content/docs/docs/introduction/index.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": ["Kyverno"],
+      "conceptIDs": ["k8ssec.kyverno"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-alwayspullimages-classification",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 9670,
+      "front": "Is AlwaysPullImages purely a validating admission plugin?",
+      "back": "No. It's both mutating (it forces imagePullPolicy to Always) and validating (that setting then requires valid pull credentials).",
+      "explanation": "Confusing it for validating-only misses that it actively changes the Pod spec before any check runs.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"AlwaysPullImages\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#alwayspullimages",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["AlwaysPullImages", "mutating vs validating admission"],
+      "conceptIDs": ["k8ssec.alwayspullimages"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-extension-points-not-just-webhook",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 9672,
+      "front": "Is ValidatingAdmissionWebhook the only way to extend admission control beyond the built-in plugins?",
+      "back": "No. There are four extension points: MutatingAdmissionWebhook, MutatingAdmissionPolicy, ValidatingAdmissionWebhook and ValidatingAdmissionPolicy.",
+      "explanation": "The two policy-based extension points avoid needing an external webhook service at all.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"Admission control extension points\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#admission-control-extension-points",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["admission webhook", "ValidatingAdmissionPolicy (VAP)", "MutatingAdmissionPolicy"],
+      "conceptIDs": ["k8ssec.admission-webhook"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.contrast-rego-vs-cel",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 9930,
+      "front": "What is the difference between the policy languages OPA and Kyverno use?",
+      "back": "OPA (and Gatekeeper) use Rego, a purpose-built policy language; Kyverno uses ordinary YAML with CEL expressions.",
+      "explanation": "This is a large part of Kyverno's pitch: no new language to learn on top of what Kubernetes users already write.",
+      "contrast": "Rego is a language built specifically for policy; CEL in Kyverno rides on YAML that already looks like Kubernetes.",
+      "source": "Open Policy Agent documentation and Kyverno documentation, \"Introduction\"",
+      "sourceURL": "https://github.com/open-policy-agent/opa/blob/main/docs/docs/index.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": ["Open Policy Agent (OPA)", "Kyverno"],
+      "conceptIDs": ["k8ssec.opa", "k8ssec.kyverno"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-imagepolicywebhook-config-reuse",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 9674,
+      "front": "A team configuring ImagePolicyWebhook's backend connection wants to reuse a format they already know from other Kubernetes webhook configs. Which format does its configuration file use?",
+      "back": "The kubeconfig file format, naming the backend service and a cache duration for approvals.",
+      "explanation": "This is the same pattern webhook token authentication and webhook authorization also use for their remote service configuration.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"Configuration file format\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagereview-config-file-format",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["ImagePolicyWebhook"],
+      "conceptIDs": ["k8ssec.imagepolicywebhook"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-sidecar-then-reject",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 9940,
+      "front": "An admission webhook needs to inject a sidecar container into every new Pod, then reject any Pod that still fails policy afterwards. Which two phases does this need?",
+      "back": "Mutating admission, to inject the sidecar, followed by validating admission, to reject Pods that still fail the check.",
+      "explanation": "Mutating controllers always run before validating ones, so validation sees the already-mutated object.",
+      "source": "Kubernetes documentation, \"Using Admission Controllers\", \"Admission control phases\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#admission-control-phases",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["mutating vs validating admission"],
+      "conceptIDs": ["k8ssec.mutating-validating"]
+    },
+    {
+      "id": "k8ssec.admission-control-policy-engines.app-shared-cross-platform-engine",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 9950,
+      "front": "A platform team wants one shared policy engine that microservices, CI/CD pipelines and Kubernetes admission can all query the same way. Which general-purpose engine fits?",
+      "back": "Open Policy Agent (OPA): a CNCF-graduated engine used across microservices, Kubernetes and CI/CD, not tied to Kubernetes admission alone.",
+      "explanation": "OPA decouples the policy decision from how it's enforced, which is what lets one engine serve several different systems.",
+      "source": "Open Policy Agent documentation, \"Introduction\"",
+      "sourceURL": "https://github.com/open-policy-agent/opa/blob/main/docs/docs/index.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": ["Open Policy Agent (OPA)"],
+      "conceptIDs": ["k8ssec.opa"]
+    }
+  ]
+}

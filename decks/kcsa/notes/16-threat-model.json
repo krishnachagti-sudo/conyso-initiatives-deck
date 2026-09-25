@@ -1,0 +1,2207 @@
+{
+  "topic": "The Kubernetes threat model",
+  "notes": [
+    {
+      "id": "k8ssec.threat-model.what-is-threat-modelling",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16000,
+      "front": "What is threat modelling, in one sentence?",
+      "back": "Scoping a system's architecture and security boundaries, then analysing how elements interact across them to find risks.",
+      "explanation": "It is the primary mechanism for identifying which risks, controls and mitigations a cloud native system actually needs.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Modeling”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-modeling",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "threat modelling",
+        "threat"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-modelling"
+      ],
+      "introduces": [
+        "threat modelling"
+      ],
+      "example": "Like drawing a building's floor plan before deciding where to put alarms and locks."
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-trust-boundary",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16009,
+      "front": "What is a trust boundary, in one sentence?",
+      "back": "A logical line between zones of different criticality, where controls should be enforced.",
+      "explanation": "Threat modelling pays special attention to interactions that cross a trust boundary, since that is where controls matter most.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zones”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "trust boundary",
+        "threat modelling"
+      ],
+      "conceptIDs": [
+        "k8ssec.trust-boundary"
+      ],
+      "introduces": [
+        "trust boundary"
+      ],
+      "example": "Like the line between a shop's public floor and its staff-only stockroom."
+    },
+    {
+      "id": "k8ssec.threat-model.what-are-k8s-trust-zones",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16018,
+      "front": "What are Kubernetes trust zones, in one sentence?",
+      "back": "Six logical groupings of cluster components by shared criticality, from a 2019 external threat model.",
+      "explanation": "Grouping components by trust zone, rather than by physical placement, is what makes the boundaries between them meaningful.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zones”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubernetes trust zones",
+        "trust boundary"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-trust-zones"
+      ],
+      "introduces": [
+        "Kubernetes trust zones"
+      ],
+      "example": "Like sorting a company's rooms into public lobby, open-plan office, server room and vault.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · 2019 threat model, terminology since renamed"
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-data-flow",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16027,
+      "front": "What is a data flow, in the trust-zone sense, in one sentence?",
+      "back": "A connection between two trust zones, described by its data, its protocol and how it is authenticated.",
+      "explanation": "Trust zones only matter once you know what flows between them, and whether that flow is verified.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zone Connections”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "data flow",
+        "Kubernetes trust zones"
+      ],
+      "conceptIDs": [
+        "k8ssec.data-flow"
+      ],
+      "introduces": [
+        "data flow"
+      ],
+      "example": "Like a company org chart with arrows showing who reports to whom, and by what channel."
+    },
+    {
+      "id": "k8ssec.threat-model.what-are-threat-actors",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16036,
+      "front": "What is a threat actor, in one sentence?",
+      "back": "A type of entity considered ahead of time when deciding which protections a system needs.",
+      "explanation": "Defining actors in advance lets a threat model reuse the same set of possible attackers across every finding.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "threat actors",
+        "threat"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ],
+      "introduces": [
+        "threat actors"
+      ],
+      "example": "Like a heist film casting its suspects before the plot: insider, outsider, or someone in between."
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-stride",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16045,
+      "front": "What is STRIDE, in one sentence?",
+      "back": "A mature model of six threat categories: Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege.",
+      "explanation": "STRIDE gives threat modelling a checklist of threat types to consider for each part of a system.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE",
+        "threat modelling"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ],
+      "introduces": [
+        "STRIDE"
+      ],
+      "example": "Like a pilot's pre-flight checklist, but each item is a way an attacker could win."
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-attack-tree",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16054,
+      "front": "What is an attack tree, in one sentence?",
+      "back": "A branching, hierarchical structure showing the different ways an attacker could reach a particular goal.",
+      "explanation": "Attack trees make the many small steps of an attack visible, so each branch can be mitigated on its own.",
+      "source": "NIST CSRC Glossary, “attack tree”",
+      "sourceURL": "https://csrc.nist.gov/glossary/term/attack_tree",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "attack tree",
+        "threat"
+      ],
+      "conceptIDs": [
+        "k8ssec.attack-tree"
+      ],
+      "introduces": [
+        "attack tree"
+      ],
+      "example": "Like a choose-your-own-adventure book, but every page is a step towards compromising a system."
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-persistence",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16063,
+      "front": "What is persistence, as a Kubernetes threat, in one sentence?",
+      "back": "An attacker keeping a foothold in the cluster that survives Pod, container and node restarts.",
+      "explanation": "A one-off compromise is far less dangerous to an organisation than one the attacker can keep returning to.",
+      "source": "Kubernetes Attack Trees, Establish Persistence",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/EstablishPersistence.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "persistence",
+        "attack tree"
+      ],
+      "conceptIDs": [
+        "k8ssec.persistence"
+      ],
+      "introduces": [
+        "persistence"
+      ],
+      "example": "Like a burglar copying a house key instead of climbing back through the same broken window."
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-dos",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16072,
+      "front": "What is denial of service (DoS), in one sentence?",
+      "back": "Preventing authorised access to resources, or delaying time-critical operations.",
+      "explanation": "In a cluster this can come from resource exhaustion inside a container, or from flooding control plane endpoints.",
+      "source": "NIST CSRC Glossary, “denial of service (DoS)”",
+      "sourceURL": "https://csrc.nist.gov/glossary/term/denial_of_service",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "denial of service (DoS)",
+        "availability"
+      ],
+      "conceptIDs": [
+        "k8ssec.denial-of-service"
+      ],
+      "introduces": [
+        "denial of service (DoS)"
+      ],
+      "example": "Like jamming a shop's till queue so genuine customers can never reach the counter."
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-malicious-code-execution",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16081,
+      "front": "What is malicious code execution, as a Kubernetes threat, in one sentence?",
+      "back": "An attacker running their own code inside a container, often via a vulnerable application or a poisoned image.",
+      "explanation": "This is frequently the very first foothold an attacker gets into a cluster.",
+      "source": "Kubernetes Attack Trees, Malicious Code Execution",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/MaliciousCodeExecution.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "malicious code execution",
+        "container",
+        "attack tree"
+      ],
+      "conceptIDs": [
+        "k8ssec.malicious-code-execution"
+      ],
+      "introduces": [
+        "malicious code execution"
+      ],
+      "example": "Like a smuggled note that, once opened, starts giving its own instructions."
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-compromised-container",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16090,
+      "front": "What is the compromised container scenario, in one sentence?",
+      "back": "A named attack-tree scenario starting from a vulnerable application in a container, often exploited through its mounted service account token.",
+      "explanation": "It models one of the most common real starting points for an attack: a bug in the application itself.",
+      "source": "Kubernetes Attack Trees, Scenario: Compromised application leads to foothold in container",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/CompromisedContainer.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "compromised container scenario",
+        "attack tree",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8ssec.compromised-container"
+      ],
+      "introduces": [
+        "compromised container scenario"
+      ],
+      "example": "Like a shop's front door being left open because a cheap lock (the app) failed, not the vault behind it."
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-attacker-on-network",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16099,
+      "front": "What is the “attacker on the network” scenario, in one sentence?",
+      "back": "An attack-tree scenario for an internal attacker on the cluster's network who has no direct cluster access yet.",
+      "explanation": "It models an internal attacker who has reached the network but must still work their way into the cluster itself.",
+      "source": "Kubernetes Attack Trees, Scenario: Attacker on the Network",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/AttackerOnTheNetwork.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "attacker on the network",
+        "attack tree",
+        "trust boundary"
+      ],
+      "conceptIDs": [
+        "k8ssec.attacker-on-network"
+      ],
+      "introduces": [
+        "attacker on the network"
+      ],
+      "example": "Like a stranger who has slipped into an office building's corridor, but has no keycard for any door yet."
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-access-sensitive-data",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16108,
+      "front": "What does “access to sensitive data” cover, as a Kubernetes threat, in one sentence?",
+      "back": "Reading data an attacker should not see, chiefly by exploiting misconfigured RBAC, but also via logs or eavesdropping.",
+      "explanation": "This attack tree centres on Secrets, since misreading them is the most direct route to sensitive data.",
+      "source": "Kubernetes Attack Trees, Access Sensitive Data",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/AccessSensitiveData.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "access to sensitive data",
+        "attack tree",
+        "Secret",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.access-sensitive-data"
+      ],
+      "introduces": [
+        "access to sensitive data"
+      ],
+      "example": "Like reading confidential files left on an unlocked shared drive rather than breaking into a safe."
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-privilege-escalation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16117,
+      "front": "What is privilege escalation, in one sentence?",
+      "back": "Gaining higher privileges than originally granted, such as breaking out of a container to the host, or abusing RBAC.",
+      "explanation": "It is often the goal that follows an initial foothold: turning limited access into much broader control.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Matrix for Containers”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-matrix-for-containersnew-in-v2",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privilege escalation",
+        "least privilege"
+      ],
+      "conceptIDs": [
+        "k8ssec.privilege-escalation"
+      ],
+      "introduces": [
+        "privilege escalation"
+      ],
+      "example": "Like a visitor's day pass somehow letting them into the executive suite."
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-attack-mitre-containers",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 16126,
+      "front": "What is MITRE ATT&CK for Containers, in one sentence?",
+      "back": "A matrix of attacker tactics (columns) and techniques (rows) that specifically target containers and orchestrators.",
+      "explanation": "It gives threat modelling a shared, detailed vocabulary for how real attackers actually operate against containers.",
+      "source": "Cloud Native Security Whitepaper v2, \"Threat Matrix for Containers\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-matrix-for-containersnew-in-v2",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "MITRE ATT&CK for Containers",
+        "attack vector"
+      ],
+      "conceptIDs": [
+        "k8ssec.attack-containers"
+      ],
+      "introduces": [
+        "MITRE ATT&CK for Containers"
+      ],
+      "example": "Like a criminology textbook's table of burglary methods, organised by stage of the crime.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · attack.mitre.org Containers matrix as of that date"
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-resource-abuse",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 16135,
+      "front": "What is meant by fork bomb / cryptomining threats, in one sentence?",
+      "back": "Workloads that intentionally exhaust node resources, which requests and limits enforced via cgroups help prevent.",
+      "explanation": "This is denial of service turned inward: the attacker's own workload consumes the resources other workloads need.",
+      "source": "Cloud Native Security Whitepaper v2, “Resource Requests and Limits”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#resource-requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "fork bomb / cryptomining",
+        "denial of service (DoS)"
+      ],
+      "conceptIDs": [
+        "k8ssec.resource-abuse"
+      ],
+      "introduces": [
+        "fork bomb / cryptomining"
+      ],
+      "example": "Like one tenant running every tap in a shared building until the water pressure drops for everyone."
+    },
+    {
+      "id": "k8ssec.threat-model.what-is-threat-intelligence",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 16144,
+      "front": "What is threat intelligence, in one sentence?",
+      "back": "Information about threats and threat actors, such as IP addresses, domains, hashes and tactics, used to help identify attacks.",
+      "explanation": "It supplies the indicators that runtime detection and monitoring tools compare live activity against.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Intelligence”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-intelligence",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "threat intelligence",
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-intelligence"
+      ],
+      "introduces": [
+        "threat intelligence"
+      ],
+      "example": "Like a neighbourhood watch newsletter listing the makes of car recently used in break-ins."
+    },
+    {
+      "id": "k8ssec.threat-model.stride-spoofing",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16153,
+      "front": "In STRIDE, what cloud native example illustrates “Spoofing”?",
+      "back": "Stealing a cluster admin's authentication credentials via a social engineering attack.",
+      "explanation": "STRIDE's six categories each need a concrete cloud native example to be useful in practice.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.stride-tampering",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16162,
+      "front": "In STRIDE, what cloud native example illustrates “Tampering”?",
+      "back": "Tampering with an API server config file or certificate, which could break API server restart or mutual TLS.",
+      "explanation": "STRIDE's six categories each need a concrete cloud native example to be useful in practice.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.stride-repudiation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16171,
+      "front": "In STRIDE, what cloud native example illustrates “Repudiation”?",
+      "back": "Disabled or misconfigured API auditing leaving no evidence that an attack happened.",
+      "explanation": "STRIDE's six categories each need a concrete cloud native example to be useful in practice.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.stride-information-disclosure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16180,
+      "front": "In STRIDE, what cloud native example illustrates “Information disclosure”?",
+      "back": "A compromised workload exfiltrating data to an external entity.",
+      "explanation": "STRIDE's six categories each need a concrete cloud native example to be useful in practice.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.stride-denial-of-service",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16189,
+      "front": "In STRIDE, what cloud native example illustrates “Denial of Service”?",
+      "back": "A workload with no resource limits consuming all CPU and memory on a node, so the node is lost.",
+      "explanation": "STRIDE's six categories each need a concrete cloud native example to be useful in practice.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.stride-elevation-of-privilege",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16198,
+      "front": "In STRIDE, what cloud native example illustrates “Elevation of privilege”?",
+      "back": "A workload running with unrestricted privileges, or its security context being modified.",
+      "explanation": "STRIDE's six categories each need a concrete cloud native example to be useful in practice.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.zone-internet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16207,
+      "front": "What does the “Internet” trust zone contain?",
+      "back": "The externally facing, wider internet zone: kubectl and application clients.",
+      "explanation": "The 2019 threat model divides a cluster into exactly six trust zones by shared criticality.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zones”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubernetes trust zones"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-trust-zones"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.zone-api-server",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16216,
+      "front": "What does the “API Server” trust zone contain?",
+      "back": "The central coordinator, exposed only as much as needed for administrator access: kube-apiserver.",
+      "explanation": "The 2019 threat model divides a cluster into exactly six trust zones by shared criticality.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zones”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubernetes trust zones"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-trust-zones"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.zone-master-components",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16225,
+      "front": "What does the “Master Components” trust zone contain?",
+      "back": "Internal parts of the control plane that work via callbacks to the API server: kube-controller-manager, cloud-controller-manager.",
+      "explanation": "The 2019 threat model divides a cluster into exactly six trust zones by shared criticality.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zones”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubernetes trust zones"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-trust-zones"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.zone-master-data",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16234,
+      "front": "What does the “Master Data” trust zone contain?",
+      "back": "The data layer of the API server: etcd, tantamount to administrative access to the cluster if uncontrolled.",
+      "explanation": "The 2019 threat model divides a cluster into exactly six trust zones by shared criticality.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zones”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubernetes trust zones"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-trust-zones"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.zone-worker",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16243,
+      "front": "What does the “Worker” trust zone contain?",
+      "back": "Everything needed to run and network containers: kubelet and kube-proxy.",
+      "explanation": "The 2019 threat model divides a cluster into exactly six trust zones by shared criticality.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zones”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubernetes trust zones"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-trust-zones"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.zone-container",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16252,
+      "front": "What does the “Container” trust zone contain?",
+      "back": "The actual Linux containers themselves, run by the container runtime.",
+      "explanation": "The 2019 threat model divides a cluster into exactly six trust zones by shared criticality.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zones”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubernetes trust zones"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-trust-zones"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.master-terminology-legacy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 16261,
+      "front": "Is “Master Components” and “Master Data” still the current Kubernetes terminology?",
+      "back": "No: these are legacy names from the 2019 threat model; the current term is “control plane”.",
+      "explanation": "Current Kubernetes docs say \"control plane\" instead of \"master\".",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zones”; Kubernetes documentation, Glossary, \"control plane\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?fundamental=true#term-control-plane",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Kubernetes trust zones"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-trust-zones"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.flow-apiserver-masterdata",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16270,
+      "front": "How is the data flow from the API Server to Master Data (etcd) authenticated?",
+      "back": "Over an encrypted, authenticated connection (TLS), verified: kube-apiserver retrieving and storing data from etcd.",
+      "explanation": "This is one of the best-protected flows: verified and encrypted, matching the sensitivity of etcd's contents.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zone Connections”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "data flow",
+        "Kubernetes trust zones",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "k8ssec.data-flow"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.flow-apiserver-worker",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16279,
+      "front": "The data flow from the API Server to the Worker zone, for log and status retrieval from kubelet, runs over {{c1::plain HTTP, unverified}}.",
+      "explanation": "2019 threat model value; current docs describe HTTPS, with the kubelet's certificate unverified by default.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zone Connections”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · 2019 threat model; current docs differ",
+      "uses": [
+        "data flow",
+        "Kubernetes trust zones"
+      ],
+      "conceptIDs": [
+        "k8ssec.data-flow"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.flow-internet-apiserver",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16288,
+      "front": "How is the Internet-to-API-Server data flow (kubectl administration) authenticated?",
+      "back": "Over an encrypted, authenticated connection (TLS), verified, and possibly two-way TLS, potentially via a bastion host.",
+      "explanation": "This is the main entry point administrators use, so it carries the strongest authentication of the internet-facing flows.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zone Connections”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "data flow",
+        "Kubernetes trust zones",
+        "bastion host",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "k8ssec.data-flow"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.flow-worker-container",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 16297,
+      "front": "How does the kubelet schedule containers for execution, in trust-zone terms?",
+      "back": "Via interprocess communication, from the Worker zone to the Container zone, with no external authentication (not applicable).",
+      "explanation": "This flow stays entirely on the same node, which is why it has no network-level authentication of its own.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zone Connections”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "data flow",
+        "Kubernetes trust zones"
+      ],
+      "conceptIDs": [
+        "k8ssec.data-flow"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-wp-malicious-insider",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16306,
+      "front": "In the whitepaper's threat-actor vocabulary, who is the “Malicious insider”?",
+      "back": "An actor with malicious intent who has authorisation to perform actions within the modelled system.",
+      "explanation": "Other actors, such as uninformed outsiders, can be added; controls for them are usually a subset of those for these three.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-wp-uninformed-insider",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16315,
+      "front": "In the whitepaper's threat-actor vocabulary, who is the “Uninformed insider”?",
+      "back": "An actor with authorisation to perform actions within the system, who can be duped into causing harm.",
+      "explanation": "Other actors, such as uninformed outsiders, can be added; controls for them are usually a subset of those for these three.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-wp-malicious-outsider",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16324,
+      "front": "In the whitepaper's threat-actor vocabulary, who is the “Malicious outsider”?",
+      "back": "An actor with malicious intent, outside the system, attacking via the internet, supply chain or physical perimeter.",
+      "explanation": "Other actors, such as uninformed outsiders, can be added; controls for them are usually a subset of those for these three.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-tm19-malicious-internal-user",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16333,
+      "front": "In the 2019 Kubernetes threat model, who is the “Malicious Internal User” actor?",
+      "back": "A user, such as an administrator or developer, who misuses their privileged position, or whose credentials are stolen.",
+      "explanation": "The 2019 model lists six actors; the whitepaper lists three.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-tm19-internal-attacker",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16342,
+      "front": "In the 2019 Kubernetes threat model, who is the “Internal Attacker” actor?",
+      "back": "An attacker who has transited one or more trust boundaries, such as an attacker with container access.",
+      "explanation": "The 2019 model lists six actors; the whitepaper lists three.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-tm19-external-attacker",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16351,
+      "front": "In the 2019 Kubernetes threat model, who is the “External Attacker” actor?",
+      "back": "An attacker who is external to the cluster and unauthenticated.",
+      "explanation": "The 2019 model lists six actors; the whitepaper lists three.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-tm19-administrator",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16360,
+      "front": "In the 2019 Kubernetes threat model, who is the “Administrator” actor?",
+      "back": "An actual administrator of the system, tasked with operating and maintaining the cluster.",
+      "explanation": "The 2019 model lists six actors; the whitepaper lists three.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-tm19-developer",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16369,
+      "front": "In the 2019 Kubernetes threat model, who is the “Developer” actor?",
+      "back": "An application developer deploying an application to a cluster, directly or via another user.",
+      "explanation": "The 2019 model lists six actors; the whitepaper lists three.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-tm19-end-user",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16378,
+      "front": "In the 2019 Kubernetes threat model, who is the “End User” actor?",
+      "back": "An external user of an application hosted by a cluster.",
+      "explanation": "The 2019 model lists six actors; the whitepaper lists three.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-internal-user-controls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 16387,
+      "front": "Why must every action of a Malicious Internal User be logged, according to the 2019 threat model?",
+      "back": "Because they are often privileged with wide access, so strong non-repudiation of their actions is essential.",
+      "explanation": "Logging alone will not stop a malicious insider, but it ensures their actions can be traced afterwards.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "threat actors",
+        "non-repudiation"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.persistence-branches",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16396,
+      "front": "What are the two major branches of the Establish Persistence attack tree?",
+      "back": "Reading Secrets to exploit other vulnerable areas; and leveraging misconfigurations after container access to survive restarts.",
+      "explanation": "Both branches aim at the same goal, longevity, but start from different points: stolen Secrets versus existing container access.",
+      "source": "Kubernetes Attack Trees, Establish Persistence",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/EstablishPersistence.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "persistence",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.persistence"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.dos-branches",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16405,
+      "front": "What are the two main approaches in the Denial of Service attack tree?",
+      "back": "From a container compromise, creating extra workloads to exhaust cluster resources; and flooding control plane network endpoints.",
+      "explanation": "The left branch abuses the API server from inside; the right branch attacks control plane endpoints directly over the network.",
+      "source": "Kubernetes Attack Trees, Denial Of Service",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/DenialOfService.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "denial of service (DoS)"
+      ],
+      "conceptIDs": [
+        "k8ssec.denial-of-service"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.dos-nonprivileged-route",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16414,
+      "front": "What is the most likely non-privileged route for creating a denial of service from inside a container?",
+      "back": "Leveraging the service account token to launch additional containers via the API server.",
+      "explanation": "Without resource quotas in place, this can rapidly starve the cluster of resources.",
+      "source": "Kubernetes Attack Trees, Denial Of Service",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/DenialOfService.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "denial of service (DoS)"
+      ],
+      "conceptIDs": [
+        "k8ssec.denial-of-service"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.dos-object-creation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16423,
+      "front": "How can users with rights to create objects cause a denial of service, according to Kubernetes RBAC good practice?",
+      "back": "By creating sufficiently large or numerous objects to exhaust etcd, especially in multi-tenant clusters.",
+      "explanation": "Resource quotas that limit the count of objects a user can create are the recommended mitigation.",
+      "source": "Kubernetes documentation, RBAC good practices, “Object creation denial-of-service”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#object-creation-dos",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "denial of service (DoS)",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.denial-of-service"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.malicious-code-entry",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16432,
+      "front": "What is the most likely initial foothold in the Malicious Code Execution attack tree?",
+      "back": "A compromised application giving access to the container, reachable via a NodePort or directly from the external network.",
+      "explanation": "This entry point recurs throughout the attack trees, since it is often the easiest way in for an attacker.",
+      "source": "Kubernetes Attack Trees, Malicious Code Execution",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/MaliciousCodeExecution.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "malicious code execution",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8ssec.malicious-code-execution"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.malicious-code-pull-secret",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16441,
+      "front": "How might an attacker distribute malicious code if they obtain an image pull secret?",
+      "back": "By poisoning the image repository the secret grants access to, and distributing malicious code from there.",
+      "explanation": "This turns a stolen credential into a supply-chain attack against everyone who later pulls from that repository.",
+      "source": "Kubernetes Attack Trees, Malicious Code Execution",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/MaliciousCodeExecution.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "malicious code execution",
+        "imagePullSecrets"
+      ],
+      "conceptIDs": [
+        "k8ssec.malicious-code-execution"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.compromised-container-token-path",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16450,
+      "front": "In the compromised container scenario, what is one of the most exploited attack paths once inside a container?",
+      "back": "A mounted and insecure service account token, giving the attacker its permissions on the API server.",
+      "explanation": "This is why service account tokens deserve special protection: they are frequently the very next step after a compromise.",
+      "source": "Kubernetes Attack Trees, Scenario: Compromised application leads to foothold in container",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/CompromisedContainer.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "compromised container scenario"
+      ],
+      "conceptIDs": [
+        "k8ssec.compromised-container"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.attacker-network-assumption",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16459,
+      "front": "What default gap does the “attacker on the network” scenario assume, allowing broad access from any Pod?",
+      "back": "No NetworkPolicy is configured in the kube-system namespace by default, so all Pods can reach it.",
+      "explanation": "This scenario's threats can mostly be mitigated with firewalls and appropriate Kubernetes configuration, such as NetworkPolicy for kube-system.",
+      "source": "Kubernetes Attack Trees, Scenario: Attacker on the Network",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/AttackerOnTheNetwork.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "attacker on the network",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.attacker-on-network"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.sensitive-data-approaches",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16468,
+      "front": "Besides misconfigured RBAC, what other two approaches does the Access Sensitive Data attack tree cover?",
+      "back": "Viewing sensitive data stored in logs, and eavesdropping on network traffic.",
+      "explanation": "Sensitive data can leak through channels that have nothing to do with the API server's own access controls.",
+      "source": "Kubernetes Attack Trees, Access Sensitive Data",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/AccessSensitiveData.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "access to sensitive data",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.access-sensitive-data"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.escalation-paths-list",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16477,
+      "front": "What are two ways a user who can run arbitrary Pods in a namespace could escalate their privileges there?",
+      "back": "Mounting arbitrary Secrets meant for other workloads; using arbitrary ServiceAccounts to impersonate other workloads.",
+      "explanation": "The Kubernetes documentation lists four such routes, all stemming from unrestricted Pod creation in a namespace.",
+      "source": "Kubernetes documentation, Authorization, “Escalation paths”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#escalation-paths",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privilege escalation",
+        "Secret",
+        "ServiceAccount"
+      ],
+      "conceptIDs": [
+        "k8ssec.privilege-escalation"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.escalation-configmaps-volumes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16486,
+      "front": "What two other resources, besides Secrets and ServiceAccounts, can a Pod-creating attacker abuse to escalate privileges in a namespace?",
+      "back": "ConfigMaps and volumes meant for other workloads, to obtain or change information meant for them.",
+      "explanation": "Any resource another workload's Pod can mount is a potential escalation route if Pod creation is not restricted.",
+      "source": "Kubernetes documentation, Authorization, “Escalation paths”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#escalation-paths",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privilege escalation"
+      ],
+      "conceptIDs": [
+        "k8ssec.privilege-escalation"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.attack-matrix-shape",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16495,
+      "front": "In the MITRE ATT&CK for Containers matrix, what do the rows and columns represent?",
+      "back": "Rows are techniques; columns are tactics, the attacker's end goals at each stage.",
+      "explanation": "Reading the matrix this way shows both what an attacker is trying to achieve and how they might do it.",
+      "source": "Cloud Native Security Whitepaper v2, \"Threat Matrix for Containers\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-matrix-for-containersnew-in-v2",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "MITRE ATT&CK for Containers"
+      ],
+      "conceptIDs": [
+        "k8ssec.attack-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.attack-tactics-current",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16504,
+      "front": "What are the ten tactics in the current MITRE ATT&CK Containers matrix?",
+      "back": "Initial Access, Execution, Persistence, Privilege Escalation, Stealth, Defense Impairment, Credential Access, Discovery, Lateral Movement, Impact.",
+      "explanation": "This is a complete set, current as of the date below.",
+      "source": "MITRE ATT&CK Containers matrix",
+      "sourceURL": "https://attack.mitre.org/matrices/enterprise/containers/",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "MITRE ATT&CK for Containers"
+      ],
+      "conceptIDs": [
+        "k8ssec.attack-containers"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · attack.mitre.org Containers matrix as of that date"
+    },
+    {
+      "id": "k8ssec.threat-model.attack-tactics-whitepaper-name",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 16513,
+      "front": "What tactic name does the 2022 whitepaper use that the live ATT&CK Containers matrix no longer has a column for?",
+      "back": "“Defense Evasion”; the live matrix has no Defense Evasion column, it instead has Stealth and Defense Impairment.",
+      "explanation": "Tactic names are volatile: always check the live matrix rather than trust an older document's wording.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Matrix for Containers” (tier B); MITRE ATT&CK Containers matrix (tier C)",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-matrix-for-containersnew-in-v2",
+      "sourceLicence": "B · CC BY 4.0; live-matrix part C · facts only",
+      "uses": [
+        "MITRE ATT&CK for Containers"
+      ],
+      "conceptIDs": [
+        "k8ssec.attack-containers"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · comparing the 2022 whitepaper with the live matrix on that date"
+    },
+    {
+      "id": "k8ssec.threat-model.attack-initial-access-mitigation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 16522,
+      "front": "What developer practice does the whitepaper recommend against the Initial Access tactic?",
+      "back": "Implement mutual authentication for externally facing services, and limit sharing host resources such as host filesystem mounts.",
+      "explanation": "Vulnerable public-facing applications are the usual first step the whitepaper describes.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Matrix for Containers”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-matrix-for-containersnew-in-v2",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "MITRE ATT&CK for Containers"
+      ],
+      "conceptIDs": [
+        "k8ssec.attack-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.resource-limits-mitigation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 16531,
+      "front": "What Kubernetes mechanism most directly prevents a workload from exhausting a node's CPU and memory?",
+      "back": "Resource requests and limits, enforced through cgroups.",
+      "explanation": "Without them, a single workload, malicious or not, can consume all of a node's shared resources.",
+      "source": "Cloud Native Security Whitepaper v2, “Resource Requests and Limits”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#resource-requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "fork bomb / cryptomining"
+      ],
+      "conceptIDs": [
+        "k8ssec.resource-abuse"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.threat-intel-indicators",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 16540,
+      "front": "What kinds of indicators does cloud native threat intelligence typically use?",
+      "back": "Network or host indicators such as IP addresses, domain names, URLs and file hashes.",
+      "explanation": "Behavioural indicators, such as an attacker's typical tactics, techniques and procedures, can also be used.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Intelligence”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-intelligence",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "threat intelligence"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-intelligence"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.stride-classify-spoof",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16549,
+      "front": "An attacker tricks a cluster admin into revealing their login credentials through a phishing email. Which STRIDE category does this fit?",
+      "back": "Spoofing",
+      "choices": "A) Spoofing\nB) Tampering\nC) Repudiation",
+      "choicesExplained": "B: tampering means altering something, such as a config file, not stealing credentials. C: repudiation is about denying responsibility for an action already taken.",
+      "explanation": "Stealing credentials to impersonate a legitimate identity is the definition of spoofing in STRIDE.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.stride-classify-tamper",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16558,
+      "front": "An attacker edits the API server's TLS certificate file, causing mutual TLS authentication to start failing. Which STRIDE category does this fit?",
+      "back": "Tampering",
+      "choices": "A) Tampering\nB) Information disclosure\nC) Elevation of privilege",
+      "choicesExplained": "B: nothing has been disclosed here, only altered. C: no privilege has been gained yet, only a configuration broken.",
+      "explanation": "Unauthorised modification of a config file or certificate is a textbook tampering threat.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.stride-classify-repudiate",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16567,
+      "front": "API auditing is disabled, so investigators find no record of who deleted a critical Deployment. Which STRIDE category does this fit?",
+      "back": "Repudiation",
+      "choices": "A) Repudiation\nB) Denial of Service\nC) Spoofing",
+      "choicesExplained": "B: nothing about availability was affected, only accountability. C: no identity was stolen; the actor's identity is simply untraceable.",
+      "explanation": "Without audit records, an attacker's actions cannot be attributed to them: the definition of a repudiation threat.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.stride-classify-info",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16576,
+      "front": "A compromised workload sends customer records to an external server outside the cluster. Which STRIDE category does this fit?",
+      "back": "Information disclosure",
+      "choices": "A) Information disclosure\nB) Elevation of privilege\nC) Denial of Service",
+      "choicesExplained": "B: no additional privilege was needed or gained here, only exfiltration. C: nothing about availability was affected.",
+      "explanation": "Data leaving the system to an unauthorised party is exactly what “information disclosure” in STRIDE describes.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.stride-classify-dos",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16585,
+      "front": "A workload with no resource limits consumes all CPU and memory on its node, and the node is lost. Which STRIDE category does this fit?",
+      "back": "Denial of Service",
+      "choices": "A) Denial of Service\nB) Tampering\nC) Repudiation",
+      "choicesExplained": "B: nothing was altered, only exhausted. C: this is about availability, not accountability.",
+      "explanation": "Exhausting a shared resource so legitimate access is prevented is the STRIDE denial-of-service category.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.stride-classify-elevation",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16594,
+      "front": "A workload's security context is modified so its container runs with unrestricted privileges. Which STRIDE category does this fit?",
+      "back": "Elevation of privilege",
+      "choices": "A) Elevation of privilege\nB) Spoofing\nC) Information disclosure",
+      "choicesExplained": "B: no identity was stolen, only privilege gained on an existing identity. C: nothing has been read or exfiltrated yet.",
+      "explanation": "Gaining privileges beyond what was originally granted is the STRIDE elevation-of-privilege category.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.zone-crossing-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16603,
+      "front": "An attacker who has gained access to a container wants to reach the API server directly. How many trust boundaries must they cross, from the Container zone, in the shortest documented path?",
+      "back": "None: a Pod can reach the API server directly, using its mounted service account token.",
+      "choices": "A) None; a Pod reaches the API server directly with its service account token\nB) At least two: Container to Worker, then Worker to API Server\nC) Four or more, always",
+      "choicesExplained": "B: this describes a different, indirect path; the deck's own compromised-container cards teach the direct one. C: nothing in the sources requires four hops.",
+      "explanation": "Kubernetes' own docs say Pods \"can do so securely by leveraging a service account\"; the control plane's default network exposure to running containers is also documented in the attack trees.",
+      "source": "Kubernetes documentation, \"Communication between Nodes and the Control Plane\", \"Node to Control Plane\"; Kubernetes Attack Trees README, \"Compromised container\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/architecture/control-plane-node-communication/#node-to-control-plane",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Kubernetes trust zones",
+        "data flow",
+        "trust boundary"
+      ],
+      "conceptIDs": [
+        "k8ssec.trust-boundary",
+        "k8ssec.k8s-trust-zones"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.flow-unverified-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16612,
+      "front": "A penetration tester impersonates the API server to a kubelet, exploiting a documented flow. Which data flow does this attack most directly abuse?",
+      "back": "API Server to Worker: today the kubelet's certificate is still not checked unless --kubelet-certificate-authority is set.",
+      "choices": "A) API Server to Worker (kubelet certificate unverified by default)\nB) API Server to Master Data (verified, over TLS)\nC) Internet to API Server (verified, possibly two-way TLS)",
+      "choicesExplained": "B: this flow is verified, making impersonation far harder. C: this flow is also verified, and the strongest of the internet-facing connections.",
+      "explanation": "Connections terminate at the kubelet's HTTPS endpoint, but by default the API server does not verify the kubelet's serving certificate.",
+      "source": "Kubernetes documentation, \"Communication between Nodes and the Control Plane\", \"API server to kubelet\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/architecture/control-plane-node-communication/#api-server-to-kubelet",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "uses": [
+        "data flow",
+        "Kubernetes trust zones",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "k8ssec.data-flow"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.zone-classify-etcd",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16621,
+      "front": "Which trust zone does etcd belong to, and why is uncontrolled access to it especially serious?",
+      "back": "Master Data: uncontrolled access is tantamount to root or administrative access to the whole cluster.",
+      "choices": "A) Master Data\nB) Worker\nC) API Server",
+      "choicesExplained": "B: the Worker zone covers kubelet and kube-proxy, not the cluster's data store. C: the API Server zone is the coordinator, not the data layer it talks to.",
+      "explanation": "etcd holds the cluster's full state, so the 2019 threat model treats access to it as equivalent to full administrative access.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zones”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubernetes trust zones"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-trust-zones"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.zone-image-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16630,
+      "front": "Looking at the trust boundaries diagram, which numbered flow carries the user's request into the API server?",
+      "back": "Flow 1, Apply Deployment.",
+      "choices": "A) Flow 1, Apply Deployment\nB) Flow 7, Poll for New Pod\nC) Flow 16, Poll for services / endpoints",
+      "choicesExplained": "B: flow 7 is the kubelet polling the API server for new Pods, not the user's own request. C: flow 16 is kube-proxy polling for Services and endpoints, an internal flow.",
+      "explanation": "The diagram is from 2019, pre-v1.24; flow 8, \"Docker run\", is out of date since dockershim was removed.",
+      "source": "Kubernetes Attack Trees, \"Kubernetes Architecture and Trust Boundaries\"",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/images/trustboundaries.png",
+      "sourceLicence": "B · Apache 2.0",
+      "image": {
+        "file": "media/trustboundaries.png",
+        "alt": "A Kubernetes architecture diagram with numbered data flows between components: 1 Apply Deployment (User to API Server) through 16 (two separate flows share this number), an unnumbered Read/Write flow to etcd, red dashed lines marking trust boundaries around single components or small groups, and green lines marking machine segregation.",
+        "credit": "\"Kubernetes Architecture and Trust Boundaries\", Kubernetes Attack Trees (CNCF Financial Services User Group), https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/images/trustboundaries.png",
+        "licence": "B · Apache 2.0",
+        "side": "front"
+      },
+      "uses": [
+        "Kubernetes trust zones",
+        "data flow"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-trust-zones",
+        "k8ssec.data-flow"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-classify-phished-admin",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16639,
+      "front": "A cluster administrator is tricked by a phishing email into running a malicious script with their own privileges. Which whitepaper threat actor best describes them?",
+      "back": "Uninformed insider: authorised, but duped into causing harm.",
+      "choices": "A) Uninformed insider\nB) Malicious insider\nC) Malicious outsider",
+      "choicesExplained": "B: a malicious insider acts with intent; this administrator did not intend harm. C: the administrator is inside the system, with legitimate authorisation, not an outsider.",
+      "explanation": "The distinguishing factor between the whitepaper's insider actors is intent, not authorisation: both have it, only one means harm.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-classify-supply-chain",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16648,
+      "front": "An unauthenticated party outside the organisation compromises a dependency in the software supply chain to attack the cluster. Which whitepaper actor is this?",
+      "back": "Malicious outsider: outside the system, without explicit authorisation, attacking via the supply chain.",
+      "choices": "A) Malicious outsider\nB) Malicious insider\nC) Uninformed insider",
+      "choicesExplained": "B and C both require some form of authorisation within the system, which a supply-chain attacker from outside does not have.",
+      "explanation": "The whitepaper explicitly names the supply chain as one of the malicious outsider's possible attack routes.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-classify-container-access",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16657,
+      "front": "Using the 2019 threat model's vocabulary, an attacker has broken out of an application into its container, but holds no valid cluster credentials. Which actor are they?",
+      "back": "Internal Attacker: they have transited a trust boundary, but are not an authenticated cluster user.",
+      "choices": "A) Internal Attacker\nB) External Attacker\nC) Malicious Internal User",
+      "choicesExplained": "B: an External Attacker has not yet crossed any trust boundary. C: a Malicious Internal User is a legitimate, credentialed user misusing their position, unlike this attacker.",
+      "explanation": "The 2019 model's Internal Attacker specifically describes someone who has crossed into the system without holding valid credentials themselves.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-contrast-vocab-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16666,
+      "front": "A card describes an actor as “Developer”. Which source uses this term?",
+      "back": "The 2019 Kubernetes threat model; the whitepaper's actor vocabulary does not include a Developer category.",
+      "choices": "A) The 2019 threat model\nB) The whitepaper\nC) Both name it identically",
+      "choicesExplained": "B: the whitepaper only names malicious insider, uninformed insider and malicious outsider. C: the two vocabularies do not overlap term for term.",
+      "explanation": "The two lists come from different documents and do not map one to one.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.actor-victim-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 16675,
+      "front": "In a Confused Deputy attack such as Cross-Site Request Forgery, a normal user is tricked into acting against their own cluster's interest. What role can this user play, according to the 2019 model?",
+      "back": "Both victim and potential direct attacker, even though a secondary attacker enticed the action.",
+      "choices": "A) Both victim and potential direct attacker\nB) Only a victim, never an attacker\nC) Only an attacker, never a victim",
+      "choicesExplained": "B and C both miss the model's point: the same user can be recorded as the (unwitting) source of an action while also being its target.",
+      "explanation": "The 2019 model deliberately notes that an enticed user can appear as the attacker of record, even without malicious intent.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.persistence-mitigation-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16684,
+      "front": "An attacker who has compromised a container wants a foothold that survives a Pod restart. Which underlying Kubernetes weakness are they most likely relying on?",
+      "back": "A misconfiguration resilient to Pod restarts, node restarts and container restarts.",
+      "choices": "A) A misconfiguration resilient to Pod, node and container restarts\nB) A missing NetworkPolicy\nC) An unpatched flaw in the container runtime",
+      "choicesExplained": "B: NetworkPolicy affects network reachability, not restart survival. C: an unpatched runtime flaw is one possible entry route, but persistence specifically targets what survives a restart.",
+      "explanation": "The persistence attack tree's second branch is specifically about misconfigurations that are resilient to Pod, container and node restarts.",
+      "source": "Kubernetes Attack Trees, Establish Persistence",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/EstablishPersistence.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "persistence"
+      ],
+      "conceptIDs": [
+        "k8ssec.persistence"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.dos-mitigation-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16693,
+      "front": "A multi-tenant cluster has no ResourceQuota configured. A tenant's compromised Pod starts launching hundreds of additional Pods via the API server. What single control would have limited this?",
+      "back": "A ResourceQuota limiting the number of objects a namespace can create.",
+      "choices": "A) A ResourceQuota on object counts\nB) A stricter Pod Security Standard\nC) Enabling audit logging",
+      "choicesExplained": "B: Pod Security Standards restrict configuration such as privilege, not object counts. C: audit logging would record the attack, but would not have prevented it.",
+      "explanation": "The attack tree names exactly this route as the most likely denial-of-service path from inside a compromised, non-privileged container.",
+      "source": "Kubernetes Attack Trees, Denial Of Service",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/DenialOfService.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "denial of service (DoS)"
+      ],
+      "conceptIDs": [
+        "k8ssec.denial-of-service"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.malicious-code-mitigation-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16702,
+      "front": "A public-facing web application in a Pod has a remote code execution bug. What is the most direct consequence, per the Malicious Code Execution attack tree?",
+      "back": "The attacker gains access to the container, the most likely initial foothold modelled by this tree.",
+      "choices": "A) Access to the container\nB) Immediate root access to the node\nC) Automatic persistence across restarts",
+      "choicesExplained": "B: reaching the node requires a further escalation step, not modelled as automatic. C: persistence is a separate attack tree, requiring its own additional steps.",
+      "explanation": "A vulnerable public-facing application is described as perhaps the most likely initial foothold into a Kubernetes environment.",
+      "source": "Kubernetes Attack Trees, Malicious Code Execution",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/MaliciousCodeExecution.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "malicious code execution"
+      ],
+      "conceptIDs": [
+        "k8ssec.malicious-code-execution"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.compromised-container-mitigation-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16711,
+      "front": "To validate mitigations against the compromised container scenario, what should a security team specifically test?",
+      "back": "Whether the mounted service account token's permissions are restricted enough to limit an attacker who reaches the container.",
+      "choices": "A) The mounted service account token's permissions\nB) The cluster's audit log retention period\nC) The number of nodes in the cluster",
+      "choicesExplained": "B: log retention matters for investigation, not for limiting what a compromised token can do. C: cluster size has no bearing on this specific attack path.",
+      "explanation": "The scenario's most exploited path is a mounted, insecure service account token, so testing its permissions directly validates the mitigation.",
+      "source": "Kubernetes Attack Trees, Scenario: Compromised application leads to foothold in container",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/CompromisedContainer.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "compromised container scenario"
+      ],
+      "conceptIDs": [
+        "k8ssec.compromised-container"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.attacker-network-mitigation-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16720,
+      "front": "A cluster has no firewall restrictions and the default kube-system NetworkPolicy gap. Which control would most directly reduce the “attacker on the network” scenario's threats?",
+      "back": "Firewalls together with appropriate NetworkPolicy configuration restricting access to kube-system.",
+      "choices": "A) Firewalls and NetworkPolicy for kube-system\nB) A stricter audit policy\nC) Rotating Secrets more frequently",
+      "choicesExplained": "B: an audit policy records events; it does not stop network access in the first place. C: Secret rotation reduces the value of stolen credentials, but does not address network reachability.",
+      "explanation": "The scenario's own assumptions name exactly these two gaps: no firewalls, and no NetworkPolicy for kube-system.",
+      "source": "Kubernetes Attack Trees, Scenario: Attacker on the Network",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/AttackerOnTheNetwork.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "attacker on the network",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.attacker-on-network"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.sensitive-data-mitigation-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16729,
+      "front": "A security review finds that a service account has `list` access to Secrets across a namespace it does not need. Which attack tree threat does this most directly enable?",
+      "back": "Access to sensitive data, via misconfigured RBAC exposing Secrets.",
+      "choices": "A) Access to sensitive data\nB) Denial of service\nC) Persistence",
+      "choicesExplained": "B: excess Secret access does not by itself exhaust resources. C: it may support persistence indirectly, but its primary and most direct threat is reading sensitive data.",
+      "explanation": "Misconfigured RBAC granting broader Secret access than needed is named as the major approach in this attack tree.",
+      "source": "Kubernetes Attack Trees, Access Sensitive Data",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/AccessSensitiveData.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "access to sensitive data",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.access-sensitive-data"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.escalation-scenario-secret-mount",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16738,
+      "front": "A user can create Pods in a namespace, but has no direct RBAC access to Secrets. They create a Pod that mounts another workload's Secret. What have they achieved?",
+      "back": "Privilege escalation, by mounting an arbitrary Secret in that namespace to access confidential information.",
+      "choices": "A) Privilege escalation via Secret mounting\nB) Nothing; Pod creation does not touch Secrets\nC) A denial-of-service condition",
+      "choicesExplained": "B: this is exactly one of the documented escalation paths from unrestricted Pod creation. C: no resource exhaustion is involved here.",
+      "explanation": "Pod creation rights alone can let a user reach Secrets they were never directly granted, one of the named escalation paths.",
+      "source": "Kubernetes documentation, Authorization, “Escalation paths”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#escalation-paths",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privilege escalation",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.privilege-escalation"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.escalation-scenario-sa-impersonation",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16747,
+      "front": "A user creates a Pod that uses a more privileged ServiceAccount than their own RBAC role allows. What can they now do?",
+      "back": "Perform any Kubernetes API action that ServiceAccount is permitted to do, effectively impersonating a more privileged identity.",
+      "choices": "A) Act with the more privileged ServiceAccount's permissions\nB) Nothing changes; RBAC still applies to the user directly\nC) Only read access is escalated, never write",
+      "choicesExplained": "B: once the Pod runs with that ServiceAccount, its requests carry that identity's permissions, not the user's own. C: the escalation is not limited to reads; it grants whatever that ServiceAccount can do.",
+      "explanation": "Using an arbitrary ServiceAccount in a namespace is a documented escalation path precisely because Pods act with their ServiceAccount's own permissions.",
+      "source": "Kubernetes documentation, Authorization, “Escalation paths”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#escalation-paths",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privilege escalation",
+        "ServiceAccount"
+      ],
+      "conceptIDs": [
+        "k8ssec.privilege-escalation"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.escalation-classify-crd",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 16756,
+      "front": "A cluster administrator deploys a CRD that lets ordinary users change which Secrets or ServiceAccounts a workload uses. What should the administrator have considered?",
+      "back": "That this CRD may open a privilege escalation path, since it lets users make changes in areas escalation paths rely on.",
+      "choices": "A) A possible privilege escalation path\nB) Only a performance concern\nC) No security impact, since CRDs are user-defined data only",
+      "choicesExplained": "B: performance is not the concern raised here. C: CRDs can carry real security consequences if they let users touch privileged fields.",
+      "explanation": "The documentation specifically cautions administrators to consider escalation consequences when deploying CRDs that touch these sensitive areas.",
+      "source": "Kubernetes documentation, Authorization, “Escalation paths”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#escalation-paths",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privilege escalation"
+      ],
+      "conceptIDs": [
+        "k8ssec.privilege-escalation"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.attack-classify-persistence-tactic",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16765,
+      "front": "An adversary deploys their own malicious image to a cluster so their code keeps running across reboots. Under which whitepaper heading does this fall?",
+      "back": "Execution & Persistence.",
+      "choices": "A) Execution & Persistence\nB) Initial Access\nC) Discovery",
+      "choicesExplained": "B: Initial Access is the first foothold, not maintaining control afterwards. C: Discovery is about mapping the environment, not maintaining a presence in it.",
+      "explanation": "The current live ATT&CK matrix instead has separate Execution and Persistence tactics; this card follows the whitepaper's combined heading.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · whitepaper heading vs current ATT&CK matrix",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Matrix for Containers”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-matrix-for-containersnew-in-v2",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "MITRE ATT&CK for Containers"
+      ],
+      "conceptIDs": [
+        "k8ssec.attack-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.attack-classify-discovery-tactic",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16774,
+      "front": "An adversary makes many GET-style calls against the API gateway to enumerate what containers and permissions exist. Which ATT&CK for Containers tactic is this?",
+      "back": "Discovery.",
+      "choices": "A) Discovery\nB) Credential Access\nC) Impact",
+      "choicesExplained": "B: Credential Access is about obtaining credentials, not mapping the environment. C: Impact covers the attacker's final objective, such as a denial-of-service action.",
+      "explanation": "Auditing get calls of an API gateway is the whitepaper's own recommended way to detect this discovery-phase activity.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Matrix for Containers”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-matrix-for-containersnew-in-v2",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "MITRE ATT&CK for Containers"
+      ],
+      "conceptIDs": [
+        "k8ssec.attack-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.attack-classify-impact-tactic",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16783,
+      "front": "An adversary uses compromised containers to launch a denial of service attack that degrades a hosted service's availability. Which ATT&CK for Containers tactic is this?",
+      "back": "Impact.",
+      "choices": "A) Impact\nB) Lateral Movement\nC) Privilege Escalation",
+      "choicesExplained": "B: Lateral Movement is about spreading within the environment, not the final damaging action. C: Privilege Escalation is about gaining higher access, a separate earlier stage.",
+      "explanation": "The whitepaper names denial-of-service attacks degrading availability as its example of the Impact tactic.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Matrix for Containers”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-matrix-for-containersnew-in-v2",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "MITRE ATT&CK for Containers",
+        "denial of service (DoS)"
+      ],
+      "conceptIDs": [
+        "k8ssec.attack-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.resource-abuse-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 16792,
+      "front": "A shared node hosts several tenants' Pods, none of which have CPU or memory limits set. One tenant's workload begins cryptomining. What is the effect on the other tenants?",
+      "back": "Resource starvation: the cryptomining workload can consume the node's shared CPU and memory, degrading everyone else.",
+      "choices": "A) Resource starvation for other tenants on the node\nB) No effect; Kubernetes isolates CPU by default\nC) Only that tenant's own workloads are affected",
+      "choicesExplained": "B: without explicit limits, Kubernetes does not cap a container's resource use by default. C: shared node resources mean neighbours are affected too, not just the offending tenant.",
+      "explanation": "Resource requests and limits, enforced via cgroups, exist specifically to stop one workload from starving its neighbours.",
+      "source": "Cloud Native Security Whitepaper v2, “Resource Requests and Limits”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#resource-requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "fork bomb / cryptomining"
+      ],
+      "conceptIDs": [
+        "k8ssec.resource-abuse"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.threat-intel-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 16801,
+      "front": "A security team notices a container repeatedly resolving a domain name known to be used for command-and-control by a particular attacker group. What kind of information let them notice this?",
+      "back": "Threat intelligence: an indicator (the domain name) associated with a known threat actor's behaviour.",
+      "choices": "A) Threat intelligence indicators\nB) Kubernetes auditing alone\nC) Pod Security Standards",
+      "choicesExplained": "B: auditing records API server requests; recognising a malicious domain needs external threat intelligence to interpret. C: Pod Security Standards restrict configuration, not network behaviour.",
+      "explanation": "Threat intelligence supplies exactly this kind of indicator, letting defenders recognise known-bad network activity.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Intelligence”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-intelligence",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "threat intelligence"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-intelligence"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.persistence-classify-branch",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16810,
+      "front": "An attacker reads a Secret to obtain credentials for a different, more durable part of the cluster. Which branch of the Establish Persistence tree is this?",
+      "back": "The first branch: reading Secrets from within the cluster to exploit other vulnerable areas for a persistent foothold.",
+      "choices": "A) The Secret-reading branch\nB) The container-misconfiguration branch\nC) Neither; this is a Denial of Service technique",
+      "choicesExplained": "B: that branch starts from existing container access and abuses misconfigurations, not Secret reads. C: nothing here affects availability.",
+      "explanation": "The attack tree explicitly separates the more obvious Secret-reading route from the misconfiguration-abuse route.",
+      "source": "Kubernetes Attack Trees, Establish Persistence",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/EstablishPersistence.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "persistence",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.persistence"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.dos-classify-branch",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16819,
+      "front": "An attacker without any cluster access floods the kube-apiserver's exposed port with requests. Which branch of the Denial of Service tree is this?",
+      "back": "The right branch: performing DoS attacks by flooding the network at control plane endpoints.",
+      "choices": "A) The network-flooding right branch\nB) The container-compromise left branch\nC) Neither; this only fits the persistence tree",
+      "choicesExplained": "B: the left branch assumes the attacker already has container access, which is not the case here. C: this scenario has nothing to do with maintaining a foothold.",
+      "explanation": "The right branch specifically targets network endpoints, distinct from the left branch's container-compromise starting point.",
+      "source": "Kubernetes Attack Trees, Denial Of Service",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/DenialOfService.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "denial of service (DoS)"
+      ],
+      "conceptIDs": [
+        "k8ssec.denial-of-service"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.threat-modelling-boundary-application",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16828,
+      "front": "A team draws their cluster's architecture but never marks where trust changes across it. What step of threat modelling have they skipped?",
+      "back": "Identifying security boundaries, so the model shows where trust actually changes and where controls should sit.",
+      "choices": "A) Identifying security boundaries\nB) Listing every container image in use\nC) Writing an incident response plan",
+      "choicesExplained": "B: an image inventory is useful, but it is not what threat modelling's boundary-identification step is about. C: incident response is a separate, later activity.",
+      "explanation": "Threat modelling starts by scoping architecture and boundaries; without boundaries, the model cannot say where controls matter most.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Modeling”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-modeling",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "threat modelling",
+        "trust boundary"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-modelling"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.attack-tree-application-goal",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 16837,
+      "front": "A security team wants to show every distinct way an attacker could reach “run code inside a production container”, so each step can be mitigated separately. What technique fits?",
+      "back": "An attack tree, branching from that goal into the distinct ways it could be reached.",
+      "choices": "A) An attack tree\nB) A single STRIDE category\nC) A vulnerability severity score",
+      "choicesExplained": "B: STRIDE categorises threat types, but does not branch out every path to one specific goal. C: a vulnerability severity score rates one known flaw; it does not map out attack paths.",
+      "explanation": "An attack tree is precisely a branching structure for the ways an attacker could reach one particular goal.",
+      "source": "NIST CSRC Glossary, “attack tree”",
+      "sourceURL": "https://csrc.nist.gov/glossary/term/attack_tree",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "attack tree"
+      ],
+      "conceptIDs": [
+        "k8ssec.attack-tree"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.dos-cluster-lost-application",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 16846,
+      "front": "A team notices one node repeatedly runs out of memory and drops out of the cluster whenever a particular workload is scheduled there. What STRIDE category, and which mitigation, applies?",
+      "back": "Denial of Service; set resource requests and limits so the workload cannot exhaust the node.",
+      "choices": "A) Denial of Service, fixed by resource requests and limits\nB) Tampering, fixed by stronger RBAC\nC) Spoofing, fixed by mutual TLS",
+      "choicesExplained": "B: nothing has been altered without authorisation here, only exhausted. C: no identity has been stolen or impersonated in this scenario.",
+      "explanation": "A workload with no resource limits consuming all of a node's CPU and memory is the whitepaper's own Denial of Service example.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE",
+        "denial of service (DoS)"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride",
+        "k8ssec.denial-of-service"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.privilege-escalation-classify-container-breakout",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 16855,
+      "front": "An attacker inside a privileged container breaks out to gain root access on the underlying node. Which threat does this best illustrate?",
+      "back": "Privilege escalation, specifically by breaking out of a container to the host.",
+      "choices": "A) Privilege escalation\nB) Persistence\nC) Access to sensitive data",
+      "choicesExplained": "B: the attacker may then pursue persistence, but the act described here is the escalation itself. C: nothing about reading sensitive data is described here.",
+      "explanation": "Breaking out of a containerized environment to the underlying host is the documentation's own example of privilege escalation.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Matrix for Containers”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-matrix-for-containersnew-in-v2",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privilege escalation"
+      ],
+      "conceptIDs": [
+        "k8ssec.privilege-escalation"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.attack-tree-reuse-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 16864,
+      "front": "Several different attack trees in this model all include a “Gain Access to Container” sub-tree. Why is this fragment reused so heavily?",
+      "back": "It is often a key point of entry for a wide range of attacker goals and scenarios.",
+      "choices": "A) It is a common key entry point reused across many attacker goals\nB) It is required by Kubernetes RBAC syntax\nC) It only applies to the Denial of Service tree",
+      "choicesExplained": "B: this is a modelling choice about attacker behaviour, not an RBAC requirement. C: the fragment appears across several trees, not just one.",
+      "explanation": "The Malicious Code Execution tree explicitly notes that this fragment is heavily reused across the models for this reason.",
+      "source": "Kubernetes Attack Trees, Malicious Code Execution",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/MaliciousCodeExecution.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "malicious code execution",
+        "attack tree"
+      ],
+      "conceptIDs": [
+        "k8ssec.malicious-code-execution",
+        "k8ssec.attack-tree"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.escalation-classify-configmap",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 16873,
+      "front": "A user creates a Pod that mounts a ConfigMap belonging to another workload in the namespace. What have they potentially gained access to?",
+      "back": "Information meant for the other workload, such as a database host name stored in that ConfigMap.",
+      "choices": "A) Information meant for the other workload\nB) The other workload's ServiceAccount token automatically\nC) Nothing; ConfigMaps hold no sensitive data by design",
+      "choicesExplained": "B: mounting a ConfigMap does not by itself grant another workload's token; that is a separate escalation path. C: ConfigMaps often hold operationally sensitive data such as hostnames, even if not marked as Secrets.",
+      "explanation": "Mounting or using ConfigMaps meant for other workloads is one of the documented escalation paths from unrestricted Pod creation.",
+      "source": "Kubernetes documentation, Authorization, “Escalation paths”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#escalation-paths",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "privilege escalation"
+      ],
+      "conceptIDs": [
+        "k8ssec.privilege-escalation"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.contrast-actor-vocabularies",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 16882,
+      "front": "How do the whitepaper's and the 2019 threat model's threat-actor vocabularies differ?",
+      "back": "The whitepaper names three: malicious insider, uninformed insider, malicious outsider. The 2019 model names six, including Administrator, Developer and End User.",
+      "explanation": "The two lists come from different documents and do not map one to one.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification” / Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.contrast-persistence-vs-dos",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 16891,
+      "front": "How do persistence and denial of service differ as attacker goals?",
+      "back": "Persistence aims to keep a foothold alive across restarts; denial of service aims to disrupt availability.",
+      "explanation": "The DoS tree itself notes that DoS is \"perhaps not the most valuable to an attacker\".",
+      "source": "Kubernetes Attack Trees, Establish Persistence / Denial Of Service",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/EstablishPersistence.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "persistence",
+        "denial of service (DoS)"
+      ],
+      "conceptIDs": [
+        "k8ssec.persistence",
+        "k8ssec.denial-of-service"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.contrast-malicious-code-vs-compromised-container",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 16900,
+      "front": "How does the Malicious Code Execution attack tree differ from the compromised container scenario?",
+      "back": "Malicious Code Execution is the general tree for running code in the cluster; the compromised container scenario is one named starting point.",
+      "explanation": "The scenario zooms into one likely entry route (a vulnerable application) that the broader tree also covers.",
+      "source": "Kubernetes Attack Trees, Malicious Code Execution / Scenario: Compromised application",
+      "sourceURL": "https://github.com/cncf/financial-user-group/blob/main/projects/k8s-threat-model/AttackTrees/MaliciousCodeExecution.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "malicious code execution",
+        "compromised container scenario"
+      ],
+      "conceptIDs": [
+        "k8ssec.malicious-code-execution",
+        "k8ssec.compromised-container"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.contrast-stride-vs-attack-mitre",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 16909,
+      "front": "How does STRIDE differ from MITRE ATT&CK for Containers?",
+      "back": "STRIDE is a small set of general threat categories; ATT&CK is a detailed, container-specific matrix of real attacker tactics and techniques.",
+      "explanation": "STRIDE helps you brainstorm threat types quickly; ATT&CK gives a much more granular, container-specific catalogue to check against.",
+      "source": "Cloud Native Security Whitepaper v2, “Threat Identification” and “Threat Matrix for Containers”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#threat-identification",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "STRIDE",
+        "MITRE ATT&CK for Containers"
+      ],
+      "conceptIDs": [
+        "k8ssec.stride",
+        "k8ssec.attack-containers"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.contrast-trust-boundary-vs-data-flow",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 16918,
+      "front": "How does a trust boundary differ from a data flow?",
+      "back": "A trust boundary is the line between zones of different criticality; a data flow is the connection that actually crosses (or stays within) it.",
+      "explanation": "You cannot assess a boundary's risk without knowing which data flows actually cross it, and how they are authenticated.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Trust Zones” / “Trust Zone Connections”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "trust boundary",
+        "data flow"
+      ],
+      "conceptIDs": [
+        "k8ssec.trust-boundary",
+        "k8ssec.data-flow"
+      ]
+    },
+    {
+      "id": "k8ssec.threat-model.contrast-internal-vs-external-attacker",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 16927,
+      "front": "How does the 2019 model's Internal Attacker differ from its External Attacker?",
+      "back": "The Internal Attacker has crossed at least one trust boundary, such as gaining container access; the External Attacker has not, and is unauthenticated.",
+      "explanation": "This distinction matters because the two face very different sets of controls: what stops one may not stop the other.",
+      "source": "Kubernetes Threat Model (Trail of Bits, 2019), “Threat Actors”",
+      "sourceURL": "https://github.com/kubernetes/sig-security/blob/main/sig-security-external-audit/security-audit-2019/findings/Kubernetes%20Threat%20Model.pdf",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "threat actors"
+      ],
+      "conceptIDs": [
+        "k8ssec.threat-actors"
+      ]
+    }
+  ]
+}

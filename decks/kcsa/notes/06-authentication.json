@@ -1,0 +1,1719 @@
+{
+  "topic": "Authentication",
+  "notes": [
+    {
+      "id": "k8ssec.authentication.normal-user",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6000,
+      "front": "What is a \"normal user\" in Kubernetes?",
+      "back": "A human user managed outside the cluster; Kubernetes has no User object and cannot add users through the API.",
+      "explanation": "Kubernetes assumes a separate system, such as private keys or a user store, manages people; only their credentials are checked at request time.",
+      "example": "Like a building that checks ID cards issued by an outside authority, rather than keeping its own list of residents.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Users in Kubernetes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#users-in-kubernetes",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "normal user"
+      ],
+      "uses": [
+        "normal user"
+      ],
+      "conceptIDs": [
+        "k8ssec.normal-user"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.authenticator",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6010,
+      "front": "What is an authentication module (authenticator)?",
+      "back": "A plugin the API server runs to try to identify who is making a request, from client certificates, bearer tokens, or a proxy.",
+      "explanation": "Several authenticators can be enabled at once; each is tried in turn until one succeeds.",
+      "example": "Like a security desk that checks an ID card, then a fob, then a visitor badge, one after another.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Authentication methods\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#authentication-methods",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "authentication module (authenticator)"
+      ],
+      "uses": [
+        "normal user",
+        "authentication module (authenticator)"
+      ],
+      "conceptIDs": [
+        "k8ssec.authenticator"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.user-attributes",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 6020,
+      "front": "What attributes does an authenticator attach to a request?",
+      "back": "Username, UID, groups, and an \"extra\" map of additional string data.",
+      "explanation": "These values are opaque to authentication; they only matter later, when an authorizer reads them.",
+      "example": "Like a visitor badge that lists a name, a badge number, a department, and a few notes.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Authentication strategies\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#authentication-strategies",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "user attributes (username, UID, groups, extra)"
+      ],
+      "uses": [
+        "authentication module (authenticator)",
+        "user attributes (username, UID, groups, extra)"
+      ],
+      "conceptIDs": [
+        "k8ssec.user-attributes"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.anonymous-request",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6030,
+      "front": "What is an anonymous request?",
+      "back": "A request no configured authenticator rejects, given the username system:anonymous and group system:unauthenticated.",
+      "explanation": "It matters because an anonymous request can still be authorized if RBAC rules grant that group access.",
+      "example": "Like a visitor who shows no ID at all, but is waved through because no one checks the sign-in sheet.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Anonymous requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "anonymous request"
+      ],
+      "uses": [
+        "authentication module (authenticator)",
+        "anonymous request"
+      ],
+      "conceptIDs": [
+        "k8ssec.anonymous-request"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.system-authenticated",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6040,
+      "front": "What is the system:authenticated group?",
+      "back": "The group the API server automatically adds every successfully authenticated user to.",
+      "explanation": "It sits alongside any custom groups an authenticator assigns, and can itself be bound in RBAC.",
+      "example": "Like an automatic \"verified\" tag given to anyone who badges in, on top of their department tag.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Users in Kubernetes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#users-in-kubernetes",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "system:authenticated"
+      ],
+      "uses": [
+        "authentication module (authenticator)",
+        "system:authenticated"
+      ],
+      "conceptIDs": [
+        "k8ssec.system-authenticated"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.x509-client-cert",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6050,
+      "front": "What is X.509 client certificate authentication?",
+      "back": "Authenticating a client by a certificate signed by the cluster's trusted CA; the certificate's common name gives the username.",
+      "explanation": "Kubernetes uses this for system components such as the kubelet, and it can also authenticate people.",
+      "example": "Like an ID badge issued and signed by the building's own security office.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"X.509 client certificates\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#x509-client-certificates",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "X.509 client certificate authentication"
+      ],
+      "uses": [
+        "authentication module (authenticator)",
+        "X.509 client certificate authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.x509-client-cert-auth"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.bearer-token",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6060,
+      "front": "What is a bearer token?",
+      "back": "A token sent in an HTTP \"Authorization: Bearer\" header; whoever presents it is treated as its owner.",
+      "explanation": "Static tokens, bootstrap tokens, service account tokens, OpenID Connect and webhook authentication are all forms of bearer token.",
+      "example": "Like a numbered ticket that grants entry to whoever is holding it.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Putting a bearer token in a request\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#putting-a-bearer-token-in-a-request",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "bearer token"
+      ],
+      "uses": [
+        "authentication module (authenticator)",
+        "bearer token"
+      ],
+      "conceptIDs": [
+        "k8ssec.bearer-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.static-token-file",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6070,
+      "front": "What is a static token file?",
+      "back": "A CSV of tokens loaded into the API server at start-up (--token-auth-file); changing it needs a restart.",
+      "explanation": "The hardening guide calls it unsuitable for production: credentials sit in clear text on disk with no rotation or lockout.",
+      "example": "Like a paper guest list taped to the front desk that only a new print run can update.",
+      "source": "Kubernetes documentation, \"Hardening Guide: Authentication Mechanisms\", \"Static token file\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/authentication-mechanisms/#static-token-file",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "static token file"
+      ],
+      "uses": [
+        "bearer token",
+        "static token file"
+      ],
+      "conceptIDs": [
+        "k8ssec.static-token-file"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.bootstrap-token",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6080,
+      "front": "What is a bootstrap token?",
+      "back": "A dynamically managed bearer token, stored as a Secret in kube-system, used to join new nodes to a cluster.",
+      "explanation": "It authenticates as system:bootstrap:<Token ID> in the deliberately limited system:bootstrappers group, so it isn't fit for ordinary user access.",
+      "example": "Like a one-time construction pass that opens only the site gate, not the whole building.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Bootstrap tokens\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#bootstrap-tokens",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "bootstrap token"
+      ],
+      "uses": [
+        "bearer token",
+        "Secret",
+        "bootstrap token"
+      ],
+      "conceptIDs": [
+        "k8ssec.bootstrap-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.oidc",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6090,
+      "front": "What is OpenID Connect (OIDC)?",
+      "back": "An OAuth2-based protocol whose signed ID token the API server can accept as a bearer token; recommended for production users.",
+      "explanation": "Because the ID token carries everything needed to verify identity, the API server never has to contact the identity provider on each request.",
+      "example": "Like showing a signed, sealed pass from an outside identity office instead of a locally issued badge.",
+      "source": "Kubernetes documentation, \"Authenticating: OpenID Connect tokens\" and \"Hardening Guide: Authentication Mechanisms\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/authentication-mechanisms/#openid-connect-token-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "OpenID Connect (OIDC)"
+      ],
+      "uses": [
+        "bearer token",
+        "OpenID Connect (OIDC)"
+      ],
+      "conceptIDs": [
+        "k8ssec.oidc"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.jwt",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6100,
+      "front": "What is a JSON Web Token (JWT)?",
+      "back": "A signed token format with well-known fields; OIDC ID tokens and Kubernetes service account tokens are both JWTs.",
+      "explanation": "Because the signature can be checked locally, a JWT lets the API server verify each token without asking the issuer about that token.",
+      "example": "Like a tamper-evident seal on an envelope: anyone can check it's intact without contacting the sender.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"JSON Web Token authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#json-web-token-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "JSON Web Token (JWT)"
+      ],
+      "uses": [
+        "bearer token",
+        "JSON Web Token (JWT)"
+      ],
+      "conceptIDs": [
+        "k8ssec.jwt"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.webhook-token-auth",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6110,
+      "front": "What is webhook token authentication?",
+      "back": "The API server posts a TokenReview containing the bearer token to an external HTTP service, which replies whether it's valid.",
+      "explanation": "It lets Kubernetes delegate authentication decisions to systems it doesn't otherwise integrate with, such as LDAP or Kerberos gateways.",
+      "example": "Like phoning an outside credentials office to check a badge before letting someone in.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Webhook token authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#webhook-token-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "webhook token authentication"
+      ],
+      "uses": [
+        "bearer token",
+        "webhook token authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.webhook-token-auth"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.authenticating-proxy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6120,
+      "front": "What is an authenticating proxy?",
+      "back": "A reverse proxy in front of the API server that authenticates the caller itself and passes the username and groups in request headers.",
+      "explanation": "The API server trusts those headers completely, so the link between proxy and API server must be secured or an attacker could forge them.",
+      "example": "Like a receptionist who checks ID and tells the office \"this is Alice from Sales\" \u2014 the office just trusts the receptionist.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Authenticating reverse proxy\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#authenticating-proxy",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "authenticating proxy"
+      ],
+      "uses": [
+        "authentication module (authenticator)",
+        "authenticating proxy"
+      ],
+      "conceptIDs": [
+        "k8ssec.authenticating-proxy"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.user-impersonation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6130,
+      "front": "What is user impersonation in Kubernetes?",
+      "back": "Acting as another user, group or service account by setting impersonation headers, when authorized to do so.",
+      "explanation": "It lets a trusted administrator test what another identity can do, without logging in as them.",
+      "example": "Like a manager using a \"log in as\" feature to see exactly what an employee's account can access.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"User impersonation\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#user-impersonation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "user impersonation"
+      ],
+      "uses": [
+        "normal user",
+        "user impersonation"
+      ],
+      "conceptIDs": [
+        "k8ssec.user-impersonation"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.service-account-token",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6140,
+      "front": "What is a service account token?",
+      "back": "A signed JWT that authenticates a ServiceAccount, checked for signature, expiry, audience and object binding.",
+      "explanation": "It is the standard identity a Pod uses to talk to the API server, distinct from a human user's credentials.",
+      "example": "Like a staff pass issued to a machine or a robot rather than to a person.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Authenticating service account credentials\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#authenticating-credentials",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "service account token"
+      ],
+      "uses": [
+        "JSON Web Token (JWT)",
+        "service account token"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-account-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.tokenrequest-api",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6150,
+      "front": "What is the TokenRequest API?",
+      "back": "An API that issues short-lived, audience-bound tokens for a ServiceAccount, instead of a long-lived Secret.",
+      "explanation": "It is the mechanism behind the tokens the kubelet has automatically mounted into Pods since v1.22.",
+      "example": "Like a day pass printed fresh each morning instead of a permanent key that never changes.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Manually retrieve ServiceAccount credentials\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#get-a-token",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs v1.37",
+      "introduces": [
+        "TokenRequest API"
+      ],
+      "uses": [
+        "service account token",
+        "TokenRequest API"
+      ],
+      "conceptIDs": [
+        "k8ssec.tokenrequest-api"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.bound-sa-token",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6160,
+      "front": "What is a bound service account token?",
+      "back": "A time-limited TokenRequest token, tied to an audience and an object such as a Pod; it expires when that object is deleted.",
+      "explanation": "Binding the token's life to the Pod's means a stolen token from a deleted Pod stops working immediately.",
+      "example": "Like a conference badge that is deactivated the moment its holder checks out.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Authenticating service account credentials\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#authenticating-credentials",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "bound service account token"
+      ],
+      "uses": [
+        "TokenRequest API",
+        "bound service account token"
+      ],
+      "conceptIDs": [
+        "k8ssec.bound-sa-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.projected-sa-token",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6170,
+      "front": "What is a projected service account token volume?",
+      "back": "The projected volume the kubelet uses to mount an auto-rotating bound token, the cluster CA certificate, and the Pod's namespace into a Pod.",
+      "explanation": "The kubelet fetches the token through the TokenRequest API and refreshes it before it expires, so the application never handles an expired credential.",
+      "example": "Like a hotel key card the front desk silently re-issues before it expires.",
+      "source": "Kubernetes documentation, \"Managing Service Accounts\", \"Bound service account token volume mechanism\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#bound-service-account-token-volume",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "projected service account token volume"
+      ],
+      "uses": [
+        "bound service account token",
+        "projected service account token volume"
+      ],
+      "conceptIDs": [
+        "k8ssec.projected-sa-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.legacy-sa-token-secret",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6180,
+      "front": "What is a legacy service account token Secret?",
+      "back": "A long-lived token in a Secret; one you create by hand never expires. Since v1.29, unused auto-generated legacy tokens are purged after a year.",
+      "explanation": "Because a hand-created one never expires, its exposure risk is open-ended: anyone who can read that Secret can authenticate as the account indefinitely.",
+      "example": "Like a permanent master key that was cut once and never gets recalled.",
+      "source": "Kubernetes documentation, \"Manage Service Accounts\", \"Clean up Legacy ServiceAccount Token Secrets\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#clean-up-legacy-serviceaccount-token-secrets",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs v1.37",
+      "introduces": [
+        "legacy service account token Secret"
+      ],
+      "uses": [
+        "service account token",
+        "Secret",
+        "legacy service account token Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.legacy-sa-token-secret"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.automount-sa-token",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6190,
+      "front": "What does automountServiceAccountToken: false do?",
+      "back": "Stops a ServiceAccount's token being automatically mounted into Pods, set on the ServiceAccount or overridden per Pod.",
+      "explanation": "Most Pods never call the Kubernetes API, so mounting a token they don't need only adds attack surface.",
+      "example": "Like not issuing a building pass to a role that never needs to enter the building.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Assign a ServiceAccount to a Pod\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#assign-to-pod",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "automountServiceAccountToken"
+      ],
+      "uses": [
+        "service account token",
+        "automountServiceAccountToken"
+      ],
+      "conceptIDs": [
+        "k8ssec.automount-sa-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.token-audience",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 6200,
+      "front": "What is a token's audience?",
+      "back": "The intended recipient of a token; the service receiving the token should check that it matches itself.",
+      "explanation": "Checking the audience stops a token meant for one service being replayed against another.",
+      "example": "Like checking a ticket is for tonight's show, not just any show at the venue.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Authenticating service account credentials in your own code\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#authenticating-in-code",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "token audience"
+      ],
+      "uses": [
+        "service account token",
+        "token audience"
+      ],
+      "conceptIDs": [
+        "k8ssec.token-audience"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.kubeconfig-security",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6210,
+      "front": "Why should you only use kubeconfig files from trusted sources?",
+      "back": "A specially crafted kubeconfig file could run malicious code or expose local files when kubectl reads it.",
+      "explanation": "If you must use an untrusted kubeconfig file, inspect it carefully first, much as you would a shell script.",
+      "example": "Like being wary of a USB stick handed to you by a stranger, even though it looks like a settings file.",
+      "source": "Kubernetes documentation, \"Organizing Cluster Access Using kubeconfig Files\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "kubeconfig security"
+      ],
+      "uses": [
+        "kubeconfig security"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubeconfig-security"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.first-authenticator-wins",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6300,
+      "front": "When multiple authenticator modules are enabled, the {{c1::first module to successfully authenticate}} the request short-circuits evaluation, and the API server does not guarantee the order they run in.",
+      "explanation": "This is why enabling too many authenticators makes it hard to predict which one identified a given request.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Authentication methods\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#authentication-methods",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "authentication module (authenticator)"
+      ],
+      "conceptIDs": [
+        "k8ssec.authenticator"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.anonymous-default-enabled",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6310,
+      "front": "When is anonymous access enabled by default in Kubernetes?",
+      "back": "Whenever the API server uses an authorization mode other than AlwaysAllow.",
+      "explanation": "It can be turned off with --anonymous-auth=false on the API server.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Anonymous requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs v1.37",
+      "uses": [
+        "anonymous request"
+      ],
+      "conceptIDs": [
+        "k8ssec.anonymous-request"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.invalid-vs-missing-token",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6320,
+      "front": "With token authentication and anonymous access both configured, what happens if a request carries an invalid bearer token?",
+      "back": "A 401 Unauthorized error, not treatment as an anonymous request.",
+      "explanation": "Only a request with no bearer token at all is treated as anonymous; a bad token is a failed authentication.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Anonymous requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "anonymous request",
+        "bearer token"
+      ],
+      "conceptIDs": [
+        "k8ssec.anonymous-request"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.x509-username-mapping",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6330,
+      "front": "With X.509 client certificate authentication, Kubernetes takes the username from the {{c1::commonName field}} of the certificate's subject, and group memberships from its organization (O) fields.",
+      "explanation": "A certificate with several O fields places its holder in several groups at once.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"X.509 client certificates\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#x509-client-certificates-k8s-username",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "X.509 client certificate authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.x509-client-cert-auth"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.no-cert-revocation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6340,
+      "front": "Can a Kubernetes client certificate be revoked once issued?",
+      "back": "No. Kubernetes does not support certificate revocation; any issued certificate stays valid until it expires.",
+      "explanation": "This is why the hardening guide recommends short lifetimes for certificates used to authenticate people.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"X.509 client certificates\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#x509-client-certificates-k8s",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "X.509 client certificate authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.x509-client-cert-auth"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.node-client-cert-identity",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6350,
+      "front": "What username and group does a node's client certificate give the kubelet?",
+      "back": "Username system:node:<node name>, in the system:nodes group.",
+      "explanation": "This identity is what the Node authorization mode checks against when deciding what a kubelet can do.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Node client certificates\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#x509-client-certificates-nodes",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "X.509 client certificate authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.x509-client-cert-auth"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.bootstrap-token-format",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6360,
+      "front": "A bootstrap token has the form {{c1::[a-z0-9]{6}.[a-z0-9]{16}}}, a Token ID followed by a Token Secret.",
+      "explanation": "The API server must be started with --enable-bootstrap-token-auth for this authenticator to be active.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Bootstrap tokens\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#bootstrap-tokens",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "bootstrap token"
+      ],
+      "conceptIDs": [
+        "k8ssec.bootstrap-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.jwt-minimum-claims",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6370,
+      "front": "What claims must a minimal valid JWT payload contain to authenticate to Kubernetes?",
+      "back": "iss (issuer), aud (audience), exp (expiry), and the configured username claim.",
+      "explanation": "The API server checks the signature and these claims before treating the token as a valid identity.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"JSON Web Token authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#json-web-token-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "JSON Web Token (JWT)",
+        "token audience"
+      ],
+      "conceptIDs": [
+        "k8ssec.jwt"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.oidc-uses-id-token",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6380,
+      "front": "Which OAuth2 token does kubectl send as the bearer token in OIDC authentication?",
+      "back": "The id_token, not the access_token.",
+      "explanation": "The id_token is the signed JWT that carries the user's identity claims for the API server to verify.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"OpenID Connect tokens\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "OpenID Connect (OIDC)",
+        "bearer token"
+      ],
+      "conceptIDs": [
+        "k8ssec.oidc"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.webhook-cache-ttl",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6390,
+      "front": "What is the default cache time-to-live for a webhook authentication decision?",
+      "back": "Two minutes, set by --authentication-token-webhook-cache-ttl.",
+      "explanation": "Caching avoids calling the external service on every single request that reuses the same token.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Webhook token authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#webhook-token-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs v1.37",
+      "uses": [
+        "webhook token authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.webhook-token-auth"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.sa-username-groups",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6400,
+      "front": "What username and groups does a ServiceAccount authenticate with?",
+      "back": "Username system:serviceaccount:<namespace>:<name>, in groups system:serviceaccounts and system:serviceaccounts:<namespace>.",
+      "explanation": "These are the exact strings an RBAC RoleBinding needs to target that ServiceAccount.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Service account tokens\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#service-account-tokens",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "service account token"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-account-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.tokenrequest-default-lifespan",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6410,
+      "front": "What is the default lifespan of a token issued by the TokenRequest API, and who refreshes it?",
+      "back": "One hour by default; the kubelet refreshes the mounted token before it expires.",
+      "explanation": "The short default lifespan limits how long a leaked token stays useful.",
+      "source": "Kubernetes documentation, \"Managing Service Accounts\", \"Bound service account token volume mechanism\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#bound-service-account-token-volume",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs v1.37",
+      "uses": [
+        "TokenRequest API",
+        "projected service account token volume"
+      ],
+      "conceptIDs": [
+        "k8ssec.tokenrequest-api"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.pod-deletion-expires-token",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6420,
+      "front": "How is a bound service account token invalidated before its normal expiry?",
+      "back": "By deleting the Pod it is bound to; there is no other mechanism to invalidate a TokenRequest token.",
+      "explanation": "This makes deleting the Pod the way to immediately cut off a token you no longer trust.",
+      "source": "Kubernetes documentation, \"Managing Service Accounts\", \"Bound service account token volume mechanism\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#bound-service-account-token-volume",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "bound service account token"
+      ],
+      "conceptIDs": [
+        "k8ssec.bound-sa-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.two-methods-recommended",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6430,
+      "front": "What is the recommended minimum set of authentication methods for a cluster?",
+      "back": "Service account tokens for ServiceAccounts, plus at least one other method for normal user authentication.",
+      "explanation": "One authenticator alone can't cover both machine and human identities, which have different needs.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Authentication methods\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#authentication-methods",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "service account token",
+        "normal user"
+      ],
+      "conceptIDs": [
+        "k8ssec.authenticator"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.production-user-auth",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6440,
+      "front": "For production clusters with multiple users accessing the API directly, what authentication source does the hardening guide recommend?",
+      "back": "An external source such as OIDC; internal mechanisms like client certificates and service account tokens are not suitable.",
+      "explanation": "Internal mechanisms lack revocation and rotation, which becomes a bigger problem the more people share a cluster.",
+      "source": "Kubernetes documentation, \"Hardening Guide: Authentication Mechanisms\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/authentication-mechanisms/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "OpenID Connect (OIDC)",
+        "X.509 client certificate authentication",
+        "service account token"
+      ],
+      "conceptIDs": [
+        "k8ssec.oidc"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.secret-write-implies-sa-auth",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6450,
+      "front": "Why is write access to Secrets dangerous when service account tokens can be stored in them?",
+      "back": "Anyone with write access to Secrets can request a token, and anyone with read access can authenticate as that ServiceAccount.",
+      "explanation": "This is why RBAC good practice restricts both write and read access to Secrets tightly.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Service account tokens\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#service-account-tokens",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "service account token",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-account-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.tokenreview-recommended",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6460,
+      "front": "Why does Kubernetes recommend the TokenReview API over OIDC discovery for validating service account tokens in your own code?",
+      "back": "TokenReview invalidates tokens bound to deleted objects immediately; OIDC validation treats the token as valid until it expires.",
+      "explanation": "If a Pod is deleted, an application checking with TokenReview will reject its token right away; one relying on OIDC discovery won't.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Authenticating service account credentials in your own code\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#authenticating-in-code",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "service account token",
+        "bound service account token"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-account-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.cert-group-fixed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6470,
+      "front": "Can a user's group membership be changed while their client certificate is still valid?",
+      "back": "No. Group data is embedded in the certificate's organization fields and is fixed for the certificate's lifetime.",
+      "explanation": "Changing someone's groups means issuing them a new certificate, since the old one keeps its original claims.",
+      "source": "Kubernetes documentation, \"Hardening Guide: Authentication Mechanisms\", \"X.509 client certificate authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/authentication-mechanisms/#x509-client-certificate-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "X.509 client certificate authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.x509-client-cert-auth"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-anonymous-outcome",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6600,
+      "front": "A cluster uses RBAC (not AlwaysAllow) and anonymous access hasn't been disabled. A request arrives with no Authorization header at all. What identity does it get?",
+      "back": "system:anonymous, in group system:unauthenticated.",
+      "explanation": "Anonymous access is on by default unless the cluster is set to allow every request automatically, and a missing token (not an invalid one) is what triggers it.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Anonymous requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs v1.37",
+      "uses": [
+        "anonymous request"
+      ],
+      "conceptIDs": [
+        "k8ssec.anonymous-request"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-ci-credential-choice",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6610,
+      "front": "An external CI system outside the cluster needs a Kubernetes credential for a long-running job. What should it use rather than a legacy token Secret?",
+      "back": "A short-lived TokenRequest token, refreshed as needed, rather than a non-expiring Secret token.",
+      "explanation": "The Kubernetes project recommends against long-lived bearer tokens because, once disclosed, they can be misused indefinitely.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Manually retrieve ServiceAccount credentials\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#get-a-token",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "TokenRequest API",
+        "legacy service account token Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.tokenrequest-api"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-automount-batch-job",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6620,
+      "front": "A Pod only renders images and never calls the Kubernetes API. What setting removes an unnecessary credential from it?",
+      "back": "automountServiceAccountToken: false, on the Pod or its ServiceAccount.",
+      "explanation": "A token the Pod never uses is still a credential an attacker inside the container could steal.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Assign a ServiceAccount to a Pod\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#assign-to-pod",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "automountServiceAccountToken"
+      ],
+      "conceptIDs": [
+        "k8ssec.automount-sa-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-bootstrap-token-user",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6630,
+      "front": "An administrator wants to give a new employee daily kubectl access using a bootstrap token. Is that appropriate?",
+      "back": "No. Bootstrap tokens have hard-coded, narrow group memberships meant only for joining nodes, not for user access.",
+      "explanation": "Using them for people also inherits their lack of a lockout mechanism against guessing.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Bootstrap tokens\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#bootstrap-tokens",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "bootstrap token"
+      ],
+      "conceptIDs": [
+        "k8ssec.bootstrap-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-static-token-file-prod",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6640,
+      "front": "A team wants to add a new user by editing a static token file and restarting the API server each time. Is this suitable for a production cluster?",
+      "back": "No. Credentials sit in clear text on control-plane disks, and every change needs a restart, with no lockout mechanism.",
+      "explanation": "This is exactly why the hardening guide lists the static token file as unsuitable for production.",
+      "source": "Kubernetes documentation, \"Hardening Guide: Authentication Mechanisms\", \"Static token file\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/authentication-mechanisms/#static-token-file",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "static token file"
+      ],
+      "conceptIDs": [
+        "k8ssec.static-token-file"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-impersonation-debug",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6650,
+      "front": "An administrator wants to check exactly what a low-privileged user can do, without logging in as them. What lets them do this?",
+      "back": "User impersonation, using an impersonation header, if the administrator is authorized to impersonate that user.",
+      "explanation": "kubectl auth can-i --as <user> uses this mechanism to run the check as that identity.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"User impersonation\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#user-impersonation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "user impersonation"
+      ],
+      "conceptIDs": [
+        "k8ssec.user-impersonation"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-shared-kubeconfig",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6660,
+      "front": "A colleague emails you a kubeconfig file \"to save time setting up your cluster access\". Should you load it straight into kubectl?",
+      "back": "No. Only use kubeconfig files from trusted sources; a crafted one can run malicious code or expose files.",
+      "explanation": "Treat an unfamiliar kubeconfig file with the same caution as an unfamiliar shell script.",
+      "source": "Kubernetes documentation, \"Organizing Cluster Access Using kubeconfig Files\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubeconfig security"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubeconfig-security"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-webhook-auth-integration",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 6670,
+      "front": "A company already runs its own LDAP-backed credential service and wants Kubernetes to check bearer tokens against it directly. Which authenticator fits?",
+      "back": "Webhook token authentication, which posts the token to that external service for a decision.",
+      "explanation": "It lets Kubernetes integrate with authentication systems it doesn't natively speak, without building a new authenticator.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Webhook token authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#webhook-token-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "webhook token authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.webhook-token-auth"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-token-audience-check",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 6680,
+      "front": "A service accepts any bearer token that passes signature checks, without looking at its audience. What risk does this create?",
+      "back": "A token issued for a different service could be replayed against this one.",
+      "explanation": "Checking the audience keeps a token scoped to the application it was meant for.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Authenticating service account credentials in your own code\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#authenticating-in-code",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "token audience"
+      ],
+      "conceptIDs": [
+        "k8ssec.token-audience"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.contrast-invalid-vs-missing",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6900,
+      "front": "What is the difference between an invalid bearer token and no bearer token at all?",
+      "back": "An invalid token gets a 401 Unauthorized error; no token at all is treated as an anonymous request.",
+      "explanation": "Both fail to authenticate as a real user, but only the second is eligible for anonymous access rules.",
+      "contrast": "One is a rejected attempt at proof; the other is simply no attempt.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Anonymous requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "anonymous request",
+        "bearer token"
+      ],
+      "conceptIDs": [
+        "k8ssec.anonymous-request"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.contrast-oidc-vs-webhook",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6910,
+      "front": "What is the difference between OIDC and webhook token authentication?",
+      "back": "OIDC checks the token's signature and claims itself; webhook authentication asks an external service to decide, caching each answer briefly.",
+      "explanation": "OIDC scales better because it avoids a round trip per request; webhook decisions are cached, by default for two minutes, rather than looked up fresh each time.",
+      "contrast": "One checks a signature; the other asks someone else to decide.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"OpenID Connect tokens\" and \"Webhook token authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "OpenID Connect (OIDC)",
+        "webhook token authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.oidc"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.contrast-bound-vs-legacy-token",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6920,
+      "front": "What is the difference between a bound service account token and a legacy service account token Secret?",
+      "back": "A bound token is short-lived, audience-scoped and expires when its Pod is deleted; a legacy Secret token never expires.",
+      "explanation": "The bound token is the recommended mechanism since it limits how long a leaked credential stays useful.",
+      "contrast": "One is disposable by design; the other has to be manually revoked.",
+      "source": "Kubernetes documentation, \"Managing Service Accounts\", \"Bound service account token volume mechanism\" and \"Manual Secret management for ServiceAccounts\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#bound-service-account-token-volume",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "bound service account token",
+        "legacy service account token Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.bound-sa-token",
+        "k8ssec.legacy-sa-token-secret"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.two-user-categories",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6480,
+      "front": "What are the two categories of users every Kubernetes cluster has?",
+      "back": "ServiceAccounts, managed by Kubernetes itself, and normal users, managed by a system outside the cluster.",
+      "explanation": "Only ServiceAccounts exist as API objects; a normal user's identity is opaque to the API server.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Users in Kubernetes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#users-in-kubernetes",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "normal user",
+        "service account token"
+      ],
+      "conceptIDs": [
+        "k8ssec.normal-user"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.default-sa-per-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6490,
+      "front": "What ServiceAccount does every namespace get automatically, and what permissions does it start with?",
+      "back": "A \"default\" ServiceAccount, with no permissions beyond the default API discovery permissions RBAC grants every authenticated principal.",
+      "explanation": "Deleting the default ServiceAccount doesn't remove it for long: the control plane recreates it.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Default service accounts\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#default-service-accounts",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "service account token"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-account-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.automount-default-true",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6500,
+      "front": "By default, does Kubernetes inject ServiceAccount credentials into a Pod, or does a Pod have to opt in?",
+      "back": "It injects them by default, for the default ServiceAccount or any custom one specified, unless automountServiceAccountToken is set to false.",
+      "explanation": "This is why forgetting to set automountServiceAccountToken: false leaves a credential mounted even in Pods that never call the API.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Assign a ServiceAccount to a Pod\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#assign-to-pod",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "automountServiceAccountToken"
+      ],
+      "conceptIDs": [
+        "k8ssec.automount-sa-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.kubeconfig-default-lookup",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6510,
+      "front": "Where does kubectl look for a kubeconfig file by default?",
+      "back": "A file named config in $HOME/.kube, unless overridden by the KUBECONFIG environment variable or the --kubeconfig flag.",
+      "explanation": "\"kubeconfig\" describes the format, not a required filename, which is why this default matters.",
+      "source": "Kubernetes documentation, \"Organizing Cluster Access Using kubeconfig Files\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "kubeconfig security"
+      ],
+      "conceptIDs": [
+        "k8ssec.kubeconfig-security"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.proxy-header-example",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6520,
+      "front": "What header does an authenticating proxy typically use to tell the API server the caller's username?",
+      "back": "Whatever `--requestheader-username-headers` names; the docs' example uses X-Remote-User, and suggest X-Remote-Group for groups.",
+      "explanation": "The API server trusts these header values completely once request-header authentication is configured.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Authenticating reverse proxy\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#authenticating-proxy",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "authenticating proxy"
+      ],
+      "conceptIDs": [
+        "k8ssec.authenticating-proxy"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.proxy-requires-client-cert",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6530,
+      "front": "What must an authenticating proxy present before the API server will trust its identity headers?",
+      "back": "A valid client certificate, checked against a specified CA, to prevent an attacker from spoofing those headers.",
+      "explanation": "Without this check, anyone able to reach the API server directly could forge the identity headers themselves.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Client certificate\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#reverse-proxy-client-certificate",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "authenticating proxy",
+        "X.509 client certificate authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.authenticating-proxy"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.webhook-default-version",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6540,
+      "front": "Which TokenReview API version does the API server send to a webhook authenticator by default?",
+      "back": "authentication.k8s.io/v1beta1, for backwards compatibility; v1 requires --authentication-token-webhook-version=v1.",
+      "explanation": "A webhook implementer must check the apiVersion field and reply using that same version.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Webhook token authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#webhook-token-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs v1.37",
+      "uses": [
+        "webhook token authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.webhook-token-auth"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.static-token-file-format",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6550,
+      "front": "A static token file is a CSV with at least {{c1::token, user name, user uid, and an optional comma-separated group list}} per line.",
+      "explanation": "Multiple groups must be double-quoted, as in token,user,uid,\"group1,group2,group3\".",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Static token file\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#static-token-file",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "static token file"
+      ],
+      "conceptIDs": [
+        "k8ssec.static-token-file"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.oidc-username-prefix-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6560,
+      "front": "If --oidc-username-prefix isn't set and the username claim isn't email, what prefix does Kubernetes add to the OIDC username?",
+      "back": "The issuer URL followed by #, to prevent naming clashes between identity providers.",
+      "explanation": "Setting the prefix to \"-\" disables prefixing entirely, which risks collisions with other authenticators.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Configuring the API Server\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "OpenID Connect (OIDC)"
+      ],
+      "conceptIDs": [
+        "k8ssec.oidc"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.external-integration-routes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6570,
+      "front": "How does Kubernetes integrate with authentication protocols it has no native support for, such as LDAP, SAML or Kerberos?",
+      "back": "Through an authenticating proxy or an authentication webhook; of the external protocols, Kubernetes supports only JWT and OIDC natively.",
+      "explanation": "This is why organisations with existing identity infrastructure usually reach for one of these two extension points.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"External integrations\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "authenticating proxy",
+        "webhook token authentication",
+        "JSON Web Token (JWT)",
+        "OpenID Connect (OIDC)"
+      ],
+      "conceptIDs": [
+        "k8ssec.authenticating-proxy"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.legacy-sa-token-gate-timeline",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6580,
+      "front": "What happened to the LegacyServiceAccountTokenNoAutoGeneration feature gate that once stopped legacy SA token creation?",
+      "back": "It was enabled by default from v1.24 to v1.26, then removed in v1.27 once it reached GA status, so the block became permanent.",
+      "explanation": "Indefinite tokens can still be created manually, but they're no longer generated automatically for every ServiceAccount.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Manually retrieve ServiceAccount credentials\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#get-a-token",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs v1.37",
+      "uses": [
+        "legacy service account token Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.legacy-sa-token-secret"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.oidc-id-token-short-lived",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6590,
+      "front": "Why should an OIDC id_token be short-lived?",
+      "back": "Because it can't be revoked, much like a certificate, so a short lifetime limits how long a leaked one stays valid.",
+      "explanation": "kubectl's OIDC authenticator handles this by refreshing the id_token using the refresh_token once it expires.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"OpenID Connect tokens\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "OpenID Connect (OIDC)"
+      ],
+      "conceptIDs": [
+        "k8ssec.oidc"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.impersonation-vs-proxy-trust",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6603,
+      "front": "What is the key trust difference between user impersonation and an authenticating proxy?",
+      "back": "With impersonation, one user asks to be treated as another; with a proxy, the API server simply trusts its claim about who made the request.",
+      "explanation": "This is why an authenticating proxy needs a client certificate check, while impersonation is controlled by authorization of the impersonate verb.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Authenticating reverse proxy\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#authenticating-proxy",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "user impersonation",
+        "authenticating proxy"
+      ],
+      "conceptIDs": [
+        "k8ssec.authenticating-proxy",
+        "k8ssec.user-impersonation"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-oidc-refresh",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6700,
+      "front": "A user's OIDC id_token expires every few minutes during a long kubectl session. What keeps their session working without re-authenticating each time?",
+      "back": "kubectl's OIDC authenticator automatically fetches a new id_token using the stored refresh_token.",
+      "explanation": "This is the practical answer to why short-lived id_tokens don't mean constant manual logins.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Using kubectl\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#using-kubectl",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "OpenID Connect (OIDC)"
+      ],
+      "conceptIDs": [
+        "k8ssec.oidc"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-proxy-no-tls",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6710,
+      "front": "A team configures an authenticating proxy in front of the API server but skips TLS and client-certificate checks between them, for simplicity. Is this safe?",
+      "back": "No. Without those checks an attacker could intercept or forge the identity headers the API server blindly trusts.",
+      "explanation": "The hardening guide requires securely configured TLS between proxy and API server, and the docs require a client certificate so headers cannot be spoofed.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Authenticating reverse proxy\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#authenticating-proxy",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "authenticating proxy"
+      ],
+      "conceptIDs": [
+        "k8ssec.authenticating-proxy"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-test-env-static-token",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 6720,
+      "front": "A short-lived integration test environment wants a fixed, never-rotated credential that's simple to set up. Is a static token file a reasonable fit there, even though it's unsuitable for production?",
+      "back": "Yes: the docs say it suits long-lived, static tokens that may never be rotated.",
+      "explanation": "Its production drawbacks (clear text on disk, restart to change, no lockout) matter far less in a disposable test environment.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Static token file\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#static-token-file",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "static token file"
+      ],
+      "conceptIDs": [
+        "k8ssec.static-token-file"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-multi-group-csv",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 6730,
+      "front": "An administrator writes a static token file line as token,alice,1001,team-a,team-b, meaning to put alice in two groups. Will this parse as intended?",
+      "back": "No. A multi-group column must be double-quoted, e.g. token,alice,1001,\"team-a,team-b\", or it will be read as extra columns.",
+      "explanation": "This formatting detail is exactly the kind of trap that makes the static token file error-prone to hand-edit.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Static token file\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#static-token-file",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "static token file"
+      ],
+      "conceptIDs": [
+        "k8ssec.static-token-file"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-no-user-api-object",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6740,
+      "front": "An administrator tries to run kubectl create user alice to add a new normal user. Does this API object exist?",
+      "back": "No. Kubernetes has no User object; normal users are never added through the API, only recognised by their credentials.",
+      "explanation": "A person becomes a \"user\" simply by presenting credentials an authenticator accepts, such as a signed client certificate.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Users in Kubernetes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#users-in-kubernetes",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "normal user"
+      ],
+      "conceptIDs": [
+        "k8ssec.normal-user"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-webhook-version-mismatch",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 6750,
+      "front": "A webhook authenticator implementation only replies with authentication.k8s.io/v1 TokenReview objects, but the API server wasn't configured for that version. What happens?",
+      "back": "The exchange fails, because the API server defaults to sending v1beta1 unless started with --authentication-token-webhook-version=v1.",
+      "explanation": "A webhook must respond using the same version it received, so a mismatch here is a configuration bug, not a policy decision.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Webhook token authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#webhook-token-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 \u00b7 Kubernetes docs v1.37",
+      "uses": [
+        "webhook token authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.webhook-token-auth"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-batch-job-default-sa",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6760,
+      "front": "A new namespace is created and a Job is deployed without specifying serviceAccountName. Which ServiceAccount does it run as?",
+      "back": "The namespace's default ServiceAccount, automatically created with it.",
+      "explanation": "That default account starts with only the baseline API discovery permissions, unless someone binds it further RBAC rights.",
+      "source": "Kubernetes documentation, \"Service Accounts\", \"Default service accounts\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/service-accounts/#default-service-accounts",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "service account token"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-account-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.contrast-impersonation-vs-proxy",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6930,
+      "front": "What is the difference between user impersonation and an authenticating proxy?",
+      "back": "Impersonation is one authorized user deliberately acting as another; a proxy is a trusted intermediary the API server relies on for every caller's identity.",
+      "explanation": "Impersonation needs the impersonate verb per request; a proxy's trust is set up once, in its client certificate configuration.",
+      "contrast": "Impersonation is a one-off, authorized substitution; a proxy is a standing, structural trust relationship.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Authenticating reverse proxy\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#authenticating-proxy",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "user impersonation",
+        "authenticating proxy"
+      ],
+      "conceptIDs": [
+        "k8ssec.user-impersonation",
+        "k8ssec.authenticating-proxy"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.normal-user-management-methods",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6605,
+      "front": "What are the three ways the docs give for a cluster-independent service to manage normal users?",
+      "back": "An administrator distributing private keys, a user store such as Keystone or Google Accounts, or a file of usernames and passwords.",
+      "explanation": "None of these run inside Kubernetes; they're examples of the outside system authentication assumes exists.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Users in Kubernetes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#users-in-kubernetes",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "normal user"
+      ],
+      "conceptIDs": [
+        "k8ssec.normal-user"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.oidc-no-web-interface",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6607,
+      "front": "Why must a user log in to their identity provider separately, rather than through Kubernetes itself, when using OIDC?",
+      "back": "Kubernetes has no web interface to trigger the authentication process or collect credentials.",
+      "explanation": "This is why OIDC users authenticate to the provider first, then feed the resulting id_token to kubectl.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"OpenID Connect tokens\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "OpenID Connect (OIDC)"
+      ],
+      "conceptIDs": [
+        "k8ssec.oidc"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.sa-token-valid-outside-cluster",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6609,
+      "front": "Can a service account bearer token be used from outside the cluster?",
+      "back": "Yes. Service account tokens are valid outside the cluster too, and can identify long-standing jobs that talk to the Kubernetes API.",
+      "explanation": "This is why a CI system without its own Kubernetes identity often authenticates using a service account token rather than a human credential.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Service account tokens\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#service-account-tokens",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "service account token"
+      ],
+      "conceptIDs": [
+        "k8ssec.service-account-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-contractor-needs-revocable",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6770,
+      "front": "A short-term contractor needs cluster access that should end soon after their contract does. Should the cluster issue them a client certificate, or use OIDC against the company's identity provider?",
+      "back": "OIDC: disabling the account stops new tokens being issued, and short-lived id_tokens expire within minutes; a client certificate stays valid until it expires.",
+      "explanation": "This is exactly the production-user scenario the hardening guide has in mind when it steers away from client certificates.",
+      "source": "Kubernetes documentation, \"Hardening Guide: Authentication Mechanisms\", \"X.509 client certificate authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/authentication-mechanisms/#x509-client-certificate-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "OpenID Connect (OIDC)",
+        "X.509 client certificate authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.oidc"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.contrast-static-token-vs-bootstrap-token",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 6940,
+      "front": "What is the difference between a static token file entry and a bootstrap token?",
+      "back": "A static token file entry is a hand-written, indefinitely valid CSV line; a bootstrap token is dynamically generated, meant only for joining nodes.",
+      "explanation": "Both are bearer tokens, but they serve very different purposes and have very different lifecycles.",
+      "contrast": "One is a hand-maintained list; the other is a short-purpose, dynamically managed credential.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Static token file\" and \"Bootstrap tokens\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#static-token-file",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "static token file",
+        "bootstrap token"
+      ],
+      "conceptIDs": [
+        "k8ssec.static-token-file",
+        "k8ssec.bootstrap-token"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-jwt-claim-check-fail",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6780,
+      "front": "A presented JWT has a valid signature, but is missing the exp claim. Does the API server accept it?",
+      "back": "No. A minimal valid JWT payload must include iss, aud, exp and the configured username claim; a missing one fails authentication.",
+      "explanation": "The exp claim is what lets Kubernetes reject an otherwise well-signed token once it's meant to have expired.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"JSON Web Token authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#json-web-token-authentication",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "JSON Web Token (JWT)"
+      ],
+      "conceptIDs": [
+        "k8ssec.jwt"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-single-authenticator-risk",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6790,
+      "front": "A cluster enables only client certificates as its authenticator, used by kubelets, controllers and every human administrator alike. What has this setup overlooked?",
+      "back": "Using one authenticator for every identity; the recommended minimum is service account tokens plus at least one separate method for people.",
+      "explanation": "Machine and human identities have different needs, such as revocation, that one authenticator alone rarely covers well.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Authentication methods\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#authentication-methods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authentication module (authenticator)",
+        "service account token"
+      ],
+      "conceptIDs": [
+        "k8ssec.authenticator"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-cert-compromise-lifetime",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6800,
+      "front": "An administrator's X.509 client certificate, issued with a five-year lifetime, is stolen. What can the cluster do about it?",
+      "back": "Very little: the certificate cannot be revoked, only outlived, short of re-keying the CA.",
+      "explanation": "This is exactly why the Hardening Guide recommends short lifetimes for certificates used for user authentication.",
+      "source": "Kubernetes documentation, \"Hardening Guide: Authentication Mechanisms\", \"X.509 client certificate authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/hardening-guide/authentication-mechanisms/#x509-client-certificate-authentication",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "X.509 client certificate authentication"
+      ],
+      "conceptIDs": [
+        "k8ssec.x509-client-cert-auth"
+      ]
+    },
+    {
+      "id": "k8ssec.authentication.app-bound-token-pod-deleted",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6810,
+      "front": "A Pod's bound service account token is due to expire in 40 minutes, but the Pod is deleted 5 minutes from now. When does the token stop working?",
+      "back": "In 5 minutes, at Pod deletion: a bound token is invalidated the moment its Pod is deleted, ahead of its normal expiry.",
+      "explanation": "Deleting the Pod is the only way to invalidate a bound token early; there is no separate revocation call.",
+      "source": "Kubernetes documentation, \"Managing Service Accounts\", \"Bound service account token volume mechanism\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#bound-service-account-token-volume",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "bound service account token"
+      ],
+      "conceptIDs": [
+        "k8ssec.bound-sa-token"
+      ]
+    }
+  ]
+}

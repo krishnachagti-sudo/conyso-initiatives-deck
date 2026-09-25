@@ -1,0 +1,776 @@
+{
+  "topic": "Isolation, segmentation and multi-tenancy",
+  "notes": [
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.what-is-tenant",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14000,
+      "front": "What is a \"tenant\", in Kubernetes multi-tenancy?",
+      "back": "There is no single definition: in multi-team tenancy it is usually a team; in multi-customer tenancy it is a group sharing one workload.",
+      "explanation": "The same organisation can use both definitions at once, for example a platform team serving internal \"customers\".",
+      "example": "Like calling both a company department and an external client company by the same word, \"account\", depending on context.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Terminology\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#tenants",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "tenant"
+      ],
+      "uses": [
+        "tenant",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "k8ssec.tenant"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.hard-vs-soft",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14010,
+      "front": "What is the difference between \"hard\" and \"soft\" multi-tenancy?",
+      "back": "Hard implies strong isolation, for tenants that do not trust each other; soft implies weaker isolation. It is really a spectrum.",
+      "explanation": "\"Hard\" tenancy often needs extra attention on the data plane, since it typically has the largest attack surface.",
+      "example": "Like the difference between locked private offices and an open-plan desk-sharing arrangement \u2014 both are sharing, at different strengths.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "hard vs soft multi-tenancy"
+      ],
+      "uses": [
+        "hard vs soft multi-tenancy",
+        "tenant"
+      ],
+      "conceptIDs": [
+        "k8ssec.hard-soft-multitenancy"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.control-plane-isolation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14020,
+      "front": "What does control plane isolation ensure?",
+      "back": "That different tenants cannot access or affect each other's Kubernetes API resources.",
+      "explanation": "Authorization is the most important control here: if tenants can modify each other's resources, every other policy can be disabled.",
+      "example": "Like separate accounts on a shared server, each unable to read or edit the others' files.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Control plane isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#control-plane-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "control plane isolation"
+      ],
+      "uses": [
+        "control plane isolation",
+        "tenant",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "k8ssec.control-plane-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.data-plane-isolation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14030,
+      "front": "What does data plane isolation cover?",
+      "back": "Isolating tenants' Pods and workloads on nodes: network, storage, sandboxing and node isolation.",
+      "explanation": "It complements control plane isolation, which only covers API resources, not the running workloads themselves.",
+      "example": "Like separating not just the paperwork but the physical workspaces two competing teams use.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Data Plane Isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#data-plane-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "data plane isolation"
+      ],
+      "uses": [
+        "data plane isolation",
+        "tenant",
+        "control plane isolation"
+      ],
+      "conceptIDs": [
+        "k8ssec.data-plane-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.node-isolation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14040,
+      "front": "What is node isolation?",
+      "back": "Dedicating a set of nodes to one tenant, with co-mingling of tenants' Pods on those nodes prohibited.",
+      "explanation": "A container escape on such a node then reaches only that tenant's other containers and mounted volumes, not another tenant's.",
+      "example": "Like giving each tenant company its own floor of a shared building, instead of mixing desks across floors.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Node Isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#node-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "node isolation"
+      ],
+      "uses": [
+        "node isolation",
+        "data plane isolation",
+        "node",
+        "taint",
+        "toleration"
+      ],
+      "conceptIDs": [
+        "k8ssec.node-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.noisy-neighbour",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14050,
+      "front": "What is the \"noisy neighbour\" problem?",
+      "back": "One tenant's workload negatively affecting the performance of other tenants' workloads that share the same cluster.",
+      "explanation": "ResourceQuota and node isolation are two of the documented mitigations.",
+      "example": "Like one flat playing loud music and disturbing the neighbours in a shared building.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", overview",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "noisy neighbour"
+      ],
+      "uses": [
+        "noisy neighbour",
+        "tenant"
+      ],
+      "conceptIDs": [
+        "k8ssec.noisy-neighbour"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.namespace-weak-boundary",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14060,
+      "front": "Why are the boundaries inside one namespace weak, for anyone who can create Pods within it?",
+      "back": "Because they can then implicitly use every Secret, ConfigMap and ServiceAccount available in that namespace.",
+      "explanation": "Namespaces themselves should separate resources needing different trust levels; it's the boundaries within a namespace that are weak.",
+      "example": "Like a shared office with one keycard: it separates the office from the rest of the building, but not the desks inside it from each other.",
+      "source": "Kubernetes documentation, \"Role Based Access Control Good Practices\", \"Workload creation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#workload-creation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "namespaces as a weak boundary"
+      ],
+      "uses": [
+        "namespaces as a weak boundary",
+        "namespace",
+        "Secret",
+        "ConfigMap",
+        "ServiceAccount"
+      ],
+      "conceptIDs": [
+        "k8ssec.namespace-weak-boundary"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.virtual-control-plane",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 14070,
+      "front": "What is a virtual control plane per tenant?",
+      "back": "Giving each tenant its own dedicated control plane components, while worker nodes are shared across all tenants.",
+      "explanation": "The shared cluster of worker nodes is often called a super-cluster or host-cluster, normally inaccessible to tenants directly.",
+      "example": "Like giving each department its own management office, while they all still share the same factory floor.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Virtual control plane per tenant\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#virtual-control-plane-per-tenant",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "virtual control plane per tenant"
+      ],
+      "uses": [
+        "virtual control plane per tenant",
+        "control plane isolation",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "k8ssec.virtual-control-plane"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.api-priority-fairness",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 14080,
+      "front": "What does API Priority and Fairness do?",
+      "back": "Classifies incoming requests into priority levels and queues them fairly, so one client cannot starve others.",
+      "explanation": "It matters most when tenants run applications that themselves call the Kubernetes API, such as controllers.",
+      "example": "Like a queue that lets urgent tickets jump ahead of routine ones when the desk is busy.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"API Priority and Fairness\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#api-priority-and-fairness",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "API Priority and Fairness"
+      ],
+      "uses": [
+        "API Priority and Fairness",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "k8ssec.api-priority-fairness"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.dedicated-cluster",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14090,
+      "front": "What is a dedicated cluster per tenant?",
+      "back": "The option with no cluster-level sharing at all, for extreme cases, possibly even on dedicated hardware.",
+      "explanation": "It trades off against the cost and complexity of managing many clusters, which managed Kubernetes offerings can ease somewhat.",
+      "example": "Like giving each client their own separate building, instead of any shared space at all.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "introduces": [
+        "dedicated cluster per tenant"
+      ],
+      "uses": [
+        "dedicated cluster per tenant",
+        "hard vs soft multi-tenancy",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "k8ssec.cluster-per-tenant"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.multi-team-vs-multi-customer",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14100,
+      "front": "In multi-team tenancy, do members of different teams usually have some level of trust in each other?",
+      "back": "Yes, often some trust exists, but RBAC, quotas and network policies are still called essential.",
+      "explanation": "This differs from multi-customer tenancy, where customers typically have no direct access to the cluster at all.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Multiple teams\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#multiple-teams",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "tenant",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.tenant"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.namespace-two-dimensions",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14110,
+      "front": "Namespace isolation has two key dimensions: object names can overlap across namespaces, and many security policies, such as {{c1::RBAC Roles and Network Policies}}, are scoped to namespaces.",
+      "explanation": "It needs RBAC, quotas and network policies around it to isolate tenants properly.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Namespaces\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#namespaces",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "control plane isolation",
+        "namespace",
+        "RBAC",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8ssec.control-plane-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.least-privilege-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14120,
+      "front": "What does the multi-tenancy guide call the principle that each tenant should have access to only the namespaces they need, and no more?",
+      "back": "The Principle of Least Privilege.",
+      "explanation": "The guide says authorization is the most important control-plane isolation, and least privilege is how to apply it.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Access controls\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#access-controls",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "control plane isolation",
+        "least privilege",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "k8ssec.control-plane-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.quota-object-count",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14130,
+      "front": "How can ResourceQuota limit a noisy neighbour issue at the control plane, not just at the compute level?",
+      "back": "By limiting the number of API resources, such as Pods or ConfigMaps, that a tenant can create in their namespace.",
+      "explanation": "Quotas cannot protect against all forms of resource sharing, such as network traffic, so node isolation may still be needed on top.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Quotas\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#quotas",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "noisy neighbour",
+        "ResourceQuota"
+      ],
+      "conceptIDs": [
+        "k8ssec.noisy-neighbour"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.memory-limit-oom",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14140,
+      "front": "What risk does a container's memory limit set higher than its request expose the node to?",
+      "back": "Out-of-memory (OOM) issues that can affect the whole node.",
+      "explanation": "This is one reason the checklist asks for memory limits to be equal to or below the corresponding request.",
+      "source": "Kubernetes documentation, \"Security Checklist\", \"Pod security\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#pod-security",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "noisy neighbour",
+        "LimitRange"
+      ],
+      "conceptIDs": [
+        "k8ssec.noisy-neighbour"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.pvc-namespaced-pv-cluster-wide",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14150,
+      "front": "For storage isolation, is a PersistentVolumeClaim namespaced, and is a PersistentVolume?",
+      "back": "PersistentVolumeClaim is namespaced; PersistentVolume is cluster-wide, with a lifecycle independent of workloads and namespaces.",
+      "explanation": "Setting a StorageClass's reclaim policy to Delete stops a PersistentVolume being reused across namespaces once released.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Storage isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#storage-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "data plane isolation",
+        "PersistentVolumeClaim (PVC)",
+        "PersistentVolume (PV)",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "k8ssec.data-plane-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.sandboxing-why",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14160,
+      "front": "Why is sandboxing especially recommended for untrusted code in a shared cluster?",
+      "back": "Because containers share a kernel and mount host paths like /sys and /proc, making them less isolated than a virtual machine with its own kernel.",
+      "explanation": "Sandboxing typically runs each Pod in a separate VM or userspace kernel to add another isolation layer.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Sandboxing containers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#sandboxing-containers",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "data plane isolation",
+        "sandboxed runtime",
+        "container escape"
+      ],
+      "conceptIDs": [
+        "k8ssec.data-plane-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.node-isolation-implementation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14170,
+      "front": "How is node isolation typically implemented?",
+      "back": "Taint the tenant's nodes, and give only that tenant's Pods the matching toleration (and a node selector or affinity).",
+      "explanation": "A mutating webhook can automatically add these tolerations and node affinities to Pods deployed into a tenant's namespaces.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Node Isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#node-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "node isolation",
+        "taint",
+        "toleration",
+        "nodeSelector"
+      ],
+      "conceptIDs": [
+        "k8ssec.node-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.node-isolation-shared-kubelet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14180,
+      "front": "Even with node isolation, is the kubelet on a tenant's dedicated node still a shared service?",
+      "back": "Yes, unless a virtual control plane is also used; a skilled attacker could abuse kubelet or Pod permissions to move laterally.",
+      "explanation": "Compensating controls such as seccomp, AppArmor or SELinux are suggested for this residual risk.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Node Isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#node-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "node isolation",
+        "kubelet",
+        "lateral movement"
+      ],
+      "conceptIDs": [
+        "k8ssec.node-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.pod-priority-preemption",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 14190,
+      "front": "How can pod priority and preemption help offer different tiers of service to different tenants?",
+      "back": "The scheduler can evict lower-priority Pods when resources are scarce, so higher-tier tenants keep their guaranteed resources.",
+      "explanation": "This is one Quality-of-Service construct listed alongside network QoS and storage classes.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Quality-of-Service (QoS)\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#qos",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "noisy neighbour"
+      ],
+      "conceptIDs": [
+        "k8ssec.noisy-neighbour"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.dns-cross-namespace-restriction",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 14200,
+      "front": "What does the Kubernetes DNS service allow by default, that a multi-tenant environment may need to restrict?",
+      "back": "Lookups across all namespaces in the cluster.",
+      "explanation": "CoreDNS can be configured to restrict queries to Pods and Services within a namespace using Kubernetes metadata.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"DNS\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#dns",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "namespace"
+      ],
+      "conceptIDs": [
+        "k8ssec.data-plane-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.operator-multi-tenant-guidelines",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 14210,
+      "front": "What should an Operator used in a multi-tenant environment support, beyond creating resources in its own namespace?",
+      "back": "Creating resources within different tenant namespaces, and supporting node isolation or sandboxing for the Pods it manages.",
+      "explanation": "This is a stricter set of guidelines than for an Operator deployed in a single-tenant cluster.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Operators\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#operators",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "data plane isolation",
+        "node isolation"
+      ],
+      "conceptIDs": [
+        "k8ssec.node-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.namespace-hierarchy-mgmt",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 14220,
+      "front": "What is one advantage a namespace management tool can offer over plain per-workload namespaces?",
+      "back": "Organising namespaces into hierarchies, sharing policies, labels and quotas across related namespaces.",
+      "explanation": "This addresses the tension between namespacing at the workload level and at the tenant level.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Namespace per tenant\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#namespace-per-tenant",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "namespaces as a weak boundary"
+      ],
+      "conceptIDs": [
+        "k8ssec.namespace-weak-boundary"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.virtual-cp-cost",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 14230,
+      "front": "What does a virtual control plane per tenant solve, and what does it cost?",
+      "back": "It solves problems from sharing one API server, such as noisy neighbours and cluster-scoped conflicts, at the cost of an extra control plane per tenant.",
+      "explanation": "It still does not solve data-plane isolation problems, such as node-level noisy neighbours, on its own.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Virtual control plane per tenant\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#virtual-control-plane-per-tenant",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "virtual control plane per tenant",
+        "control plane isolation"
+      ],
+      "conceptIDs": [
+        "k8ssec.virtual-control-plane"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.escalation-via-workload-pss",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 14240,
+      "front": "A tenant you do not fully trust can create Pods in their own namespace. What should you enforce to limit how far they can escalate?",
+      "back": "The Baseline or Restricted Pod Security Standard, via Pod Security admission or another mechanism.",
+      "explanation": "RBAC alone cannot restrict a Pod's own privileged fields, so it must be paired with a Pod Security Standard.",
+      "source": "Kubernetes documentation, \"Role Based Access Control Good Practices\", \"Workload creation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#workload-creation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "namespaces as a weak boundary",
+        "Pod Security Standards",
+        "Pod Security Admission"
+      ],
+      "conceptIDs": [
+        "k8ssec.namespace-weak-boundary"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.saas-model-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 14250,
+      "front": "A vendor runs one instance of their application per paying customer, and the customers never touch kubectl or the cluster directly. Which multi-tenancy pattern is this?",
+      "back": "Multiple customers (SaaS tenancy).",
+      "choices": "A) Multiple customers\nB) Multiple teams\nC) A dedicated cluster per tenant",
+      "choicesExplained": "B: multiple teams implies internal users who typically do have some direct access to the cluster, unlike these customers. C: nothing in the scenario says each customer gets their own cluster; sharing a cluster is exactly what defines this as multi-tenancy at all.",
+      "explanation": "In this model, Kubernetes is entirely invisible to the customer, who only ever sees the vendor's application.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Multiple customers\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#multiple-customers",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "tenant"
+      ],
+      "conceptIDs": [
+        "k8ssec.tenant"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.hard-tenancy-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 14260,
+      "front": "Two competing companies will share a cluster and neither trusts the other with even accidental access to its data. What kind of multi-tenancy does this call for?",
+      "back": "Hard multi-tenancy: strong isolation, with particular attention to the data plane.",
+      "choices": "A) Hard multi-tenancy\nB) Soft multi-tenancy, since Kubernetes handles trust automatically\nC) No special measures, since RBAC alone is always sufficient",
+      "choicesExplained": "B: Kubernetes has no built-in notion of trust between tenants; soft tenancy assumes some existing trust, which is absent here. C: RBAC only covers control-plane isolation, not the data-plane concerns (sandboxing, node isolation) that hard tenancy needs.",
+      "explanation": "In extreme cases, the guide notes it may even be easier to forgo cluster-level sharing entirely and assign each tenant a dedicated cluster.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "hard vs soft multi-tenancy",
+        "data plane isolation"
+      ],
+      "conceptIDs": [
+        "k8ssec.hard-soft-multitenancy"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.workload-creation-namespace-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 14270,
+      "front": "A user has permission only to create Pods in the \"reporting\" namespace. What else can they now reach, without any additional RBAC grant?",
+      "back": "Every Secret, ConfigMap and PersistentVolume mountable in that namespace, and the API access of any ServiceAccount there.",
+      "choices": "A) Everything mountable in that namespace, via any ServiceAccount there\nB) Nothing beyond creating Pods themselves\nC) Only resources they separately have explicit RBAC rights to",
+      "choicesExplained": "B: Pod creation implicitly reaches far more than the Pod object itself, since a Pod can mount Secrets and run as any ServiceAccount in its namespace. C: this describes the ideal, RBAC-only world; the workload-creation risk is precisely that reality is broader than the explicit grants.",
+      "explanation": "This is why the boundaries between resources inside one namespace are weak.",
+      "source": "Kubernetes documentation, \"Role Based Access Control Good Practices\", \"Workload creation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#workload-creation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "namespaces as a weak boundary",
+        "ServiceAccount",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.namespace-weak-boundary"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.node-isolation-vs-sandboxing-cost",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 14280,
+      "front": "A platform team wants an isolation option that is easier to reason about for billing and has fewer compatibility issues than sandboxing. What do they gain, and what do they still not solve?",
+      "back": "Easier per-node billing and fewer compatibility issues, but it does not stop a skilled attacker with kubelet access from moving laterally.",
+      "choices": "A) Easier billing and fewer compatibility issues, but lateral movement via the shared kubelet is still possible\nB) Complete isolation with no residual risk\nC) The same isolation strength as sandboxing, at lower cost",
+      "choicesExplained": "B: the documentation explicitly flags the shared kubelet and API service as a residual risk. C: node isolation and sandboxing address different layers; node isolation does not replicate a sandboxed runtime's per-Pod kernel isolation.",
+      "explanation": "This trade-off is why the guide suggests compensating controls, such as seccomp or AppArmor, alongside node isolation for higher-assurance needs.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Node Isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#node-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "node isolation",
+        "sandboxed runtime"
+      ],
+      "conceptIDs": [
+        "k8ssec.node-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.api-priority-fairness-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 14290,
+      "front": "A tenant's own controller floods the API server with requests during a traffic spike, risking other tenants' calls being starved. What feature is designed for exactly this?",
+      "back": "API Priority and Fairness.",
+      "explanation": "It queues or rejects lower-priority calls under contention, instead of letting one busy client crowd out everyone else.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"API Priority and Fairness\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#api-priority-and-fairness",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "API Priority and Fairness",
+        "noisy neighbour"
+      ],
+      "conceptIDs": [
+        "k8ssec.api-priority-fairness"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.pv-outlives-namespace",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 14300,
+      "front": "A tenant's namespace is deleted. Does the PersistentVolume it once used necessarily disappear with it?",
+      "back": "Not necessarily; a PersistentVolume is cluster-wide and has a lifecycle independent of the namespace.",
+      "choices": "A) No, not necessarily\nB) Yes, it is deleted automatically with the namespace\nC) Yes, but only if it was provisioned dynamically",
+      "choicesExplained": "B: deleting a namespace does not automatically delete a cluster-scoped PersistentVolume. C: dynamic provisioning does not by itself change this cluster-scoped, independent lifecycle.",
+      "explanation": "Setting the StorageClass's reclaim policy to Delete is what prevents a PersistentVolume being silently reused by a different tenant afterwards.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Storage isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#storage-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "data plane isolation",
+        "PersistentVolume (PV)"
+      ],
+      "conceptIDs": [
+        "k8ssec.data-plane-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.control-plane-vs-data-plane-contrast",
+      "type": "scenario",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 14310,
+      "front": "A cluster has strict RBAC and per-tenant namespaces, but no NetworkPolicy, node isolation, or sandboxing. Which kind of isolation is missing?",
+      "back": "Data plane isolation; only control plane isolation has been addressed.",
+      "choices": "A) Data plane isolation\nB) Control plane isolation\nC) Neither is missing, since RBAC alone covers both",
+      "choicesExplained": "B: RBAC and namespaces are exactly what provides control plane isolation, so that side is already covered. C: RBAC governs API resources; it says nothing about how Pods are isolated from each other once running.",
+      "explanation": "Both forms are recommended together, because they protect different layers: API resources on one side, running workloads on the other.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "control plane isolation",
+        "data plane isolation"
+      ],
+      "conceptIDs": [
+        "k8ssec.control-plane-isolation",
+        "k8ssec.data-plane-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.node-isolation-vs-dedicated-cluster-contrast",
+      "type": "scenario",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 14320,
+      "front": "Node isolation and a dedicated cluster per tenant both give a tenant its own set of nodes. What does a dedicated cluster remove, that node isolation alone does not?",
+      "back": "The shared control plane, API server and kubelet trust that node isolation still leaves in place.",
+      "choices": "A) The shared control plane and API server\nB) Nothing; the two provide identical isolation\nC) Node-level noisy neighbour effects only",
+      "choicesExplained": "B: the documentation is explicit that node isolation still leaves the API service and kubelet as shared services, unlike a dedicated cluster. C: noisy neighbour mitigation is a side benefit of both, not the defining difference between them.",
+      "explanation": "Forgoing all cluster-level sharing gives stronger isolation, at the cost of managing many clusters.",
+      "source": "Kubernetes documentation, \"Multi-tenancy\", \"Node Isolation\"; \"Isolation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#node-isolation",
+      "sourceLicence": "B \u00b7 CC BY 4.0",
+      "uses": [
+        "node isolation",
+        "dedicated cluster per tenant"
+      ],
+      "conceptIDs": [
+        "k8ssec.node-isolation",
+        "k8ssec.cluster-per-tenant"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.app-shared-namespace-tenants",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 14330,
+      "front": "Two tenants share one namespace, though each has a RoleBinding scoped only to their own ServiceAccount. Does this achieve proper control plane isolation between them?",
+      "back": "No. Either tenant could run a Pod as the other's ServiceAccount, since anyone who can create Pods in a namespace can use everything in it.",
+      "explanation": "RBAC scoping within a shared namespace cannot recreate what separate namespaces provide, such as isolated NetworkPolicies and quotas.",
+      "source": "Kubernetes documentation, \"Role Based Access Control Good Practices\", \"Workload creation\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#workload-creation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "control plane isolation"
+      ],
+      "conceptIDs": [
+        "k8ssec.control-plane-isolation"
+      ]
+    },
+    {
+      "id": "k8ssec.isolation-segmentation-multi-tenancy.app-object-count-noisy-neighbour",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 14340,
+      "front": "A tenant's namespace has generous CPU and memory limits but no ResourceQuota on object counts, and it creates thousands of ConfigMaps. What noisy neighbour risk does this create, even though compute usage looks fine?",
+      "back": "Overloading the API server and etcd with excessive objects; ResourceQuota also limits object counts, not just compute resources.",
+      "explanation": "A tenant can degrade the whole cluster's control plane without ever exceeding a compute limit.",
+      "source": "Kubernetes documentation, \"Resource Quotas\", \"Object Count Quota\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/policy/resource-quotas/#object-count-quota",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "noisy neighbour",
+        "ResourceQuota"
+      ],
+      "conceptIDs": [
+        "k8ssec.noisy-neighbour"
+      ]
+    }
+  ]
+}

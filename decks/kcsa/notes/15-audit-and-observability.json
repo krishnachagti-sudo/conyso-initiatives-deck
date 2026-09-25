@@ -1,0 +1,1073 @@
+{
+  "topic": "Audit logging, observability and runtime detection",
+  "notes": [
+    {
+      "id": "k8ssec.audit-and-observability.what-is-k8s-auditing",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 15000,
+      "front": "What is Kubernetes auditing, in one sentence?",
+      "back": "A chronological, security-relevant record of actions in a cluster by users, applications and the control plane.",
+      "explanation": "Auditing lets administrators answer what happened, when, who did it and from where, after the fact.",
+      "source": "Kubernetes documentation, Auditing",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Kubernetes auditing"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-auditing"
+      ],
+      "introduces": [
+        "Kubernetes auditing"
+      ],
+      "example": "Like a building's visitor log: who entered, when, and which door they used."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.what-are-audit-stages",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 15010,
+      "front": "What is an audit stage, in one sentence?",
+      "back": "The point in a request's handling that an audit event was generated for.",
+      "explanation": "A single request can generate several audit events, one per stage it passes through.",
+      "source": "Kubernetes documentation, Auditing",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit stages",
+        "Kubernetes auditing"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-stages"
+      ],
+      "introduces": [
+        "audit stages"
+      ],
+      "example": "Like stamping a parcel at pickup, in transit and on delivery, rather than once."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.what-are-audit-levels",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 15020,
+      "front": "What is an audit level, in one sentence?",
+      "back": "How much detail an audit event records: none, or increasing amounts of metadata and body content.",
+      "explanation": "The level controls how verbose, and how large, the audit log becomes for a given kind of request.",
+      "source": "Kubernetes documentation, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit levels",
+        "Kubernetes auditing"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-levels"
+      ],
+      "introduces": [
+        "audit levels"
+      ],
+      "example": "Like choosing whether a receipt lists just the total, or every item and its price."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.what-is-audit-policy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 15030,
+      "front": "What is an audit policy, in one sentence?",
+      "back": "A set of rules, checked in order, whose first match sets the audit level for an event.",
+      "explanation": "Without a policy file, kube-apiserver does not audit at all, so the policy is what turns auditing on.",
+      "source": "Kubernetes documentation, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit policy",
+        "audit levels",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-policy"
+      ],
+      "introduces": [
+        "audit policy"
+      ],
+      "example": "Like a spam filter's rule list: the first rule that matches an email decides its fate."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.what-are-audit-backends",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 15040,
+      "front": "What is an audit backend, in one sentence?",
+      "back": "The component that persists audit events to external storage: a log file or a webhook.",
+      "explanation": "The backend is where the events the policy selected actually end up, ready to be reviewed.",
+      "source": "Kubernetes documentation, Auditing, “Audit backends”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-backends",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit backends",
+        "Kubernetes auditing"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-backends"
+      ],
+      "introduces": [
+        "audit backends"
+      ],
+      "example": "Like choosing to file a report on paper (log) or send it straight to head office (webhook)."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.what-is-audit-log-protection",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 15050,
+      "front": "What does audit log protection mean, in one sentence?",
+      "back": "Keeping audit logs, if enabled, from general access; \"Securing a Cluster\" separately advises archiving them on a secure server.",
+      "explanation": "An attacker who can edit or delete the audit log can hide their own actions from investigators.",
+      "source": "Kubernetes documentation, Security checklist, \"Logs and auditing\"; \"Securing a Cluster\", \"Enable audit logging\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/security-checklist/#logs-and-auditing",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit log protection",
+        "Kubernetes auditing"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-log-protection"
+      ],
+      "introduces": [
+        "audit log protection"
+      ],
+      "example": "Like keeping a ship's log in a locked, fireproof box instead of on the bridge desk."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.audit-vs-security-vs-monitoring",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 15060,
+      "front": "How do audit logging, security logging and monitoring differ, in one sentence?",
+      "back": "Audit logging records events and changes; security logging is its security-relevant subset; monitoring analyses logs and metrics to spot deviations.",
+      "explanation": "The three overlap but answer different questions: what happened, what mattered for security, and what looks wrong right now.",
+      "source": "Cloud Native Security Lexicon, “Audit logging vs security logging vs monitoring”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-lexicon/cloud-native-security-lexicon.md#audit-logging-vs-security-logging-vs-monitoring",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit logging vs security logging vs monitoring",
+        "Kubernetes auditing"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-vs-security-logging"
+      ],
+      "introduces": [
+        "audit logging vs security logging vs monitoring"
+      ],
+      "example": "Like a shop's full camera footage (audit log), the clips flagged for theft (security log), and the guard watching live (monitoring)."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.what-is-runtime-detection",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 15070,
+      "front": "What is runtime detection, in one sentence?",
+      "back": "Monitoring the syscalls and network traffic of running containers to spot unexpected or malicious behaviour.",
+      "explanation": "Security tests catch known problems before release; runtime detection is what catches the ones nobody anticipated.",
+      "source": "Cloud Native Security Whitepaper v2, “Runtime Detection”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#runtime-detection",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "runtime detection",
+        "system call"
+      ],
+      "conceptIDs": [
+        "k8ssec.runtime-detection"
+      ],
+      "introduces": [
+        "runtime detection"
+      ],
+      "example": "Like a security guard who notices a staff member acting oddly, not just checking badges at the door."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.what-is-behavioural-baseline",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 15080,
+      "front": "What is a behavioural baseline, in one sentence?",
+      "back": "The expected, normal behaviour of a workload, against which runtime detection compares live activity to find anomalies.",
+      "explanation": "Without a baseline, detection tools have nothing to call “unexpected”.",
+      "source": "Cloud Native Security Whitepaper v2, “Runtime Detection”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#runtime-detection",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "behavioural baseline",
+        "runtime detection"
+      ],
+      "conceptIDs": [
+        "k8ssec.behavioural-baseline"
+      ],
+      "introduces": [
+        "behavioural baseline"
+      ],
+      "example": "Like knowing a shop is normally empty at 3am, so a light suddenly turning on then is worth investigating."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.what-is-falco",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 15090,
+      "front": "What is Falco, in one sentence?",
+      "back": "A cloud native runtime security tool that parses Linux syscalls, checks them against rules, and alerts on violations.",
+      "explanation": "Falco is a concrete example of runtime detection: it is the rules engine watching the syscall stream.",
+      "source": "Falco documentation, “What is Falco?”",
+      "sourceURL": "https://falco.org/docs/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "runtime detection",
+        "system call"
+      ],
+      "conceptIDs": [
+        "k8ssec.falco"
+      ],
+      "introduces": [
+        "Falco"
+      ],
+      "example": "Like a smoke detector wired to every system call a container makes.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Falco docs as of that date"
+    },
+    {
+      "id": "k8ssec.audit-and-observability.what-is-siem",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 15100,
+      "front": "What is a security information and event management (SIEM), in one sentence?",
+      "back": "Central tooling that collects and correlates security events, so teams can detect, analyse and respond to incidents.",
+      "explanation": "Security logs are typically forwarded to a SIEM, which gives visibility and tracking across the whole environment.",
+      "source": "Cloud Native Security Lexicon, \"Audit logging vs security logging vs monitoring\"",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-lexicon/cloud-native-security-lexicon.md#audit-logging-vs-security-logging-vs-monitoring",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "security information and event management (SIEM)",
+        "audit logging vs security logging vs monitoring"
+      ],
+      "conceptIDs": [
+        "k8ssec.siem"
+      ],
+      "introduces": [
+        "security information and event management (SIEM)"
+      ],
+      "example": "Like a control room screen that pulls together every camera and alarm feed in one place."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.what-is-incident-response",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 15110,
+      "front": "What is incident response, in one sentence?",
+      "back": "The planned way an organisation detects, contains and recovers from a security incident.",
+      "explanation": "Cloud native environments revisit old assumptions, such as static addressing and a workload staying on one server, which a playbook written for static servers can otherwise break on.",
+      "source": "Cloud Native Security Whitepaper v2, “Incident Response”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#incident-response",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "incident response"
+      ],
+      "conceptIDs": [
+        "k8ssec.incident-response"
+      ],
+      "introduces": [
+        "incident response"
+      ],
+      "example": "Like a fire drill written for one building needing a rewrite for a fleet of moving vehicles."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.what-is-forensics",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 15120,
+      "front": "What is forensics, in the incident-response sense, in one sentence?",
+      "back": "Capturing and analysing evidence to establish an incident's root cause.",
+      "explanation": "It supplies the evidence trail incident response needs, but short-lived containers make that evidence harder to catch.",
+      "source": "Cloud Native Security Whitepaper v2, “Incident Response & Mitigation”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#incident-response--mitigation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "forensics",
+        "incident response"
+      ],
+      "conceptIDs": [
+        "k8ssec.forensics"
+      ],
+      "introduces": [
+        "forensics"
+      ],
+      "example": "Like reconstructing a crash from skid marks and debris after the vehicles are towed away."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.what-is-observability-chain-integrity",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 15130,
+      "front": "What does observability chain integrity mean, in one sentence?",
+      "back": "Protecting the whole chain of components that feed a dashboard, so it stays reliable even during an incident.",
+      "explanation": "A dashboard is only as trustworthy as every link that populates it; a degraded cluster can degrade the picture too.",
+      "source": "Kubernetes documentation, Cloud native security, “Observability and runtime security”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/cloud-native-security/#observability-and-runtime-security",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "observability chain integrity"
+      ],
+      "conceptIDs": [
+        "k8ssec.observability-integrity"
+      ],
+      "introduces": [
+        "observability chain integrity"
+      ],
+      "example": "Like trusting a thermometer only if you also trust the person reading it and writing it down."
+    },
+    {
+      "id": "k8ssec.audit-and-observability.audit-record-origin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15150,
+      "front": "Where do Kubernetes audit records begin their lifecycle?",
+      "back": "Inside kube-apiserver: each request, at each stage of its execution, generates an audit event.",
+      "explanation": "Because every audit event starts at the API server, auditing sees only what passes through it.",
+      "source": "Kubernetes documentation, Auditing",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Kubernetes auditing",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-auditing"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.stage-requestreceived",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15160,
+      "front": "What does the audit stage `RequestReceived` mark?",
+      "back": "As soon as the audit handler receives the request, before it reaches the handler chain.",
+      "explanation": "Kubernetes has exactly four audit stages, and each recorded event is tagged with one of them.",
+      "source": "Kubernetes documentation, Auditing",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit stages"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-stages"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.stage-responsestarted",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15170,
+      "front": "What does the audit stage `ResponseStarted` mark?",
+      "back": "Once response headers are sent but before the body; generated only for long-running requests such as watch.",
+      "explanation": "Kubernetes has exactly four audit stages, and each recorded event is tagged with one of them.",
+      "source": "Kubernetes documentation, Auditing",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit stages"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-stages"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.stage-responsecomplete",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15180,
+      "front": "What does the audit stage `ResponseComplete` mark?",
+      "back": "The response body has finished sending; no more bytes will follow.",
+      "explanation": "Kubernetes has exactly four audit stages, and each recorded event is tagged with one of them.",
+      "source": "Kubernetes documentation, Auditing",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit stages"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-stages"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.stage-panic",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15190,
+      "front": "What does the audit stage `Panic` mark?",
+      "back": "Generated when a panic occurred while handling the request.",
+      "explanation": "Kubernetes has exactly four audit stages, and each recorded event is tagged with one of them.",
+      "source": "Kubernetes documentation, Auditing",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit stages"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-stages"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.level-none",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15200,
+      "front": "What does the audit level `None` record?",
+      "back": "Don't log events that match this rule.",
+      "explanation": "Kubernetes has exactly four audit levels, ordered from no record to the fullest record.",
+      "source": "Kubernetes documentation, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit levels"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-levels"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.level-metadata",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15210,
+      "front": "What does the audit level `Metadata` record?",
+      "back": "Log request metadata (user, timestamp, resource, verb) but not the request or response body.",
+      "explanation": "Kubernetes has exactly four audit levels, ordered from no record to the fullest record.",
+      "source": "Kubernetes documentation, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit levels"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-levels"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.level-request",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15220,
+      "front": "What does the audit level `Request` record?",
+      "back": "Log request metadata and the request body, but not the response body.",
+      "explanation": "Kubernetes has exactly four audit levels, ordered from no record to the fullest record.",
+      "source": "Kubernetes documentation, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit levels"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-levels"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.level-requestresponse",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15230,
+      "front": "What does the audit level `RequestResponse` record?",
+      "back": "Log request metadata, the request body and the response body.",
+      "explanation": "Kubernetes has exactly four audit levels, ordered from no record to the fullest record.",
+      "source": "Kubernetes documentation, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit levels"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-levels"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.levels-body-note",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 15240,
+      "front": "Do the Request and RequestResponse audit levels apply to non-resource requests?",
+      "back": "No: neither the Request nor the RequestResponse body applies to non-resource requests.",
+      "explanation": "Non-resource requests (such as a health check) have no resource body for the policy to log.",
+      "source": "Kubernetes documentation, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit levels"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-levels"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.no-policy-file",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15250,
+      "front": "If `--audit-policy-file` is omitted when starting kube-apiserver, {{c1::no audit events are logged at all}}.",
+      "explanation": "Auditing is off by default; you must supply a policy file to record anything.",
+      "source": "Kubernetes documentation, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit policy",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-policy"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.zero-rules-illegal",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15260,
+      "front": "Is an audit policy file with zero rules valid?",
+      "back": "No: the `rules` field must be provided, and a policy with 0 rules is treated as illegal.",
+      "explanation": "The docs require the rules field; use a one-rule policy (level: Metadata) to log everything minimally.",
+      "source": "Kubernetes documentation, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit policy"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-policy"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.log-backend",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15270,
+      "front": "What format does the kube-apiserver log audit backend write events in, and which flag enables it?",
+      "back": "JSON Lines format, enabled with `--audit-log-path` (a value of `-` means standard out).",
+      "explanation": "Not specifying `--audit-log-path` disables the log backend entirely.",
+      "source": "Kubernetes documentation, Auditing, “Log backend”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#log-backend",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit backends"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-backends"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.webhook-backend",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15280,
+      "front": "What does the webhook audit backend do?",
+      "back": "Sends audit events to a remote web API, treated as a form of the Kubernetes API with its own authentication.",
+      "explanation": "This lets audit events flow straight into an external system, such as a security information and event management (SIEM), without a local log file.",
+      "source": "Kubernetes documentation, Auditing, “Webhook backend”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#webhook-backend",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit backends",
+        "security information and event management (SIEM)"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-backends"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.webhook-modes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 15290,
+      "front": "What are the three buffering modes for the webhook audit backend?",
+      "back": "`batch` (buffered, async, the default), `blocking` (blocks the response), and `blocking-strict`.",
+      "explanation": "`blocking-strict` fails the whole request if audit logging fails at the RequestReceived stage, unlike plain `blocking`.",
+      "source": "Kubernetes documentation, Auditing, “Event batching”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#batching",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit backends"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-backends"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.tamper-proof-high-assurance",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15300,
+      "front": "What extra step does a high-assurance environment take with its logs?",
+      "back": "Deploy cryptographic protections so logs are both tamper-proof and confidential.",
+      "explanation": "Ordinary access control stops casual reading; cryptographic protection stops an attacker from silently rewriting history.",
+      "source": "Kubernetes documentation, Cloud native security, “Observability and runtime security”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/cloud-native-security/#observability-and-runtime-security",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit log protection"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-log-protection"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.measured-boot-for-logs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 15310,
+      "front": "What below-the-Kubernetes-layer measure can help ensure logs and audit records are trustworthy?",
+      "back": "Cryptographically measured boot, or authenticated distribution of time.",
+      "explanation": "These protect the fidelity of logs from below Kubernetes itself, where the cluster's own controls cannot reach.",
+      "source": "Kubernetes documentation, Cloud native security, “Observability and runtime security”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/cloud-native-security/#observability-and-runtime-security",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "observability chain integrity",
+        "measured boot"
+      ],
+      "conceptIDs": [
+        "k8ssec.observability-integrity"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.time-delayed-trojan",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15320,
+      "front": "Why can't security tests alone catch a time-delayed attack, such as data exfiltration that starts after days of normal running?",
+      "back": "It has no known, expected occurrence to test for; only comparison against a behavioural baseline can flag it.",
+      "explanation": "Regression and security tests check for known, expected issues, not for behaviour nobody has described yet.",
+      "source": "Cloud Native Security Whitepaper v2, “Runtime Detection”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#runtime-detection",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "runtime detection",
+        "behavioural baseline"
+      ],
+      "conceptIDs": [
+        "k8ssec.runtime-detection",
+        "k8ssec.behavioural-baseline"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.falco-components",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15330,
+      "front": "What are Falco's five main components?",
+      "back": "The userspace program, configuration, a driver (kernel event source), plugins, and Falcoctl.",
+      "explanation": "The driver is what actually streams kernel events to Falco; the userspace program interprets and alerts on them.",
+      "source": "Falco documentation, \"What are the Components of Falco?\"",
+      "sourceURL": "https://falco.org/docs/",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Falco docs as of that date",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "k8ssec.falco"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.falco-checks-example",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 15340,
+      "front": "What are two examples of behaviour Falco's default rules check for?",
+      "back": "Privilege escalation using privileged containers; unexpected network connections or socket mutations.",
+      "explanation": "Falco ships with a default rule set aimed at behaviours that are rarely legitimate inside a running container.",
+      "source": "Falco documentation, “What does Falco check for?”",
+      "sourceURL": "https://falco.org/docs/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "k8ssec.falco"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.security-logs-to-siem",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 15350,
+      "front": "Where are security logs typically forwarded for visibility and incident tracking?",
+      "back": "To a security information and event management (SIEM) system.",
+      "explanation": "Centralising security logs in a SIEM makes correlation across many components practical.",
+      "source": "Cloud Native Security Lexicon, “Audit logging vs security logging vs monitoring”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-lexicon/cloud-native-security-lexicon.md#audit-logging-vs-security-logging-vs-monitoring",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "security information and event management (SIEM)"
+      ],
+      "conceptIDs": [
+        "k8ssec.siem"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.cloud-native-ir-assumptions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15360,
+      "front": "What are two cloud native assumptions that can break a traditional incident response playbook?",
+      "back": "Workloads move (a new instance may run on a different server) and IP addresses are assigned dynamically.",
+      "explanation": "A playbook that assumes a compromised server stays put, or keeps its address, will misdirect the response.",
+      "source": "Cloud Native Security Whitepaper v2, “Incident Response”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#incident-response",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "incident response"
+      ],
+      "conceptIDs": [
+        "k8ssec.incident-response"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.ir-phases-ransomware",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15370,
+      "front": "What four phases does the whitepaper's ransomware incident response follow?",
+      "back": "Preparation; Detection & Analysis; Containment, Eradication & Recovery; Post-Incident Retrospective.",
+      "explanation": "These phases, drawn from a government incident-response guide, are applied by the whitepaper to a cloud native ransomware scenario.",
+      "source": "Cloud Native Security Whitepaper v2, “Ransomware Incident Response”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#ransomware-incident-response",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "incident response"
+      ],
+      "conceptIDs": [
+        "k8ssec.incident-response"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.forensics-short-lived-containers",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 15380,
+      "front": "Why does forensics need a more agile tool set in a container environment?",
+      "back": "Containers are short-lived, so evidence can disappear when a container or Pod is replaced.",
+      "explanation": "An orchestrator that treats workloads as replaceable can unintentionally destroy evidence before anyone can capture it.",
+      "source": "Cloud Native Security Whitepaper v2, “Incident Response & Mitigation” / “Incident Response”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#incident-response--mitigation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "forensics",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8ssec.forensics"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.stage-watch-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 15400,
+      "front": "A cluster admin sees an audit event at the `ResponseStarted` stage for a request. What kind of request is it most likely to be?",
+      "back": "A long-running request, such as a `watch`.",
+      "choices": "A) A long-running request such as watch\nB) A simple read of a single object\nC) A request rejected by audit policy level None",
+      "choicesExplained": "B: a simple read completes in one round trip, so it is only recorded at RequestReceived and ResponseComplete. C: a request at policy level None is not recorded at any stage at all.",
+      "explanation": "ResponseStarted is only generated once response headers are sent but the body is still streaming, which happens for long-running requests.",
+      "source": "Kubernetes documentation, Auditing",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit stages"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-stages"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.first-match-wins",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 15410,
+      "front": "An audit policy has, in order: rule 1 matches Secrets at level None, rule 2 matches all resources at level Metadata. A request reads a Secret. What level applies?",
+      "back": "None: the first matching rule (rule 1) sets the level, and later rules are not consulted.",
+      "choices": "A) None\nB) Metadata\nC) Both levels are recorded",
+      "choicesExplained": "B: rule 2 never gets a chance once rule 1 has matched. C: only one level is ever set per event.",
+      "explanation": "Kubernetes evaluates policy rules in order and stops at the first match, so rule order matters.",
+      "source": "Kubernetes documentation, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit policy",
+        "audit levels",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-policy",
+        "k8ssec.audit-levels"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.no-audit-file-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 15420,
+      "front": "An administrator runs kube-apiserver without `--audit-policy-file`. A security review later asks for the audit trail of who deleted a namespace. What will they find?",
+      "back": "Nothing: no audit events were logged at all, because no policy file was supplied.",
+      "choices": "A) Nothing was logged\nB) Metadata-level events were logged by default\nC) Only the deletion itself was logged",
+      "choicesExplained": "B: there is no default level; without a policy file, auditing is off entirely. C: with no policy, not even that single event is recorded.",
+      "explanation": "Auditing needs an explicit policy file; omitting the flag disables the entire feature, not just some levels.",
+      "source": "Kubernetes documentation, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit policy",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-policy"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.webhook-vs-log-choice",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 15430,
+      "front": "A team wants audit events to flow directly into their external security information and event management (SIEM) without managing log files on cluster nodes. Which audit backend fits?",
+      "back": "The webhook backend: it sends events to a remote web API, such as the SIEM's ingestion endpoint.",
+      "choices": "A) Webhook backend\nB) Log backend\nC) Neither backend can reach an external system",
+      "choicesExplained": "B: the log backend writes to the local filesystem, requiring extra shipping. C: the webhook backend is designed exactly for this.",
+      "explanation": "The webhook backend was built to forward events to an external HTTP API, avoiding local log management.",
+      "source": "Kubernetes documentation, Auditing, “Audit backends”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-backends",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit backends",
+        "security information and event management (SIEM)"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-backends",
+        "k8ssec.siem"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.slow-exfiltration-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 15440,
+      "front": "A workload runs normally for three weeks, then quietly starts exfiltrating data via a delayed command. Security tests never caught this. What kind of control would have?",
+      "back": "Runtime detection compared against a behavioural baseline, flagging the deviation from expected activity.",
+      "choices": "A) Runtime detection against a behavioural baseline\nB) A stricter static code analysis pass\nC) A tighter Pod configuration policy",
+      "choicesExplained": "B: static code analysis examines source code before deployment; it cannot see a delayed runtime action. C: a configuration policy restricts settings, not ongoing behaviour.",
+      "explanation": "Delayed, unexpected behaviour is exactly what security tests miss and behavioural-baseline monitoring is designed to catch.",
+      "source": "Cloud Native Security Whitepaper v2, “Runtime Detection”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#runtime-detection",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "runtime detection",
+        "behavioural baseline"
+      ],
+      "conceptIDs": [
+        "k8ssec.runtime-detection",
+        "k8ssec.behavioural-baseline"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.classify-audit-event",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 15450,
+      "front": "An audit policy rule sets level `Request` for `create` requests to Pods. Which parts of a matching event are logged?",
+      "back": "Request metadata and the request body, but not the response body.",
+      "choices": "A) Metadata and request body only\nB) Metadata only\nC) Metadata, request body and response body",
+      "choicesExplained": "B: that description matches the Metadata level, one step below Request. C: that description matches RequestResponse, one step above Request.",
+      "explanation": "Each audit level is a fixed step: None, Metadata, Request, then RequestResponse, each adding more detail.",
+      "source": "Kubernetes documentation, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit levels",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-levels"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.ir-assumption-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 15460,
+      "front": "An incident responder tries to re-image “the compromised server”, expecting it to still be running at the same address an hour later. What cloud native assumption did they get wrong?",
+      "back": "That the workload stays on the same server with the same IP address.",
+      "choices": "A) That addresses and node placement stay fixed\nB) That containers cannot be compromised\nC) That Kubernetes has no incident response process",
+      "choicesExplained": "B and C are not assumptions made in the scenario; the failure described is specifically about expecting static placement and addressing.",
+      "explanation": "Traditional incident response assumptions about fixed servers and addresses often do not hold in a cloud native cluster.",
+      "source": "Cloud Native Security Whitepaper v2, “Incident Response”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#incident-response",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "incident response"
+      ],
+      "conceptIDs": [
+        "k8ssec.incident-response"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.falco-vs-audit-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 15470,
+      "front": "A container starts spawning an unexpected shell process. Which control is designed to catch this live, rather than after the fact?",
+      "back": "Falco (runtime detection): it watches syscalls as they happen and alerts on rule violations.",
+      "choices": "A) Falco / runtime detection\nB) Kubernetes auditing\nC) A software inventory list",
+      "choicesExplained": "B: Kubernetes auditing records API server requests, not in-container process activity. C: an inventory list names components; it says nothing about live behaviour.",
+      "explanation": "Kubernetes auditing and Falco both produce records, but only runtime detection tools like Falco watch container-level behaviour as it happens.",
+      "source": "Falco documentation, “What is Falco?”",
+      "sourceURL": "https://falco.org/docs/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "runtime detection",
+        "Kubernetes auditing"
+      ],
+      "conceptIDs": [
+        "k8ssec.falco",
+        "k8ssec.runtime-detection",
+        "k8ssec.k8s-auditing"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.audit-log-deletion-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 15475,
+      "front": "An attacker with cluster-admin access deletes the in-cluster audit log file to cover their tracks. What practice would have kept a record of their actions anyway?",
+      "back": "Archiving the audit file on a secure server off-cluster, as \"Securing a Cluster\" recommends.",
+      "choices": "A) Archiving the audit file on a secure server off-cluster\nB) Increasing the audit level to RequestResponse\nC) Nothing; deleted logs cannot be recovered",
+      "choicesExplained": "B: a higher audit level records more detail per event, but does not stop a privileged attacker deleting the file. C: archiving logs elsewhere before deletion is exactly what preserves them.",
+      "explanation": "Audit log protection exists because a sufficiently privileged attacker can otherwise erase the very evidence meant to catch them.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Enable audit logging\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#enable-audit-logging",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit log protection",
+        "Kubernetes auditing"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-log-protection",
+        "k8ssec.k8s-auditing"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.forensics-replaced-container-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 15480,
+      "front": "Investigators try to inspect a compromised container an hour after the incident, but the orchestrator has already replaced it with a fresh one. What made evidence capture harder here?",
+      "back": "The container's short-lived nature: forensics needs a more agile tool set to capture evidence before replacement happens.",
+      "choices": "A) The container's short-lived nature\nB) A missing audit policy\nC) The lack of a behavioural baseline",
+      "choicesExplained": "B: an audit policy affects API server records, not the container's own filesystem or process state. C: a behavioural baseline helps detect anomalies, not preserve evidence after the fact.",
+      "explanation": "Cloud native forensics has to work faster and differently than traditional forensics, because containers do not persist the way servers do.",
+      "source": "Cloud Native Security Whitepaper v2, “Incident Response & Mitigation”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-whitepaper/v2/cloud-native-security-whitepaper.md#incident-response--mitigation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "forensics",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8ssec.forensics"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.contrast-audit-security-monitoring",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 15490,
+      "front": "How do audit logging, security logging and monitoring differ from each other?",
+      "back": "Audit logging records events and changes; security logging is its security-relevant subset; monitoring analyses logs and metrics live to trigger alerts.",
+      "explanation": "A security log is a subset of the audit log; monitoring is the analysis that raises alerts.",
+      "source": "Cloud Native Security Lexicon, “Audit logging vs security logging vs monitoring”",
+      "sourceURL": "https://github.com/cncf/tag-security/blob/main/community/resources/security-lexicon/cloud-native-security-lexicon.md#audit-logging-vs-security-logging-vs-monitoring",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit logging vs security logging vs monitoring",
+        "Kubernetes auditing"
+      ],
+      "conceptIDs": [
+        "k8ssec.audit-vs-security-logging"
+      ]
+    },
+    {
+      "id": "k8ssec.audit-and-observability.contrast-auditing-vs-runtime-detection",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 15500,
+      "front": "How does Kubernetes auditing differ from runtime detection?",
+      "back": "Auditing records API server requests after the fact; runtime detection watches container syscalls and network traffic live.",
+      "explanation": "Both are detective controls, but they watch different layers: the API server's front door versus the container's own activity.",
+      "source": "Kubernetes documentation, Auditing / Cloud Native Security Whitepaper v2, “Runtime Detection”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Kubernetes auditing",
+        "runtime detection"
+      ],
+      "conceptIDs": [
+        "k8ssec.k8s-auditing",
+        "k8ssec.runtime-detection"
+      ]
+    }
+  ]
+}

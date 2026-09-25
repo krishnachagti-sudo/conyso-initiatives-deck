@@ -1,0 +1,831 @@
+{
+  "topic": "Pod Security Standards and Pod Security Admission",
+  "notes": [
+    {
+      "id": "k8ssec.pod-security-standards-admission.baseline-controls",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8000,
+      "front": "What does the Baseline Pod Security Standard forbid?",
+      "back": "HostProcess containers, host namespaces, privileged containers, extra capabilities beyond a default list, hostPath volumes, and more.",
+      "explanation": "Baseline aims at ease of adoption while blocking the privilege escalations that are already well known.",
+      "example": "Like a workplace safety minimum: it stops the obviously dangerous shortcuts, without demanding perfect discipline.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Baseline controls"
+      ],
+      "uses": [
+        "Pod Security Standards",
+        "Baseline controls"
+      ],
+      "conceptIDs": [
+        "k8ssec.baseline-controls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.restricted-controls",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8010,
+      "front": "What does the Restricted Pod Security Standard add on top of Baseline?",
+      "back": "Everything in Baseline, plus limited volume types, no privilege escalation, running as non-root, a seccomp profile set, and dropping all capabilities.",
+      "explanation": "It is aimed at security-critical applications and lower-trust users, at some cost to compatibility.",
+      "example": "Like a locked-down laptop image for staff handling the most sensitive data.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Restricted\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Restricted controls"
+      ],
+      "uses": [
+        "Baseline controls",
+        "Restricted controls"
+      ],
+      "conceptIDs": [
+        "k8ssec.restricted-controls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.restricted-volume-types",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8020,
+      "front": "Which volume types does the Restricted policy allow?",
+      "back": "Only configMap, csi, downwardAPI, emptyDir, ephemeral, persistentVolumeClaim, projected and secret.",
+      "explanation": "Leaving out hostPath and other host-facing volume types closes off a major route to escaping container isolation.",
+      "example": "Like an approved list of storage boxes, deliberately excluding anything that opens onto the building's own systems.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Restricted\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Restricted volume types"
+      ],
+      "uses": [
+        "Restricted controls",
+        "Restricted volume types"
+      ],
+      "conceptIDs": [
+        "k8ssec.restricted-volume-types"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.host-ports",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 8030,
+      "front": "How does Baseline treat host ports?",
+      "back": "hostPort should be disallowed entirely, or restricted to a known list.",
+      "explanation": "A container binding a port directly on the node can collide with, or expose, other workloads on that same node.",
+      "example": "Like tenants in a shared building being told not to run wiring straight to the building's own switchboard.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "host ports"
+      ],
+      "uses": [
+        "Baseline controls",
+        "host ports"
+      ],
+      "conceptIDs": [
+        "k8ssec.host-ports"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.sysctls",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 8040,
+      "front": "What are sysctls, and how does Baseline treat them?",
+      "back": "Kernel parameters; Baseline allows only a \"safe\", namespaced subset that can't disable security mechanisms or affect other Pods.",
+      "explanation": "An unsafe sysctl can reach beyond the container into shared kernel state on the node.",
+      "example": "Like a thermostat that only controls one room, not the whole building's heating system.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "sysctls"
+      ],
+      "uses": [
+        "Baseline controls",
+        "sysctls"
+      ],
+      "conceptIDs": [
+        "k8ssec.sysctls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.psa-version-label",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8050,
+      "front": "What does a Pod Security Admission version label do?",
+      "back": "pod-security.kubernetes.io/<MODE>-version pins that mode's policy to the version of the Standard that shipped with a given Kubernetes minor version, or to \"latest\".",
+      "explanation": "Without pinning, the policy follows \"latest\", so its rules can change when the cluster is upgraded.",
+      "example": "Like specifying which edition of a rulebook applies, so an update to the rules doesn't catch you by surprise.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Pod Security Admission labels for namespaces\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#pod-security-admission-labels-for-namespaces",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "introduces": [
+        "Pod Security Admission version label"
+      ],
+      "uses": [
+        "Pod Security Admission",
+        "Pod Security Admission version label"
+      ],
+      "conceptIDs": [
+        "k8ssec.psa-version-label"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.psa-exemptions",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8060,
+      "front": "What are Pod Security Admission exemptions?",
+      "back": "Statically configured usernames, RuntimeClassNames, or namespaces the admission controller skips entirely, for all modes.",
+      "explanation": "They must be explicitly enumerated in the admission controller's own configuration; a matching request is ignored, not just relaxed.",
+      "example": "Like a short list of vehicles allowed through a checkpoint without stopping at all.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Exemptions\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#exemptions",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Pod Security Admission exemptions"
+      ],
+      "uses": [
+        "Pod Security Admission",
+        "Pod Security Admission exemptions"
+      ],
+      "conceptIDs": [
+        "k8ssec.psa-exemptions"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.podsecurity-plugin",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8070,
+      "front": "What is the PodSecurity admission plugin?",
+      "back": "The built-in admission controller that enforces the Pod Security Standards, enabled by default and stable since v1.25.",
+      "explanation": "It replaced the deprecated PodSecurityPolicy, which was removed from Kubernetes in v1.25.",
+      "example": "Like a standard-issue checkpoint every cluster now ships with, instead of a bespoke one each team had to build.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "introduces": [
+        "PodSecurity admission plugin"
+      ],
+      "uses": [
+        "Pod Security Admission",
+        "PodSecurity admission plugin"
+      ],
+      "conceptIDs": [
+        "k8ssec.podsecurity-plugin"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.pod-os-field",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 8080,
+      "front": "What does the Pod OS field control for the Restricted policy?",
+      "back": "spec.os.name; when it is windows, the Restricted policy relaxes its privilege escalation, seccomp and capabilities checks.",
+      "explanation": "Those Linux-specific controls have no equivalent on Windows, so applying them there would be meaningless rather than protective.",
+      "example": "Like a safety checklist that skips the steps for a machine type that isn't actually in the room.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Pod OS field\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#pod-os-field",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Pod OS field"
+      ],
+      "uses": [
+        "Restricted controls",
+        "Pod OS field"
+      ],
+      "conceptIDs": [
+        "k8ssec.pod-os-field"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.three-modes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8300,
+      "front": "What are the three Pod Security Admission modes, and what does each do on a violation?",
+      "back": "enforce rejects the Pod; audit adds an annotation to the audit log; warn shows a user-facing warning.",
+      "explanation": "A namespace can set a different level for each mode, so warn or audit can trial a stricter policy before enforce adopts it.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Pod Security Admission labels for namespaces\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#pod-security-admission-labels-for-namespaces",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod Security Admission"
+      ],
+      "conceptIDs": [
+        "k8ssec.podsecurity-plugin"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.enforce-pods-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8310,
+      "front": "Does enforce mode apply to Deployments and other workload resources, or only to Pods?",
+      "back": "Only to the resulting Pod objects. Audit and warn apply to workload resources too, to catch violations early.",
+      "explanation": "This is why a Deployment with a violating Pod template can be accepted, and only its Pods then get rejected.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Workload resources and Pod templates\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#workload-resources-and-pod-templates",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod Security Admission",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "k8ssec.podsecurity-plugin"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.three-exemption-dimensions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8320,
+      "front": "What three dimensions can a Pod Security Admission exemption be configured on?",
+      "back": "Usernames, RuntimeClassNames, and namespaces.",
+      "explanation": "A matching request skips enforce, audit and warn together, so exemptions should be as narrow as possible.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Exemptions\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#exemptions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod Security Admission exemptions"
+      ],
+      "conceptIDs": [
+        "k8ssec.psa-exemptions"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.controller-sa-exemption-caution",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8330,
+      "front": "Why does the documentation warn against exempting a controller's own ServiceAccount, such as the ReplicaSet controller's?",
+      "back": "Doing so implicitly exempts any user who can create the corresponding workload resource, since the controller creates the Pods on their behalf.",
+      "explanation": "Exempting the end user only skips enforcement for Pods they create directly, but exempting the controller skips it for everyone indirectly.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Exemptions\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#exemptions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod Security Admission exemptions"
+      ],
+      "conceptIDs": [
+        "k8ssec.psa-exemptions"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.hostprocess-baseline",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8340,
+      "front": "How does Baseline treat Windows HostProcess containers?",
+      "back": "It disallows them; they enable privileged access to the Windows host machine.",
+      "explanation": "HostProcess is Baseline's Windows equivalent of disallowing privileged Linux containers.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Baseline controls"
+      ],
+      "conceptIDs": [
+        "k8ssec.baseline-controls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.baseline-capabilities-list",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8350,
+      "front": "Under Baseline, can a Pod add capabilities beyond a fixed allowed list?",
+      "back": "No. Only a specific default list, such as CHOWN, KILL, SETUID and SETGID, may be added; anything else is forbidden.",
+      "explanation": "This stops workloads from quietly acquiring powerful Linux capabilities that undermine container isolation.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Baseline controls"
+      ],
+      "conceptIDs": [
+        "k8ssec.baseline-controls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.restricted-drop-all-add-only-net-bind",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8360,
+      "front": "Under Restricted, which capabilities may a container drop and add?",
+      "back": "It must drop ALL capabilities, and is only permitted to add back NET_BIND_SERVICE.",
+      "explanation": "This is the strictest capability posture of the three policies, leaving almost nothing beyond an unprivileged process's defaults.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Restricted\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Restricted controls"
+      ],
+      "conceptIDs": [
+        "k8ssec.restricted-controls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.restricted-nonroot-true",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8370,
+      "front": "What must runAsNonRoot be set to under the Restricted policy?",
+      "back": "true. Containers must be required to run as non-root users.",
+      "explanation": "Running as non-root limits what a compromised process can do.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Restricted\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Restricted controls"
+      ],
+      "conceptIDs": [
+        "k8ssec.restricted-controls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.restricted-seccomp-required",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8380,
+      "front": "Under Restricted, is having no seccomp profile at all acceptable?",
+      "back": "No. A seccomp profile must be explicitly set to RuntimeDefault or Localhost; both Unconfined and an absent profile are prohibited.",
+      "explanation": "This is stricter than Baseline, which only forbids explicitly setting Unconfined and still allows an unset profile.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Restricted\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Restricted controls",
+        "sysctls"
+      ],
+      "conceptIDs": [
+        "k8ssec.restricted-controls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.psp-removed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8390,
+      "front": "What replaced PodSecurityPolicy, which was deprecated in v1.21 and removed in v1.25?",
+      "back": "The Pod Security Standards, enforced by the built-in PodSecurity admission plugin, or by third-party admission tools.",
+      "explanation": "Study material written before v1.25 may still reference PodSecurityPolicy as if it were current.",
+      "source": "Kubernetes documentation, \"PodSecurityPolicy\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-policy/",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "uses": [
+        "PodSecurity admission plugin"
+      ],
+      "conceptIDs": [
+        "k8ssec.podsecurity-plugin"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.app-workload-vs-pod-rejection",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8600,
+      "front": "A namespace enforces Restricted. Someone applies a Deployment whose Pod template runs as root. What happens to the Deployment, and to its Pods?",
+      "back": "The Deployment object is accepted, but the Pods it tries to create are rejected by enforce mode.",
+      "explanation": "Enforce mode only ever applies to the final Pod object, never to the workload resource that generates it.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Workload resources and Pod templates\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#workload-resources-and-pod-templates",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod Security Admission",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "k8ssec.podsecurity-plugin"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.app-pin-version-label",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8610,
+      "front": "A team wants a namespace's Restricted policy to stop getting stricter automatically after cluster upgrades. What should they set?",
+      "back": "The pod-security.kubernetes.io/enforce-version label, pinned to a specific Kubernetes minor version instead of \"latest\".",
+      "explanation": "Pinning the version separates a deliberate policy change from an incidental one caused by upgrading the cluster.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Pod Security Admission labels for namespaces\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#pod-security-admission-labels-for-namespaces",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod Security Admission version label"
+      ],
+      "conceptIDs": [
+        "k8ssec.psa-version-label"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.app-hostpath-baseline",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8620,
+      "front": "A Pod in a Baseline-enforced namespace mounts a hostPath volume. Will it be admitted?",
+      "back": "No. HostPath volumes must be forbidden under Baseline.",
+      "explanation": "hostPath is one of the clearest routes from a Pod to the underlying node's filesystem.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Baseline controls"
+      ],
+      "conceptIDs": [
+        "k8ssec.baseline-controls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.app-restricted-net-bind-add",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8630,
+      "front": "A Restricted Pod adds the capability SETUID back after dropping ALL. Is this allowed?",
+      "back": "No. Restricted allows adding back only NET_BIND_SERVICE; any other added capability fails validation.",
+      "explanation": "Restricted's capability rule is stricter than Baseline's default-list approach: almost nothing may be re-added.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Restricted\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Restricted controls"
+      ],
+      "conceptIDs": [
+        "k8ssec.restricted-controls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.app-exempt-namespace-choice",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8640,
+      "front": "A cluster runs a trusted, cluster-critical component in the kube-system namespace that needs Privileged-level access everywhere. What static admission-controller setting lets Pods in kube-system skip Pod Security Admission entirely?",
+      "back": "An exempt namespace in the controller's configuration. Labelling the namespace pod-security.kubernetes.io/enforce: privileged is the usual alternative.",
+      "explanation": "An exemption on the namespace dimension skips every check for every Pod in it, so it should be used sparingly.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Exemptions\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#exemptions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod Security Admission exemptions"
+      ],
+      "conceptIDs": [
+        "k8ssec.psa-exemptions"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.app-sandboxed-pod-profile",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 8650,
+      "front": "A team asks which Pod Security Standard profile is designed specifically for sandboxed Pods, such as those using gVisor. Is there one?",
+      "back": "No. There is no single recommended profile for all sandboxed workloads; protection needs vary with the sandboxing method used.",
+      "explanation": "The FAQ is explicit that no API standard exists to mark a Pod as sandboxed in the first place.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"What about sandboxed Pods?\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#what-about-sandboxed-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Restricted controls"
+      ],
+      "conceptIDs": [
+        "k8ssec.restricted-controls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.contrast-baseline-vs-restricted",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8900,
+      "front": "What is the difference between Baseline and Restricted?",
+      "back": "Baseline blocks known privilege escalations while staying easy to adopt; Restricted adds current hardening best practices, at the cost of compatibility.",
+      "explanation": "They are cumulative: Restricted always includes everything Baseline requires, plus more.",
+      "contrast": "Baseline asks \"is this clearly dangerous?\"; Restricted asks \"is this as locked-down as practical?\"",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Profile Details\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#profile-details",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Baseline controls",
+        "Restricted controls"
+      ],
+      "conceptIDs": [
+        "k8ssec.baseline-controls",
+        "k8ssec.restricted-controls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.contrast-pss-vs-security-context",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8910,
+      "front": "What is the difference between a Pod Security Standard and a security context?",
+      "back": "A Pod Security Standard is a control-plane enforcement profile; a security context is the Pod's own runtime settings that the profile checks.",
+      "explanation": "The FAQ draws this line explicitly: one is policy, the other is configuration the policy validates.",
+      "contrast": "The Standard sets the rule; the security context is what a Pod actually declares.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"What's the difference between a security profile and a security context?\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#faq",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Restricted controls",
+        "Baseline controls"
+      ],
+      "conceptIDs": [
+        "k8ssec.restricted-controls"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.contrast-enforce-vs-audit-warn",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8920,
+      "front": "What is the difference between enforce mode and audit/warn mode on workload resources?",
+      "back": "Enforce only ever rejects Pods; audit and warn also inspect Deployments and other workload resources, to catch problems early.",
+      "explanation": "This gap is deliberate: it lets teams see warnings on a workload resource before any Pod is even created.",
+      "contrast": "enforce reacts to the object that actually runs; audit and warn also watch the templates that produce it.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Workload resources and Pod templates\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#workload-resources-and-pod-templates",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod Security Admission",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "k8ssec.podsecurity-plugin"
+      ]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.privileged-profile-definition",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8400,
+      "front": "What is the Privileged Pod Security Standard, and who is it aimed at?",
+      "back": "A purposely-open, entirely unrestricted policy, typically used for system- and infrastructure-level workloads managed by trusted users.",
+      "explanation": "It's defined by an absence of restrictions, so it lets a Pod bypass typical container isolation mechanisms.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Privileged\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#privileged",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Baseline controls", "Restricted controls"],
+      "conceptIDs": ["k8ssec.baseline-controls"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.baseline-selinux-values",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8410,
+      "front": "What SELinux type values does Baseline allow a Pod or container to set?",
+      "back": "Only container_t, container_init_t, container_kvm_t, or (since v1.31) container_engine_t; a custom SELinux user or role is forbidden entirely.",
+      "explanation": "This stops a Pod from requesting a broader, more privileged SELinux label than these known-safe container types.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "uses": ["Baseline controls"],
+      "conceptIDs": ["k8ssec.baseline-controls"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.baseline-procmount-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8420,
+      "front": "What must a Pod's /proc mount type be under Baseline?",
+      "back": "Default (or undefined/nil); the default /proc masks are set up to reduce attack surface.",
+      "explanation": "Requesting a non-default procMount would expose more of the kernel's /proc tree than Baseline allows.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Baseline controls"],
+      "conceptIDs": ["k8ssec.baseline-controls"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.baseline-capabilities-complete-list",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8430,
+      "front": "Baseline's full list of capabilities a container may add is: {{c1::AUDIT_WRITE, CHOWN, DAC_OVERRIDE, FOWNER, FSETID, KILL, MKNOD, NET_BIND_SERVICE, SETFCAP, SETGID, SETPCAP, SETUID, SYS_CHROOT}}.",
+      "explanation": "Any capability outside this exact list, added beyond the container's defaults, fails Baseline validation.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "uses": ["Baseline controls"],
+      "conceptIDs": ["k8ssec.baseline-controls"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.no-profile-between",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8440,
+      "front": "Why doesn't Kubernetes define a fourth profile between Privileged and Baseline?",
+      "back": "Privileges needed above Baseline are typically very application-specific, so they don't fit a single standard profile.",
+      "explanation": "The FAQ notes SIG Auth may reconsider this if a clear need for such a profile arises.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Why isn't there a profile between Privileged and Baseline?\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#faq",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Baseline controls"],
+      "conceptIDs": ["k8ssec.baseline-controls"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.windows-relaxed-controls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8450,
+      "front": "Which Restricted controls are relaxed for a Pod whose spec.os.name is windows?",
+      "back": "Privilege Escalation, Seccomp, and Linux Capabilities: all three are Linux-only checks under Restricted since v1.25.",
+      "explanation": "Windows has no equivalent of these Linux kernel mechanisms, so enforcing them there would be meaningless.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"OS-specific policy controls\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#os-specific-policy-controls",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "uses": ["Restricted controls", "Pod OS field"],
+      "conceptIDs": ["k8ssec.pod-os-field"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.host-probe-v134",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8460,
+      "front": "Since which Kubernetes version does Baseline disallow the Host field in probes and lifecycle hooks?",
+      "back": "v1.34, which restricts fields such as livenessProbe.httpGet.host across containers, init containers and ephemeral containers.",
+      "explanation": "Pointing a probe at an arbitrary host lets a Pod use the kubelet to reach addresses it might not otherwise be authorized to touch.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs v1.37",
+      "uses": ["Baseline controls"],
+      "conceptIDs": ["k8ssec.baseline-controls"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.warn-mode-not-blocking",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8470,
+      "front": "Does warn mode stop a Pod that violates the policy from being created?",
+      "back": "No. It only triggers a user-facing warning; the Pod is otherwise allowed.",
+      "explanation": "Only enforce mode actually blocks the Pod; audit and warn both let it through while flagging it.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Pod Security Admission labels for namespaces\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#pod-security-admission-labels-for-namespaces",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Pod Security Admission"],
+      "conceptIDs": ["k8ssec.podsecurity-plugin"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.app-selinux-custom-type",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 8660,
+      "front": "A Pod in a Baseline-enforced namespace sets seLinuxOptions.type to a custom value not on the allowed list. Is it admitted?",
+      "back": "No. Baseline restricts the SELinux type to a small known-safe set; anything else fails validation.",
+      "explanation": "A custom SELinux role or user is forbidden outright, regardless of the type chosen.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Baseline\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#baseline",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Baseline controls"],
+      "conceptIDs": ["k8ssec.baseline-controls"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.app-windows-hostprocess-capabilities",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 8670,
+      "front": "A Windows Pod (spec.os.name: windows) under a Restricted namespace adds a Linux-style capability field. Is that field checked by Restricted?",
+      "back": "No. Restricted's capabilities check is Linux-only; it's relaxed for Windows Pods.",
+      "explanation": "Windows Pods are instead constrained by their own separate mechanism, such as disallowing HostProcess under Baseline.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"OS-specific policy controls\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#os-specific-policy-controls",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Restricted controls", "Pod OS field"],
+      "conceptIDs": ["k8ssec.pod-os-field"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.app-warn-then-enforce-rollout",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8680,
+      "front": "A team wants to see which of their existing Pods would fail Restricted before actually blocking anything. What label combination lets them do this safely?",
+      "back": "Set pod-security.kubernetes.io/warn (and audit) to restricted, while leaving enforce at a looser level for now.",
+      "explanation": "This surfaces violations as warnings and audit annotations without breaking any currently running workload.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Pod Security Admission labels for namespaces\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#pod-security-admission-labels-for-namespaces",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Pod Security Admission"],
+      "conceptIDs": ["k8ssec.podsecurity-plugin"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.app-runtimeclass-exempt-workload",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 8690,
+      "front": "A RuntimeClassName is listed as exempt in the admission controller's configuration. Does a Pod using that RuntimeClassName still get checked against its namespace's enforce policy?",
+      "back": "No. A matching RuntimeClassName is one of the three exemption dimensions, and an exempt request skips enforce, audit and warn entirely.",
+      "explanation": "This is a narrower, more targeted exemption than exempting an entire namespace.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Exemptions\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#exemptions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Pod Security Admission exemptions"],
+      "conceptIDs": ["k8ssec.psa-exemptions"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.app-infra-workload-privileged",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8700,
+      "front": "A cluster's own CNI plugin needs to configure host networking directly, something no application workload should ever need. Which Pod Security Standard fits that one trusted system component's namespace?",
+      "back": "Privileged, since it's aimed exactly at system- and infrastructure-level workloads managed by trusted users.",
+      "explanation": "It should stay confined to the smallest possible set of namespaces, since it removes container isolation entirely.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Privileged\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#privileged",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Baseline controls"],
+      "conceptIDs": ["k8ssec.baseline-controls"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.app-audit-mode-annotation",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 8710,
+      "front": "A namespace sets pod-security.kubernetes.io/audit to restricted, but enforce is left at privileged. A Pod violating Restricted is created. What actually happens to it?",
+      "back": "It is created successfully; audit mode only adds an annotation to the recorded audit log event, without blocking anything.",
+      "explanation": "This makes audit useful for building a record of violations to review later, without affecting running workloads.",
+      "source": "Kubernetes documentation, \"Pod Security Admission\", \"Pod Security Admission labels for namespaces\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-admission/#pod-security-admission-labels-for-namespaces",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Pod Security Admission"],
+      "conceptIDs": ["k8ssec.podsecurity-plugin"]
+    },
+    {
+      "id": "k8ssec.pod-security-standards-admission.contrast-privileged-vs-baseline",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 8930,
+      "front": "What is the difference between the Privileged and Baseline Pod Security Standards?",
+      "back": "Privileged is entirely unrestricted, defined by an absence of rules; Baseline blocks the specific privilege escalations already well known.",
+      "explanation": "Privileged is meant for a small set of trusted infrastructure components, never for ordinary application workloads.",
+      "contrast": "Privileged has no floor; Baseline blocks known privilege escalations.",
+      "source": "Kubernetes documentation, \"Pod Security Standards\", \"Profile Details\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/pod-security-standards/#profile-details",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": ["Baseline controls"],
+      "conceptIDs": ["k8ssec.baseline-controls"]
+    }
+  ]
+}
