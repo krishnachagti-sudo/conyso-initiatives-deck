@@ -13,7 +13,7 @@ const n0 = (n) => Number(n).toLocaleString('en-GB');
 // The apps named on the formats page, in the order a learner would look.
 const APPS = ['Anki', 'AnkiDroid', 'AnkiMobile', 'Quizlet', 'Brainscape', 'Mochi', 'RemNote', 'Obsidian', 'Logseq', 'Knowt', 'Mnemosyne', 'Noji'];
 
-export function homePage(cfg, decks) {
+export function homePage(cfg, decks, { roadmap = 0 } = {}) {
   const stats = decks.map((d) => ({ deck: d, s: deckStats(d) }));
   const cards = stats.reduce((a, x) => a + x.s.cards, 0);
   const primers = stats.reduce((a, x) => a + x.s.primers, 0);
@@ -31,9 +31,9 @@ export function homePage(cfg, decks) {
 <section class="hero wrap">
   <div class="hero-grid">
     <div>
-      <p class="eyebrow">Free · sourced · no account</p>
-      <h1><span>Flashcards that</span><span class="l2">teach you first.</span></h1>
-      <p class="hero-sub">Decks for certification exams that explain every idea before they test it.</p>
+      <p class="eyebrow">Free · built on learning science · every card sourced</p>
+      <h1><span>Every certification.</span><span class="l2">One standard.</span></h1>
+      <p class="hero-sub">Flashcards that explain each idea before they test it, built from the research on how people learn.</p>
       <div class="hero-actions">${lead ? `<a class="btn btn-primary" href="${leadUrl}">${icon('cards')} Open the ${esc(lead.deck.meta.shortTitle || lead.deck.meta.title)} deck</a><a class="btn" href="${leadUrl}#try">${icon('browser')} Try it here</a>` : ''}</div>
     </div>
     ${hero ? `<div class="hero-card"><div class="stack tilt-r">${cardHTML(hero)}</div></div>` : ''}
@@ -44,8 +44,8 @@ export function homePage(cfg, decks) {
 <div class="wrap"><div class="numbers">
   <div><b>${n0(cards)}</b><span>cards</span></div>
   <div><b>${n0(primers)}</b><span>primers that explain first</span></div>
+  ${roadmap ? `<div><b>${n0(roadmap)}</b><span>certifications on the build list</span></div>` : ''}
   <div><b>${n0(FORMATS.length)}</b><span>formats per deck</span></div>
-  <div><b>0</b><span>ads, accounts or trackers</span></div>
 </div></div>`;
 
   const trio = lead && teachingTrio(lead.deck);
@@ -55,11 +55,23 @@ export function homePage(cfg, decks) {
   ${trioHTML(trio, { href: `${leadUrl}#path` })}
 </section>` : '';
 
+  const research = `
+<section class="band wrap" aria-labelledby="sci-h">
+  <div class="band-h center"><h2 id="sci-h">Built on the research</h2><p class="sub">Every rule in the standard traces to a study, and we say where the evidence runs out.</p></div>
+  <div class="sci">
+    <div class="sci-c"><b>g = 0.33</b><span>Recalling beats rereading, in real classrooms</span><i>Yang et al. 2021</i></div>
+    <div class="sci-c"><b>d = 0.46</b><span>Teaching the parts first helps newcomers</span><i>Mayer, pre-training studies</i></div>
+    <div class="sci-c"><b>0.73 vs 0.39</b><span>Testing with feedback, against without</span><i>Rowland 2014</i></div>
+    <div class="sci-c"><b>Facts + use</b><span>Mixed practice beat facts alone on harder questions</span><i>Agarwal 2019</i></div>
+  </div>
+  <p class="center" style="margin-top:22px"><a class="link" href="${cfg.base}method/">The science, and its limits →</a></p>
+</section>`;
+
   const deckBand = `
 <section class="band wrap" id="decks" aria-labelledby="decks-h">
-  <div class="band-h"><h2 id="decks-h">The decks</h2></div>
+  <div class="band-h"><h2 id="decks-h">The decks</h2>${roadmap ? `<p class="kicker">${n0(decks.length)} published · ${n0(roadmap)} on the build list</p>` : ''}</div>
   <div class="deck-grid">${stats.map(({ deck, s }) => `<a class="deck-card" href="${cfg.base}${esc(deck.meta.slug)}/"><div class="icard"><div class="ic-top"><span>${esc(deck.meta.familyTitle || deck.meta.family)}</span><b>${deck.meta.status === 'released' ? 'released' : 'draft'}</b></div><h3>${esc(deck.meta.title)}</h3><div class="dc-stats">${n0(s.cards)} cards · ${n0(s.primers)} primers · ${n0(s.topics.length)} topics</div></div></a>`).join('')}
-  <div class="deck-soon"><span>${icon('cards')}</span><p>More certifications on the way.</p></div></div>
+  <div class="deck-soon"><span>${icon('cards')}</span><p>${roadmap ? `Next: the ${n0(roadmap)} certifications on the build list.` : 'More certifications on the way.'}</p></div></div>
 </section>`;
 
   const appsBand = `
@@ -86,10 +98,10 @@ export function homePage(cfg, decks) {
   const script = primerCards.length > 1 ? `<script>(function(){try{var d=JSON.parse(document.getElementById('cotd-data').textContent);var i=Math.floor(Date.now()/864e5)%d.length,c=d[i],box=document.querySelector('#cotd-card .icard');var e=function(t,c,x){var n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n};box.textContent='';var top=e('div','ic-top');top.append(e('span',null,c.deck+' · '+c.topic),e('b',null,'primer'));var q=e('div','ic-q');q.appendChild(e('p',null,c.front));var a=e('div','ic-a');a.appendChild(e('p','ic-ans',c.answer));if(c.example){var x=e('p','ic-x');x.append(e('b',null,'Example'),' '+c.example);a.appendChild(x)}box.append(top,q,e('div','ic-rule'),a);document.getElementById('cotd-link').href='${cfg.base}'+c.slug+'/#'+c.id}catch(x){}})();</script>` : '';
 
   return page(cfg, {
-    title: `Certification Flashcards That Teach First | ${cfg.brand}`,
-    description: `Free, sourced flashcard decks for certification exams that explain every idea before they test it. ${n0(cards)} cards for Anki, Quizlet, Brainscape, Mochi and print.`,
+    title: `${cfg.brand}: Flashcards for Every Certification`,
+    description: `Free flashcard decks for certification exams, all built to one standard from learning science: every idea explained before it is tested, every card sourced. For Anki, Quizlet and print.`,
     path: '',
-    body: `${heroBand}${numbers}${how}${deckBand}${appsBand}${cotd}${cta}${otherWays(cfg, '')}`,
+    body: `${heroBand}${numbers}${how}${research}${deckBand}${appsBand}${cotd}${cta}${otherWays(cfg, '')}`,
     graph: [{ '@type': 'WebSite', '@id': `${cfg.origin}${cfg.base}#website`, name: cfg.brand, url: `${cfg.origin}${cfg.base}`, inLanguage: 'en', publisher: { '@id': `${cfg.origin}${cfg.base}#organization` } },
       { '@type': 'CollectionPage', name: cfg.brand, url: `${cfg.origin}${cfg.base}`, mainEntity: { '@type': 'ItemList', itemListElement: decks.map((d, i) => ({ '@type': 'ListItem', position: i + 1, url: `${cfg.origin}${cfg.base}${d.meta.slug}/`, name: d.meta.title })) } }],
     scripts: script,

@@ -63,7 +63,7 @@ node build/build.mjs --fixtures --only=csv,json   # the fictional test deck, som
 ```
 
 `dist/` is uploaded as-is to the address in `site.config.json` (working
-values: `https://conyso.com/decks/`). Each deck page sits in the same
+values: `https://conyso.com/primer/`, name The Exam Primer). Each deck page sits in the same
 directory as its downloads. The same site is also published to GitHub Pages at
 https://krishnachagti-sudo.github.io/conyso-initiatives-deck/ by
 `.github/workflows/pages.yml`, as a noindex preview (`--origin=` and `--base=`

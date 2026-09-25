@@ -76,7 +76,12 @@ for (const src of sources) {
 const deckList = built.map((b) => b.deck);
 const nav = deckList.map((d) => ({ slug: d.meta.slug, title: d.meta.shortTitle || d.meta.title }));
 for (const b of built) writeFileSync(join(b.target, 'index.html'), deckPage(cfg, b.deck, b.manifest, { decks: nav }));
-const pages = { '': homePage(cfg, deckList), 'method/': methodPage(cfg, deckList), 'formats/': formatsPage(cfg, deckList) };
+// The roadmap figure on the home page: exams in MASTER-LIST.md marked "Build"
+// (buildable now under CONTENT-POLICY.md). Quoted fields may contain commas.
+const csvRow = (line) => [...line.matchAll(/(?:^|,)("(?:[^"]|"")*"|[^,]*)/g)].map((m) => m[1].replace(/^"|"$/g, '').replace(/""/g, '"'));
+const [hdr, ...rows] = readFileSync('master-list.csv', 'utf8').trim().split('\n').map(csvRow);
+const roadmap = rows.filter((r) => r[hdr.indexOf('status')] === 'Build').length;
+const pages = { '': homePage(cfg, deckList, { roadmap }), 'method/': methodPage(cfg, deckList), 'formats/': formatsPage(cfg, deckList) };
 for (const [p, html] of Object.entries(pages)) { mkdirSync(join(out, p), { recursive: true }); writeFileSync(join(out, p, 'index.html'), html); }
 cpSync('src/assets', join(out, 'assets'), { recursive: true }); // fonts travel with their OFL licence files
 
@@ -92,7 +97,7 @@ ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod
 // llms.txt (llmstxt.org): a plain map of the site for answer engines.
 writeFileSync(join(out, 'llms.txt'), `# ${cfg.brand}
 
-> Free, standardised flashcard decks for certification exams, by Conyso. Every card cites a public source, every deck teaches each idea before it tests it, and every deck downloads for Anki, Quizlet, Brainscape, Mochi, RemNote, Obsidian, Logseq, spreadsheets and paper. Decks are licensed CC BY-SA 4.0.
+> Free flashcard decks for certification exams, all built to one standard from the research on how people learn, by Conyso. Every card cites a public source, every deck teaches each idea before it tests it, and every deck downloads for Anki, Quizlet, Brainscape, Mochi, RemNote, Obsidian, Logseq, spreadsheets and paper. Decks are licensed CC BY-SA 4.0.
 
 ## Decks
 

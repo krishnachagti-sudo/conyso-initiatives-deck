@@ -52,14 +52,14 @@ export const mark = (cls = 'mark') => `<svg class="${cls}" viewBox="0 0 38 28" a
 
 const NAV = [
   ['decks', '', 'All decks'],
-  ['method', 'method/', 'How we teach'],
+  ['method', 'method/', 'The science'],
   ['formats', 'formats/', 'Which file?'],
 ];
 
 /** The ways into the site, for the band at the foot of every page. */
 export const WAYS = [
   ['', 'All decks', 'Every published deck, by subject'],
-  ['method/', 'How we teach', 'Why every deck explains each idea before it tests it'],
+  ['method/', 'The science', 'The learning research behind every deck, and its limits'],
   ['formats/', 'Which file for my app?', 'Anki, Quizlet, Brainscape, Mochi, RemNote, Obsidian, Logseq, paper'],
 ];
 
@@ -141,9 +141,9 @@ ${jsonLd([siteOrg(cfg), conysoOrg(), founderNode(), ...graph])}
 ${sprite()}
 <a class="skip" href="#main">Skip to content</a>
 <header class="site" data-nosnippet>
-  <div class="kick"><div class="wrap"><span class="k-l">Free · CC BY-SA 4.0</span><span class="k-c">flashcards that teach each idea before they test it</span><span class="k-r">no ads · no tracking</span></div></div>
+  <div class="kick"><div class="wrap"><span class="k-l">Free · CC BY-SA 4.0</span><span class="k-c">one standard for every certification</span><span class="k-r">no ads · no tracking</span></div></div>
   <div class="wrap bar">
-    <a class="brand" href="${cfg.base}" aria-label="${esc(cfg.brand)}, home">${mark()}<span class="brand-txt"><span class="brand-name">${esc(cfg.brand)}</span><span class="brand-sub">certification flashcards</span></span></a>
+    <a class="brand" href="${cfg.base}" aria-label="${esc(cfg.brand)}, home">${mark()}<span class="brand-txt"><span class="brand-name">${esc(cfg.brand)}</span><span class="brand-sub">flashcards for every certification</span></span></a>
     <nav class="links" id="primary-nav" aria-label="Primary">${nav}</nav>
     <div class="right">
       ${count != null ? `<a class="count" href="${cfg.base}"><span class="count-n">${count.toLocaleString('en-GB')}</span><span class="count-l">cards</span></a>` : ''}
@@ -159,13 +159,13 @@ ${body}
   <div class="wrap foot-grid">
     <div class="foot-brand">
       <a class="brand" href="${cfg.base}">${mark()}<span class="brand-txt"><span class="brand-name">${esc(cfg.brand)}</span></span></a>
-      <p class="foot-blurb">Free flashcard decks for certification exams. Every card cites its source, and every deck teaches each idea before it tests it. No ads, no account, no tracking of what you study.</p>
+      <p class="foot-blurb">Free flashcard decks for certification exams, all built to one standard from the research on how people learn. No ads, no account, no tracking of what you study.</p>
       <p class="foot-conyso">Created by <a href="https://conyso.com/founder/" rel="author">Krishna Chagti</a> · an initiative by <a href="https://conyso.com/">Conyso</a>.</p>
-      <p class="foot-motto">Learn it first. Then remember it.</p>
+      <p class="foot-motto">One standard. Every certification.</p>
     </div>
     ${foot('Decks', [['', 'All decks'], ...decks.map((x) => [`${x.slug}/`, x.title])])}
     ${foot('Use them', [['formats/', 'Which file for my app?'], ['formats/#anki', 'Importing into Anki'], ['formats/#print', 'Printing the cards']])}
-    ${foot('The project', [['method/', 'How we teach'], ['method/#checks', 'How cards are checked'], ['method/#ai', 'The part AI plays'], ['https://github.com/krishnachagti-sudo/conyso-initiatives-deck/issues/new?labels=card-report', 'Report a card']])}
+    ${foot('The project', [['method/', 'The science'], ['method/#checks', 'How cards are checked'], ['method/#ai', 'The part AI plays'], ['https://github.com/krishnachagti-sudo/conyso-initiatives-deck/issues/new?labels=card-report', 'Report a card']])}
   </div>
   <div class="wrap foot-share"><span class="fs-lab">Know someone studying for an exam?</span>${shareRow({ live: true })}</div>
   <div class="wrap foot-rule"><span>Decks licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">CC BY-SA 4.0</a>. Independent: not affiliated with any exam body.</span><span>Report a wrong card and it is checked against its source and fixed.</span></div>
