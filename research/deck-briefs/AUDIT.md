@@ -44,6 +44,15 @@ finding.
 - Scenarios are original, not a course activity reworded.
 - Figures show what the card says, with the right credit and licence.
 
+## Working lean
+Each tool call re-sends everything you have read, so read in large batches and
+keep calls few.
+- Read a topic file whole, once. Check each card against its `evidence`
+  first.
+- Open the source (grep in `research/sources/<slug>/`) only for a claim the
+  evidence does not cover.
+- Write the report and the patch file once, at the end.
+
 ## Pass 2: easy to understand
 Read each card as a newcomer who has studied only the cards before it. Flag
 a sentence they would read twice, a front open to two readings, a buried

@@ -111,6 +111,11 @@ facts, credited "Drawn for this deck from <source>". Figures are part of the
 budget, not an extra.
 
 ## Working lean (every tool call re-sends everything you have read)
+- **Start from the slice's passages.** Under each concept the slice prints a
+  passage of its cached source, found by keyword, with its page. When it is
+  the right passage, write from it (and take your evidence from it) with no
+  search at all. When it is not, grep for the right one. The page the slice
+  names may correct a wrong `#page=` in the concept list.
 - **Grep, don't read.** Find the passage you need with `grep -n -A8
   '<phrase>' <file>` and read only that. Open a whole page only when the
   card is about the whole page.
@@ -118,6 +123,9 @@ budget, not an extra.
   single Write. Don't build it up through many small Edits.
 - **Check once per topic.** Run the checks when the topic file is complete,
   fix everything they list in one pass, and run them once more.
+- **Aim for about ten tool calls a topic:** read the three documents, write
+  the topic, check, fix, check. Each extra call re-sends everything you have
+  read so far.
 
 ## Last pass, before the checks
 Reread every explanation beside its evidence (or its cited passage), and ask
