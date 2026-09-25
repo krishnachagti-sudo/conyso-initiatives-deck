@@ -5,6 +5,12 @@ to the standard in CARD-STANDARD.md and the rules in CONTENT-POLICY.md (read bot
 first, in /home/user/conyso-initiatives-deck). You do not write cards. You produce
 the brief that card writers will work from, so it must be complete and correct.
 
+## Privacy (absolute)
+Never put any email address, name or other personal detail in a request: not in a
+User-Agent, header, query string or body. If a site asks for contact details in the
+User-Agent, use a generic one such as "Mozilla/5.0 (compatible; research)" or skip
+that site.
+
 ## The one rule
 Never write a fact you have not read in a source you fetched during this task. No
 figures, dates, question counts, pass marks, URLs, section numbers or licence terms
@@ -45,7 +51,10 @@ written from memory: they are not evidence, and some may be wrong.
    circulating, differences between editions, and rules that recently changed.
 8. Naming: the owner's trademark or naming terms, fetched from its own site, and
    how CONTENT-POLICY.md §4 applies.
-9. Not verified: everything you could not confirm, and what you tried.
+9. Languages: every language the exam is offered in, and every official or
+   openly licensed translation of the main sources (with its licence), each with
+   a quote and URL. One short section; do not research further than that.
+10. Not verified: everything you could not confirm, and what you tried.
 
 ## Your reply
 At most 200 words: the brief's path, how many outline items and concepts it
