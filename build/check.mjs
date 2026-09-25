@@ -193,6 +193,21 @@ export function checkDeck(deck, ctx = {}) {
     if (!applied) add(null, 'application', `core concept "${c}" has a fact card but no application or classification card`);
   }
 
+  // ── Deck-level: one front, one answer ───────────────────────────────────
+  // Two cards that ask the same thing but accept different answers leave the
+  // learner guessing which one is wanted ("Name one of four…" set cards).
+  // Choices or a figure make the question different, so those are exempt.
+  const byFront = new Map();
+  for (const n of notes) {
+    if (n.type === 'cloze' || n.choices || n.image || !nonEmpty(n.front)) continue;
+    const k = n.front.trim().toLowerCase();
+    byFront.set(k, [...(byFront.get(k) || []), n]);
+  }
+  for (const group of byFront.values()) {
+    if (new Set(group.map((n) => String(n.back).trim().toLowerCase())).size < 2) continue;
+    for (const n of group) add(n.id, 'front', `${group.length} cards share this front but accept different answers; give each its own question`);
+  }
+
   // ── Released IDs must never disappear ───────────────────────────────────
   for (const rid of deck.releasedIds || []) {
     if (!seenIds.has(rid)) add(rid, 'released-id', 'a released card is missing; retire it with the "retired" tag instead of deleting it');

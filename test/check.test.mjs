@@ -43,6 +43,16 @@ test('a primer needs an example and exactly one new term', () => {
   assert.match(r, /at most 1 new term/);
 });
 
+test('two cards with one front and different answers fail', () => {
+  const d = fresh();
+  const [a, b] = d.notes.filter((n) => n.type !== 'cloze' && !n.choices && !n.image && n.back);
+  const shared = () => run(d).filter((x) => x.message.includes('share this front')).length;
+  b.front = a.front;
+  assert.equal(shared(), 2);
+  b.back = a.back;
+  assert.equal(shared(), 0, 'the same question with the same answer is only a repeat');
+});
+
 test('a primer may teach one term together with its abbreviation', () => {
   const d = fresh();
   const p = card(d, 'example.widgets.what-is-a-widget');
