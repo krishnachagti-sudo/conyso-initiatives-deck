@@ -59,6 +59,11 @@ an everyday word would do (keep the exam's own term, but explain it).
      value.
    - A **minor** finding with no patch is logged and skipped, so patch it or
      leave it.
+   - **A patch must pass the checker:** a front is a question ending in "?"
+     ("Name two…" becomes "What are two…?"), a back has 25 words or fewer, an
+     explanation says why, and code goes in backticks. Before you reply, run
+     `node build/apply-fixes.mjs <slug> <your fixes file> --dry`. It patches a
+     copy and names every patched card that breaks a rule; fix those lines.
 
 ## Your reply
 At most five lines:

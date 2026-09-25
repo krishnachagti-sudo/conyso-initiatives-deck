@@ -3,7 +3,8 @@
 //
 //   node build/merge.mjs <slug> [--dry]
 //
-// 1. Concepts: research/deck-briefs/<slug>-concepts-*.json → concepts/<family>.json,
+// 1. Concepts: research/deck-briefs/<slug>-concepts.json (research) and
+//    <slug>-concepts-*.json (writers) → concepts/<family>.json,
 //    leaving out concepts the prerequisite decks already own, hyphens for
 //    underscores in ids.
 // 2. Terms: "Term (ABBR)" in introduces becomes two entries, and in uses the
@@ -36,7 +37,7 @@ export function merge(slug, { dry = false, briefs = 'research/deck-briefs', deck
   const fixId = (id) => id.replace(/_/g, '-');
   const target = join(concepts, `${meta.family}.json`);
   const merged = new Map(existsSync(target) ? readJSON(target).map((c) => [c.id, c]) : []);
-  for (const f of readdirSync(briefs).filter((f) => f.startsWith(`${slug}-concepts-`) && f.endsWith('.json'))) {
+  for (const f of readdirSync(briefs).filter((f) => (f === `${slug}-concepts.json` || f.startsWith(`${slug}-concepts-`)) && f.endsWith('.json'))) { // research's list, then writers' additions
     for (const c of readJSON(join(briefs, f))) {
       const id = fixId(c.id);
       if (owned.has(id) || merged.has(id)) continue;

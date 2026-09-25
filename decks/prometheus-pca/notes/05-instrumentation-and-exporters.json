@@ -1,0 +1,1310 @@
+{
+  "topic": "Instrumentation and exporters",
+  "notes": [
+    {
+      "id": "prom.instrumentation.what-is-a-client-library",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a Prometheus client library?",
+      "back": "A library in a given language that implements the Prometheus metric types, letting you define and expose internal metrics via an HTTP endpoint.",
+      "explanation": "The page says to add instrumentation through one before you can monitor your services, though if none suits, you may implement one of the exposition formats yourself.",
+      "example": "Like a translator built into your code, turning your own counts and measurements into the format Prometheus expects to scrape.",
+      "source": "Prometheus documentation, Client libraries",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/clientlibs/",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "client library"
+      ],
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.client-library"
+      ],
+      "order": 5000
+    },
+    {
+      "id": "prom.instrumentation.what-is-direct-instrumentation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is direct instrumentation?",
+      "back": "Instrumentation added inline as part of a program's own source code, using a client library.",
+      "explanation": "That's the contrast with an exporter, which pulls metrics from a separate system rather than living inside that system's own code.",
+      "example": "Like a factory recording its own output on the production line itself, rather than a separate inspector counting from outside.",
+      "source": "Prometheus documentation, Glossary, \"Direct instrumentation\"",
+      "sourceURL": "https://prometheus.io/docs/introduction/glossary/#direct-instrumentation",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "direct instrumentation"
+      ],
+      "uses": [
+        "direct instrumentation"
+      ],
+      "conceptIDs": [
+        "prom.direct-instrumentation"
+      ],
+      "order": 5010
+    },
+    {
+      "id": "prom.instrumentation.what-is-cardinality",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is cardinality, in the context of a Prometheus metric's labels?",
+      "back": "How many distinct label sets a metric has, since each unique labelset is its own additional time series with its own resource cost.",
+      "explanation": "As a general guideline, the docs suggest keeping a metric's cardinality below 10, with only a handful across a whole system allowed to exceed that.",
+      "example": "Like a spreadsheet growing one new row for every unique combination of columns: more distinct combinations means more rows to store.",
+      "source": "Prometheus documentation, Instrumentation, \"Do not overuse labels\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#do-not-overuse-labels",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "cardinality"
+      ],
+      "uses": [
+        "cardinality"
+      ],
+      "conceptIDs": [
+        "prom.cardinality"
+      ],
+      "order": 5020
+    },
+    {
+      "id": "prom.instrumentation.what-is-an-exporter",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an exporter?",
+      "back": "A binary running alongside the application you want metrics from, which exposes Prometheus metrics, commonly by converting a non-Prometheus format into one.",
+      "explanation": "Exporters exist for cases where instrumenting a system directly isn't feasible, such as HAProxy or Linux system stats.",
+      "example": "Like a translator standing beside a foreign-language speaker, converting their words into a language the audience understands.",
+      "source": "Prometheus documentation, Glossary, \"Exporter\"",
+      "sourceURL": "https://prometheus.io/docs/introduction/glossary/#exporter",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "exporter"
+      ],
+      "uses": [
+        "exporter"
+      ],
+      "conceptIDs": [
+        "prom.exporter"
+      ],
+      "order": 5030
+    },
+    {
+      "id": "prom.instrumentation.what-is-node-exporter",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the Node exporter?",
+      "back": "The Node/system metrics exporter: an official exporter, listed under “Hardware related” in the exporters list.",
+      "explanation": "It's the standard source for machine-level metrics, which is why the docs say other exporters should drop machine metrics they'd otherwise duplicate.",
+      "example": "Like a building's own facilities monitor, reporting on the building itself rather than on any one tenant inside it.",
+      "source": "Prometheus documentation, Exporters and integrations, \"Hardware related\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/exporters/#hardware-related",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "Node exporter"
+      ],
+      "uses": [
+        "Node exporter"
+      ],
+      "conceptIDs": [
+        "prom.node-exporter"
+      ],
+      "order": 5040
+    },
+    {
+      "id": "prom.instrumentation.what-is-a-collector",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a collector?",
+      "back": "A part of an exporter that represents a set of metrics: a single metric for direct instrumentation, or many when pulling metrics from another system.",
+      "explanation": "Custom collectors are what let an exporter's Collect() method build fresh metrics on every scrape, instead of maintaining long-lived state.",
+      "example": "Like one gauge on a control panel, grouping the readings for one particular subsystem out of the whole panel.",
+      "source": "Prometheus documentation, Glossary, \"Collector\"",
+      "sourceURL": "https://prometheus.io/docs/introduction/glossary/#collector",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "collector"
+      ],
+      "uses": [
+        "collector"
+      ],
+      "conceptIDs": [
+        "prom.collector"
+      ],
+      "order": 5050
+    },
+    {
+      "id": "prom.instrumentation.what-is-pushgateway",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the Pushgateway?",
+      "back": "An intermediary service that persists the most recent push of metrics from batch jobs, so Prometheus can scrape them after they terminate.",
+      "explanation": "It exists because a job that has already exited can't be pulled from directly; the Pushgateway holds the result until Prometheus next scrapes it.",
+      "example": "Like a parcel locker: the sender drops the parcel off and leaves, and the courier collects it on the next round.",
+      "source": "Prometheus documentation, Glossary, \"Pushgateway\"",
+      "sourceURL": "https://prometheus.io/docs/introduction/glossary/#pushgateway",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "Pushgateway"
+      ],
+      "uses": [
+        "Pushgateway"
+      ],
+      "conceptIDs": [
+        "prom.pushgateway"
+      ],
+      "order": 5060
+    },
+    {
+      "id": "prom.instrumentation.what-is-info-function",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does the experimental info() function do?",
+      "back": "For each series in v, it finds matching info series and adds their data (non-identifying) labels onto that series.",
+      "explanation": "It's built to work with info metrics such as build info, letting queries pull in extra labels like a version string without redesigning the base metric.",
+      "example": "Like stapling a supplier's extra product details onto your own inventory sheet, matched by the same product code.",
+      "source": "Prometheus documentation, Functions, \"info()\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#info",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "info metric",
+        "info()"
+      ],
+      "uses": [
+        "info metric",
+        "info()"
+      ],
+      "conceptIDs": [
+        "prom.info-metric"
+      ],
+      "order": 5070
+    },
+    {
+      "id": "prom.instrumentation.official-clientlibs-name-two",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What are two of the official Prometheus client library languages?",
+      "back": "Any two of: Go, Java or Scala, Node.js, Python, Ruby, Rust.",
+      "explanation": "Beyond these, there are also unofficial third-party client libraries for languages such as C, C++, Perl and Elixir.",
+      "source": "Prometheus documentation, Client libraries",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/clientlibs/",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.official-clientlibs"
+      ],
+      "order": 5080
+    },
+    {
+      "id": "prom.instrumentation.three-service-types-online",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What is an online-serving system, as one of Prometheus's three types of service to monitor?",
+      "back": "One where a human or another system is expecting an immediate response, such as most database and HTTP requests.",
+      "explanation": "It's contrasted with offline-processing and batch jobs, where no one is actively waiting on the result.",
+      "source": "Prometheus documentation, Instrumentation, \"Online-serving systems\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#online-serving-systems",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.three-service-types"
+      ],
+      "order": 5090
+    },
+    {
+      "id": "prom.instrumentation.three-service-types-offline",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What characterises offline processing, as one of Prometheus's three types of service to monitor?",
+      "back": "No one is actively waiting for a response, batching of work is common, and there may be multiple stages of processing.",
+      "explanation": "For each stage, the docs suggest tracking items in, items in progress, the last time something was processed and items sent out; a heartbeat item passed through every stage then shows how long items take to get through.",
+      "source": "Prometheus documentation, Instrumentation, \"Offline processing\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#offline-processing",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.three-service-types"
+      ],
+      "order": 5100
+    },
+    {
+      "id": "prom.instrumentation.three-service-types-batch",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Batch jobs are distinguished from offline processing by the fact that they {{c1::do not run continuously}}, which makes scraping them difficult.",
+      "explanation": "The docs say a batch job’s key metrics are gauges that should be pushed to a Pushgateway.",
+      "source": "Prometheus documentation, Instrumentation, \"Batch jobs\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#batch-jobs",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Pushgateway"
+      ],
+      "conceptIDs": [
+        "prom.three-service-types"
+      ],
+      "order": 5110
+    },
+    {
+      "id": "prom.instrumentation.online-serving-key-metrics",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are the key metrics for an online-serving system?",
+      "back": "The number of queries performed, errors, and latency. The number of in-progress requests can also be useful.",
+      "explanation": "The docs also suggest being consistent about whether queries are counted when they start or when they end, favouring \"when they end\".",
+      "source": "Prometheus documentation, Instrumentation, \"Online-serving systems\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#online-serving-systems",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.online-serving-metrics"
+      ],
+      "order": 5120
+    },
+    {
+      "id": "prom.instrumentation.online-serving-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A service handles both HTTP requests and calls out to a downstream database. Should it be monitored only on the client side, or on both sides?",
+      "back": "Both. Online-serving systems should be monitored on both client and server side; different behaviour on the two sides is useful for debugging.",
+      "explanation": "If a service has many clients, though, it's not practical to track every one individually, so clients have to rely on their own stats.",
+      "source": "Prometheus documentation, Instrumentation, \"Online-serving systems\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#online-serving-systems",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.online-serving-metrics"
+      ],
+      "order": 5130
+    },
+    {
+      "id": "prom.instrumentation.batch-key-metric",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "The key metric of a batch job is {{c1::the last time it succeeded}}.",
+      "explanation": "It's also useful to track how long each major stage took, the overall runtime, and the last time the job completed (successful or failed).",
+      "source": "Prometheus documentation, Instrumentation, \"Batch jobs\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#batch-jobs",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Pushgateway"
+      ],
+      "conceptIDs": [
+        "prom.batch-metrics"
+      ],
+      "order": 5140
+    },
+    {
+      "id": "prom.instrumentation.batch-frequent-jobs-become-daemons",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A batch job runs every 5 minutes. Should it stay a Pushgateway-fed batch job, or be converted into a daemon handled as offline processing?",
+      "back": "The docs suggest converting it into a daemon: for batch jobs running more often than every 15 minutes, consider this instead.",
+      "explanation": "The 15 minutes is the docs’ own example (“say, more often than every 15 minutes”), not a hard limit.",
+      "source": "Prometheus documentation, Instrumentation, \"Batch jobs\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#batch-jobs",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Pushgateway"
+      ],
+      "conceptIDs": [
+        "prom.batch-metrics"
+      ],
+      "order": 5150
+    },
+    {
+      "id": "prom.instrumentation.subsystems-libraries",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What should a library that accesses an outside resource, such as the network or disk, track at a minimum?",
+      "back": "The overall query count, errors (if errors are possible), and latency.",
+      "explanation": "It should provide this with no extra configuration required from the library's own users.",
+      "source": "Prometheus documentation, Instrumentation, \"Libraries\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#subsystems",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.subsystems"
+      ],
+      "order": 5160
+    },
+    {
+      "id": "prom.instrumentation.subsystems-logging",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "As a general rule, what should accompany every line of logging code?",
+      "back": "A counter that gets incremented, so you can see how often a given log message has happened and for how long.",
+      "explanation": "For several closely related log lines in the same function, it can sometimes make sense to increment a single shared counter for all of them.",
+      "source": "Prometheus documentation, Instrumentation, \"Logging\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#subsystems",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.subsystems"
+      ],
+      "order": 5170
+    },
+    {
+      "id": "prom.instrumentation.subsystems-failures",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What should generally accompany a failure counter, according to the docs' guidance on failures?",
+      "back": "Some other metric representing the total number of attempts, so the failure ratio is easy to calculate.",
+      "explanation": "Every failure should increment a counter, and it may also bubble up to a more general error counter depending on how the code is structured.",
+      "source": "Prometheus documentation, Instrumentation, \"Failures\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#subsystems",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.subsystems"
+      ],
+      "order": 5180
+    },
+    {
+      "id": "prom.instrumentation.subsystems-threadpools",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "For a threadpool, what are the key metrics the docs recommend tracking?",
+      "back": "Queued requests, threads in use, total threads, tasks processed, and how long they took; also how long tasks waited in the queue.",
+      "explanation": "Together these cover both the pool's current load and how efficiently it's working through it.",
+      "source": "Prometheus documentation, Instrumentation, \"Threadpools\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#subsystems",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.subsystems"
+      ],
+      "order": 5190
+    },
+    {
+      "id": "prom.instrumentation.subsystems-caches",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What are the key metrics for a cache?",
+      "back": "Total queries, hits, overall latency, plus the query count, errors and latency of the online-serving system the cache sits in front of.",
+      "explanation": "That last part means a cache's metrics don't stand alone: they're read alongside the system it's fronting.",
+      "source": "Prometheus documentation, Instrumentation, \"Caches\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#subsystems",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.subsystems"
+      ],
+      "order": 5200
+    },
+    {
+      "id": "prom.instrumentation.subsystems-collectors-duration-as-gauge",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A custom metrics collector exports how long its own collection took. Should that duration be a gauge, or a summary/histogram?",
+      "back": "A gauge. That's one of two acceptable cases for a duration as a gauge, the other being batch job durations.",
+      "explanation": "In both cases the value describes just that one particular push or scrape, not a series of durations to be aggregated over time.",
+      "source": "Prometheus documentation, Instrumentation, \"Collectors\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#subsystems",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.subsystems"
+      ],
+      "order": 5210
+    },
+    {
+      "id": "prom.instrumentation.use-labels-rule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When you have multiple metrics you want to add, average or sum together, what does the docs' guidance recommend instead of separate metrics?",
+      "back": "Usually, one metric with labels rather than several separately named metrics.",
+      "explanation": "That's why http_responses_total{code=\"500\"} is preferred over a separate http_responses_500_total metric.",
+      "source": "Prometheus documentation, Instrumentation, \"Use labels\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#use-labels",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.use-labels"
+      ],
+      "order": 5220
+    },
+    {
+      "id": "prom.instrumentation.use-labels-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team has separate metrics http_responses_500_total and http_responses_403_total. Following the docs' guidance, how should these be restructured?",
+      "back": "As one metric, http_responses_total, with a code label for the HTTP response code, processed as one in rules and graphs.",
+      "explanation": "As a rule of thumb, no part of a metric name should ever be procedurally generated; a label is what that value belongs in instead.",
+      "source": "Prometheus documentation, Instrumentation, \"Use labels\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#use-labels",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.use-labels"
+      ],
+      "order": 5230
+    },
+    {
+      "id": "prom.instrumentation.no-overuse-labels-guideline",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "As a general guideline, the docs suggest keeping a metric's cardinality below {{c1::10}}, with only a handful across a whole system allowed to exceed it.",
+      "explanation": "The vast majority of a system's metrics, by this guideline, should have no labels at all.",
+      "source": "Prometheus documentation, Instrumentation, \"Do not overuse labels\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#do-not-overuse-labels",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "cardinality"
+      ],
+      "conceptIDs": [
+        "prom.no-overuse-labels"
+      ],
+      "order": 5240
+    },
+    {
+      "id": "prom.instrumentation.no-overuse-labels-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A metric adds a per-user quota label across 10,000 users on 10,000 nodes, reaching tens of millions of series. What does the guidance say to do?",
+      "back": "Too much for Prometheus as implemented. Above about 100 cardinality, use fewer dimensions or move the analysis to a general-purpose system.",
+      "explanation": "That's well past the docs' own worked comparison: 10,000 nodes with node_filesystem_avail alone reaches only around 100,000 series, which is fine.",
+      "source": "Prometheus documentation, Instrumentation, \"Do not overuse labels\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#do-not-overuse-labels",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "cardinality"
+      ],
+      "conceptIDs": [
+        "prom.no-overuse-labels"
+      ],
+      "order": 5250
+    },
+    {
+      "id": "prom.instrumentation.choose-type-rule-of-thumb",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "To pick between a counter and a gauge, the rule of thumb is: if the value can {{c1::go down}}, it is a gauge.",
+      "explanation": "Counters can only go up, or reset (such as on a process restart), which is what makes rate() meaningful on them but never on a gauge.",
+      "source": "Prometheus documentation, Instrumentation, \"Counter vs. gauge, summary vs. histogram\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#counter-vs-gauge-summary-vs-histogram",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "counter",
+        "gauge"
+      ],
+      "conceptIDs": [
+        "prom.choose-type"
+      ],
+      "order": 5260
+    },
+    {
+      "id": "prom.instrumentation.choose-type-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A metric tracks how many requests are currently in progress, a number that rises and falls. Counter or gauge?",
+      "back": "Gauge. It's a snapshot of current state that can go up and down, exactly the case the docs give a gauge for.",
+      "explanation": "A counter, by contrast, is for accumulating events or amounts, such as the total number of HTTP requests served.",
+      "source": "Prometheus documentation, Instrumentation, \"Counter vs. gauge, summary vs. histogram\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#counter-vs-gauge-summary-vs-histogram",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "counter",
+        "gauge"
+      ],
+      "conceptIDs": [
+        "prom.choose-type"
+      ],
+      "order": 5270
+    },
+    {
+      "id": "prom.instrumentation.avoid-missing-rule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does the docs' guidance recommend to avoid a time series that's absent until something first happens?",
+      "back": "Export a default value, such as 0, for any time series you know may exist in advance.",
+      "explanation": "Most client libraries, including Go, Java and Python, will do this automatically for metrics with no labels.",
+      "source": "Prometheus documentation, Instrumentation, \"Avoid missing metrics\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#avoid-missing-metrics",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.avoid-missing"
+      ],
+      "order": 5280
+    },
+    {
+      "id": "prom.instrumentation.avoid-missing-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A counter for a labelled error type only appears once that error type first happens, making sum() over it awkward beforehand. What's the fix?",
+      "back": "Initialise that labelled counter to 0 in advance, so it exists as a time series before the error ever occurs.",
+      "explanation": "Time series that are absent until something happens are hard to work with, since the usual simple operations no longer suffice for them.",
+      "source": "Prometheus documentation, Instrumentation, \"Avoid missing metrics\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#avoid-missing-metrics",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.avoid-missing"
+      ],
+      "order": 5290
+    },
+    {
+      "id": "prom.instrumentation.inner-loops-rule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "For code called more than 100k times a second, what does the docs' guidance suggest to limit instrumentation overhead?",
+      "back": "Limit the number of metrics updated in the inner loop, and avoid labels, or cache the result of the label lookup.",
+      "explanation": "Outside such performance-critical code, the resource cost of instrumentation is far outweighed by its benefits, so this caution doesn't generally apply.",
+      "source": "Prometheus documentation, Instrumentation, \"Inner loops\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#inner-loops",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.inner-loops"
+      ],
+      "order": 5300
+    },
+    {
+      "id": "prom.instrumentation.official-vs-third-party-exporters",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "front": "What's the difference between an official and a third-party Prometheus exporter, as the exporters list marks them?",
+      "back": "Official exporters are maintained as part of the official Prometheus GitHub organization; others are externally contributed and maintained, commonly hosted elsewhere.",
+      "explanation": "The docs note they encourage more exporters being created, but cannot vet every third-party one for best practices.",
+      "contrast": "Official: e.g. Node exporter, Consul exporter, HAProxy exporter, listed as (official). Third-party: externally hosted, not vetted by the Prometheus project.",
+      "source": "Prometheus documentation, Exporters and integrations, \"Third-party exporters\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/exporters/#third-party-exporters",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "exporter"
+      ],
+      "conceptIDs": [
+        "prom.official-exporters"
+      ],
+      "order": 5310
+    },
+    {
+      "id": "prom.instrumentation.exposing-software-direct",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "Some software, such as Caddy or etcd, exposes metrics in the Prometheus format itself, marked \"direct\" in the docs' list. Does that software still need a separate exporter?",
+      "back": "No. No separate exporter is needed for software that already exposes Prometheus metrics directly.",
+      "explanation": "\"Direct\" here specifically means that software is also directly instrumented with a Prometheus client library, not just Prometheus-format output.",
+      "source": "Prometheus documentation, Exporters and integrations, \"Software exposing Prometheus metrics\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/exporters/#software-exposing-prometheus-metrics",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "exporter"
+      ],
+      "conceptIDs": [
+        "prom.exposing-software"
+      ],
+      "order": 5320
+    },
+    {
+      "id": "prom.instrumentation.target-labels-rule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "If you find yourself wanting to apply the same label to all of an exporter's metrics, what does the writing-exporters guidance say to do?",
+      "back": "Stop. Labels like region or cluster name are target labels, and belong in Prometheus's scrape configs, not applied statically inside the exporter.",
+      "explanation": "It's not for the application to say where it fits in your label taxonomy; different people scraping the same application may name that taxonomy differently.",
+      "source": "Prometheus documentation, Writing exporters, \"Target labels, not static scraped labels\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/writing_exporters/#target-labels-not-static-scraped-labels",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "exporter"
+      ],
+      "conceptIDs": [
+        "prom.target-labels"
+      ],
+      "order": 5330
+    },
+    {
+      "id": "prom.instrumentation.target-labels-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "An exporter's author wants every metric it exposes to carry a region=\"eu-west\" label. Where should that label actually be set?",
+      "back": "In Prometheus's scrape configuration for that target, via service discovery, not baked into the exporter's own exposed metrics.",
+      "explanation": "region is exactly the kind of infrastructure-derived label the docs class as a target label rather than something the application should decide.",
+      "source": "Prometheus documentation, Writing exporters, \"Target labels, not static scraped labels\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/writing_exporters/#target-labels-not-static-scraped-labels",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "exporter"
+      ],
+      "conceptIDs": [
+        "prom.target-labels"
+      ],
+      "order": 5340
+    },
+    {
+      "id": "prom.instrumentation.exporter-scrape-metrics-rule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "If an exporter reports metrics about the scrape itself, such as how long it took, what metric type should those be, and how should they be named?",
+      "back": "Gauges, with the metric name prefixed by the exporter name, for example jmx_scrape_duration_seconds.",
+      "explanation": "Other scrape \"meta\" metrics, such as a counter of scrape count, should be avoided: they'd duplicate metrics Prometheus itself already generates automatically.",
+      "source": "Prometheus documentation, Writing exporters, \"Metrics about the scrape itself\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/writing_exporters/#metrics-about-the-scrape-itself",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "exporter"
+      ],
+      "conceptIDs": [
+        "prom.exporter-scrape-metrics"
+      ],
+      "order": 5350
+    },
+    {
+      "id": "prom.instrumentation.exporter-scrapes-synchronous",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Exporters should not perform scrapes based on their own timers: all scrapes should be {{c1::synchronous}}, pulled only when Prometheus scrapes them.",
+      "explanation": "If you think you need to set your own timestamps on exposed metrics, the docs say you probably need the Pushgateway instead.",
+      "source": "Prometheus documentation, Writing exporters, \"Scheduling\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/writing_exporters/#scheduling",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "exporter",
+        "Pushgateway"
+      ],
+      "conceptIDs": [
+        "prom.exporter-no-push"
+      ],
+      "order": 5360
+    },
+    {
+      "id": "prom.instrumentation.exporter-failed-scrape-patterns",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What are the two patterns the docs describe for handling a failed scrape, where the target application doesn't respond?",
+      "back": "Return a 5xx error, or expose a myexporter_up variable that's 0 or 1 depending on whether the scrape worked.",
+      "explanation": "The up-variable pattern is better when there are still some useful metrics to get even from a failed scrape, such as the exporter's own process stats.",
+      "source": "Prometheus documentation, Writing exporters, \"Failed scrapes\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/writing_exporters/#failed-scrapes",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "exporter"
+      ],
+      "conceptIDs": [
+        "prom.exporter-failed-scrape"
+      ],
+      "order": 5370
+    },
+    {
+      "id": "prom.instrumentation.exporter-failed-scrape-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "The HAProxy exporter can still provide process stats even when a scrape of HAProxy itself fails. Which failed-scrape pattern fits better here: a 5xx error, or a myexporter_up variable?",
+      "back": "A myexporter_up variable, since a bare 5xx would throw away the still-useful process stats the exporter can report.",
+      "explanation": "The 5xx pattern is a little easier for users, since up works in the usual way, but with it you can't tell the exporter being down apart from the application being down.",
+      "source": "Prometheus documentation, Writing exporters, \"Failed scrapes\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/writing_exporters/#failed-scrapes",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "exporter"
+      ],
+      "conceptIDs": [
+        "prom.exporter-failed-scrape"
+      ],
+      "order": 5380
+    },
+    {
+      "id": "prom.instrumentation.port-numbers-rule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Why does each Prometheus exporter get a unique default port number?",
+      "back": "A user may run many exporters and Prometheus components on the same machine, so unique ports make that easier.",
+      "explanation": "The allocations are tracked on a publicly editable wiki page, where authors may grab the next free port for a new exporter.",
+      "source": "Prometheus documentation, Writing exporters, \"Port numbers\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/writing_exporters/#port-numbers",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "exporter"
+      ],
+      "conceptIDs": [
+        "prom.port-numbers"
+      ],
+      "order": 5390
+    },
+    {
+      "id": "prom.instrumentation.pushgateway-spof",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What pitfall arises from monitoring multiple instances through a single Pushgateway?",
+      "back": "The Pushgateway becomes both a single point of failure and a potential bottleneck.",
+      "explanation": "This is one of the reasons the docs limit recommended Pushgateway use so narrowly, rather than treating it as a general substitute for pulling.",
+      "source": "Prometheus documentation, When to use the Pushgateway, \"Should I be using the Pushgateway?\"",
+      "sourceURL": "https://prometheus.io/docs/practices/pushing/#should-i-be-using-the-pushgateway",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Pushgateway"
+      ],
+      "conceptIDs": [
+        "prom.pushgateway-pitfalls"
+      ],
+      "order": 5400
+    },
+    {
+      "id": "prom.instrumentation.pushgateway-loses-up",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Using the Pushgateway means you lose Prometheus's automatic instance health monitoring via the {{c1::up}} metric.",
+      "explanation": "Prometheus scrapes the Pushgateway, not the jobs that pushed to it, so the up metric from each scrape describes the Pushgateway only.",
+      "source": "Prometheus documentation, When to use the Pushgateway, \"Should I be using the Pushgateway?\"",
+      "sourceURL": "https://prometheus.io/docs/practices/pushing/#should-i-be-using-the-pushgateway",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Pushgateway"
+      ],
+      "conceptIDs": [
+        "prom.pushgateway-pitfalls"
+      ],
+      "order": 5410
+    },
+    {
+      "id": "prom.instrumentation.pushgateway-never-forgets",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does the Pushgateway do with a series once it's been pushed, unless something intervenes?",
+      "back": "It never forgets it, and exposes it to Prometheus forever unless that series is manually deleted via the Pushgateway's API.",
+      "explanation": "This is especially relevant when instances differentiate their metrics via an instance label: a renamed or removed instance's metrics stay stuck there.",
+      "source": "Prometheus documentation, When to use the Pushgateway, \"Should I be using the Pushgateway?\"",
+      "sourceURL": "https://prometheus.io/docs/practices/pushing/#should-i-be-using-the-pushgateway",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Pushgateway"
+      ],
+      "conceptIDs": [
+        "prom.pushgateway-pitfalls"
+      ],
+      "order": 5420
+    },
+    {
+      "id": "prom.instrumentation.pushgateway-renamed-instance-classification",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A batch job pushes metrics to the Pushgateway with instance=\"worker-3\". That machine is later renamed and worker-3 no longer exists. Do worker-3's metrics disappear from the Pushgateway on their own?",
+      "back": "No. The Pushgateway never forgets pushed series, so worker-3's metrics stay exposed until someone deletes them manually via its API.",
+      "explanation": "With ordinary pull-style scraping, an instance's metrics would instead vanish automatically once it disappeared, which the Pushgateway doesn't do.",
+      "source": "Prometheus documentation, When to use the Pushgateway, \"Should I be using the Pushgateway?\"",
+      "sourceURL": "https://prometheus.io/docs/practices/pushing/#should-i-be-using-the-pushgateway",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Pushgateway"
+      ],
+      "conceptIDs": [
+        "prom.pushgateway-pitfalls"
+      ],
+      "order": 5425
+    },
+    {
+      "id": "prom.instrumentation.process-metrics-prefix",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Standard process metrics from client libraries carry the prefix {{c1::process_}}, such as process_cpu_seconds_total and process_resident_memory_bytes.",
+      "explanation": "If getting one of these values is impossible in a given language or runtime, client libraries should leave the metric out rather than export a bogus value.",
+      "source": "Prometheus documentation, Writing client libraries, \"Process metrics\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.process-runtime-metrics"
+      ],
+      "order": 5430
+    },
+    {
+      "id": "prom.instrumentation.runtime-metrics-prefix",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Besides process metrics, what else are client libraries encouraged to offer, with a prefix such as go_ or hotspot_?",
+      "back": "Runtime metrics: whatever makes sense for their language's own runtime, such as garbage collection statistics.",
+      "explanation": "Unlike the fixed process_ metrics, runtime metrics vary by language, since each runtime has its own things worth reporting.",
+      "source": "Prometheus documentation, Writing client libraries, \"Runtime metrics\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.process-runtime-metrics"
+      ],
+      "order": 5440
+    },
+    {
+      "id": "prom.instrumentation.naming-single-quantity",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "According to the naming guidance, what two things must a metric name refer to, singly rather than mixed?",
+      "back": "A single unit (don't mix seconds with milliseconds) and a single quantity (don't mix request size with request duration).",
+      "explanation": "As a rule of thumb, either sum() or avg() over all of a metric's dimensions should be meaningful; if it isn't, split it into separate metrics.",
+      "source": "Prometheus documentation, Metric and label naming, \"Metric names\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#metric-names",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name"
+      ],
+      "conceptIDs": [
+        "prom.naming-rules"
+      ],
+      "order": 5450
+    },
+    {
+      "id": "prom.instrumentation.naming-dont-put-label-in-name",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A metric is named api_http_requests_create_total, with separate names for each operation, instead of one metric with an operation label. What problem does the naming guidance flag with this?",
+      "back": "Putting label names in the metric name introduces redundancy and causes confusion once the equivalent label is aggregated away.",
+      "explanation": "The guidance's own preferred version is api_http_requests_total with a label such as operation=\"create|update|delete\".",
+      "source": "Prometheus documentation, Metric and label naming, \"Labels\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#labels",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name"
+      ],
+      "conceptIDs": [
+        "prom.naming-rules"
+      ],
+      "order": 5460
+    },
+    {
+      "id": "prom.instrumentation.app-prefix-rule",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A metric name should have a {{c1::single-word application prefix}} relevant to the domain it belongs to, such as prometheus_notifications_total.",
+      "explanation": "Some metrics are more generic, like process_cpu_seconds_total, which uses a shared prefix exported by many client libraries rather than one specific application.",
+      "source": "Prometheus documentation, Metric and label naming, \"Metric names\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#metric-names",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name"
+      ],
+      "conceptIDs": [
+        "prom.app-prefix"
+      ],
+      "order": 5470
+    },
+    {
+      "id": "prom.instrumentation.app-prefix-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A billing service exposes a metric simply named requests_total. What does the naming guidance say this name is missing?",
+      "back": "A single-word application prefix relevant to the metric's domain, such as billing_requests_total.",
+      "explanation": "Writing exporters guidance separately notes that requests_total on its own doesn't even say what kind of requests are being counted.",
+      "source": "Prometheus documentation, Metric and label naming, \"Metric names\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#metric-names",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name"
+      ],
+      "conceptIDs": [
+        "prom.app-prefix"
+      ],
+      "order": 5480
+    },
+    {
+      "id": "prom.instrumentation.base-units-name-two",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two of the base units the naming guidance's table recommends for metrics, and the family each belongs to?",
+      "back": "Any two, e.g. seconds (time), bytes (bytes and bits), meters (length), celsius (temperature), volts (voltage), grams (mass), ratio (percent).",
+      "explanation": "The list is explicitly not exhaustive; it's a set of examples for common families, not a closed list of every possible unit.",
+      "source": "Prometheus documentation, Metric and label naming, \"Base Units\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#base-units",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name"
+      ],
+      "conceptIDs": [
+        "prom.base-units"
+      ],
+      "order": 5490
+    },
+    {
+      "id": "prom.instrumentation.base-units-bytes-not-bits",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A network metric measures throughput in bits per second, since bits are the usual unit network engineers use. What base unit should the metric name use instead?",
+      "back": "bytes. The table specifically says to always use bytes, even where bits appear more common, to avoid confusion when combining different metrics.",
+      "explanation": "The table makes similar practical choices elsewhere, such as celsius over kelvin and grams over kilograms.",
+      "source": "Prometheus documentation, Metric and label naming, \"Base Units\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#base-units",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name"
+      ],
+      "conceptIDs": [
+        "prom.base-units"
+      ],
+      "order": 5500
+    },
+    {
+      "id": "prom.instrumentation.base-units-ratio-not-percent",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "For a percent value, the base unit table uses {{c1::ratio}}, with values expressed as 0–1 rather than 0–100.",
+      "explanation": "ratio is used only as a suffix for names like disk_usage_ratio, and the usual metric name pattern for this is A_per_B.",
+      "source": "Prometheus documentation, Metric and label naming, \"Base Units\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#base-units",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name"
+      ],
+      "conceptIDs": [
+        "prom.base-units"
+      ],
+      "order": 5510
+    },
+    {
+      "id": "prom.instrumentation.unit-suffix-rule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What should a metric name's unit suffix look like, and what additional suffix does an accumulating count get?",
+      "back": "The unit suffix should be in plural form, and an accumulating counter additionally gets _total as a suffix.",
+      "explanation": "That's the pattern behind names like http_request_duration_seconds and process_cpu_seconds_total.",
+      "source": "Prometheus documentation, Metric and label naming, \"Metric names\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#metric-names",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name",
+        "counter"
+      ],
+      "conceptIDs": [
+        "prom.unit-suffix"
+      ],
+      "order": 5520
+    },
+    {
+      "id": "prom.instrumentation.unit-suffix-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A counter tracks a unit-less accumulating count of HTTP requests. Following the suffix rule, what should it be named, given there's no unit to add?",
+      "back": "http_requests_total. Even with no unit to append, the _total suffix marking it as an accumulating count still applies.",
+      "explanation": "Where a unit does apply to an accumulating count, both suffixes appear, as in process_cpu_seconds_total.",
+      "source": "Prometheus documentation, Metric and label naming, \"Metric names\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#metric-names",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name",
+        "counter"
+      ],
+      "conceptIDs": [
+        "prom.unit-suffix"
+      ],
+      "order": 5530
+    },
+    {
+      "id": "prom.instrumentation.snake-case-rule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What case convention do Prometheus metric and label names use?",
+      "back": "snake_case. Converting camelCase to snake_case is desirable, though automatic conversion doesn't always give nice results for names like myTCPExample.",
+      "explanation": "For those awkward cases, it's sometimes best to just leave the original name as-is rather than force an automatic conversion.",
+      "source": "Prometheus documentation, Metric and label naming, \"Metric names\"; Writing exporters, \"Naming\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/writing_exporters/#naming",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name"
+      ],
+      "conceptIDs": [
+        "prom.snake-case"
+      ],
+      "order": 5540
+    },
+    {
+      "id": "prom.instrumentation.label-naming-cardinality-caution",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does the naming guidance warn against storing in labels, giving user IDs and email addresses as examples?",
+      "back": "Dimensions with high cardinality, i.e. many different label values, since every unique combination of label values is a new time series.",
+      "explanation": "Unbounded sets of values like these are exactly what dramatically increases the amount of data stored.",
+      "source": "Prometheus documentation, Metric and label naming, \"Labels\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#labels",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "cardinality"
+      ],
+      "conceptIDs": [
+        "prom.label-naming"
+      ],
+      "order": 5550
+    },
+    {
+      "id": "prom.instrumentation.label-naming-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A metric adds an email label holding each user's own email address. What does the naming guidance say is wrong with this?",
+      "back": "Email addresses are an unbounded, high-cardinality set of values, exactly what the guidance says not to store as a label.",
+      "explanation": "Each distinct email value creates its own time series, so this one label alone could add an unbounded number of series.",
+      "source": "Prometheus documentation, Metric and label naming, \"Labels\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#labels",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "cardinality"
+      ],
+      "conceptIDs": [
+        "prom.label-naming"
+      ],
+      "order": 5560
+    },
+    {
+      "id": "prom.instrumentation.info-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A team wants to add a running binary's version string onto its request-count series, without adding a high-cardinality version label directly to that series. Which function reaches for a separate info metric to do this?",
+      "back": "info(), which finds matching info series and adds their non-identifying (data) labels onto the target series at query time.",
+      "explanation": "foobar_build_info is the naming guide’s example of a pseudo-metric carrying metadata about the running binary. info() is experimental and needs --enable-feature=promql-experimental-functions.",
+      "source": "Prometheus documentation, Functions, \"info()\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#info",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "info metric",
+        "info()"
+      ],
+      "conceptIDs": [
+        "prom.info-metric"
+      ],
+      "order": 5570
+    },
+    {
+      "id": "prom.instrumentation.subsystems-collectors-errors-gauge",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Besides collection duration, what else does the docs' guidance recommend a non-trivial custom collector export as a gauge?",
+      "back": "The number of errors encountered during that collection.",
+      "explanation": "Both this and the duration gauge describe just the one collection they came from, which is why gauges, not histograms, fit here.",
+      "source": "Prometheus documentation, Instrumentation, \"Collectors\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#subsystems",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "collector"
+      ],
+      "conceptIDs": [
+        "prom.subsystems"
+      ],
+      "order": 5575
+    },
+    {
+      "id": "prom.instrumentation.three-service-types-classification",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A nightly job that doesn't run continuously and completes in a few minutes, with nobody waiting on it: which of the three service types does this fit best?",
+      "back": "A batch job, distinguished from offline processing precisely by not running continuously, which is what makes scraping it difficult.",
+      "explanation": "If the same job instead ran continuously in the background, it would be better described as offline processing, or online-serving if something waited on each result.",
+      "source": "Prometheus documentation, Instrumentation, \"The three types of services\"",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#the-three-types-of-services",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Pushgateway"
+      ],
+      "conceptIDs": [
+        "prom.three-service-types"
+      ],
+      "order": 5580
+    },
+    {
+      "id": "prom.instrumentation.snake-case-application",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A metric is named httpRequestDurationSeconds, following the camelCase style of its host language. Should it be renamed for Prometheus?",
+      "back": "Yes, generally to http_request_duration_seconds, since Prometheus metric and label names use snake_case.",
+      "explanation": "Automatic camelCase-to-snake_case conversion doesn't always read well for names like myTCPExample, so such awkward cases may be left as-is instead.",
+      "source": "Prometheus documentation, Metric and label naming, \"Metric names\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#metric-names",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name"
+      ],
+      "conceptIDs": [
+        "prom.snake-case"
+      ],
+      "order": 5585
+    },
+    {
+      "id": "prom.instrumentation.exposing-software-blackbox",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A monitored system is a black box that can't run any extra code on it at all, such as a network device managed purely over its own protocol. Can it expose Prometheus metrics directly, or does it need an exporter?",
+      "back": "It needs an exporter, since it can't be directly instrumented or run software that already speaks the Prometheus format.",
+      "explanation": "Everything under “Software exposing Prometheus metrics” needs no separate exporter, whether or not it is marked “direct”; that marker only means the software is also directly instrumented with a Prometheus client library.",
+      "source": "Prometheus documentation, Exporters and integrations, \"Software exposing Prometheus metrics\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/exporters/#software-exposing-prometheus-metrics",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "exporter"
+      ],
+      "conceptIDs": [
+        "prom.exposing-software"
+      ],
+      "order": 5590
+    },
+    {
+      "id": "prom.instrumentation.official-exporters-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A team wants to scrape MySQL metrics and is choosing between mysqld_exporter, marked (official), and an unrelated community fork. Which one is maintained as part of the official Prometheus GitHub organization?",
+      "back": "mysqld_exporter, since the (official) marker specifically means it's maintained under the official Prometheus GitHub organization.",
+      "explanation": "That marker says nothing about the fork's quality either way; it only tells you where an exporter is maintained.",
+      "source": "Prometheus documentation, Exporters and integrations, \"Third-party exporters\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/exporters/#third-party-exporters",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "exporter"
+      ],
+      "conceptIDs": [
+        "prom.official-exporters"
+      ],
+      "order": 5595
+    },
+    {
+      "id": "prom.instrumentation.naming-sort-ordering",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What may a metric name's components be ordered by, to keep related metrics grouped together?",
+      "back": "It may put common name components first, so that a lexicographically sorted list of metric names groups related metrics together.",
+      "explanation": "The docs give prometheus_tsdb_head_truncations_closed_total as this style, versus prometheus_tsdb_head_closed_truncations_total, which reads more naturally per metric but sorts less tidily.",
+      "source": "Prometheus documentation, Metric and label naming, \"Metric names\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#metric-names",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name"
+      ],
+      "conceptIDs": [
+        "prom.naming-rules"
+      ],
+      "order": 5600
+    },
+    {
+      "id": "prom.instrumentation.process-runtime-classification",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A metric is named go_goroutines, describing something specific to the Go runtime rather than the operating-system process. Is this a process metric or a runtime metric?",
+      "back": "A runtime metric: it carries the go_ prefix, not process_, because it's specific to that language's own runtime rather than the operating-system process in general.",
+      "explanation": "Process metrics all share the fixed process_ prefix; runtime metrics instead use whatever prefix suits the language, such as go_ or hotspot_.",
+      "source": "Prometheus documentation, Writing client libraries, \"Runtime metrics\"",
+      "sourceURL": "https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "client library"
+      ],
+      "conceptIDs": [
+        "prom.process-runtime-metrics"
+      ],
+      "order": 5605
+    },
+    {
+      "id": "prom.instrumentation.use-labels-single-metric",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A team is deciding between a single api_request_duration_seconds metric with a stage label, or three separate metrics for extract, transform and load. Which fits the guidance to use labels?",
+      "back": "The single metric with a stage label, e.g. stage=\"extract|transform|load\", following the same pattern the docs give for request stages.",
+      "explanation": "One labelled metric can be summed, averaged or graphed as a whole, which three separately named metrics can't be as easily.",
+      "source": "Prometheus documentation, Metric and label naming, \"Labels\"",
+      "sourceURL": "https://prometheus.io/docs/practices/naming/#labels",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name"
+      ],
+      "conceptIDs": [
+        "prom.use-labels"
+      ],
+      "order": 5610
+    }
+  ]
+}

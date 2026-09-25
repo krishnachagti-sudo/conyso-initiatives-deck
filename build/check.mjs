@@ -185,7 +185,7 @@ export function checkDeck(deck, ctx = {}) {
     // an earlier primer (or this card's own), listed in its uses, assumed, or
     // expanded in the deck's glossary. This catches jargon a writer never listed
     // in `uses`, which the term check cannot see.
-    const text = ['front', 'back', 'explanation', 'example', 'contrast', 'choices', 'choicesExplained'].map((f) => n[f] || '').join(' ').replace(/\{\{c\d+::|\}\}/g, ' ');
+    const text = ['front', 'back', 'explanation', 'example', 'contrast', 'choices', 'choicesExplained'].map((f) => n[f] || '').join(' ').replace(/\{\{c\d+::|\}\}/g, ' ').replace(/`[^`]*`/g, ' '); // `code` (PromQL, regexes) is not prose
     const has = (list, a) => [...list].some((k) => new RegExp(`(^|[^a-z0-9])${a}([^a-z0-9]|$)`).test(norm(k)));
     for (const tok of new Set(text.match(/\b[A-Z][A-Z0-9]{1,5}\b/g) || [])) {
       const a = tok.toLowerCase();

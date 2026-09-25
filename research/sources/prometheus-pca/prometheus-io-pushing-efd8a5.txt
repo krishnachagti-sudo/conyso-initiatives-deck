@@ -1,0 +1,206 @@
+Join PromCon EU 2026   , the Prometheus users conference, on October 7–8, 2026 in Munich.
+PromCon EU 2026   — Oct 7–8, Munich.
+
+Prometheus
+
+Docs Download Community Support & Training Blog
+
+Ctrl + K
+
+Show nav Introduction
+Overview
+First steps
+Comparison to alternatives
+FAQ
+Roadmap
+Design documents
+Media
+Glossary
+Long-term support
+
+Concepts
+Data model
+Metric types
+Jobs and instances
+
+Prometheus Server
+
+Getting started
+Installation
+Configuration
+Configuration
+Recording rules
+Alerting rules
+Template examples
+Template reference
+HTTP configuration for promtool
+Unit testing for rules
+HTTPS and authentication
+
+Agent Mode
+Querying
+Basics
+Operators
+Functions
+Examples
+HTTP API
+Remote Read API
+
+Storage
+Federation
+HTTP SD
+Management API
+Command Line
+prometheus
+promtool
+
+Migration
+API stability
+Feature flags
+
+Visualization
+Expression browser
+Grafana
+Perses
+Console templates
+
+Instrumenting
+Client libraries
+Writing client libraries
+Pushing metrics
+Exporters and integrations
+Writing exporters
+Exposition formats
+UTF-8 escaping schemes
+Content negotiation
+
+Operating
+Security
+Integrations
+
+Alertmanager
+
+Alerting overview
+Alertmanager
+Configuration
+High Availability
+Notification Integrations
+Alerts API
+Notification template reference
+Notification template examples
+Management API
+HTTPS and authentication
+
+Best practices
+Metric and label naming
+Consoles and dashboards
+Instrumentation
+Histograms and summaries
+Alerting
+Recording rules
+When to use the Pushgateway
+Remote write tuning
+The Zen of Prometheus
+
+Guides
+Basic auth
+Monitoring Docker container metrics using cAdvisor
+Contributing
+Use file-based service discovery to discover scrape targets
+Instrumenting a Go application
+Understanding and using the multi-target exporter pattern
+Monitoring Linux host metrics with the Node Exporter
+OpenTelemetry
+UTF-8 in Prometheus
+Docker Swarm
+OpenMetrics 2.0 Migration Guide for Client Libraries
+Query log
+TLS encryption
+
+Tutorials
+Getting started with Prometheus
+Understanding metric types
+Instrumenting HTTP server written in Go
+Visualizing metrics using Grafana
+Alerting based on metrics
+
+Specifications
+Native Histograms
+OpenMetrics
+1.0
+2.0
+
+Remote Write
+1.0
+2.0
+
+When to use the Pushgateway
+The Pushgateway is an intermediary service which allows you to push metrics
+from jobs which cannot be scraped. For details, see Pushing metrics .
+
+Should I be using the Pushgateway?
+
+We only recommend using the Pushgateway in certain limited cases. There are
+several pitfalls when blindly using the Pushgateway instead of Prometheus's
+usual pull model for general metrics collection:
+
+- When monitoring multiple instances through a single Pushgateway, the
+Pushgateway becomes both a single point of failure and a potential
+bottleneck.
+
+- You lose Prometheus's automatic instance health monitoring via the up
+metric (generated on every scrape).
+
+- The Pushgateway never forgets series pushed to it and will expose them to
+Prometheus forever unless those series are manually deleted via the
+Pushgateway's API.
+
+The latter point is especially relevant when multiple instances of a job
+differentiate their metrics in the Pushgateway via an instance label or
+similar. Metrics for an instance will then remain in the Pushgateway even if
+the originating instance is renamed or removed. This is because the lifecycle
+of the Pushgateway as a metrics cache is fundamentally separate from the
+lifecycle of the processes that push metrics to it. Contrast this to
+Prometheus's usual pull-style monitoring: when an instance disappears
+(intentional or not), its metrics will automatically disappear along with it.
+When using the Pushgateway, this is not the case, and you would now have to
+delete any stale metrics manually or automate this lifecycle synchronization
+yourself.
+
+Usually, the only valid use case for the Pushgateway is for capturing the
+outcome of a service-level batch job . A "service-level" batch job is one
+which is not semantically related to a specific machine or job instance (for
+example, a batch job that deletes a number of users for an entire service).
+Such a job's metrics should not include a machine or instance label to decouple
+the lifecycle of specific machines or instances from the pushed metrics. This
+decreases the burden for managing stale metrics in the Pushgateway. See also
+the best practices for monitoring batch jobs .
+
+Alternative strategies
+
+If an inbound firewall or NAT is preventing you from pulling metrics from
+targets, consider moving the Prometheus server behind the network barrier as
+well. We generally recommend running Prometheus servers on the same network as
+the monitored instances. Otherwise, consider PushProx   ,
+which allows Prometheus to traverse a firewall or NAT.
+
+For batch jobs that are related to a machine (such as automatic
+security update cronjobs or configuration management client runs), expose the
+resulting metrics using the Node Exporter's  
+textfile collector   instead of the Pushgateway.
+
+Previous
+Recording rules
+
+Edit
+Edit this page
+Issue
+Report an issue
+
+Next
+Remote write tuning
+
+On this page
+
+© Prometheus Authors 2014- 2026 | All components are available under the Apache 2 License on GitHub .
+© 2026 The Linux Foundation. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our Trademark Usage page.

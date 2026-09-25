@@ -1,0 +1,1703 @@
+{
+  "topic": "PromQL: selectors, rates and time",
+  "notes": [
+    {
+      "id": "prom.promql.what-is-promql",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is PromQL?",
+      "back": "Prometheus's functional query language, letting you select and aggregate time series data in real time.",
+      "explanation": "Every card in this topic is really about one language: PromQL is what all these selectors, modifiers and functions belong to.",
+      "example": "Like a purpose-built query language for a database, built specifically to ask questions of the data store underneath it.",
+      "source": "Prometheus documentation, Querying basics",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "PromQL",
+        "time series"
+      ],
+      "introduces": [
+        "PromQL"
+      ],
+      "conceptIDs": [
+        "prom.promql"
+      ],
+      "order": 3000
+    },
+    {
+      "id": "prom.promql.what-is-an-instant-vector",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an instant vector, in PromQL's expression language?",
+      "back": "A set of time series, each containing a single sample value, all sharing the same timestamp.",
+      "explanation": "It's the type you get from a plain metric selector: one snapshot value per matching series, not a history of values.",
+      "example": "Like a single photo taken of several runners at once: one position per runner, all at the same moment.",
+      "source": "Prometheus documentation, Querying basics, “Expression language data types”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "instant vector"
+      ],
+      "introduces": [
+        "instant vector"
+      ],
+      "conceptIDs": [
+        "prom.instant-vector"
+      ],
+      "order": 3005
+    },
+    {
+      "id": "prom.promql.what-is-a-range-vector",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a range vector, in PromQL's expression language?",
+      "back": "A set of time series, each containing a range of data points over time, rather than just one value.",
+      "explanation": "Where an instant vector is a snapshot, a range vector carries a whole window of history for each series.",
+      "example": "Like a runner's full tracked route over the last five minutes, rather than one snapshot position.",
+      "source": "Prometheus documentation, Querying basics, “Expression language data types”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "range vector"
+      ],
+      "introduces": [
+        "range vector"
+      ],
+      "conceptIDs": [
+        "prom.range-vector"
+      ],
+      "order": 3010
+    },
+    {
+      "id": "prom.promql.what-is-an-instant-vector-selector",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does an instant vector selector do, in its simplest form?",
+      "back": "It selects an instant vector containing elements for every time series with the specified metric name.",
+      "explanation": "It can be filtered further by adding a comma-separated list of label matchers in curly braces after the metric name.",
+      "example": "Like typing just a surname into a directory search: it returns every entry that shares it, until you narrow the search further.",
+      "source": "Prometheus documentation, Querying basics, “Instant vector selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#instant-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "instant vector selector",
+        "instant vector",
+        "metric name"
+      ],
+      "introduces": [
+        "instant vector selector"
+      ],
+      "conceptIDs": [
+        "prom.instant-selector"
+      ],
+      "order": 3015
+    },
+    {
+      "id": "prom.promql.what-are-label-matchers",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What are the four label matching operators PromQL supports in a selector?",
+      "back": "= (equal), != (not equal), =~ (regex match) and !~ (regex not match).",
+      "explanation": "Together they let a selector filter time series precisely, beyond just matching on the metric name.",
+      "example": "Like filters on an online shop's search: exact match, exclude, and pattern-based include or exclude.",
+      "source": "Prometheus documentation, Querying basics, “Instant vector selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#instant-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Prometheus label"
+      ],
+      "introduces": [
+        "label matching operators"
+      ],
+      "conceptIDs": [
+        "prom.label-matchers"
+      ],
+      "order": 3020
+    },
+    {
+      "id": "prom.promql.what-is-a-range-vector-selector",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a range vector selector, syntactically?",
+      "back": "A vector selector with a time duration appended in square brackets, such as [5m], selecting a range of samples back from the current instant.",
+      "explanation": "The range it selects is left-open and right-closed: the sample exactly at the left boundary is excluded, but the one at the right boundary is included.",
+      "example": "Like asking for “the last 5 minutes of readings” rather than just “the current reading”.",
+      "source": "Prometheus documentation, Querying basics, “Range Vector Selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#range-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "range vector selector",
+        "range vector"
+      ],
+      "introduces": [
+        "range vector selector"
+      ],
+      "conceptIDs": [
+        "prom.range-selector"
+      ],
+      "order": 3025
+    },
+    {
+      "id": "prom.promql.what-is-the-offset-modifier",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does PromQL's offset modifier do?",
+      "back": "It shifts an instant or range vector's time back into the past (or, with a negative offset, forward).",
+      "explanation": "It must immediately follow the selector it applies to; putting it after an aggregation like sum(...) instead is invalid.",
+      "example": "Like asking “what was the score five minutes ago” instead of “what is the score now”.",
+      "source": "Prometheus documentation, Querying basics, “Offset modifier”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#offset-modifier",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "offset modifier"
+      ],
+      "introduces": [
+        "offset modifier"
+      ],
+      "conceptIDs": [
+        "prom.offset"
+      ],
+      "order": 3030
+    },
+    {
+      "id": "prom.promql.what-is-the-at-modifier",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does PromQL's @ modifier do?",
+      "back": "It changes the evaluation time for an individual instant or range vector to a fixed Unix timestamp, rather than the query's own evaluation time.",
+      "explanation": "Like offset, it must immediately follow the selector it applies to, and the two can be combined, in either order, with the same result.",
+      "example": "Like pinning a calendar view to one specific date, instead of always showing “today”.",
+      "source": "Prometheus documentation, Querying basics, “@ modifier”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#-modifier",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "@ modifier"
+      ],
+      "introduces": [
+        "@ modifier"
+      ],
+      "conceptIDs": [
+        "prom.at-modifier"
+      ],
+      "order": 3035
+    },
+    {
+      "id": "prom.promql.what-is-a-subquery",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does a PromQL subquery let you do?",
+      "back": "Run an instant query for a given range and resolution, with the result of that subquery itself being a range vector.",
+      "explanation": "It's written by appending [<range>:<resolution>] to an instant query, letting a range-vector function operate on the output of another query.",
+      "example": "Like taking a reading every minute for an hour, then treating that list of readings as one dataset to analyse.",
+      "source": "Prometheus documentation, Querying basics, “Subquery”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#subquery",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "subquery",
+        "range vector"
+      ],
+      "introduces": [
+        "subquery"
+      ],
+      "conceptIDs": [
+        "prom.subquery"
+      ],
+      "order": 3040
+    },
+    {
+      "id": "prom.promql.what-is-rate",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the rate() function calculate?",
+      "back": "The per-second average rate of increase of the time series in a range vector, over that whole range.",
+      "explanation": "It automatically adjusts for breaks in monotonicity, such as counter resets from a target restart.",
+      "example": "Like reading a car's average speed over the last hour from how far the odometer moved, rather than glancing at the speedometer once.",
+      "source": "Prometheus documentation, Querying functions, “rate()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#rate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "rate",
+        "range vector",
+        "counter"
+      ],
+      "introduces": [
+        "rate"
+      ],
+      "conceptIDs": [
+        "prom.rate"
+      ],
+      "order": 3045
+    },
+    {
+      "id": "prom.promql.what-is-irate",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the irate() function calculate?",
+      "back": "The per-second instant rate of increase of the time series in a range vector, based on the last two data points.",
+      "explanation": "Because it looks only at the two most recent points, the docs recommend it only for graphing volatile, fast-moving counters, and rate() for alerts and slow-moving counters.",
+      "example": "Like reading a car's speed from its last two position readings, rather than the whole trip's average.",
+      "source": "Prometheus documentation, Querying functions, “irate()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#irate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "irate",
+        "range vector",
+        "counter",
+        "rate"
+      ],
+      "introduces": [
+        "irate"
+      ],
+      "conceptIDs": [
+        "prom.irate"
+      ],
+      "order": 3050
+    },
+    {
+      "id": "prom.promql.what-is-increase",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the increase() function calculate?",
+      "back": "The increase in a counter time series over a range vector, extrapolated to cover the full time range specified.",
+      "explanation": "The docs call it syntactic sugar for rate(v) multiplied by the number of seconds in the window, meant mainly for human readability.",
+      "example": "Like asking “how many miles did the car cover this trip” rather than “what was its average speed”.",
+      "source": "Prometheus documentation, Querying functions, “increase()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#increase",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "increase",
+        "range vector",
+        "counter",
+        "rate"
+      ],
+      "introduces": [
+        "increase"
+      ],
+      "conceptIDs": [
+        "prom.increase"
+      ],
+      "order": 3055
+    },
+    {
+      "id": "prom.promql.what-is-delta",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the delta() function calculate?",
+      "back": "The difference between the first and last value of each time series in a range vector, extrapolated to cover the full range.",
+      "explanation": "It should only be used with gauges, unlike rate, irate and increase, which are for counters.",
+      "example": "Like comparing a water tank’s level at the start and end of a shift, ignoring every rise and fall in between.",
+      "source": "Prometheus documentation, Querying functions, “delta()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#delta",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "delta",
+        "range vector",
+        "gauge"
+      ],
+      "introduces": [
+        "delta"
+      ],
+      "conceptIDs": [
+        "prom.delta"
+      ],
+      "order": 3060
+    },
+    {
+      "id": "prom.promql.what-is-deriv",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the deriv() function calculate?",
+      "back": "The per-second derivative of each float time series in a range vector, using simple linear regression.",
+      "explanation": "It needs at least two float samples in the range to work, and, like delta, it should only be used with gauges.",
+      "example": "Like fitting a trend line through a room's last few temperature readings to estimate how fast it's warming, right now.",
+      "source": "Prometheus documentation, Querying functions, “deriv()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#deriv",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "deriv",
+        "range vector",
+        "gauge"
+      ],
+      "introduces": [
+        "deriv"
+      ],
+      "conceptIDs": [
+        "prom.deriv"
+      ],
+      "order": 3065
+    },
+    {
+      "id": "prom.promql.what-is-predict-linear",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the predict_linear() function do?",
+      "back": "Predicts the value of a time series a given number of seconds from now, based on a range vector and simple linear regression.",
+      "explanation": "Like deriv, it needs at least two float samples in the range, and it should only be used with gauges.",
+      "example": "Like using a room's recent warming trend to estimate its temperature an hour from now.",
+      "source": "Prometheus documentation, Querying functions, “predict_linear()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#predict_linear",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "predict_linear",
+        "range vector",
+        "gauge",
+        "deriv"
+      ],
+      "introduces": [
+        "predict_linear"
+      ],
+      "conceptIDs": [
+        "prom.predict-linear"
+      ],
+      "order": 3070
+    },
+    {
+      "id": "prom.promql.what-are-resets-and-changes",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What do the resets() and changes() functions each return?",
+      "back": "resets() returns the number of counter resets in a range vector; changes() returns the number of times a series' value changed at all.",
+      "explanation": "For float samples, resets() treats any decrease between two consecutive samples as a counter reset, and it should only be used with counters.",
+      "example": "Like counting how many times a bank balance dropped (resets) versus how many times it moved at all (changes).",
+      "source": "Prometheus documentation, Querying functions, “resets()”, “changes()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#resets",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "resets and changes",
+        "counter"
+      ],
+      "introduces": [
+        "resets and changes"
+      ],
+      "conceptIDs": [
+        "prom.resets-changes"
+      ],
+      "order": 3075
+    },
+    {
+      "id": "prom.promql.what-is-idelta",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does the idelta() function calculate?",
+      "back": "The difference between the last two samples in a range vector, returning an instant vector with those deltas.",
+      "explanation": "It mirrors irate's “last two points only” approach, but for gauges rather than counters.",
+      "example": "Like comparing only a room's last two temperature readings, ignoring everything earlier in the range.",
+      "source": "Prometheus documentation, Querying functions, “idelta()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#idelta",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "idelta",
+        "range vector",
+        "gauge",
+        "irate"
+      ],
+      "introduces": [
+        "idelta"
+      ],
+      "conceptIDs": [
+        "prom.idelta"
+      ],
+      "order": 3080
+    },
+    {
+      "id": "prom.promql.what-is-absent",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does absent() do, and why is it useful?",
+      "back": "A 1-element vector if the input has no elements; an empty vector otherwise — useful for alerting when a metric stops existing.",
+      "explanation": "absent_over_time() does the same thing for a range vector, useful for alerting when a series has been missing for a certain amount of time.",
+      "example": "Like a smoke alarm that only goes off when its own test signal stops arriving, rather than when smoke is detected.",
+      "source": "Prometheus documentation, Querying functions, “absent()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#absent",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "absent and absent_over_time",
+        "instant vector"
+      ],
+      "introduces": [
+        "absent and absent_over_time"
+      ],
+      "conceptIDs": [
+        "prom.absent"
+      ],
+      "order": 3085
+    },
+    {
+      "id": "prom.promql.what-is-time-function",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the time() function return?",
+      "back": "The time at which the expression is evaluated, as the number of seconds since 1 January 1970 UTC, rather than the actual current time.",
+      "explanation": "That evaluation-timestamp behaviour matters for range queries: time() reflects each step's own evaluation moment, not a single “now”.",
+      "example": "Like a stamped clock on a form, showing when the form was processed rather than the exact instant you're reading it.",
+      "source": "Prometheus documentation, Querying functions, “time()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#time",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "time"
+      ],
+      "introduces": [
+        "time"
+      ],
+      "conceptIDs": [
+        "prom.time-fn"
+      ],
+      "order": 3090
+    },
+    {
+      "id": "prom.promql.what-is-timestamp-function",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the timestamp() function return?",
+      "back": "The timestamp of each sample in an instant vector, as the number of seconds since 1 January 1970, in universal time.",
+      "explanation": "Unlike time(), which returns the query's own evaluation time, timestamp() returns when each individual sample was actually recorded.",
+      "example": "Like the postmark on a letter: it records when that specific letter was sent, not when you happen to open it.",
+      "source": "Prometheus documentation, Querying functions, “timestamp()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#timestamp",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "timestamp",
+        "instant vector",
+        "time"
+      ],
+      "introduces": [
+        "timestamp"
+      ],
+      "conceptIDs": [
+        "prom.timestamp-fn"
+      ],
+      "order": 3095
+    },
+    {
+      "id": "prom.promql.four-expression-types",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Besides instant vector and range vector, what are the other two types a PromQL expression can evaluate to?",
+      "back": "Scalar (a simple numeric floating-point value) and string (currently unused).",
+      "explanation": "An instant query can evaluate to any of the four types as its root, but a range query only supports scalar-typed and instant-vector-typed expressions.",
+      "source": "Prometheus documentation, Querying basics, “Expression language data types”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "instant vector",
+        "range vector"
+      ],
+      "conceptIDs": [
+        "prom.data-types"
+      ],
+      "order": 3100
+    },
+    {
+      "id": "prom.promql.range-query-rejects-range-vector-root",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A dashboard tries to run http_requests_total[5m], a bare range vector selector, as the root expression of a range query. Does a range query support a range-vector-typed root expression?",
+      "back": "No. Range queries only support scalar-typed and instant-vector-typed root expressions, not range-vector-typed ones.",
+      "explanation": "Wrapping the selector in a function such as rate() turns it into an instant vector, which a range query does accept as its root.",
+      "source": "Prometheus documentation, Querying basics, “Expression language data types”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "instant vector",
+        "range vector",
+        "rate"
+      ],
+      "conceptIDs": [
+        "prom.data-types"
+      ],
+      "order": 3105
+    },
+    {
+      "id": "prom.promql.regex-matches-fully-anchored",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In PromQL, regex matches are {{c1::fully anchored}}: env=~\"foo\" is treated as env=~\"^foo$\".",
+      "explanation": "Someone expecting a substring match, as in many other regex tools, would be surprised that =~\"foo\" doesn't match \"foobar\" at all.",
+      "source": "Prometheus documentation, Querying basics, “Instant vector selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#instant-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "label matching operators"
+      ],
+      "conceptIDs": [
+        "prom.regex-anchored"
+      ],
+      "order": 3110
+    },
+    {
+      "id": "prom.promql.regex-anchoring-trap",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A query uses method=~\"GET\" expecting it to also match a label value of \"GETALLITEMS\". Will it?",
+      "back": "No. Because regex matches in PromQL are fully anchored, method=~\"GET\" is treated as method=~\"^GET$\", so it only matches the exact value \"GET\".",
+      "explanation": "To match a longer value too, the pattern would need to be written to allow it explicitly, such as method=~\"GET.*\".",
+      "source": "Prometheus documentation, Querying basics, “Instant vector selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#instant-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "label matching operators"
+      ],
+      "conceptIDs": [
+        "prom.regex-anchored"
+      ],
+      "order": 3115
+    },
+    {
+      "id": "prom.promql.name-label-internal",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "The expression http_requests_total is equivalent to {{c1::{__name__=\"http_requests_total\"}}}, since the metric name is internally a label.",
+      "explanation": "Because __name__ is an ordinary label internally, it can be matched with !=, =~ and !~ too, not just plain equality.",
+      "source": "Prometheus documentation, Querying basics, “Instant vector selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#instant-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name",
+        "Prometheus label"
+      ],
+      "conceptIDs": [
+        "prom.name-matcher"
+      ],
+      "order": 3120
+    },
+    {
+      "id": "prom.promql.name-matcher-for-prefix-selection",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A team wants to select every metric whose name starts with job:, without knowing every such name in advance. Which selector does this?",
+      "back": "{__name__=~\"job:.*\"} — matching the internal __name__ label with a regex is how a set of metric names is selected by pattern.",
+      "explanation": "A plain metric name selector only ever matches one exact name; the __name__ label matcher is what makes pattern-based name selection possible.",
+      "source": "Prometheus documentation, Querying basics, “Instant vector selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#instant-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name",
+        "Prometheus label"
+      ],
+      "conceptIDs": [
+        "prom.name-matcher"
+      ],
+      "order": 3125
+    },
+    {
+      "id": "prom.promql.bare-metric-name-required-or-nonempty-matcher",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A query is written as {job=~\".*\"}, with no metric name and a regex matcher that can match an empty string. Is this a legal PromQL selector?",
+      "back": "No. A vector selector must specify a name or at least one label matcher that does not match the empty string; {job=~\".*\"} is explicitly illegal.",
+      "explanation": "Writing {job=~\".+\"} instead fixes it, since .+ can never match an empty string the way .* can.",
+      "source": "Prometheus documentation, Querying basics, “Instant vector selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#instant-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "label matching operators"
+      ],
+      "conceptIDs": [
+        "prom.name-matcher"
+      ],
+      "order": 3130
+    },
+    {
+      "id": "prom.promql.duration-units-list",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are three of the time units PromQL supports for suffixing a decimal integer duration, such as in [5m]?",
+      "back": "Any three of: ms (milliseconds), s (seconds), m (minutes), h (hours), d (days), w (weeks), y (years).",
+      "explanation": "Multiple units can be combined by concatenation, ordered from longest to shortest, such as 1h30m.",
+      "source": "Prometheus documentation, Querying basics, “Float literals and time durations”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#float-literals-and-time-durations",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.durations"
+      ],
+      "order": 3135
+    },
+    {
+      "id": "prom.promql.duration-1d-ignores-dst",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A team writes a 1d duration in a query, expecting it to always mean exactly 24 hours even on a daylight-saving change day. Does PromQL's own definition of 1d agree?",
+      "back": "Yes. The docs define 1d as equal to 24h, explicitly ignoring so-called daylight saving time.",
+      "explanation": "A duration with a unit is just another way of writing a number of seconds, so 1d always stands for 86,400 seconds.",
+      "source": "Prometheus documentation, Querying basics, “Float literals and time durations”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#float-literals-and-time-durations",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.durations"
+      ],
+      "order": 3140
+    },
+    {
+      "id": "prom.promql.staleness-lookback-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "By default, Prometheus's staleness lookback period is {{c1::5 minutes}}: the newest sample less than that long ago is used to answer a query.",
+      "explanation": "It can be changed with the --query.lookback-delta flag, or overridden per query with the lookback_delta parameter.",
+      "source": "Prometheus documentation, Querying basics, “Staleness”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#staleness",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Prometheus docs as of that date",
+      "conceptIDs": [
+        "prom.staleness"
+      ],
+      "order": 3145
+    },
+    {
+      "id": "prom.promql.target-removed-marks-stale",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A target is removed from Prometheus's configuration entirely. What happens to the time series that target used to produce?",
+      "back": "They are marked as stale soon after the target is removed, and queries after that point return no value for them.",
+      "explanation": "A time series also goes stale if a target simply stops exporting it, even without being removed — staleness tracks the data disappearing, not just the target.",
+      "source": "Prometheus documentation, Querying basics, “Staleness”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#staleness",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.staleness"
+      ],
+      "order": 3150
+    },
+    {
+      "id": "prom.promql.query-timestamps-independent-of-data",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "PromQL picks the timestamps to sample data at {{c1::independently of the actual present time series data}}, mainly to support aggregation across series that don't align precisely in time.",
+      "explanation": "That's exactly why staleness lookback exists at all: a query still needs a value at a given timestamp, even if a series' real samples don't land exactly there.",
+      "source": "Prometheus documentation, Querying basics, “Staleness”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#staleness",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.staleness"
+      ],
+      "order": 3155
+    },
+    {
+      "id": "prom.promql.rate-vs-irate-contrast",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "What's the difference between rate() and irate()?",
+      "back": "rate() averages the increase over the whole range; irate() is based on just the last two data points in the range.",
+      "explanation": "The docs recommend rate for alerts and slow-moving counters, and irate only for graphing volatile, fast-moving ones, since brief rate changes can reset an alert's FOR clause.",
+      "contrast": "rate(): per-second average over the whole range, smooth, best for alerting. irate(): per-second rate from only the last two points, reacts fast, best for graphing volatile counters.",
+      "source": "Prometheus documentation, Querying functions, “irate()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#irate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "rate",
+        "irate"
+      ],
+      "conceptIDs": [
+        "prom.rate-vs-irate"
+      ],
+      "order": 3160
+    },
+    {
+      "id": "prom.promql.irate-graphing-volatile-counter",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A dashboard graphs a fast-moving, spiky counter and needs it to react quickly to sudden changes. rate() or irate()?",
+      "back": "irate(), since the docs say it should be used when graphing volatile, fast-moving counters.",
+      "explanation": "For an alert on the same counter, rate would usually be preferred instead, since irate's brief spikes can make a FOR clause reset repeatedly.",
+      "source": "Prometheus documentation, Querying functions, “irate()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#irate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "rate",
+        "irate"
+      ],
+      "conceptIDs": [
+        "prom.rate-vs-irate"
+      ],
+      "order": 3165
+    },
+    {
+      "id": "prom.promql.rate-and-increase-need-counters",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "rate() and increase() should only be used with {{c1::counters}} (for both floats and histograms).",
+      "explanation": "Both functions automatically adjust for breaks in monotonicity, such as a counter reset from a target restart, which only makes sense for a value that's meant to only increase.",
+      "source": "Prometheus documentation, Querying functions, “rate()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#rate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "rate",
+        "increase",
+        "counter"
+      ],
+      "conceptIDs": [
+        "prom.rate-counters-only"
+      ],
+      "order": 3170
+    },
+    {
+      "id": "prom.promql.rate-on-gauge-misleading",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A dashboard applies rate() to a gauge tracking current memory usage, which rises and falls freely. Is rate() a sound choice here?",
+      "back": "No. rate() is only for counters; on a gauge it misleads, since it assumes any decrease is a reset rather than a real drop.",
+      "explanation": "delta() or deriv() are the functions meant for gauges, precisely because they don't assume the value only ever increases.",
+      "source": "Prometheus documentation, Querying functions, “rate()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#rate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "rate",
+        "gauge",
+        "counter"
+      ],
+      "conceptIDs": [
+        "prom.rate-counters-only"
+      ],
+      "order": 3175
+    },
+    {
+      "id": "prom.promql.rate-before-aggregate-rule",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When combining rate() with an aggregation operator or an _over_time function, always take the {{c1::rate() first, then aggregate}}.",
+      "explanation": "Aggregating first would combine raw counter values across series before resets are accounted for, so rate() could no longer detect them.",
+      "source": "Prometheus documentation, Querying functions, “rate()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#rate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "rate"
+      ],
+      "conceptIDs": [
+        "prom.rate-then-aggregate"
+      ],
+      "order": 3180
+    },
+    {
+      "id": "prom.promql.sum-rate-vs-rate-sum",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "To get the combined per-second request rate across several instances of the same job, should a query write sum(rate(http_requests_total[5m])) or rate(sum(http_requests_total)[5m])?",
+      "back": "sum(rate(http_requests_total[5m])) — taking rate() first, then aggregating, so counter resets on any one instance can still be detected and adjusted for.",
+      "explanation": "The other form isn’t even valid as written: [5m] after sum() would need a subquery’s colon. The docs’ rule is to take rate() first, then aggregate, or rate() cannot detect counter resets when a target restarts.",
+      "source": "Prometheus documentation, Querying functions, “rate()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#rate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "rate"
+      ],
+      "conceptIDs": [
+        "prom.rate-then-aggregate"
+      ],
+      "order": 3185
+    },
+    {
+      "id": "prom.promql.irate-also-needs-rate-first",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "The same rate-before-aggregate rule that applies to rate() is stated separately for which other function, for the same reason?",
+      "back": "irate(). Combining it with an aggregation operator or an _over_time function should also take irate() first, or it cannot detect counter resets either.",
+      "explanation": "Both functions share the same underlying issue: aggregating raw counter values first destroys the per-series reset information each function needs.",
+      "source": "Prometheus documentation, Querying functions, “irate()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#irate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "irate",
+        "rate"
+      ],
+      "conceptIDs": [
+        "prom.rate-then-aggregate"
+      ],
+      "order": 3190
+    },
+    {
+      "id": "prom.promql.rate-vs-deriv-contrast",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How do the rate()/increase() family and the delta()/deriv() family differ in what they're meant for?",
+      "back": "rate() and increase() are for counters, adjusting for resets. delta() and deriv() are for gauges, with no reset handling, since gauges can go down.",
+      "explanation": "Using the wrong family the wrong way round is a classic mistake: delta() on a counter, for instance, wouldn't correct for a restart the way increase() does.",
+      "contrast": "Counters: rate(), increase() (adjust for resets). Gauges: delta(), deriv() (no reset handling, since decreases are expected).",
+      "source": "Prometheus documentation, Querying functions, “delta()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#delta",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "rate",
+        "increase",
+        "delta",
+        "deriv",
+        "counter",
+        "gauge"
+      ],
+      "conceptIDs": [
+        "prom.rate-vs-deriv"
+      ],
+      "order": 3195
+    },
+    {
+      "id": "prom.promql.delta-for-temperature-gauge",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A query needs the change in CPU temperature between now and two hours ago, where the temperature is exposed as a gauge. rate() or delta()?",
+      "back": "delta() — this is the docs' own example: delta(cpu_temp_celsius{host=\"zeus\"}[2h]) returns the difference in temperature over 2 hours.",
+      "explanation": "rate() would be the wrong choice here since it assumes a monotonically increasing counter, not a value that can freely rise and fall like temperature.",
+      "source": "Prometheus documentation, Querying functions, “delta()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#delta",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "delta",
+        "gauge",
+        "rate"
+      ],
+      "conceptIDs": [
+        "prom.rate-vs-deriv"
+      ],
+      "order": 3200
+    },
+    {
+      "id": "prom.promql.over-time-functions-list",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Besides avg_over_time and sum_over_time, what are two other _over_time functions that aggregate a range vector into an instant vector?",
+      "back": "Any two of: min_over_time, max_over_time, count_over_time, quantile_over_time, stddev_over_time, stdvar_over_time, last_over_time, first_over_time, present_over_time.",
+      "explanation": "Each one takes a range vector per series and reduces it to a single aggregated value per series, as an instant vector.",
+      "source": "Prometheus documentation, Querying functions, “<aggregation>_over_time()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#aggregation_over_time",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "range vector",
+        "instant vector"
+      ],
+      "conceptIDs": [
+        "prom.over-time"
+      ],
+      "order": 3205
+    },
+    {
+      "id": "prom.promql.over-time-equal-weight",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "All values in an _over_time function's interval carry the {{c1::same weight}} in the aggregation, even if they aren't equally spaced.",
+      "explanation": "That means a run of closely-spaced samples doesn't get counted more heavily than a single sample sitting alone in a gap.",
+      "source": "Prometheus documentation, Querying functions, “<aggregation>_over_time()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#aggregation_over_time",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.over-time"
+      ],
+      "order": 3210
+    },
+    {
+      "id": "prom.promql.avg-over-time-for-noisy-gauge",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A gauge for queue depth is noisy from sample to sample, and a dashboard wants a smoothed 10-minute average rather than the raw value at each point. Which function fits?",
+      "back": "avg_over_time(queue_depth[10m]) — the average of all samples in the specified interval.",
+      "explanation": "Because it's an _over_time function, it collapses the whole 10-minute range vector down to one averaged instant-vector value per series.",
+      "source": "Prometheus documentation, Querying functions, “<aggregation>_over_time()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#aggregation_over_time",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "range vector",
+        "gauge"
+      ],
+      "conceptIDs": [
+        "prom.over-time"
+      ],
+      "order": 3215
+    },
+    {
+      "id": "prom.promql.export-timestamp-not-elapsed-time",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does the instrumentation guidance recommend exporting to track the time since something happened: the elapsed time itself, or a timestamp?",
+      "back": "A timestamp — export the Unix timestamp at which the event happened, not the time since it happened.",
+      "explanation": "An elapsed-time metric would need to be updated continuously by the instrumented code; a timestamp only needs to be set once, when the event occurs.",
+      "source": "Prometheus documentation, Instrumentation, “Timestamps, not time since”",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#timestamps-not-time-since",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.timestamps-not-time-since"
+      ],
+      "order": 3220
+    },
+    {
+      "id": "prom.promql.elapsed-time-metric-can-get-stuck",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "An application exports \"seconds_since_last_backup\" as a gauge that its own code increments every second. What risk does exporting a timestamp instead avoid?",
+      "back": "The update logic getting stuck: a timestamp needs no continuous update logic at all, so there's nothing to get stuck in the first place.",
+      "explanation": "Exporting the raw timestamp shifts the “time since” calculation into the query itself, using time() minus that timestamp.",
+      "source": "Prometheus documentation, Instrumentation, “Timestamps, not time since”",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#timestamps-not-time-since",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "gauge",
+        "time"
+      ],
+      "conceptIDs": [
+        "prom.timestamps-not-time-since"
+      ],
+      "order": 3225
+    },
+    {
+      "id": "prom.promql.time-since-query-expression",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "With a timestamp metric exported, the time since that event can be calculated in a query as {{c1::time() - my_timestamp_metric}}.",
+      "explanation": "This works because time() gives the query's evaluation time, and subtracting the stored timestamp leaves the elapsed seconds since the event.",
+      "source": "Prometheus documentation, Instrumentation, “Timestamps, not time since”",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#timestamps-not-time-since",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "time"
+      ],
+      "conceptIDs": [
+        "prom.time-since-query"
+      ],
+      "order": 3230
+    },
+    {
+      "id": "prom.promql.time-since-query-application",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A team wants to alert if a nightly backup metric, exported as last_backup_timestamp_seconds, is older than 26 hours. Which PromQL expression should the alert compare against 26 hours?",
+      "back": "time() - last_backup_timestamp_seconds — the elapsed time since the exported timestamp, computed at query time.",
+      "explanation": "Because the metric is a plain timestamp, no update logic on the instrumented side is needed to keep the “time since” value current; the query recomputes it each time.",
+      "source": "Prometheus documentation, Instrumentation, “Timestamps, not time since”",
+      "sourceURL": "https://prometheus.io/docs/practices/instrumentation/#timestamps-not-time-since",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "time"
+      ],
+      "conceptIDs": [
+        "prom.time-since-query"
+      ],
+      "order": 3235
+    },
+    {
+      "id": "prom.promql.day-of-week-values",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "day_of_week() returns values from 0 to 6, where {{c1::0 means Sunday}}.",
+      "explanation": "Like the other date functions, it interprets its input as Unix timestamps and reports the result in UTC.",
+      "source": "Prometheus documentation, Querying functions, “day_of_week()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#day_of_week",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Prometheus docs as of that date",
+      "conceptIDs": [
+        "prom.date-functions"
+      ],
+      "order": 3240
+    },
+    {
+      "id": "prom.promql.date-functions-default-to-now",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A query calls day_of_month() with no argument at all. What time does it interpret as its input?",
+      "back": "The current evaluation time — day_of_month() defaults its argument to vector(time()) when none is given.",
+      "explanation": "Each of the date functions shares this same default, which is why they can be called bare to describe the query's own evaluation moment.",
+      "source": "Prometheus documentation, Querying functions, “day_of_month()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#day_of_month",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "time"
+      ],
+      "conceptIDs": [
+        "prom.date-functions"
+      ],
+      "order": 3245
+    },
+    {
+      "id": "prom.promql.utc-only-no-timezone",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Why does Prometheus exclusively use Unix time internally and UTC for display, according to the FAQ?",
+      "back": "To avoid timezone confusion, especially around daylight saving time.",
+      "explanation": "The FAQ notes a timezone selector could be added to the interface in future, but as things stand, every component works in universal time.",
+      "source": "Prometheus documentation, FAQ, “Can I change the timezone? Why is everything in UTC?”",
+      "sourceURL": "https://prometheus.io/docs/introduction/faq/#can-i-change-the-timezone-why-is-everything-in-utc",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.utc"
+      ],
+      "order": 3250
+    },
+    {
+      "id": "prom.promql.day-of-week-not-local-time",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A team in UTC+9 expects day_of_week() to return the day of the week in their own local timezone. Will it?",
+      "back": "No. Every date function, and Prometheus generally, works in UTC; day_of_week() reports the day in UTC, not the caller's local timezone.",
+      "explanation": "This follows directly from the FAQ's own reasoning for using UTC everywhere: it avoids exactly this kind of timezone ambiguity.",
+      "source": "Prometheus documentation, FAQ, “Can I change the timezone? Why is everything in UTC?”",
+      "sourceURL": "https://prometheus.io/docs/introduction/faq/#can-i-change-the-timezone-why-is-everything-in-utc",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "time"
+      ],
+      "conceptIDs": [
+        "prom.utc"
+      ],
+      "order": 3255
+    },
+    {
+      "id": "prom.promql.experimental-functions-feature-flag",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "PromQL functions considered experimental, which might still change name, syntax or semantics, are enabled with {{c1::--enable-feature=promql-experimental-functions}}.",
+      "explanation": "Because they're explicitly allowed to change or be removed, relying on one of these functions in production carries more risk than a stable function.",
+      "source": "Prometheus documentation, Feature flags, “Experimental PromQL functions”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/feature_flags/#experimental-promql-functions",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Prometheus docs as of that date",
+      "conceptIDs": [
+        "prom.experimental-functions"
+      ],
+      "order": 3260
+    },
+    {
+      "id": "prom.promql.experimental-function-without-flag",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A query calls a function documented as needing --enable-feature=promql-experimental-functions, but the Prometheus server was started without that flag. What should be expected?",
+      "back": "The function isn't available: experimental functions are only enabled once that feature flag is set on the server.",
+      "explanation": "This is exactly the kind of function whose name, syntax or semantics the docs warn might still change, or which might be removed entirely.",
+      "source": "Prometheus documentation, Feature flags, “Experimental PromQL functions”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/feature_flags/#experimental-promql-functions",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Prometheus docs as of that date",
+      "conceptIDs": [
+        "prom.experimental-functions"
+      ],
+      "order": 3265
+    },
+    {
+      "id": "prom.promql.holt-winters-renamed",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "The PromQL function once called holt_winters is now named {{c1::double_exponential_smoothing}}.",
+      "explanation": "The rename happened because “Holt-Winters” usually refers to triple exponential smoothing, which caused confusion about what the function actually computed.",
+      "source": "Prometheus documentation, Querying functions, “double_exponential_smoothing()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#double_exponential_smoothing",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Prometheus docs as of that date",
+      "conceptIDs": [
+        "prom.holt-renamed"
+      ],
+      "order": 3270
+    },
+    {
+      "id": "prom.promql.old-name-in-study-material",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "Older PCA study material refers to a smoothing function called holt_winters() and expects it to work as documented today, with no feature flag needed. Is that accurate now?",
+      "back": "No. That function is now called double_exponential_smoothing(), and, like other experimental functions, it needs --enable-feature=promql-experimental-functions to be enabled.",
+      "explanation": "The docs note the old name caused confusion, since Holt-Winters usually means triple exponential smoothing; what this function computes is also called “Holt Linear”.",
+      "source": "Prometheus documentation, Querying functions, “double_exponential_smoothing()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#double_exponential_smoothing",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Prometheus docs as of that date",
+      "conceptIDs": [
+        "prom.holt-renamed"
+      ],
+      "order": 3275
+    },
+    {
+      "id": "prom.promql.promql-instant-vs-range-query",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A user picks a single point in time and asks PromQL to evaluate an expression just there, versus asking for the same expression at equally-spaced steps across an hour. Which PromQL query type is each?",
+      "back": "The first is an instant query; the second is a range query. PromQL itself works exactly the same way in both cases.",
+      "explanation": "The Prometheus web console reflects this split directly: the Table tab is for instant queries, and the Graph tab is for range queries.",
+      "source": "Prometheus documentation, Querying basics",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "PromQL"
+      ],
+      "conceptIDs": [
+        "prom.promql"
+      ],
+      "order": 3280
+    },
+    {
+      "id": "prom.promql.instant-vector-single-sample-per-series",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A query http_requests_total returns one value for each matching series, all at the same moment. What PromQL data type is this result?",
+      "back": "An instant vector — a set of time series, each with a single sample value, all sharing the same timestamp.",
+      "explanation": "This is the plain, unmodified form of a metric selector: no range in square brackets means the result stays an instant vector.",
+      "source": "Prometheus documentation, Querying basics, “Expression language data types”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "instant vector"
+      ],
+      "conceptIDs": [
+        "prom.instant-vector"
+      ],
+      "order": 3285
+    },
+    {
+      "id": "prom.promql.range-vector-needs-bracket",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A query is written as http_requests_total[5m]. What PromQL data type does this produce, rather than an instant vector?",
+      "back": "A range vector — appending a duration in square brackets after a selector turns it from an instant vector selector into a range vector selector.",
+      "explanation": "A range vector can't be graphed directly; it's normally the input to a function such as rate() or increase() that reduces it back to an instant vector.",
+      "source": "Prometheus documentation, Querying basics, “Range Vector Selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#range-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "range vector",
+        "instant vector"
+      ],
+      "conceptIDs": [
+        "prom.range-vector"
+      ],
+      "order": 3290
+    },
+    {
+      "id": "prom.promql.instant-selector-with-two-matchers",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "What PromQL instant vector selector fetches http_requests_total restricted to series where job is \"prometheus\" and group is \"canary\"?",
+      "back": "http_requests_total{job=\"prometheus\",group=\"canary\"}",
+      "explanation": "This is the docs' own worked example: a metric name followed by a comma-separated list of label matchers in curly braces.",
+      "source": "Prometheus documentation, Querying basics, “Instant vector selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#instant-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "instant vector selector"
+      ],
+      "conceptIDs": [
+        "prom.instant-selector"
+      ],
+      "order": 3295
+    },
+    {
+      "id": "prom.promql.range-selector-boundary-exclusion",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A sample lands exactly on the left boundary of a [5m] range selector, five minutes ago to the second. Is that sample included in the range?",
+      "back": "No. The range is left-open and right-closed, so a sample exactly at the left boundary is excluded, while one at the right boundary is included.",
+      "explanation": "A sample exactly five minutes old sits on the left boundary, so it is left out; a sample at the evaluation time itself sits on the right boundary and is kept.",
+      "source": "Prometheus documentation, Querying basics, “Range Vector Selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#range-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "range vector selector"
+      ],
+      "conceptIDs": [
+        "prom.range-selector"
+      ],
+      "order": 3300
+    },
+    {
+      "id": "prom.promql.offset-must-follow-selector",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "Is sum(http_requests_total{method=\"GET\"}) offset 5m a valid PromQL expression?",
+      "back": "No. The offset modifier must immediately follow the selector it applies to; placing it after the sum() aggregation is invalid.",
+      "explanation": "The correct form moves offset inside the aggregation, next to the selector: sum(http_requests_total{method=\"GET\"} offset 5m).",
+      "source": "Prometheus documentation, Querying basics, “Offset modifier”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#offset-modifier",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "offset modifier"
+      ],
+      "conceptIDs": [
+        "prom.offset"
+      ],
+      "order": 3305
+    },
+    {
+      "id": "prom.promql.negative-offset-looks-forward",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A query uses http_requests_total offset -1w. Does this look further into the past, or does it look forward in time relative to the evaluation time?",
+      "back": "Forward. A negative offset enables temporal comparisons forward in time, letting the query look ahead of its evaluation time.",
+      "explanation": "This is the mirror image of an ordinary positive offset, which shifts the selector back into the past instead.",
+      "source": "Prometheus documentation, Querying basics, “Offset modifier”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#offset-modifier",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "offset modifier"
+      ],
+      "conceptIDs": [
+        "prom.offset"
+      ],
+      "order": 3310
+    },
+    {
+      "id": "prom.promql.at-modifier-order-independent",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "Do http_requests_total @ 1609746000 offset 5m and http_requests_total offset 5m @ 1609746000 produce the same result?",
+      "back": "Yes. The @ modifier works with offset regardless of their order, with offset applied relative to the @ modifier's time either way.",
+      "explanation": "That order-independence is explicit in the docs, which give this exact pair of expressions as producing the same result.",
+      "source": "Prometheus documentation, Querying basics, “@ modifier”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#-modifier",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "@ modifier",
+        "offset modifier"
+      ],
+      "conceptIDs": [
+        "prom.at-modifier"
+      ],
+      "order": 3315
+    },
+    {
+      "id": "prom.promql.subquery-default-resolution",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In a subquery's [<range>:<resolution>] syntax, the resolution is optional, defaulting to the {{c1::global evaluation interval}} when left out.",
+      "explanation": "That means a bare subquery's resolution can shift if the global evaluation_interval setting changes, unless a resolution is given explicitly.",
+      "source": "Prometheus documentation, Querying basics, “Subquery”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#subquery",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "subquery"
+      ],
+      "conceptIDs": [
+        "prom.subquery"
+      ],
+      "order": 3320
+    },
+    {
+      "id": "prom.promql.subquery-for-max-over-time-rate",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A team wants the maximum 5-minute rate of a counter over the last hour, sampled every minute. max_over_time() needs a range vector, but rate() returns an instant vector. Which kind of PromQL expression bridges the two?",
+      "back": "A subquery: max_over_time(rate(http_requests_total[5m])[1h:1m]) runs the rate query repeatedly and turns its output into a range vector for max_over_time.",
+      "explanation": "Without a subquery, there would be no way to feed the already-computed result of rate() into another range-vector function like max_over_time.",
+      "source": "Prometheus documentation, Querying basics, “Subquery”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#subquery",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "subquery",
+        "rate",
+        "range vector"
+      ],
+      "conceptIDs": [
+        "prom.subquery"
+      ],
+      "order": 3325
+    },
+    {
+      "id": "prom.promql.increase-syntactic-sugar-for-rate",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "increase() is syntactic sugar for {{c1::rate(v) multiplied by the number of seconds in the range}}, meant mainly for human readability.",
+      "explanation": "The docs recommend using rate in recording rules instead, so increases are tracked consistently on a per-second basis rather than per arbitrary window.",
+      "source": "Prometheus documentation, Querying functions, “increase()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#increase",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "increase",
+        "rate"
+      ],
+      "conceptIDs": [
+        "prom.increase"
+      ],
+      "order": 3330
+    },
+    {
+      "id": "prom.promql.increase-application-http-requests",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "What PromQL expression gives the number of HTTP requests to the api-server job over the last 5 minutes?",
+      "back": "increase(http_requests_total{job=\"api-server\"}[5m])",
+      "explanation": "This is the docs' own worked example for increase(), applied to a counter over a 5-minute range vector.",
+      "source": "Prometheus documentation, Querying functions, “increase()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#increase",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "increase",
+        "counter"
+      ],
+      "conceptIDs": [
+        "prom.increase"
+      ],
+      "order": 3335
+    },
+    {
+      "id": "prom.promql.delta-only-gauges-note",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A recording rule applies delta() to a counter that has just been reset by a target restart. Is delta() the right function for this, given it has no built-in reset handling?",
+      "back": "No. delta() should only be used with gauges; unlike rate() and increase(), it does not automatically adjust for counter resets.",
+      "explanation": "Using delta() on a reset counter would produce a large negative jump, since it just subtracts the first value from the last with no reset correction.",
+      "source": "Prometheus documentation, Querying functions, “delta()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#delta",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "delta",
+        "gauge",
+        "counter"
+      ],
+      "conceptIDs": [
+        "prom.delta"
+      ],
+      "order": 3340
+    },
+    {
+      "id": "prom.promql.deriv-needs-two-samples",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A range vector selector for deriv() only ever captures a single float sample in its window. Can deriv() calculate a derivative from that?",
+      "back": "No. deriv() needs at least two float samples in the range vector to perform its linear-regression calculation.",
+      "explanation": "With only one point, there's no slope to fit a line through, which is exactly why the function requires a second sample.",
+      "source": "Prometheus documentation, Querying functions, “deriv()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#deriv",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "deriv",
+        "range vector"
+      ],
+      "conceptIDs": [
+        "prom.deriv"
+      ],
+      "order": 3345
+    },
+    {
+      "id": "prom.promql.predict-linear-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A disk usage gauge is trending upward. Which function estimates its value 4 hours from now, based on its recent trend over the last hour?",
+      "back": "predict_linear(disk_usage_bytes[1h], 4 * 3600)",
+      "explanation": "The second argument to predict_linear() is the number of seconds ahead to predict, which is why an hour-in-seconds conversion is needed for “4 hours”.",
+      "source": "Prometheus documentation, Querying functions, “predict_linear()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#predict_linear",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "predict_linear",
+        "gauge"
+      ],
+      "conceptIDs": [
+        "prom.predict-linear"
+      ],
+      "order": 3350
+    },
+    {
+      "id": "prom.promql.resets-vs-changes-application",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A counter's value goes 10, 12, 15, 3, 7 across five consecutive samples. How many resets() does this range report, and how many changes()?",
+      "back": "resets() reports 1 (the drop from 15 to 3); changes() reports 4, since every consecutive pair of samples differs.",
+      "explanation": "resets() only counts decreases, which signal a counter reset; changes() counts every value change at all, decreases and increases alike.",
+      "source": "Prometheus documentation, Querying functions, “resets()”, “changes()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#resets",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "resets and changes",
+        "counter"
+      ],
+      "conceptIDs": [
+        "prom.resets-changes"
+      ],
+      "order": 3355
+    },
+    {
+      "id": "prom.promql.idelta-only-gauges",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "Should idelta() be applied to a counter that resets periodically, the way irate() is?",
+      "back": "No. idelta() should only be used with gauges, unlike irate(), which is meant for counters and adjusts for resets.",
+      "explanation": "idelta() has no reset-detection logic at all: it simply subtracts the second-to-last sample from the last one.",
+      "source": "Prometheus documentation, Querying functions, “idelta()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#idelta",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "idelta",
+        "gauge",
+        "irate",
+        "counter"
+      ],
+      "conceptIDs": [
+        "prom.idelta"
+      ],
+      "order": 3360
+    },
+    {
+      "id": "prom.promql.absent-over-time-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "What PromQL expression alerts (returns a 1-element vector) if backup_completed{job=\"nightly\"} has had no samples at all for the last hour?",
+      "back": "absent_over_time(backup_completed{job=\"nightly\"}[1h])",
+      "explanation": "absent_over_time() is the range-vector counterpart of absent(), built for exactly this “missing for a while” case rather than a single missing instant.",
+      "source": "Prometheus documentation, Querying functions, “absent_over_time()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#absent_over_time",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "absent and absent_over_time"
+      ],
+      "conceptIDs": [
+        "prom.absent"
+      ],
+      "order": 3365
+    },
+    {
+      "id": "prom.promql.timestamp-function-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A team wants to know exactly when each series' most recent sample of up{job=\"api-server\"} was recorded, as a Unix timestamp. Which function gives this?",
+      "back": "timestamp(up{job=\"api-server\"})",
+      "explanation": "timestamp() reads the recorded time of each sample directly, rather than the query's own evaluation time, which is what time() would give instead.",
+      "source": "Prometheus documentation, Querying functions, “timestamp()”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#timestamp",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "timestamp",
+        "time"
+      ],
+      "conceptIDs": [
+        "prom.timestamp-fn"
+      ],
+      "order": 3370
+    },
+    {
+      "id": "prom.promql.label-matchers-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "What PromQL selector for http_requests_total is restricted to the staging, testing and development environments, and to HTTP methods other than GET?",
+      "back": "http_requests_total{environment=~\"staging|testing|development\",method!=\"GET\"}",
+      "explanation": "This combines a regex-match matcher for environment with a not-equal matcher for method, both inside the same set of curly braces.",
+      "source": "Prometheus documentation, Querying basics, “Instant vector selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#instant-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "label matching operators"
+      ],
+      "conceptIDs": [
+        "prom.label-matchers"
+      ],
+      "order": 3375
+    },
+    {
+      "id": "prom.promql.empty-matcher-matches-missing-label",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A dataset has some http_requests_total series with an environment label and some with none at all. Does the matcher environment=\"\" select the series with no environment label?",
+      "back": "Yes. Label matchers that match empty label values also select every time series that doesn't have that label set at all.",
+      "explanation": "In the docs’ example, environment=\"\" returns the three series that have no environment label and leaves out the one with environment=\"development\".",
+      "source": "Prometheus documentation, Querying basics, “Instant vector selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#instant-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "label matching operators"
+      ],
+      "conceptIDs": [
+        "prom.label-matchers"
+      ],
+      "order": 3380
+    },
+    {
+      "id": "prom.promql.multiple-matchers-same-label-and-logic",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A selector writes replica!=\"rep-a\",replica=~\"rep.*\" for the same replica label twice. Must a series satisfy both matchers, or just one, to be selected?",
+      "back": "Both. Multiple matchers on the same label name are allowed, and all of them must pass for a series to be returned.",
+      "explanation": "So this selector keeps every replica matching “rep.*” except exactly “rep-a”, since both conditions apply together, not either one alone.",
+      "source": "Prometheus documentation, Querying basics, “Instant vector selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#instant-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "label matching operators"
+      ],
+      "conceptIDs": [
+        "prom.label-matchers"
+      ],
+      "order": 3385
+    },
+    {
+      "id": "prom.promql.reserved-keywords-not-metric-names",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "Can a metric literally be named on, so that a bare selector on{} would work?",
+      "back": "No. A metric name must not be one of the keywords bool, on, ignoring, group_left and group_right; on{} is explicitly illegal.",
+      "explanation": "The workaround is the __name__ label instead: {__name__=\"on\"} selects the same metric without running into the reserved keyword.",
+      "source": "Prometheus documentation, Querying basics, “Instant vector selectors”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#instant-vector-selectors",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "metric name",
+        "Prometheus label"
+      ],
+      "conceptIDs": [
+        "prom.name-matcher"
+      ],
+      "order": 3390
+    },
+    {
+      "id": "prom.promql.comments-start-with-hash",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "PromQL line comments start with a {{c1::#}} character.",
+      "explanation": "The docs’ example is a line reading # This is a comment.",
+      "source": "Prometheus documentation, Querying basics, “Comments”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#comments",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "PromQL"
+      ],
+      "conceptIDs": [
+        "prom.promql"
+      ],
+      "order": 3395
+    },
+    {
+      "id": "prom.promql.promql-regex-syntax",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "All regular expressions in Prometheus, including in PromQL matchers, use {{c1::RE2}} syntax.",
+      "explanation": "The same section adds that regex matches are always fully anchored.",
+      "source": "Prometheus documentation, Querying basics, “Regular expressions”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#regular-expressions",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "label matching operators"
+      ],
+      "conceptIDs": [
+        "prom.regex-anchored"
+      ],
+      "order": 3400
+    },
+    {
+      "id": "prom.promql.avoid-slow-bare-selector",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A bare metric name selector like api_http_requests_total could expand to thousands of series with different labels. What does the querying-basics page suggest doing before switching a query like this to graph mode?",
+      "back": "Start in the tabular view and filter or aggregate the data until the result set is reasonable — hundreds, not thousands, of series.",
+      "explanation": "The docs warn this can time out or overload the server or browser if graphed too early, before the query is narrowed down.",
+      "source": "Prometheus documentation, Querying basics, “Avoiding slow queries and overloads”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#avoiding-slow-queries-and-overloads",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "PromQL"
+      ],
+      "conceptIDs": [
+        "prom.promql"
+      ],
+      "order": 3405
+    },
+    {
+      "id": "prom.promql.aggregation-still-costs-load",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A query aggregates over many thousands of time series but its final output is just a single number. Does that small output mean the query is cheap to run?",
+      "back": "No. The docs say aggregating over many series generates load on the server even when the output is a small number of series.",
+      "explanation": "The comparison given is summing a whole column in a relational database: the output is one value, but the database still has to touch every row to get there.",
+      "source": "Prometheus documentation, Querying basics, “Avoiding slow queries and overloads”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#avoiding-slow-queries-and-overloads",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "PromQL"
+      ],
+      "conceptIDs": [
+        "prom.promql"
+      ],
+      "order": 3410
+    },
+    {
+      "id": "prom.promql.staleness-exporter-own-timestamps",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "An exporter puts its own timestamps on the samples it exposes, rather than letting Prometheus stamp them at scrape time. When that series stops being exported, does it disappear from queries immediately?",
+      "back": "Not immediately. By default, such a series keeps returning its last value for about 5 minutes before disappearing, unlike the ordinary staleness behaviour.",
+      "explanation": "This different behaviour can be changed with the track_timestamps_staleness setting, since exporter-supplied timestamps aren't tracked for staleness the same way.",
+      "source": "Prometheus documentation, Querying basics, “Staleness”",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/basics/#staleness",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.staleness"
+      ],
+      "order": 3415
+    }
+  ]
+}

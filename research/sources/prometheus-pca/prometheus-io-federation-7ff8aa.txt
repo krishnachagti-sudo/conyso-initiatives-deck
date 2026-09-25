@@ -1,0 +1,237 @@
+Join PromCon EU 2026   , the Prometheus users conference, on October 7–8, 2026 in Munich.
+PromCon EU 2026   — Oct 7–8, Munich.
+
+Prometheus
+
+Docs Download Community Support & Training Blog
+
+Ctrl + K
+
+Show nav Introduction
+Overview
+First steps
+Comparison to alternatives
+FAQ
+Roadmap
+Design documents
+Media
+Glossary
+Long-term support
+
+Concepts
+Data model
+Metric types
+Jobs and instances
+
+Prometheus Server
+
+Getting started
+Installation
+Configuration
+Configuration
+Recording rules
+Alerting rules
+Template examples
+Template reference
+HTTP configuration for promtool
+Unit testing for rules
+HTTPS and authentication
+
+Agent Mode
+Querying
+Basics
+Operators
+Functions
+Examples
+HTTP API
+Remote Read API
+
+Storage
+Federation
+HTTP SD
+Management API
+Command Line
+prometheus
+promtool
+
+Migration
+API stability
+Feature flags
+
+Visualization
+Expression browser
+Grafana
+Perses
+Console templates
+
+Instrumenting
+Client libraries
+Writing client libraries
+Pushing metrics
+Exporters and integrations
+Writing exporters
+Exposition formats
+UTF-8 escaping schemes
+Content negotiation
+
+Operating
+Security
+Integrations
+
+Alertmanager
+
+Alerting overview
+Alertmanager
+Configuration
+High Availability
+Notification Integrations
+Alerts API
+Notification template reference
+Notification template examples
+Management API
+HTTPS and authentication
+
+Best practices
+Metric and label naming
+Consoles and dashboards
+Instrumentation
+Histograms and summaries
+Alerting
+Recording rules
+When to use the Pushgateway
+Remote write tuning
+The Zen of Prometheus
+
+Guides
+Basic auth
+Monitoring Docker container metrics using cAdvisor
+Contributing
+Use file-based service discovery to discover scrape targets
+Instrumenting a Go application
+Understanding and using the multi-target exporter pattern
+Monitoring Linux host metrics with the Node Exporter
+OpenTelemetry
+UTF-8 in Prometheus
+Docker Swarm
+OpenMetrics 2.0 Migration Guide for Client Libraries
+Query log
+TLS encryption
+
+Tutorials
+Getting started with Prometheus
+Understanding metric types
+Instrumenting HTTP server written in Go
+Visualizing metrics using Grafana
+Alerting based on metrics
+
+Specifications
+Native Histograms
+OpenMetrics
+1.0
+2.0
+
+Remote Write
+1.0
+2.0
+
+Federation
+Federation allows a Prometheus server to scrape selected time series from
+another Prometheus server.
+
+Note about native histograms: To scrape native histograms via federation, the
+scraping Prometheus server needs to set scrape_native_histograms: true in its
+scrape config, implying that the protobuf format is used for scraping. Should
+the federated metrics contain a mix of different sample types (floats of any
+flavor, counter histograms, or gauge histograms) for the same metric name, the
+federation payload will contain multiple metric families with the same name
+(but different types – for technical reasons, float samples are always federated
+as untyped , while histogram samples are federated with their full type
+information). Technically, this violates the rules of the protobuf exposition
+format, but Prometheus is nevertheless able to ingest all metrics correctly.
+
+Use cases
+
+There are different use cases for federation. Commonly, it is used to either
+achieve scalable Prometheus monitoring setups or to pull related metrics from
+one service's Prometheus into another.
+
+Hierarchical federation
+
+Hierarchical federation allows Prometheus to scale to environments with tens of
+data centers and millions of nodes. In this use case, the federation topology
+resembles a tree, with higher-level Prometheus servers collecting aggregated
+time series data from a larger number of subordinated servers.
+
+For example, a setup might consist of many per-datacenter Prometheus servers
+that collect data in high detail (instance-level drill-down), and a set of
+global Prometheus servers which collect and store only aggregated data
+(job-level drill-down) from those local servers. This provides an aggregate
+global view and detailed local views.
+
+Cross-service federation
+
+In cross-service federation, a Prometheus server of one service is configured
+to scrape selected data from another service's Prometheus server to enable
+alerting and queries against both datasets within a single server.
+
+For example, a cluster scheduler running multiple services might expose
+resource usage information (like memory and CPU usage) about service instances
+running on the cluster. On the other hand, a service running on that cluster
+will only expose application-specific service metrics. Often, these two sets of
+metrics are scraped by separate Prometheus servers. Using federation, the
+Prometheus server containing service-level metrics may pull in the cluster
+resource usage metrics about its specific service from the cluster Prometheus,
+so that both sets of metrics can be used within that server.
+
+Configuring federation
+
+On any given Prometheus server, the /federate endpoint allows retrieving the
+current value for a selected set of time series in that server. At least one
+match[] URL parameter must be specified to select the series to expose. Each
+match[] argument needs to specify an
+instant vector selector like
+up or {job="api-server"} . If multiple match[] parameters are provided,
+the union of all matched series is selected.
+
+To federate metrics from one server to another, configure your destination
+Prometheus server to scrape from the /federate endpoint of a source server,
+while also enabling the honor_labels scrape option (to not overwrite any
+labels exposed by the source server) and passing in the desired match[]
+parameters. For example, the following scrape_configs federates any series
+with the label job="prometheus" or a metric name starting with job: from
+the Prometheus servers at source-prometheus-{1,2,3}:9090 into the scraping
+Prometheus:
+
+scrape_configs :
+- job_name : 'federate'
+scrape_interval : 15s
+
+honor_labels : true
+metrics_path : '/federate'
+
+params :
+'match[]' :
+- '{job="prometheus"}'
+- '{__name__=~"job:.*"}'
+
+static_configs :
+- targets :
+- 'source-prometheus-1:9090'
+- 'source-prometheus-2:9090'
+- 'source-prometheus-3:9090'
+
+Previous
+Storage
+
+Edit
+Edit this page
+Issue
+Report an issue
+
+Next
+HTTP SD
+
+On this page
+
+© Prometheus Authors 2014- 2026 | All components are available under the Apache 2 License on GitHub .
+© 2026 The Linux Foundation. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our Trademark Usage page.

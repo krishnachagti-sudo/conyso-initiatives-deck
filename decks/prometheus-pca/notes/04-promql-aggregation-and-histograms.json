@@ -1,0 +1,1422 @@
+{
+  "topic": "PromQL: aggregation, operators and histograms",
+  "notes": [
+    {
+      "id": "prom.promql-aggregation.what-is-topk-bottomk",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What do PromQL's topk and bottomk aggregation operators do?",
+      "back": "They return a subset of k elements from the input vector, keeping the original labels: topk the largest values, bottomk the smallest.",
+      "explanation": "Unlike other aggregators, they return actual vector elements rather than a single aggregated value, so the source series stay identifiable.",
+      "example": "Like picking the 5 tallest people from a crowd and keeping their name tags on, rather than just reporting the group's average height.",
+      "source": "Prometheus documentation, Operators, \"topk and bottomk\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#topk-and-bottomk",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "topk",
+        "bottomk"
+      ],
+      "uses": [
+        "topk",
+        "bottomk"
+      ],
+      "conceptIDs": [
+        "prom.topk"
+      ],
+      "order": 4000
+    },
+    {
+      "id": "prom.promql-aggregation.what-is-count-values",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does the count_values(l, v) aggregation operator do?",
+      "back": "One series per unique sample value in v, labelled l with that value; each series' value is how often it occurred.",
+      "explanation": "It's the aggregation to reach for when the thing you want to count is a value itself, rather than a label.",
+      "example": "Like tallying how many students got each exam score, rather than each student's own score.",
+      "source": "Prometheus documentation, Operators, \"count_values\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#count_values",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "count_values"
+      ],
+      "uses": [
+        "count_values"
+      ],
+      "conceptIDs": [
+        "prom.count-values"
+      ],
+      "order": 4010
+    },
+    {
+      "id": "prom.promql-aggregation.what-is-quantile-agg",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does the quantile(φ, v) aggregation operator calculate?",
+      "back": "The φ-quantile (0 ≤ φ ≤ 1) over the dimensions being aggregated, the value that ranks at number φ×N among the N input values.",
+      "explanation": "It works only on float samples in the input vector, quite unlike histogram_quantile, which reads bucketed histogram data instead.",
+      "example": "Like reading off the value at the 95th mark once N measurements are lined up smallest to largest.",
+      "source": "Prometheus documentation, Operators, \"quantile\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#quantile",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "quantile aggregation operator"
+      ],
+      "uses": [
+        "quantile aggregation operator"
+      ],
+      "conceptIDs": [
+        "prom.quantile-agg"
+      ],
+      "order": 4020
+    },
+    {
+      "id": "prom.promql-aggregation.what-is-vector-matching",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is vector matching in PromQL?",
+      "back": "How a binary operator finds a matching element in the right-hand vector for each entry in the left-hand vector, when operating between two instant vectors.",
+      "explanation": "Without a match, an entry from one side simply has nothing to combine with, so it drops out of the result by default.",
+      "example": "Like matching up left and right shoes from two separate piles: only pairs that share the same size and style get matched.",
+      "source": "Prometheus documentation, Operators, \"Vector matching\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#vector-matching",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "vector matching"
+      ],
+      "uses": [
+        "vector matching"
+      ],
+      "conceptIDs": [
+        "prom.vector-matching"
+      ],
+      "order": 4030
+    },
+    {
+      "id": "prom.promql-aggregation.what-is-one-to-one-matching",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is one-to-one vector matching?",
+      "back": "The default matching behaviour: each left-hand entry finds a unique pair on the right, matched by an identical label set.",
+      "explanation": "It's the plain case of `vector1 <operator> vector2`, before `on`, `ignoring`, `group_left` or `group_right` reshape how matching happens.",
+      "example": "Like pairing each guest at a dinner with exactly one place setting: one guest, one seat.",
+      "source": "Prometheus documentation, Operators, \"One-to-one vector matches\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#one-to-one-vector-matches",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "one-to-one vector matching"
+      ],
+      "uses": [
+        "one-to-one vector matching",
+        "vector matching"
+      ],
+      "conceptIDs": [
+        "prom.one-to-one"
+      ],
+      "order": 4040
+    },
+    {
+      "id": "prom.promql-aggregation.what-is-group-left-right",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What do the group_left and group_right modifiers do in PromQL?",
+      "back": "They enable many-to-one or one-to-many vector matching, letting one element on the \"one\" side match several on the \"many\" side.",
+      "explanation": "left/right names which side of the operator has the higher cardinality: group_left means the left vector does, group_right means the right vector does.",
+      "example": "Like matching one team captain (the \"one\" side) against every player on their team (the \"many\" side).",
+      "source": "Prometheus documentation, Operators, \"Many-to-one and one-to-many vector matches\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#many-to-one-and-one-to-many-vector-matches",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "group_left",
+        "group_right"
+      ],
+      "uses": [
+        "group_left",
+        "group_right",
+        "vector matching"
+      ],
+      "conceptIDs": [
+        "prom.group-left-right"
+      ],
+      "order": 4050
+    },
+    {
+      "id": "prom.promql-aggregation.what-is-label-replace-join",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What do label_replace() and label_join() do?",
+      "back": "label_replace sets a destination label from a regular-expression match on a source label; label_join joins several labels' values into one, with a separator.",
+      "explanation": "Both act on float and histogram samples in the same way, and label_replace returns a series unchanged if its regular expression doesn’t match.",
+      "example": "Like relabelling one shipping box from a barcode already stuck to it, or combining a box's aisle and shelf codes into one location code.",
+      "source": "Prometheus documentation, Functions, \"label_replace()\" and \"label_join()\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#label_replace",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "label_replace",
+        "label_join"
+      ],
+      "uses": [
+        "label_replace",
+        "label_join"
+      ],
+      "conceptIDs": [
+        "prom.label-replace"
+      ],
+      "order": 4060
+    },
+    {
+      "id": "prom.promql-aggregation.what-is-histogram-quantile",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the histogram_quantile() function do?",
+      "back": "It calculates the φ-quantile (0 ≤ φ ≤ 1) of observations from a classic histogram's buckets, or from a native histogram sample.",
+      "explanation": "It's the function that turns a histogram's raw bucket counts into an actual quantile value, such as a 90th-percentile request duration.",
+      "example": "Like reading a percentile off a bucketed survey of exam scores, rather than being told the percentile directly.",
+      "source": "Prometheus documentation, Functions, \"histogram_quantile()\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "histogram_quantile"
+      ],
+      "uses": [
+        "histogram_quantile"
+      ],
+      "conceptIDs": [
+        "prom.histogram-quantile"
+      ],
+      "order": 4070
+    },
+    {
+      "id": "prom.promql-aggregation.what-is-native-histogram",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a native histogram?",
+      "back": "A histogram exposed and ingested as one composite sample per timestamp, holding the count and sum of observations together with a dynamic set of buckets.",
+      "explanation": "That's the contrast with a classic histogram, which spreads the same information across several separate float series instead of one composite sample.",
+      "example": "Like one parcel holding a whole itemised receipt, instead of a separate slip of paper for every line item.",
+      "source": "Prometheus documentation, Histograms and summaries, \"Overview\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#overview",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "native histogram"
+      ],
+      "uses": [
+        "native histogram"
+      ],
+      "conceptIDs": [
+        "prom.native-histogram"
+      ],
+      "order": 4080
+    },
+    {
+      "id": "prom.promql-aggregation.what-is-nhcb",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What are native histograms with custom bucket boundaries (NHCB)?",
+      "back": "A form of native histogram that Prometheus can ingest classic histograms into, keeping the classic histogram's own configured bucket layout.",
+      "explanation": "They're a middle ground: stored efficiently like other native histograms, but still limited by the same fixed bucket boundaries a classic histogram was instrumented with.",
+      "example": "Like repacking the same fixed-size crates into one efficient container, without changing the size of the crates themselves.",
+      "source": "Prometheus documentation, Histograms and summaries, \"Instrumentation library support\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#instrumentation-library-support",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "native histograms with custom buckets",
+        "NHCB"
+      ],
+      "uses": [
+        "native histograms with custom buckets",
+        "NHCB"
+      ],
+      "conceptIDs": [
+        "prom.nhcb"
+      ],
+      "order": 4090
+    },
+    {
+      "id": "prom.promql-aggregation.what-is-a-recording-rule",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a recording rule?",
+      "back": "A rule that precomputes a frequently needed or expensive PromQL expression and saves its result as a new set of time series.",
+      "explanation": "Querying the saved result is then often much faster than re-running the original expression, which matters most for dashboards that re-query it on every refresh.",
+      "example": "Like precooking a dish that's ordered constantly, rather than cooking it fresh from scratch every single time it's requested.",
+      "source": "Prometheus documentation, Defining recording rules, \"Recording rules\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/#recording-rules",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "recording rule"
+      ],
+      "uses": [
+        "recording rule"
+      ],
+      "conceptIDs": [
+        "prom.recording-rule"
+      ],
+      "order": 4100
+    },
+    {
+      "id": "prom.promql-aggregation.sum-across-dimensions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does sum(v) calculate in PromQL?",
+      "back": "The sum of the sample values in v, applied the same way the + binary operator adds two values.",
+      "explanation": "Mixing float samples and histogram samples in one sum is invalid, and the affected element is dropped from the result with a warning.",
+      "source": "Prometheus documentation, Operators, \"sum\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.aggregation-operators"
+      ],
+      "order": 4110
+    },
+    {
+      "id": "prom.promql-aggregation.avg-divides-sum",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "avg(v) divides the sum of v by the {{c1::number of aggregated samples}}, the same way the / binary operator does.",
+      "explanation": "So avg is really sum followed by a division, and it inherits the same rule against mixing float and histogram samples.",
+      "source": "Prometheus documentation, Operators, \"avg\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.aggregation-operators"
+      ],
+      "order": 4120
+    },
+    {
+      "id": "prom.promql-aggregation.min-max-ignore-histograms",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Do min(v) and max(v) operate on histogram samples in the input vector?",
+      "back": "No. They only work on float samples; histogram samples are ignored, flagged by an info-level annotation.",
+      "explanation": "That's a narrower behaviour than sum or avg, which do accept histogram samples, provided none are mixed with floats.",
+      "source": "Prometheus documentation, Operators, \"min and max\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.aggregation-operators"
+      ],
+      "order": 4130
+    },
+    {
+      "id": "prom.promql-aggregation.group-returns-one",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "group(v) returns {{c1::1}} for each group that contains any value at that timestamp.",
+      "explanation": "The values being grouped may be float or histogram samples.",
+      "source": "Prometheus documentation, Operators, \"group\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.aggregation-operators"
+      ],
+      "order": 4140
+    },
+    {
+      "id": "prom.promql-aggregation.count-returns-number-of-values",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does count(v) return?",
+      "back": "The number of values present at that timestamp, or no value at all if none are present.",
+      "explanation": "Unlike min, max, stddev and stdvar, count accepts both float and histogram samples in v.",
+      "source": "Prometheus documentation, Operators, \"count\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.aggregation-operators"
+      ],
+      "order": 4150
+    },
+    {
+      "id": "prom.promql-aggregation.stddev-stdvar-floats-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Do stddev(v) and stdvar(v) work on histogram samples?",
+      "back": "No. Both only work with float samples; histogram samples in the input vector are ignored, flagged by an info-level annotation.",
+      "explanation": "stddev returns the standard deviation of v and stdvar its variance, and both follow this same restriction to floats.",
+      "source": "Prometheus documentation, Operators, \"stddev\" and \"stdvar\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.aggregation-operators"
+      ],
+      "order": 4160
+    },
+    {
+      "id": "prom.promql-aggregation.by-vs-without",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "What's the difference between a by clause and a without clause on an aggregation operator?",
+      "back": "by keeps only the listed labels in the result, dropping everything else. without removes the listed labels, keeping all the rest.",
+      "explanation": "So the two clauses are opposites of each other over the same label list, and picking the wrong one silently changes what the result is grouped by.",
+      "contrast": "by (application, group) keeps just those two labels; without (instance) drops only instance and keeps everything else, including application and group.",
+      "source": "Prometheus documentation, Operators, \"Aggregation operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.by-without"
+      ],
+      "order": 4170
+    },
+    {
+      "id": "prom.promql-aggregation.topk-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A dashboard should show the 5 instances currently consuming the most memory, keeping each instance's own labels visible. Which aggregation operator fits: topk or sum?",
+      "back": "topk(5, memory_consumption_bytes). sum would collapse the instances into one number, losing exactly the labels the dashboard needs.",
+      "explanation": "topk and bottomk are the operators built to return a subset of the original elements, with their labels intact, rather than one aggregated value.",
+      "source": "Prometheus documentation, Operators, \"topk and bottomk\", example",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#topk-and-bottomk",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "topk"
+      ],
+      "conceptIDs": [
+        "prom.topk"
+      ],
+      "order": 4180
+    },
+    {
+      "id": "prom.promql-aggregation.topk-ignores-nan-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "In an instant query, how are the series returned by topk and bottomk ordered?",
+      "back": "By value, descending for topk and ascending for bottomk, with NaN treated as farthest from the top or bottom respectively.",
+      "explanation": "That ordering guarantee holds for instant queries; no sorting applies to range queries.",
+      "source": "Prometheus documentation, Operators, \"topk and bottomk\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#topk-and-bottomk",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "topk",
+        "bottomk"
+      ],
+      "conceptIDs": [
+        "prom.topk"
+      ],
+      "order": 4190
+    },
+    {
+      "id": "prom.promql-aggregation.count-values-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A team wants to know how many running binaries report each build_version value. Which aggregation operator, applied to the build_version metric, answers this directly?",
+      "back": "count_values, e.g. count_values(\"version\", build_version): one series per version, valued at how many binaries report it.",
+      "explanation": "This is exactly the operator's own worked example: counting binaries by the version value they report.",
+      "source": "Prometheus documentation, Operators, \"count_values\", example",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#count_values",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "count_values"
+      ],
+      "conceptIDs": [
+        "prom.count-values"
+      ],
+      "order": 4200
+    },
+    {
+      "id": "prom.promql-aggregation.quantile-agg-floats-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Does the quantile(φ, v) aggregation operator work on histogram samples in v?",
+      "back": "No. It only works with float samples; histogram samples in the input vector are ignored, flagged by an info-level annotation.",
+      "explanation": "For φ = NaN, NaN is returned; for φ < 0, -Inf; for φ > 1, +Inf.",
+      "source": "Prometheus documentation, Operators, \"quantile\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#quantile",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "quantile aggregation operator"
+      ],
+      "conceptIDs": [
+        "prom.quantile-agg"
+      ],
+      "order": 4210
+    },
+    {
+      "id": "prom.promql-aggregation.arithmetic-ops-name-two",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two of the six binary arithmetic operators PromQL supports?",
+      "back": "Any two of: + (addition), - (subtraction), * (multiplication), / (division), % (modulo), ^ (power).",
+      "explanation": "They follow IEEE 754 floating-point arithmetic, including its handling of special values such as NaN, +Inf and -Inf.",
+      "source": "Prometheus documentation, Operators, \"Arithmetic binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#arithmetic-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.arithmetic-ops"
+      ],
+      "order": 4220
+    },
+    {
+      "id": "prom.promql-aggregation.plus-minus-between-histograms",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Between two histogram samples, which arithmetic operators are valid?",
+      "back": "Only + and -. Each adds or subtracts all matching bucket populations and the count and sum of observations.",
+      "explanation": "Every other arithmetic operator between two histogram samples removes that element from the result, flagged by an info-level annotation.",
+      "source": "Prometheus documentation, Operators, \"Arithmetic binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#arithmetic-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.arithmetic-ops"
+      ],
+      "order": 4230
+    },
+    {
+      "id": "prom.promql-aggregation.divide-histogram-scalar-lhs",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "For a histogram sample divided by a scalar (/), the docs say the histogram must be on which side of the operator?",
+      "back": "The left-hand side, with the scalar on the right. Every bucket population, count and sum is then divided by the scalar.",
+      "explanation": "Between a scalar and a histogram sample only two operations work: * (every bucket population, count and sum multiplied) and / with the histogram on the left. Any other combination, including + and -, removes that element from the result.",
+      "source": "Prometheus documentation, Operators, \"Arithmetic binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#arithmetic-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.arithmetic-ops"
+      ],
+      "order": 4240
+    },
+    {
+      "id": "prom.promql-aggregation.arithmetic-drops-metric-name",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What happens to the metric name in any arithmetic binary operation involving vectors?",
+      "back": "It is dropped, even if __name__ was explicitly named in an on clause.",
+      "explanation": "Comparison operators differ: without bool they keep the left side’s metric name, with some exceptions.",
+      "source": "Prometheus documentation, Operators, \"Arithmetic binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#arithmetic-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.arithmetic-ops"
+      ],
+      "order": 4250
+    },
+    {
+      "id": "prom.promql-aggregation.comparison-ops-name-two",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two of the six binary comparison operators PromQL supports?",
+      "back": "Any two of: == (equal), != (not-equal), > (greater-than), < (less-than), >= (greater-or-equal), <= (less-or-equal).",
+      "explanation": "They're defined between scalar/scalar, vector/scalar and vector/vector value pairs.",
+      "source": "Prometheus documentation, Operators, \"Comparison binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#comparison-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.comparison-ops"
+      ],
+      "order": 4260
+    },
+    {
+      "id": "prom.promql-aggregation.comparison-default-filters",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "By default, what do PromQL's comparison operators do to a vector, rather than returning true/false values?",
+      "back": "They filter it: elements where the comparison is false, or which find no match, are dropped from the result vector.",
+      "explanation": "This default behaviour is why up == 0 returns only the down targets, not a 0/1 value for every target.",
+      "source": "Prometheus documentation, Operators, \"Comparison binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#comparison-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.comparison-ops"
+      ],
+      "order": 4270
+    },
+    {
+      "id": "prom.promql-aggregation.bool-modifier-returns-0-1",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Adding the {{c1::bool}} modifier after a comparison operator makes it return 0 or 1 for the value, instead of filtering.",
+      "explanation": "Between two scalars, this modifier isn't optional: bool must be provided for a comparison to return a scalar result at all.",
+      "source": "Prometheus documentation, Operators, \"Comparison binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#comparison-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.bool-modifier"
+      ],
+      "order": 4280
+    },
+    {
+      "id": "prom.promql-aggregation.bool-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You want every target's up value shown as 0 or 1, rather than having down targets dropped from the result. Which modifier do you add to up == 1?",
+      "back": "bool, written as up == bool 1. This returns 1 or 0 for every matched target instead of filtering any out.",
+      "explanation": "Without bool, the comparison would drop every target that fails the check, leaving only the up ones.",
+      "source": "Prometheus documentation, Operators, \"Comparison binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#comparison-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.bool-modifier"
+      ],
+      "order": 4290
+    },
+    {
+      "id": "prom.promql-aggregation.and-intersection",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "vector1 and vector2 results in the elements of vector1 for which vector2 has {{c1::exactly matching label sets}}; the rest are dropped.",
+      "explanation": "The metric name and values it keeps are carried over from vector1, never from vector2.",
+      "source": "Prometheus documentation, Operators, \"Logical/set binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#logicalset-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.set-ops"
+      ],
+      "order": 4300
+    },
+    {
+      "id": "prom.promql-aggregation.or-union",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does vector1 or vector2 return?",
+      "back": "All of vector1's elements, plus every element of vector2 that has no matching label set already in vector1.",
+      "explanation": "So vector1's elements always win on overlap; vector2 only contributes what vector1 doesn't already have.",
+      "source": "Prometheus documentation, Operators, \"Logical/set binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#logicalset-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.set-ops"
+      ],
+      "order": 4310
+    },
+    {
+      "id": "prom.promql-aggregation.unless-complement",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does vector1 unless vector2 return?",
+      "back": "The elements of vector1 that have no exactly matching label set in vector2; any matching elements in both are dropped.",
+      "explanation": "It's the complement of and: and keeps the overlap, unless keeps everything except the overlap.",
+      "source": "Prometheus documentation, Operators, \"Logical/set binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#logicalset-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.set-ops"
+      ],
+      "order": 4320
+    },
+    {
+      "id": "prom.promql-aggregation.on-vs-ignoring",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "What's the difference between the on and ignoring vector matching keywords?",
+      "back": "on(labels) matches only on the listed labels. ignoring(labels) matches on every label except the listed ones.",
+      "explanation": "Both reshape which labels two vectors are matched on, in opposite directions, much like by and without do for aggregation.",
+      "contrast": "on(code) matches purely by the code label; ignoring(code) matches on every other shared label and disregards code.",
+      "source": "Prometheus documentation, Operators, \"Vector matching keywords\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#vector-matching-keywords",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "vector matching"
+      ],
+      "conceptIDs": [
+        "prom.on-ignoring"
+      ],
+      "order": 4330
+    },
+    {
+      "id": "prom.promql-aggregation.one-to-one-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "method_code:http_errors:rate5m has a code label; method:http_requests:rate5m does not. To divide error rate by request rate per method, what keyword lets the two vectors match despite that difference?",
+      "back": "ignoring(code), as in method_code:http_errors:rate5m{code=\"500\"} / ignoring(code) method:http_requests:rate5m.",
+      "explanation": "Without ignoring(code), no pair would share an identical label set, so the division would return nothing at all.",
+      "source": "Prometheus documentation, Operators, \"One-to-one vector matches\", example",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#one-to-one-vector-matches",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "one-to-one vector matching"
+      ],
+      "conceptIDs": [
+        "prom.one-to-one"
+      ],
+      "order": 4340
+    },
+    {
+      "id": "prom.promql-aggregation.group-left-cardinality",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "method_code:http_errors:rate5m has several entries per method (split further by code), while method:http_requests:rate5m has just one entry per method. Dividing the two needs which modifier: group_left or group_right?",
+      "back": "group_left, because the left-hand vector (the errors, with the extra code label) is the side with higher cardinality.",
+      "explanation": "group_left allows many-to-one matching, where the left vector is the \"many\" side and the right vector is the \"one\" side.",
+      "source": "Prometheus documentation, Operators, \"Many-to-one and one-to-many vector matches\", example",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#many-to-one-and-one-to-many-vector-matches",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "group_left",
+        "group_right"
+      ],
+      "conceptIDs": [
+        "prom.group-left-right"
+      ],
+      "order": 4350
+    },
+    {
+      "id": "prom.promql-aggregation.group-right-retains-right-name",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "In a comparison binary operation without the bool modifier, which side's metric name is kept if group_right is used?",
+      "back": "The right side's metric name, to avoid collisions.",
+      "explanation": "Without group_right, the left side's metric name is normally the one kept, unless on is also used, which drops it entirely.",
+      "source": "Prometheus documentation, Operators, \"Comparison binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#comparison-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.group-left-right"
+      ],
+      "order": 4360
+    },
+    {
+      "id": "prom.promql-aggregation.scalar-vector-application",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Between an instant vector and a scalar, an arithmetic operator is applied to {{c1::the value of every data sample in the vector}}.",
+      "explanation": "So multiplying an instant vector of floats by 2 multiplies every sample's value by 2. As in any arithmetic operation involving vectors, the metric name is dropped from the result.",
+      "source": "Prometheus documentation, Operators, \"Arithmetic binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#arithmetic-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.scalar-vector-ops"
+      ],
+      "order": 4370
+    },
+    {
+      "id": "prom.promql-aggregation.precedence-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "In PromQL's binary operator precedence, which group of operators binds more tightly: * / % atan2, or + -?",
+      "back": "* / % atan2 bind more tightly than + -, which in turn bind more tightly than the comparison operators.",
+      "explanation": "^ binds tightest of all and, unlike the others, is right-associative, so 2^3^2 is 2^(3^2), not (2^3)^2.",
+      "source": "Prometheus documentation, Operators, \"Binary operator precedence\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#binary-operator-precedence",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.precedence"
+      ],
+      "order": 4380
+    },
+    {
+      "id": "prom.promql-aggregation.label-replace-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A series carries service=\"a:c\", and you want a new foo label holding just the part before the colon. Which function, and roughly how, gets you foo=\"a\"?",
+      "back": "label_replace, matching a regex against service and capturing the part before the colon into $1, e.g. label_replace(v, \"foo\", \"$1\", \"service\", \"(.*):.*\").",
+      "explanation": "If the regular expression doesn't match a given series, that series is returned unchanged rather than erroring.",
+      "source": "Prometheus documentation, Functions, \"label_replace()\", example",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#label_replace",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "label_replace"
+      ],
+      "conceptIDs": [
+        "prom.label-replace"
+      ],
+      "order": 4390
+    },
+    {
+      "id": "prom.promql-aggregation.label-join-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A series has src1=\"a\", src2=\"b\" and src3=\"c\", and you want one foo label holding \"a,b,c\". Which function does this, and with what separator argument?",
+      "back": "label_join, with \",\" as the separator: label_join(v, \"foo\", \",\", \"src1\", \"src2\", \"src3\").",
+      "explanation": "label_join can join any number of source labels, unlike label_replace, which works from a single source label.",
+      "source": "Prometheus documentation, Functions, \"label_join()\", example",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#label_join",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "label_join"
+      ],
+      "conceptIDs": [
+        "prom.label-replace"
+      ],
+      "order": 4400
+    },
+    {
+      "id": "prom.promql-aggregation.bucket-series-fields",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A classic histogram with base name <basename> results in which three kinds of time series?",
+      "back": "<basename>_bucket{le=\"...\"} for each bucket, <basename>_sum for the total of observed values, and <basename>_count for the number observed.",
+      "explanation": "<basename>_count is identical to <basename>_bucket{le=\"+Inf\"}, since the +Inf bucket by definition contains every observation.",
+      "source": "Prometheus documentation, Metric types, \"Histogram\"",
+      "sourceURL": "https://prometheus.io/docs/concepts/metric_types/#histogram",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram"
+      ],
+      "conceptIDs": [
+        "prom.bucket-series"
+      ],
+      "order": 4410
+    },
+    {
+      "id": "prom.promql-aggregation.bucket-created-even-if-empty",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "If a classic histogram's configured bucket boundary has received no observations at all, does Prometheus still expose its _bucket series?",
+      "back": "Yes. Every configured bucket creates a _bucket series, whether or not it is populated.",
+      "explanation": "This \"one series per bucket, populated or not\" cost is exactly what makes classic histograms more expensive to store than NHCBs.",
+      "source": "Prometheus documentation, Histograms and summaries, \"Bucketing\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#bucketing",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram"
+      ],
+      "conceptIDs": [
+        "prom.bucket-series"
+      ],
+      "order": 4420
+    },
+    {
+      "id": "prom.promql-aggregation.cumulative-buckets-fact",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A classic histogram's buckets are cumulative: every bucket counts all observations {{c1::less than or equal to its own upper boundary}}.",
+      "explanation": "That's what the le (\"less or equal\") label name on each bucket series stands for.",
+      "source": "Prometheus documentation, Metric types, \"Histogram\"",
+      "sourceURL": "https://prometheus.io/docs/concepts/metric_types/#histogram",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram"
+      ],
+      "conceptIDs": [
+        "prom.cumulative-buckets"
+      ],
+      "order": 4430
+    },
+    {
+      "id": "prom.promql-aggregation.cumulative-buckets-figure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "For a classic histogram's cumulative buckets, what should be true of the bucket counts as le increases from one boundary to the next?",
+      "back": "They should be monotonically increasing (non-decreasing): a higher-le bucket's count can never be lower than a lower-le bucket's.",
+      "explanation": "That follows directly from cumulation: a bucket with a higher boundary contains every observation the lower one does, plus possibly more.",
+      "source": "Prometheus documentation, Functions, \"histogram_quantile()\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram"
+      ],
+      "conceptIDs": [
+        "prom.cumulative-buckets"
+      ],
+      "image": {
+        "file": "media/histogram-buckets.svg",
+        "alt": "Bar chart of a classic histogram's cumulative bucket counts for http_request_duration_seconds_bucket: le=\"0.1\" holds 12, le=\"0.3\" holds 30, le=\"1\" holds 41, le=\"+Inf\" holds 45. Each bar's count includes every observation at or below its own le boundary, so the counts only grow as le increases.",
+        "credit": "Drawn for this deck from Prometheus documentation, Metric types and Functions",
+        "licence": "B · Apache 2.0",
+        "side": "back"
+      },
+      "order": 4440
+    },
+    {
+      "id": "prom.promql-aggregation.hq-classic-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "How do you calculate the 90th percentile of request durations over the last 10m from a classic histogram called http_request_duration_seconds?",
+      "back": "histogram_quantile(0.9, rate(http_request_duration_seconds_bucket[10m])).",
+      "explanation": "rate() is applied first to the raw bucket counters to get a per-second rate before histogram_quantile reads them.",
+      "source": "Prometheus documentation, Functions, \"histogram_quantile()\", example",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram_quantile",
+        "rate"
+      ],
+      "conceptIDs": [
+        "prom.hq-procedure"
+      ],
+      "order": 4450
+    },
+    {
+      "id": "prom.promql-aggregation.hq-native-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "The same 90th-percentile query, but http_request_duration_seconds is now a native histogram. How does the expression change?",
+      "back": "histogram_quantile(0.9, rate(http_request_duration_seconds[10m])) — the same metric name, with no _bucket suffix needed.",
+      "explanation": "Native histogram samples carry their own buckets inside one composite sample, so there's no separate _bucket series to name.",
+      "source": "Prometheus documentation, Functions, \"histogram_quantile()\", example",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram_quantile",
+        "native histogram"
+      ],
+      "conceptIDs": [
+        "prom.hq-procedure"
+      ],
+      "order": 4460
+    },
+    {
+      "id": "prom.promql-aggregation.hq-aggregate-by-job",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "To aggregate a classic histogram's 90th percentile by job across all instances, which label must the by clause include alongside job, and why?",
+      "back": "le. histogram_quantile needs the le label present to read the buckets, so a by clause that drops it breaks the calculation.",
+      "explanation": "The full expression is histogram_quantile(0.9, sum by (job, le) (rate(http_request_duration_seconds_bucket[10m]))).",
+      "source": "Prometheus documentation, Functions, \"histogram_quantile()\", example",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram_quantile"
+      ],
+      "conceptIDs": [
+        "prom.hq-procedure"
+      ],
+      "order": 4470
+    },
+    {
+      "id": "prom.promql-aggregation.hq-special-cases",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "For a classic histogram, what does histogram_quantile() return if b contains fewer than two buckets, and what must the highest bucket's upper bound be?",
+      "back": "It returns NaN with fewer than two buckets. The highest bucket must have an upper bound of +Inf, or NaN is returned as well.",
+      "explanation": "Both checks guard against a histogram that's missing the structure histogram_quantile needs to interpolate a value at all.",
+      "source": "Prometheus documentation, Functions, \"histogram_quantile()\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram_quantile"
+      ],
+      "conceptIDs": [
+        "prom.hq-procedure"
+      ],
+      "order": 4480
+    },
+    {
+      "id": "prom.promql-aggregation.hq-min-max-estimate",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "How can histogram_quantile() be used to get the estimated minimum and maximum values stored in a histogram?",
+      "back": "histogram_quantile(0, v) for the estimated minimum, histogram_quantile(1, v) for the estimated maximum.",
+      "explanation": "These are just the φ=0 and φ=1 edges of the same quantile calculation, not a separate function.",
+      "source": "Prometheus documentation, Functions, \"histogram_quantile()\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram_quantile"
+      ],
+      "conceptIDs": [
+        "prom.histogram-quantile"
+      ],
+      "order": 4490
+    },
+    {
+      "id": "prom.promql-aggregation.average-formula-classic",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "How do you calculate the average request duration over the last 5m from a classic histogram or summary called http_request_duration_seconds?",
+      "back": "rate(http_request_duration_seconds_sum[5m]) / rate(http_request_duration_seconds_count[5m]).",
+      "explanation": "The count series behaves like a counter of requests, so dividing the rate of the sum by the rate of the count gives an average per observation.",
+      "source": "Prometheus documentation, Histograms and summaries, \"Count and sum of observations\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram",
+        "summary",
+        "rate"
+      ],
+      "conceptIDs": [
+        "prom.average-from-sum-count"
+      ],
+      "order": 4500
+    },
+    {
+      "id": "prom.promql-aggregation.average-formula-native",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "What's the equivalent average-duration expression for a native histogram, using histogram_sum and histogram_count?",
+      "back": "histogram_sum(rate(http_request_duration_seconds[5m])) / histogram_count(rate(http_request_duration_seconds[5m])).",
+      "explanation": "A shorter equivalent also exists: histogram_avg(rate(http_request_duration_seconds[5m])).",
+      "source": "Prometheus documentation, Histograms and summaries, \"Count and sum of observations\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "native histogram",
+        "rate"
+      ],
+      "conceptIDs": [
+        "prom.average-from-sum-count"
+      ],
+      "order": 4510
+    },
+    {
+      "id": "prom.promql-aggregation.count-series-behaves-like-counter",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "The key property of a counter in Prometheus is that it always goes up, unless there is a counter reset, and the _count series of a summary or classic histogram {{c1::behaves exactly like a counter}}.",
+      "explanation": "That's why rate() is applied to _count the same way it would be applied to a metric named http_requests_total.",
+      "source": "Prometheus documentation, Histograms and summaries, \"Count and sum of observations\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "counter"
+      ],
+      "conceptIDs": [
+        "prom.average-from-sum-count"
+      ],
+      "order": 4520
+    },
+    {
+      "id": "prom.promql-aggregation.histogram-vs-summary-contrast",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "What's the essential difference between how a summary and a histogram produce a quantile?",
+      "back": "A summary calculates streaming quantiles inside the instrumented program itself. A histogram exposes bucketed counts, and Prometheus calculates the quantile from those buckets.",
+      "explanation": "That difference is also why a histogram's quantile and time window can be changed at query time, while a summary's are fixed at instrumentation time.",
+      "contrast": "Summary: pre-calculated φ-quantiles chosen up front, expensive to record, not aggregatable. Histogram: bucketed counts, cheap to record, quantile computed ad hoc, aggregatable.",
+      "source": "Prometheus documentation, Histograms and summaries, \"Quantiles\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#quantiles",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram",
+        "summary"
+      ],
+      "conceptIDs": [
+        "prom.histogram-vs-summary"
+      ],
+      "order": 4530
+    },
+    {
+      "id": "prom.promql-aggregation.summary-not-aggregatable",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A service runs several replicated instances, each exposing its own 95th-percentile summary. Does averaging those per-instance quantiles give a statistically valid overall 95th percentile?",
+      "back": "No. Aggregating a summary’s precomputed quantiles rarely makes sense, and here averaging them yields statistically nonsensical values.",
+      "explanation": "With histograms the docs sum the bucket rates across instances first, then histogram_quantile() computes one overall 95th percentile.",
+      "source": "Prometheus documentation, Histograms and summaries, \"Quantiles\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#quantiles",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "summary"
+      ],
+      "conceptIDs": [
+        "prom.summary-not-aggregatable"
+      ],
+      "order": 4540
+    },
+    {
+      "id": "prom.promql-aggregation.quantile-error-bucket-width",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "For a classic histogram, what limits the error in a quantile that histogram_quantile() estimates?",
+      "back": "The width of the bucket the quantile value falls into: a wider bucket means a larger possible error.",
+      "explanation": "For a native histogram, the error is limited by the configured resolution instead, which is generally easier to tighten than redesigning a fixed classic bucket layout.",
+      "source": "Prometheus documentation, Histograms and summaries, \"Quantiles\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#quantiles",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram",
+        "native histogram"
+      ],
+      "conceptIDs": [
+        "prom.quantile-error"
+      ],
+      "order": 4550
+    },
+    {
+      "id": "prom.promql-aggregation.apdex-formula",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "With a target duration of 300ms and a tolerated duration of 1.2s, how is an Apdex score built from a native histogram's histogram_fraction()?",
+      "back": "The fraction of requests within the target, plus half the fraction between the target and the tolerated duration.",
+      "explanation": "The tolerated duration is usually 4 times the target duration, though this expression takes both as already-chosen values.",
+      "source": "Prometheus documentation, Histograms and summaries, \"Apdex score\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#apdex-score",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram"
+      ],
+      "conceptIDs": [
+        "prom.apdex"
+      ],
+      "order": 4560
+    },
+    {
+      "id": "prom.promql-aggregation.classic-vs-native-contrast",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "front": "What's the main structural difference between a classic histogram and a native histogram in storage?",
+      "back": "Classic: several separate float series (_bucket, _sum, _count). Native: one composite sample per timestamp, holding buckets, sum and count together.",
+      "explanation": "In the TSDB, one native histogram is one time series of composite samples rather than a bunch of independent time series.",
+      "contrast": "Classic: many series, fixed bucket boundaries set at instrumentation time. Native: one series, dynamic exponential buckets at a configured resolution.",
+      "source": "Prometheus documentation, Histograms and summaries, \"Overview\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#overview",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "native histogram",
+        "histogram"
+      ],
+      "conceptIDs": [
+        "prom.classic-vs-native"
+      ],
+      "order": 4570
+    },
+    {
+      "id": "prom.promql-aggregation.nhcb-application",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "An instrumentation library only supports classic histograms, but the team still wants more efficient storage. Can Prometheus still give them some of native histograms’ benefits, without changing the instrumentation?",
+      "back": "Yes, by configuring Prometheus to ingest the classic histogram as an NHCB, though it keeps the same fixed bucket layout and its limitations.",
+      "explanation": "NHCBs are only created on the Prometheus server side; on the instrumentation side, the metric still behaves exactly like a classic histogram.",
+      "source": "Prometheus documentation, Histograms and summaries, \"Instrumentation library support\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#instrumentation-library-support",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "NHCB",
+        "native histograms with custom buckets"
+      ],
+      "conceptIDs": [
+        "prom.nhcb"
+      ],
+      "order": 4580
+    },
+    {
+      "id": "prom.promql-aggregation.histogram-count-sum-fns",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "For a native histogram, what do histogram_count() and histogram_sum() return?",
+      "back": "histogram_count returns the number of observations stored in the histogram sample; histogram_sum returns the sum of the observed values.",
+      "explanation": "They give direct access to the two pieces a classic histogram would otherwise expose as separate _count and _sum series.",
+      "source": "Prometheus documentation, Functions, \"histogram_count() and histogram_sum()\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_count-and-histogram_sum",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "native histogram"
+      ],
+      "conceptIDs": [
+        "prom.histogram-fns"
+      ],
+      "order": 4590
+    },
+    {
+      "id": "prom.promql-aggregation.histogram-avg-shortcut",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "histogram_avg(rate(http_request_duration_seconds[5m])) is a shorter equivalent of dividing {{c1::histogram_sum}} by histogram_count of the same rate expression.",
+      "explanation": "It exists purely as a convenience: it computes exactly the same average, without writing the division out.",
+      "source": "Prometheus documentation, Histograms and summaries, \"Count and sum of observations\"",
+      "sourceURL": "https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "native histogram"
+      ],
+      "conceptIDs": [
+        "prom.histogram-fns"
+      ],
+      "order": 4600
+    },
+    {
+      "id": "prom.promql-aggregation.histogram-fraction-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "How do you calculate, from a native histogram, the fraction of HTTP requests over the last hour that took 200ms or less?",
+      "back": "histogram_fraction(0, 0.2, rate(http_request_duration_seconds[1h])).",
+      "explanation": "If the 0 and 0.2 boundaries don't land exactly on bucket edges, the function estimates the fraction by interpolation.",
+      "source": "Prometheus documentation, Functions, \"histogram_fraction()\", example",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_fraction",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "native histogram"
+      ],
+      "conceptIDs": [
+        "prom.histogram-fns"
+      ],
+      "order": 4610
+    },
+    {
+      "id": "prom.promql-aggregation.rule-naming-format",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Recording rules should be named in the general form {{c1::level:metric:operations}}.",
+      "explanation": "level is the aggregation level and labels of the rule's output, metric is the (largely unchanged) source metric name, and operations lists what was applied, newest first.",
+      "source": "Prometheus documentation, Recording rules, \"Naming\"",
+      "sourceURL": "https://prometheus.io/docs/practices/rules/#naming",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "recording rule"
+      ],
+      "conceptIDs": [
+        "prom.rule-naming"
+      ],
+      "order": 4620
+    },
+    {
+      "id": "prom.promql-aggregation.rule-naming-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A recording rule takes the rate() of requests_total over 5m for one instance and path. Following level:metric:operations, what would a sensible rule name be?",
+      "back": "instance_path:requests:rate5m — level names the labels kept (instance, path), metric drops _total, and operations records rate5m.",
+      "explanation": "That’s the docs’ own worked example: the naming convention strips _total off a counter’s name when rate() or irate() is used.",
+      "source": "Prometheus documentation, Recording rules, \"Examples\"",
+      "sourceURL": "https://prometheus.io/docs/practices/rules/#examples",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "recording rule"
+      ],
+      "conceptIDs": [
+        "prom.rule-naming"
+      ],
+      "order": 4630
+    },
+    {
+      "id": "prom.promql-aggregation.ratio-aggregation-rule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "When aggregating a ratio (such as a failure rate) up to a coarser level, what does the docs' guidance say to do, and what should you avoid?",
+      "back": "Aggregate the numerator and the denominator separately, then divide. Avoid taking the average of a ratio, or the average of an average.",
+      "explanation": "Averaging ratios directly isn't statistically valid, in the same way averaging summary quantiles isn't.",
+      "source": "Prometheus documentation, Recording rules, \"Aggregation\"",
+      "sourceURL": "https://prometheus.io/docs/practices/rules/#aggregation",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "recording rule"
+      ],
+      "conceptIDs": [
+        "prom.ratio-aggregation"
+      ],
+      "order": 4640
+    },
+    {
+      "id": "prom.promql-aggregation.ratio-aggregation-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "instance_path:request_failures:rate5m and instance_path:requests:rate5m both exist per instance and path. To get the job-level failure ratio, aggregating away instance and path, what's the correct order of operations?",
+      "back": "sum without (instance, path) each of the two series first, then divide the summed failures by the summed requests.",
+      "explanation": "Dividing at the instance/path level first, then averaging those ratios, would give a statistically invalid result instead.",
+      "source": "Prometheus documentation, Recording rules, \"Examples\"",
+      "sourceURL": "https://prometheus.io/docs/practices/rules/#examples",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "recording rule"
+      ],
+      "conceptIDs": [
+        "prom.ratio-aggregation"
+      ],
+      "order": 4650
+    },
+    {
+      "id": "prom.promql-aggregation.always-specify-without-labels",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "When writing a recording rule, why does the docs' guidance say to always specify a without clause naming the labels being aggregated away?",
+      "back": "To preserve all the other labels, such as job, which avoids conflicts and gives more useful metrics and alerts.",
+      "explanation": "Leaving the without clause implicit risks silently dropping labels the rule's consumers still need.",
+      "source": "Prometheus documentation, Recording rules, \"Aggregation\"",
+      "sourceURL": "https://prometheus.io/docs/practices/rules/#aggregation",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "recording rule"
+      ],
+      "conceptIDs": [
+        "prom.ratio-aggregation"
+      ],
+      "order": 4660
+    },
+    {
+      "id": "prom.promql-aggregation.recording-rule-metric-name-valid",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What must a recording rule's record field, the name of the series it writes, be?",
+      "back": "A valid metric name, following the same rules as any other Prometheus metric name.",
+      "explanation": "This is what lets a recording rule's output be queried later exactly like any other metric.",
+      "source": "Prometheus documentation, Defining recording rules, \"Recording rules\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/#recording-rules",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "recording rule"
+      ],
+      "conceptIDs": [
+        "prom.recording-rule"
+      ],
+      "order": 4670
+    },
+    {
+      "id": "prom.promql-aggregation.recording-rule-dashboard-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A dashboard re-runs the same expensive aggregation over thousands of series on every refresh, making it slow to load. What's the fix, using what this topic teaches?",
+      "back": "Precompute that expression as a recording rule, and have the dashboard query the saved result instead of the original expression.",
+      "explanation": "Querying a recording rule's precomputed series is often much faster than re-running the original expression each time it's needed.",
+      "source": "Prometheus documentation, Defining recording rules, \"Recording rules\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/#recording-rules",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "recording rule"
+      ],
+      "conceptIDs": [
+        "prom.recording-rule"
+      ],
+      "order": 4675
+    },
+    {
+      "id": "prom.promql-aggregation.aggregation-operators-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "memory_consumption_bytes has application, instance and group labels. You want total memory consumption per application and group, across all instances. Which expression does this?",
+      "back": "sum without (instance) (memory_consumption_bytes), equivalent to sum by (application, group) (memory_consumption_bytes).",
+      "explanation": "sum(v) adds up sample values the same way the + operator does between two values, here collapsing just the instance dimension away.",
+      "source": "Prometheus documentation, Operators, \"sum\", example",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#aggregation-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.aggregation-operators"
+      ],
+      "order": 4680
+    },
+    {
+      "id": "prom.promql-aggregation.comparison-ops-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You want only the targets that are currently down, using the up metric, not a 0/1 value for every target. Which comparison expression, with or without bool, gets this?",
+      "back": "up == 0, without bool. By default, comparison operators filter, dropping elements where the comparison is false or unmatched.",
+      "explanation": "Adding bool here would instead keep every target and turn the result into 0s and 1s, which isn't what's wanted for this particular query.",
+      "source": "Prometheus documentation, Operators, \"Comparison binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#comparison-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.comparison-ops"
+      ],
+      "order": 4685
+    },
+    {
+      "id": "prom.promql-aggregation.set-ops-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You want the instances present in up_targets that are NOT present in maintenance_targets, dropping any that match on both sides. Which logical/set operator does this?",
+      "back": "unless: up_targets unless maintenance_targets keeps only up_targets elements with no exactly matching label set in maintenance_targets.",
+      "explanation": "and would instead keep only the overlap between the two vectors, the opposite of what's wanted here.",
+      "source": "Prometheus documentation, Operators, \"Logical/set binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#logicalset-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.set-ops"
+      ],
+      "order": 4690
+    },
+    {
+      "id": "prom.promql-aggregation.scalar-vector-kb-conversion",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "An instant vector of byte counts needs converting to kilobytes for a graph. What does bytes_metric / 1024 do to the vector, label-wise?",
+      "back": "Every sample's value is divided by 1024; the other labels stay, but the metric name is dropped.",
+      "explanation": "That's the general rule for a vector combined with a scalar: the operator is applied to the value of every sample in the vector.",
+      "source": "Prometheus documentation, Operators, \"Arithmetic binary operators\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/operators/#arithmetic-binary-operators",
+      "sourceLicence": "B · Apache 2.0",
+      "conceptIDs": [
+        "prom.scalar-vector-ops"
+      ],
+      "order": 4695
+    },
+    {
+      "id": "prom.promql-aggregation.bucket-series-application",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A histogram is named http_request_duration_seconds. What is the exact series name for its count of observations at or below 0.5 seconds?",
+      "back": "http_request_duration_seconds_bucket{le=\"0.5\"}.",
+      "explanation": "The same base name also produces _sum for the total of observed values and _count for the number observed.",
+      "source": "Prometheus documentation, Metric types, \"Histogram\"",
+      "sourceURL": "https://prometheus.io/docs/concepts/metric_types/#histogram",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram"
+      ],
+      "conceptIDs": [
+        "prom.bucket-series"
+      ],
+      "order": 4700
+    },
+    {
+      "id": "prom.promql-aggregation.cumulative-buckets-application",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A histogram's le=\"0.1\" bucket reports 30 observations and its le=\"0.3\" bucket reports 24. Is this a valid cumulative bucket layout?",
+      "back": "No. Cumulative bucket counts must be monotonically increasing as le rises, so a higher-le bucket can never report fewer observations than a lower one.",
+      "explanation": "A le=\"0.3\" bucket, having a higher boundary, must contain every observation the le=\"0.1\" bucket does, plus possibly more.",
+      "source": "Prometheus documentation, Functions, \"histogram_quantile()\"",
+      "sourceURL": "https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "histogram"
+      ],
+      "conceptIDs": [
+        "prom.cumulative-buckets"
+      ],
+      "order": 4705
+    }
+  ]
+}

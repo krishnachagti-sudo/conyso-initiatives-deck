@@ -106,7 +106,7 @@ budget, not an extra.
 ## Before you reply
 From /home/user/conyso-initiatives-deck, all three must be clean for your
 topics:
-- `node build/check.mjs --only=<slug> --summary --registry=research/deck-briefs/<slug>-terms.json --concepts-extra=<your concept file>`
+- `node build/check.mjs --only=<slug> --summary --registry=research/deck-briefs/<slug>-terms.json --concepts-extra=research/deck-briefs/<slug>-concepts.json,<your concept file>`
 - `node build/status.mjs <slug> --registry`
 - `node build/sources.mjs --only=<slug>`
 

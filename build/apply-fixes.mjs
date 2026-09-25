@@ -8,11 +8,14 @@
 //
 //   node build/apply-fixes.mjs <slug> <fixes.jsonl> [--dry]
 //
+// --dry changes nothing: it patches a copy and reports what would break.
+//
 // Lines that match no card are reported, never guessed at. If the deck was
 // already pushed (deck.json is tracked by git), the patch version goes up and
 // the changelog gets a line. Run the checker afterwards.
 
-import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, mkdtempSync, cpSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { loadDeck, checkContext } from '../src/decks.mjs';
@@ -70,12 +73,17 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (!slug || !file) { console.error('usage: node build/apply-fixes.mjs <slug> <fixes.jsonl> [--dry]'); process.exitCode = 1; }
   else {
     const lines = readFileSync(file, 'utf8').split('\n').filter((l) => l.trim()).map((l, i) => { try { return JSON.parse(l); } catch { throw new Error(`${file}:${i + 1} is not JSON`); } });
-    const r = applyFixes(join('decks', slug), lines, { dry: process.argv.includes('--dry') });
+    // --dry applies the patches to a temporary copy and checks that copy, so an
+    // auditor can test its patch file before handing it over.
+    const dry = process.argv.includes('--dry');
+    const dir = dry ? join(mkdtempSync(join(tmpdir(), 'fixes-')), slug) : join('decks', slug);
+    if (dry) cpSync(join('decks', slug), dir, { recursive: true });
+    const r = applyFixes(dir, lines);
     console.log(`${r.applied} fix(es) applied (${Object.entries(r.bySeverity).map(([k, v]) => `${k} ${v}`).join(', ') || 'none'})${r.version ? `; deck is now v${r.version}` : ''}`);
     if (r.unmatched.length) { console.log(`${r.unmatched.length} line(s) matched no card: ${r.unmatched.slice(0, 10).join(', ')}`); process.exitCode = 1; }
     // A patch must not break a rule: check the patched cards now, so the next
     // step starts from a clean deck (writers' concept files count as merged).
-    const deck = loadDeck(join('decks', slug));
+    const deck = loadDeck(dir);
     const ctx = checkContext(deck.meta);
     const briefs = 'research/deck-briefs';
     for (const f of readdirSync(briefs).filter((x) => x.startsWith(`${slug}-concepts`) && x.endsWith('.json'))) for (const c of JSON.parse(readFileSync(join(briefs, f), 'utf8'))) if (!ctx.concepts.has(c.id)) ctx.concepts.set(c.id, c);
