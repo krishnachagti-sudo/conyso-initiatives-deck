@@ -1,0 +1,1815 @@
+{
+  "topic": "Secure access to virtual networks",
+  "notes": [
+    {
+      "id": "az104.secure-network-access.nsg-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a network security group (NSG)?",
+      "back": "A set of security rules that allow or deny inbound or outbound network traffic for Azure resources in a virtual network.",
+      "explanation": "It filters traffic between Azure resources inside Azure virtual networks, one rule at a time.",
+      "source": "Microsoft, “Azure network security groups overview” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can use an Azure network security group to filter network traffic between Azure resources in Azure virtual networks. A network security group contains security rules that allow or deny inbound network traffic to, or outbound network traffic from, several types of Azure resources.",
+      "introduces": [
+        "network security group",
+        "NSG"
+      ],
+      "example": "Like a guest list at a door, checked in both directions, but written as numbered allow and deny rules.",
+      "uses": [
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.nsg"
+      ],
+      "order": 12005
+    },
+    {
+      "id": "az104.secure-network-access.service-tags-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "In a security rule, what is a service tag?",
+      "back": "A named group of IP address prefixes from a given Azure service, usable in place of addresses.",
+      "explanation": "Using the tag spares you from updating rules each time the service's addresses change.",
+      "source": "Microsoft, “Azure network security groups overview”, “Service tags” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#service-tags",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A service tag represents a group of IP address prefixes from a given Azure service. It helps minimize the complexity of frequent updates on network security rules.",
+      "introduces": [
+        "service tags"
+      ],
+      "example": "Like writing \"the post office\" on a list instead of every counter's street address.",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.service-tags"
+      ],
+      "order": 12010
+    },
+    {
+      "id": "az104.secure-network-access.augmented-rules-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What are augmented security rules?",
+      "back": "NSG rules that combine several ports and several explicit IP addresses and ranges in one rule.",
+      "explanation": "Fewer rules can then express a larger, more complex policy.",
+      "source": "Microsoft, “Azure network security groups overview”, “Augmented security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#augmented-security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Augmented security rules simplify the security definition for virtual networks, allowing you to define larger and complex network security policies with fewer rules. You can combine multiple ports and multiple explicit IP addresses and ranges into a single, easily understood security rule.",
+      "introduces": [
+        "augmented security rules"
+      ],
+      "example": "Like one door rule reading \"staff from floors 2, 3 and 5, at doors 80 and 443\" rather than six separate rules.",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.augmented-rules"
+      ],
+      "order": 12015
+    },
+    {
+      "id": "az104.secure-network-access.asg-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an application security group (ASG)?",
+      "back": "A named group of virtual machine network interfaces that NSG rules can use as a source or destination instead of IP addresses.",
+      "explanation": "Rules follow the application's structure, so you no longer maintain lists of explicit IP addresses.",
+      "source": "Microsoft, “Application security groups” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/application-security-groups.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Application security groups in Azure Virtual Network enable you to configure network security as a natural extension of an application's structure, allowing you to group virtual machines and define network security policies based on those groups. You can reuse your security policy at scale without manual maintenance of explicit IP addresses.",
+      "introduces": [
+        "application security group",
+        "ASG"
+      ],
+      "example": "Like labelling machines \"web tier\" and writing rules for the label, not for each machine's address.",
+      "uses": [
+        "network security group",
+        "NSG",
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "az104.asg"
+      ],
+      "order": 12020
+    },
+    {
+      "id": "az104.secure-network-access.effective-rules-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What are effective security rules?",
+      "back": "The aggregated inbound and outbound rules actually applied to a network interface, viewed in Network Watcher.",
+      "explanation": "The view gathers every rule that applies to the interface in one place, for troubleshooting and audits.",
+      "source": "Microsoft, “Effective security rules overview” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/network-watcher/effective-security-rules-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Effective security rules view is a feature in Azure Network Watcher that you can use to view the aggregated inbound and outbound rules applied to a network interface.",
+      "introduces": [
+        "effective security rules"
+      ],
+      "example": "Like reading the final merged guest list for one door, not each organiser's separate list.",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.effective-security-rules"
+      ],
+      "order": 12025
+    },
+    {
+      "id": "az104.secure-network-access.bastion-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is Azure Bastion?",
+      "back": "A fully managed PaaS service giving RDP and SSH access to virtual machines over TLS, from the portal or a native client.",
+      "explanation": "It is deployed in your virtual network and reaches the machines on their private IP addresses.",
+      "source": "Microsoft, “What is Azure Bastion?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/bastion-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure Bastion is a fully managed PaaS service that provides secure and seamless RDP/SSH connectivity to your virtual machines directly over TLS from the Azure portal, or via the native SSH or RDP client already installed on your local computer.",
+      "introduces": [
+        "Azure Bastion"
+      ],
+      "example": "Like a staffed gatehouse that escorts you to any building on site, so no building needs its own street door.",
+      "uses": [
+        "virtual machine",
+        "Azure portal"
+      ],
+      "conceptIDs": [
+        "az104.bastion"
+      ],
+      "order": 12030
+    },
+    {
+      "id": "az104.secure-network-access.private-only-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a private-only Bastion?",
+      "back": "A Premium SKU Bastion deployment with no public IP address.",
+      "explanation": "Dropping the public IP address is aimed at enhanced security.",
+      "source": "Microsoft, “What is Azure Bastion?”, “Architecture” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/bastion-overview.md#architecture",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Private-only deployment**: Premium SKU without public IP address for enhanced security.",
+      "introduces": [
+        "private-only Bastion"
+      ],
+      "example": "Like a gatehouse that only opens onto the internal site road, never onto the public street.",
+      "uses": [
+        "Azure Bastion"
+      ],
+      "conceptIDs": [
+        "az104.bastion-private-only"
+      ],
+      "order": 12035
+    },
+    {
+      "id": "az104.secure-network-access.service-endpoint-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a virtual network service endpoint?",
+      "back": "A subnet setting giving direct, secure connectivity to Azure services over the Azure backbone network.",
+      "explanation": "Private IP addresses can then reach the service with no public IP address needed.",
+      "source": "Microsoft, “Azure virtual network service endpoints” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoints-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure virtual network service endpoints provide secure and direct connectivity to Azure services over an optimized route through the Azure backbone network. These endpoints allow you to secure critical Azure service resources exclusively to your virtual networks, enabling private IP addresses to reach Azure services without requiring public IP addresses.",
+      "introduces": [
+        "virtual network service endpoint"
+      ],
+      "example": "Like a staff-only corridor from your office wing straight to the records room, rather than going out onto the street.",
+      "uses": [
+        "virtual network",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.service-endpoint"
+      ],
+      "order": 12040
+    },
+    {
+      "id": "az104.secure-network-access.sep-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a service endpoint policy?",
+      "back": "A subnet policy that limits traffic over a service endpoint to specific Azure Storage accounts.",
+      "explanation": "It gives granular control over which storage accounts the virtual network can reach.",
+      "source": "Microsoft, “Virtual network service endpoint policies for Azure Storage” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoint-policies-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Virtual Network service endpoint policies allow you to filter egress virtual network traffic to Azure Storage accounts over service endpoint, and allow data exfiltration to only specific Azure Storage accounts.",
+      "introduces": [
+        "service endpoint policy"
+      ],
+      "example": "Like the staff corridor to the records room, but with a list of the only filing cabinets you may open.",
+      "uses": [
+        "virtual network service endpoint",
+        "storage account"
+      ],
+      "conceptIDs": [
+        "az104.service-endpoint-policy"
+      ],
+      "order": 12045
+    },
+    {
+      "id": "az104.secure-network-access.private-link-resource-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a private link resource?",
+      "back": "The destination target of a private endpoint, such as a storage account.",
+      "explanation": "A private endpoint always points at one of these resources, picked from the supported types.",
+      "source": "Microsoft, “What is a private endpoint?”, “Private-link resource” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/private-link/private-endpoint-overview.md#private-link-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A private-link resource is the destination target of a specified private endpoint.",
+      "introduces": [
+        "private link resource"
+      ],
+      "example": "Like the specific shop a private delivery door opens into, not the door itself.",
+      "uses": [
+        "private endpoint"
+      ],
+      "conceptIDs": [
+        "az104.private-link-resource"
+      ],
+      "order": 12050
+    },
+    {
+      "id": "az104.secure-network-access.priority-range",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "An NSG rule's priority is a number between {{c1::100 and 4096}}.",
+      "explanation": "The number sets the order in which Azure processes the rules.",
+      "source": "Microsoft, “Azure network security groups overview”, “Security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A number between 100 and 4096. Rules are processed in priority order, with lower numbers processed before higher numbers because lower numbers have higher priority.",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.nsg-priority"
+      ],
+      "order": 12060
+    },
+    {
+      "id": "az104.secure-network-access.priority-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which NSG rule is processed first: priority 200 or priority 300?",
+      "back": "Priority 200: lower numbers are processed before higher numbers.",
+      "explanation": "A lower number means a higher priority.",
+      "source": "Microsoft, “Azure network security groups overview”, “Security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Rules are processed in priority order, with lower numbers processed before higher numbers because lower numbers have higher priority.",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.nsg-priority"
+      ],
+      "order": 12065
+    },
+    {
+      "id": "az104.secure-network-access.first-match",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What happens once traffic matches an NSG rule?",
+      "back": "Processing stops; no later (higher-numbered) rule is evaluated.",
+      "explanation": "A later rule with the same attributes is never reached.",
+      "source": "Microsoft, “Azure network security groups overview”, “Security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Once traffic matches a rule, processing stops. As a result, any rules that exist with lower priorities (higher numbers) that have the same attributes as rules with higher priorities aren't processed.",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.nsg-first-match"
+      ],
+      "order": 12070
+    },
+    {
+      "id": "az104.secure-network-access.default-lowest",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why are Azure's default NSG rules given the highest priority numbers?",
+      "back": "So that your custom rules are always processed first.",
+      "explanation": "The default rules sit at 65000 and above, beyond the 100–4096 range for your own rules.",
+      "source": "Microsoft, “Azure network security groups overview”, “Security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Azure default security rules are given the lowest priority (highest number) to ensure your custom rules are always processed first.**",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.nsg-priority"
+      ],
+      "order": 12075
+    },
+    {
+      "id": "az104.secure-network-access.src-dst-options",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two kinds of value you can give as the source or destination of an NSG rule?",
+      "back": "Any two of: Any, an individual IP address, a CIDR block, a service tag, an application security group.",
+      "explanation": "To target a particular Azure resource, you use its private IP address.",
+      "source": "Microsoft, “Azure network security groups overview”, “Security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can specify Any, an individual IP address, a CIDR block (for example, 10.0.0.0/24), a service tag, or an application security group.",
+      "uses": [
+        "network security group",
+        "NSG",
+        "service tags",
+        "application security group"
+      ],
+      "conceptIDs": [
+        "az104.nsg-rule-properties"
+      ],
+      "order": 12080
+    },
+    {
+      "id": "az104.secure-network-access.inbound-after-nat",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "For inbound traffic, does an NSG see public or private destination IP addresses?",
+      "back": "Private: NSGs process inbound traffic after Azure translates public IP addresses to private ones.",
+      "explanation": "Outbound it is the other way round: rules run before private addresses are translated to public ones.",
+      "source": "Microsoft, “Azure network security groups overview”, “Security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For inbound traffic, network security groups process traffic after Azure translates public IP addresses to private IP addresses. For outbound traffic, network security groups process traffic before translating private IP addresses to public IP addresses.",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.nsg-rule-properties"
+      ],
+      "order": 12085
+    },
+    {
+      "id": "az104.secure-network-access.stateful",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You allow outbound traffic on port 80. Do you need an inbound rule for the replies?",
+      "back": "No: NSGs are stateful, so responses to allowed traffic are allowed.",
+      "explanation": "A flow record kept for each existing connection lets the NSG allow the return traffic.",
+      "source": "Microsoft, “Azure network security groups overview”, “Security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The flow record allows a network security group to be stateful. If you specify an outbound security rule to any address over port 80, for example, it's not necessary to specify an inbound security rule for the response to the outbound traffic.",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.nsg-rule-properties"
+      ],
+      "order": 12100
+    },
+    {
+      "id": "az104.secure-network-access.removed-rule",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You delete the NSG rule that allowed an open SSH session. What happens to that session?",
+      "back": "It stays connected; only new connections are blocked.",
+      "explanation": "New or changed rules apply only to connections made afterwards.",
+      "source": "Microsoft, “Azure network security groups overview”, “Security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you remove a security rule that allowed a connection, existing connections remain uninterrupted. Network security group rules only affect new connections.",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.nsg-rule-properties"
+      ],
+      "order": 12105
+    },
+    {
+      "id": "az104.secure-network-access.allowvnetinbound",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which default inbound NSG rule, at priority 65000, allows traffic from VirtualNetwork to VirtualNetwork?",
+      "back": "AllowVNetInBound.",
+      "explanation": "It allows any protocol, on all ports, between VirtualNetwork sources and destinations.",
+      "source": "Microsoft, “Azure network security groups overview”, “Default security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#default-security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "AllowVNetInBound |Priority|Source|Source ports|Destination|Destination ports|Protocol|Access| |---|---|---|---|---|---|---| |65000|VirtualNetwork|0-65535|VirtualNetwork|0-65535|Any|Allow|",
+      "uses": [
+        "network security group",
+        "NSG",
+        "service tags"
+      ],
+      "conceptIDs": [
+        "az104.nsg-default-inbound"
+      ],
+      "order": 12110
+    },
+    {
+      "id": "az104.secure-network-access.allowlbinbound",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which default inbound NSG rule, at priority 65001, allows traffic from the AzureLoadBalancer service tag?",
+      "back": "AllowAzureLoadBalancerInBound.",
+      "explanation": "It sits just after the virtual network rule and before the final deny.",
+      "source": "Microsoft, “Azure network security groups overview”, “Default security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#default-security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "AllowAzureLoadBalancerInBound |Priority|Source|Source ports|Destination|Destination ports|Protocol|Access| |---|---|---|---|---|---|---| |65001|AzureLoadBalancer|0-65535|0.0.0.0/0|0-65535|Any|Allow|",
+      "uses": [
+        "network security group",
+        "NSG",
+        "service tags"
+      ],
+      "conceptIDs": [
+        "az104.nsg-default-inbound"
+      ],
+      "order": 12115
+    },
+    {
+      "id": "az104.secure-network-access.denyallinbound",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which default inbound NSG rule, at priority 65500, denies everything that no earlier rule allowed?",
+      "back": "DenyAllInbound.",
+      "explanation": "It denies any protocol from any source on all ports.",
+      "source": "Microsoft, “Azure network security groups overview”, “Default security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#default-security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "DenyAllInbound |Priority|Source|Source ports|Destination|Destination ports|Protocol|Access| |---|---|---|---|---|---|---| |65500|0.0.0.0/0|0-65535|0.0.0.0/0|0-65535|Any|Deny|",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.nsg-default-inbound"
+      ],
+      "order": 12120
+    },
+    {
+      "id": "az104.secure-network-access.allowvnetoutbound",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which default outbound NSG rule, at priority 65000, allows traffic to VirtualNetwork?",
+      "back": "AllowVnetOutBound.",
+      "explanation": "It mirrors the inbound virtual network rule.",
+      "source": "Microsoft, “Azure network security groups overview”, “Default security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#default-security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "AllowVnetOutBound |Priority|Source|Source ports| Destination | Destination ports | Protocol | Access | |---|---|---|---|---|---|---| | 65000 | VirtualNetwork | 0-65535 | VirtualNetwork | 0-65535 | Any | Allow |",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.nsg-default-outbound"
+      ],
+      "order": 12125
+    },
+    {
+      "id": "az104.secure-network-access.allowinternetoutbound",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A new NSG holds only its default rules. Can a VM behind it download updates from the internet, and which rule decides?",
+      "back": "Yes: AllowInternetOutBound, at priority 65001.",
+      "explanation": "Outbound internet traffic is therefore allowed until you add a rule that denies it.",
+      "source": "Microsoft, “Azure network security groups overview”, “Default security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#default-security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "AllowInternetOutBound |Priority|Source|Source ports| Destination | Destination ports | Protocol | Access | |---|---|---|---|---|---|---| | 65001 | 0.0.0.0/0 | 0-65535 | Internet | 0-65535 | Any | Allow |",
+      "uses": [
+        "network security group",
+        "NSG",
+        "service tags"
+      ],
+      "conceptIDs": [
+        "az104.nsg-default-outbound"
+      ],
+      "order": 12130
+    },
+    {
+      "id": "az104.secure-network-access.denyalloutbound",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which default outbound NSG rule, at priority 65500, denies all remaining outbound traffic?",
+      "back": "DenyAllOutBound.",
+      "explanation": "It catches outbound traffic that neither the virtual network nor the internet rule allowed.",
+      "source": "Microsoft, “Azure network security groups overview”, “Default security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#default-security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "DenyAllOutBound |Priority|Source|Source ports| Destination | Destination ports | Protocol | Access | |---|---|---|---|---|---|---| | 65500 | 0.0.0.0/0 | 0-65535 | 0.0.0.0/0 | 0-65535 | Any | Deny |",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.nsg-default-outbound"
+      ],
+      "order": 12135
+    },
+    {
+      "id": "az104.secure-network-access.default-override",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You must stop VMs in one subnet from reaching a database VM elsewhere in the virtual network, which AllowVNetInBound permits. You can't delete that rule. What do you do?",
+      "back": "Add a deny rule with a priority number below 65000, which is processed first and overrides it.",
+      "explanation": "Default rules can't be removed but can be overridden by rules with higher priority.",
+      "source": "Microsoft, “Azure network security groups overview”, “Default security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#default-security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can't remove the default rules, but you can override them by creating rules with higher priorities.",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.nsg-default-inbound"
+      ],
+      "order": 12140
+    },
+    {
+      "id": "az104.secure-network-access.tag-maintenance",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Outbound, VMs may reach only Azure Storage, not the wider internet, and you don't want to track Storage's IP ranges. What do you use in the NSG rules?",
+      "back": "The Storage service tag as the allowed destination, with a rule denying other internet traffic.",
+      "explanation": "Azure maintains the IP addresses underlying each tag.",
+      "source": "Microsoft, “Azure virtual network service endpoints”, “Considerations” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoints-overview.md#considerations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you want to deny all outbound internet traffic and allow only traffic to specific Azure services, you can do so using service tags in your NSGs. You can specify supported Azure services as destination in your NSG rules and Azure also provides the maintenance of IP addresses underlying each tag.",
+      "uses": [
+        "network security group",
+        "NSG",
+        "service tags"
+      ],
+      "conceptIDs": [
+        "az104.service-tags"
+      ],
+      "order": 12150
+    },
+    {
+      "id": "az104.secure-network-access.augmented-limit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "In a single NSG rule, can you list several individual IP ranges? Several service tags?",
+      "back": "Several IP ranges, yes (augmented rules); several service tags or application security groups, no.",
+      "explanation": "Augmented rules widen the address and port fields, not the tag or group fields.",
+      "source": "Microsoft, “Azure network security groups overview”, “Security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Augmented security rules allow specifying multiple individual IP addresses and ranges in a single rule. However, you can't specify multiple service tags or application groups in a single rule.",
+      "uses": [
+        "augmented security rules",
+        "service tags",
+        "application security group"
+      ],
+      "conceptIDs": [
+        "az104.augmented-rules"
+      ],
+      "order": 12155
+    },
+    {
+      "id": "az104.secure-network-access.order-inbound",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "For inbound traffic, Azure processes the {{c1::subnet}} NSG first and then the network interface NSG.",
+      "explanation": "Traffic reaches the subnet before it reaches the virtual machine's interface.",
+      "source": "Microsoft, “How network security groups filter network traffic”, “Inbound traffic” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-group-how-it-works.md#inbound-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For inbound traffic, Azure first processes the rules in a network security group associated with a subnet if one exists. Azure then processes the rules in a network security group associated with the network interface if one exists.",
+      "uses": [
+        "network security group",
+        "NSG",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.nsg-order-inbound"
+      ],
+      "order": 12165
+    },
+    {
+      "id": "az104.secure-network-access.order-outbound",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "For outbound traffic, Azure processes the {{c1::network interface}} NSG first and then the subnet NSG.",
+      "explanation": "It is the reverse of the inbound order.",
+      "source": "Microsoft, “How network security groups filter network traffic”, “Outbound traffic” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-group-how-it-works.md#outbound-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For outbound traffic, Azure processes network security group rules in a specific order. Azure evaluates the rules in any network security group associated with a network interface. Then, Azure processes the rules in any network security group associated with the subnet.",
+      "uses": [
+        "network security group",
+        "NSG",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.nsg-order-outbound"
+      ],
+      "order": 12170
+    },
+    {
+      "id": "az104.secure-network-access.both-must-allow",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A VM's subnet NSG allows inbound TCP 443 from the internet; the NSG on its network interface has only the default rules. Does the traffic reach the VM?",
+      "back": "No. With NSGs at both levels, both must allow it; the interface NSG's DenyAllInbound blocks it.",
+      "explanation": "The subnet NSG passes the traffic on, and the interface NSG then evaluates it.",
+      "source": "Microsoft, “How network security groups filter network traffic”, “Inbound traffic” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-group-how-it-works.md#inbound-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To permit port 80 to the virtual machine, both *NSG1* and *NSG2* must include a rule that allows port 80 from the internet.",
+      "uses": [
+        "network security group",
+        "NSG",
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "az104.nsg-order-inbound"
+      ],
+      "order": 12175
+    },
+    {
+      "id": "az104.secure-network-access.outbound-nic-deny",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A VM's interface NSG denies outbound port 25; its subnet NSG allows everything outbound. Is the traffic sent?",
+      "back": "No. The interface NSG is evaluated first outbound and denies it; the subnet NSG never sees it.",
+      "explanation": "Outbound, a deny at either level is enough.",
+      "source": "Microsoft, “How network security groups filter network traffic”, “Outbound traffic” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-group-how-it-works.md#outbound-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If *NSG2* denies port 80 in its security rule, it denies the traffic, and *NSG1* never receives the traffic and can't evaluate it. To deny port 80 from the virtual machine, either one of or both of the network security groups must have a rule that denies port 80 to the internet.",
+      "uses": [
+        "network security group",
+        "NSG",
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "az104.nsg-order-outbound"
+      ],
+      "order": 12180
+    },
+    {
+      "id": "az104.secure-network-access.no-nsg-standard-ip",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A VM with a Standard public IP address has no NSG on its subnet or network interface. Can internet traffic reach it?",
+      "back": "No. It is secure by default; an NSG must be associated to let traffic in.",
+      "explanation": "Inbound traffic through a subnet and network interface with no NSG is blocked, so an NSG rule must allow it.",
+      "source": "Microsoft, “How network security groups filter network traffic”, “Inbound traffic” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-group-how-it-works.md#inbound-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The virtual machine with a standard public IP address is secure by default. For traffic to flow from the internet, a network security group must be associated with the subnet or network interface of the virtual machine.",
+      "uses": [
+        "network security group",
+        "NSG",
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "az104.nsg-order-inbound"
+      ],
+      "order": 12185
+    },
+    {
+      "id": "az104.secure-network-access.nsg-reuse",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Five subnets need identical inbound rules. Must you create five NSGs?",
+      "back": "No; one NSG can be associated with all five subnets.",
+      "explanation": "Each subnet and each interface can have its own NSG, or share one.",
+      "source": "Microsoft, “How network security groups filter network traffic” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-group-how-it-works.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If desired, you can associate a network security group with each virtual network subnet and network interface in a virtual machine. The same network security group can be associated with as many subnets and network interfaces as you choose.",
+      "uses": [
+        "network security group",
+        "NSG",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.nsg"
+      ],
+      "order": 12190
+    },
+    {
+      "id": "az104.secure-network-access.intra-subnet",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You add a deny-all inbound and outbound rule to the NSG on a subnet holding two VMs. Can the two VMs still talk to each other?",
+      "back": "No. Subnet NSG rules also apply to traffic between VMs in that subnet.",
+      "explanation": "By default a rule allows traffic within the subnet; the new deny-all rule overrides it.",
+      "source": "Microsoft, “How network security groups filter network traffic”, “Intra-subnet traffic” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-group-how-it-works.md#intra-subnet-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, virtual machines in the same subnet can communicate based on a default network security group rule allowing intra-subnet traffic. If you add a rule to *NSG1* that denies all inbound and outbound traffic, *VM1* and *VM2* can't communicate with each other.",
+      "uses": [
+        "network security group",
+        "NSG",
+        "virtual machine",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.nsg-order-inbound"
+      ],
+      "order": 12200
+    },
+    {
+      "id": "az104.secure-network-access.first-match-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "An NSG has inbound rule 110 \"allow TCP 3389 from 10.1.0.0/16\" and rule 120 \"deny TCP 3389 from any\". A connection arrives from 10.1.4.7 on 3389. What happens?",
+      "back": "It is allowed: rule 110 matches first and processing stops.",
+      "explanation": "Rule 120 would deny it, but it is never reached for this source.",
+      "source": "Microsoft, “Azure network security groups overview”, “Security rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-groups-overview.md#security-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Rules are processed in priority order, with lower numbers processed before higher numbers because lower numbers have higher priority. Once traffic matches a rule, processing stops.",
+      "uses": [
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.nsg-first-match"
+      ],
+      "order": 12205
+    },
+    {
+      "id": "az104.secure-network-access.asg-multi",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Can one network interface belong to more than one application security group?",
+      "back": "Yes, up to the Azure limits.",
+      "explanation": "Membership is per network interface, not per virtual machine.",
+      "source": "Microsoft, “Application security groups” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/application-security-groups.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Although each network interface (NIC) in this example is a member of only one application security group, a network interface can be a member of multiple application security groups, up to the Azure limits.",
+      "uses": [
+        "application security group"
+      ],
+      "conceptIDs": [
+        "az104.asg"
+      ],
+      "order": 12220
+    },
+    {
+      "id": "az104.secure-network-access.asg-same-vnet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which network interfaces can join an application security group?",
+      "back": "Only those in the same virtual network as the first interface assigned to it.",
+      "explanation": "You can't add interfaces from different virtual networks to the same group.",
+      "source": "Microsoft, “Application security groups”, “Constraints” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/application-security-groups.md#constraints",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "All network interfaces assigned to an application security group must exist in the same virtual network that the first network interface assigned to the application security group is in.",
+      "uses": [
+        "application security group",
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.asg-same-vnet"
+      ],
+      "order": 12225
+    },
+    {
+      "id": "az104.secure-network-access.asg-src-dst-vnet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "An NSG rule uses one ASG as its source and another as its destination. What must be true of their network interfaces?",
+      "back": "All of them must be in the same virtual network.",
+      "explanation": "Groups whose interfaces sit in different virtual networks can't be paired in one rule.",
+      "source": "Microsoft, “Application security groups”, “Constraints” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/application-security-groups.md#constraints",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you specify an application security group as the source and destination in a network security group rule, the network interfaces in both application security groups must exist in the same virtual network.",
+      "uses": [
+        "application security group",
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.asg-same-vnet"
+      ],
+      "order": 12230
+    },
+    {
+      "id": "az104.secure-network-access.asg-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "AsgApp already holds interfaces in VNet-A. You try to add an interface from a VM in VNet-B. What happens?",
+      "back": "It can't be added: every interface in an ASG must be in the same virtual network as the first one.",
+      "explanation": "The first interface assigned fixes the group's virtual network.",
+      "source": "Microsoft, “Application security groups”, “Constraints” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/application-security-groups.md#constraints",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can't add network interfaces from different virtual networks to the same application security group.",
+      "uses": [
+        "application security group",
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.asg-same-vnet"
+      ],
+      "order": 12235
+    },
+    {
+      "id": "az104.secure-network-access.asg-non-member",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "An NSG on a subnet has a rule whose destination is AsgDb. Does it apply to a VM in that subnet that isn't in AsgDb?",
+      "back": "No; the rule applies only to member network interfaces.",
+      "explanation": "Group membership, not subnet placement, decides whether the rule applies.",
+      "source": "Microsoft, “Application security groups” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/application-security-groups.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If the network interface isn't a member of an application security group, the rule doesn't apply to the network interface, even though the network security group is associated to the subnet.",
+      "uses": [
+        "application security group",
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.asg"
+      ],
+      "order": 12240
+    },
+    {
+      "id": "az104.secure-network-access.asg-tier-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Only the app tier (AsgApp) may reach the database tier (AsgSql) on TCP 1433; everything else in the virtual network must be blocked. How do you order the two inbound rules?",
+      "back": "Allow AsgApp → AsgSql 1433 at a lower number (say 110), then deny any → AsgSql 1433 at a higher number (say 120).",
+      "explanation": "The allow rule is processed first, so only AsgApp traffic gets past the deny rule.",
+      "source": "Microsoft, “Application security groups”, “Allow-Database-BusinessLogic” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/application-security-groups.md#allow-database-businesslogic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The priority for this rule is higher than the priority for the *Deny-Database-All* rule. As a result, this rule is processed before the *Deny-Database-All* rule, so traffic from the *AsgLogic* application security group is allowed, whereas all other traffic is blocked.",
+      "uses": [
+        "application security group",
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.asg",
+        "az104.nsg-priority"
+      ],
+      "order": 12245
+    },
+    {
+      "id": "az104.secure-network-access.effective-aggregation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Effective security rules for a network interface combine the rules of which NSGs?",
+      "back": "The NSG on the network interface and the NSG on its subnet (plus any Virtual Network Manager admin rules).",
+      "explanation": "It shows in one view the rules from both levels that the interface is subject to.",
+      "source": "Microsoft, “Effective security rules overview” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/network-watcher/effective-security-rules-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The effective security rules applied to a network interface are an aggregation of rules that exist in the network security group associated to a network interface and the subnet the network interface is in.",
+      "uses": [
+        "effective security rules",
+        "network security group",
+        "NSG"
+      ],
+      "conceptIDs": [
+        "az104.effective-security-rules"
+      ],
+      "order": 12255
+    },
+    {
+      "id": "az104.secure-network-access.effective-portal",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "An auditor wants a spreadsheet of every security rule applied to a VM's network interface. How do you produce it?",
+      "back": "Open the interface's effective security rules in the portal and use the download button for a CSV file.",
+      "explanation": "The portal groups the rules by inbound and outbound for each network interface.",
+      "source": "Microsoft, “Effective security rules overview”, “Effective security rules in the Azure portal” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/network-watcher/effective-security-rules-overview.md#effective-security-rules-in-the-azure-portal",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In Azure portal, rules are displayed for each network interface and grouped by inbound vs outbound. A download button is available to easily download all the security rules into a CSV file.",
+      "uses": [
+        "effective security rules",
+        "Azure portal"
+      ],
+      "conceptIDs": [
+        "az104.view-effective-rules"
+      ],
+      "order": 12260
+    },
+    {
+      "id": "az104.secure-network-access.effective-vs-ipflow",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "You want to see every NSG rule that applies to a VM's network interface at once. Effective security rules or IP flow verify?",
+      "back": "Effective security rules. IP flow verify tests one flow and names the single rule that allows or denies it.",
+      "explanation": "One view lists the aggregate; the other answers yes or no for a single communication.",
+      "source": "Microsoft, “How network security groups filter network traffic”, “Intra-subnet traffic” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/network-security-group-how-it-works.md#intra-subnet-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can easily view the aggregate rules applied to a network interface by viewing the effective security rules for a network interface. The IP flow verify capability in Azure Network Watcher helps determine whether communication is allowed to or from a network interface.",
+      "uses": [
+        "effective security rules",
+        "IP flow verify"
+      ],
+      "conceptIDs": [
+        "az104.effective-security-rules"
+      ],
+      "order": 12275
+    },
+    {
+      "id": "az104.secure-network-access.bastion-no-public-ip",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When you connect through Azure Bastion, what do the target VMs not need?",
+      "back": "A public IP address, an agent or special client software.",
+      "explanation": "Bastion reaches them on their private IP addresses from inside the virtual network.",
+      "source": "Microsoft, “What is Azure Bastion?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/bastion-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you connect via Azure Bastion, your virtual machines don't need a public IP address, agent, or special client software.",
+      "uses": [
+        "Azure Bastion",
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "az104.bastion"
+      ],
+      "order": 12280
+    },
+    {
+      "id": "az104.secure-network-access.bastion-443",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Admin PCs may send only outbound HTTPS on port 443. Can admins still open RDP sessions through Azure Bastion?",
+      "explanation": "The VMs are also protected from port scanning.",
+      "source": "Microsoft, “What is Azure Bastion?”, “Key benefits” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/bastion-overview.md#key-benefits",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Secure connectivity over TLS**: Connect to VMs using RDP/SSH over TLS on port 443.",
+      "uses": [
+        "Azure Bastion"
+      ],
+      "conceptIDs": [
+        "az104.bastion-tls-443"
+      ],
+      "order": 12285,
+      "back": "Yes: Bastion carries RDP and SSH over TLS on port 443."
+    },
+    {
+      "id": "az104.secure-network-access.sku-developer",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Bastion SKU is free, runs on shared infrastructure and supports one VM at a time?",
+      "back": "Developer.",
+      "explanation": "It is recommended for development and testing, and only in select regions.",
+      "source": "Microsoft, “What is Azure Bastion?”, “SKUs” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/bastion-overview.md#sku",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Developer**: Free SKU using shared infrastructure recommended for development and testing. Supports one VM at a time. Available in select regions.",
+      "uses": [
+        "Azure Bastion"
+      ],
+      "conceptIDs": [
+        "az104.bastion-skus"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Azure documentation as published",
+      "order": 12290
+    },
+    {
+      "id": "az104.secure-network-access.sku-basic",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Bastion SKU is a dedicated deployment with fixed capacity, for production with moderate connection needs?",
+      "back": "Basic.",
+      "explanation": "With Basic, two instances are created and you can't change that number.",
+      "source": "Microsoft, “What is Azure Bastion?”, “SKUs” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/bastion-overview.md#sku",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Basic**: Dedicated deployment with fixed capacity for production environments with moderate connection requirements.",
+      "uses": [
+        "Azure Bastion"
+      ],
+      "conceptIDs": [
+        "az104.bastion-skus"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Azure documentation as published",
+      "order": 12295
+    },
+    {
+      "id": "az104.secure-network-access.sku-standard",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Bastion SKU adds native client support, shareable links, IP-based connections, custom ports and file transfer?",
+      "back": "Standard.",
+      "explanation": "It builds on everything in Basic.",
+      "source": "Microsoft, “What is Azure Bastion?”, “SKUs” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/bastion-overview.md#sku",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Standard**: Includes all Basic features plus scalability and advanced features (native client, shareable links, IP-based connections, custom ports, file transfer).",
+      "uses": [
+        "Azure Bastion"
+      ],
+      "conceptIDs": [
+        "az104.bastion-skus"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Azure documentation as published",
+      "order": 12300
+    },
+    {
+      "id": "az104.secure-network-access.sku-premium",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Compliance requires recordings of admin sessions made through Bastion. Which SKU do you need?",
+      "back": "Premium.",
+      "explanation": "Premium includes all Standard features plus session recording and private-only deployment.",
+      "source": "Microsoft, “What is Azure Bastion?”, “SKUs” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/bastion-overview.md#sku",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Premium**: Includes all Standard features plus session recording for compliance and private-only deployment.",
+      "uses": [
+        "Azure Bastion",
+        "private-only Bastion"
+      ],
+      "conceptIDs": [
+        "az104.bastion-skus"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Azure documentation as published",
+      "order": 12305
+    },
+    {
+      "id": "az104.secure-network-access.subnet-name",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Every Bastion SKU except Developer needs a dedicated subnet named {{c1::AzureBastionSubnet}}.",
+      "explanation": "You create it in the same virtual network you deploy Bastion to.",
+      "source": "Microsoft, “About Azure Bastion configuration settings”, “Azure Bastion subnet” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/configuration-settings.md#subnet",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you deploy Azure Bastion using any SKU except the Bastion Developer offering, Bastion requires a dedicated subnet named **AzureBastionSubnet**.",
+      "uses": [
+        "Azure Bastion",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.bastion-subnet"
+      ],
+      "order": 12310
+    },
+    {
+      "id": "az104.secure-network-access.subnet-size",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How large must AzureBastionSubnet be?",
+      "back": "/26 or larger (/25, /24 and so on).",
+      "explanation": "A smaller subnet limits the number of scale units for host scaling.",
+      "source": "Microsoft, “About Azure Bastion configuration settings”, “Azure Bastion subnet” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/configuration-settings.md#subnet",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Subnet size must be /26 or larger (/25, /24 etc.).",
+      "uses": [
+        "Azure Bastion",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.bastion-subnet"
+      ],
+      "order": 12315
+    },
+    {
+      "id": "az104.secure-network-access.subnet-rules",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two other requirements on AzureBastionSubnet besides its name and size?",
+      "back": "It must be in the same virtual network and resource group as the bastion host, and contain no other resources.",
+      "explanation": "The subnet is reserved for Bastion alone.",
+      "source": "Microsoft, “About Azure Bastion configuration settings”, “Azure Bastion subnet” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/configuration-settings.md#subnet",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The subnet must be in the same virtual network and resource group as the bastion host. * The subnet can't contain other resources.",
+      "uses": [
+        "Azure Bastion",
+        "subnet",
+        "resource group"
+      ],
+      "conceptIDs": [
+        "az104.bastion-subnet"
+      ],
+      "order": 12320
+    },
+    {
+      "id": "az104.secure-network-access.subnet-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You create a /27 subnet called AzureBastionSubnet for a new Standard Bastion. Is it large enough?",
+      "back": "No: new deployments need a /26 or larger subnet.",
+      "explanation": "Since 2 November 2021 the minimum is /26; only Bastions already deployed on /27 before that date keep working unchanged.",
+      "source": "Microsoft, “About Azure Bastion configuration settings”, “Azure Bastion subnet” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/configuration-settings.md#subnet",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For Azure Bastion resources deployed on or after November 2, 2021, the minimum AzureBastionSubnet size is /26 or larger (/25, /24, etc.).",
+      "uses": [
+        "Azure Bastion",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.bastion-subnet"
+      ],
+      "order": 12325
+    },
+    {
+      "id": "az104.secure-network-access.public-ip",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "For a new Standard Bastion you pick an unused public IP that is Standard SKU with Dynamic allocation. Will it do?",
+      "back": "No: the public IP must be Standard SKU and Static.",
+      "explanation": "An existing public IP is acceptable only if it meets Bastion's criteria and isn't already in use.",
+      "source": "Microsoft, “About Azure Bastion configuration settings”, “Public IP address” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/configuration-settings.md#public-ip",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The Public IP address SKU must be **Standard**. * The Public IP address assignment/allocation method must be **Static**.",
+      "uses": [
+        "Azure Bastion"
+      ],
+      "conceptIDs": [
+        "az104.bastion-public-ip"
+      ],
+      "order": 12330
+    },
+    {
+      "id": "az104.secure-network-access.public-ip-exceptions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which two Bastion deployments need no public IP address?",
+      "back": "Bastion Developer and private-only deployments.",
+      "explanation": "All other deployments need a Standard, Static public IP.",
+      "source": "Microsoft, “About Azure Bastion configuration settings”, “Public IP address” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/configuration-settings.md#public-ip",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure Bastion deployments, except Bastion Developer and Private-only, require a Public IP address.",
+      "uses": [
+        "Azure Bastion",
+        "private-only Bastion"
+      ],
+      "conceptIDs": [
+        "az104.bastion-public-ip",
+        "az104.bastion-developer"
+      ],
+      "order": 12335
+    },
+    {
+      "id": "az104.secure-network-access.private-only-sku",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "Production needs a dedicated Bastion deployment, and security policy forbids it any public IP address. Which SKU must you deploy?",
+      "back": "Premium, as a private-only deployment.",
+      "explanation": "The other dedicated SKUs require a public IP address.",
+      "source": "Microsoft, “What is Azure Bastion?”, “Requirements” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/bastion-overview.md#requirements",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Premium supports private-only deployment without a public IP.",
+      "uses": [
+        "Azure Bastion",
+        "private-only Bastion"
+      ],
+      "conceptIDs": [
+        "az104.bastion-private-only"
+      ],
+      "order": 12345
+    },
+    {
+      "id": "az104.secure-network-access.conn-browser",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which Bastion connection method works on every SKU and needs no extra client software?",
+      "back": "Browser-based connection through the Azure portal (HTML5 web client).",
+      "explanation": "The other methods need Standard or Premium.",
+      "source": "Microsoft, “What is Azure Bastion?”, “Connection methods” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/bastion-overview.md#connection-methods",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Browser-based connections**: Connect through the Azure portal using an HTML5 web client. Available for all SKU tiers. No additional client software required.",
+      "uses": [
+        "Azure Bastion",
+        "Azure portal"
+      ],
+      "conceptIDs": [
+        "az104.bastion-connection-methods"
+      ],
+      "order": 12350
+    },
+    {
+      "id": "az104.secure-network-access.conn-native",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which Bastion connection method uses the SSH or RDP client on your own computer, and which SKUs offer it?",
+      "back": "Native client connection; Standard and Premium.",
+      "explanation": "It also supports Microsoft Entra ID authentication and file transfer.",
+      "source": "Microsoft, “What is Azure Bastion?”, “Connection methods” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/bastion-overview.md#connection-methods",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Native client connections**: Connect using the SSH or RDP client already installed on your local computer. Available for Standard and Premium SKUs. Supports Microsoft Entra ID authentication and file transfer.",
+      "uses": [
+        "Azure Bastion",
+        "Microsoft Entra ID"
+      ],
+      "conceptIDs": [
+        "az104.bastion-connection-methods"
+      ],
+      "order": 12355
+    },
+    {
+      "id": "az104.secure-network-access.bastion-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Admins must reach Windows VMs with RDP from the portal, and the VMs must have no public IP addresses. What do you deploy?",
+      "back": "Azure Bastion in the VMs' virtual network.",
+      "choices": "A) A public IP address and an NSG rule for 3389 on each VM\nB) Azure Bastion in the virtual network\nC) A service endpoint on the VMs' subnet\nD) A private endpoint for each VM",
+      "choicesExplained": "A gives each VM a public IP, which is forbidden. C secures access to Azure services, not to VMs. D connects to private link resources, not RDP sessions.",
+      "explanation": "Bastion reaches each VM on its private IP address.",
+      "source": "Microsoft, “What is Azure Bastion?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/bastion/bastion-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure Bastion is deployed directly in your virtual network and supports all VMs in the virtual network using private IP addresses.",
+      "uses": [
+        "Azure Bastion",
+        "virtual machine",
+        "virtual network service endpoint",
+        "private endpoint"
+      ],
+      "conceptIDs": [
+        "az104.bastion"
+      ],
+      "order": 12365
+    },
+    {
+      "id": "az104.secure-network-access.se-source-ip",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "After enabling a Microsoft.Storage service endpoint on a subnet, what source IP will storage diagnostics show for new requests from its VMs?",
+      "back": "The VM's private IP address from the virtual network, not an Azure public IP.",
+      "explanation": "Checking this source address is one way to confirm the endpoint route is in effect.",
+      "source": "Microsoft, “Azure virtual network service endpoints”, “Logging and troubleshooting” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoints-overview.md#logging-and-troubleshooting",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "All new requests with service endpoints show the source IP address for the request as the virtual network private IP address, assigned to the client making the request from your virtual network. Without the endpoint, the address is an Azure public IP address.",
+      "uses": [
+        "virtual network service endpoint"
+      ],
+      "conceptIDs": [
+        "az104.service-endpoint"
+      ],
+      "order": 12380
+    },
+    {
+      "id": "az104.secure-network-access.se-benefit-security",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How does a service endpoint improve the security of an Azure service resource?",
+      "back": "Once enabled, a virtual network rule on the resource removes public internet access and allows only your virtual network.",
+      "explanation": "The endpoint extends the virtual network's identity to the service.",
+      "source": "Microsoft, “Azure virtual network service endpoints”, “Key benefits” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoints-overview.md#key-benefits",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Once you enable service endpoints in your virtual network, you can add a virtual network rule to secure the Azure service resources to your virtual network. The rule addition provides improved security by fully removing public internet access to resources and allowing traffic only from your virtual network.",
+      "uses": [
+        "virtual network service endpoint"
+      ],
+      "conceptIDs": [
+        "az104.service-endpoint-benefits"
+      ],
+      "order": 12385
+    },
+    {
+      "id": "az104.secure-network-access.se-benefit-routing",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A user-defined route forces all internet-bound traffic to an on-premises firewall. After you enable a Storage service endpoint, does storage traffic still take that route?",
+      "back": "No: service endpoint traffic goes directly to the service over the Azure backbone.",
+      "explanation": "You can keep auditing internet traffic through the tunnel without affecting service traffic.",
+      "source": "Microsoft, “Azure virtual network service endpoints”, “Key benefits” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoints-overview.md#key-benefits",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Endpoints always take service traffic directly from your virtual network to the service on the Microsoft Azure backbone network.",
+      "uses": [
+        "virtual network service endpoint"
+      ],
+      "conceptIDs": [
+        "az104.service-endpoint-benefits"
+      ],
+      "order": 12390
+    },
+    {
+      "id": "az104.secure-network-access.se-config-subnet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Where is a service endpoint enabled, and which compute does it cover?",
+      "back": "On a subnet; it works for any type of compute instance in that subnet.",
+      "explanation": "You can enable several endpoints, for different services, on one subnet.",
+      "source": "Microsoft, “Azure virtual network service endpoints”, “Configuration” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoints-overview.md#configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Configure service endpoints on a subnet in a virtual network. Endpoints work with any type of compute instances running within that subnet.",
+      "uses": [
+        "virtual network service endpoint",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.service-endpoint-config"
+      ],
+      "order": 12400
+    },
+    {
+      "id": "az104.secure-network-access.se-storage-name",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which resource name do you enable on a subnet for an Azure Storage service endpoint?",
+      "back": "Microsoft.Storage.",
+      "explanation": "Each supported service has its own Microsoft.* name.",
+      "source": "Microsoft, “Azure virtual network service endpoints” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoints-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Enable this resource from the subnet side while configuring service endpoints for your service: **Generally available** - **Azure Storage** (*Microsoft.Storage*): Generally available in all Azure regions.",
+      "uses": [
+        "virtual network service endpoint",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.service-endpoint-config"
+      ],
+      "order": 12405
+    },
+    {
+      "id": "az104.secure-network-access.se-tcp-reset",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You plan to enable a service endpoint on a busy production subnet at midday. What should you expect?",
+      "back": "Open TCP connections to that service are closed as source addresses switch to private; plan for no critical tasks.",
+      "explanation": "Firewall rules that use Azure public IP addresses also stop working.",
+      "source": "Microsoft, “Azure virtual network service endpoints”, “Considerations” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoints-overview.md#considerations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Any existing open TCP connections to the service are closed during this switch. Ensure that no critical tasks are running when enabling or disabling a service endpoint to a service for a subnet.",
+      "uses": [
+        "virtual network service endpoint",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.service-endpoint-config"
+      ],
+      "order": 12410
+    },
+    {
+      "id": "az104.secure-network-access.se-on-prem",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Can a service endpoint carry traffic from on-premises networks to Azure services?",
+      "back": "No; endpoints serve only subnets in Azure virtual networks.",
+      "explanation": "To let on-premises traffic in, you allow its public (usually NAT) addresses in the service's IP firewall.",
+      "source": "Microsoft, “Azure virtual network service endpoints”, “Limitations” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoints-overview.md#limitations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Endpoints are enabled on subnets configured in Azure virtual networks. Endpoints can't be used for traffic from your on-premises services to Azure services.",
+      "uses": [
+        "virtual network service endpoint"
+      ],
+      "conceptIDs": [
+        "az104.service-endpoint-limitations"
+      ],
+      "order": 12415
+    },
+    {
+      "id": "az104.secure-network-access.se-dns",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "With a service endpoint, what do the DNS entries for the Azure service resolve to?",
+      "back": "Still to the service's public IP addresses.",
+      "explanation": "DNS is unchanged; only the route and source address change.",
+      "source": "Microsoft, “Azure virtual network service endpoints”, “Considerations” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoints-overview.md#considerations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "With service endpoints, DNS entries for Azure services remain as-is today and continue to resolve to public IP addresses assigned to the Azure service.",
+      "uses": [
+        "virtual network service endpoint"
+      ],
+      "conceptIDs": [
+        "az104.service-vs-private-endpoint"
+      ],
+      "order": 12425
+    },
+    {
+      "id": "az104.secure-network-access.sep-allow",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Once a service endpoint policy is applied to a subnet, which storage accounts can the subnet reach?",
+      "back": "Only those listed in the policy; all others are denied.",
+      "explanation": "Without a policy, the subnet can reach every storage account in the service.",
+      "source": "Microsoft, “Virtual network service endpoint policies for Azure Storage”, “Configuration” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoint-policies-overview.md#configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Once a policy is configured on that subnet, only the resources specified in the policy can be accessed from compute instances in that subnet. Access to all other storage accounts is denied.",
+      "uses": [
+        "service endpoint policy",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.service-endpoint-policy"
+      ],
+      "order": 12440
+    },
+    {
+      "id": "az104.secure-network-access.sep-prereq",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What must be enabled on a subnet before a service endpoint policy can apply?",
+      "back": "Service endpoints for Azure Storage.",
+      "explanation": "The policy filters traffic that travels over the service endpoint.",
+      "source": "Microsoft, “Virtual network service endpoint policies for Azure Storage”, “Configuration” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoint-policies-overview.md#configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Endpoint policy is configured on a subnet in a virtual network. Service endpoints for Azure Storage should be enabled on the subnet to apply the policy.",
+      "uses": [
+        "service endpoint policy",
+        "virtual network service endpoint"
+      ],
+      "conceptIDs": [
+        "az104.service-endpoint-policy"
+      ],
+      "order": 12445
+    },
+    {
+      "id": "az104.secure-network-access.sep-vs-tags",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "front": "Service tag or service endpoint policy: which can limit outbound traffic to named storage accounts, not just a storage region?",
+      "back": "A service endpoint policy; a service tag allows any account in the selected region.",
+      "explanation": "That finer control is aimed at preventing data exfiltration.",
+      "source": "Microsoft, “Virtual network service endpoint policies for Azure Storage”, “Key benefits” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoint-policies-overview.md#key-benefits",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "However, this process allows traffic to any account within selected Azure Storage region. Endpoint policies allow you to specify the Azure Storage accounts that are allowed virtual network outbound access and restricts access to all the other storage accounts.",
+      "uses": [
+        "service tags",
+        "service endpoint policy"
+      ],
+      "conceptIDs": [
+        "az104.service-endpoint-policy"
+      ],
+      "order": 12455
+    },
+    {
+      "id": "az104.secure-network-access.pe-nic",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What is a private endpoint, physically, in your virtual network?",
+      "back": "A network interface with a private IP address from your virtual network.",
+      "explanation": "By enabling it you bring the service into your virtual network.",
+      "source": "Microsoft, “What is a private endpoint?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/private-link/private-endpoint-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A private endpoint is a network interface that uses a private IP address from your virtual network. This network interface connects you privately and securely to a service that's powered by Azure Private Link.",
+      "uses": [
+        "private endpoint"
+      ],
+      "conceptIDs": [
+        "az104.private-endpoint-nic"
+      ],
+      "order": 12460
+    },
+    {
+      "id": "az104.secure-network-access.pe-region",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Your storage account is in West Europe and your virtual network in North Europe. Where must the private endpoint be deployed?",
+      "back": "In North Europe, in the virtual network's subscription; the storage account may stay in West Europe.",
+      "explanation": "The resource it connects to may sit in another region.",
+      "source": "Microsoft, “What is a private endpoint?”, “Private endpoint properties” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/private-link/private-endpoint-overview.md#private-endpoint-properties",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The private endpoint must be deployed in the same region and subscription as the virtual network. - The private-link resource can be deployed in a different region than the one for the virtual network and private endpoint.",
+      "uses": [
+        "private endpoint",
+        "private link resource",
+        "Azure region"
+      ],
+      "conceptIDs": [
+        "az104.private-endpoint-nic"
+      ],
+      "order": 12470
+    },
+    {
+      "id": "az104.secure-network-access.pe-sources",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two places clients can reach a private endpoint from, besides its own virtual network?",
+      "back": "Any two of: regionally or globally peered virtual networks; on-premises over VPN or ExpressRoute; Private Link services.",
+      "explanation": "Connections are always started by the client, in one direction only.",
+      "source": "Microsoft, “What is a private endpoint?”, “Private endpoint properties” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/private-link/private-endpoint-overview.md#private-endpoint-properties",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Private endpoints enable connectivity between the customers from the same: - Virtual network - Regionally peered virtual networks - Globally peered virtual networks - On-premises environments that use VPN or Express Route - Services that are powered by Private Link",
+      "uses": [
+        "private endpoint",
+        "virtual network peering",
+        "ExpressRoute"
+      ],
+      "conceptIDs": [
+        "az104.private-endpoint-nic"
+      ],
+      "order": 12475
+    },
+    {
+      "id": "az104.secure-network-access.pe-auto",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When is a private endpoint connection approved automatically?",
+      "back": "When you own, or have permissions on, the private link resource.",
+      "explanation": "The permission needed is a privateEndpointConnectionsApproval action for that resource type.",
+      "source": "Microsoft, “What is a private endpoint?”, “Access to a private-link resource using approval workflow” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/private-link/private-endpoint-overview.md#access-to-a-private-link-resource-using-approval-workflow",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Automatically approve**: Use this method when you own or have permissions for the specific private-link resource.",
+      "uses": [
+        "private endpoint",
+        "private link resource"
+      ],
+      "conceptIDs": [
+        "az104.private-endpoint-approval"
+      ],
+      "order": 12480
+    },
+    {
+      "id": "az104.secure-network-access.pe-manual",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You request a private endpoint to a resource you have no permissions on. What state is the connection in?",
+      "back": "Pending, until the resource owner approves it.",
+      "explanation": "After approval the endpoint can send traffic normally.",
+      "source": "Microsoft, “What is a private endpoint?”, “Access to a private-link resource using approval workflow” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/private-link/private-endpoint-overview.md#access-to-a-private-link-resource-using-approval-workflow",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "An approval workflow is initiated. The private endpoint and later private-endpoint connections are created in a *Pending* state. The private-link resource owner is responsible to approve the connection.",
+      "uses": [
+        "private endpoint",
+        "private link resource"
+      ],
+      "conceptIDs": [
+        "az104.private-endpoint-approval"
+      ],
+      "order": 12485
+    },
+    {
+      "id": "az104.secure-network-access.pe-approved-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In which connection state can a private endpoint send traffic?",
+      "back": "Only Approved.",
+      "explanation": "Pending, Rejected and Disconnected endpoints can't.",
+      "source": "Microsoft, “What is a private endpoint?”, “Access to a private-link resource using approval workflow” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/private-link/private-endpoint-overview.md#access-to-a-private-link-resource-using-approval-workflow",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Only private endpoints in an *Approved* state can send traffic to a specified private-link resource.",
+      "uses": [
+        "private endpoint",
+        "private link resource"
+      ],
+      "conceptIDs": [
+        "az104.private-endpoint-approval"
+      ],
+      "order": 12490
+    },
+    {
+      "id": "az104.secure-network-access.pe-dns",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "After you add a private endpoint for a storage account, VMs still resolve its name to a public IP. What is missing?",
+      "back": "DNS settings, typically a private DNS zone, resolving the name to the private endpoint's private IP.",
+      "explanation": "The public DNS settings used for the public endpoint are not enough.",
+      "source": "Microsoft, “What is a private endpoint?”, “DNS configuration” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/private-link/private-endpoint-overview.md#dns-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To connect to the same service over private endpoint, separate DNS settings, often configured via private DNS zones, are required. Ensure that your DNS settings are correct when you use the fully qualified domain name (FQDN) for the connection. The settings must resolve to the private IP address of the private endpoint.",
+      "uses": [
+        "private endpoint"
+      ],
+      "conceptIDs": [
+        "az104.private-endpoint-dns"
+      ],
+      "order": 12500
+    },
+    {
+      "id": "az104.secure-network-access.pe-blob-zone",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What is the recommended private DNS zone name for a storage account's blob private endpoint?",
+      "back": "privatelink.blob.core.windows.net.",
+      "explanation": "Zone configurations generate automatically only if you use the recommended names.",
+      "source": "Microsoft, “Azure Private Endpoint private DNS zone values”, “Storage” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/private-link/private-endpoint-dns.md#storage",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Storage account (Microsoft.Storage/storageAccounts) | blob </br> blob_secondary | privatelink.blob.core.windows.net | blob.core.windows.net |",
+      "uses": [
+        "private endpoint",
+        "storage account"
+      ],
+      "conceptIDs": [
+        "az104.private-endpoint-dns"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Azure documentation as published",
+      "order": 12505
+    },
+    {
+      "id": "az104.secure-network-access.pe-subresources",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You need private access to both the blob and file services of one storage account. How many private endpoints?",
+      "back": "Two: one per target subresource.",
+      "explanation": "The platform allows only connections that reach the specified resource target.",
+      "source": "Microsoft, “What is a private endpoint?”, “Network security of private endpoints” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/private-link/private-endpoint-overview.md#network-security-of-private-endpoints",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To access more subresources within the same Azure service, more private endpoints with corresponding targets are required. In the case of Azure Storage, for instance, you would need separate private endpoints to access the *file* and *blob* subresources.",
+      "uses": [
+        "private endpoint",
+        "private link resource",
+        "storage account"
+      ],
+      "conceptIDs": [
+        "az104.private-link-resource"
+      ],
+      "order": 12515
+    },
+    {
+      "id": "az104.secure-network-access.se-vs-pe-recommend",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Service endpoint or private endpoint: which does Microsoft recommend for secure, private access to Azure-hosted services?",
+      "back": "Private endpoints (Azure Private Link).",
+      "explanation": "Private Link places a network interface for the service inside your own virtual network.",
+      "source": "Microsoft, “Azure virtual network service endpoints” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoints-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Microsoft recommends use of Azure Private Link and private endpoints for secure and private access to services hosted on the Azure platform. Azure Private Link deploys a network interface into a virtual network of your choosing for Azure services such as Azure Storage or Azure SQL.",
+      "uses": [
+        "virtual network service endpoint",
+        "private endpoint"
+      ],
+      "conceptIDs": [
+        "az104.service-vs-private-endpoint"
+      ],
+      "order": 12525
+    },
+    {
+      "id": "az104.secure-network-access.se-vs-pe-onprem",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Staff on-premises, connected over ExpressRoute, must reach a storage account privately. Service endpoint or private endpoint?",
+      "back": "Private endpoint: it serves on-premises clients over VPN or ExpressRoute, which a service endpoint can't.",
+      "choices": "A) Service endpoint on the gateway subnet\nB) Private endpoint in the virtual network\nC) Service endpoint policy\nD) Application security group",
+      "choicesExplained": "A and C: service endpoints and their policies can't carry on-premises traffic. D groups VM interfaces for NSG rules; it gives no path to storage.",
+      "explanation": "A private endpoint accepts clients from on-premises networks linked by VPN or ExpressRoute.",
+      "source": "Microsoft, “What is a private endpoint?”, “Private endpoint properties” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/private-link/private-endpoint-overview.md#private-endpoint-properties",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "On-premises environments that use VPN or Express Route",
+      "uses": [
+        "private endpoint",
+        "virtual network service endpoint",
+        "service endpoint policy",
+        "application security group",
+        "ExpressRoute"
+      ],
+      "conceptIDs": [
+        "az104.service-vs-private-endpoint"
+      ],
+      "order": 12530
+    },
+    {
+      "id": "az104.secure-network-access.se-vs-pe-ip",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Service endpoint or private endpoint: which gives the Azure service an IP address inside your virtual network?",
+      "back": "Private endpoint; a service endpoint keeps the service on its public IP and changes only your source address and route.",
+      "explanation": "A private endpoint, by contrast, is a network interface with a private IP from your virtual network.",
+      "source": "Microsoft, “Azure virtual network service endpoints”, “Considerations” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-network-service-endpoints-overview.md#considerations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "With service endpoints, DNS entries for Azure services remain as-is today and continue to resolve to public IP addresses assigned to the Azure service.",
+      "uses": [
+        "virtual network service endpoint",
+        "private endpoint"
+      ],
+      "conceptIDs": [
+        "az104.service-vs-private-endpoint"
+      ],
+      "order": 12535
+    }
+  ]
+}

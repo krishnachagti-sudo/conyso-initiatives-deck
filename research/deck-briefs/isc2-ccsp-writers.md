@@ -1,0 +1,22 @@
+# CCSP: notes for every writer (read after DIGEST.md)
+
+- **Slug:** `isc2-ccsp`. **Family prefix:** `ccsp` (card ids `ccsp.<topic-slug>.<card-slug>`, concept ids `ccsp.<concept-slug>`). Use the concept ids in `isc2-ccsp-concepts.json`; add new ones only when a card needs them.
+- **Builds on:** nothing. Every term gets its primer.
+- **Sources, their tiers and licence labels.** The label must match src/licences.json for the host. Tier A or B: "B · <licence>", with evidence. Tier C: "C · facts only, in our own words", with no evidence.
+  - www.itu.int → tier C ("© ITU 2014 All rights reserved. No part of this publication may be reproduced, )
+  - nvlpubs.nist.gov → tier B ("Works authored by NIST employees are not subject to Copyright protection within)
+  - www.enisa.europa.eu → tier C ("Reproduction is authorised provided the source is acknowledged. © European Netw)
+  - www.meity.gov.in → tier C (No licence statement found in the gazette PDF)
+  - owasp.org → tier B ("© Copyright 2021-2025 - OWASP Top 10 Team - This work is licensed under a Creat)
+  - genai.owasp.org → tier B ("Unless otherwise specified, all content on the site is Creative Commons Attribu)
+  - cwe.mitre.org → tier B ("The MITRE Corporation hereby grants you a non-exclusive, royalty-free license t)
+  - learn.microsoft.com → tier C (Microsoft Learn page; licence not read on this page (CONTENT-POLICY §3 lists Mic)
+  - www.ecfr.gov → tier B (17 U.S.C. §105: "Copyright protection under this title is not available for any )
+  - edge.sitecorecloud.io → tier C ("All contents of this site constitute the property of ISC2, Inc. and may not be )
+  - www.aicpa-cima.com → tier C (Not read; commercial site, treat as facts only)
+  - www.isc2.org → tier C ("All contents of this site constitute the property of ISC2, Inc. and may not be )
+  - www.nist.gov → tier B ("Works authored by NIST employees are not subject to Copyright protection within)
+- **Evidence is required.** The texts are in `research/sources/isc2-ccsp/`; the slice prints a passage under each concept.
+- **Volatile facts:** `volatile: true`, `validAsOf: "2026-09-25 · CCSP outline effective 1 August 2026"`.
+- **Scenarios:** your own. Never reuse a source's worked examples or exercises.
+- **Deck notice:** already in deck.json.

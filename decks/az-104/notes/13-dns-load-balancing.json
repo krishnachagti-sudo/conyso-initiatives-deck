@@ -1,0 +1,2079 @@
+{
+  "topic": "Name resolution and load balancing",
+  "notes": [
+    {
+      "id": "az104.dns-load-balancing.dns-zone-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a DNS zone in Azure DNS?",
+      "back": "The Azure DNS resource, named after your domain (such as contoso.com), in which you create and manage the domain's DNS records.",
+      "explanation": "Once the domain is delegated to the zone at the registrar, internet users resolving names in the domain are directed to it.",
+      "source": "Microsoft, “Tutorial: Host your domain in Azure DNS” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-delegate-domain-azure-dns.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Suppose you buy the domain `contoso.com` from a domain name registrar and then create a zone with the name `contoso.com` in Azure DNS.",
+      "introduces": [
+        "DNS zone"
+      ],
+      "example": "Like the page for one surname in a phone book, where every entry under that name is kept.",
+      "uses": [
+        "Azure DNS"
+      ],
+      "conceptIDs": [
+        "az104.dns-zone"
+      ],
+      "order": 13005
+    },
+    {
+      "id": "az104.dns-load-balancing.record-set-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "In Azure DNS, what is a record set?",
+      "back": "A group of DNS records in a zone; Azure DNS sets the TTL for the whole group, not for each record.",
+      "explanation": "So every record within a record set uses the same TTL value.",
+      "source": "Microsoft, “Overview of DNS zones and records”, “Time-to-live” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-zones-records.md#time-to-live",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In Azure DNS, the TTL gets specified for the record set, not for each record, so the same value is used for all records within that record set.",
+      "introduces": [
+        "record set"
+      ],
+      "example": "Like one line in a phone book that lists several numbers for the same name.",
+      "uses": [
+        "DNS zone"
+      ],
+      "conceptIDs": [
+        "az104.record-set"
+      ],
+      "order": 13010
+    },
+    {
+      "id": "az104.dns-load-balancing.wildcard-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What are wildcard records in Azure DNS?",
+      "back": "Record sets named * (or with * as the left-most label) that answer any query with a matching name that has no closer match.",
+      "explanation": "A more specific, non-wildcard record set still wins when one exists.",
+      "source": "Microsoft, “Overview of DNS zones and records”, “Wildcard records” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-zones-records.md#wildcard-records",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Wildcard records get returned in response to any query with a matching name, unless there's a closer match from a non-wildcard record set. Azure DNS supports wildcard record sets for all record types except NS and SOA.",
+      "introduces": [
+        "wildcard records"
+      ],
+      "example": "Like a post room rule \"anything addressed to any desk on floor 3 goes to reception\", unless a desk is named.",
+      "uses": [
+        "record set"
+      ],
+      "conceptIDs": [
+        "az104.wildcard-records"
+      ],
+      "order": 13015
+    },
+    {
+      "id": "az104.dns-load-balancing.alias-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an alias record set in Azure DNS?",
+      "back": "A record set that references an Azure resource, such as a public IP address, and updates itself when that resource changes.",
+      "explanation": "The record points at the resource dynamically, so it updates itself during resolution.",
+      "source": "Microsoft, “Azure DNS alias records overview” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-alias.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure DNS alias records are qualifications on a DNS record set. They can reference other Azure resources from within your DNS zone. For example, you can create an alias record set that references an Azure public IP address instead of an A record. Your alias record set points to an Azure public IP address service instance dynamically.",
+      "introduces": [
+        "alias record set"
+      ],
+      "example": "Like a phone book entry that says \"whatever number reception currently has\", not a fixed number.",
+      "uses": [
+        "record set",
+        "DNS zone"
+      ],
+      "conceptIDs": [
+        "az104.alias-record"
+      ],
+      "order": 13020
+    },
+    {
+      "id": "az104.dns-load-balancing.private-zone-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a private DNS zone?",
+      "back": "An Azure DNS zone that resolves names only for virtual networks linked to it, with no custom DNS servers needed.",
+      "explanation": "Resolution depends on the link between the zone and each virtual network.",
+      "source": "Microsoft, “What is Azure Private DNS?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/private-dns-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To resolve the records of a private DNS zone from your virtual network, you must link the virtual network with the zone. Linked virtual networks have full access and can resolve all DNS records published in the private zone.",
+      "introduces": [
+        "private DNS zone"
+      ],
+      "example": "Like an internal staff directory that only works on phones connected to the office network.",
+      "uses": [
+        "DNS zone",
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.private-dns-zone"
+      ],
+      "order": 13025
+    },
+    {
+      "id": "az104.dns-load-balancing.azure-provided-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is Azure-provided name resolution?",
+      "back": "Basic DNS that Azure runs for a virtual network, with zone names and records managed by Azure, needing no configuration.",
+      "explanation": "You get convenience, but not control over zone names or record lifecycles.",
+      "source": "Microsoft, “Configure DNS name resolution for Azure virtual networks”, “Azure-provided name resolution” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances.md#azure-provided-name-resolution",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure-provided name resolution provides only basic authoritative DNS capabilities. Azure manages the DNS zone names and records if you use the DNS provided by Azure. You aren't able to control the DNS zone names or the life cycle of DNS records.",
+      "introduces": [
+        "Azure-provided name resolution"
+      ],
+      "example": "Like a building's automatic door plaques: every office gets one, but you can't choose the wording.",
+      "uses": [
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.azure-provided-dns"
+      ],
+      "order": 13030
+    },
+    {
+      "id": "az104.dns-load-balancing.frontend-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a load balancer's frontend IP configuration?",
+      "back": "The load balancer's IP address, public or private, that clients connect to.",
+      "explanation": "Whether it is public or private decides the type of load balancer.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Frontend IP configuration” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#frontend-ip-configurations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The frontend IP configuration is the IP address of your Azure Load Balancer and the point of contact for clients. A frontend IP address can be either of the following types: - **Public IP address** - **Private IP address**",
+      "introduces": [
+        "frontend IP configuration"
+      ],
+      "example": "Like a shop's single front counter, whichever assistant in the back then serves you.",
+      "uses": [],
+      "conceptIDs": [
+        "az104.frontend-ip"
+      ],
+      "order": 13035
+    },
+    {
+      "id": "az104.dns-load-balancing.backend-pool-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a load balancer's backend pool?",
+      "back": "The group of virtual machines, or scale set instances, that serve the incoming requests.",
+      "explanation": "Adding instances to the pool is how you scale to more traffic.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Backend pool” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#backend-pool",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The backend pool is the group of virtual machines or instances in a virtual machine scale set that serves the incoming request. To scale cost-effectively and meet high volumes of incoming traffic, add more instances to the backend pool.",
+      "introduces": [
+        "backend pool"
+      ],
+      "example": "Like the assistants behind the counter who actually fetch the orders.",
+      "uses": [
+        "virtual machine",
+        "Virtual Machine Scale Sets"
+      ],
+      "conceptIDs": [
+        "az104.backend-pool"
+      ],
+      "order": 13040
+    },
+    {
+      "id": "az104.dns-load-balancing.health-probe-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a load balancer health probe?",
+      "back": "A check the load balancer sends to backend instances to decide whether each one is healthy and can take traffic.",
+      "explanation": "The probe result decides which instances receive new connections.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Health probes” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#health-probes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A health probe checks the health of the instances in the backend pool. When you create the load balancer, you set up a health probe for it to use. This health probe decides if an instance is healthy and can handle traffic.",
+      "introduces": [
+        "health probe"
+      ],
+      "example": "Like a supervisor tapping each assistant on the shoulder: no answer, no more customers for them.",
+      "uses": [
+        "backend pool"
+      ],
+      "conceptIDs": [
+        "az104.health-probe"
+      ],
+      "order": 13045
+    },
+    {
+      "id": "az104.dns-load-balancing.lb-rule-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a load balancer rule?",
+      "back": "A rule mapping a frontend IP and port to all instances in the backend pool, for inbound traffic.",
+      "explanation": "It spreads traffic across the whole pool rather than sending it to one machine.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Load balancer rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#load-balancer-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A load balancer rule defines how the load balancer distributes incoming traffic to **all** the instances in the backend pool. The rule maps a frontend IP configuration and port to multiple backend IP addresses and ports. Load balancer rules apply to inbound traffic only.",
+      "introduces": [
+        "load balancer rule"
+      ],
+      "example": "Like \"all orders at counter 80 are shared among the assistants\".",
+      "uses": [
+        "frontend IP configuration",
+        "backend pool"
+      ],
+      "conceptIDs": [
+        "az104.lb-rule"
+      ],
+      "order": 13050
+    },
+    {
+      "id": "az104.dns-load-balancing.nat-rule-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an inbound NAT rule on a load balancer?",
+      "back": "A rule forwarding traffic on a frontend IP and port to one specific VM or instance in the backend pool.",
+      "explanation": "Unlike a load balancer rule, it targets a single instance.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Inbound NAT rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#inbound-nat-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "An inbound NAT rule forwards incoming traffic that arrives at a frontend IP address and port combination. The rule sends this traffic to a **specific** virtual machine or instance in the backend pool.",
+      "introduces": [
+        "inbound NAT rule"
+      ],
+      "example": "Like a direct extension number that always rings one particular assistant.",
+      "uses": [
+        "frontend IP configuration",
+        "backend pool",
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "az104.inbound-nat-rule"
+      ],
+      "order": 13055
+    },
+    {
+      "id": "az104.dns-load-balancing.outbound-rule-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a load balancer outbound rule?",
+      "back": "A rule configuring outbound NAT so backend instances can reach the internet through the load balancer's frontend.",
+      "explanation": "It covers every instance the backend pool identifies.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Outbound rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#outbound-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "An outbound rule configures outbound network address translation (NAT) for all virtual machines or instances that the backend pool identifies. By using this rule, instances in the backend can communicate (outbound) to the internet or other endpoints.",
+      "introduces": [
+        "outbound rule"
+      ],
+      "example": "Like letting all assistants send post under the shop's return address.",
+      "uses": [
+        "backend pool"
+      ],
+      "conceptIDs": [
+        "az104.outbound-rule"
+      ],
+      "order": 13060
+    },
+    {
+      "id": "az104.dns-load-balancing.ha-ports-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What are HA ports on a load balancer?",
+      "back": "A load balancer rule with protocol All and port 0 balancing all TCP and UDP flows on every port of an internal Standard Load Balancer.",
+      "explanation": "One rule replaces a separate rule for every port.",
+      "source": "Microsoft, “Azure Load Balancer components”, “High availability ports” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#high-availability-ports",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A high availability (HA) ports rule is a load balancer rule that you configure with `protocol` set to `All` and `port` set to `0`. A single HA ports rule load-balances all TCP and UDP flows that arrive on all ports of an internal Standard Load Balancer.",
+      "introduces": [
+        "HA ports"
+      ],
+      "example": "Like one sign saying \"all deliveries, any door\" instead of a sign on every door.",
+      "uses": [
+        "load balancer rule"
+      ],
+      "conceptIDs": [
+        "az104.ha-ports"
+      ],
+      "order": 13065
+    },
+    {
+      "id": "az104.dns-load-balancing.session-persistence-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is session persistence on a load balancer?",
+      "back": "A distribution mode sending connections from the same client to the same backend instance.",
+      "explanation": "It is also known as session affinity, source IP affinity or client IP affinity.",
+      "source": "Microsoft, “Azure Load Balancer distribution modes”, “Session persistence” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/distribution-mode-concepts.md#session-persistence",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Session persistence is also known session affinity, source IP affinity, or client IP affinity. This distribution mode uses a two-tuple (source IP and destination IP) or three-tuple (source IP, destination IP, and protocol type) hash to route to backend instances.",
+      "introduces": [
+        "session persistence"
+      ],
+      "example": "Like a bank that always sends you to the same cashier, whichever door you use.",
+      "uses": [
+        "backend pool"
+      ],
+      "conceptIDs": [
+        "az104.session-persistence"
+      ],
+      "order": 13070
+    },
+    {
+      "id": "az104.dns-load-balancing.snat-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is source network address translation (SNAT) on a load balancer?",
+      "back": "Translating a backend VM's private IP address into the load balancer's public IP address for outbound connections.",
+      "explanation": "Outside sources then have no direct address for the backend instances.",
+      "source": "Microsoft, “Use Source Network Address Translation (SNAT) for outbound connections” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-outbound-connections.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This configuration uses **source network address translation (SNAT)** to translate virtual machine's private IP into the load balancer's public IP address.",
+      "introduces": [
+        "source network address translation",
+        "SNAT"
+      ],
+      "example": "Like staff letters all leaving with the company's return address instead of their home addresses.",
+      "uses": [
+        "frontend IP configuration",
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "az104.snat"
+      ],
+      "order": 13075
+    },
+    {
+      "id": "az104.dns-load-balancing.ttl-record-set",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In Azure DNS, is the TTL set per record or per record set?",
+      "back": "Per record set; every record in the set uses the same value.",
+      "explanation": "The TTL says how long clients cache each record before querying again.",
+      "source": "Microsoft, “Overview of DNS zones and records”, “Time-to-live” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-zones-records.md#time-to-live",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In Azure DNS, the TTL gets specified for the record set, not for each record, so the same value is used for all records within that record set.",
+      "uses": [
+        "record set"
+      ],
+      "conceptIDs": [
+        "az104.ttl-per-record-set"
+      ],
+      "order": 13080
+    },
+    {
+      "id": "az104.dns-load-balancing.ttl-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A record set holds two A records. You want clients to cache one for 60 seconds and the other for an hour. Can you?",
+      "back": "No: the TTL belongs to the record set, so both records share one value.",
+      "explanation": "Records that need different TTLs can't share one record set, because the TTL is set for the set.",
+      "source": "Microsoft, “Overview of DNS zones and records”, “Time-to-live” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-zones-records.md#time-to-live",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In Azure DNS, the TTL gets specified for the record set, not for each record, so the same value is used for all records within that record set.",
+      "uses": [
+        "record set"
+      ],
+      "conceptIDs": [
+        "az104.ttl-per-record-set"
+      ],
+      "order": 13090
+    },
+    {
+      "id": "az104.dns-load-balancing.cname-coexist",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "The zone has an A record set named www. You now try to add a CNAME record set named www. What happens?",
+      "back": "It is refused: a CNAME record set can't coexist with another record set of the same name.",
+      "explanation": "This comes from the DNS standards, not from Azure DNS.",
+      "source": "Microsoft, “Overview of DNS zones and records”, “CNAME records” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-zones-records.md#cname-records",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "CNAME record sets can't coexist with other record sets with the same name. For example, you can't create a CNAME record set with the relative name `www` and an A record with the relative name `www` at the same time.",
+      "uses": [
+        "record set"
+      ],
+      "conceptIDs": [
+        "az104.cname-not-at-apex"
+      ],
+      "order": 13095
+    },
+    {
+      "id": "az104.dns-load-balancing.cname-apex",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why can't you create a CNAME record set at a zone's apex (@)?",
+      "back": "The apex already holds the NS and SOA record sets, and a CNAME can't coexist with them.",
+      "explanation": "These constraints come from the DNS standards, not Azure DNS.",
+      "source": "Microsoft, “Overview of DNS zones and records”, “CNAME records” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-zones-records.md#cname-records",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Since the zone apex (name = '\\@') contains the NS and SOA record sets during the creation of the zone, you can't create a CNAME record set at the zone apex.",
+      "uses": [
+        "record set",
+        "DNS zone"
+      ],
+      "conceptIDs": [
+        "az104.cname-not-at-apex"
+      ],
+      "order": 13100
+    },
+    {
+      "id": "az104.dns-load-balancing.ns-apex-auto",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What happens to the NS record set at the zone apex when you create or delete the zone?",
+      "back": "It is created and deleted automatically with the zone and can't be deleted separately.",
+      "explanation": "It holds the names of the Azure DNS name servers assigned to the zone.",
+      "source": "Microsoft, “Overview of DNS zones and records”, “NS records” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-zones-records.md#ns-records",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The NS record set at the zone apex (name '\\@') gets created automatically with each DNS zone and gets deleted automatically when the zone gets deleted. It can't be deleted separately.",
+      "uses": [
+        "record set",
+        "DNS zone"
+      ],
+      "conceptIDs": [
+        "az104.ns-soa-auto"
+      ],
+      "order": 13105
+    },
+    {
+      "id": "az104.dns-load-balancing.wildcard-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A zone has a wildcard A record set * and an A record set named shop. Which answers a query for shop in that zone?",
+      "back": "The shop record set: a closer, non-wildcard match wins.",
+      "explanation": "The wildcard answers only names with no closer match.",
+      "source": "Microsoft, “Overview of DNS zones and records”, “Wildcard records” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-zones-records.md#wildcard-records",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Wildcard records get returned in response to any query with a matching name, unless there's a closer match from a non-wildcard record set.",
+      "uses": [
+        "wildcard records",
+        "record set"
+      ],
+      "conceptIDs": [
+        "az104.wildcard-records"
+      ],
+      "order": 13125
+    },
+    {
+      "id": "az104.dns-load-balancing.zone-global",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When you create a DNS zone, does its resource group's location affect the zone?",
+      "back": "No; the DNS zone service is global and not bound to a location.",
+      "explanation": "You only choose a location if you create a new resource group.",
+      "source": "Microsoft, “Tutorial: Host your domain in Azure DNS”, “Create a DNS zone” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-delegate-domain-azure-dns.md#create-a-dns-zone",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The resource group location doesn't affect your DNS zone service, which is global and not bound to a location.",
+      "uses": [
+        "DNS zone",
+        "resource group"
+      ],
+      "conceptIDs": [
+        "az104.dns-zone"
+      ],
+      "order": 13140
+    },
+    {
+      "id": "az104.dns-load-balancing.zone-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Your company registered fabrikam.net with an outside registrar and wants to manage its records with Azure tools. What do you create first in Azure?",
+      "back": "A DNS zone named fabrikam.net in Azure DNS, then delegate the domain to its name servers.",
+      "explanation": "Delegation at the registrar is the last step, after the zone exists.",
+      "source": "Microsoft, “Tutorial: Host your domain in Azure DNS”, “Overview” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-delegate-domain-azure-dns.md#overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To host your domain in Azure: * Create the DNS zone. * Create resource records in the DNS zone. * Retrieve the list of Azure nameservers for your DNS zone. * Delegate the domain to Azure's nameservers at your registrar.",
+      "uses": [
+        "DNS zone",
+        "Azure DNS"
+      ],
+      "conceptIDs": [
+        "az104.dns-zone",
+        "az104.delegate-domain"
+      ],
+      "order": 13145
+    },
+    {
+      "id": "az104.dns-load-balancing.ns-pool",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Where do a new zone's Azure DNS name servers come from?",
+      "back": "Azure DNS assigns them from a pool each time a zone is created.",
+      "explanation": "You read them from the zone's Overview page before delegating.",
+      "source": "Microsoft, “Tutorial: Host your domain in Azure DNS”, “Retrieve name servers” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-delegate-domain-azure-dns.md#retrieve-name-servers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Before you can delegate your DNS zone to Azure DNS, you need to know the name servers for your zone. Azure DNS assigns name servers from a pool each time a zone is created.",
+      "uses": [
+        "DNS zone",
+        "Azure DNS"
+      ],
+      "conceptIDs": [
+        "az104.name-servers-pool"
+      ],
+      "order": 13150
+    },
+    {
+      "id": "az104.dns-load-balancing.ns-pool-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You delete and re-create the zone contoso.xyz. Can you assume it has the same name servers as before?",
+      "back": "No: name servers are assigned from a pool at each creation, so check them again and update the registrar.",
+      "explanation": "Delegation must always use the name servers Azure DNS gives the zone.",
+      "source": "Microsoft, “Tutorial: Host your domain in Azure DNS”, “Retrieve name servers” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-delegate-domain-azure-dns.md#retrieve-name-servers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure DNS assigns name servers from a pool each time a zone is created.",
+      "uses": [
+        "DNS zone",
+        "Azure DNS"
+      ],
+      "conceptIDs": [
+        "az104.name-servers-pool"
+      ],
+      "order": 13155
+    },
+    {
+      "id": "az104.dns-load-balancing.ns-auto-records",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Must you create the NS records for a new zone's assigned name servers yourself?",
+      "back": "No; Azure DNS creates authoritative NS records for them automatically.",
+      "explanation": "You still have to copy them to the registrar.",
+      "source": "Microsoft, “Tutorial: Host your domain in Azure DNS”, “Retrieve name servers” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-delegate-domain-azure-dns.md#retrieve-name-servers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure DNS automatically creates authoritative NS records in your zone for the assigned name servers.",
+      "uses": [
+        "DNS zone",
+        "Azure DNS"
+      ],
+      "conceptIDs": [
+        "az104.name-servers-pool"
+      ],
+      "order": 13160
+    },
+    {
+      "id": "az104.dns-load-balancing.delegate-where",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Where do you delegate a domain to Azure DNS?",
+      "back": "At the domain registrar, by creating or editing NS records to point to the Azure DNS name servers.",
+      "explanation": "The parent zone then sends resolvers to Azure DNS.",
+      "source": "Microsoft, “Tutorial: Host your domain in Azure DNS”, “Delegate the domain” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-delegate-domain-azure-dns.md#delegate-the-domain",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "After the DNS zone is created, you must update the parent domain with the Azure DNS name servers by registering the domain with a domain registrar. Each registrar has its own DNS management tools to assign the name server records for a domain.",
+      "uses": [
+        "Azure DNS",
+        "DNS zone"
+      ],
+      "conceptIDs": [
+        "az104.delegate-domain"
+      ],
+      "order": 13165
+    },
+    {
+      "id": "az104.dns-load-balancing.delegate-all-four",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How many of the Azure DNS name servers should you use when delegating?",
+      "back": "All four, whatever your domain's top-level domain.",
+      "explanation": "A name server need not share your domain's top-level domain.",
+      "source": "Microsoft, “Tutorial: Host your domain in Azure DNS”, “Delegate the domain” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-delegate-domain-azure-dns.md#delegate-the-domain",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you delegate a domain to Azure DNS, you must use the name servers that Azure DNS provides. Use all four name servers, regardless of the name of your domain.",
+      "uses": [
+        "Azure DNS"
+      ],
+      "conceptIDs": [
+        "az104.delegate-domain"
+      ],
+      "order": 13170
+    },
+    {
+      "id": "az104.dns-load-balancing.delegate-verify",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You have just updated the NS records at the registrar. How do you check the delegation works?",
+      "back": "Query the zone's SOA record with a tool such as nslookup, after waiting at least 10 minutes.",
+      "explanation": "Changes take a while to spread through the DNS system.",
+      "source": "Microsoft, “Tutorial: Host your domain in Azure DNS”, “Verify the delegation” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-delegate-domain-azure-dns.md#verify-the-delegation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "After you complete the delegation, you can verify that it's working by using a tool such as *nslookup* to query the Start of Authority (SOA) record for your zone. The SOA record is automatically created when the zone is created. You may need to wait at least 10 minutes after you complete the delegation",
+      "uses": [
+        "DNS zone"
+      ],
+      "conceptIDs": [
+        "az104.delegate-domain"
+      ],
+      "order": 13175
+    },
+    {
+      "id": "az104.dns-load-balancing.alias-types",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which three record types can be alias record sets in an Azure DNS zone?",
+      "back": "A, AAAA and CNAME.",
+      "explanation": "You turn it on by choosing Yes under Alias record set when adding the record set.",
+      "source": "Microsoft, “Azure DNS alias records overview” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-alias.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "An alias record set is supported for the following record types in an Azure DNS zone: - A - AAAA - CNAME",
+      "uses": [
+        "alias record set"
+      ],
+      "conceptIDs": [
+        "az104.alias-record-types"
+      ],
+      "order": 13185
+    },
+    {
+      "id": "az104.dns-load-balancing.alias-mx-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You want an MX record set to follow a public IP resource automatically. Can you make it an alias record set?",
+      "back": "No: only A, AAAA and CNAME record sets can be aliases.",
+      "explanation": "MX is not among the supported types.",
+      "source": "Microsoft, “Azure DNS alias records overview” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-alias.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "An alias record set is supported for the following record types in an Azure DNS zone: - A - AAAA - CNAME",
+      "uses": [
+        "alias record set",
+        "record set"
+      ],
+      "conceptIDs": [
+        "az104.alias-record-types"
+      ],
+      "order": 13190
+    },
+    {
+      "id": "az104.dns-load-balancing.alias-type-choice",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When creating an alias record set in the portal, what two alias types can you choose?",
+      "back": "Azure resource or Zone record set.",
+      "explanation": "For an Azure resource you also choose the subscription and the resource.",
+      "source": "Microsoft, “Azure DNS alias records overview” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-alias.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To create an alias record set in your DNS zone using the Azure portal, add a record set and choose **Yes** under **Alias record set**. You must also specify the **Alias type** as either an **Azure resource** or **Zone record set**.",
+      "uses": [
+        "alias record set",
+        "Azure portal"
+      ],
+      "conceptIDs": [
+        "az104.alias-record"
+      ],
+      "order": 13195
+    },
+    {
+      "id": "az104.dns-load-balancing.alias-dangling",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What happens to an alias record set when its target public IP resource is deleted?",
+      "back": "It becomes an empty record set; it no longer references the deleted resource.",
+      "explanation": "Alias records tie the DNS record's life cycle to the Azure resource, preventing dangling records.",
+      "source": "Microsoft, “Azure DNS alias records overview”, “Prevent dangling DNS records” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-alias.md#prevent-dangling-dns-records",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you delete those underlying resources, the DNS alias record becomes an empty record set. It no longer references the deleted resource.",
+      "uses": [
+        "alias record set"
+      ],
+      "conceptIDs": [
+        "az104.alias-record"
+      ],
+      "order": 13200
+    },
+    {
+      "id": "az104.dns-load-balancing.alias-ip-change",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A web VM's Standard public IP address changes after a redeployment. Which kind of A record keeps pointing to it with no manual edit?",
+      "back": "An alias record set targeting the public IP resource.",
+      "explanation": "Dangling records pointing to wrong addresses are avoided.",
+      "source": "Microsoft, “Azure DNS alias records overview”, “Capabilities” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-alias.md#capabilities",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can create an A/AAAA record set and make it an alias record set to point to a Standard SKU public IP resource. The DNS record set changes automatically if the public IP address changes or is deleted. Dangling DNS records that point to incorrect IP addresses are avoided.",
+      "uses": [
+        "alias record set",
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "az104.alias-record"
+      ],
+      "order": 13205
+    },
+    {
+      "id": "az104.dns-load-balancing.alias-apex",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How can the zone apex contoso.com point to a Traffic Manager profile when a CNAME is not allowed there?",
+      "back": "With an alias record, which can be created at the zone apex.",
+      "explanation": "A Traffic Manager profile would otherwise need a CNAME record.",
+      "source": "Microsoft, “Azure DNS alias records overview”, “Host load-balanced applications at the zone apex” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-alias.md#host-load-balanced-applications-at-the-zone-apex",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Since using a Traffic Manager profile requires creation of a CNAME record, it's not possible to point to Traffic Manager profile from the zone apex. To resolve this issue, you can use alias records. Unlike CNAME records, alias records are created at the zone apex.",
+      "uses": [
+        "alias record set"
+      ],
+      "conceptIDs": [
+        "az104.alias-zone-apex"
+      ],
+      "order": 13215
+    },
+    {
+      "id": "az104.dns-load-balancing.alias-apex-cdn",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Users should reach your static website at contoso.com without typing www; it is served from an Azure CDN endpoint. Which record do you create at the apex?",
+      "back": "An alias record pointing the zone apex to the CDN endpoint.",
+      "explanation": "CNAME records aren't supported at the zone apex.",
+      "source": "Microsoft, “Azure DNS alias records overview”, “Point zone apex to Azure CDN endpoints” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-alias.md#point-zone-apex-to-azure-cdn-endpoints",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can’t use a CNAME record to point contoso.com to your CDN endpoint. Instead, you can use an alias record to point the zone apex to a CDN endpoint directly.",
+      "uses": [
+        "alias record set"
+      ],
+      "conceptIDs": [
+        "az104.alias-zone-apex"
+      ],
+      "order": 13220
+    },
+    {
+      "id": "az104.dns-load-balancing.alias-vs-cname",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "At the zone apex, CNAME record or alias record: which can you create?",
+      "back": "Only an alias record.",
+      "explanation": "CNAME records remain fine below the apex, such as for somelabel.contoso.com.",
+      "source": "Microsoft, “Azure DNS alias records overview”, “Host load-balanced applications at the zone apex” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/dns-alias.md#host-load-balanced-applications-at-the-zone-apex",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The DNS protocol prevents the assignment of CNAME records at the zone apex. For example if your domain is contoso.com. You can create CNAME records for somelabel.contoso.com but you can't create a CNAME for contoso.com itself.",
+      "uses": [
+        "alias record set",
+        "record set"
+      ],
+      "conceptIDs": [
+        "az104.alias-zone-apex",
+        "az104.cname-not-at-apex"
+      ],
+      "order": 13225
+    },
+    {
+      "id": "az104.dns-load-balancing.pdns-link-needed",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "VMs in VNet-B can't resolve names in the private DNS zone corp.internal, though VNet-A's VMs can. What is the likely fix?",
+      "back": "Link VNet-B to the private DNS zone.",
+      "explanation": "Only linked virtual networks can resolve the zone's records.",
+      "source": "Microsoft, “What is Azure Private DNS?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/private-dns-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To resolve the records of a private DNS zone from your virtual network, you must link the virtual network with the zone.",
+      "uses": [
+        "private DNS zone",
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.private-dns-zone"
+      ],
+      "order": 13230
+    },
+    {
+      "id": "az104.dns-load-balancing.pdns-autoreg",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does autoregistration on a virtual network link do?",
+      "back": "Creates DNS records in the private zone for the VMs in that virtual network.",
+      "explanation": "The VMs are registered as A records pointing to their private IP addresses.",
+      "source": "Microsoft, “What is Azure Private DNS?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/private-dns-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you enable autoregistration on a virtual network link, the DNS records for the virtual machines in that virtual network are registered in the private zone.",
+      "uses": [
+        "private DNS zone",
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "az104.private-dns-zone"
+      ],
+      "order": 13235
+    },
+    {
+      "id": "az104.dns-load-balancing.pdns-no-peering",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Must two virtual networks linked to the same private zone be peered to resolve each other's names in it?",
+      "back": "No; forward resolution works across linked virtual networks without peering.",
+      "explanation": "You might still peer them for other reasons, such as HTTP traffic.",
+      "source": "Microsoft, “What is Azure Private DNS?”, “Capabilities” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/private-dns-overview.md#capabilities",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For cross-virtual network DNS resolution, there's no explicit dependency such that the virtual networks are peered with each other.",
+      "uses": [
+        "private DNS zone",
+        "virtual network peering"
+      ],
+      "conceptIDs": [
+        "az104.private-dns-zone"
+      ],
+      "order": 13245
+    },
+    {
+      "id": "az104.dns-load-balancing.registration-vnet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What makes a virtual network a registration virtual network for a private DNS zone?",
+      "back": "Linking it to the zone with autoregistration enabled.",
+      "explanation": "Records are also created for VMs already in the virtual network.",
+      "source": "Microsoft, “What is a virtual network link?”, “Registration virtual network” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/private-dns-virtual-network-links.md#registration-virtual-network",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "With this setting enabled, the virtual network becomes a `registration virtual network` for the private DNS zone. A DNS record gets automatically created for any virtual machines you deploy in the virtual network.",
+      "uses": [
+        "private DNS zone",
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.registration-vs-resolution"
+      ],
+      "order": 13260
+    },
+    {
+      "id": "az104.dns-load-balancing.resolution-vnet",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Registration or resolution virtual network: which only queries the zone, with no records created for its own VMs?",
+      "back": "Resolution virtual network (linked without autoregistration).",
+      "explanation": "Its VMs can still query all records in the zone, including those registered from other networks.",
+      "source": "Microsoft, “What is a virtual network link?”, “Resolution virtual network” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/private-dns-virtual-network-links.md#resolution-virtual-network",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you choose to link your virtual network with the private DNS zone without autoregistration, the virtual network is treated as a `resolution virtual network` only. DNS records for virtual machines deployed this virtual network aren't created automatically in the private zone.",
+      "uses": [
+        "private DNS zone",
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.registration-vs-resolution"
+      ],
+      "order": 13265
+    },
+    {
+      "id": "az104.dns-load-balancing.one-registration-zone",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How many registration zones can one virtual network have? How many registration virtual networks can one private zone have?",
+      "back": "One per virtual network; a zone can have many.",
+      "explanation": "Resolution links have no such limit: a network can have many resolution zones.",
+      "source": "Microsoft, “What is a virtual network link?”, “Registration virtual network” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/private-dns-virtual-network-links.md#registration-virtual-network",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A private DNS zone can have multiple registration virtual networks. However, every virtual network can only have one registration zone associated with it.",
+      "uses": [
+        "private DNS zone",
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.one-registration-zone"
+      ],
+      "order": 13270
+    },
+    {
+      "id": "az104.dns-load-balancing.registration-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "VNet-Hub already autoregisters into zone a.internal. You link it to b.internal and also want its VMs registered there. Will that work?",
+      "back": "No: a virtual network can have only one registration zone; link to b.internal for resolution only.",
+      "explanation": "The VNet can still resolve b.internal through a resolution link.",
+      "source": "Microsoft, “What is Azure Private DNS?”, “Other considerations” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/dns/private-dns-overview.md#other-considerations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A specific virtual network can be linked to only one private zone if automatic registration of VM DNS records is enabled. You can however link multiple virtual networks to a single DNS zone.",
+      "uses": [
+        "private DNS zone",
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.one-registration-zone",
+        "az104.registration-vs-resolution"
+      ],
+      "order": 13275
+    },
+    {
+      "id": "az104.dns-load-balancing.ap-no-config",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What configuration does Azure-provided name resolution need?",
+      "back": "None.",
+      "explanation": "It still doesn't suit every scenario.",
+      "source": "Microsoft, “Configure DNS name resolution for Azure virtual networks”, “Azure-provided name resolution” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances.md#azure-provided-name-resolution",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Although Azure-provided name resolution doesn't require any configuration, it isn't the appropriate choice for all deployment scenarios, as described in the previous table.",
+      "uses": [
+        "Azure-provided name resolution"
+      ],
+      "conceptIDs": [
+        "az104.azure-provided-dns"
+      ],
+      "order": 13290
+    },
+    {
+      "id": "az104.dns-load-balancing.ap-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "With Azure-provided name resolution, can a VM resolve the names of VMs in another virtual network?",
+      "back": "No; DNS lookup is scoped to one virtual network.",
+      "explanation": "Other options, such as private DNS zones, are needed across networks.",
+      "source": "Microsoft, “Configure DNS name resolution for Azure virtual networks”, “Considerations” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances.md#considerations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "DNS lookup is scoped to a virtual network. DNS names created for one virtual network can't be resolved from other virtual networks.",
+      "uses": [
+        "Azure-provided name resolution",
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.azure-provided-dns"
+      ],
+      "order": 13295
+    },
+    {
+      "id": "az104.dns-load-balancing.ap-limits",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Under Azure-provided name resolution, can you modify the DNS suffix or register your own records?",
+      "back": "Neither: the suffix can't be modified and manual registration isn't allowed.",
+      "explanation": "Azure manages the zone names and records itself.",
+      "source": "Microsoft, “Configure DNS name resolution for Azure virtual networks”, “Considerations” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances.md#considerations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The Azure-created DNS suffix can't be modified. * DNS lookup is scoped to a virtual network. DNS names created for one virtual network can't be resolved from other virtual networks. * Manual registration of your own records isn't allowed.",
+      "uses": [
+        "Azure-provided name resolution"
+      ],
+      "conceptIDs": [
+        "az104.azure-provided-dns"
+      ],
+      "order": 13300
+    },
+    {
+      "id": "az104.dns-load-balancing.ap-vs-private",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "VMs in two peered virtual networks must resolve each other's hostnames. Azure-provided name resolution or a private DNS zone?",
+      "back": "A private DNS zone linked to both; Azure-provided resolution stays within one virtual network.",
+      "explanation": "Azure Private DNS zones are also the preferred solution overall.",
+      "source": "Microsoft, “Configure DNS name resolution for Azure virtual networks” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "| Name resolution between virtual machines in different virtual networks or role instances in different cloud services. |Azure Private DNS zones, Azure DNS Private Resolver, or customer-managed DNS servers forwarding queries between virtual networks",
+      "uses": [
+        "Azure-provided name resolution",
+        "private DNS zone",
+        "virtual network peering"
+      ],
+      "conceptIDs": [
+        "az104.azure-provided-dns",
+        "az104.private-dns-zone"
+      ],
+      "order": 13310
+    },
+    {
+      "id": "az104.dns-load-balancing.ap-preferred",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Of the name resolution methods for virtual networks, which does Microsoft call the preferred solution?",
+      "back": "Azure Private DNS zones.",
+      "explanation": "They give flexibility in managing zones and records.",
+      "source": "Microsoft, “Configure DNS name resolution for Azure virtual networks” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure Private DNS zones are the preferred solution and give you flexibility in managing your DNS zones and records.",
+      "uses": [
+        "private DNS zone"
+      ],
+      "conceptIDs": [
+        "az104.azure-provided-dns"
+      ],
+      "order": 13315
+    },
+    {
+      "id": "az104.dns-load-balancing.own-dns-forward",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How can your own DNS servers in a virtual network resolve Azure hostnames too?",
+      "back": "By forwarding queries they can't answer to Azure's recursive resolvers.",
+      "explanation": "A domain controller can answer for its own domains and forward the rest.",
+      "source": "Microsoft, “Configure DNS name resolution for Azure virtual networks”, “Name resolution that uses your own DNS server” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances.md#name-resolution-that-uses-your-own-dns-server",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "DNS servers within a virtual network can forward DNS queries to the recursive resolvers in Azure. By using this procedure, you can resolve hostnames within that virtual network.",
+      "uses": [
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.custom-dns-servers"
+      ],
+      "order": 13320
+    },
+    {
+      "id": "az104.dns-load-balancing.own-dns-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "VMs in Azure must resolve names of on-premises servers. Which methods fit?",
+      "back": "Azure DNS Private Resolver, or your own DNS servers such as a domain controller.",
+      "explanation": "Azure-provided resolution alone can't see on-premises names.",
+      "source": "Microsoft, “Configure DNS name resolution for Azure virtual networks” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Resolution of on-premises computer and service names from virtual machines or role instances in Azure. |Azure DNS Private Resolver or customer-managed DNS servers (on-premises domain controller, local read-only domain controller, or a DNS secondary synced by using zone transfers, for example).",
+      "uses": [
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "az104.custom-dns-servers"
+      ],
+      "order": 13325
+    },
+    {
+      "id": "az104.dns-load-balancing.lb-layer4",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "At which OSI layer does Azure Load Balancer work, and for which protocols?",
+      "back": "Layer 4, for TCP and UDP traffic.",
+      "explanation": "It distributes inbound flows arriving at its frontend to backend pool instances.",
+      "source": "Microsoft, “What is Azure Load Balancer?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use Azure Load Balancer when you need to distribute Layer 4 TCP or UDP traffic across VMs or virtual machine scale sets.",
+      "uses": [
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "az104.lb-components"
+      ],
+      "order": 13335
+    },
+    {
+      "id": "az104.dns-load-balancing.public-vs-internal",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "What decides whether a load balancer is public or internal?",
+      "back": "Its frontend IP: a public IP makes it public, a private IP makes it internal.",
+      "explanation": "The frontend is the address clients use, so whether it is public or private decides who can reach the load balancer.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Frontend IP configuration” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#frontend-ip-configurations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The nature of the IP address determines the **type** of load balancer that you create. A private IP address creates an internal load balancer. A public IP address creates a public load balancer.",
+      "uses": [
+        "frontend IP configuration"
+      ],
+      "conceptIDs": [
+        "az104.public-vs-internal-lb"
+      ],
+      "order": 13340
+    },
+    {
+      "id": "az104.dns-load-balancing.internal-scenario",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "Web servers must reach a pool of API servers on private addresses only, including from on-premises over VPN. Public or internal load balancer?",
+      "back": "Internal load balancer.",
+      "explanation": "A public load balancer is for internet traffic.",
+      "source": "Microsoft, “What is Azure Load Balancer?”, “How Azure Load Balancer distributes Layer 4 traffic” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-overview.md#how-azure-load-balancer-distributes-layer-4-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Alternatively, an internal (or private) load balancer is used to load balance traffic inside a virtual network. By using an internal load balancer, you can provide inbound connectivity to your VMs in private network connectivity scenarios, such as accessing a load balancer frontend from an on-premises network in a hybrid scenario.",
+      "uses": [
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.public-vs-internal-lb"
+      ],
+      "order": 13345
+    },
+    {
+      "id": "az104.dns-load-balancing.public-outbound",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Besides inbound internet traffic, what can a public load balancer provide for VMs?",
+      "back": "Outbound connectivity, translating their private IPs to public IPs.",
+      "explanation": "This translation is SNAT.",
+      "source": "Microsoft, “What is Azure Load Balancer?”, “How Azure Load Balancer distributes Layer 4 traffic” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-overview.md#how-azure-load-balancer-distributes-layer-4-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For outbound traffic scenarios, the service can translate the VMs' private IP addresses to public IP addresses for any outbound connections that originate from your VMs.",
+      "uses": [
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "az104.public-vs-internal-lb"
+      ],
+      "order": 13350
+    },
+    {
+      "id": "az104.dns-load-balancing.lb-skus",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which two Azure Load Balancer SKUs are current?",
+      "back": "Standard and Gateway (Basic is retired).",
+      "explanation": "Each SKU differs in scale, features and pricing.",
+      "source": "Microsoft, “What is Azure Load Balancer?”, “How Azure Load Balancer distributes Layer 4 traffic” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-overview.md#how-azure-load-balancer-distributes-layer-4-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure Load Balancer offers two current SKUs: Standard and Gateway. Each SKU caters to a specific scenario and has differences in scale, features, and pricing. A third SKU, Basic, was retired on September 30, 2025.",
+      "uses": [],
+      "conceptIDs": [
+        "az104.lb-skus"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Azure documentation as published",
+      "order": 13355
+    },
+    {
+      "id": "az104.dns-load-balancing.basic-retired",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "On what date was Basic Load Balancer retired?",
+      "back": "30 September 2025.",
+      "explanation": "Existing users are told to upgrade to Standard as soon as possible.",
+      "source": "Microsoft, “Azure Load Balancer SKUs” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/skus.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "On September 30, 2025, Basic Load Balancer was retired.",
+      "uses": [],
+      "conceptIDs": [
+        "az104.basic-lb-retired"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Azure documentation as published",
+      "order": 13365
+    },
+    {
+      "id": "az104.dns-load-balancing.basic-retired-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "You are building a new internet-facing load balancer for production today. Which SKU do you choose?",
+      "back": "Standard; Basic was retired on 30 September 2025.",
+      "choices": "A) Basic\nB) Standard\nC) Gateway",
+      "choicesExplained": "A was retired in 2025. C is aimed at third-party network virtual appliances.",
+      "explanation": "Even existing Basic users are told to move to Standard.",
+      "source": "Microsoft, “What is Azure Load Balancer?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you're currently using Basic Load Balancer, upgrade to Standard Load Balancer as soon as possible.",
+      "uses": [],
+      "conceptIDs": [
+        "az104.basic-lb-retired",
+        "az104.lb-skus"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Azure documentation as published",
+      "order": 13370
+    },
+    {
+      "id": "az104.dns-load-balancing.ip-sku-match",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What SKU must the public IP on a public Standard Load Balancer be?",
+      "back": "Standard; Basic public IPs aren't supported on Standard Load Balancer.",
+      "explanation": "The SKUs of the load balancer and its public IP must match.",
+      "source": "Microsoft, “Azure Load Balancer SKUs”, “SKU comparison” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/skus.md#skus",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When using a Public Standard Load Balancer, the SKU of the public IP must be Standard. Basic Public IPs are not supported on Standard LB",
+      "uses": [
+        "frontend IP configuration"
+      ],
+      "conceptIDs": [
+        "az104.lb-ip-sku-match"
+      ],
+      "order": 13375
+    },
+    {
+      "id": "az104.dns-load-balancing.ip-sku-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Deploying a public Standard Load Balancer, you try to reuse an old Basic public IP as the frontend. Will it work?",
+      "back": "No: a Standard load balancer needs a Standard public IP.",
+      "explanation": "Load balancer and public IP SKUs must match.",
+      "source": "Microsoft, “Azure Load Balancer SKUs”, “SKU comparison” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/skus.md#skus",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When using a Public Standard Load Balancer, the SKU of the public IP must be Standard. Basic Public IPs are not supported on Standard LB",
+      "uses": [
+        "frontend IP configuration"
+      ],
+      "conceptIDs": [
+        "az104.lb-ip-sku-match"
+      ],
+      "order": 13380
+    },
+    {
+      "id": "az104.dns-load-balancing.secure-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Is a Standard Load Balancer open to inbound flows by default?",
+      "back": "No; it is closed unless a network security group allows them.",
+      "explanation": "Internal traffic from the virtual network to an internal load balancer is allowed.",
+      "source": "Microsoft, “Azure Load Balancer SKUs”, “SKU comparison” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/skus.md#skus",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Closed to inbound flows unless allowed by a network security group. Internal traffic from the virtual network to the internal load balancer is allowed.",
+      "uses": [
+        "network security group"
+      ],
+      "conceptIDs": [
+        "az104.lb-skus"
+      ],
+      "order": 13385
+    },
+    {
+      "id": "az104.dns-load-balancing.standard-backend",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which VMs can a Standard Load Balancer's backend pool hold?",
+      "back": "Any VMs or scale sets in a single virtual network.",
+      "explanation": "Basic was limited to one availability set or scale set.",
+      "source": "Microsoft, “Azure Load Balancer SKUs”, “SKU comparison” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/skus.md#skus",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Backend pool endpoints | Any virtual machines or virtual machine scale sets in a single virtual network",
+      "uses": [
+        "backend pool",
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.backend-pool"
+      ],
+      "order": 13390
+    },
+    {
+      "id": "az104.dns-load-balancing.frontend-multi",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Can a load balancer have more than one frontend IP?",
+      "back": "Yes, it can have multiple frontend IPs.",
+      "explanation": "Each frontend is its own IP address and point of contact for clients.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Frontend IP configuration” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#frontend-ip-configurations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A load balancer can have multiple frontend IPs.",
+      "uses": [
+        "frontend IP configuration"
+      ],
+      "conceptIDs": [
+        "az104.frontend-ip"
+      ],
+      "order": 13400
+    },
+    {
+      "id": "az104.dns-load-balancing.frontend-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You need a load balancer that internet clients reach at 20.50.1.10 and that sends traffic to web VMs. What must its frontend be?",
+      "back": "A public IP address frontend, which makes it a public load balancer.",
+      "explanation": "A private frontend would make it internal.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Frontend IP configuration” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#frontend-ip-configurations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A private IP address creates an internal load balancer. A public IP address creates a public load balancer.",
+      "uses": [
+        "frontend IP configuration"
+      ],
+      "conceptIDs": [
+        "az104.frontend-ip"
+      ],
+      "order": 13405
+    },
+    {
+      "id": "az104.dns-load-balancing.backend-no-pip",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Do VMs need public IP addresses to join the backend pool of a public load balancer?",
+      "back": "No.",
+      "explanation": "They can even be attached while stopped.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Backend pool” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#backend-pool",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "VMs don't need a public IP address to attach to the backend pool of a public load balancer. You can attach VMs to the backend pool of a load balancer even if they're in a stopped state.",
+      "uses": [
+        "backend pool"
+      ],
+      "conceptIDs": [
+        "az104.backend-pool"
+      ],
+      "order": 13410
+    },
+    {
+      "id": "az104.dns-load-balancing.backend-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Traffic has doubled and you add three VMs to the backend pool. What else must you reconfigure on the load balancer?",
+      "back": "Nothing; it reconfigures itself when instances are added or removed.",
+      "explanation": "The backend pool can hold any VM in a single virtual network.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Backend pool” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#backend-pool",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Load Balancer automatically reconfigures itself when you scale instances up or down. Adding or removing VMs from the backend pool reconfigures the load balancer without other operations.",
+      "uses": [
+        "backend pool"
+      ],
+      "conceptIDs": [
+        "az104.backend-pool"
+      ],
+      "order": 13415
+    },
+    {
+      "id": "az104.dns-load-balancing.one-vnet",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You want one load balancer rule to send traffic to VMs in VNet-A and VNet-B. Can you?",
+      "back": "No: a rule can't span two virtual networks; frontends and backends must share one virtual network.",
+      "explanation": "This is a listed limitation of Azure Load Balancer.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Limitations” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#limitations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A load balancer rule can't span two virtual networks. All load balancer frontends and their backend instances must be in a single virtual network.",
+      "uses": [
+        "load balancer rule",
+        "virtual network"
+      ],
+      "conceptIDs": [
+        "az104.lb-components"
+      ],
+      "order": 13420
+    },
+    {
+      "id": "az104.dns-load-balancing.lb-rule-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Web traffic on port 443 must be spread across all four web VMs. Load balancer rule or inbound NAT rule?",
+      "back": "A load balancer rule.",
+      "explanation": "An inbound NAT rule would send the traffic to one specific VM.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Load balancer rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#load-balancer-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A load balancer rule defines how the load balancer distributes incoming traffic to **all** the instances in the backend pool.",
+      "uses": [
+        "load balancer rule",
+        "inbound NAT rule"
+      ],
+      "conceptIDs": [
+        "az104.lb-rule"
+      ],
+      "order": 13430
+    },
+    {
+      "id": "az104.dns-load-balancing.lb-rule-inbound",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Do load balancer rules apply to outbound traffic?",
+      "back": "No; they apply to inbound traffic only.",
+      "explanation": "Outbound traffic is handled by outbound rules.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Load balancer rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#load-balancer-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The rule maps a frontend IP configuration and port to multiple backend IP addresses and ports. Load balancer rules apply to inbound traffic only.",
+      "uses": [
+        "load balancer rule"
+      ],
+      "conceptIDs": [
+        "az104.lb-rule"
+      ],
+      "order": 13435
+    },
+    {
+      "id": "az104.dns-load-balancing.lb-rule-probe",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Does a load balancer rule need a health probe?",
+      "back": "Yes; load balancer rules require one to detect endpoint status.",
+      "explanation": "Inbound NAT rules, by contrast, don't need one.",
+      "source": "Microsoft, “Azure Load Balancer health probes” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure Load Balancer rules require a health probe to detect the endpoint status. The configuration of the health probe and probe responses determines which backend pool instances receive new connections.",
+      "uses": [
+        "load balancer rule",
+        "health probe"
+      ],
+      "conceptIDs": [
+        "az104.lb-rule",
+        "az104.health-probe"
+      ],
+      "order": 13440
+    },
+    {
+      "id": "az104.dns-load-balancing.nat-rule-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "An admin must reach the VM web02 in the backend pool on RDP through the load balancer's public IP at port 50002. What do you configure?",
+      "back": "An inbound NAT rule from frontend port 50002 to web02.",
+      "explanation": "A load balancer rule would spread the sessions across all VMs.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Inbound NAT rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#inbound-nat-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "An inbound NAT rule forwards incoming traffic that arrives at a frontend IP address and port combination. The rule sends this traffic to a **specific** virtual machine or instance in the backend pool.",
+      "uses": [
+        "inbound NAT rule",
+        "frontend IP configuration",
+        "backend pool"
+      ],
+      "conceptIDs": [
+        "az104.inbound-nat-rule"
+      ],
+      "order": 13445
+    },
+    {
+      "id": "az104.dns-load-balancing.nat-rule-no-probe",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Does an inbound NAT rule need a health probe attached?",
+      "back": "No.",
+      "explanation": "Load balancing rules do need one.",
+      "source": "Microsoft, “Azure Load Balancer health probes”, “Design guidance” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md#design-guidance",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Unlike load balancing rules, inbound NAT rules don't need a health probe attached to it.",
+      "uses": [
+        "inbound NAT rule",
+        "health probe"
+      ],
+      "conceptIDs": [
+        "az104.inbound-nat-rule"
+      ],
+      "order": 13450
+    },
+    {
+      "id": "az104.dns-load-balancing.ha-internal-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "On which kind of load balancer are HA ports rules available?",
+      "back": "Only an internal Standard Load Balancer.",
+      "explanation": "Public and Basic load balancers don't support them.",
+      "source": "Microsoft, “High availability ports overview”, “Limitations” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-ha-ports-overview.md#limitations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "HA ports load-balancing rules are available only for an internal standard load balancer.",
+      "uses": [
+        "HA ports"
+      ],
+      "conceptIDs": [
+        "az104.ha-ports"
+      ],
+      "order": 13455
+    },
+    {
+      "id": "az104.dns-load-balancing.ha-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A pair of firewall appliances sits behind a load balancer and must receive all traffic on every port. What rule do you configure?",
+      "back": "An HA ports rule on an internal Standard Load Balancer.",
+      "explanation": "The appliance instances go into the internal load balancer's backend pool.",
+      "source": "Microsoft, “High availability ports overview”, “Use HA ports for network virtual appliances” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-ha-ports-overview.md#use-ha-ports-for-network-virtual-appliances",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Add NVA instances to the backend pool of your internal load balancer and configure an HA ports rule.",
+      "uses": [
+        "HA ports",
+        "backend pool"
+      ],
+      "conceptIDs": [
+        "az104.ha-ports"
+      ],
+      "order": 13460
+    },
+    {
+      "id": "az104.dns-load-balancing.outbound-rule-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "Backend VMs behind a public Standard Load Balancer must reach the internet using the load balancer's public IP, with SNAT ports you allocate. What do you create?",
+      "back": "An outbound rule.",
+      "explanation": "The backends then use the load balancer's public IP for outbound connectivity.",
+      "source": "Microsoft, “Use Source Network Address Translation (SNAT) for outbound connections”, “Use the frontend IP address(es) of a load balancer for outbound via outbound rules” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-outbound-connections.md#outboundrules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Outbound rules enable you to explicitly define SNAT (source network address translation) for a standard SKU public load balancer. This configuration allows you to use the public IP or IPs of your load balancer for outbound connectivity of the backend instances.",
+      "uses": [
+        "outbound rule",
+        "SNAT"
+      ],
+      "conceptIDs": [
+        "az104.outbound-rule"
+      ],
+      "order": 13465
+    },
+    {
+      "id": "az104.dns-load-balancing.outbound-best",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which outbound connectivity method does Microsoft rate best and give precedence over the others?",
+      "back": "Associating Azure NAT Gateway with the subnet.",
+      "explanation": "It avoids the SNAT port exhaustion concerns of the other methods.",
+      "source": "Microsoft, “Use Source Network Address Translation (SNAT) for outbound connections”, “Associate Azure NAT Gateway to the subnet” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-outbound-connections.md#1-associate-azure-nat-gateway-to-the-subnet",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Using NAT Gateway is the best method for outbound connectivity. NAT Gateway is highly extensible, reliable, and doesn't have the same concerns about SNAT port exhaustion. NAT Gateway takes precedence over other outbound connectivity methods, including a load balancer, instance-level public IP addresses, and Azure Firewall.",
+      "uses": [
+        "SNAT",
+        "subnet"
+      ],
+      "conceptIDs": [
+        "az104.outbound-methods"
+      ],
+      "order": 13475
+    },
+    {
+      "id": "az104.dns-load-balancing.probe-protocols",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which health probe protocols does Standard Load Balancer support?",
+      "back": "TCP, HTTP and HTTPS.",
+      "explanation": "Basic supported only TCP and HTTP.",
+      "source": "Microsoft, “Azure Load Balancer health probes”, “Probe protocols” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md#probe-protocols",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "| Standard | TCP, HTTP, HTTPS | All probes down, all TCP flows continue. |",
+      "uses": [
+        "health probe"
+      ],
+      "conceptIDs": [
+        "az104.probe-protocols"
+      ],
+      "order": 13480
+    },
+    {
+      "id": "az104.dns-load-balancing.probe-http-200",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When is an HTTP health probe marked up?",
+      "back": "When the instance responds with HTTP status 200 within the timeout period.",
+      "explanation": "Any other response code counts as a failure.",
+      "source": "Microsoft, “Azure Load Balancer health probes”, “Probe protocol” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md#probe-protocol",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The health probe is marked up when the instance responds with an HTTP status 200 within the timeout period.",
+      "uses": [
+        "health probe"
+      ],
+      "conceptIDs": [
+        "az104.probe-protocols"
+      ],
+      "order": 13485
+    },
+    {
+      "id": "az104.dns-load-balancing.probe-protocol-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "The web app on your VMs can be running while its database connection is broken. Which probe type lets the app report that itself: TCP or HTTP?",
+      "back": "HTTP (or HTTPS): the app can return a non-200 code from a health path.",
+      "explanation": "A TCP probe checks only that the port accepts a connection.",
+      "source": "Microsoft, “Azure Load Balancer health probes”, “Probe protocol” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md#probe-protocol",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "An HTTP/HTTPS probe fails when:</br> 1. Probe endpoint returns an HTTP response code other than 200",
+      "uses": [
+        "health probe"
+      ],
+      "conceptIDs": [
+        "az104.probe-protocols"
+      ],
+      "order": 13490
+    },
+    {
+      "id": "az104.dns-load-balancing.probe-down-standard",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "With Standard Load Balancer, what happens to established TCP flows when every instance's probe is down?",
+      "back": "They continue (with more than one backend instance); no new flows are sent.",
+      "explanation": "Basic Load Balancer ended all existing TCP flows in that case.",
+      "source": "Microsoft, “Azure Load Balancer health probes”, “Probe down behavior” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md#probe-down-behavior",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "No new flows are sent to the backend pool. Standard Load Balancer allows established TCP flows to continue given that a backend pool has more than one backend instance.",
+      "uses": [
+        "health probe",
+        "backend pool"
+      ],
+      "conceptIDs": [
+        "az104.probe-down-behaviour"
+      ],
+      "order": 13495
+    },
+    {
+      "id": "az104.dns-load-balancing.probe-interval-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What is a health probe's default interval in the Azure portal, and in ARM templates or the CLI?",
+      "back": "5 seconds in the portal; 15 seconds (minimum 5) otherwise.",
+      "explanation": "The interval is how often the probe checks each instance.",
+      "source": "Microsoft, “Azure Load Balancer health probes”, “Probe interval & timeout” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md#probe-interval--timeout",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The health probe attempts to check the configured health probe port every 5 seconds by default in the Azure portal, but you can set it to another value. When you deploy through ARM templates, the REST API, the Azure CLI, or PowerShell, the default interval is 15 seconds (minimum 5 seconds).",
+      "uses": [
+        "health probe",
+        "Azure portal",
+        "ARM template"
+      ],
+      "conceptIDs": [
+        "az104.probe-interval-threshold"
+      ],
+      "order": 13500
+    },
+    {
+      "id": "az104.dns-load-balancing.probe-threshold",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does a health probe's threshold set?",
+      "back": "How many consecutive successes or failures mark an instance healthy or unhealthy.",
+      "explanation": "For HTTP probes it matters only when the probe times out.",
+      "source": "Microsoft, “Azure Load Balancer health probes”, “Probe threshold” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md#probe-threshold",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The probe threshold value is the number of times a health probe will need to succeed or fail consecutively in order for the probe to mark a backend instance as healthy or unhealthy, respectively.",
+      "uses": [
+        "health probe"
+      ],
+      "conceptIDs": [
+        "az104.probe-interval-threshold"
+      ],
+      "order": 13510
+    },
+    {
+      "id": "az104.dns-load-balancing.probe-threshold-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A TCP probe has threshold 3. A healthy VM misses two probes in a row, then answers. Does it stop receiving new traffic?",
+      "back": "No: it takes 3 consecutive failures to mark it unhealthy.",
+      "explanation": "The source's example uses a threshold of 2; the rule is the same for 3.",
+      "source": "Microsoft, “Azure Load Balancer health probes”, “Probe threshold” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md#probe-threshold",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Similarly, once a backend instance is deemed healthy, 2 consecutive failures or timeouts are required for the instance to be considered unhealthy and stop receiving new traffic.",
+      "uses": [
+        "health probe"
+      ],
+      "conceptIDs": [
+        "az104.probe-interval-threshold"
+      ],
+      "order": 13515
+    },
+    {
+      "id": "az104.dns-load-balancing.probe-source-ip",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "From which IP address do all IPv4 Load Balancer health probes come?",
+      "back": "168.63.129.16.",
+      "explanation": "NSGs and local firewalls must allow it.",
+      "source": "Microsoft, “Azure Load Balancer health probes”, “Probe source IP address” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md#probe-source-ip-address",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "All IPv4 Load Balancer health probes originate from the IP address 168.63.129.16 as their source.",
+      "uses": [
+        "health probe"
+      ],
+      "conceptIDs": [
+        "az104.probe-source-ip"
+      ],
+      "order": 13520
+    },
+    {
+      "id": "az104.dns-load-balancing.probe-source-tag",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which service tag identifies the health probe source address in NSGs?",
+      "back": "AzureLoadBalancer.",
+      "explanation": "A default NSG rule already allows it.",
+      "source": "Microsoft, “Azure Load Balancer health probes”, “Probe source IP address” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md#probe-source-ip-address",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The `AzureLoadBalancer` service tag identifies this source IP address in your network security groups and permits health probe traffic by default.",
+      "uses": [
+        "service tags",
+        "health probe",
+        "network security group"
+      ],
+      "conceptIDs": [
+        "az104.probe-source-ip"
+      ],
+      "order": 13525
+    },
+    {
+      "id": "az104.dns-load-balancing.probe-source-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "All backend VMs show as down, though the app runs. Someone added a guest firewall rule blocking 168.63.129.16. What is happening?",
+      "back": "The probes can't reach the VMs, so the load balancer marks them down; allow that address.",
+      "explanation": "This misconfiguration can make the load-balanced application fail.",
+      "source": "Microsoft, “Azure Load Balancer health probes”, “Probe source IP address” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md#probe-source-ip-address",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you don't allow the source IP of the probe in your firewall policies, the health probe fails as it is unable to reach your instance. In turn, Azure Load Balancer marks your instance as -down- due to the health probe failure.",
+      "uses": [
+        "health probe"
+      ],
+      "conceptIDs": [
+        "az104.probe-source-ip",
+        "az104.troubleshoot-lb"
+      ],
+      "order": 13530
+    },
+    {
+      "id": "az104.dns-load-balancing.probe-test",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "How can you deliberately mark one backend instance down to test probe failure?",
+      "back": "Block the probe with an NSG rule on the probe's destination port or source IP.",
+      "explanation": "The source also warns that routinely blocking probes is unsupported.",
+      "source": "Microsoft, “Azure Load Balancer health probes”, “Design guidance” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-custom-probe-overview.md#design-guidance",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To test a health probe failure or mark down an individual instance, use a network security group to explicitly block the health probe. Create an NSG rule to block the destination port or source IP to simulate the failure of a probe.",
+      "uses": [
+        "health probe",
+        "network security group"
+      ],
+      "conceptIDs": [
+        "az104.troubleshoot-probe"
+      ],
+      "order": 13540
+    },
+    {
+      "id": "az104.dns-load-balancing.five-tuple",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which distribution mode does Azure Load Balancer use by default?",
+      "back": "A five-tuple hash: source IP and port, destination IP and port, protocol.",
+      "explanation": "In the portal this is session persistence set to None.",
+      "source": "Microsoft, “Azure Load Balancer distribution modes”, “Hash based” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/distribution-mode-concepts.md#hash-based",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure Load Balancer uses a five-tuple hash based distribution mode by default. The five-tuple consists of: - **Source IP** - **Source port** - **Destination IP** - **Destination port** - **Protocol type**",
+      "uses": [],
+      "conceptIDs": [
+        "az104.five-tuple-default",
+        "az104.distribution-modes"
+      ],
+      "order": 13545
+    },
+    {
+      "id": "az104.dns-load-balancing.five-tuple-new-session",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "With the default hash mode, where does a client's new session from the same IP go?",
+      "back": "Possibly to a different instance, since the source port changes.",
+      "explanation": "Stickiness lasts only within one transport session.",
+      "source": "Microsoft, “Azure Load Balancer distribution modes”, “Hash based” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/distribution-mode-concepts.md#hash-based",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The algorithm provides stickiness only within a transport session. When the client starts a new session from the same source IP, the source port changes and causes the traffic to go to a different backend instance.",
+      "uses": [],
+      "conceptIDs": [
+        "az104.five-tuple-default"
+      ],
+      "order": 13550
+    },
+    {
+      "id": "az104.dns-load-balancing.persistence-client-ip",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which session persistence setting sends successive requests from one client IP to the same instance, whatever the protocol?",
+      "back": "Client IP (two-tuple).",
+      "explanation": "It hashes on source and destination IP only.",
+      "source": "Microsoft, “Azure Load Balancer distribution modes”, “Session persistence” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/distribution-mode-concepts.md#session-persistence",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Client IP (2-tuple)** - Specifies that successive requests from the same client IP address are handled by the same backend instance.",
+      "uses": [
+        "session persistence"
+      ],
+      "conceptIDs": [
+        "az104.session-persistence",
+        "az104.distribution-modes"
+      ],
+      "order": 13555
+    },
+    {
+      "id": "az104.dns-load-balancing.persistence-client-ip-protocol",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which session persistence setting keys on client IP plus protocol?",
+      "back": "Client IP and protocol (three-tuple).",
+      "explanation": "It adds the protocol type to the two IP addresses.",
+      "source": "Microsoft, “Azure Load Balancer distribution modes”, “Session persistence” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/distribution-mode-concepts.md#session-persistence",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Client IP and protocol (3-tuple)** - Specifies that successive requests from the same client IP address and protocol combination are handled by the same backend instance.",
+      "uses": [
+        "session persistence"
+      ],
+      "conceptIDs": [
+        "az104.session-persistence",
+        "az104.distribution-modes"
+      ],
+      "order": 13560
+    },
+    {
+      "id": "az104.dns-load-balancing.persistence-scenario",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A shopping app keeps each user's basket in the memory of the VM that served them, so users must keep hitting the same VM. What do you set?",
+      "back": "Session persistence: Client IP (or Client IP and protocol), not None.",
+      "explanation": "The default five-tuple hash can send a new session to another instance.",
+      "source": "Microsoft, “Azure Load Balancer distribution modes”, “Session persistence” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/distribution-mode-concepts.md#session-persistence",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When using session persistence, connections from the same client go to the same backend instance within the backend pool.",
+      "uses": [
+        "session persistence"
+      ],
+      "conceptIDs": [
+        "az104.session-persistence"
+      ],
+      "order": 13565
+    },
+    {
+      "id": "az104.dns-load-balancing.persistence-none",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Your stateless API should let any VM handle any request from any client. Which session persistence setting do you pick in the portal?",
+      "back": "None (the default five-tuple hash).",
+      "explanation": "None means hash-based distribution.",
+      "source": "Microsoft, “Azure Load Balancer distribution modes”, “Hash based” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/distribution-mode-concepts.md#hash-based",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In order to configure hash based distribution, you must select session persistence to be **None** in the Azure portal. This specifies that successive requests from the same client can be handled by any virtual machine.",
+      "uses": [
+        "session persistence",
+        "Azure portal"
+      ],
+      "conceptIDs": [
+        "az104.five-tuple-default",
+        "az104.distribution-modes"
+      ],
+      "order": 13570
+    },
+    {
+      "id": "az104.dns-load-balancing.mode-switch",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Is there downtime when you switch a load balancer's distribution mode?",
+      "back": "No.",
+      "explanation": "You can change modes on a running load balancer.",
+      "source": "Microsoft, “Azure Load Balancer distribution modes” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/distribution-mode-concepts.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "There's no downtime when switching from one distribution mode to another on a load balancer.",
+      "uses": [],
+      "conceptIDs": [
+        "az104.distribution-modes"
+      ],
+      "order": 13575
+    },
+    {
+      "id": "az104.dns-load-balancing.ts-no-nsg",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A new public Standard Load Balancer has a correct rule and healthy probes, but no client traffic reaches the VMs, whose subnet and NICs have no NSG. Why?",
+      "back": "Standard load balancers are closed to inbound connections by default; an NSG must allow the traffic.",
+      "explanation": "Traffic is blocked when no NSG exists on the subnet or NIC.",
+      "source": "Microsoft, “What is Azure Load Balancer?”, “Security features” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/load-balancer-overview.md#securebydefault",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Standard load balancers and public IP addresses are **closed to inbound connections by default**. - **Network Security Groups (NSGs)** must explicitly permit allowed traffic. - Traffic is blocked if no NSG exists on a subnet or NIC.",
+      "uses": [
+        "network security group"
+      ],
+      "conceptIDs": [
+        "az104.troubleshoot-lb"
+      ],
+      "order": 13585
+    },
+    {
+      "id": "az104.dns-load-balancing.ts-backend-to-ilb",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A VM in an internal load balancer's backend pool can't reach the load balancer's own frontend IP. Is that expected?",
+      "back": "Yes: outbound flow from a backend VM to its internal load balancer's frontend fails.",
+      "explanation": "It is a documented limitation, not a misconfiguration.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Limitations” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#limitations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Outbound flow from a backend VM to a frontend of an internal load balancer fails.",
+      "uses": [
+        "backend pool",
+        "frontend IP configuration"
+      ],
+      "conceptIDs": [
+        "az104.troubleshoot-lb"
+      ],
+      "order": 13590
+    },
+    {
+      "id": "az104.dns-load-balancing.ts-icmp",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A VM pings an internal Standard Load Balancer's frontend and gets no reply, though TCP traffic through it works. It has no HA ports rule. What explains it?",
+      "back": "Its load-balancing and inbound NAT rules carry TCP or UDP only; an internal load balancer handles ICMP only with HA ports.",
+      "explanation": "Load Balancer balances specific TCP or UDP protocols, not other IP protocols such as ICMP.",
+      "source": "Microsoft, “Azure Load Balancer components”, “Limitations” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/load-balancer/components.md#limitations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Load-balancing rules and inbound NAT rules don't support other IP protocols, including ICMP, except that an internal Standard Load Balancer supports ICMP traffic when you enable **HA ports**.",
+      "uses": [
+        "load balancer rule",
+        "inbound NAT rule",
+        "HA ports"
+      ],
+      "conceptIDs": [
+        "az104.troubleshoot-lb"
+      ],
+      "order": 13595
+    },
+    {
+      "id": "az104.dns-load-balancing.ts-topics",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Standard load balancer type does the troubleshooting guide cover for no outbound connectivity, and which for no inbound connectivity?",
+      "back": "Internal for no outbound; external (public) for no inbound.",
+      "explanation": "The guide also covers backend port changes, removed VMs and failed states.",
+      "source": "Microsoft, “Troubleshoot Azure Load Balancer common problems”, “Troubleshooting resources” (MicrosoftDocs/SupportArticles-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/main/support/azure/load-balancer/troubleshoot-common-problems/load-balancer-troubleshoot.md#troubleshooting-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Troubleshoot no outbound connectivity from Standard internal load balancers - Troubleshoot no inbound connectivity to Standard external load balancers",
+      "uses": [],
+      "conceptIDs": [
+        "az104.troubleshoot-lb"
+      ],
+      "order": 13600
+    }
+  ]
+}

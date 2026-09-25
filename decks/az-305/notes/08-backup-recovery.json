@@ -1,0 +1,1652 @@
+{
+  "topic": "Backup and disaster recovery",
+  "notes": [
+    {
+      "id": "az305.backup-recovery.what-is-rto",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8010,
+      "front": "What is a recovery time objective (RTO)?",
+      "back": "The longest an application may acceptably stay unavailable after an incident.",
+      "explanation": "It is a target the workload team sets; the Well-Architected Framework treats it as one of the recovery metrics that disaster recovery plans and testing must meet.",
+      "example": "A payroll system with a four-hour RTO must be serving users again within four hours of an outage starting.",
+      "source": "Azure Well-Architected Framework: Architecture strategies for defining reliability targets (Microsoft Learn), “Define recovery metrics”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/metrics#define-recovery-metrics",
+      "sourceLicence": "C · facts only, in our own words",
+      "introduces": [
+        "recovery time objective",
+        "RTO"
+      ],
+      "uses": [
+        "recovery time objective",
+        "RTO"
+      ],
+      "conceptIDs": [
+        "az305.rto"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.what-is-rpo",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8020,
+      "front": "What is a recovery point objective (RPO)?",
+      "back": "The greatest amount of data loss, measured as a span of time, that is acceptable during an incident.",
+      "explanation": "RPO looks backwards to the last good copy of the data, while the recovery time objective looks forwards to when service returns.",
+      "example": "With a one-hour RPO, a shop may lose at most the last hour of orders when its database fails.",
+      "source": "Azure Well-Architected Framework: Architecture strategies for defining reliability targets (Microsoft Learn), “Define recovery metrics”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/metrics#define-recovery-metrics",
+      "sourceLicence": "C · facts only, in our own words",
+      "introduces": [
+        "recovery point objective",
+        "RPO"
+      ],
+      "uses": [
+        "recovery point objective",
+        "RPO",
+        "recovery time objective"
+      ],
+      "conceptIDs": [
+        "az305.rpo"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.what-is-composite-slo",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 8030,
+      "front": "What is a composite SLO?",
+      "back": "A service-level objective (SLO) for a whole flow or workload, calculated by multiplying the availability targets of the components it depends on.",
+      "explanation": "Because the figures multiply, the combined target can only equal or fall below the weakest component that is included.",
+      "example": "A checkout flow that needs both a web tier and a database has a composite SLO below either one's own target.",
+      "source": "Azure Well-Architected Framework: Architecture strategies for defining reliability targets (Microsoft Learn), “Define composite SLO targets”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/metrics#define-composite-slo-targets",
+      "sourceLicence": "C · facts only, in our own words",
+      "introduces": [
+        "composite SLO"
+      ],
+      "uses": [
+        "composite SLO"
+      ],
+      "conceptIDs": [
+        "az305.slo-composite"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.what-are-region-pairs",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8040,
+      "front": "What are Azure region pairs?",
+      "back": "Two Azure regions that Microsoft associates with each other, usually in the same geography.",
+      "explanation": "A small number of Azure services use these pairs for geo-replication and geo-redundancy, and the pairs support some aspects of disaster recovery.",
+      "example": "Geo-redundant storage in Canada Central copying its data to Canada East, the region it is paired with.",
+      "evidence": "Microsoft associates some Azure regions with another region, where both regions are usually in the same geography. Together, the regions form a *region pair*. A small number of Azure services use these region pairs to support geo-replication and geo-redundancy. The pairs also support some aspects of disaster recovery",
+      "source": "Azure region pairs and nonpaired regions, “Azure region pairs and nonpaired regions”",
+      "sourceURL": "https://github.com/MicrosoftDocs/reliability-docs/blob/main/articles/reliability/regions-paired.md#azure-region-pairs-and-nonpaired-regions",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Azure region pairs"
+      ],
+      "uses": [
+        "Azure region pairs",
+        "geo-redundant storage"
+      ],
+      "conceptIDs": [
+        "az305.region-pairs"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.what-are-nonpaired-regions",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8050,
+      "front": "What are nonpaired regions?",
+      "back": "Azure regions that have no region pair; many regions, including many newer ones, are like this.",
+      "explanation": "The documentation says you can design a highly resilient solution with paired regions, nonpaired regions or a mix of both.",
+      "example": "A new region that opens with several separate datacentre groups but no partner region at all.",
+      "evidence": "However, many regions aren't paired, and instead use availability zones as their primary means of redundancy. In addition, many Azure services support geo-redundancy whether regions are paired or not. You can design a highly resilient solution whether you use paired regions, nonpaired regions, or a combination.",
+      "source": "Azure region pairs and nonpaired regions, “Azure region pairs and nonpaired regions”",
+      "sourceURL": "https://github.com/MicrosoftDocs/reliability-docs/blob/main/articles/reliability/regions-paired.md#azure-region-pairs-and-nonpaired-regions",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "nonpaired regions"
+      ],
+      "uses": [
+        "nonpaired regions",
+        "Azure region pairs"
+      ],
+      "conceptIDs": [
+        "az305.nonpaired-regions"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.what-are-asymmetric-pairs",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 8060,
+      "front": "What are asymmetrically paired regions?",
+      "back": "Region pairs that are not bidirectional: region A is paired with region B, but B is paired with some other region.",
+      "explanation": "Most pairs are symmetrical, meaning each region is paired with the other in both directions.",
+      "example": "West India is paired with South India, but South India is paired with Central India.",
+      "evidence": "Most region pairs are *symmetrical*, which means that each region is bidirectionally paired with another region. For example, West US is paired with East US, and East US is paired with West US. *Asymmetrical region pairs* involve regions that aren't bidirectionally paired.",
+      "source": "Azure region pairs and nonpaired regions, “Asymmetrically paired regions”",
+      "sourceURL": "https://github.com/MicrosoftDocs/reliability-docs/blob/main/articles/reliability/regions-paired.md#asymmetrically-paired-regions",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "asymmetrically paired regions"
+      ],
+      "uses": [
+        "asymmetrically paired regions",
+        "Azure region pairs"
+      ],
+      "conceptIDs": [
+        "az305.asymmetric-pairs"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.what-is-azure-backup",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8070,
+      "front": "What is Azure Backup?",
+      "back": "A native Azure service that protects your data and restores it when needed, with central, policy-based backup across Azure and on-premises.",
+      "explanation": "You do not deploy or manage any backup infrastructure yourself.",
+      "example": "One backup policy that copies a company's virtual machines each night and keeps 30 days of restore points.",
+      "evidence": "Azure Backup is a native Azure service that helps you protect your data and restore it when required. It provides a centralized, policy-based solution to back up workloads across Azure and on-premises environments without the need to deploy or manage backup infrastructure.",
+      "source": "What is the Azure Backup service?, “What is the Azure Backup service?”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#what-is-the-azure-backup-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Azure Backup"
+      ],
+      "uses": [
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.azure-backup"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.what-is-rsv",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8080,
+      "front": "What is a Recovery Services vault?",
+      "back": "An Azure storage entity that houses backup data, typically copies of data or configuration information for virtual machines, workloads, servers or workstations.",
+      "explanation": "It holds backups for services such as infrastructure virtual machines and SQL Server running in Azure virtual machines.",
+      "example": "The vault where a firm's nightly virtual machine backups and their recovery points are kept.",
+      "evidence": "A Recovery Services vault is a storage entity in Azure that houses data. The data is typically copies of data or configuration information for virtual machines (VMs), workloads, servers, or workstations. You can use Recovery Services vaults to hold backup data for various Azure services such as IaaS VMs (Linux or Windows) and SQL Server in Azure VMs.",
+      "source": "Recovery Services vaults overview, “Recovery Services vaults overview”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-azure-recovery-services-vault-overview.md#recovery-services-vaults-overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Recovery Services vault"
+      ],
+      "uses": [
+        "Recovery Services vault",
+        "Azure Backup",
+        "SQL Server on Azure Virtual Machines"
+      ],
+      "conceptIDs": [
+        "az305.recovery-services-vault"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.what-is-backup-vault",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8090,
+      "front": "What is a Backup vault?",
+      "back": "An Azure storage entity that houses backup data for certain newer workloads that Azure Backup supports.",
+      "explanation": "Examples include Azure Blob and Azure Database for PostgreSQL servers, plus newer workloads that Azure Backup will support.",
+      "example": "The vault that holds the backups of a team's PostgreSQL database.",
+      "evidence": "A Backup vault is a storage entity in Azure that houses backup data for certain newer workloads that Azure Backup supports. You can use Backup vaults to hold backup data for various Azure services, such as Azure Blob, Azure Database for PostgreSQL servers and newer workloads that Azure Backup will support.",
+      "source": "Backup vaults overview, “Backup vaults overview”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-vault-overview.md#backup-vaults-overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Backup vault"
+      ],
+      "uses": [
+        "Backup vault",
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.backup-vault"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.what-is-cross-region-restore",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 8100,
+      "front": "What is Cross Region Restore?",
+      "back": "A feature that lets you restore Azure virtual machine backups in the secondary region, which is the Azure paired region.",
+      "explanation": "It is enabled per vault, and the replicated data can then be restored there at any time you choose.",
+      "example": "Restoring last night's copy of a virtual machine into the paired region for a compliance check, while the primary region runs normally.",
+      "evidence": "Cross Region Restore (CRR) allows you to restore Azure VMs in a secondary region, which is an Azure paired region. By enabling this feature at the vault level, you can restore the replicated data in the secondary region any time, when you choose.",
+      "source": "Recovery Services vaults overview, “Key features”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-azure-recovery-services-vault-overview.md#key-features",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Cross Region Restore"
+      ],
+      "uses": [
+        "Cross Region Restore",
+        "Azure region pairs",
+        "Recovery Services vault"
+      ],
+      "conceptIDs": [
+        "az305.cross-region-restore"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.what-is-asr",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8110,
+      "front": "What is Azure Site Recovery (ASR)?",
+      "back": "A service that replicates workloads from a primary site to a secondary location, so you can fail over during an outage and fail back later.",
+      "explanation": "Site Recovery keeps business apps and workloads running during outages; after the primary location recovers, you fail back to it.",
+      "example": "Virtual machines in one Azure region are replicated to another region and started there when the first region goes down.",
+      "evidence": "Site Recovery replicates workloads running on physical and virtual machines (VMs) from a primary site to a secondary location. When an outage occurs at your primary site, you fail over to a secondary location, and access apps from there. After the primary location is running again, you can fail back to it.",
+      "source": "About Site Recovery, “About Site Recovery”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/site-recovery/site-recovery-overview.md#about-site-recovery",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Azure Site Recovery",
+        "ASR"
+      ],
+      "uses": [
+        "Azure Site Recovery",
+        "ASR"
+      ],
+      "conceptIDs": [
+        "az305.site-recovery"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.what-are-sql-automated-backups",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8120,
+      "front": "What are SQL Database automated backups?",
+      "back": "Backups that Azure SQL Database takes automatically, letting you restore a database to a point in time within the retention period.",
+      "explanation": "They protect data from corruption or deletion; for longer needs, up to 10 years, you configure long-term retention.",
+      "example": "Restoring a customer database to how it stood at 09:55, just before a faulty script ran.",
+      "evidence": "Database backups are an essential part of any business continuity and disaster recovery strategy, because they help protect your data from corruption or deletion. These backups enable database restore to a point in time within the configured retention period.",
+      "source": "Automated backups in Azure SQL Database, “What is a database backup?”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/automated-backups-overview.md#what-is-a-database-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "SQL Database automated backups"
+      ],
+      "uses": [
+        "SQL Database automated backups",
+        "Azure SQL Database"
+      ],
+      "conceptIDs": [
+        "az305.sql-automated-backups"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.what-is-geo-restore",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8130,
+      "front": "What is geo-restore in Azure SQL Database?",
+      "back": "Restoring a database from its backups into another geographic region, creating a new database on any existing server in any Azure region.",
+      "explanation": "It is for recovering from a regional outage, when neither the database nor its backups in the primary region can be reached.",
+      "example": "A region goes offline, so the team restores the orders database from its geo-replicated backups onto a server in another region.",
+      "evidence": "Geo-restore helps you recover from a regional outage when you can't access your database or backups in the primary region. It creates a new database on any existing server in any Azure region.",
+      "source": "Automated backups in Azure SQL Database, “Backup usage”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/automated-backups-overview.md#backup-usage",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "geo-restore"
+      ],
+      "uses": [
+        "geo-restore",
+        "Azure SQL Database"
+      ],
+      "conceptIDs": [
+        "az305.sql-geo-restore"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.rto-vs-rpo",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8140,
+      "front": "What is the difference between the recovery time objective and the recovery point objective?",
+      "back": "The RTO limits how long the application may be down; the RPO limits how much data, measured in time, may be lost.",
+      "explanation": "An outage can meet one target and miss the other: a quick restore from an old copy is fast but loses data.",
+      "source": "Azure Well-Architected Framework: Architecture strategies for defining reliability targets (Microsoft Learn), “Define recovery metrics”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/metrics#define-recovery-metrics",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "recovery time objective",
+        "RTO",
+        "recovery point objective",
+        "RPO"
+      ],
+      "conceptIDs": [
+        "az305.rto",
+        "az305.rpo"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.rto-rpo-guarantees",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8150,
+      "front": "Does Microsoft publish RTO and RPO guarantees for every Azure product?",
+      "back": "No, only for some products, such as Azure SQL Database.",
+      "explanation": "The Well-Architected Framework asks you to take those platform guarantees into account when you set your own recovery targets.",
+      "source": "Azure Well-Architected Framework: Architecture strategies for defining reliability targets (Microsoft Learn), “Define recovery metrics”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/metrics#define-recovery-metrics",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "RTO",
+        "RPO",
+        "Azure SQL Database"
+      ],
+      "conceptIDs": [
+        "az305.rto",
+        "az305.rpo"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.classify-rpo",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8160,
+      "front": "A finance manager says, \"After any failure we can re-key at most ten minutes of transactions.\" Which recovery target is she setting?",
+      "back": "The recovery point objective (RPO).",
+      "explanation": "She is limiting how much data can be lost, expressed as a span of time, not how long the outage may last.",
+      "source": "Azure Well-Architected Framework: Architecture strategies for defining reliability targets (Microsoft Learn), “Define recovery metrics”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/metrics#define-recovery-metrics",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "recovery point objective",
+        "RPO"
+      ],
+      "conceptIDs": [
+        "az305.rpo"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.classify-rto",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8170,
+      "front": "A clinic says its booking site must be usable again within 30 minutes of any incident. Which recovery target is that?",
+      "back": "The recovery time objective (RTO).",
+      "explanation": "It caps the time the application may remain unavailable, which is what the RTO measures.",
+      "source": "Azure Well-Architected Framework: Architecture strategies for defining reliability targets (Microsoft Learn), “Define recovery metrics”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/metrics#define-recovery-metrics",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "recovery time objective",
+        "RTO"
+      ],
+      "conceptIDs": [
+        "az305.rto"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.composite-slo-calc",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 8180,
+      "front": "A flow needs two components, each with a 99.9% availability target, and fails if either fails. What is its composite SLO, roughly?",
+      "back": "B: about 99.8% (99.9% × 99.9%).",
+      "choices": "A) About 99.9%\nB) About 99.8%\nC) About 99.95%",
+      "choicesExplained": "A ignores the second dependency. C is higher than either component, which a product of the two can never be.",
+      "explanation": "The framework calculates a composite SLO as the product of the contributing components' targets.",
+      "source": "Azure Well-Architected Framework: Architecture strategies for defining reliability targets (Microsoft Learn), “Define composite SLO targets”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/metrics#define-composite-slo-targets",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "composite SLO"
+      ],
+      "conceptIDs": [
+        "az305.slo-composite"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.pair-recovery-sequence",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8190,
+      "front": "In a geography-wide outage, what benefit does a region pair give for recovery?",
+      "back": "One region in every pair is prioritised for recovery.",
+      "explanation": "Components deployed across a pair use one of its regions as the prioritised region for recovery.",
+      "evidence": "In the unlikely event of a geography-wide outage, one region in every region pair is prioritized for recovery. Components that are deployed across paired regions use one of the regions as the prioritized region for recovery.",
+      "source": "Azure region pairs and nonpaired regions, “Paired regions”",
+      "sourceURL": "https://github.com/MicrosoftDocs/reliability-docs/blob/main/articles/reliability/regions-paired.md#paired-regions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure region pairs"
+      ],
+      "conceptIDs": [
+        "az305.region-pairs"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.pair-sequential-updating",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8200,
+      "front": "How does Azure schedule planned system updates across a region pair?",
+      "back": "It strives to stagger them across the two regions of a pair (sequential updating).",
+      "explanation": "Staggering limits the impact of bugs or logical failures from a faulty update, and avoids downtime for solutions built to use both regions.",
+      "evidence": "Azure strives to stagger any planned system updates across region pairs. This approach minimizes the impact of bugs or logical failures in the rare event of a faulty update, and it prevents downtime to solutions that are designed to use paired regions together for resiliency.",
+      "source": "Azure region pairs and nonpaired regions, “Paired regions”",
+      "sourceURL": "https://github.com/MicrosoftDocs/reliability-docs/blob/main/articles/reliability/regions-paired.md#paired-regions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure region pairs"
+      ],
+      "conceptIDs": [
+        "az305.region-pairs"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.pair-data-residency",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8210,
+      "front": "How do region pairs help with data residency requirements?",
+      "back": "Almost all regions sit in the same geography as their pair, so a copy in the pair usually stays in that geography.",
+      "explanation": "There are exceptions, which the list of Azure regions names.",
+      "evidence": "To meet data residency requirements, almost all regions reside within the same geography as their pair. To learn about the exceptions, see the list of Azure regions.",
+      "source": "Azure region pairs and nonpaired regions, “Paired regions”",
+      "sourceURL": "https://github.com/MicrosoftDocs/reliability-docs/blob/main/articles/reliability/regions-paired.md#paired-regions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure region pairs"
+      ],
+      "conceptIDs": [
+        "az305.region-pairs"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.pair-not-automatic",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8220,
+      "front": "Does deploying resources to a region that has a pair make them more resilient on its own?",
+      "back": "No. It gives no automatic high availability, disaster recovery or failover; you must build your own plans.",
+      "explanation": "This holds whether or not you use paired regions.",
+      "evidence": "Deploying resources to a region in a pair doesn't automatically make them more resilient, nor does it provide automatic high availability, disaster recovery capabilities, or failover. Develop your own high availability and disaster recovery plans, regardless of whether you use paired regions or not.",
+      "source": "Azure region pairs and nonpaired regions, “Paired regions”",
+      "sourceURL": "https://github.com/MicrosoftDocs/reliability-docs/blob/main/articles/reliability/regions-paired.md#paired-regions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure region pairs"
+      ],
+      "conceptIDs": [
+        "az305.region-pairs"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-region-pair",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8230,
+      "front": "A team deploys its app to a region that has a pair and assumes Azure will fail it over automatically in a regional outage. What is the right response?",
+      "back": "B: they must build their own high availability and disaster recovery plans.",
+      "choices": "A) Correct: paired regions fail over automatically\nB) Wrong: they must design and test their own high availability and disaster recovery\nC) Correct, but only for virtual machines",
+      "choicesExplained": "A and C both assume the pair provides failover, which the documentation says it does not do automatically for anything.",
+      "explanation": "A region pair supplies benefits such as prioritised recovery and staggered updates, not automatic failover of your workload.",
+      "evidence": "Deploying resources to a region in a pair doesn't automatically make them more resilient, nor does it provide automatic high availability, disaster recovery capabilities, or failover.",
+      "source": "Azure region pairs and nonpaired regions, “Paired regions”",
+      "sourceURL": "https://github.com/MicrosoftDocs/reliability-docs/blob/main/articles/reliability/regions-paired.md#paired-regions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure region pairs"
+      ],
+      "conceptIDs": [
+        "az305.region-pairs"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.nonpaired-geo-replication",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8240,
+      "front": "In a nonpaired region, how do you get replication to another region?",
+      "back": "Many services geo-replicate between any set of regions without relying on pairs; for others you design your own multiregion approach.",
+      "explanation": "Each service's reliability guide says which case applies to it.",
+      "evidence": "Many Azure services support geo-replication and geo-redundancy between any arbitrary set of regions and don't rely on region pairs. Others might require that you design and implement your own multiregion approaches.",
+      "source": "Azure region pairs and nonpaired regions, “Nonpaired regions”",
+      "sourceURL": "https://github.com/MicrosoftDocs/reliability-docs/blob/main/articles/reliability/regions-paired.md#nonpaired-regions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "nonpaired regions",
+        "Azure region pairs"
+      ],
+      "conceptIDs": [
+        "az305.nonpaired-regions"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-nonpaired",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8250,
+      "front": "A company must use a new region that has no pair. Can it still build a highly resilient solution there?",
+      "back": "B: yes, resilience does not depend on having a pair.",
+      "choices": "A) No: resilience needs a region pair\nB) Yes: resilient designs are possible with paired, nonpaired or mixed regions\nC) Only by moving to the nearest paired region",
+      "choicesExplained": "A and C assume pairs are required; many services geo-replicate between any regions, and nonpaired regions have other means of redundancy.",
+      "explanation": "The documentation states outright that a highly resilient design is possible with paired regions, nonpaired regions or a combination.",
+      "evidence": "You can design a highly resilient solution whether you use paired regions, nonpaired regions, or a combination.",
+      "source": "Azure region pairs and nonpaired regions, “Azure region pairs and nonpaired regions”",
+      "sourceURL": "https://github.com/MicrosoftDocs/reliability-docs/blob/main/articles/reliability/regions-paired.md#azure-region-pairs-and-nonpaired-regions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "nonpaired regions",
+        "Azure region pairs"
+      ],
+      "conceptIDs": [
+        "az305.nonpaired-regions"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.shared-responsibility",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8260,
+      "front": "Under Azure's shared responsibility model for reliability, what do you own and what does Microsoft own?",
+      "back": "Microsoft provides the resilient platform; you design and operate the resilient workload.",
+      "explanation": "Microsoft owns platform foundations such as resilient infrastructure and regional distribution; you turn those capabilities into reliable behaviour.",
+      "evidence": "Reliability in Azure follows a shared responsibility model. Microsoft provides the resilient platform through Azure. You design the resilient workload.",
+      "source": "Reliability in Azure, “Shared responsibility for reliability”",
+      "sourceURL": "https://github.com/MicrosoftDocs/reliability-docs/blob/main/articles/reliability/overview.md#shared-responsibility-for-reliability",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [],
+      "conceptIDs": [
+        "az305.shared-responsibility-reliability"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.backup-when",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8270,
+      "front": "What are two threats to data that Azure Backup is meant to protect against?",
+      "back": "Any two of: accidental deletion, corruption, ransomware.",
+      "explanation": "Other reasons to use it include short- and long-term retention for compliance and central management of backups.",
+      "evidence": "Use Azure Backup when you want to: - Protect data against accidental deletion, corruption, or ransomware - Retain data for short-term and long-term compliance needs - Manage backups centrally across workloads and environments",
+      "source": "What is the Azure Backup service?, “When to use Azure Backup”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#when-to-use-azure-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.azure-backup"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.backup-policy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8280,
+      "front": "In Azure Backup, what does a backup policy define?",
+      "back": "The schedule, frequency and retention of backups.",
+      "explanation": "The policy is the first step of the workflow; Azure Backup then captures data, stores recovery points in a vault and restores on request.",
+      "evidence": "Azure Backup uses a policy-driven workflow to protect your data: 1. **Configures backup policy**: Define the schedule, frequency, and retention based on your requirements.",
+      "source": "What is the Azure Backup service?, “How Azure Backup works”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#how-azure-backup-works",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.azure-backup"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.backup-vault-role",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8290,
+      "front": "In Azure Backup, what two jobs does a vault (Recovery Services vault or Backup vault) do?",
+      "back": "It stores backup data and recovery points, and it acts as a security boundary.",
+      "explanation": "Both vault types play this role; they differ in the workloads they hold.",
+      "evidence": "Stores backup data and recovery points, and acts as a security boundary.",
+      "source": "What is the Azure Backup service?, “Key components in Azure Backup”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#key-components-in-azure-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup",
+        "Recovery Services vault",
+        "Backup vault"
+      ],
+      "conceptIDs": [
+        "az305.azure-backup",
+        "az305.recovery-services-vault",
+        "az305.backup-vault"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.backup-what-storage",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8300,
+      "front": "What are two storage workloads that Azure Backup can protect?",
+      "back": "Any two of: Azure Files, Azure Blobs, Azure Data Lake Storage.",
+      "explanation": "Storage is one of several workload categories, alongside Azure compute, databases, containers and on-premises resources.",
+      "evidence": "Storage | - Azure Files<br>- Azure Blobs<br>- Azure Data Lake Storage",
+      "source": "What is the Azure Backup service?, “What can I back up?”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#what-can-i-back-up",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup",
+        "Azure Files",
+        "Azure Blob Storage",
+        "Azure Data Lake Storage"
+      ],
+      "conceptIDs": [
+        "az305.backup-what",
+        "az305.azure-files-backup"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.classify-backup-on-premises",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8310,
+      "front": "Can Azure Backup protect files, folders and system state on an on-premises Windows server, and if so how?",
+      "back": "Yes, through agents installed on premises.",
+      "explanation": "On-premises resources are a supported category, covering files, folders, system state, Hyper-V and VMware.",
+      "evidence": "On-premises | Files, folders, system state, Hyper-V, VMware (via agents)",
+      "source": "What is the Azure Backup service?, “What can I back up?”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#what-can-i-back-up",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.backup-what"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.backup-operational-vaulted",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8320,
+      "front": "For some services, which Azure Backup approach combines fast restore with long-term retention?",
+      "back": "Operational plus vaulted backup.",
+      "explanation": "Vaulted backup on its own copies data to a vault for durability and isolation; snapshot-based backup gives fast backups and restores.",
+      "evidence": "Snapshot-based backup – Fast backups and restores for supported workloads. - Vaulted backup – Copies data to a vault for durability and isolation. - Operational + vaulted backup (for some services) – Combines fast restore and long-term retention.",
+      "source": "What is the Azure Backup service?, “Backup types and tiers”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#backup-types-and-tiers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.blob-backup"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.backup-grs-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8330,
+      "front": "Which storage replication option is the default, and recommended, for Azure Backup?",
+      "back": "Geo-redundant storage, which replicates backup data to a secondary region.",
+      "explanation": "It costs more than locally redundant storage but keeps data durable even through a regional outage.",
+      "evidence": "Geo-redundant storage (GRS) is the default and recommended replication option. GRS replicates your data to a secondary region (hundreds of miles away from the primary location of the source data). GRS costs more than LRS, but GRS provides a higher level of durability for your data, even if there's a regional outage.",
+      "source": "What is the Azure Backup service?, “Why use Azure Backup?”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#why-use-azure-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup",
+        "geo-redundant storage",
+        "locally redundant storage"
+      ],
+      "conceptIDs": [
+        "az305.vault-storage-redundancy"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-backup-zrs",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8340,
+      "front": "Backups of a critical workload must stay inside its region for data residency and must have no downtime. Which backup storage replication fits?",
+      "back": "B: zone-redundant storage.",
+      "choices": "A) Locally redundant storage\nB) Zone-redundant storage\nC) Geo-redundant storage",
+      "choicesExplained": "A keeps data in one region but only guards against local hardware failures. C copies data to a secondary region, outside the region.",
+      "explanation": "The documentation recommends zone-redundant storage for critical workloads that need data residency and no downtime.",
+      "evidence": "ZRS has no downtime. So your critical workloads that require data residency, and must have no downtime, can be backed up in ZRS.",
+      "source": "What is the Azure Backup service?, “Why use Azure Backup?”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#why-use-azure-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup",
+        "zone-redundant storage",
+        "locally redundant storage",
+        "geo-redundant storage"
+      ],
+      "conceptIDs": [
+        "az305.vault-storage-redundancy"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.backup-soft-delete",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8350,
+      "front": "In Azure Backup, what does soft delete do?",
+      "back": "It keeps deleted backup data for a set period, protecting against accidental or malicious deletion.",
+      "explanation": "It is one of the built-in security capabilities, alongside isolated vault storage and immutable backups.",
+      "evidence": "Soft delete: Retains deleted backup data for a defined period to protect against accidental or malicious deletion.",
+      "source": "What is the Azure Backup service?, “Security and ransomware protection by Azure Backup”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#security-and-ransomware-protection-by-azure-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.backup-soft-delete-immutability"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.backup-immutable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8360,
+      "front": "In Azure Backup, what does an immutable backup do?",
+      "back": "It locks recovery points so they cannot be modified or deleted.",
+      "explanation": "Locking the recovery points protects the integrity of the backed-up data.",
+      "evidence": "Immutable backup: Locks recovery points to prevent modification or deletion, ensuring data integrity.",
+      "source": "What is the Azure Backup service?, “Security and ransomware protection by Azure Backup”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#security-and-ransomware-protection-by-azure-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.backup-soft-delete-immutability"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.rsv-soft-delete-14-days",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8370,
+      "front": "With soft delete in a Recovery Services vault, a deleted backup is kept for {{c1::14}} additional days at no extra cost.",
+      "explanation": "That window lets you recover the backup item with no data loss, even if a malicious actor deleted it.",
+      "evidence": "With soft delete, even if a malicious actor deletes a backup (or backup data is accidentally deleted), the backup data is retained for 14 additional days, allowing the recovery of that backup item with no data loss. The additional 14 days of retention for backup data in the \"soft delete\" state don't incur any cost to you.",
+      "source": "Recovery Services vaults overview, “Key features”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-azure-recovery-services-vault-overview.md#key-features",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Recovery Services vault"
+      ],
+      "conceptIDs": [
+        "az305.backup-soft-delete-immutability"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-ransomware",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8380,
+      "front": "An attacker with stolen credentials may try to alter or delete a company's recovery points. Which Azure Backup feature stops the points being modified or deleted?",
+      "back": "A: immutable backup.",
+      "choices": "A) Immutable backup\nB) Geo-redundant storage\nC) Cross Region Restore",
+      "choicesExplained": "B keeps a copy in another region but does not lock recovery points. C lets you restore in the paired region; it does not stop deletion.",
+      "explanation": "Immutability locks the recovery points; soft delete would additionally keep deleted data for a while.",
+      "evidence": "Immutable backup: Locks recovery points to prevent modification or deletion, ensuring data integrity.",
+      "source": "What is the Azure Backup service?, “Security and ransomware protection by Azure Backup”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#security-and-ransomware-protection-by-azure-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup",
+        "geo-redundant storage",
+        "Cross Region Restore"
+      ],
+      "conceptIDs": [
+        "az305.backup-soft-delete-immutability"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.rsv-vs-backup-vault",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8390,
+      "front": "How do a Recovery Services vault and a Backup vault differ in what they hold?",
+      "back": "A Recovery Services vault holds workloads such as virtual machines; a Backup vault holds certain newer workloads, such as blobs and PostgreSQL.",
+      "explanation": "Both are storage entities for backup data; which one you use depends on the workload.",
+      "evidence": "A Backup vault is a storage entity in Azure that houses backup data for certain newer workloads that Azure Backup supports. You can use Backup vaults to hold backup data for various Azure services, such as Azure Blob, Azure Database for PostgreSQL servers and newer workloads",
+      "source": "Backup vaults overview, “Backup vaults overview”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-vault-overview.md#backup-vaults-overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Recovery Services vault",
+        "Backup vault",
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.rsv-vs-backup-vault",
+        "az305.backup-vault",
+        "az305.recovery-services-vault"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-which-vault",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8400,
+      "front": "A team starts backing up an Azure Database for PostgreSQL server with Azure Backup. Which vault type holds those backups?",
+      "back": "B: a Backup vault.",
+      "choices": "A) Recovery Services vault\nB) Backup vault\nC) Azure Key Vault",
+      "choicesExplained": "A is for workloads such as infrastructure virtual machines and SQL Server in Azure virtual machines. C stores keys and secrets, not backups.",
+      "explanation": "PostgreSQL servers are among the newer workloads the documentation assigns to Backup vaults.",
+      "evidence": "You can use Backup vaults to hold backup data for various Azure services, such as Azure Blob, Azure Database for PostgreSQL servers and newer workloads that Azure Backup will support.",
+      "source": "Backup vaults overview, “Backup vaults overview”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-vault-overview.md#backup-vaults-overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Backup vault",
+        "Recovery Services vault",
+        "Azure Backup",
+        "Azure Key Vault"
+      ],
+      "conceptIDs": [
+        "az305.backup-vault",
+        "az305.rsv-vs-backup-vault"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.crr-vs-grs",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 8410,
+      "front": "With geo-redundant backup storage alone, when can you restore from the secondary region, and what does Cross Region Restore change?",
+      "back": "With geo-redundancy alone, only after Microsoft declares a primary-region outage; Cross Region Restore allows restores even when there is no outage.",
+      "explanation": "This makes the secondary copy usable for drills and audits, not only for disasters.",
+      "evidence": "When you enable the backups with GRS, the backups in the secondary region become accessible only when Microsoft declares an outage in the primary region. However, Cross Region Restore enables you to access and perform restores from the secondary region recovery points even when no outage occurs in the primary region",
+      "source": "Backup vaults overview, “Cross Region Restore support for PostgreSQL using Azure Backup”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-vault-overview.md#cross-region-restore-support-for-postgresql-using-azure-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Cross Region Restore",
+        "geo-redundant storage"
+      ],
+      "conceptIDs": [
+        "az305.cross-region-restore"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.vm-backup-process",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8420,
+      "front": "How does Azure Backup back up an Azure virtual machine?",
+      "back": "It takes a snapshot, then transfers the data to the Recovery Services vault.",
+      "explanation": "The transfer happens with no impact on production workloads.",
+      "evidence": "As part of the backup process, a snapshot is taken, and the data is transferred to the Recovery Services vault with no impact on production workloads.",
+      "source": "An overview of Azure VM backup, “An overview of Azure VM backup”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-azure-vms-introduction.md#an-overview-of-azure-vm-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup",
+        "Recovery Services vault"
+      ],
+      "conceptIDs": [
+        "az305.vm-backup-snapshot"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.snapshot-app-consistent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8430,
+      "front": "Which virtual machine snapshot type captures memory content and pending I/O operations, so apps start in a consistent state after restore?",
+      "back": "Application-consistent.",
+      "explanation": "It is a default setting of the virtual machine backup policy and uses a writer, or pre- and post-scripts on Linux, to make app data consistent first.",
+      "evidence": "This is the default setting in the VM backup policy. App-consistent backups capture memory content and pending I/O operations. App-consistent snapshots use a VSS writer (or pre/post scripts for Linux) to ensure the consistency of the app data before a backup occurs.",
+      "source": "An overview of Azure VM backup, “Snapshot consistency”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-azure-vms-introduction.md#snapshot-consistency",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.snapshot-consistency"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.snapshot-crash-consistent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8440,
+      "front": "Which virtual machine snapshot type captures only data already on disk, not data in the read/write host cache?",
+      "back": "Crash-consistent.",
+      "explanation": "Whatever was still only in memory or in the host cache when the snapshot ran is not in the backup.",
+      "evidence": "Only the data that already exists on the disk at the time of the backup operation is captured and backed up; data in read/write host cache isn't captured.",
+      "source": "An overview of Azure VM backup, “Snapshot consistency”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-azure-vms-introduction.md#snapshot-consistency",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.snapshot-consistency"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.app-vs-crash-consistent",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8450,
+      "front": "After restore, how does a crash-consistent virtual machine snapshot differ from an application-consistent one?",
+      "back": "Application-consistent: boots with no corruption or loss. Crash-consistent: boots, runs a disk check, and loses in-memory data and unwritten writes.",
+      "explanation": "With a crash-consistent restore, apps verify their own data, for instance a database using its transaction log.",
+      "evidence": "Starts with the VM boot process followed by a disk check to fix corruption errors. Any in-memory data or write operations that weren't transferred to disk before the crash are lost. Apps implement their own data verification.",
+      "source": "An overview of Azure VM backup, “Snapshot consistency”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-azure-vms-introduction.md#snapshot-consistency",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.snapshot-consistency"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-stopped-vm",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8460,
+      "front": "A virtual machine whose policy asks for application-consistent backups is shut down (deallocated) when its backup runs. What kind of backup does Azure Backup take?",
+      "back": "B: crash-consistent.",
+      "choices": "A) Application-consistent\nB) Crash-consistent\nC) None: the job is skipped",
+      "choicesExplained": "A needs the running machine's writers or scripts. C is wrong: Azure Backup still takes a backup.",
+      "explanation": "Azure Backup takes crash-consistent backups when the machine is not running during backup.",
+      "evidence": "Azure Backup also takes crash-consistent backups if the VM is not running during backup and when application/file-consistent backups fail.",
+      "source": "An overview of Azure VM backup, “Snapshot consistency”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-azure-vms-introduction.md#snapshot-consistency",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.snapshot-consistency"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.workload-aware-rpo",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8470,
+      "front": "What recovery point objective do Azure Backup's workload-aware database offerings, such as the one for SQL Server, give?",
+      "back": "15 minutes.",
+      "explanation": "They also let you back up and restore individual databases, not just whole virtual machines.",
+      "evidence": "Azure Backup also has specialized offerings for database workloads like SQL Server and SAP HANA that are workload-aware, offer 15 minute RPO (recovery point objective), and allow backup and restore of individual databases.",
+      "source": "An overview of Azure VM backup, “An overview of Azure VM backup”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-azure-vms-introduction.md#an-overview-of-azure-vm-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup",
+        "RPO",
+        "SQL Server on Azure Virtual Machines"
+      ],
+      "conceptIDs": [
+        "az305.vm-backup-snapshot",
+        "az305.rpo"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-workload-aware",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8480,
+      "front": "A SQL Server database runs in an Azure virtual machine and needs a 15-minute RPO and single-database restores. What Azure Backup option fits?",
+      "back": "B: the workload-aware SQL Server backup.",
+      "choices": "A) A daily virtual machine snapshot backup\nB) Azure Backup's workload-aware SQL Server backup\nC) Azure Site Recovery replication",
+      "choicesExplained": "A backs up the whole machine daily, far above a 15-minute RPO. C replicates for failover; it is not a database backup.",
+      "explanation": "The workload-aware offering gives a 15-minute RPO and restores of individual databases.",
+      "evidence": "Azure Backup also has specialized offerings for database workloads like SQL Server and SAP HANA that are workload-aware, offer 15 minute RPO (recovery point objective), and allow backup and restore of individual databases.",
+      "source": "An overview of Azure VM backup, “An overview of Azure VM backup”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-azure-vms-introduction.md#an-overview-of-azure-vm-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup",
+        "RPO",
+        "SQL Server on Azure Virtual Machines",
+        "Azure Site Recovery"
+      ],
+      "conceptIDs": [
+        "az305.vm-backup-snapshot",
+        "az305.rpo"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.backup-vs-asr",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8490,
+      "front": "What is the difference in purpose between Azure Backup and Azure Site Recovery?",
+      "back": "Azure Backup protects data (backup and restore); Site Recovery handles disaster recovery and failover orchestration.",
+      "explanation": "Backup brings data back after loss or corruption; Site Recovery keeps workloads running elsewhere during an outage.",
+      "evidence": "Azure Backup focuses on data protection (backup and restore). For disaster recovery and failover orchestration, use Azure Site Recovery.",
+      "source": "What is the Azure Backup service?, “When to use Azure Backup”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#when-to-use-azure-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup",
+        "Azure Site Recovery"
+      ],
+      "conceptIDs": [
+        "az305.backup-vs-site-recovery",
+        "az305.azure-backup",
+        "az305.site-recovery"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-asr-failover",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8500,
+      "front": "If an Azure region fails, a company's virtual machines must be running in another region within an hour. Which service do they use?",
+      "back": "B: Azure Site Recovery.",
+      "choices": "A) Azure Backup with a daily policy\nB) Azure Site Recovery\nC) Soft delete",
+      "choicesExplained": "A restores data but does not replicate and fail over workloads. C only keeps deleted backups for a period.",
+      "explanation": "Site Recovery replicates workloads to a secondary location and fails over to it when the primary has an outage.",
+      "evidence": "Site Recovery replicates workloads running on physical and virtual machines (VMs) from a primary site to a secondary location. When an outage occurs at your primary site, you fail over to a secondary location, and access apps from there.",
+      "source": "About Site Recovery, “About Site Recovery”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/site-recovery/site-recovery-overview.md#about-site-recovery",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Site Recovery",
+        "Azure Backup"
+      ],
+      "conceptIDs": [
+        "az305.site-recovery",
+        "az305.backup-vs-site-recovery"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-backup-not-asr",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8510,
+      "front": "A user deleted a folder of spreadsheets on a file server last week. Which service restores them?",
+      "back": "B: Azure Backup.",
+      "choices": "A) Azure Site Recovery failover\nB) Azure Backup\nC) Cross Region Restore",
+      "choicesExplained": "A fails over whole workloads for disaster recovery; it is not an item-level restore. C restores in the paired region; it is a feature of the backup service, not the service itself.",
+      "explanation": "Restoring individual items after accidental deletion is a core Azure Backup use.",
+      "evidence": "Protect data against accidental deletion, corruption, or ransomware - Retain data for short-term and long-term compliance needs - Manage backups centrally across workloads and environments - Restore individual items or entire workloads based on your business requirements",
+      "source": "What is the Azure Backup service?, “When to use Azure Backup”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/backup/backup-overview.md#when-to-use-azure-backup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Backup",
+        "Azure Site Recovery",
+        "Cross Region Restore"
+      ],
+      "conceptIDs": [
+        "az305.backup-vs-site-recovery",
+        "az305.azure-backup"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.asr-replication-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8520,
+      "front": "What can Azure Site Recovery manage replication for?",
+      "back": "Azure virtual machines between regions; Azure Extended Zones to their region; on-premises and Azure Stack virtual machines and physical servers.",
+      "explanation": "Its Extended Zones support was still in preview when these notes were written.",
+      "evidence": "Site Recovery can manage replication for: - Azure VMs replicating between Azure regions - Replication from Azure Extended Zones to the region - On-premises VMs, Azure Stack VMs, and physical servers",
+      "source": "About Site Recovery, “About Site Recovery”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/site-recovery/site-recovery-overview.md#about-site-recovery",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Azure documentation as published",
+      "uses": [
+        "Azure Site Recovery"
+      ],
+      "conceptIDs": [
+        "az305.asr-what-replicate"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.classify-asr-vmware",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8530,
+      "front": "Can Azure Site Recovery protect on-premises VMware virtual machines and physical Windows or Linux servers by replicating them to Azure?",
+      "back": "Yes, both are supported replication scenarios.",
+      "explanation": "Hyper-V virtual machines and Azure Stack virtual machines can also be replicated to Azure.",
+      "evidence": "Replicate on-premises VMware VMs, Hyper-V VMs, physical servers (Windows and Linux), Azure Stack VMs to Azure.",
+      "source": "About Site Recovery, “What can I replicate?”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/site-recovery/site-recovery-overview.md#what-can-i-replicate",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Site Recovery"
+      ],
+      "conceptIDs": [
+        "az305.asr-what-replicate"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.asr-replication-frequency",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8540,
+      "front": "How often does Site Recovery replicate Azure and VMware virtual machines, compared with Hyper-V?",
+      "back": "Continuously for Azure and VMware virtual machines; as often as every 30 seconds for Hyper-V.",
+      "explanation": "Replication frequency bounds how much data a failover can lose, so it serves the recovery point objective.",
+      "evidence": "Keep recovery time objectives (RTO) and recovery point objectives (RPO) within organizational limits. Site Recovery provides continuous replication for Azure VMs and VMware VMs, and replication frequency as low as 30 seconds for Hyper-V.",
+      "source": "About Site Recovery, “What does Site Recovery provide?”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/site-recovery/site-recovery-overview.md#what-does-site-recovery-provide",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Site Recovery",
+        "recovery point objective"
+      ],
+      "conceptIDs": [
+        "az305.site-recovery"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.asr-planned-unplanned",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8550,
+      "front": "In Site Recovery, how does a planned failover differ from an unplanned one in data loss?",
+      "back": "Planned failover, for expected outages, loses no data; unplanned failover loses minimal data, depending on replication frequency.",
+      "explanation": "After either kind, you can fail back to the primary site once it is available.",
+      "evidence": "You can run planned failovers for expected outages with zero-data loss. Or, unplanned failovers with minimal data loss, depending on replication frequency, for unexpected disasters. You can easily fail back to your primary site when it's available again.",
+      "source": "About Site Recovery, “What does Site Recovery provide?”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/site-recovery/site-recovery-overview.md#what-does-site-recovery-provide",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Site Recovery"
+      ],
+      "conceptIDs": [
+        "az305.site-recovery"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.asr-recovery-plans",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8560,
+      "front": "What does a Site Recovery recovery plan let you do?",
+      "back": "Group machines and customise and sequence the failover and recovery of multi-tier applications, optionally with scripts and manual actions.",
+      "explanation": "Recovery plans can also be integrated with Azure Automation runbooks.",
+      "evidence": "Using recovery plans, you can customize and sequence the failover and recovery of multi-tier applications running on multiple VMs. You group machines together in a recovery plan, and optionally add scripts and manual actions.",
+      "source": "About Site Recovery, “What does Site Recovery provide?”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/site-recovery/site-recovery-overview.md#what-does-site-recovery-provide",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Site Recovery"
+      ],
+      "conceptIDs": [
+        "az305.site-recovery"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-asr-multitier",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8570,
+      "front": "In a failover, a database tier must start before its web tier. Which Site Recovery feature controls that order?",
+      "back": "A: a recovery plan.",
+      "choices": "A) A recovery plan\nB) A backup policy\nC) Cross Region Restore",
+      "choicesExplained": "B belongs to Azure Backup and sets backup schedules. C restores backups in another region; it does not order a failover.",
+      "explanation": "Recovery plans customise and sequence the failover of multi-tier applications running on several machines.",
+      "evidence": "Using recovery plans, you can customize and sequence the failover and recovery of multi-tier applications running on multiple VMs.",
+      "source": "About Site Recovery, “What does Site Recovery provide?”",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/site-recovery/site-recovery-overview.md#what-does-site-recovery-provide",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure Site Recovery",
+        "Azure Backup",
+        "Cross Region Restore"
+      ],
+      "conceptIDs": [
+        "az305.site-recovery"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.sql-full-backup",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8580,
+      "front": "How often does Azure SQL Database take full backups?",
+      "back": "Every week.",
+      "explanation": "Differential and transaction log backups fill the gaps between full backups.",
+      "evidence": "Azure SQL Database creates: - Full backups every week.",
+      "source": "Automated backups in Azure SQL Database, “Backup frequency”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/automated-backups-overview.md#backup-frequency",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure SQL Database",
+        "SQL Database automated backups"
+      ],
+      "conceptIDs": [
+        "az305.sql-backup-frequency"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.sql-differential-backup",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8590,
+      "front": "How often does Azure SQL Database take differential backups?",
+      "back": "Every 12 or 24 hours.",
+      "explanation": "On restore, the service decides which full, differential and log backups to use.",
+      "evidence": "Differential backups every 12 or 24 hours.",
+      "source": "Automated backups in Azure SQL Database, “Backup frequency”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/automated-backups-overview.md#backup-frequency",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure SQL Database",
+        "SQL Database automated backups"
+      ],
+      "conceptIDs": [
+        "az305.sql-backup-frequency"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.sql-log-backup",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8600,
+      "front": "How often does Azure SQL Database take transaction log backups?",
+      "back": "Approximately every 10 minutes.",
+      "explanation": "The exact frequency depends on the compute size and the amount of database activity.",
+      "evidence": "Transaction log backups approximately every 10 minutes. The exact frequency of transaction log backups depends on the compute size and the amount of database activity.",
+      "source": "Automated backups in Azure SQL Database, “Backup frequency”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/automated-backups-overview.md#backup-frequency",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure SQL Database",
+        "SQL Database automated backups"
+      ],
+      "conceptIDs": [
+        "az305.sql-backup-frequency"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.sql-pitr-retention",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8610,
+      "front": "How long does Azure SQL Database keep point-in-time restore backups?",
+      "back": "7 days by default, configurable from 1 to 35 days (1 to 7 days for Basic databases).",
+      "explanation": "This short-term window is separate from long-term retention, which is not enabled by default.",
+      "evidence": "7 days by default, configurable between 1 and 35 days (except Basic databases, which are configurable between 1 and 7 days).",
+      "source": "Automated backups in Azure SQL Database, “Restore capabilities and features”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/automated-backups-overview.md#restore-capabilities",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure SQL Database",
+        "SQL Database automated backups"
+      ],
+      "conceptIDs": [
+        "az305.sql-pitr-retention"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.sql-ltr-10-years",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8620,
+      "front": "For how long can long-term retention keep Azure SQL Database backups?",
+      "back": "Up to 10 years.",
+      "explanation": "It also applies to the Hyperscale service tier and to Azure SQL Managed Instance.",
+      "evidence": "Long-term retention can be configured for up to 10 years on backups for Azure SQL Database (including in the Hyperscale service tier) and Azure SQL Managed Instance.",
+      "source": "Long-term retention backups: Azure SQL Database and Azure SQL Managed Instance, “Long-term retention backups”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/long-term-retention-overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure SQL Database",
+        "Hyperscale service tier",
+        "Azure SQL Managed Instance"
+      ],
+      "conceptIDs": [
+        "az305.sql-ltr"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.pitr-vs-ltr",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8630,
+      "front": "How does long-term retention differ from the short-term retention of Azure SQL Database automated backups?",
+      "back": "Short-term keeps backups 1 to 35 days; long-term keeps chosen full backups in Blob storage for up to 10 years.",
+      "explanation": "Long-term retention builds on the full backups the service already creates automatically.",
+      "evidence": "Many applications have regulatory, compliance, or other business reasons that require you to retain database backups beyond the 1-35 days provided by the short-term retention period of automatic backups. Long-term backup retention (LTR) relies on the full database backups that are automatically created by the Azure SQL service.",
+      "source": "Long-term retention backups: Azure SQL Database and Azure SQL Managed Instance, “How long-term retention works”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/long-term-retention-overview.md#how-long-term-retention-works",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure SQL Database",
+        "SQL Database automated backups"
+      ],
+      "conceptIDs": [
+        "az305.sql-ltr",
+        "az305.sql-pitr-retention"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-ltr",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8640,
+      "front": "A bank must keep yearly database backups for 7 years. What should it configure in Azure SQL Database?",
+      "back": "B: a long-term retention policy.",
+      "choices": "A) Point-in-time restore retention of 35 days\nB) A long-term retention policy\nC) Geo-restore",
+      "choicesExplained": "A tops out at 35 days. C restores to another region from recent backups; it does not extend retention.",
+      "explanation": "Long-term retention keeps specified full backups with a retention policy of up to 10 years.",
+      "evidence": "By using the LTR feature, you can store specified full SQL Database and SQL Managed Instance backups in redundant Azure Blob storage with a configurable retention policy of up to 10 years.",
+      "source": "Long-term retention backups: Azure SQL Database and Azure SQL Managed Instance, “How long-term retention works”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/long-term-retention-overview.md#how-long-term-retention-works",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure SQL Database",
+        "geo-restore",
+        "Azure Blob Storage"
+      ],
+      "conceptIDs": [
+        "az305.sql-ltr",
+        "az305.sql-pitr-retention"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-pitr",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8650,
+      "front": "A faulty update corrupted rows in an Azure SQL database two hours ago. What does a point-in-time restore produce?",
+      "back": "B: a new database on the same server, with a different name.",
+      "choices": "A) It overwrites the damaged database in place\nB) A new database on the same server, under a different name\nC) A new database in the paired region",
+      "choicesExplained": "A is wrong: the restore never overwrites the original. C describes geo-restore, which is for regional outages.",
+      "explanation": "You can afterwards delete or rename the original and give the restored copy its name.",
+      "evidence": "This operation creates a new database on the same server as the original database, but it uses a different name to avoid overwriting the original database.",
+      "source": "Automated backups in Azure SQL Database, “Backup usage”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/automated-backups-overview.md#backup-usage",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure SQL Database",
+        "SQL Database automated backups",
+        "geo-restore"
+      ],
+      "conceptIDs": [
+        "az305.sql-automated-backups",
+        "az305.sql-pitr-retention"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.sql-default-geo-redundant",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8660,
+      "front": "By default, what storage do new Azure SQL databases use for their backups?",
+      "back": "Geo-redundant storage blobs, replicated to a paired region.",
+      "explanation": "Geo-redundancy protects against outages of backup storage in the primary region and allows restore in another region.",
+      "evidence": "By default, new databases in Azure SQL Database store backups in geo-redundant storage blobs that are replicated to a paired region. Geo-redundancy helps protect against outages that affect backup storage in the primary region. It also allows you to restore your databases in a different region in the event of a regional outage.",
+      "source": "Automated backups in Azure SQL Database, “Backup storage redundancy”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/automated-backups-overview.md#backup-storage-redundancy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure SQL Database",
+        "SQL Database automated backups",
+        "geo-redundant storage",
+        "Azure region pairs"
+      ],
+      "conceptIDs": [
+        "az305.sql-automated-backups",
+        "az305.sql-backup-storage-redundancy"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.geo-restore-needs-grs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8670,
+      "front": "What happens to geo-restore when an Azure SQL database is switched to locally redundant or zone-redundant backup storage?",
+      "back": "Geo-restore is disabled as soon as the change is made.",
+      "explanation": "Geo-restore is available only for databases configured with geo-redundant backup storage.",
+      "evidence": "Geo-restore is disabled as soon as a database is updated to use locally redundant or zone-redundant storage.",
+      "source": "Automated backups in Azure SQL Database, “Backup storage redundancy”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/automated-backups-overview.md#backup-storage-redundancy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "geo-restore",
+        "Azure SQL Database",
+        "locally redundant storage",
+        "zone-redundant storage"
+      ],
+      "conceptIDs": [
+        "az305.sql-geo-restore"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-geo-restore",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8680,
+      "front": "A whole Azure region is down and a database there cannot be reached. Its backups were geo-redundant. What recovers it fastest from backups?",
+      "back": "B: geo-restore to another region.",
+      "choices": "A) Point-in-time restore on the same server\nB) Geo-restore to a server in another region\nC) Waiting for long-term retention to copy the backups",
+      "choicesExplained": "A needs the original server, which is in the failed region. C is for keeping backups for years, not for regional recovery.",
+      "explanation": "Geo-restore exists for regional outages and creates a new database on any existing server in any region.",
+      "evidence": "Geo-restore helps you recover from a regional outage when you can't access your database or backups in the primary region. It creates a new database on any existing server in any Azure region.",
+      "source": "Automated backups in Azure SQL Database, “Backup usage”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/automated-backups-overview.md#backup-usage",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "geo-restore",
+        "Azure SQL Database"
+      ],
+      "conceptIDs": [
+        "az305.sql-geo-restore"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.sql-deleted-database",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8690,
+      "front": "Where can you restore a deleted Azure SQL database, and what protects its last changes?",
+      "back": "Only on the server where it was created; a final transaction log backup is taken before deletion.",
+      "explanation": "The restore can go to any point within the retention period, including the time of deletion.",
+      "evidence": "You can only restore the deleted database on the same server where you created the original database. Before you delete a database, Azure SQL Database takes a final transaction log backup to prevent any data loss.",
+      "source": "Automated backups in Azure SQL Database, “Backup usage”",
+      "sourceURL": "https://github.com/MicrosoftDocs/sql-docs/blob/live/azure-sql/database/automated-backups-overview.md#backup-usage",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Azure SQL Database",
+        "SQL Database automated backups"
+      ],
+      "conceptIDs": [
+        "az305.sql-automated-backups"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.cosmos-modes",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8700,
+      "front": "How do Azure Cosmos DB's periodic and continuous backup modes differ in how you restore?",
+      "back": "Continuous: self-service restore to any moment within the retention tier. Periodic: backups at set intervals, restored by asking the support team.",
+      "explanation": "Periodic mode is the default for existing accounts; continuous mode is chosen per account.",
+      "source": "Online backup and on-demand data restore in Azure Cosmos DB (Microsoft Learn), “Backup modes”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/cosmos-db/online-backup-and-restore#backup-modes",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "Azure Cosmos DB"
+      ],
+      "conceptIDs": [
+        "az305.cosmos-backup-modes"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.cosmos-continuous-tiers",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8710,
+      "front": "Azure Cosmos DB continuous backup comes in three retention tiers: 7 days, 30 days and {{c1::35 days}}.",
+      "explanation": "You pick the tier when you create the account, and can restore to any moment inside it.",
+      "source": "Online backup and on-demand data restore in Azure Cosmos DB (Microsoft Learn), “Backup modes”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/cosmos-db/online-backup-and-restore#backup-modes",
+      "sourceLicence": "C · facts only, in our own words",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Azure documentation as published",
+      "uses": [
+        "Azure Cosmos DB"
+      ],
+      "conceptIDs": [
+        "az305.cosmos-continuous-tiers"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.cosmos-no-switch-back",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8720,
+      "front": "Once an Azure Cosmos DB account uses continuous backup, can it go back to periodic mode?",
+      "back": "No. The move from periodic to continuous is one-way.",
+      "explanation": "Migrating an account from periodic to continuous is supported, so plan the change as permanent.",
+      "source": "Online backup and on-demand data restore in Azure Cosmos DB (Microsoft Learn), “Backup modes”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/cosmos-db/online-backup-and-restore#backup-modes",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "Azure Cosmos DB"
+      ],
+      "conceptIDs": [
+        "az305.cosmos-no-switch-back"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.cosmos-periodic-limits",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8730,
+      "front": "In Azure Cosmos DB periodic backup mode, what are the longest retention and the shortest backup interval?",
+      "back": "Retention of up to about a month; an interval as short as one hour.",
+      "explanation": "You set both the interval and the retention yourself for the account.",
+      "source": "Online backup and on-demand data restore in Azure Cosmos DB (Microsoft Learn), “Backup modes”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/cosmos-db/online-backup-and-restore#backup-modes",
+      "sourceLicence": "C · facts only, in our own words",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Azure documentation as published",
+      "uses": [
+        "Azure Cosmos DB"
+      ],
+      "conceptIDs": [
+        "az305.cosmos-backup-modes"
+      ]
+    },
+    {
+      "id": "az305.backup-recovery.scenario-cosmos-backup",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8740,
+      "front": "A team wants to restore its Azure Cosmos DB container themselves, to the minute before a bad bulk update, without a support ticket. Which backup mode fits?",
+      "back": "B: continuous backup mode.",
+      "choices": "A) Periodic backup mode\nB) Continuous backup mode\nC) Geo-restore",
+      "choicesExplained": "A restores only at backup intervals and through the support team. C is an Azure SQL Database feature.",
+      "explanation": "Continuous mode gives self-service, point-in-time restore within its retention tier.",
+      "source": "Online backup and on-demand data restore in Azure Cosmos DB (Microsoft Learn), “Backup modes”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/cosmos-db/online-backup-and-restore#backup-modes",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "Azure Cosmos DB",
+        "geo-restore",
+        "Azure SQL Database"
+      ],
+      "conceptIDs": [
+        "az305.cosmos-backup-modes"
+      ]
+    }
+  ]
+}
