@@ -67,7 +67,9 @@ an everyday word would do (keep the exam's own term, but explain it).
    whose fix you know, one JSON line:
    `{"id", "field", "value", "severity", "reason"}`, with the complete new
    value of the field. `"value": null` removes a field; `{"id", "op":
-   "delete"}` removes a card. Write the fix itself, in plain British English,
+   "delete"}` removes a card (when it is a duplicate, add its conceptIDs to
+   the card you keep with a `conceptIDs` patch, or the concept is left with
+   no application card). Write the fix itself, in plain British English,
    checked against the source.
    - A finding that needs more research gets `"needs": "research"` and no
      value.
