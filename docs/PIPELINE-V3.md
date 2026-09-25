@@ -99,3 +99,22 @@ flow, with its evidence, the fix and the order of work. The target is about
   with a short review. The next deck starts only after the process has been
   corrected. First: the Prometheus Certified Associate (small, open docs,
   builds on KCNA).
+
+## 5. Runbook: one deck
+
+| Step | Who | What |
+|---|---|---|
+| 1. Research | one agent, strong model | Follows research/deck-briefs/BRIEF.md. Writes `<slug>.md`, `-sources.json`, `-terms.json`, `-concepts.json` and `-budget.json`. |
+| 2. Set up | main session | Writes deck.json (with `pool` if the exam has one) and `<slug>-writers.md` from WRITERS-TEMPLATE.md. Runs `node build/pool-cards.mjs <slug>` if there is a pool. |
+| 3. Pilot | one writer, smaller model | Writes one topic, following DIGEST.md. The main session runs `node build/status.mjs <slug> --registry` and reads 15 cards. Then one auditor audits that topic, and its patches are applied. The findings correct `<slug>-writers.md`. |
+| 4. Fan out | writers, smaller model | The remaining topics, in groups of 4 to 6. |
+| 5. Merge | main session | `node build/merge.mjs <slug>`. Topics more than 15% off budget go back to the same writer. Then `node build/check.mjs --only=<slug> --summary` must be clean. |
+| 6. Audit | auditors, strong model | Follow AUDIT.md: one per 400 to 600 cards, each writing a report and a patch file. |
+| 7. Patch | main session | `node build/apply-fixes.mjs <slug> <fixes.jsonl>`, then the checker. |
+| 8. Fix | fixer, smaller model | Only findings marked `"needs": "research"`, following DIGEST.md. |
+| 9. Verify | one agent, strong model | Follows VERIFY.md, for the cards whose finding was "wrong". Its patches are applied. |
+| 10. Figures | main session | Renders every figure and checks it against its source. |
+| 11. Sources | main session | `node build/cache-sources.mjs --only=<slug> --saved=<scratch sources>` and `node build/sources.mjs --only=<slug>`. |
+| 12. Record | main session | `checks` and `releaseBlockers` in deck.json; one ledger row per agent in research/ledger.csv. |
+| 13. Ship | main session | Build, preflight and the tests in a clean worktree, then commit and push. |
+| 14. Review | main session | A short note in docs/: what cost the most, what broke, what to change before the next deck. |

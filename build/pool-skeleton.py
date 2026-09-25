@@ -1,6 +1,6 @@
 """Turn a public-domain question pool into per-topic skeletons for card writers.
 
-Usage: python3 build/pool-skeleton.py <pool.txt> <brief.md> <out-dir>
+Usage: python3 build/pool-skeleton.py <pool.txt> <brief.md | concepts.json> <out-dir>
 
 The pool text uses the NCVEC layout (research/deck-briefs/fcc-technician-pool.txt):
     T1A01 (C) [97.1]
@@ -8,9 +8,9 @@ The pool text uses the NCVEC layout (research/deck-briefs/fcc-technician-pool.tx
     A. …
     B. …
     ~~
-The brief's concept inventory has "### Topic N: <name>" headings, with the pool
-IDs each concept covers listed in its table rows. Each question goes to the first
-topic that lists it. Writers turn every skeleton question into a scenario card,
+Topics come from the concept list (<slug>-concepts.json, each concept with a
+"pool" array of question IDs), or from an older brief's "### Topic N: <name>"
+tables. Each question goes to the first topic that lists it. Writers turn every skeleton question into a scenario card,
 verbatim, and add the teaching around it (wave 1 lesson: add teaching, don't type).
 Exits non-zero if any question is unmapped.
 """
@@ -32,7 +32,13 @@ for m in re.finditer(r'^([A-Z]\d[A-Z]\d\d) \(([A-D])\)(?: \[([^\]]*)\])?\n(.*?)\
     qs[qid] = dict(poolId=qid, question=q, choices=choices, correct=ans, answer=choices[ans], ref=ref, figure=fig.group(1) if fig else None)
 
 topic_of, cur = {}, None
-for line in open(brief_path, encoding='utf-8'):
+if brief_path.endswith('.json'):
+    # The concept list (research brief, pipeline v3): each concept's "pool"
+    # array lists the question IDs it covers.
+    for c in json.load(open(brief_path, encoding='utf-8')):
+        for pid in c.get('pool', []):
+            topic_of.setdefault(pid, (int(c['topic']), c.get('topicName', f"Topic {c['topic']}")))
+for line in ([] if brief_path.endswith('.json') else open(brief_path, encoding='utf-8')):
     m = re.match(r'### Topic (\d+): (.*)', line)
     if m:
         cur = (int(m.group(1)), m.group(2).strip())

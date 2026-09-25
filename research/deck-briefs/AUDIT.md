@@ -1,49 +1,68 @@
 # Audit brief (given to every audit agent)
 
-You audit every card of ONE deck. You do not edit files; you report. Work from
-the sources already saved in the deck's scratch folder (named in your
-assignment); fetch only what is missing. Keep context small: grep the saved text.
+You check the cards of ONE deck (or the topics named in your assignment) for
+truth and clarity. You do not edit cards: you write a report and a patch
+file, and a script applies the patches. Work from the saved text in
+`research/sources/<slug>/` (see its manifest.json); fetch only what is
+missing, never mirroring a site. Grep; don't read whole documents.
 
-## Privacy (absolute)
-Never put any email address, name or other personal detail in a request: not in a
-User-Agent, header, query string or body. If a site asks for contact details in the
-User-Agent, use a generic one such as "Mozilla/5.0 (compatible; research)" or skip
-that site.
+**Privacy.** No email, name or personal detail in any request. Use a generic
+User-Agent.
 
-The checker already enforces the mechanical rules (undefined terms and
-abbreviations, back length, restating explanations, Wikipedia-only sources,
-missing fields) and build/sources.mjs checks links. Do not report those; spend
-your attention on truth and clarity.
+**Policy.** For what a source may be used for, cite CONTENT-POLICY.md §3 (tiers
+A, B, C) and do not paraphrase it. Tier C is allowed for facts in our own words.
 
-## Pass 1: correct and sourced
-For every card:
-- Every claim in front, back, explanation, example, contrast, choices and
-  choicesExplained is supported by its cited source. Paraphrase is fine; changed
-  meaning, overstatement ("only", "always", "must" not in the source), wrong
-  numbers or units, and inference presented as the source's statement are not.
-- The cited section actually holds the support.
+## Out of scope: the checker catches these
+Do not report:
+- undefined terms and abbreviations;
+- back length and list length;
+- explanations that restate the answer;
+- shared fronts, and "name two" answered with one;
+- Wikipedia-only sources;
+- licence labels that don't match the source host;
+- `#page=` values that are not numbers or fall outside the PDF;
+- pool questions, choices, keys, ids and source lines (all checked word for
+  word against the skeleton);
+- missing fields.
+
+For pool cards, check only the explanation and choicesExplained.
+
+## Pass 1: true and sourced
+- Every claim is supported by the cited page or section. Paraphrase is fine.
+  These are not: changed meaning; overstatement ("only", "always", "must" not
+  in the source); wrong numbers or units; inference presented as the
+  source's own statement.
+- The cited page actually holds the support. For a PDF, check that `#page=N`
+  is the page where it appears.
 - Quoted words match the source verbatim.
-- Exactly one defensible answer; wrong options are really wrong and explained.
-- Figures show what the card says, with a correct credit and licence.
+- Exactly one defensible answer, and every wrong option is really wrong.
+- Scenarios are original, not a course activity reworded.
+- Figures show what the card says, with the right credit and licence.
 
 ## Pass 2: easy to understand
-Read each card as a newcomer who has studied only the cards before it. Flag:
-- a word, abbreviation or symbol not taught by an earlier card or explained on
-  the card;
-- a sentence a newcomer would have to read twice (long, nested, passive where
-  active is plainer, double negatives, stacked nouns);
-- a front that could be read two ways, or whose answer does not match what it
-  asked;
-- a back that states the answer less plainly than it could, or buries it;
-- an explanation that restates the answer instead of saying why;
-- an example that is abstract when a concrete one would do;
-- jargon where an everyday word says the same thing (keep the exam's own term,
-  but explain it).
-Suggest the plainer wording in each case.
+Read each card as a newcomer who has studied only the cards before it. Flag
+a sentence they would read twice, a front open to two readings, a buried
+answer, an abstract example where a concrete one would do, and jargon where
+an everyday word would do (keep the exam's own term, but explain it).
 
-## Report
-Write the full report to research/deck-briefs/<slug>-audit.md: one line per
-problem card, as `id | pass 1 or 2 | severity (wrong / unsupported / ambiguous /
-unclear / minor) | the problem | the source text or the plainer wording`.
-Your reply, at most 120 words: cards checked, counts by severity, and the three
-most serious problems.
+## Output
+1. **`research/deck-briefs/<slug>-audit[-<part>].md`**: one line per finding,
+   as `id | severity | problem | evidence (source words, with page)`.
+   Severity is one of wrong, unsupported, ambiguous, unclear or minor.
+2. **`research/deck-briefs/<slug>-fixes[-<part>].jsonl`**: for every finding
+   whose fix you know, one JSON line:
+   `{"id", "field", "value", "severity", "reason"}`, with the complete new
+   value of the field. `"value": null` removes a field; `{"id", "op":
+   "delete"}` removes a card. Write the fix itself, in plain British English,
+   checked against the source.
+   - A finding that needs more research gets `"needs": "research"` and no
+     value.
+   - A **minor** finding with no patch is logged and skipped, so patch it or
+     leave it.
+
+## Your reply
+At most five lines:
+1. cards checked;
+2. counts by severity;
+3. patches written, and findings that need research;
+4. the three most serious problems.

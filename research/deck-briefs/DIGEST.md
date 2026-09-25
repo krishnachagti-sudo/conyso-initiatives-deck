@@ -1,41 +1,100 @@
-# Card standard, one page (for writers and fixers)
+# Writer's brief (the only document writers and fixers need)
 
-The full rules are in CARD-STANDARD.md; this page is what you need to write.
+You write the cards for some topics of ONE deck. Read this page, the deck's
+notes (`research/deck-briefs/<slug>-writers.md`) and your topic slice
+(`node build/topic-slice.mjs <slug> <topics>`). Do not read the research brief
+or CARD-STANDARD.md unless this page does not answer a question. For the
+shape and tone of cards, see decks/kanban-guide/notes/*.json.
 
-**The one rule.** Never write a fact you did not read in a source you fetched or
-that is saved. Paraphrase in plain British English; quote verbatim only when the
-words matter. Unsure → leave it out and report it.
+## Rules
+- **The one rule.** Never write a fact you did not read in a source you fetched
+  or that is saved (`research/sources/<slug>/` first, then the scratch folder).
+  Paraphrase in plain British English. Quote only when the words matter, and
+  then verbatim. Unsure → leave it out and report it.
+- **Privacy.** No email, name or personal detail in any request. Use a generic
+  User-Agent.
+- **Coverage.** Every concept in your slice gets its cards, extras included:
+  decks are comprehensive. Stay within 15% of each topic's budget. If you
+  cannot, say so in your report; never trim to save effort.
+- Never run git. Never edit another writer's topics.
 
-**Privacy.** No email, name or personal detail in any request. Generic User-Agent.
+## Files
+- One file per topic: `decks/<slug>/notes/<NN>-<topic-slug>.json`, shaped
+  `{"topic": "<title>", "notes": [...]}`. Save each topic file as soon as it is
+  complete, so an interruption loses at most one topic.
+- New concepts: `research/deck-briefs/<slug>-concepts-<letter>.json`, as
+  `[{"id", "name"}]`.
+- Figures: `decks/<slug>/media/`, png or svg, under 400 KB.
 
-**Shape** (see decks/kanban-guide/notes/*.json for real examples): id
-`<family>.<topic-slug>.<card-slug>`; type basic | cloze (one `{{c1::…}}`) |
-scenario (with choices); kind primer | fact | application | classification |
-contrast; priority core | extra; order (unique, in your range, gaps of 5–10);
-front (a question, or a cloze sentence); back (≤ 25 words, lists ≤ 3 items);
-explanation (1–2 sentences saying WHY, never repeating the answer); source
-(title, section, page); sourceURL (exact page or anchor); sourceLicence ("A ·
-public domain", "B · CC BY 4.0", "B · public domain (US Government work)", …);
-uses (every term the card relies on, spelled exactly as the registry does);
-conceptIDs. Primers also: introduces (exactly one term, the registry spelling)
-and example (concrete, "like X, but…"). Volatile facts: volatile + validAsOf.
-Scenario choices: choicesExplained says why each wrong option is wrong.
+## Formats (exactly these)
+- **Card id:** `<family>.<topic-slug>.<card-slug>`. Lowercase, with hyphens
+  inside words and dots between parts, e.g. `prom.alerting.pending-state`.
+- **Concept id:** `<family>.<concept-slug>`. Hyphens only, never underscores,
+  and always the deck's own family prefix. Reuse a prerequisite deck's concept
+  id only if it already exists in its `concepts/<family>.json`.
+- **Terms:** in `introduces` and `uses`, spell each term exactly as the
+  registry does, with no brackets. A primer that teaches an abbreviation
+  lists both, e.g. `"introduces": ["Incident Command System", "ICS"]`, and
+  says both on the card.
+- **Order:** topic N uses N×1000 to N×1000+999, unique, in teaching order, with
+  gaps of 5 to 10. Primers come first.
+- **sourceLicence:** the tier letter, then the licence, as src/licences.json
+  expects for the host, e.g. "B · CC BY 4.0", "B · Apache 2.0",
+  "B · public domain (US Government work)", or "C · facts only, in our own
+  words" for a source that is not openly licensed.
+- **sourceURL:** the exact page or anchor. For a PDF use `#page=N`, where N is
+  the PDF page (count form feeds in pdftotext output), not the printed number.
+- **Pool cards** are written by `node build/pool-cards.mjs <slug>`, never by
+  hand. You fill in each one's explanation, choicesExplained, uses and
+  conceptIDs; question, choices and key stay word for word.
 
-**Teaching order.** Each topic opens with primers for its registry terms, then
-facts, then application and classification (every core fact concept needs one),
-then contrasts. Use only terms from earlier topics (registry) and your own
-earlier primers. Abbreviations: teach them (primer) or add them to the deck
-glossary list in your report. Complete sets: one card per member.
+## Card shape
+Every card: id; type (basic | cloze with one `{{c1::…}}` | scenario with
+choices); kind (primer | fact | application | classification | contrast);
+priority (core | extra); order; front (a question, or a cloze sentence); back
+(≤ 25 words, lists ≤ 3 items); explanation (1–2 sentences saying WHY, never
+restating the answer); source (title, section, page); sourceURL;
+sourceLicence; uses; conceptIDs.
+- **Primers** also have `introduces` (one term, plus its abbreviation) and an
+  `example` (concrete: "like X, but…").
+- **Volatile facts:** `volatile: true` and `validAsOf: "YYYY-MM-DD · <version>"`.
+- **Scenario cards:** `choicesExplained` says why each wrong option is wrong.
 
-**Sources.** Primary sources first (the owner's documents, law, government
-handbooks). Wikipedia only co-cites; alone it needs `"sourceFallback": true` and a
-line in your report. Figures only where the figure is the content, with alt text
-that describes without giving the answer, a credit and a licence.
+## Teaching
+- Each topic opens with primers for its registry terms, then facts, then
+  application and classification cards (every core fact concept needs one),
+  then contrasts.
+- Use only terms from earlier topics or the prerequisite deck, and your own
+  earlier primers.
+- Abbreviations: teach them in a primer, or name them in your report for the
+  glossary.
+- **Sets:** one card per member. Each member's card asks a question that only
+  that member answers. Never write "Name one of the four…" with a different
+  accepted answer on each card; the checker rejects shared fronts.
+- "Name two" questions give two answers.
+- Scenarios are your own: never copy a course's activities or worked examples.
 
-**Budget.** Stay within 15% of your topics' card budget in the brief. Anything
-beyond the exam's scope is priority "extra".
+## Figures
+A concept whose slice names a figure gets that figure on one card, where the
+figure is the content: a chart, a schematic, an organisation chart. Add it as
+`"image": {"file": "media/<name>", "alt": "<what it shows, fully>", "credit":
+"<publisher, document, figure>", "licence": "<tier> · <licence>", "side":
+"front"|"back"}`. Either crop the source's own figure (open licences only;
+never seals, logos or photos of people) or draw a plain SVG from the sourced
+facts, credited "Drawn for this deck from <source>". Figures are part of the
+budget, not an extra.
 
-**Before you reply**, from /home/user/conyso-initiatives-deck:
-`node build/check.mjs --registry=research/deck-briefs/<slug>-terms.json` (your
-files must be clean) and `node build/sources.mjs --only=<slug>` (your deck's links must answer).
-Never run git. Never edit another writer's files.
+## Before you reply
+From /home/user/conyso-initiatives-deck, all three must be clean for your
+topics:
+- `node build/check.mjs --only=<slug> --summary --registry=research/deck-briefs/<slug>-terms.json --concepts-extra=<your concept file>`
+- `node build/status.mjs <slug> --registry`
+- `node build/sources.mjs --only=<slug>`
+
+## Your reply
+At most five lines:
+1. files written;
+2. cards per topic against budget;
+3. figures added;
+4. anything assigned that you did not cover or could not verify;
+5. abbreviations for the glossary.

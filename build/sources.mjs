@@ -20,7 +20,16 @@ const roots = [arg('decks') || 'decks'];
 if (process.argv.includes('--fixtures')) roots.push('test/fixtures/decks');
 const only = arg('only')?.split(','); // one writer's deck, not the whole repository
 
+/** GitHub pages refuse automated requests here; the same file is on raw.githubusercontent.com. */
+export function rawGitHub(url) {
+  const m = url.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)(?:\/(?:blob|tree)\/([^/]+)\/(.+))?\/?$/);
+  if (!m) return url;
+  const [, owner, repo, branch, path] = m;
+  return path ? `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}` : `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/README.md`;
+}
+
 export function status(url) {
+  url = rawGitHub(url);
   const run = (extra) => {
     try {
       return Number(execFileSync('curl', ['-sS', '-L', '-o', '/dev/null', '-w', '%{http_code}', '--max-time', '30',

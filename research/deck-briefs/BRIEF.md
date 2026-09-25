@@ -1,70 +1,81 @@
-# Deck research brief (given to every research agent)
+# Research brief (given to every research agent)
 
-You are researching ONE certification so that a flashcard deck can be written for it
-to the standard in CARD-STANDARD.md and the rules in CONTENT-POLICY.md (read both
-first, in /home/user/conyso-initiatives-deck). You do not write cards. You produce
-the brief that card writers will work from, so it must be complete and correct.
+You research ONE certification so that writers can build its deck. You do not
+write cards, definitions or explanations: writers read the sources themselves.
+Your job is to find and pin down what the deck must cover, where each thing is
+written, and what may be used. Keep it lean. The Law Tome and Bias Atlas needed
+no research stage at all; this one exists only to map a whole exam at once.
 
-## Privacy (absolute)
-Never put any email address, name or other personal detail in a request: not in a
-User-Agent, header, query string or body. If a site asks for contact details in the
-User-Agent, use a generic one such as "Mozilla/5.0 (compatible; research)" or skip
-that site.
+**Budget:** about 150k tokens. Stop fetching once every outline item has a
+source. The Markdown brief stays under 5,000 words.
 
-## The one rule
-Never write a fact you have not read in a source you fetched during this task. No
-figures, dates, question counts, pass marks, URLs, section numbers or licence terms
-from memory. If you cannot verify something, write it under "Not verified" and say
-what you tried. An incomplete brief beats an invented fact. The leads below were
-written from memory: they are not evidence, and some may be wrong.
+## Rules
+- **The one rule.** Never write a fact you have not read in a source you fetched
+  in this task. No figures, dates, counts, section numbers or licence terms from
+  memory. Anything you cannot confirm goes under "Not verified", with what you
+  tried. The leads in your prompt were written from memory: they are not
+  evidence.
+- **Privacy.** Never put any email address, name or other personal detail in a
+  request (User-Agent, header, query, body). Use a generic User-Agent such as
+  "Mozilla/5.0 (compatible; research)".
+- **Fetch pages, not sites.** Download only the pages and documents the outline
+  needs; never mirror a website or clone a repository. Save each one once to the
+  scratch folder, extract its text (pdftotext for PDFs) and grep it.
+- **Look twice only where it matters.** Read the exam facts (pass mark, question
+  count, time, dates) and each licence statement in the raw text, not through a
+  summarising tool. Nothing else needs a second fetch.
+- **Build on the prerequisite deck.** If the deck builds on another
+  (prerequisiteDecks), read that deck's `research/sources/<slug>/manifest.json`
+  and `<slug>-terms.json` first. Re-use its sources and its terms; research only
+  what is new.
+- Never run git. Write only your outputs and the scratch folder.
 
-## How to work
-- Download each source once to your scratch folder (given below), extract text
-  (pdftotext for PDFs), and grep it. Do not rely on summarising fetch tools for
-  figures: confirm every number in the raw text.
-- Quote the exact words that establish each licence, each exam fact and each
-  outline item, with the URL and the section or page.
-- Never run git. Never edit files outside your brief and your scratch folder.
-- Use the network through the configured proxy; never disable TLS checks.
-
-## The brief (write it to research/deck-briefs/<slug>.md)
-1. Exam facts: owner, current version and its effective dates, number of
-   questions, time, pass mark, format, retake rules, validity. Each with a quote
-   and URL. Say which facts change often.
-2. Sources, one row each: title, URL, publisher, licence as quoted from the source
-   itself, content-policy tier (A/B/C/D), and what the deck can use it for.
-3. The exam outline: every domain, subdomain and objective, in the owner's order,
-   with weights if published. This is the coverage checklist: the deck must leave
-   nothing out.
-4. Concept inventory, grouped into topics in teaching order: every term, rule,
-   number and procedure the exam requires. For each: a one-line plain definition
-   taken from a source, the source section, what must be taught first
-   (prerequisite terms), and whether it is a volatile fact. Mark core versus
-   extra. Be exhaustive: this list is how we make sure nothing is left behind.
-5. Numbers and thresholds: every figure a candidate must know, with units,
-   conditions and the source line.
-6. Visuals: every figure, chart, diagram or table in the sources that IS content
-   (a schematic, a chart symbol, a sectional chart extract, an architecture
-   diagram), with its file URL, figure number, licence, and what a card would ask
-   about it. Also list diagrams we could draw ourselves from sourced facts.
-7. Confusions and traps: things candidates mix up, outdated versions still
-   circulating, differences between editions, and rules that recently changed.
-8. Naming: the owner's trademark or naming terms, fetched from its own site, and
-   how CONTENT-POLICY.md §4 applies.
-8b. Term registry: also write research/deck-briefs/<slug>-terms.json, an array of
-   {"term": "<exact spelling writers must use>", "abbr": "<abbreviation or empty>",
-   "topic": <number of the topic whose primer introduces it>, "concept":
-   "<conceptID>", "source": "<URL of the defining passage>"}. One entry per term,
-   covering every term in the concept inventory, in teaching order. Save the
-   primary sources that define basic terms (so writers never need Wikipedia).
-8c. Card budget: for each topic, a target card count derived from the outline's
-   weights and the number of concepts (roughly: one primer per term, one fact per
-   rule or number, one application per core concept). State the deck total.
-9. Languages: every language the exam is offered in, and every official or
-   openly licensed translation of the main sources (with its licence), each with
-   a quote and URL. One short section; do not research further than that.
-10. Not verified: everything you could not confirm, and what you tried.
+## Outputs (in research/deck-briefs/)
+1. **`<slug>.md`**, under 5,000 words:
+   - **Exam facts:** owner, current version and dates, question count, time,
+     pass mark, format, retake rules, validity. Each with its quote and URL.
+     Say which facts change often.
+   - **Naming:** the owner's trademark and naming terms from its own site, and
+     how CONTENT-POLICY.md §4 applies. Include the deck notice text.
+   - **Outline:** every domain and objective in the owner's order, with
+     weights. Tag each with the topic that covers it, as `[T3]`.
+   - **Traps:** one bullet each, tagged `[Tn]`: things candidates confuse,
+     outdated versions still in circulation, rules that changed recently.
+   - **Languages:** the exam's languages, and any official or openly licensed
+     translation of the main sources. One short paragraph.
+   - **Not verified.**
+2. **`<slug>-sources.json`**: `[{"id", "title", "url", "publisher",
+   "licence": "<quoted from the source>", "tier": "A|B|C", "path": "<saved
+   text, in scratch>"}]`. Take the tier from CONTENT-POLICY.md §3; do not
+   restate it.
+3. **`<slug>-terms.json`** (the term registry): `[{"term", "abbr", "topic",
+   "concept", "source"}]`, one entry per term to teach, in teaching order.
+   `term` is the exact spelling writers will use. It has **no brackets**: an
+   abbreviation goes in `abbr`, and a synonym or gloss goes in the concept's
+   `note`. `topic` 0 means a prerequisite deck already teaches it.
+4. **`<slug>-concepts.json`**: `[{"id", "name", "topic", "topicName", "kind":
+   "term|rule|number|procedure|set|contrast", "priority": "core|extra",
+   "source": "<URL#anchor or #page=N>", "figure": "<figure to show, if the
+   figure is the content>", "note": "<≤ 15 words, only if needed>"}]`.
+   - Concept ids are `<family>.<slug>`: lowercase, hyphens only, and the
+     deck's own family prefix.
+   - Every outline item maps to at least one concept.
+   - `#page=N` is the PDF page: count the form feeds in pdftotext output,
+     not the printed page number.
+5. **`<slug>-budget.json`**: `{"<topic>": <target cards>}`. Count one primer
+   per term, one fact per rule or number, one card per member of a set with
+   more than 3 members, one application or classification per core concept,
+   and one contrast per contrast concept. Decks are comprehensive: extra
+   concepts get cards too.
+6. **If the exam uses a public question pool**, give each concept a `"pool"`
+   array of the question IDs it covers. Run `python3 build/pool-skeleton.py
+   <pool.txt> <slug>-concepts.json <slug>-skeleton` and fix the concept list
+   until no question is unmapped. The deck's `pool` block then lets
+   `build/pool-cards.mjs` write the pool cards.
 
 ## Your reply
-At most 200 words: the brief's path, how many outline items and concepts it
-lists, how many visuals, and the most important thing you could not verify.
+At most five lines:
+1. the files written;
+2. counts of outline items, concepts, terms and budgeted cards;
+3. the most important thing you could not verify;
+4. where the leads in your prompt were wrong.
