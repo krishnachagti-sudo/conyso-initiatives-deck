@@ -1,0 +1,1644 @@
+{
+  "topic": "Scheduling and resources",
+  "notes": [
+    {
+      "id": "k8s.scheduling.what-is-scheduling",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8005,
+      "front": "How does kube-scheduler choose a node for a new Pod?",
+      "back": "In two steps: filtering keeps the nodes that can run the Pod, then scoring ranks them; the Pod goes to the highest-scoring node.",
+      "explanation": "If no node can run it, the Pod stays unscheduled until one is; the scheduler then tells the API server its decision, which is called binding.",
+      "example": "Like hiring: first drop every candidate missing a must-have, then rank the rest and pick the top one.",
+      "source": "Kubernetes documentation, “Kubernetes Scheduler”, “Node selection in kube-scheduler”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/#kube-scheduler-implementation",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "scheduling (two steps)"
+      ],
+      "uses": [
+        "kube-scheduler",
+        "node (k8s)",
+        "Pod",
+        "kube-apiserver",
+        "scheduling (two steps)"
+      ],
+      "conceptIDs": [
+        "k8s.scheduling-two-steps"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-are-requests-and-limits",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8010,
+      "front": "What are a container's resource requests and limits?",
+      "back": "Request: the amount the scheduler uses to place the Pod. Limit: the most the container may use, enforced on the node.",
+      "explanation": "A container may use more than its request if the node has spare capacity, but never more CPU than its limit; the most common resources are CPU and memory.",
+      "example": "Request 256 MiB (mebibytes; 1 MiB is 1,048,576 bytes) of memory, limit 512 MiB: the Pod is placed on a node with 256 MiB unreserved, and risks being killed above 512 MiB.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Requests and limits”; Kubernetes documentation, “Pods”, “Resource requests and limits”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "requests and limits"
+      ],
+      "uses": [
+        "container",
+        "kube-scheduler",
+        "Pod",
+        "node (k8s)",
+        "requests and limits",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.requests-and-limits"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-is-a-cpu-unit",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8015,
+      "front": "In Kubernetes, what is 1 CPU unit?",
+      "back": "1 physical CPU core or 1 virtual core, depending on whether the node is a physical host or a virtual machine.",
+      "explanation": "Fractions are allowed: 0.1 CPU can be written 100m, read as one hundred millicpu.",
+      "example": "500m is roughly the same computing power whether the container runs on a single-core or a 48-core machine.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “CPU resource units”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "CPU units"
+      ],
+      "uses": [
+        "node (k8s)",
+        "virtual machine (VM)",
+        "requests and limits",
+        "CPU units",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.cpu-units",
+        "k8s.requests-and-limits"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-are-memory-units",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8020,
+      "front": "In what unit are memory requests and limits measured?",
+      "back": "Bytes, written as plain numbers or with suffixes such as M (power of ten) or Mi (power of two).",
+      "explanation": "E, P, T, G, M and k are powers of ten; Ei, Pi, Ti, Gi, Mi and Ki are powers of two; case matters.",
+      "example": "128974848, 129M and 123Mi all express roughly the same amount of memory.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Memory resource units”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "memory units"
+      ],
+      "uses": [
+        "requests and limits",
+        "memory units"
+      ],
+      "conceptIDs": [
+        "k8s.memory-units",
+        "k8s.requests-and-limits"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-is-bin-packing",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 8025,
+      "front": "What is automatic bin packing in Kubernetes?",
+      "back": "Fitting containers onto the cluster's nodes to make the best use of resources, using the CPU and memory each container needs.",
+      "explanation": "You give Kubernetes a cluster of nodes and tell it what each container needs; it decides the placement.",
+      "example": "Like packing boxes of known sizes into vans so that as little space as possible is wasted.",
+      "source": "Kubernetes documentation, “Overview”, “Why you need Kubernetes and what it can do”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/overview/#why-you-need-kubernetes-and-what-can-it-do",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "bin packing"
+      ],
+      "uses": [
+        "kubernetes",
+        "container",
+        "cluster (k8s)",
+        "node (k8s)",
+        "bin packing",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.bin-packing"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-is-nodeselector",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8030,
+      "front": "What is nodeSelector?",
+      "back": "A Pod field listing node labels; Kubernetes schedules the Pod only onto nodes that have every one of them.",
+      "explanation": "It is the simplest recommended form of node selection constraint.",
+      "example": "A Pod with nodeSelector disktype: ssd runs only on nodes labelled disktype=ssd.",
+      "source": "Kubernetes documentation, “Assigning Pods to Nodes”, “nodeSelector”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "nodeSelector"
+      ],
+      "uses": [
+        "Pod",
+        "node (k8s)",
+        "label",
+        "kubernetes",
+        "nodeSelector"
+      ],
+      "conceptIDs": [
+        "k8s.nodeselector"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-are-affinity-anti-affinity",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8035,
+      "front": "What are affinity and anti-affinity?",
+      "back": "Rules that give the scheduler hints about where to place Pods, based on node labels or on the labels of Pods already running.",
+      "explanation": "They are more expressive than nodeSelector, and a rule can be required or merely preferred.",
+      "example": "Anti-affinity on three cache replicas tells the scheduler not to put two of them on the same node.",
+      "source": "Kubernetes glossary, “Affinity”; Kubernetes documentation, “Assigning Pods to Nodes”, “Affinity and anti-affinity”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "affinity / anti-affinity"
+      ],
+      "uses": [
+        "kube-scheduler",
+        "Pod",
+        "node (k8s)",
+        "label",
+        "nodeSelector",
+        "replica",
+        "affinity / anti-affinity"
+      ],
+      "conceptIDs": [
+        "k8s.affinity-anti-affinity"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-is-a-taint",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8040,
+      "front": "What is a taint?",
+      "back": "A key, value and effect placed on a node that makes it repel Pods that do not tolerate it.",
+      "explanation": "Node affinity attracts Pods to nodes; taints are the opposite, letting a node repel a set of Pods.",
+      "example": "Tainting the few nodes with graphics processors (GPUs) keeps ordinary Pods off them, leaving room for Pods that need GPUs.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”; Kubernetes glossary, “Taint”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "taint"
+      ],
+      "uses": [
+        "node (k8s)",
+        "Pod",
+        "affinity / anti-affinity",
+        "taint"
+      ],
+      "conceptIDs": [
+        "k8s.taint"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-is-a-toleration",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8045,
+      "front": "What is a toleration?",
+      "back": "A key, value and effect placed on a Pod that allows, but does not require, scheduling onto nodes with a matching taint.",
+      "explanation": "A toleration permits; it does not attract, so the scheduler still weighs other factors when placing the Pod.",
+      "example": "GPU Pods carry a toleration for the GPU nodes' taint, so they may run there as well as anywhere else.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”; Kubernetes glossary, “Toleration”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "toleration"
+      ],
+      "uses": [
+        "Pod",
+        "node (k8s)",
+        "taint",
+        "kube-scheduler",
+        "toleration"
+      ],
+      "conceptIDs": [
+        "k8s.toleration"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-is-a-taint-effect",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8050,
+      "front": "What does a taint's effect specify?",
+      "back": "What happens to Pods that do not tolerate the taint: NoSchedule, PreferNoSchedule or NoExecute.",
+      "explanation": "The first two affect only new scheduling; NoExecute also evicts non-tolerating Pods already running on the node.",
+      "example": "Like signs on a door: “no entry”, “please avoid”, or “no entry, and everyone inside must leave”.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”, “Concepts”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/#concepts",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "taint effects"
+      ],
+      "uses": [
+        "taint",
+        "Pod",
+        "toleration",
+        "node (k8s)",
+        "taint effects"
+      ],
+      "conceptIDs": [
+        "k8s.taint-effects",
+        "k8s.taint"
+      ],
+      "image": {
+        "file": "media/taint-effects.svg",
+        "alt": "Table of the three taint effects for Pods without a matching toleration. NoSchedule: new Pods are not scheduled on the node; Pods already running stay. PreferNoSchedule: the control plane tries to avoid placing new Pods there but it is not guaranteed; running Pods stay. NoExecute: new Pods are not scheduled, and running Pods are evicted.",
+        "credit": "Drawn for this deck from Kubernetes documentation, “Taints and Tolerations”",
+        "licence": "B · CC BY-SA 4.0",
+        "side": "back"
+      }
+    },
+    {
+      "id": "k8s.scheduling.what-are-topology-spread-constraints",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 8055,
+      "front": "What are topology spread constraints?",
+      "back": "Rules spreading a workload’s Pods across places that can fail separately (nodes, data-centre zones, regions), so one failure cannot take them all down.",
+      "explanation": "They help achieve high availability as well as efficient use of resources.",
+      "example": "6 replicas, 2 in each of 3 zones: losing one zone still leaves 4 running.",
+      "source": "Kubernetes documentation, “Pod Topology Spread Constraints”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "topology spread constraints"
+      ],
+      "uses": [
+        "Pod",
+        "node (k8s)",
+        "workload",
+        "replica",
+        "topology spread constraints"
+      ],
+      "conceptIDs": [
+        "k8s.topology-spread-constraints"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-are-priority-and-preemption",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8060,
+      "front": "What are Pod priority, a PriorityClass and preemption?",
+      "back": "Priority is a Pod's importance; a PriorityClass names a priority value; preemption evicts lower-priority Pods so a pending higher-priority Pod fits.",
+      "explanation": "Pods get priority through priorityClassName, normally set in a workload's Pod template; with no default class, priority is zero.",
+      "example": "A pending payment-service Pod with high priority can displace a low-priority batch Pod from a full node.",
+      "source": "Kubernetes documentation, “Pod Priority and Preemption”; Kubernetes glossary, “Preemption”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "pod priority / PriorityClass / preemption"
+      ],
+      "uses": [
+        "Pod",
+        "workload",
+        "PodTemplate",
+        "node (k8s)",
+        "pod priority / PriorityClass / preemption"
+      ],
+      "conceptIDs": [
+        "k8s.pod-priority-preemption"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-is-eviction",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8065,
+      "front": "What is eviction, and what is node-pressure eviction?",
+      "back": "Eviction is terminating Pods on nodes; node-pressure eviction is the kubelet proactively failing Pods to reclaim a node's scarce resources.",
+      "explanation": "The kubelet watches free memory and disk space and acts before the node runs out.",
+      "example": "A node nearly out of memory: the kubelet fails some Pods so the node itself keeps working.",
+      "source": "Kubernetes glossary, “Eviction” and “Node-pressure eviction”; Kubernetes documentation, “Node-pressure Eviction”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "eviction / node-pressure eviction"
+      ],
+      "uses": [
+        "Pod",
+        "node (k8s)",
+        "kubelet",
+        "eviction / node-pressure eviction"
+      ],
+      "conceptIDs": [
+        "k8s.eviction"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-is-a-qos-class",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8070,
+      "front": "What is a Pod’s QoS (Quality of Service) class?",
+      "back": "A class (Guaranteed, Burstable or BestEffort) assigned from its containers' requests and limits, used in eviction decisions.",
+      "explanation": "It is set when the Pod is created; under node pressure, BestEffort Pods are the most likely to be evicted and Guaranteed the least.",
+      "example": "Like airline fare classes: when the flight is overbooked, the cheapest, least-committed tickets are bumped first.",
+      "source": "Kubernetes documentation, “Pod Quality of Service Classes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#quality-of-service-classes",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "QoS classes"
+      ],
+      "uses": [
+        "Pod",
+        "container",
+        "requests and limits",
+        "eviction / node-pressure eviction",
+        "node (k8s)",
+        "QoS classes"
+      ],
+      "conceptIDs": [
+        "k8s.qos-classes"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.what-is-an-oom-kill",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8072,
+      "front": "What is an OOM kill?",
+      "back": "An out-of-memory (OOM) kill: the kernel terminating a container that uses more memory than its limit, once it detects memory pressure.",
+      "explanation": "The container’s last state then shows the reason OOMKilled, and the kubelet can restart it according to its restartPolicy.",
+      "example": "A container limited to 50 MiB keeps leaking memory; each time it is killed with reason OOMKilled and restarted.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Requests and limits” and “My container is terminated”; “Node-pressure Eviction”, “Node out of memory behavior”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "conceptIDs": [
+        "k8s.requests-and-limits"
+      ],
+      "introduces": [
+        "OOM kill"
+      ],
+      "uses": [
+        "container",
+        "requests and limits",
+        "kernel",
+        "kubelet",
+        "restartPolicy",
+        "memory units",
+        "OOM kill"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.filtering",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8075,
+      "front": "In scheduling, what does the filtering step produce?",
+      "back": "The set of feasible nodes: those where the Pod can run, for example with enough resources for its requests.",
+      "explanation": "If the list is empty, the Pod is not (yet) schedulable.",
+      "source": "Kubernetes documentation, “Kubernetes Scheduler”, “Node selection in kube-scheduler”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/#kube-scheduler-implementation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "scheduling (two steps)",
+        "node (k8s)",
+        "Pod",
+        "requests and limits"
+      ],
+      "conceptIDs": [
+        "k8s.scheduling-two-steps"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.scoring-ties",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8080,
+      "front": "After scoring, what does kube-scheduler do if several nodes share the highest score?",
+      "back": "It picks one of them at random.",
+      "explanation": "Otherwise the Pod goes to the single node with the highest ranking.",
+      "source": "Kubernetes documentation, “Kubernetes Scheduler”, “Node selection in kube-scheduler”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/#kube-scheduler-implementation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-scheduler",
+        "node (k8s)",
+        "Pod",
+        "scheduling (two steps)"
+      ],
+      "conceptIDs": [
+        "k8s.scheduling-two-steps"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.requests-not-usage",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8085,
+      "front": "When placing a Pod, does the scheduler compare requests with the node's capacity or with its actual current usage?",
+      "back": "With capacity: the sum of scheduled containers' requests must stay below it, however low actual usage is.",
+      "explanation": "This protects against a shortage later, for example during a daily traffic peak.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “How Pods with resource requests are scheduled”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-requests-are-scheduled",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "kube-scheduler",
+        "requests and limits",
+        "node (k8s)",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.requests-and-limits",
+        "k8s.scheduling-two-steps"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.cpu-limit-throttling",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8090,
+      "front": "How is a container's CPU limit enforced?",
+      "back": "By CPU throttling: as it approaches the limit, the kernel restricts its CPU access.",
+      "explanation": "A CPU limit is a hard limit; the container cannot use more CPU than it sets.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Requests and limits”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "requests and limits",
+        "cpu",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "k8s.requests-and-limits"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.memory-limit-oom",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8095,
+      "front": "How is a container's memory limit enforced?",
+      "back": "By out-of-memory (OOM) kills: a container using more than its limit may be terminated by the kernel.",
+      "explanation": "Kills happen only when the kernel detects memory pressure, so enforcement is reactive rather than immediate.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Requests and limits”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "requests and limits",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "k8s.requests-and-limits"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.limit-without-request",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8100,
+      "front": "If a container sets a limit but no request, and nothing applies a default, what request does Kubernetes use?",
+      "back": "The limit value: it copies the limit as the request.",
+      "explanation": "So a limit-only container still reserves its full limit when it is scheduled.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Requests and limits” (note)",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "requests and limits",
+        "kubernetes"
+      ],
+      "conceptIDs": [
+        "k8s.requests-and-limits"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.cpu-100m",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8105,
+      "front": "CPU quantity 0.1 can also be written as {{c1::100m}}.",
+      "explanation": "The m stands for milli: one thousandth of a CPU; precision finer than 1m is not allowed.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “CPU resource units”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CPU units",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.cpu-units"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.memory-case",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8110,
+      "front": "What does a memory request of 400m mean?",
+      "back": "0.4 bytes: lowercase m means milli, not mega.",
+      "explanation": "The writer almost certainly meant 400Mi (mebibytes) or 400M (megabytes).",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Memory resource units”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "memory units",
+        "requests and limits"
+      ],
+      "conceptIDs": [
+        "k8s.memory-units"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.guaranteed-criteria",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8115,
+      "front": "What must be true of every container for a Pod to get the Guaranteed QoS class?",
+      "back": "It sets both CPU and memory requests and limits, each above zero, with each limit equal to its request.",
+      "explanation": "Guaranteed Pods are the least likely to face eviction and cannot use resources beyond their limits.",
+      "source": "Kubernetes documentation, “Pod Quality of Service Classes”, “Guaranteed”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#guaranteed",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "Pod",
+        "QoS classes",
+        "requests and limits",
+        "eviction / node-pressure eviction",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.guaranteed-criteria",
+        "k8s.qos-classes"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.burstable-criteria",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8120,
+      "front": "When does a Pod get the Burstable QoS class?",
+      "back": "When it is not Guaranteed but at least one container has a CPU or memory request or limit.",
+      "explanation": "A Burstable Pod has some lower-bound guarantee from its requests and can grow when the node has spare resources.",
+      "source": "Kubernetes documentation, “Pod Quality of Service Classes”, “Burstable”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#burstable",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "QoS classes",
+        "container",
+        "requests and limits",
+        "node (k8s)",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.qos-classes"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.besteffort-criteria",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8125,
+      "front": "When does a Pod get the BestEffort QoS class?",
+      "back": "When no container in it has any CPU or memory request or limit.",
+      "explanation": "BestEffort Pods can use whatever node resources are not assigned to others, and are the first the kubelet prefers to evict.",
+      "source": "Kubernetes documentation, “Pod Quality of Service Classes”, “BestEffort”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#besteffort",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "QoS classes",
+        "container",
+        "requests and limits",
+        "node (k8s)",
+        "kubelet",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.qos-classes"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.qos-eviction-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8130,
+      "front": "When a node runs out of resources, in what order are Pods of each QoS class evicted?",
+      "back": "BestEffort first, then Burstable, then Guaranteed.",
+      "explanation": "Only Pods using more than their requests are candidates when the eviction is due to resource pressure.",
+      "source": "Kubernetes documentation, “Pod Quality of Service Classes”, “Quality of Service classes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#quality-of-service-classes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node (k8s)",
+        "Pod",
+        "QoS classes",
+        "eviction / node-pressure eviction",
+        "requests and limits"
+      ],
+      "conceptIDs": [
+        "k8s.qos-classes",
+        "k8s.eviction"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.qos-fixed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8135,
+      "front": "Can resizing a running Pod's CPU and memory in place change its QoS class?",
+      "back": "No. The QoS class is fixed when the Pod is created.",
+      "explanation": "To change it, the Pod must be replaced, for example by updating its workload's Pod template.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “In-place Pod resize”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-resize-inplace",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "QoS classes",
+        "workload",
+        "PodTemplate",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.qos-classes"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.effect-noschedule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8140,
+      "front": "What does a NoSchedule taint do to Pods that do not tolerate it?",
+      "back": "New ones are not scheduled on the node; Pods already running there are not evicted.",
+      "explanation": "It is a hard rule for scheduling only.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”, “Concepts”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/#concepts",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "taint",
+        "taint effects",
+        "Pod",
+        "node (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.taint-effects"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.effect-prefernoschedule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8145,
+      "front": "What does a PreferNoSchedule taint do?",
+      "back": "The control plane tries to avoid placing non-tolerating Pods on the node, but it is not guaranteed.",
+      "explanation": "It is the soft, preference version of NoSchedule.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”, “Concepts”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/#concepts",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "taint",
+        "taint effects",
+        "control plane",
+        "Pod",
+        "node (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.taint-effects"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.effect-noexecute",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8150,
+      "front": "What does a NoExecute taint do to Pods already running on the node that do not tolerate it?",
+      "back": "Evicts them immediately; it also stops new ones being scheduled there.",
+      "explanation": "A tolerating Pod can set tolerationSeconds to stay only for that long before eviction.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”, “Concepts”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/#concepts",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "taint",
+        "taint effects",
+        "Pod",
+        "node (k8s)",
+        "toleration"
+      ],
+      "conceptIDs": [
+        "k8s.taint-effects"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.auto-taints",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8155,
+      "front": "Which taints does the node controller add automatically to a node that is not ready or cannot be reached?",
+      "back": "node.kubernetes.io/not-ready and node.kubernetes.io/unreachable.",
+      "explanation": "Unless set explicitly, Pods automatically get tolerations for both with tolerationSeconds=300, so they stay bound for 5 minutes after the problem is detected.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”, “Taint based Evictions”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/#taint-based-evictions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "taint",
+        "node (k8s)",
+        "toleration",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.taint"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.affinity-required-preferred",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8160,
+      "front": "What is the difference between required and preferred node affinity?",
+      "back": "Required: the Pod is not scheduled unless the rule is met. Preferred: the scheduler tries, but schedules the Pod anyway.",
+      "explanation": "The field names end in IgnoredDuringExecution: if node labels change later, the running Pod stays.",
+      "source": "Kubernetes documentation, “Assigning Pods to Nodes”, “Node affinity”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "affinity / anti-affinity",
+        "Pod",
+        "kube-scheduler",
+        "node (k8s)",
+        "label"
+      ],
+      "conceptIDs": [
+        "k8s.affinity-anti-affinity"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.interpod-affinity",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8165,
+      "front": "Inter-pod affinity rules are based on which labels?",
+      "back": "The labels of Pods already running on a node (or other topology domain), not the node's own labels.",
+      "explanation": "The rule reads: this Pod should (or, for anti-affinity, should not) run in a domain already running Pods matching a selector.",
+      "source": "Kubernetes documentation, “Assigning Pods to Nodes”, “Inter-pod affinity and anti-affinity”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "affinity / anti-affinity",
+        "label",
+        "Pod",
+        "node (k8s)",
+        "selector"
+      ],
+      "conceptIDs": [
+        "k8s.affinity-anti-affinity"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.nodename",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8170,
+      "front": "What does setting a Pod's nodeName field do?",
+      "back": "The scheduler ignores the Pod, and the kubelet on the named node tries to run it, overruling nodeSelector and affinity.",
+      "explanation": "If the named node does not exist, the Pod will not run.",
+      "source": "Kubernetes documentation, “Assigning Pods to Nodes”, “nodeName”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodename",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "kube-scheduler",
+        "kubelet",
+        "node (k8s)",
+        "nodeSelector",
+        "affinity / anti-affinity"
+      ],
+      "conceptIDs": [
+        "k8s.nodeselector"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.priorityclass-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8175,
+      "front": "Is a PriorityClass namespaced, and what is the highest value a user-defined one may have?",
+      "back": "It is not namespaced; its value may be at most 1 billion (1000000000).",
+      "explanation": "Higher values are reserved for the built-in system-cluster-critical and system-node-critical classes.",
+      "source": "Kubernetes documentation, “Pod Priority and Preemption”, “PriorityClass”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#priorityclass",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "pod priority / PriorityClass / preemption",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "k8s.pod-priority-preemption"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.default-priority",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8180,
+      "front": "What priority does a Pod without a priorityClassName get when no PriorityClass is marked globalDefault?",
+      "back": "Zero.",
+      "explanation": "A PriorityClass with globalDefault: true instead supplies the default for such Pods; only one may exist.",
+      "source": "Kubernetes documentation, “Pod Priority and Preemption”, “PriorityClass”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#priorityclass",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "pod priority / PriorityClass / preemption"
+      ],
+      "conceptIDs": [
+        "k8s.pod-priority-preemption"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.npe-ignores-pdb",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8185,
+      "front": "During node-pressure eviction, does the kubelet respect PodDisruptionBudgets and the Pod's grace period?",
+      "back": "No. With hard eviction thresholds it kills Pods immediately, with a 0-second grace period.",
+      "explanation": "API-initiated eviction, as used by kubectl drain, does respect PodDisruptionBudgets and terminationGracePeriodSeconds.",
+      "source": "Kubernetes documentation, “Node-pressure Eviction”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "eviction / node-pressure eviction",
+        "kubelet",
+        "disruptions / PodDisruptionBudget (PDB)",
+        "Pod",
+        "kubectl",
+        "drain"
+      ],
+      "conceptIDs": [
+        "k8s.eviction"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.npe-default-memory",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8190,
+      "front": "What is the kubelet's default hard eviction threshold for memory on Linux nodes?",
+      "back": "memory.available<100Mi.",
+      "explanation": "Other defaults include nodefs.available<10% and imagefs.available<15%.",
+      "source": "Kubernetes documentation, “Node-pressure Eviction”, “Hard eviction thresholds”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#hard-eviction-thresholds",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "uses": [
+        "kubelet",
+        "eviction / node-pressure eviction",
+        "node (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.eviction"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.npe-replacement",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8195,
+      "front": "After node-pressure eviction, what happens to evicted Pods that a Deployment or StatefulSet manages?",
+      "back": "The control plane creates new Pods to replace them.",
+      "explanation": "The kubelet sets an evicted Pod's phase to Failed; a workload object that replaces failed Pods then acts.",
+      "source": "Kubernetes documentation, “Node-pressure Eviction”, “Self healing behavior”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#self-healing-behavior",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "eviction / node-pressure eviction",
+        "Pod",
+        "Deployment",
+        "StatefulSet",
+        "control plane",
+        "kubelet",
+        "pod phases",
+        "workload"
+      ],
+      "conceptIDs": [
+        "k8s.eviction"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.apply-pending-no-fit",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8200,
+      "front": "A Pod requests 4 CPUs, but every node has less than 4 CPUs unreserved. What happens?",
+      "back": "Filtering finds no feasible node, so the Pod stays Pending, unscheduled, until one can fit it.",
+      "explanation": "The scheduler compares requests against unreserved capacity, not against what containers are actually using.",
+      "source": "Kubernetes documentation, “Kubernetes Scheduler”; Kubernetes documentation, “Resource Management for Pods and Containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/#kube-scheduler-implementation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "node (k8s)",
+        "scheduling (two steps)",
+        "pod phases",
+        "kube-scheduler",
+        "requests and limits",
+        "container",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.scheduling-two-steps",
+        "k8s.requests-and-limits"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.scenario-memory-over",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8205,
+      "front": "A container with a 512Mi memory limit leaks memory well past 512Mi while the node is under memory pressure. What is the likely outcome?",
+      "back": "The kernel OOM-kills the container.",
+      "choices": "A) It is throttled\nB) It is OOM-killed\nC) Its limit is raised automatically",
+      "choicesExplained": "A: throttling is how CPU limits are enforced, not memory limits. C: Kubernetes never raises a limit on its own; the limit is the ceiling.",
+      "explanation": "Memory limits are enforced reactively by out-of-memory kills when the kernel detects pressure.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Requests and limits”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "memory units",
+        "requests and limits",
+        "node (k8s)",
+        "cpu",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "k8s.requests-and-limits"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.apply-cpu-throttle",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8210,
+      "front": "A container with a 500m CPU limit becomes busy and wants more CPU. What happens?",
+      "back": "It is throttled to about half a CPU; it is not killed.",
+      "explanation": "CPU limits are hard limits enforced by throttling, even when the node has spare CPU capacity.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Requests and limits”; Kubernetes documentation, “Pods” (note)",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "CPU units",
+        "requests and limits",
+        "node (k8s)",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.requests-and-limits",
+        "k8s.cpu-units"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.apply-cpu-convert",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8215,
+      "front": "A container requests 250m CPU. How many CPU cores is that?",
+      "back": "0.25 of a core (a quarter).",
+      "explanation": "1 CPU equals 1000m, so 250m is a quarter of one physical or virtual core.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “CPU resource units”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "CPU units",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.cpu-units"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.apply-memory-typo",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8220,
+      "front": "Someone writes a memory request of 400m, meaning 400 mebibytes. What should they have written?",
+      "back": "400Mi.",
+      "explanation": "400m means 0.4 bytes; suffix case matters (M is mega, m is milli, Mi is mebi).",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Memory resource units”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "memory units",
+        "requests and limits"
+      ],
+      "conceptIDs": [
+        "k8s.memory-units"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.classify-qos-guaranteed",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8225,
+      "front": "Each container in a Pod sets CPU request = limit = 500m and memory request = limit = 256Mi. Which QoS class?",
+      "back": "Guaranteed.",
+      "explanation": "Every container has CPU and memory requests equal to their limits.",
+      "source": "Kubernetes documentation, “Pod Quality of Service Classes”, “Guaranteed”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#guaranteed",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "Pod",
+        "requests and limits",
+        "QoS classes",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.guaranteed-criteria",
+        "k8s.qos-classes"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.classify-qos-burstable",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8230,
+      "front": "A Pod's only container sets a memory request of 128Mi and nothing else. Which QoS class?",
+      "back": "Burstable.",
+      "explanation": "It has at least one request, but does not meet the Guaranteed criteria.",
+      "source": "Kubernetes documentation, “Pod Quality of Service Classes”, “Burstable”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#burstable",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "container",
+        "requests and limits",
+        "QoS classes"
+      ],
+      "conceptIDs": [
+        "k8s.qos-classes",
+        "k8s.guaranteed-criteria"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.classify-qos-besteffort",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8235,
+      "front": "A Pod's containers set no CPU or memory requests or limits at all. Which QoS class?",
+      "back": "BestEffort.",
+      "explanation": "With no CPU or memory requests or limits anywhere, the Pod is BestEffort.",
+      "source": "Kubernetes documentation, “Pod Quality of Service Classes”, “BestEffort”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#besteffort",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "container",
+        "requests and limits",
+        "QoS classes",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.qos-classes"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.apply-eviction-first",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8240,
+      "front": "A node runs short of memory. It hosts one Guaranteed, one Burstable and one BestEffort Pod, all above their requests where they have any. Which is most likely evicted first?",
+      "back": "The BestEffort Pod.",
+      "explanation": "BestEffort Pods are evicted first, then Burstable, then Guaranteed; Pod priority also affects the kubelet's ranking.",
+      "source": "Kubernetes documentation, “Pod Quality of Service Classes”; Kubernetes documentation, “Node-pressure Eviction”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/#quality-of-service-classes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node (k8s)",
+        "QoS classes",
+        "Pod",
+        "requests and limits",
+        "eviction / node-pressure eviction",
+        "pod priority / PriorityClass / preemption",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "k8s.qos-classes",
+        "k8s.eviction"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.apply-nodeselector",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8245,
+      "front": "Only some nodes carry the label gpu=true, and a Pod must run on one of them. What is the simplest recommended way to say so?",
+      "back": "Set nodeSelector with gpu: \"true\" in the Pod's spec.",
+      "explanation": "The Pod is then scheduled only onto nodes that have that label.",
+      "source": "Kubernetes documentation, “Assigning Pods to Nodes”, “nodeSelector”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node (k8s)",
+        "label",
+        "Pod",
+        "nodeSelector"
+      ],
+      "conceptIDs": [
+        "k8s.nodeselector"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.apply-anti-affinity",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8250,
+      "front": "Three replicas of a cache must each run on a different node. Which scheduling feature expresses this?",
+      "back": "Pod anti-affinity, matching the replicas' own label.",
+      "explanation": "The documentation's example uses podAntiAffinity so no two Redis cache replicas share a node.",
+      "source": "Kubernetes documentation, “Assigning Pods to Nodes”, “More practical use-cases”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#more-practical-use-cases",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "replica",
+        "node (k8s)",
+        "affinity / anti-affinity",
+        "label"
+      ],
+      "conceptIDs": [
+        "k8s.affinity-anti-affinity"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.classify-soft-rule",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8255,
+      "front": "You want Pods placed in zone A if possible, but still scheduled elsewhere if zone A is full. nodeSelector or preferred node affinity?",
+      "back": "Preferred node affinity.",
+      "explanation": "nodeSelector is a hard requirement; affinity can express soft, preferred rules.",
+      "source": "Kubernetes documentation, “Assigning Pods to Nodes”, “Affinity and anti-affinity”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "nodeSelector",
+        "affinity / anti-affinity"
+      ],
+      "conceptIDs": [
+        "k8s.affinity-anti-affinity",
+        "k8s.nodeselector"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.apply-dedicated-nodes",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8260,
+      "front": "Some nodes are reserved for one team. Which two things together keep other Pods off them and keep the team's Pods only on them?",
+      "back": "A taint on the nodes plus matching tolerations, and a node label with required node affinity on the team's Pods.",
+      "explanation": "A toleration alone only allows the team's Pods onto the nodes; it does not keep them there.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”, “Example Use Cases”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/#example-use-cases",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node (k8s)",
+        "Pod",
+        "taint",
+        "toleration",
+        "label",
+        "affinity / anti-affinity"
+      ],
+      "conceptIDs": [
+        "k8s.taint",
+        "k8s.toleration"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.scenario-add-noexecute",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8265,
+      "front": "You add a taint with effect NoExecute to a node. Its running Pods have no matching toleration. What happens to them?",
+      "back": "They are evicted immediately.",
+      "choices": "A) They keep running; only new Pods are blocked\nB) They are evicted immediately\nC) They keep running until they finish on their own",
+      "choicesExplained": "A: that is NoSchedule's behaviour. C: NoExecute does not wait for Pods to finish; only a matching toleration with tolerationSeconds delays eviction.",
+      "explanation": "NoExecute affects Pods already running on the node, unlike NoSchedule and PreferNoSchedule.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”, “Concepts”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/#concepts",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "taint",
+        "taint effects",
+        "node (k8s)",
+        "Pod",
+        "toleration"
+      ],
+      "conceptIDs": [
+        "k8s.taint-effects"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.classify-soft-taint",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8270,
+      "front": "You want the scheduler to avoid a node for ordinary Pods if it can, without forbidding it. Which taint effect?",
+      "back": "PreferNoSchedule.",
+      "explanation": "It is the soft version of NoSchedule; placement there is avoided but not guaranteed.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”, “Concepts”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/#concepts",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-scheduler",
+        "node (k8s)",
+        "Pod",
+        "taint",
+        "taint effects"
+      ],
+      "conceptIDs": [
+        "k8s.taint-effects"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.apply-toleration-meaning",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8275,
+      "front": "A Pod tolerates the taint on node gpu-1. Is it guaranteed to be scheduled on gpu-1?",
+      "back": "No. A toleration allows scheduling there but does not require or guarantee it.",
+      "explanation": "To pull the Pod onto particular nodes, use node affinity or nodeSelector as well.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "toleration",
+        "taint",
+        "node (k8s)",
+        "affinity / anti-affinity",
+        "nodeSelector"
+      ],
+      "conceptIDs": [
+        "k8s.toleration"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.apply-preemption",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8280,
+      "front": "A high-priority Pod is pending because every node is full of low-priority Pods. What can the scheduler do?",
+      "back": "Preempt (evict) lower-priority Pods on a node so the pending Pod fits.",
+      "explanation": "Preemption helps a pending Pod find a node; that is why untrusted users should not get high PriorityClasses.",
+      "source": "Kubernetes documentation, “Pod Priority and Preemption”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "node (k8s)",
+        "kube-scheduler",
+        "pod priority / PriorityClass / preemption"
+      ],
+      "conceptIDs": [
+        "k8s.pod-priority-preemption"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.apply-quota-needs-requests",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 8285,
+      "front": "A namespace has a ResourceQuota on cpu and memory. A Pod is submitted without any CPU or memory requests or limits. What may happen?",
+      "back": "The quota system may reject it: users must set requests or limits for those resources.",
+      "explanation": "A LimitRange can supply defaults so that users do not have to remember them.",
+      "source": "Kubernetes documentation, “Resource Quotas”, “How Kubernetes ResourceQuotas work”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/policy/resource-quotas/#how-kubernetes-resourcequotas-work",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "namespace",
+        "ResourceQuota",
+        "Pod",
+        "requests and limits",
+        "LimitRange",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.resourcequota",
+        "k8s.requests-and-limits"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.classify-spread",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 8290,
+      "front": "You want a workload's replicas spread evenly across zones so one zone outage cannot take them all down. Which feature fits?",
+      "back": "Topology spread constraints.",
+      "explanation": "They spread Pods across failure domains such as regions, zones and nodes.",
+      "source": "Kubernetes documentation, “Pod Topology Spread Constraints”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "workload",
+        "replica",
+        "topology spread constraints",
+        "Pod",
+        "node (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.topology-spread-constraints"
+      ]
+    },
+    {
+      "id": "k8s.architecture.provides-bin-packing",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8294,
+      "front": "You tell Kubernetes how much CPU and memory each container needs, and it fits them onto nodes to make the best use of resources. Which capability is this?",
+      "back": "Automatic bin packing.",
+      "explanation": "You supply a cluster of nodes; Kubernetes decides the placement.",
+      "source": "Kubernetes documentation, “Overview”, “Why you need Kubernetes and what it can do”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/overview/#why-you-need-kubernetes-and-what-can-it-do",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node",
+        "cluster",
+        "container",
+        "kubernetes",
+        "node (k8s)",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.kubernetes-provides"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.classify-bin-packing",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 8295,
+      "front": "Kubernetes places containers onto nodes according to their stated CPU and memory needs so as to waste as little capacity as possible. Which feature is this?",
+      "back": "Automatic bin packing.",
+      "explanation": "Requests tell the scheduler each container’s size, so it can pack nodes tightly.",
+      "source": "Kubernetes documentation, “Overview”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/overview/#why-you-need-kubernetes-and-what-can-it-do",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubernetes",
+        "container",
+        "node (k8s)",
+        "bin packing",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.bin-packing"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.contrast-request-limit",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8300,
+      "front": "What does a request decide, and what does a limit decide?",
+      "back": "The request decides where the Pod can be scheduled; the limit caps what the container may use while running.",
+      "explanation": "The scheduler uses requests; the kubelet and kernel enforce limits.",
+      "source": "Kubernetes documentation, “Pods”, “Resource requests and limits”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/#resource-requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "requests and limits",
+        "Pod",
+        "container",
+        "kube-scheduler",
+        "kubelet",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "k8s.requests-and-limits"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.contrast-cpu-memory-limits",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8305,
+      "front": "What happens when a container hits its CPU limit, compared with its memory limit?",
+      "back": "CPU: it is throttled and keeps running. Memory: it may be OOM-killed.",
+      "explanation": "CPU is enforced as a hard cap; memory is enforced reactively when the kernel sees pressure.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Requests and limits”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "requests and limits",
+        "cpu",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "k8s.requests-and-limits"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.contrast-taint-affinity",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8310,
+      "front": "How do taints and tolerations differ from node affinity in what they do to Pods?",
+      "back": "Taints let nodes repel Pods, and tolerations only permit; node affinity attracts Pods to nodes.",
+      "explanation": "They are often combined: taints keep others off, affinity keeps the chosen Pods on.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "taint",
+        "toleration",
+        "affinity / anti-affinity",
+        "node (k8s)",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.taint",
+        "k8s.affinity-anti-affinity"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.contrast-noschedule-noexecute",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8315,
+      "front": "How does NoSchedule differ from NoExecute?",
+      "back": "NoSchedule only blocks new non-tolerating Pods; NoExecute also evicts non-tolerating Pods already running.",
+      "explanation": "Adding a NoSchedule taint never disturbs running workloads.",
+      "source": "Kubernetes documentation, “Taints and Tolerations”, “Concepts”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/#concepts",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "taint effects",
+        "Pod",
+        "workload"
+      ],
+      "conceptIDs": [
+        "k8s.taint-effects"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.contrast-nodeselector-affinity",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8320,
+      "front": "What can node affinity express that nodeSelector cannot?",
+      "back": "Preferred (soft) rules and richer matching logic; nodeSelector requires every listed label.",
+      "explanation": "Required node affinity behaves like nodeSelector but with a more expressive syntax.",
+      "source": "Kubernetes documentation, “Assigning Pods to Nodes”, “Affinity and anti-affinity”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "affinity / anti-affinity",
+        "nodeSelector",
+        "label"
+      ],
+      "conceptIDs": [
+        "k8s.affinity-anti-affinity",
+        "k8s.nodeselector"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.contrast-npe-api-eviction",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8325,
+      "front": "How does node-pressure eviction differ from API-initiated eviction, such as kubectl drain?",
+      "back": "Node-pressure: the kubelet acts on its own and ignores PodDisruptionBudgets. API-initiated: requested through the API and respects them.",
+      "explanation": "API-initiated eviction also respects the Pod's terminationGracePeriodSeconds.",
+      "source": "Kubernetes documentation, “Node-pressure Eviction”; Kubernetes glossary, “API-initiated eviction”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "eviction / node-pressure eviction",
+        "kubectl",
+        "drain",
+        "kubelet",
+        "disruptions / PodDisruptionBudget (PDB)",
+        "api",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.eviction"
+      ]
+    },
+    {
+      "id": "k8s.scheduling.contrast-qos-kubelet-order",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 8330,
+      "front": "Does the kubelet rank Pods for node-pressure eviction by QoS class itself?",
+      "back": "No. It ranks by (1) whether usage exceeds requests, (2) Pod priority, (3) how far usage exceeds requests. QoS class only predicts the order.",
+      "explanation": "In practice BestEffort and over-request Burstable Pods go first, and Guaranteed Pods last.",
+      "source": "Kubernetes documentation, “Node-pressure Eviction”, “Pod selection for kubelet eviction”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#pod-selection-for-kubelet-eviction",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "Pod",
+        "eviction / node-pressure eviction",
+        "QoS classes",
+        "requests and limits",
+        "pod priority / PriorityClass / preemption"
+      ],
+      "conceptIDs": [
+        "k8s.eviction",
+        "k8s.qos-classes"
+      ]
+    }
+  ]
+}

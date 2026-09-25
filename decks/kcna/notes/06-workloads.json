@@ -1,0 +1,1649 @@
+{
+  "topic": "Workload resources",
+  "notes": [
+    {
+      "id": "k8s.workloads.what-is-a-replica",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6010,
+      "front": "What is a replica?",
+      "back": "A copy of a Pod; several identical replicas give availability, scalability and fault tolerance.",
+      "explanation": "Running more instances of an application means running more Pods, one per instance; this is called replication.",
+      "example": "Three replicas of a web server spread over nodes: if one node fails, two copies keep serving.",
+      "source": "Kubernetes glossary, “Replica”; Kubernetes documentation, “Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?all=true#term-replica",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "replica"
+      ],
+      "uses": [
+        "Pod",
+        "node (k8s)",
+        "replica"
+      ],
+      "conceptIDs": [
+        "k8s.replica"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-a-replicaset",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6015,
+      "front": "What is a ReplicaSet?",
+      "back": "An object that keeps a stable set of identical replica Pods running at any given time.",
+      "explanation": "Using a selector, a replica count and a Pod template, it creates or deletes Pods as needed to reach the desired number.",
+      "example": "A ReplicaSet set to 3: delete one of its Pods and it immediately makes a new one from its template.",
+      "source": "Kubernetes documentation, “ReplicaSet”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#how-a-replicaset-works",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "ReplicaSet"
+      ],
+      "uses": [
+        "object",
+        "replica",
+        "Pod",
+        "selector",
+        "PodTemplate",
+        "ReplicaSet"
+      ],
+      "conceptIDs": [
+        "k8s.replicaset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-a-deployment",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6020,
+      "front": "What is a Deployment?",
+      "back": "An object that manages a replicated, usually stateless, application by managing ReplicaSets, which in turn run the Pods.",
+      "explanation": "You declare the desired state and the Deployment controller moves the actual state to it at a controlled rate; it is the most common way to run an application. Stateless means it keeps no data of its own between requests, so any copy can serve any user.",
+      "example": "Declare “3 copies of shop:v2”: the Deployment creates a new ReplicaSet and gradually replaces the v1 Pods.",
+      "source": "Kubernetes documentation, “Deployments”; Kubernetes documentation, “Workload Management”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Deployment"
+      ],
+      "uses": [
+        "object",
+        "ReplicaSet",
+        "Pod",
+        "controller / control loop",
+        "replica",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "k8s.deployment"
+      ],
+      "image": {
+        "file": "media/deployment-replicaset-pods.svg",
+        "alt": "Ownership during a rolling update of a Deployment with 4 desired Pods. The Deployment owns two ReplicaSets: the old one (revision 1, image v1) scaling down and the new one (revision 2, image v2) scaling up. Each ReplicaSet owns its own Pods. A note gives the default bounds: maxUnavailable 25% and maxSurge 25%, so with 4 desired Pods at least 3 stay available and at most 5 exist at once.",
+        "credit": "Drawn for this deck from Kubernetes documentation, “Deployments”",
+        "licence": "B · CC BY-SA 4.0",
+        "side": "back"
+      }
+    },
+    {
+      "id": "k8s.workloads.what-are-deployment-strategies",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6025,
+      "front": "What are a Deployment's two update strategies?",
+      "back": "RollingUpdate (the default) replaces Pods gradually; Recreate kills all existing Pods before creating new ones.",
+      "explanation": "The choice is set in .spec.strategy.type; Recreate means a gap in service but guarantees old Pods are gone before new ones start.",
+      "example": "A web front end usually rolls; an app that must never run two versions at once can use Recreate.",
+      "source": "Kubernetes documentation, “Deployments”, “Strategy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "rolling update / Recreate"
+      ],
+      "uses": [
+        "Deployment",
+        "Pod",
+        "rolling update / Recreate"
+      ],
+      "conceptIDs": [
+        "k8s.rolling-update-recreate"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-are-maxunavailable-maxsurge",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6030,
+      "front": "What do maxUnavailable and maxSurge control?",
+      "back": "During a rolling update: how many Pods may be unavailable below, and how many extra may exist above, the desired count.",
+      "explanation": "Each can be a number or a percentage of desired Pods; they cannot both be 0.",
+      "example": "With 4 desired Pods and the defaults, at least 3 stay available and at most 5 exist at any moment.",
+      "source": "Kubernetes documentation, “Deployments”, “Rolling Update Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-update-deployment",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "maxUnavailable / maxSurge"
+      ],
+      "uses": [
+        "rolling update / Recreate",
+        "Pod",
+        "maxUnavailable / maxSurge"
+      ],
+      "conceptIDs": [
+        "k8s.maxunavailable-maxsurge"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-a-rollback",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6035,
+      "front": "What does rolling back a Deployment do?",
+      "back": "Returns it to an earlier revision, whose Pod template is kept in one of its old ReplicaSets.",
+      "explanation": "A new revision is created only when the Deployment's Pod template changes; each rollback also updates the revision.",
+      "example": "Version 2 crash-loops after rollout, so you roll back to revision 1 and the old image returns.",
+      "source": "Kubernetes documentation, “Deployments”, “Rolling Back a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-back-a-deployment",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "rollback"
+      ],
+      "uses": [
+        "Deployment",
+        "PodTemplate",
+        "ReplicaSet",
+        "CrashLoopBackOff",
+        "container image",
+        "rollback"
+      ],
+      "conceptIDs": [
+        "k8s.rollback"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-revisionhistorylimit",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 6040,
+      "front": "What does a Deployment's revisionHistoryLimit set?",
+      "back": "How many old ReplicaSets the Deployment keeps so that you can roll back to them.",
+      "explanation": "Each revision's configuration lives in its ReplicaSet, so a deleted old ReplicaSet means that revision can no longer be restored.",
+      "example": "Like keeping the last few versions of a document: older drafts beyond the limit are thrown away for good.",
+      "source": "Kubernetes documentation, “Deployments”, “Revision History Limit”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#revision-history-limit",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "revisionHistoryLimit"
+      ],
+      "uses": [
+        "Deployment",
+        "ReplicaSet",
+        "rollback",
+        "revisionHistoryLimit"
+      ],
+      "conceptIDs": [
+        "k8s.revision-history-limit"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-a-replicationcontroller",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 6045,
+      "front": "What is a ReplicationController?",
+      "back": "A legacy API that keeps a set number of Pod replicas running, superseded by Deployment and ReplicaSet.",
+      "explanation": "The documentation now recommends a Deployment that configures a ReplicaSet for replication.",
+      "example": "Like an old version of a form: it still works, but new applications use the replacement.",
+      "source": "Kubernetes documentation, “ReplicationController”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller/",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "introduces": [
+        "ReplicationController"
+      ],
+      "uses": [
+        "Pod",
+        "replica",
+        "Deployment",
+        "ReplicaSet",
+        "ReplicationController"
+      ],
+      "conceptIDs": [
+        "k8s.replicationcontroller"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-a-statefulset",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6050,
+      "front": "What is a StatefulSet?",
+      "back": "A workload object for data-keeping apps: each Pod gets a fixed name (web-0, web-1…), keeps its own storage when replaced, and starts in order.",
+      "explanation": "Unlike a Deployment's interchangeable Pods, each StatefulSet Pod keeps its identity across rescheduling, so it can be matched to its own persistent storage.",
+      "example": "A three-member database cluster in which each member must keep its own name and its own data.",
+      "source": "Kubernetes documentation, “StatefulSets”, “Using StatefulSets”; Kubernetes glossary, “StatefulSet”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#using-statefulsets",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "StatefulSet"
+      ],
+      "uses": [
+        "workload",
+        "object",
+        "Pod",
+        "Deployment",
+        "StatefulSet"
+      ],
+      "conceptIDs": [
+        "k8s.statefulset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-an-ordinal-index",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6055,
+      "front": "What is a StatefulSet Pod's ordinal index?",
+      "back": "A unique integer, from 0 to N−1 for N replicas, that forms part of the Pod's name and identity.",
+      "explanation": "Each Pod's hostname is the StatefulSet's name plus its ordinal, and the controller also adds a label holding the index.",
+      "example": "A StatefulSet called web with 3 replicas runs Pods web-0, web-1 and web-2.",
+      "source": "Kubernetes documentation, “StatefulSets”, “Ordinal Index”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#ordinal-index",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "ordinal index"
+      ],
+      "uses": [
+        "StatefulSet",
+        "Pod",
+        "replica",
+        "label",
+        "controller / control loop",
+        "ordinal index"
+      ],
+      "conceptIDs": [
+        "k8s.ordinal-index",
+        "k8s.statefulset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-a-daemonset",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6060,
+      "front": "What is a DaemonSet?",
+      "back": "An object that makes all (or some) nodes each run a copy of a Pod; new nodes get one, removed nodes' copies are cleaned up.",
+      "explanation": "It suits helpers that must run on each machine, such as a log collector or a monitoring agent that must run on every node.",
+      "example": "A log collector that reads log files on each machine runs as a DaemonSet, one Pod per node.",
+      "source": "Kubernetes documentation, “DaemonSet”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "DaemonSet"
+      ],
+      "uses": [
+        "object",
+        "node (k8s)",
+        "Pod",
+        "DaemonSet"
+      ],
+      "conceptIDs": [
+        "k8s.daemonset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-a-job",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6065,
+      "front": "What is a Job?",
+      "back": "An object that creates Pods and keeps retrying until a specified number of them complete successfully.",
+      "explanation": "It represents a one-off task that runs to completion and then stops; deleting the Job cleans up its Pods.",
+      "example": "A one-off data import that must finish once, even if a node reboots halfway through.",
+      "source": "Kubernetes documentation, “Jobs”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Job"
+      ],
+      "uses": [
+        "object",
+        "Pod",
+        "node (k8s)",
+        "Job"
+      ],
+      "conceptIDs": [
+        "k8s.job"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-a-cronjob",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6070,
+      "front": "What is a CronJob?",
+      "back": "An object that starts a Job on a repeating timetable of five fields (minute, hour, day of month, month, weekday), in Unix cron style.",
+      "explanation": "cron is the classic Unix scheduler; one CronJob is like one line of its timetable file (a crontab). Typical uses are backups and report generation.",
+      "example": "A CronJob with schedule 0 3 * * 1 starts a backup Job every Monday at 03:00.",
+      "source": "Kubernetes documentation, “CronJob”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "CronJob"
+      ],
+      "uses": [
+        "object",
+        "Job",
+        "CronJob"
+      ],
+      "conceptIDs": [
+        "k8s.cronjob"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-a-configmap",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6075,
+      "front": "What is a ConfigMap?",
+      "back": "An API object that stores non-confidential configuration data as key-value pairs for Pods to use.",
+      "explanation": "It keeps environment-specific settings out of the container image, making applications portable; it offers no secrecy or encryption.",
+      "example": "The same image reads DATABASE_HOST: set to localhost on a laptop, and to the cluster's database address in the cloud.",
+      "source": "Kubernetes documentation, “ConfigMaps”, overview and “Motivation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/configmap/#motivation",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "ConfigMap"
+      ],
+      "uses": [
+        "object",
+        "api",
+        "Pod",
+        "container image",
+        "ConfigMap",
+        "encryption"
+      ],
+      "conceptIDs": [
+        "k8s.configmap"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-a-secret",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6080,
+      "front": "What is a Secret?",
+      "back": "An object that holds a small amount of sensitive data, such as a password, a token or a key.",
+      "explanation": "It keeps confidential data out of Pod specifications and container images; it is like a ConfigMap but intended for confidential data.",
+      "example": "A database password reaches a Pod as an environment variable from a Secret instead of being baked into the image.",
+      "source": "Kubernetes documentation, “Secrets”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/secret/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Secret"
+      ],
+      "uses": [
+        "object",
+        "Pod",
+        "container image",
+        "ConfigMap",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "k8s.secret"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-are-blue-green-and-canary",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6085,
+      "front": "What are blue-green deployment and canary deployment?",
+      "back": "Blue-green: two environments, with all production traffic switched to the updated one at once. Canary: live traffic moved to the new version gradually.",
+      "explanation": "Both reduce the risk of a release; canary lets you test in production on a small share of traffic and quickly roll back.",
+      "example": "Canary: 1%, then 10%, then 25% of traffic to v2. Blue-green: test green, then flip all traffic from blue to green.",
+      "source": "Cloud Native Glossary, “Blue Green Deployment” and “Canary Deployment”",
+      "sourceURL": "https://glossary.cncf.io/canary-deployment/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "blue-green / canary deployment"
+      ],
+      "uses": [
+        "blue-green / canary deployment"
+      ],
+      "conceptIDs": [
+        "k8s.blue-green-canary-deployment"
+      ]
+    },
+    {
+      "id": "k8s.architecture.provides-rollouts",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6086,
+      "front": "Kubernetes creates containers for the new version of an app and removes the old ones at a controlled rate, and can undo this. Which capability is this?",
+      "back": "Automated rollouts and rollbacks.",
+      "explanation": "Kubernetes can create new containers, remove old ones and move their resources across.",
+      "source": "Kubernetes documentation, “Overview”, “Why you need Kubernetes and what it can do”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/overview/#why-you-need-kubernetes-and-what-can-it-do",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "desired state",
+        "container",
+        "kubernetes"
+      ],
+      "conceptIDs": [
+        "k8s.kubernetes-provides"
+      ]
+    },
+    {
+      "id": "k8s.workloads.what-is-a-workload",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6087,
+      "front": "What is a workload in Kubernetes?",
+      "back": "An application running on Kubernetes.",
+      "explanation": "Built-in workload APIs create and manage Pods for you, so you rarely create Pods directly, even single ones.",
+      "example": "A shop made of a web server and a database is one workload; each part runs under its own workload object.",
+      "source": "Kubernetes glossary, “Workload”; Kubernetes documentation, “Workload Management”",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?all=true#term-workload",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "kubernetes",
+        "object",
+        "workload"
+      ],
+      "conceptIDs": [
+        "k8s.workload"
+      ]
+    },
+    {
+      "id": "k8s.workloads.classify-shop-workload",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6088,
+      "front": "A web shop runs on Kubernetes as a web server plus a database. In Kubernetes terms, what is the shop as a whole?",
+      "back": "One workload; its database might run in a StatefulSet and its web server in a Deployment.",
+      "explanation": "A workload is an application running on Kubernetes; each of its parts is managed by a workload object suited to it.",
+      "source": "Kubernetes documentation, Glossary, “Workload”",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?all=true#term-workload",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubernetes",
+        "workload",
+        "object",
+        "StatefulSet",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "k8s.workload",
+        "k8s.statefulset",
+        "k8s.deployment"
+      ]
+    },
+    {
+      "id": "k8s.architecture.provides-batch",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6089,
+      "front": "Besides long-running services, Kubernetes can run tasks that finish (batch jobs), replacing containers that fail. Which capability is this?",
+      "back": "Batch execution.",
+      "explanation": "Work that runs to completion is managed alongside always-on services.",
+      "source": "Kubernetes documentation, “Overview”, “Why you need Kubernetes and what it can do”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/overview/#why-you-need-kubernetes-and-what-can-it-do",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "kubernetes"
+      ],
+      "conceptIDs": [
+        "k8s.kubernetes-provides"
+      ]
+    },
+    {
+      "id": "k8s.workloads.dont-manage-owned-rs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6090,
+      "front": "Should you directly manage ReplicaSets that a Deployment owns?",
+      "back": "No. Manage the Deployment; it creates, scales and retires its ReplicaSets.",
+      "explanation": "The documentation's note on Deployments says not to manage ReplicaSets owned by a Deployment.",
+      "source": "Kubernetes documentation, “Deployments”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ReplicaSet",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "k8s.deployment",
+        "k8s.replicaset"
+      ]
+    },
+    {
+      "id": "k8s.architecture.provides-secret-config",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6091,
+      "front": "Kubernetes stores passwords and keys, and lets you update application configuration without rebuilding container images. Which capability is this?",
+      "back": "Its “secret and configuration management”.",
+      "explanation": "Sensitive values are not exposed in your stack configuration.",
+      "source": "Kubernetes documentation, “Overview”, “Why you need Kubernetes and what it can do”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/overview/#why-you-need-kubernetes-and-what-can-it-do",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "container image",
+        "kubernetes"
+      ],
+      "conceptIDs": [
+        "k8s.kubernetes-provides"
+      ]
+    },
+    {
+      "id": "k8s.workloads.prefer-deployments",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6095,
+      "front": "When does the documentation suggest using a ReplicaSet directly instead of a Deployment?",
+      "back": "Only if you need custom update orchestration or no updates at all.",
+      "explanation": "A Deployment manages ReplicaSets and adds declarative updates to Pods, so it is the recommended choice.",
+      "source": "Kubernetes documentation, “ReplicaSet”, “When to use a ReplicaSet”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#when-to-use-a-replicaset",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ReplicaSet",
+        "Deployment",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.replicaset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.rollout-trigger",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6100,
+      "front": "What change, and only what change, triggers a Deployment rollout?",
+      "back": "A change to the Deployment's Pod template (.spec.template), such as a new image or labels.",
+      "explanation": "Other updates, such as scaling the Deployment, do not trigger a rollout or create a revision.",
+      "source": "Kubernetes documentation, “Deployments”, “Updating a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "PodTemplate",
+        "label",
+        "container image"
+      ],
+      "conceptIDs": [
+        "k8s.deployment",
+        "k8s.rollback"
+      ]
+    },
+    {
+      "id": "k8s.workloads.replicas-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6105,
+      "front": "If a Deployment's .spec.replicas is not set, how many Pods does it run?",
+      "back": "1.",
+      "explanation": "If an autoscaler manages the Deployment's scaling, leave .spec.replicas unset and let the control plane manage it.",
+      "source": "Kubernetes documentation, “Deployments”, “Replicas”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#replicas",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "Pod",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "k8s.deployment"
+      ]
+    },
+    {
+      "id": "k8s.workloads.strategy-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6110,
+      "front": "A Deployment's default .spec.strategy.type is {{c1::RollingUpdate}}.",
+      "explanation": "The only other value is Recreate.",
+      "source": "Kubernetes documentation, “Deployments”, “Strategy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "rolling update / Recreate"
+      ],
+      "conceptIDs": [
+        "k8s.rolling-update-recreate"
+      ]
+    },
+    {
+      "id": "k8s.workloads.maxunavailable-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6115,
+      "front": "What are the default values of maxUnavailable and maxSurge?",
+      "back": "25% each.",
+      "explanation": "So by default at least 75% of the desired Pods are up, and at most 125% exist, during an update.",
+      "source": "Kubernetes documentation, “Deployments”, “Updating a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#max-unavailable",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "maxUnavailable / maxSurge",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.maxunavailable-maxsurge"
+      ]
+    },
+    {
+      "id": "k8s.workloads.surge-rounding",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6120,
+      "front": "When maxUnavailable and maxSurge are percentages, which way is each rounded to a whole number of Pods?",
+      "back": "maxUnavailable rounds down; maxSurge rounds up.",
+      "explanation": "For example, 25% of 10 desired Pods allows 2 unavailable (2.5 rounded down) and 3 extra (rounded up).",
+      "source": "Kubernetes documentation, “Deployments”, “Max Unavailable” and “Max Surge”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#max-surge",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "maxUnavailable / maxSurge",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.maxunavailable-maxsurge"
+      ]
+    },
+    {
+      "id": "k8s.workloads.rhl-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6125,
+      "front": "How many old ReplicaSets does a Deployment keep for rollback by default?",
+      "back": "10.",
+      "explanation": "The rest are garbage-collected; the right number depends on how often and how stably you deploy.",
+      "source": "Kubernetes documentation, “Deployments”, “Clean up Policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#clean-up-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ReplicaSet",
+        "Deployment",
+        "rollback",
+        "revisionHistoryLimit"
+      ],
+      "conceptIDs": [
+        "k8s.revision-history-limit"
+      ]
+    },
+    {
+      "id": "k8s.workloads.deployment-restartpolicy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6130,
+      "front": "Which restartPolicy may the Pods of a Deployment use?",
+      "back": "Only Always.",
+      "explanation": "A Deployment keeps applications running continuously, so Always is the only allowed value.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Restart behavior comparison” (note)",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "restartPolicy",
+        "Pod",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "k8s.deployment",
+        "k8s.restart-policy"
+      ]
+    },
+    {
+      "id": "k8s.workloads.job-restartpolicy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6135,
+      "front": "Which restartPolicy values may a Job's Pod template use?",
+      "back": "Only Never or OnFailure.",
+      "explanation": "Jobs are batch tasks that end; Always would restart a container after any exit, even a successful one.",
+      "source": "Kubernetes documentation, “Jobs”, “Pod Template”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-template",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "restartPolicy",
+        "Job",
+        "PodTemplate",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.job",
+        "k8s.restart-policy"
+      ]
+    },
+    {
+      "id": "k8s.workloads.job-backofflimit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6140,
+      "front": "By default, how many retries does a Job allow before it is marked failed?",
+      "back": "6 (.spec.backoffLimit).",
+      "explanation": "Each Pod failure counts toward the limit; you can set your own number of retries.",
+      "source": "Kubernetes documentation, “Jobs”, “Pod backoff failure policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-backoff-failure-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.job"
+      ]
+    },
+    {
+      "id": "k8s.workloads.sts-ordering",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6145,
+      "front": "In what order does a StatefulSet with N replicas create its Pods, and in what order does it delete them?",
+      "back": "Creates them one by one from 0 to N−1; deletes them in reverse, from N−1 to 0.",
+      "explanation": "Before a scaling operation is applied to a Pod, all of its predecessors must be Running and Ready.",
+      "source": "Kubernetes documentation, “StatefulSets”, “Deployment and Scaling Guarantees”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#deployment-and-scaling-guarantees",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "StatefulSet",
+        "replica",
+        "Pod",
+        "ordinal index"
+      ],
+      "conceptIDs": [
+        "k8s.statefulset",
+        "k8s.ordinal-index"
+      ]
+    },
+    {
+      "id": "k8s.workloads.sts-storage-kept",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6150,
+      "front": "When you delete or scale down a StatefulSet, is the storage attached to its Pods deleted? (Storage is covered in the Storage topic.)",
+      "back": "No; it is kept, for data safety.",
+      "explanation": "The documentation values data safety over an automatic purge, so the storage must be removed manually.",
+      "source": "Kubernetes documentation, “StatefulSets”, “Limitations”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#limitations",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "StatefulSet"
+      ],
+      "conceptIDs": [
+        "k8s.statefulset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.sts-hostname",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6155,
+      "front": "What pattern gives each StatefulSet Pod its hostname?",
+      "back": "The StatefulSet's name, a hyphen, then the Pod's ordinal.",
+      "explanation": "Because the name comes from the ordinal, it stays the same when the Pod is replaced.",
+      "source": "Kubernetes documentation, “StatefulSets”, “Stable Network ID”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#stable-network-id",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "StatefulSet",
+        "Pod",
+        "ordinal index"
+      ],
+      "conceptIDs": [
+        "k8s.ordinal-index"
+      ]
+    },
+    {
+      "id": "k8s.workloads.ds-uses",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6160,
+      "front": "What typical uses does the documentation give for a DaemonSet?",
+      "back": "Running a cluster storage daemon (a background program), a log collection daemon, or a node monitoring daemon on every node.",
+      "explanation": "Each DaemonSet Pod plays a role like a system daemon on a classic Unix server.",
+      "source": "Kubernetes documentation, “DaemonSet”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "DaemonSet",
+        "node (k8s)",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.daemonset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.cron-dow",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6165,
+      "front": "In a CronJob schedule, which field comes last, and what does 0 mean in it?",
+      "back": "Day of the week (0–6); 0 means Sunday.",
+      "explanation": "The five fields are minute, hour, day of the month, month and day of the week.",
+      "source": "Kubernetes documentation, “CronJob”, “Schedule syntax”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#schedule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob"
+      ],
+      "conceptIDs": [
+        "k8s.cronjob"
+      ]
+    },
+    {
+      "id": "k8s.workloads.cron-name-length",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6170,
+      "front": "What is the maximum length of a CronJob's name, and why?",
+      "back": "52 characters, because the controller appends 11 characters and Job names may not exceed 63.",
+      "explanation": "The CronJob's name forms part of the names of the Jobs and Pods it creates.",
+      "source": "Kubernetes documentation, “CronJob”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob",
+        "Job",
+        "Pod",
+        "controller / control loop"
+      ],
+      "conceptIDs": [
+        "k8s.cronjob"
+      ]
+    },
+    {
+      "id": "k8s.workloads.cron-idempotent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6175,
+      "front": "Why should the Jobs a CronJob runs be idempotent?",
+      "back": "Scheduling is approximate: occasionally two Jobs, or none, may be created for one scheduled time.",
+      "explanation": "Kubernetes tries to avoid this but does not completely prevent it.",
+      "source": "Kubernetes documentation, “CronJob”, “Job creation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#job-creation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob",
+        "Job",
+        "idempotence"
+      ],
+      "conceptIDs": [
+        "k8s.cronjob"
+      ]
+    },
+    {
+      "id": "k8s.workloads.configmap-size",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6180,
+      "front": "What is the maximum size of the data in a ConfigMap?",
+      "back": "1 MiB.",
+      "explanation": "A ConfigMap is not meant for large chunks of data; for bigger settings, use a separate database or file service.",
+      "source": "Kubernetes documentation, “ConfigMaps”, “Motivation” (note)",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/configmap/#motivation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ConfigMap"
+      ],
+      "conceptIDs": [
+        "k8s.configmap"
+      ]
+    },
+    {
+      "id": "k8s.workloads.configmap-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6185,
+      "front": "Must a Pod and the ConfigMap it refers to be in the same namespace?",
+      "back": "Yes.",
+      "explanation": "A Pod spec that refers to a ConfigMap configures its containers from that ConfigMap's data.",
+      "source": "Kubernetes documentation, “ConfigMaps”, “ConfigMaps and Pods”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/configmap/#configmaps-and-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "ConfigMap",
+        "namespace",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.configmap"
+      ]
+    },
+    {
+      "id": "k8s.workloads.configmap-env-not-updated",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6190,
+      "front": "If a Pod consumes a ConfigMap as environment variables and the ConfigMap changes, does the Pod see the new values?",
+      "back": "No; environment variables are not updated automatically, so the Pod must be restarted.",
+      "explanation": "ConfigMaps mounted as files, by contrast, are updated automatically after a delay.",
+      "source": "Kubernetes documentation, “ConfigMaps”, “Mounted ConfigMaps are updated automatically”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/configmap/#mounted-configmaps-are-updated-automatically",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "ConfigMap"
+      ],
+      "conceptIDs": [
+        "k8s.configmap"
+      ]
+    },
+    {
+      "id": "k8s.workloads.secret-unencrypted",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6195,
+      "front": "By default, how are Secrets stored in etcd?",
+      "back": "Unencrypted: the values are only base64-encoded, a reversible text format anyone can decode.",
+      "explanation": "Anyone with API access or etcd access can read them, so turn on encryption at rest (encrypting the data where it is stored) and restrict access.",
+      "source": "Kubernetes documentation, “Secrets”, overview (caution); Kubernetes glossary, “Secret”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/secret/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Secret",
+        "etcd",
+        "api",
+        "encryption"
+      ],
+      "conceptIDs": [
+        "k8s.secret"
+      ]
+    },
+    {
+      "id": "k8s.workloads.secret-size",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6200,
+      "front": "What is the size limit of an individual Secret?",
+      "back": "1 MiB.",
+      "explanation": "The limit discourages very large Secrets that could exhaust API server and kubelet memory.",
+      "source": "Kubernetes documentation, “Secrets”, “Size limit”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/secret/#restriction-data-size",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Secret",
+        "kube-apiserver",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "k8s.secret"
+      ]
+    },
+    {
+      "id": "k8s.workloads.secret-pod-creators",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6205,
+      "front": "Who can indirectly read every Secret in a namespace, even without direct Secret access?",
+      "back": "Anyone authorised to create a Pod in that namespace, including through something like a Deployment.",
+      "explanation": "A Pod can mount or reference any Secret in its namespace, so Pod-creation rights imply Secret access.",
+      "source": "Kubernetes documentation, “Secrets”, overview (caution)",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/secret/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Secret",
+        "namespace",
+        "Pod",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "k8s.secret"
+      ]
+    },
+    {
+      "id": "k8s.workloads.canary-origin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6210,
+      "front": "In canary deployment, where does the name “canary” come from?",
+      "back": "Canaries once taken into coal mines: if the bird died, miners knew to get out.",
+      "explanation": "Likewise, if the updated code goes wrong, live traffic is “evacuated” back to the original version.",
+      "source": "Cloud Native Glossary, “Canary Deployment”",
+      "sourceURL": "https://glossary.cncf.io/canary-deployment/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "blue-green / canary deployment"
+      ],
+      "conceptIDs": [
+        "k8s.blue-green-canary-deployment"
+      ]
+    },
+    {
+      "id": "k8s.workloads.classify-stateless-web",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6215,
+      "front": "A stateless web front end (keeping no data of its own between requests) must run 5 interchangeable copies and be updated without downtime. Which workload resource fits?",
+      "back": "A Deployment.",
+      "explanation": "Deployments suit stateless applications whose Pods are interchangeable and replaceable.",
+      "source": "Kubernetes documentation, “Workload Management”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "Pod",
+        "workload"
+      ],
+      "conceptIDs": [
+        "k8s.deployment"
+      ]
+    },
+    {
+      "id": "k8s.workloads.classify-database",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6220,
+      "front": "A replicated database needs each member to keep a stable name and its own storage across restarts. Which workload resource fits?",
+      "back": "A StatefulSet.",
+      "explanation": "StatefulSets give each Pod a sticky identity, so replacements reconnect to the same storage.",
+      "source": "Kubernetes documentation, “Workload Management”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "StatefulSet",
+        "Pod",
+        "workload"
+      ],
+      "conceptIDs": [
+        "k8s.statefulset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.classify-node-agent",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6225,
+      "front": "A monitoring agent must run exactly one copy on every node, including nodes added later. Which workload resource fits?",
+      "back": "A DaemonSet.",
+      "explanation": "A DaemonSet adds its Pod to each new node automatically.",
+      "source": "Kubernetes documentation, “DaemonSet”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "DaemonSet",
+        "node (k8s)",
+        "Pod",
+        "workload"
+      ],
+      "conceptIDs": [
+        "k8s.daemonset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.classify-one-off-task",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6230,
+      "front": "A data migration must run once to successful completion and then stop. Which workload resource fits?",
+      "back": "A Job.",
+      "explanation": "A Job retries its Pods until the required number complete successfully, then it is complete.",
+      "source": "Kubernetes documentation, “Workload Management”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job",
+        "Pod",
+        "workload"
+      ],
+      "conceptIDs": [
+        "k8s.job"
+      ]
+    },
+    {
+      "id": "k8s.workloads.classify-nightly-report",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6235,
+      "front": "A report must be generated every night at 02:00. Which workload resource fits?",
+      "back": "A CronJob.",
+      "explanation": "A CronJob creates a Job for each scheduled run; a plain Job would run only once.",
+      "source": "Kubernetes documentation, “Workload Management”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob",
+        "Job",
+        "workload"
+      ],
+      "conceptIDs": [
+        "k8s.cronjob"
+      ]
+    },
+    {
+      "id": "k8s.workloads.apply-cron-expression",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6240,
+      "front": "What does the CronJob schedule 0 3 * * 1 mean?",
+      "back": "Every Monday at 03:00.",
+      "explanation": "The fields are minute (0), hour (3), day of month (*), month (*) and day of week (1, Monday).",
+      "source": "Kubernetes documentation, “CronJob”, “Schedule syntax”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#schedule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob"
+      ],
+      "conceptIDs": [
+        "k8s.cronjob"
+      ]
+    },
+    {
+      "id": "k8s.workloads.apply-rs-self-heal",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6245,
+      "front": "Someone deletes one of the 3 Pods a ReplicaSet manages. What does the ReplicaSet do?",
+      "back": "Creates a new Pod from its template to get back to 3.",
+      "explanation": "A ReplicaSet creates and deletes Pods as needed to reach its desired number.",
+      "source": "Kubernetes documentation, “ReplicaSet”, “How a ReplicaSet works”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#how-a-replicaset-works",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "ReplicaSet",
+        "PodTemplate"
+      ],
+      "conceptIDs": [
+        "k8s.replicaset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.apply-scale-no-rollout",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6250,
+      "front": "You scale a Deployment from 3 to 5 replicas. Does this create a new revision you could roll back to?",
+      "back": "No. Only a change to the Pod template triggers a rollout and a new revision.",
+      "explanation": "Scaling changes the replica count, not the template, so the revision history is unchanged.",
+      "source": "Kubernetes documentation, “Deployments”, “Rolling Back a Deployment” (note)",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-back-a-deployment",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "replica",
+        "rollback",
+        "PodTemplate"
+      ],
+      "conceptIDs": [
+        "k8s.rollback"
+      ]
+    },
+    {
+      "id": "k8s.workloads.apply-surge-math",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6255,
+      "front": "A Deployment with 10 replicas rolls out using the default bounds. What is the least number available, and the most that can exist?",
+      "back": "At least 8 available; at most 13 in total.",
+      "explanation": "25% of 10 is 2.5: maxUnavailable rounds down to 2, maxSurge rounds up to 3.",
+      "source": "Kubernetes documentation, “Deployments”, “Max Unavailable” and “Max Surge”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#max-unavailable",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "replica",
+        "maxUnavailable / maxSurge"
+      ],
+      "conceptIDs": [
+        "k8s.maxunavailable-maxsurge"
+      ]
+    },
+    {
+      "id": "k8s.workloads.apply-rhl-zero",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 6260,
+      "front": "A Deployment has revisionHistoryLimit set to 0. A new rollout goes badly. Can you roll it back?",
+      "back": "No; all old ReplicaSets are cleaned up, so there is no history to roll back to.",
+      "explanation": "Each revision's configuration lives only in its ReplicaSet.",
+      "source": "Kubernetes documentation, “Deployments”, “Revision History Limit”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#revision-history-limit",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "revisionHistoryLimit",
+        "rollback",
+        "ReplicaSet"
+      ],
+      "conceptIDs": [
+        "k8s.revision-history-limit",
+        "k8s.rollback"
+      ]
+    },
+    {
+      "id": "k8s.workloads.apply-recreate",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6265,
+      "front": "A Deployment uses the Recreate strategy. During an upgrade, are old and new Pods ever running together?",
+      "back": "No. All old Pods are terminated, and their removal awaited, before any new Pod is created.",
+      "explanation": "That guarantee costs a period with no Pods serving; RollingUpdate avoids the gap but runs both versions briefly.",
+      "source": "Kubernetes documentation, “Deployments”, “Recreate Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#recreate-deployment",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "rolling update / Recreate",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.rolling-update-recreate"
+      ]
+    },
+    {
+      "id": "k8s.workloads.apply-job-always",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6270,
+      "front": "A Job's Pod template sets restartPolicy: Always. Is that allowed?",
+      "back": "No. A Job allows only Never or OnFailure.",
+      "explanation": "Always would keep restarting a container that has already finished its task.",
+      "source": "Kubernetes documentation, “Jobs”, “Pod Template”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-template",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job",
+        "PodTemplate",
+        "restartPolicy",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.job"
+      ]
+    },
+    {
+      "id": "k8s.workloads.apply-job-retries",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 6275,
+      "front": "A Job's Pod keeps failing and you set no backoffLimit. How many retries happen before the Job is marked failed?",
+      "back": "6.",
+      "explanation": "The default .spec.backoffLimit is 6 (unless a per-index backoff limit is set).",
+      "source": "Kubernetes documentation, “Jobs”, “Pod backoff failure policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-backoff-failure-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.job"
+      ]
+    },
+    {
+      "id": "k8s.workloads.apply-sts-names",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6280,
+      "front": "A StatefulSet named db runs 3 replicas and is scaled down to 1. Which Pod is terminated first?",
+      "back": "db-2.",
+      "explanation": "StatefulSet Pods are named db-0 to db-2 and are removed in reverse ordinal order.",
+      "source": "Kubernetes documentation, “StatefulSets”, “Deployment and Scaling Guarantees”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#deployment-and-scaling-guarantees",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "StatefulSet",
+        "replica",
+        "Pod",
+        "ordinal index"
+      ],
+      "conceptIDs": [
+        "k8s.ordinal-index",
+        "k8s.statefulset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.apply-ds-new-node",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6285,
+      "front": "A new node joins a cluster that runs a log-collecting DaemonSet. What happens?",
+      "back": "The DaemonSet adds its Pod to the new node automatically.",
+      "explanation": "As nodes are added, DaemonSet Pods are added to them; as nodes leave, those Pods are garbage-collected.",
+      "source": "Kubernetes documentation, “DaemonSet”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node (k8s)",
+        "cluster (k8s)",
+        "DaemonSet",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.daemonset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.classify-configmap-or-secret-token",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6290,
+      "front": "An application needs an API token for a payment provider. ConfigMap or Secret?",
+      "back": "A Secret.",
+      "explanation": "Secrets are for confidential data; a ConfigMap provides no secrecy or encryption.",
+      "source": "Kubernetes documentation, “ConfigMaps” (caution)",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/configmap/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "api",
+        "ConfigMap",
+        "Secret",
+        "encryption"
+      ],
+      "conceptIDs": [
+        "k8s.secret",
+        "k8s.configmap"
+      ]
+    },
+    {
+      "id": "k8s.workloads.classify-configmap-or-secret-loglevel",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6295,
+      "front": "An application reads a LOG_LEVEL setting that differs between test and production. ConfigMap or Secret?",
+      "back": "A ConfigMap.",
+      "explanation": "It is non-confidential, environment-specific configuration, exactly what a ConfigMap is for.",
+      "source": "Kubernetes documentation, “ConfigMaps”, “Motivation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/configmap/#motivation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ConfigMap",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "k8s.configmap"
+      ]
+    },
+    {
+      "id": "k8s.workloads.apply-secret-base64",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 6300,
+      "front": "A colleague says a Secret is safe because its value looks scrambled. Is it encrypted?",
+      "back": "No. It is only base64-encoded, and stored unencrypted in etcd unless encryption at rest is enabled.",
+      "explanation": "Base64 is an encoding anyone can reverse; protection comes from encryption at rest and tight access control.",
+      "source": "Kubernetes glossary, “Secret”; Kubernetes documentation, “Secrets”",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?all=true#term-secret",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Secret",
+        "etcd",
+        "encryption"
+      ],
+      "conceptIDs": [
+        "k8s.secret"
+      ]
+    },
+    {
+      "id": "k8s.workloads.classify-canary",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6305,
+      "front": "A team sends 5% of live traffic to a new version, watches for errors, then raises the share step by step. Which strategy is this?",
+      "back": "Canary deployment.",
+      "explanation": "Blue-green would switch all production traffic from one environment to the other at once.",
+      "source": "Cloud Native Glossary, “Canary Deployment”",
+      "sourceURL": "https://glossary.cncf.io/canary-deployment/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "blue-green / canary deployment"
+      ],
+      "conceptIDs": [
+        "k8s.blue-green-canary-deployment"
+      ]
+    },
+    {
+      "id": "k8s.workloads.classify-blue-green",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6310,
+      "front": "A shop keeps two full environments, tests the idle one, then switches all production traffic to it at once. Which strategy is this?",
+      "back": "Blue-green deployment.",
+      "explanation": "Canary would move traffic gradually rather than all at once.",
+      "source": "Cloud Native Glossary, “Blue Green Deployment”",
+      "sourceURL": "https://glossary.cncf.io/blue-green-deployment/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "blue-green / canary deployment"
+      ],
+      "conceptIDs": [
+        "k8s.blue-green-canary-deployment"
+      ]
+    },
+    {
+      "id": "k8s.workloads.apply-replicationcontroller",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 6315,
+      "front": "An old tutorial uses a ReplicationController. What should a new setup use instead?",
+      "back": "A Deployment, which configures a ReplicaSet.",
+      "explanation": "ReplicationController has been superseded by the Deployment and ReplicaSet APIs.",
+      "source": "Kubernetes documentation, “ReplicationController”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller/",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "uses": [
+        "ReplicationController",
+        "Deployment",
+        "ReplicaSet"
+      ],
+      "conceptIDs": [
+        "k8s.replicationcontroller"
+      ]
+    },
+    {
+      "id": "k8s.workloads.contrast-deployment-statefulset",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6320,
+      "front": "How do the Pods of a Deployment differ from the Pods of a StatefulSet?",
+      "back": "Deployment Pods are interchangeable; each StatefulSet Pod keeps a sticky identity, name and storage.",
+      "explanation": "If an application needs no stable identifiers or ordering, the documentation points to a Deployment instead.",
+      "source": "Kubernetes documentation, “Workload Management”; Kubernetes documentation, “StatefulSets”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "StatefulSet",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.deployment",
+        "k8s.statefulset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.contrast-deployment-replicaset",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6325,
+      "front": "What does a Deployment add on top of a ReplicaSet?",
+      "back": "Declarative updates: rolling out new versions through new ReplicaSets, and rolling back.",
+      "explanation": "A ReplicaSet only keeps a set number of identical Pods running.",
+      "source": "Kubernetes documentation, “ReplicaSet”, “When to use a ReplicaSet”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#when-to-use-a-replicaset",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "ReplicaSet",
+        "rollback",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.deployment",
+        "k8s.replicaset"
+      ]
+    },
+    {
+      "id": "k8s.workloads.contrast-job-cronjob",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6330,
+      "front": "How does a Job differ from a CronJob?",
+      "back": "A Job is a one-off task run to completion; a CronJob creates such Jobs repeatedly on a schedule.",
+      "explanation": "Use a Job for “run this once”, a CronJob for “run this every night”.",
+      "source": "Kubernetes documentation, “Workload Management”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job",
+        "CronJob"
+      ],
+      "conceptIDs": [
+        "k8s.job",
+        "k8s.cronjob"
+      ]
+    },
+    {
+      "id": "k8s.workloads.contrast-daemonset-deployment",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6335,
+      "front": "How does a DaemonSet decide how many Pods to run, compared with a Deployment?",
+      "back": "DaemonSet: one per eligible node, following the nodes. Deployment: a replica count you set, placed on any nodes.",
+      "explanation": "Add a node and a DaemonSet grows; a Deployment's count stays the same.",
+      "source": "Kubernetes documentation, “DaemonSet”; Kubernetes documentation, “Deployments”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "DaemonSet",
+        "Pod",
+        "Deployment",
+        "node (k8s)",
+        "replica"
+      ],
+      "conceptIDs": [
+        "k8s.daemonset",
+        "k8s.deployment"
+      ]
+    },
+    {
+      "id": "k8s.workloads.contrast-configmap-secret",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6340,
+      "front": "What is the main difference in purpose between a ConfigMap and a Secret?",
+      "back": "A ConfigMap is for non-confidential data; a Secret is for confidential data such as passwords and keys.",
+      "explanation": "Both are key-value objects Pods can use; neither is encrypted in etcd by default.",
+      "source": "Kubernetes glossary, “Secret”",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?all=true#term-secret",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ConfigMap",
+        "Secret",
+        "Pod",
+        "etcd",
+        "encryption"
+      ],
+      "conceptIDs": [
+        "k8s.configmap",
+        "k8s.secret"
+      ]
+    },
+    {
+      "id": "k8s.workloads.contrast-rolling-recreate",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6345,
+      "front": "What does RollingUpdate trade off against Recreate?",
+      "back": "RollingUpdate avoids downtime but briefly runs old and new versions together; Recreate avoids mixing but has downtime.",
+      "explanation": "Recreate terminates every old Pod before creating new ones.",
+      "source": "Kubernetes documentation, “Deployments”, “Strategy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "rolling update / Recreate",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.rolling-update-recreate"
+      ]
+    }
+  ]
+}

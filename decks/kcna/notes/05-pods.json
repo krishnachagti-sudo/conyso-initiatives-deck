@@ -1,0 +1,1806 @@
+{
+  "topic": "Pods",
+  "notes": [
+    {
+      "id": "k8s.pods.what-is-shared-network-namespace",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5010,
+      "front": "What do the containers in one Pod share on the network?",
+      "back": "One network identity: one IP address and one set of ports. They can reach each other at localhost.",
+      "explanation": "“localhost” is the name a machine uses for itself. This Linux “network namespace” has nothing to do with Kubernetes namespaces; containers in different Pods have different addresses.",
+      "example": "A web server and a helper in the same Pod: the helper calls localhost:8080, with no trip across the network.",
+      "source": "Kubernetes documentation, “Pods”, “Pod networking”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/#pod-networking",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "shared network namespace"
+      ],
+      "uses": [
+        "Pod",
+        "container",
+        "shared network namespace",
+        "ip address",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.shared-network-namespace",
+        "k8s.pod"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-a-podtemplate",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5015,
+      "front": "What is a PodTemplate?",
+      "back": "A specification for creating Pods, embedded in a higher-level object, such as a Deployment (see Workloads), whose controller makes Pods from it.",
+      "explanation": "It is part of that object's desired state; changing it does not alter existing Pods, so the controller creates replacements from the new template.",
+      "example": "Like a cookie cutter kept inside a recipe: every new Pod is stamped from it, and a new cutter means new cookies, not reshaped old ones.",
+      "source": "Kubernetes documentation, “Pods”, “Pod templates”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/#pod-templates",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "PodTemplate"
+      ],
+      "uses": [
+        "Pod",
+        "object",
+        "controller / control loop",
+        "PodTemplate"
+      ],
+      "conceptIDs": [
+        "k8s.pod-template",
+        "k8s.pod"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-the-pod-phase",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5020,
+      "front": "What is a Pod's phase?",
+      "back": "A simple, high-level summary of where the Pod is in its lifecycle, held in the Pod's status.",
+      "explanation": "It has exactly five values (Pending, Running, Succeeded, Failed, Unknown), and nothing beyond their documented meaning should be assumed from them.",
+      "example": "Like a parcel tracker's headline (“in transit”, “delivered”) rather than the full scan history.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod phase”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "pod phases"
+      ],
+      "uses": [
+        "Pod",
+        "spec vs status",
+        "pod phases"
+      ],
+      "conceptIDs": [
+        "k8s.pod-phases"
+      ],
+      "image": {
+        "file": "media/pod-phases.svg",
+        "alt": "State diagram of the five Pod phases, showing the typical path. Pending leads to Running (a Pod can also go straight from Pending to Failed, for example when an init container fails and restartPolicy is Never). Running leads either to Succeeded (all containers ended in success) or to Failed (all ended, at least one in failure). Unknown stands apart: the Pod's state could not be obtained, usually because the node cannot be reached.",
+        "credit": "Drawn for this deck from Kubernetes documentation, “Pod Lifecycle”, “Pod phase”",
+        "licence": "B · CC BY-SA 4.0",
+        "side": "back"
+      }
+    },
+    {
+      "id": "k8s.pods.what-are-container-states",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5025,
+      "front": "Besides the Pod's phase, what does Kubernetes track for each container in it?",
+      "back": "The container's own state: Waiting, Running or Terminated.",
+      "explanation": "Once the kube-scheduler assigns the Pod to a node, the kubelet creates its containers through the container runtime and tracks each one's state separately.",
+      "example": "A Pod can be in phase Running while one of its containers is Waiting to be restarted after a crash.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Container states”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-states",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "container states"
+      ],
+      "uses": [
+        "Pod",
+        "container",
+        "pod phases",
+        "kube-scheduler",
+        "kubelet",
+        "node (k8s)",
+        "container runtime",
+        "container states"
+      ],
+      "conceptIDs": [
+        "k8s.container-states"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-restartpolicy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5030,
+      "front": "What does a Pod's restartPolicy control?",
+      "back": "Whether the kubelet restarts containers that exit: Always (the default), OnFailure or Never.",
+      "explanation": "These restarts replace containers inside the same Pod on the same node; they never move the Pod.",
+      "example": "A web server Pod uses Always; a one-off data migration Pod uses Never, so a failure stays visible instead of looping.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Container restarts”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "restartPolicy"
+      ],
+      "uses": [
+        "Pod",
+        "container",
+        "kubelet",
+        "node (k8s)",
+        "restartPolicy"
+      ],
+      "conceptIDs": [
+        "k8s.restart-policy"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-crashloopbackoff",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5035,
+      "front": "What does CrashLoopBackOff mean?",
+      "back": "A container keeps failing and restarting, so Kubernetes waits an exponentially growing delay before each new restart attempt.",
+      "explanation": "The backoff stops a faulty container from overwhelming the system with rapid restarts; it is a displayed status, not a Pod phase.",
+      "example": "An app that exits at once because a required setting is missing crashes, restarts, crashes again, and ends up in CrashLoopBackOff.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “How Pods handle problems with containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-restarts",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "CrashLoopBackOff"
+      ],
+      "uses": [
+        "container",
+        "restartPolicy",
+        "pod phases",
+        "Pod",
+        "CrashLoopBackOff"
+      ],
+      "conceptIDs": [
+        "k8s.crashloopbackoff"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-an-init-container",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5040,
+      "front": "What is an init container?",
+      "back": "A container that runs to completion during Pod startup, before the main application containers start; several run one after another.",
+      "explanation": "Each must succeed before the next starts; a failed one is restarted by the kubelet, unless restartPolicy is Never, which fails the whole Pod.",
+      "example": "An init container loops until a dependency's DNS name resolves, then exits, so the web app starts only once its dependency exists.",
+      "source": "Kubernetes documentation, “Init Containers”, “Understanding init containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#understanding-init-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "init container"
+      ],
+      "uses": [
+        "container",
+        "Pod",
+        "kubelet",
+        "restartPolicy",
+        "init container",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "k8s.init-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-an-app-container",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 5045,
+      "front": "In a Pod, what is an app container?",
+      "back": "A container that runs the application itself, started once any init containers have completed.",
+      "explanation": "If a Pod has no init containers configured, all of its containers are app containers.",
+      "example": "In a Pod with a wait-for-database init container and a web server, the web server is the app container.",
+      "source": "Kubernetes glossary, “App Container”",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?all=true#term-app-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "app container"
+      ],
+      "uses": [
+        "container",
+        "Pod",
+        "init container",
+        "app container"
+      ],
+      "conceptIDs": [
+        "k8s.app-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-a-sidecar-container",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5050,
+      "front": "What is a sidecar container in Kubernetes?",
+      "back": "A helper container that runs alongside the app for the Pod’s whole life, such as one handling logging. (Technically: an init container with restartPolicy: Always.)",
+      "explanation": "It gives the app a Pod-local supporting service, such as logging or data sync, without changing the app's code; the feature has been on by default since v1.29.",
+      "example": "A web server serves files while a sidecar keeps pulling fresh copies of those files from a remote source.",
+      "source": "Kubernetes documentation, “Sidecar Containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/#pod-sidecar-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "introduces": [
+        "sidecar container"
+      ],
+      "uses": [
+        "container",
+        "init container",
+        "restartPolicy",
+        "app container",
+        "Pod",
+        "sidecar container"
+      ],
+      "conceptIDs": [
+        "k8s.sidecar-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-a-probe",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5055,
+      "front": "What is a probe?",
+      "back": "A diagnostic the kubelet runs periodically on a container, either by running code inside it or by making a network request.",
+      "explanation": "From the results, Kubernetes can restart unhealthy containers or stop sending traffic to containers that are not ready.",
+      "example": "Like a nurse's rounds: regular checks that the patient is alive, and whether they are ready for visitors.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "probes"
+      ],
+      "uses": [
+        "kubelet",
+        "container",
+        "probes"
+      ],
+      "conceptIDs": [
+        "k8s.probes"
+      ],
+      "image": {
+        "file": "media/probe-timeline.svg",
+        "alt": "Timeline of the three probes for one container. At container start, only the startup probe runs; liveness and readiness wait. Once the startup probe succeeds, liveness and readiness probes run periodically for the rest of the container's life. A liveness failure leads to the container being killed and restarted under its restart policy. A readiness failure marks the Pod not ready so it stops receiving traffic, and the container keeps running.",
+        "credit": "Drawn for this deck from Kubernetes documentation, “Liveness, Readiness, and Startup Probes”",
+        "licence": "B · CC BY-SA 4.0",
+        "side": "back"
+      }
+    },
+    {
+      "id": "k8s.pods.what-is-a-liveness-probe",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5060,
+      "front": "What does a liveness probe decide?",
+      "back": "When to restart a container: if it fails more times than allowed, the kubelet restarts that container.",
+      "explanation": "It catches failures such as a deadlock, where the application is running but cannot make progress.",
+      "example": "A web server stuck in a deadlock still has a live process, but its health check times out, so the kubelet restarts it.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Liveness probe”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#liveness-probe",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "liveness probe"
+      ],
+      "uses": [
+        "probes",
+        "container",
+        "kubelet",
+        "liveness probe"
+      ],
+      "conceptIDs": [
+        "k8s.liveness-probe",
+        "k8s.probes"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-a-readiness-probe",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5065,
+      "front": "What does a readiness probe decide?",
+      "back": "When a container is ready to accept traffic; while it fails, the Pod receives no traffic but is not restarted.",
+      "explanation": "It runs for the container's whole life, so it covers slow start-up work and also later temporary faults or overloads.",
+      "example": "An app warming its cache fails readiness until the cache is loaded, so no user requests reach it in the meantime.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Readiness probe” and “Probe results”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#readiness-probe",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "readiness probe"
+      ],
+      "uses": [
+        "probes",
+        "container",
+        "Pod",
+        "readiness probe"
+      ],
+      "conceptIDs": [
+        "k8s.readiness-probe",
+        "k8s.probes"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-a-startup-probe",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5070,
+      "front": "What does a startup probe do?",
+      "back": "Checks whether the application has started; liveness and readiness probes wait until it succeeds, and it runs only at startup.",
+      "explanation": "It suits slow-starting containers better than a long liveness delay; if it fails, the kubelet kills the container and the restart policy applies.",
+      "example": "A legacy app that takes minutes to boot gets a startup probe, so its liveness probe cannot kill it halfway through booting.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Startup probe”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#startup-probe",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "startup probe"
+      ],
+      "uses": [
+        "probes",
+        "liveness probe",
+        "readiness probe",
+        "kubelet",
+        "container",
+        "restartPolicy",
+        "startup probe"
+      ],
+      "conceptIDs": [
+        "k8s.startup-probe",
+        "k8s.probes"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-a-check-mechanism",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5075,
+      "front": "What is a probe's check mechanism?",
+      "back": "The method the probe uses to test the container; each probe defines exactly one of four.",
+      "explanation": "The four are exec (run a command), grpc (a gRPC health check), httpGet (request a web address such as /healthz and check the reply) and tcpSocket (check that a port accepts connections).",
+      "example": "A web app’s liveness probe might use httpGet on /healthz, while a database probe might use exec to run a command.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Check mechanisms”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#check-mechanisms",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "probe mechanisms"
+      ],
+      "uses": [
+        "probes",
+        "container",
+        "grpc",
+        "probe mechanisms",
+        "http",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.probe-mechanisms"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-are-probe-results",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 5080,
+      "front": "What results can a single probe check return?",
+      "back": "Success, Failure or Unknown.",
+      "explanation": "Failure triggers action (a restart for liveness and startup probes, not-ready for readiness); Unknown means the diagnostic itself failed, so the kubelet takes no action and checks again.",
+      "example": "Like a smoke alarm test: it passes, it fails, or the test button did not work at all, so you try again.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Probe results”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#probe-results",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "probe results"
+      ],
+      "uses": [
+        "probes",
+        "liveness probe",
+        "startup probe",
+        "readiness probe",
+        "kubelet",
+        "probe results"
+      ],
+      "conceptIDs": [
+        "k8s.probe-results"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-an-ephemeral-container",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5085,
+      "front": "What is an ephemeral container?",
+      "back": "A temporary container added to an existing Pod for troubleshooting; it has no resource guarantees and is never restarted automatically.",
+      "explanation": "Pods cannot otherwise gain containers after creation; this helps when a container has crashed or its image lacks a shell and debugging tools.",
+      "example": "An image stripped down to just the app, with no shell or tools (a “distroless” image), can’t be inspected from inside, so you add an ephemeral container with debugging tools.",
+      "source": "Kubernetes documentation, “Ephemeral Containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "ephemeral container"
+      ],
+      "uses": [
+        "container",
+        "Pod",
+        "container image",
+        "ephemeral container"
+      ],
+      "conceptIDs": [
+        "k8s.ephemeral-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-a-static-pod",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 5090,
+      "front": "What is a static Pod, and what is its mirror Pod?",
+      "back": "A Pod the kubelet manages directly on one node; its mirror Pod shows it in the API server but cannot control it.",
+      "explanation": "Their main use is running the control plane’s own parts as Pods that the kubelet looks after directly, restarting each one if it fails.",
+      "example": "Deleting the mirror Pod through the API does not stop the kubelet from running the static Pod.",
+      "source": "Kubernetes documentation, “Pods”, “Static Pods”; Kubernetes glossary, “Mirror Pod”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/#static-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "static Pod / mirror Pod"
+      ],
+      "uses": [
+        "Pod",
+        "kubelet",
+        "node (k8s)",
+        "kube-apiserver",
+        "control plane",
+        "static Pod / mirror Pod"
+      ],
+      "conceptIDs": [
+        "k8s.static-pod"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-a-pdb",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 5095,
+      "front": "What is a PodDisruptionBudget (PDB)?",
+      "back": "An object that limits how many Pods of a replicated application can be down at once from voluntary disruptions.",
+      "explanation": "Voluntary disruptions are deliberate, such as an administrator emptying a node for repair; involuntary ones, such as hardware failure, cannot be prevented by a PDB but do count against it.",
+      "example": "An app runs 5 Pods and its PDB says at least 4 must stay up, so maintenance can take down only one Pod at a time.",
+      "source": "Kubernetes documentation, “Disruptions”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/disruptions/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "disruptions / PodDisruptionBudget (PDB)"
+      ],
+      "uses": [
+        "object",
+        "Pod",
+        "node (k8s)",
+        "disruptions / PodDisruptionBudget (PDB)"
+      ],
+      "conceptIDs": [
+        "k8s.pod-disruption-budget"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-the-downward-api",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 5100,
+      "front": "What is the downward API?",
+      "back": "A way to expose a Pod's and container's own field values to the code running in that container.",
+      "explanation": "It works through environment variables or files, so the application need not be a client of the Kubernetes API.",
+      "example": "An app reads its own Pod name from an environment variable to label its log lines.",
+      "source": "Kubernetes glossary, “Downward API”",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?all=true#term-downward-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "downward API"
+      ],
+      "uses": [
+        "Pod",
+        "container",
+        "kubernetes api",
+        "downward API"
+      ],
+      "conceptIDs": [
+        "k8s.downward-api"
+      ]
+    },
+    {
+      "id": "k8s.architecture.provides-self-healing",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5101,
+      "front": "Kubernetes restarts failed containers and kills ones that fail your health check, not advertising them until they are ready. Which capability is this?",
+      "back": "Self-healing.",
+      "explanation": "Clients are only sent to containers that are ready to serve.",
+      "source": "Kubernetes documentation, “Overview”, “Why you need Kubernetes and what it can do”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/overview/#why-you-need-kubernetes-and-what-can-it-do",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "self healing",
+        "container",
+        "kubernetes"
+      ],
+      "conceptIDs": [
+        "k8s.kubernetes-provides",
+        "k8s.self-healing"
+      ]
+    },
+    {
+      "id": "k8s.pods.what-is-a-pod",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5102,
+      "front": "What do the containers in one Pod share, and where do they run?",
+      "back": "They share storage and network, and always run together on one node.",
+      "explanation": "Kubernetes manages Pods rather than containers directly; one container per Pod is the most common case.",
+      "example": "Like a shared flat: the housemates (containers) share one address and kitchen, and always move in together.",
+      "source": "Kubernetes documentation, “Pods”, overview and “What is a Pod?”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/#what-is-a-pod",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "node (k8s)",
+        "kubernetes",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.pod"
+      ]
+    },
+    {
+      "id": "k8s.pods.phase-pending",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5105,
+      "front": "Which Pod phase covers time spent waiting to be scheduled and downloading container images?",
+      "back": "Pending.",
+      "explanation": "The Pod has been accepted by the cluster, but one or more containers are not yet set up and ready to run.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod phase”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "pod phases",
+        "Pod",
+        "container image",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.pod-phases"
+      ]
+    },
+    {
+      "id": "k8s.pods.phase-running",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5110,
+      "front": "Which Pod phase means the Pod is bound to a node, all containers are created, and at least one is running or restarting?",
+      "back": "Running.",
+      "explanation": "Running does not mean healthy: a container may be starting or restarting while the Pod is in this phase.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod phase”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "pod phases",
+        "Pod",
+        "node (k8s)",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.pod-phases"
+      ]
+    },
+    {
+      "id": "k8s.pods.phase-succeeded",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5115,
+      "front": "Which Pod phase means every container terminated in success and will not be restarted?",
+      "back": "Succeeded.",
+      "explanation": "It is one of the two terminal phases; the other is Failed.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod phase”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "pod phases",
+        "Pod",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.pod-phases"
+      ]
+    },
+    {
+      "id": "k8s.pods.phase-failed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5120,
+      "front": "Which Pod phase means all containers have terminated and at least one failed and is not set to restart?",
+      "back": "Failed.",
+      "explanation": "Failure means a non-zero exit status or termination by the system.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod phase”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "pod phases",
+        "Pod",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.pod-phases"
+      ]
+    },
+    {
+      "id": "k8s.pods.phase-unknown",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5125,
+      "front": "Which Pod phase means the Pod's state could not be obtained?",
+      "back": "Unknown.",
+      "explanation": "It typically comes from an error communicating with the node where the Pod should be running.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod phase”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "pod phases",
+        "Pod",
+        "node (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.pod-phases"
+      ]
+    },
+    {
+      "id": "k8s.pods.state-waiting",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5130,
+      "front": "Which container state means the container is still doing start-up work, such as pulling its image?",
+      "back": "Waiting.",
+      "explanation": "A container that is neither Running nor Terminated is Waiting, and a Reason field summarises why.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Container states”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-state-waiting",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container states",
+        "container",
+        "container image"
+      ],
+      "conceptIDs": [
+        "k8s.container-states"
+      ]
+    },
+    {
+      "id": "k8s.pods.state-running",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5135,
+      "front": "Which container state means the container is executing without issues?",
+      "back": "Running.",
+      "explanation": "Kubernetes also records when the container entered this state.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Container states”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-state-running",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container states",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.container-states"
+      ]
+    },
+    {
+      "id": "k8s.pods.state-terminated",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5140,
+      "front": "Which container state means the container began execution and then either completed or failed?",
+      "back": "Terminated.",
+      "explanation": "Kubernetes records a reason, an exit code, and the start and finish times.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Container states”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-state-terminated",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container states",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.container-states"
+      ]
+    },
+    {
+      "id": "k8s.pods.restartpolicy-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5145,
+      "front": "Pod restartPolicy default: {{c1::Always}}, which restarts a container after any termination.",
+      "explanation": "The field accepts Always, OnFailure and Never; Always applies when you do not set it.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod-level container restart policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "restartPolicy",
+        "Pod",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.restart-policy"
+      ]
+    },
+    {
+      "id": "k8s.pods.restartpolicy-onfailure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5150,
+      "front": "Which restartPolicy restarts a container only if it exits with an error (non-zero status)?",
+      "back": "OnFailure.",
+      "explanation": "A container that exits with status 0 under OnFailure is not restarted.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod-level container restart policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "restartPolicy",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.restart-policy"
+      ]
+    },
+    {
+      "id": "k8s.pods.restartpolicy-never",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5155,
+      "front": "Which restartPolicy never restarts a terminated container automatically?",
+      "back": "Never.",
+      "explanation": "In the documentation's example, a one-off task container that exits with code 1 under Never is not restarted and the Pod stays Failed.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod-level container restart policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "restartPolicy",
+        "container",
+        "Pod",
+        "pod phases"
+      ],
+      "conceptIDs": [
+        "k8s.restart-policy"
+      ]
+    },
+    {
+      "id": "k8s.pods.backoff-delays",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5160,
+      "front": "After containers in a Pod exit, what delays does the kubelet use before restarting them by default?",
+      "back": "Exponential backoff: 10 s, 20 s, 40 s and so on, capped at 300 s (5 minutes).",
+      "explanation": "The cap and starting delay can be changed with newer feature gates, so these are the defaults.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Container restarts”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "uses": [
+        "container",
+        "Pod",
+        "kubelet",
+        "CrashLoopBackOff"
+      ],
+      "conceptIDs": [
+        "k8s.crashloopbackoff"
+      ]
+    },
+    {
+      "id": "k8s.pods.backoff-reset",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5165,
+      "front": "After how long running without problems does the kubelet reset a container's restart backoff timer?",
+      "back": "10 minutes.",
+      "explanation": "A new crash after that is treated as the first one again.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Container restarts”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "uses": [
+        "container",
+        "kubelet",
+        "CrashLoopBackOff"
+      ],
+      "conceptIDs": [
+        "k8s.crashloopbackoff"
+      ]
+    },
+    {
+      "id": "k8s.pods.init-sequential",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5170,
+      "front": "When a Pod has several init containers, do they run in parallel or in sequence?",
+      "back": "In sequence: each must complete successfully before the next starts.",
+      "explanation": "Only when all init containers have completed does the kubelet start the app containers.",
+      "source": "Kubernetes documentation, “Init Containers”, “Differences from regular containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#differences-from-regular-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "init container",
+        "Pod",
+        "kubelet",
+        "app container"
+      ],
+      "conceptIDs": [
+        "k8s.init-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.init-no-probes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5175,
+      "front": "Do regular init containers support liveness, readiness or startup probes?",
+      "back": "No. Regular init containers must run to completion, so those probes are not supported.",
+      "explanation": "Sidecar containers keep running and do support probes.",
+      "source": "Kubernetes documentation, “Init Containers”, “Differences from sidecar containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#differences-from-sidecar-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "init container",
+        "liveness probe",
+        "readiness probe",
+        "startup probe",
+        "sidecar container"
+      ],
+      "conceptIDs": [
+        "k8s.init-container",
+        "k8s.sidecar-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.sidecar-shutdown-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5180,
+      "front": "When a Pod with sidecar containers shuts down, when do the sidecars get the TERM signal (the polite “please stop” signal)?",
+      "back": "Only after the last main container has fully terminated; sidecars then stop in reverse order of definition.",
+      "explanation": "This keeps sidecars serving the other containers until they are no longer needed.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod shutdown and sidecar containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#termination-with-sidecars",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "sidecar container",
+        "Pod",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.sidecar-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.liveness-no-wait",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5185,
+      "front": "Does a liveness probe wait for the readiness probe to succeed before it starts?",
+      "back": "No. To delay it, set initialDelaySeconds or use a startup probe.",
+      "explanation": "Without a delay, a slow-starting app can be restarted by its liveness probe before it is ever ready.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Liveness probe”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#liveness-probe",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "liveness probe",
+        "readiness probe",
+        "startup probe"
+      ],
+      "conceptIDs": [
+        "k8s.liveness-probe"
+      ]
+    },
+    {
+      "id": "k8s.pods.startup-only-at-start",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5190,
+      "front": "Which of the three probe types runs only at startup rather than periodically for the container's life?",
+      "back": "The startup probe.",
+      "explanation": "Liveness and readiness probes run periodically; readiness runs for the container's whole lifecycle.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Startup probe”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#startup-probe",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "startup probe",
+        "liveness probe",
+        "readiness probe",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.startup-probe"
+      ]
+    },
+    {
+      "id": "k8s.pods.mech-exec",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5195,
+      "front": "When does an exec probe count as successful?",
+      "back": "When the command it runs inside the container exits with status code 0.",
+      "explanation": "Because exec forks processes on every check, it can add CPU overhead on nodes with many Pods.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Check mechanisms”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#check-mechanisms",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "probe mechanisms",
+        "container",
+        "node (k8s)",
+        "Pod",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.probe-mechanisms"
+      ]
+    },
+    {
+      "id": "k8s.pods.mech-httpget",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5200,
+      "front": "When does an httpGet probe count as successful?",
+      "back": "When the response status code is at least 200 and less than 400.",
+      "explanation": "The kubelet sends an HTTP GET to the Pod's IP address on the given port and path.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Check mechanisms”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#check-mechanisms",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "probe mechanisms",
+        "kubelet",
+        "Pod",
+        "http",
+        "ip address",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.probe-mechanisms"
+      ]
+    },
+    {
+      "id": "k8s.pods.mech-tcpsocket",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5205,
+      "front": "When does a tcpSocket probe count as successful?",
+      "back": "When the specified port on the Pod's IP address is open.",
+      "explanation": "Even if the container closes the connection immediately after it opens, the check counts as healthy.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Check mechanisms”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#check-mechanisms",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "probe mechanisms",
+        "Pod",
+        "container",
+        "ip address",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.probe-mechanisms"
+      ]
+    },
+    {
+      "id": "k8s.pods.mech-grpc",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5210,
+      "front": "When does a grpc probe count as successful?",
+      "back": "When the gRPC health check response has status SERVING.",
+      "explanation": "The target must implement the gRPC Health Checking Protocol.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Check mechanisms”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#check-mechanisms",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "probe mechanisms",
+        "grpc"
+      ],
+      "conceptIDs": [
+        "k8s.probe-mechanisms"
+      ]
+    },
+    {
+      "id": "k8s.pods.probe-defaults",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5215,
+      "front": "By default, how often does a probe run, and after how many consecutive failures is the check failed?",
+      "back": "Every 10 seconds (periodSeconds); failed after 3 consecutive failures (failureThreshold).",
+      "explanation": "timeoutSeconds defaults to 1 second and initialDelaySeconds to 0.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Configuration fields”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#configure-probes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "probes"
+      ],
+      "conceptIDs": [
+        "k8s.probes"
+      ]
+    },
+    {
+      "id": "k8s.pods.no-probe-means-success",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5220,
+      "front": "If a container defines no probe of a given type, what result does the kubelet assume for it?",
+      "back": "Success.",
+      "explanation": "For readiness probes specifically, the result counts as Failure before the initial delay has passed.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Probe results”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#probe-results",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "probes",
+        "probe results",
+        "kubelet",
+        "container",
+        "readiness probe"
+      ],
+      "conceptIDs": [
+        "k8s.probe-results"
+      ]
+    },
+    {
+      "id": "k8s.pods.ephemeral-limits",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5225,
+      "front": "Which container fields are disallowed for ephemeral containers?",
+      "back": "Ports and probes such as livenessProbe and readinessProbe, and resources, because Pod resource allocations are immutable.",
+      "explanation": "Ephemeral containers are for inspecting a Pod, not for running any part of the application.",
+      "source": "Kubernetes documentation, “Ephemeral Containers”, “What is an ephemeral container?”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/#what-is-an-ephemeral-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ephemeral container",
+        "Pod",
+        "liveness probe",
+        "readiness probe",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.ephemeral-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.ephemeral-stable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5230,
+      "front": "Since which Kubernetes version have ephemeral containers been stable?",
+      "back": "v1.25.",
+      "explanation": "Static Pods do not support ephemeral containers.",
+      "source": "Kubernetes documentation, “Ephemeral Containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ephemeral container",
+        "static Pod / mirror Pod"
+      ],
+      "conceptIDs": [
+        "k8s.ephemeral-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.grace-period-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5235,
+      "front": "When a Pod is deleted, how long is the default grace period before remaining processes are killed?",
+      "back": "30 seconds.",
+      "explanation": "The kubelet has the runtime send TERM first; when the grace period expires, KILL goes to any processes still running.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Termination of Pods”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "kubelet",
+        "container runtime"
+      ],
+      "conceptIDs": [
+        "k8s.pod-termination"
+      ]
+    },
+    {
+      "id": "k8s.pods.never-rescheduled",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5240,
+      "front": "Is a Pod ever moved (rescheduled) to a different node?",
+      "back": "No. It can only be replaced by a new, near-identical Pod with a new unique ID.",
+      "explanation": "Pods are scheduled once in their lifetime; Kubernetes does not even guarantee the replacement lands on the same node.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pods and fault recovery”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-fault-recovery",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "node (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.pod"
+      ]
+    },
+    {
+      "id": "k8s.pods.classify-phase-waiting-node",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5245,
+      "front": "A new Pod has been accepted, but no node has enough room for it yet. Which phase is it in?",
+      "back": "Pending.",
+      "explanation": "Pending includes time spent waiting to be scheduled, as well as time downloading images.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod phase”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "node (k8s)",
+        "pod phases"
+      ],
+      "conceptIDs": [
+        "k8s.pod-phases"
+      ]
+    },
+    {
+      "id": "k8s.pods.classify-phase-node-lost",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5250,
+      "front": "The network link to a node drops, and the control plane cannot get the state of a Pod on it. Which phase is reported?",
+      "back": "Unknown.",
+      "explanation": "Unknown typically means an error communicating with the node where the Pod should be running.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod phase”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node (k8s)",
+        "control plane",
+        "Pod",
+        "pod phases"
+      ],
+      "conceptIDs": [
+        "k8s.pod-phases"
+      ]
+    },
+    {
+      "id": "k8s.pods.classify-state-image-pull",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5255,
+      "front": "A container's image is still downloading from a registry. Which container state is it in?",
+      "back": "Waiting.",
+      "explanation": "Pulling the image is one of the operations a container needs to finish before it can run.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Container states”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-state-waiting",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "container image",
+        "container states",
+        "registry"
+      ],
+      "conceptIDs": [
+        "k8s.container-states"
+      ]
+    },
+    {
+      "id": "k8s.pods.apply-onfailure-exit-zero",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5260,
+      "front": "A Pod has restartPolicy OnFailure. Its only container exits with code 0. What happens?",
+      "back": "It is not restarted.",
+      "explanation": "OnFailure restarts only on a non-zero exit status; Always would restart it regardless of exit code.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Restart behavior comparison”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "restartPolicy",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.restart-policy"
+      ]
+    },
+    {
+      "id": "k8s.pods.apply-sidecar-ignores-pod-policy",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5265,
+      "front": "A Pod's restartPolicy is Never, but it has a sidecar container that exits. Is the sidecar restarted?",
+      "back": "Yes. A sidecar uses its own container-level restartPolicy of Always and ignores the Pod-level field.",
+      "explanation": "The Pod-level policy applies to app containers and regular init containers, not sidecars.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Sidecar containers and restart policies”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "restartPolicy",
+        "sidecar container",
+        "app container",
+        "init container"
+      ],
+      "conceptIDs": [
+        "k8s.sidecar-container",
+        "k8s.restart-policy"
+      ]
+    },
+    {
+      "id": "k8s.pods.apply-crashloop",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5270,
+      "front": "A container crashes on start, is restarted, and crashes again several times; its status shows CrashLoopBackOff. What is the kubelet doing?",
+      "back": "Waiting an exponentially increasing backoff delay before each restart attempt.",
+      "explanation": "The delay doubles from 10 seconds up to a 5-minute cap; checking the container's logs is often the quickest way to find the cause.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “How Pods handle problems with containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-restarts",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "CrashLoopBackOff",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "k8s.crashloopbackoff"
+      ]
+    },
+    {
+      "id": "k8s.pods.classify-init-vs-sidecar-migrate",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5275,
+      "front": "A helper must finish a database schema migration before the app starts, then stop. Which kind of container is it?",
+      "back": "An init container.",
+      "explanation": "Init containers run to completion before the app containers start; a sidecar would keep running.",
+      "source": "Kubernetes documentation, “Init Containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#using-init-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "init container",
+        "app container",
+        "sidecar container"
+      ],
+      "conceptIDs": [
+        "k8s.init-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.classify-sidecar-log-shipper",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5280,
+      "front": "A helper must forward the app's logs for as long as the Pod runs. Which kind of container is it?",
+      "back": "A sidecar container.",
+      "explanation": "Sidecars start before the app containers and keep running for the Pod's whole life, for example for logging.",
+      "source": "Kubernetes documentation, “Sidecar Containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "sidecar container",
+        "app container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.sidecar-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.classify-app-container",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 5285,
+      "front": "A Pod runs one web server container and nothing else. What kind of container is the web server?",
+      "back": "An app container.",
+      "explanation": "With no init containers configured, every container in the Pod is an app container.",
+      "source": "Kubernetes glossary, “App Container”",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?all=true#term-app-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "container",
+        "app container",
+        "init container"
+      ],
+      "conceptIDs": [
+        "k8s.app-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.scenario-deadlock-probe",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5290,
+      "front": "An app's process is still alive but deadlocked and serves nothing. Which probe detects this and gets the container restarted?",
+      "back": "The liveness probe.",
+      "choices": "A) Liveness probe\nB) Readiness probe\nC) Startup probe",
+      "choicesExplained": "B: a readiness failure only stops traffic; it never restarts the container. C: the startup probe runs only while the app is starting, not later in its life.",
+      "explanation": "Liveness probes decide when to restart a container, and catching deadlocks is their typical use.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Liveness probe”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#liveness-probe",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "liveness probe",
+        "readiness probe",
+        "startup probe",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.liveness-probe"
+      ]
+    },
+    {
+      "id": "k8s.pods.scenario-overload-probe",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5295,
+      "front": "An app is briefly overloaded and should get no new requests until it recovers, without being restarted. Which probe fits?",
+      "back": "The readiness probe.",
+      "choices": "A) Liveness probe\nB) Readiness probe\nC) Startup probe",
+      "choicesExplained": "A: a liveness failure restarts the container, which is not wanted here. C: the startup probe runs only at startup, not during later overloads.",
+      "explanation": "Readiness probes run for the container's whole life and can take it out of traffic during temporary faults or overloads.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Readiness probe”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#readiness-probe",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "liveness probe",
+        "readiness probe",
+        "startup probe",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.readiness-probe"
+      ]
+    },
+    {
+      "id": "k8s.pods.scenario-slow-boot-probe",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5300,
+      "front": "An app needs several minutes to load data at boot, and its liveness probe keeps killing it before it finishes. What should you add?",
+      "back": "A startup probe.",
+      "choices": "A) A readiness probe\nB) A startup probe\nC) A shorter liveness period",
+      "choicesExplained": "A: liveness probes do not wait for readiness probes, so the kills continue. C: probing more often makes the liveness probe fail even sooner.",
+      "explanation": "While a startup probe is configured, liveness and readiness probes do not run until it succeeds.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “When should you use a startup probe?”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#when-should-you-use-a-startup-probe",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "liveness probe",
+        "readiness probe",
+        "startup probe"
+      ],
+      "conceptIDs": [
+        "k8s.startup-probe"
+      ]
+    },
+    {
+      "id": "k8s.pods.classify-mechanism-command",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5305,
+      "front": "A probe runs the command cat /tmp/healthy inside the container. Which check mechanism is this?",
+      "back": "exec.",
+      "explanation": "exec runs a command inside the container and succeeds on exit status 0.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Check mechanisms”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#check-mechanisms",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "probes",
+        "probe mechanisms",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.probe-mechanisms"
+      ]
+    },
+    {
+      "id": "k8s.pods.apply-http-404",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5310,
+      "front": "An httpGet liveness probe gets HTTP 404 from the health endpoint. Does the check pass?",
+      "back": "No. Only codes from 200 up to 399 count as success, so 404 is a failure.",
+      "explanation": "Enough consecutive failures of a liveness probe make the kubelet restart the container.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Check mechanisms”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#check-mechanisms",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "probe mechanisms",
+        "liveness probe",
+        "kubelet",
+        "container",
+        "http"
+      ],
+      "conceptIDs": [
+        "k8s.probe-mechanisms",
+        "k8s.liveness-probe"
+      ]
+    },
+    {
+      "id": "k8s.pods.classify-probe-result-unknown",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 5315,
+      "front": "The kubelet could not complete a probe's diagnostic at all. Which result is recorded, and what action follows?",
+      "back": "Unknown; no action is taken and the kubelet checks again.",
+      "explanation": "Only a Failure result leads to a restart (liveness, startup) or to not-ready (readiness).",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Probe results”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#probe-results",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "probes",
+        "probe results"
+      ],
+      "conceptIDs": [
+        "k8s.probe-results"
+      ]
+    },
+    {
+      "id": "k8s.pods.apply-ephemeral-distroless",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5320,
+      "front": "A container built from a distroless image (just the app, with no shell or tools) is misbehaving, and has no shell you could open inside it. What can you add to inspect the running Pod?",
+      "back": "An ephemeral container.",
+      "explanation": "Ephemeral containers bring their own tools into an existing Pod for troubleshooting, without restarting it.",
+      "source": "Kubernetes documentation, “Ephemeral Containers”, “Uses for ephemeral containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/#uses-for-ephemeral-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "container image",
+        "Pod",
+        "ephemeral container"
+      ],
+      "conceptIDs": [
+        "k8s.ephemeral-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.classify-static-control-plane",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 5325,
+      "front": "A cluster's control plane components run as Pods in kube-system, supervised by the kubelet on each control plane node. What are these Pods?",
+      "back": "Static Pods (visible through their mirror Pods).",
+      "explanation": "Running a self-hosted control plane is the main use of static Pods.",
+      "source": "Kubernetes documentation, “Static Pods”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/static-pods/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "control plane",
+        "Pod",
+        "initial namespaces",
+        "kubelet",
+        "node (k8s)",
+        "static Pod / mirror Pod"
+      ],
+      "conceptIDs": [
+        "k8s.static-pod"
+      ]
+    },
+    {
+      "id": "k8s.pods.classify-voluntary-disruption",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 5330,
+      "front": "Which kind of disruption is a hardware failure of a node's physical machine, and can a PDB prevent it?",
+      "back": "Involuntary; a PDB cannot prevent it, though it counts against the budget.",
+      "explanation": "PDBs limit only voluntary disruptions, such as deliberate maintenance.",
+      "source": "Kubernetes documentation, “Disruptions”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/disruptions/#voluntary-and-involuntary-disruptions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node (k8s)",
+        "disruptions / PodDisruptionBudget (PDB)"
+      ],
+      "conceptIDs": [
+        "k8s.pod-disruption-budget"
+      ]
+    },
+    {
+      "id": "k8s.pods.apply-downward-api",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 5335,
+      "front": "An app must log its own Pod name, but you do not want it to call the Kubernetes API. What provides the name?",
+      "back": "The downward API, for example as an environment variable.",
+      "explanation": "The downward API exposes Pod and container fields to the container without coupling the app to Kubernetes.",
+      "source": "Kubernetes glossary, “Downward API”",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?all=true#term-downward-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "kubernetes api",
+        "downward API",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.downward-api"
+      ]
+    },
+    {
+      "id": "k8s.pods.apply-template-change",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5340,
+      "front": "You change the container image in a PodTemplate. What happens to the Pods that already exist?",
+      "back": "Nothing directly; the controller creates new Pods from the updated template to replace them.",
+      "explanation": "Modifying or switching a pod template has no direct effect on existing Pods.",
+      "source": "Kubernetes documentation, “Pods”, “Pod templates”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/#pod-templates",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "container image",
+        "PodTemplate",
+        "Pod",
+        "controller / control loop"
+      ],
+      "conceptIDs": [
+        "k8s.pod-template"
+      ]
+    },
+    {
+      "id": "k8s.pods.apply-port-clash",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5345,
+      "front": "Two containers in the same Pod both try to listen on port 80. Why does this clash?",
+      "back": "They share one network namespace, so they share one IP address and port space.",
+      "explanation": "Containers in a Pod must coordinate their use of shared network resources such as ports.",
+      "source": "Kubernetes documentation, “Pods”, “Pod networking”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/#pod-networking",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "Pod",
+        "shared network namespace",
+        "ip address",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.shared-network-namespace"
+      ]
+    },
+    {
+      "id": "k8s.pods.apply-slow-shutdown",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5350,
+      "front": "An app needs about a minute to finish work after receiving TERM, but its Pod uses default settings. What goes wrong, and what setting fixes it?",
+      "back": "It is killed after the 30-second default; raise terminationGracePeriodSeconds.",
+      "explanation": "When the grace period expires, the runtime sends KILL to any processes still running.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod Termination Flow”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination-flow",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.pod-termination"
+      ]
+    },
+    {
+      "id": "k8s.pods.apply-node-dies",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5355,
+      "front": "The node running a Pod fails. Does that same Pod start again on another node?",
+      "back": "No. The Pod is eventually deleted; a controller may create a new replacement Pod elsewhere.",
+      "explanation": "A Pod is never rescheduled; a replacement can even reuse the name but gets a new unique ID.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pods and fault recovery”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-fault-recovery",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node (k8s)",
+        "Pod",
+        "controller / control loop"
+      ],
+      "conceptIDs": [
+        "k8s.pod"
+      ]
+    },
+    {
+      "id": "k8s.pods.contrast-liveness-readiness",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 5360,
+      "front": "What happens to a container when its liveness probe fails, compared with when its readiness probe fails?",
+      "back": "Liveness failure: the kubelet restarts the container. Readiness failure: the Pod stops getting traffic, and the container keeps running.",
+      "explanation": "Using a liveness probe where readiness was meant can cause needless restarts under load and cascading failures.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Probe results”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#probe-results",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "liveness probe",
+        "readiness probe",
+        "kubelet",
+        "container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.liveness-probe",
+        "k8s.readiness-probe"
+      ]
+    },
+    {
+      "id": "k8s.pods.contrast-init-sidecar",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 5365,
+      "front": "How does a sidecar container differ from a regular init container?",
+      "back": "An init container runs to completion before the app starts; a sidecar starts before it and keeps running alongside.",
+      "explanation": "Both are listed under initContainers; the sidecar is the one with its own restartPolicy set to Always.",
+      "source": "Kubernetes glossary, “Init Container” and “Sidecar Container”",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?all=true#term-sidecar-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "sidecar container",
+        "init container",
+        "restartPolicy",
+        "app container"
+      ],
+      "conceptIDs": [
+        "k8s.sidecar-container",
+        "k8s.init-container"
+      ]
+    },
+    {
+      "id": "k8s.pods.contrast-phase-status",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 5370,
+      "front": "Is CrashLoopBackOff one of the Pod phases?",
+      "back": "No. It is a displayed status for user intuition; the phase is an explicit field of the Pod API.",
+      "explanation": "The five phases are Pending, Running, Succeeded, Failed and Unknown; Terminating is also only a displayed status.",
+      "source": "Kubernetes documentation, “Pod Lifecycle”, “Pod phase” (note)",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CrashLoopBackOff",
+        "pod phases",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.pod-phases",
+        "k8s.crashloopbackoff"
+      ]
+    },
+    {
+      "id": "k8s.pods.contrast-container-vs-pod-restart",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 5375,
+      "front": "Is restarting a container the same as restarting its Pod?",
+      "back": "No. A Pod is an environment for containers, not a process; it persists until deleted while its containers restart.",
+      "explanation": "The restartPolicy acts on containers inside the same Pod on the same node.",
+      "source": "Kubernetes documentation, “Pods”, “Working with Pods” (note)",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/#working-with-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "Pod",
+        "restartPolicy",
+        "node (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.pod",
+        "k8s.restart-policy"
+      ]
+    },
+    {
+      "id": "k8s.pods.contrast-ephemeral-vs-sidecar",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 5380,
+      "front": "Why should you not use an ephemeral container instead of a sidecar to run part of your application?",
+      "back": "Ephemeral containers have no resource or execution guarantees and are never restarted automatically.",
+      "explanation": "They exist for user-initiated troubleshooting; a sidecar is a supported, restarted part of the Pod.",
+      "source": "Kubernetes documentation, “Ephemeral Containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ephemeral container",
+        "sidecar container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.ephemeral-container",
+        "k8s.sidecar-container"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,848 @@
+{
+  "topic": "Autoscaling",
+  "notes": [
+    {
+      "id": "k8s.autoscaling.what-is-manual-scaling",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 12010,
+      "front": "How do you scale a workload manually in Kubernetes?",
+      "back": "Horizontally, by changing the replica count, e.g. with kubectl; vertically, by patching the workload’s CPU and memory resources.",
+      "explanation": "Horizontal scaling changes how many replicas run; vertical scaling changes the resources each replica gets. Autoscalers automate both.",
+      "example": "kubectl scale deployment web --replicas=5 is manual horizontal scaling.",
+      "source": "Kubernetes documentation, “Autoscaling Workloads”, “Scaling workloads manually”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-manually",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "manual scaling"
+      ],
+      "uses": [
+        "workload",
+        "replica",
+        "kubectl",
+        "horizontal scaling",
+        "vertical scaling",
+        "Deployment",
+        "manual scaling",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.manual-scaling"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.what-is-an-hpa",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12020,
+      "front": "What is a HorizontalPodAutoscaler (HPA)?",
+      "back": "A built-in API resource and controller that periodically adjusts a workload’s number of replicas to match observed metrics such as CPU use.",
+      "explanation": "When load rises it adds Pods; when load falls it removes them, down to a configured minimum. It works on Deployments, StatefulSets and similar resources.",
+      "example": "An HPA keeps a web Deployment between 2 and 10 replicas, aiming at 60% average CPU use.",
+      "source": "Kubernetes documentation, “Autoscaling Workloads”, “Scaling workloads horizontally”; Kubernetes documentation, “Horizontal Pod Autoscaling”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "HorizontalPodAutoscaler (HPA)"
+      ],
+      "uses": [
+        "controller / control loop",
+        "workload",
+        "replica",
+        "Pod",
+        "Deployment",
+        "StatefulSet",
+        "horizontal scaling",
+        "HorizontalPodAutoscaler (HPA)",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.horizontal-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.what-is-a-vpa",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12030,
+      "front": "What is a VerticalPodAutoscaler (VPA)?",
+      "back": "An add-on that automatically adjusts the CPU and memory requests and limits of a workload’s Pods to match their actual usage.",
+      "explanation": "This is also called rightsizing. Unlike the HPA it does not come with Kubernetes; it is installed separately as a CustomResourceDefinition.",
+      "example": "A VPA notices a Deployment’s Pods use far less memory than requested and lowers the requests, freeing capacity.",
+      "source": "Kubernetes documentation, “Vertical Pod Autoscaling”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/vertical-pod-autoscale/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "VerticalPodAutoscaler (VPA)"
+      ],
+      "uses": [
+        "addons",
+        "requests and limits",
+        "workload",
+        "Pod",
+        "CustomResourceDefinition (CRD)",
+        "HorizontalPodAutoscaler (HPA)",
+        "Deployment",
+        "vertical scaling",
+        "VerticalPodAutoscaler (VPA)",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.vertical-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.what-are-node-autoscalers",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12040,
+      "front": "What do Cluster Autoscaler and Karpenter do?",
+      "back": "They are node autoscalers: they add Nodes when Pods cannot be scheduled and remove underused Nodes to save cost.",
+      "explanation": "Adding is called provisioning and removing is called consolidation. Both talk to the cloud provider to create or delete the machines behind Nodes.",
+      "example": "Ten new Pods stay Pending for lack of capacity; the autoscaler adds two virtual machines as Nodes, and the Pods are scheduled.",
+      "source": "Kubernetes documentation, “Node Autoscaling”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/cluster-administration/node-autoscaling/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Cluster Autoscaler and Karpenter"
+      ],
+      "uses": [
+        "node (k8s)",
+        "Pod",
+        "virtual machine (VM)",
+        "Cluster Autoscaler and Karpenter"
+      ],
+      "conceptIDs": [
+        "k8s.node-autoscalers"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.what-is-keda",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12050,
+      "front": "What is KEDA?",
+      "back": "The Kubernetes Event Driven Autoscaler: it scales workloads on the number of events waiting to be processed, such as messages in a queue.",
+      "explanation": "It offers many adapters for different event sources, and its Cron scaler can also scale on a schedule.",
+      "example": "A worker Deployment scales out as its message queue grows and back in when the queue empties.",
+      "source": "Kubernetes documentation, “Autoscaling Workloads”, “Event driven Autoscaling”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/#event-driven-autoscaling",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "KEDA"
+      ],
+      "uses": [
+        "workload",
+        "Deployment",
+        "event-driven architecture / event streaming",
+        "KEDA"
+      ],
+      "conceptIDs": [
+        "k8s.keda"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.what-is-cpa",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 12060,
+      "front": "What is the Cluster Proportional Autoscaler?",
+      "back": "A separate project that scales a workload’s replicas in proportion to the number of schedulable nodes and cores in the cluster.",
+      "explanation": "It suits system components whose load grows with the cluster, and is not part of Kubernetes core.",
+      "example": "Adding one cluster DNS replica for every so many nodes as the cluster grows.",
+      "source": "Kubernetes documentation, “Autoscaling Workloads”, “Autoscaling based on cluster size”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/#autoscaling-based-on-cluster-size",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Cluster Proportional Autoscaler"
+      ],
+      "uses": [
+        "workload",
+        "replica",
+        "node (k8s)",
+        "cluster (k8s)",
+        "Cluster Proportional Autoscaler",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "k8s.cluster-proportional-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.hpa-built-in-vpa-addon",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12070,
+      "front": "Which of the HPA and the VPA comes with Kubernetes by default?",
+      "back": "The HPA. The VPA is an add-on that you or an administrator must install first.",
+      "explanation": "The HPA is part of the core Kubernetes API; the VPA is defined as a CustomResourceDefinition.",
+      "source": "Kubernetes documentation, “Autoscaling Workloads”, “Scaling workloads vertically”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)",
+        "VerticalPodAutoscaler (VPA)",
+        "addons",
+        "Kubernetes API",
+        "CustomResourceDefinition (CRD)"
+      ],
+      "conceptIDs": [
+        "k8s.vertical-pod-autoscaler",
+        "k8s.horizontal-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.vpa-needs-metrics-server",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12080,
+      "front": "What must be installed in the cluster for the VPA to work, besides the VPA itself?",
+      "back": "The Metrics Server, an add-on that supplies Pods’ CPU and memory usage.",
+      "explanation": "The VPA bases its changes on resource usage, so it needs a source of those metrics.",
+      "source": "Kubernetes documentation, “Autoscaling Workloads”, “Scaling workloads vertically” (note)",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/#scaling-workloads-vertically",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "VerticalPodAutoscaler (VPA)",
+        "cluster (k8s)",
+        "addons",
+        "Pod",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.vertical-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.hpa-not-daemonset",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12090,
+      "front": "Can an HPA scale a DaemonSet?",
+      "back": "No. Horizontal Pod autoscaling does not apply to objects that cannot be scaled, such as DaemonSets.",
+      "explanation": "The HPA works through a standard “scale” handle that lets the replica count be changed; Deployments and StatefulSets have one.",
+      "source": "Kubernetes documentation, “Horizontal Pod Autoscaling”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)",
+        "DaemonSet",
+        "object",
+        "workload",
+        "Deployment",
+        "StatefulSet"
+      ],
+      "conceptIDs": [
+        "k8s.horizontal-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.hpa-needs-requests",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12100,
+      "front": "An HPA targets 70% CPU utilisation. How is a Pod’s utilisation calculated, and what if a container has no CPU request?",
+      "back": "As a percentage of the containers’ CPU requests. Without a request, utilisation is undefined and the HPA takes no action on that metric.",
+      "explanation": "So workloads scaled on utilisation must set resource requests.",
+      "source": "Kubernetes documentation, “Horizontal Pod Autoscaling”, “How does a HorizontalPodAutoscaler work?”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/#how-does-a-horizontalpodautoscaler-work",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)",
+        "Pod",
+        "container",
+        "requests and limits",
+        "workload",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.horizontal-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.hpa-sync-period",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12110,
+      "front": "How often does the HPA controller check metrics by default?",
+      "back": "Every 15 seconds.",
+      "explanation": "The HPA is a control loop that runs intermittently, not continuously; kube-controller-manager’s --horizontal-pod-autoscaler-sync-period sets the interval.",
+      "source": "Kubernetes documentation, “Horizontal Pod Autoscaling”, “How does a HorizontalPodAutoscaler work?”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/#how-does-a-horizontalpodautoscaler-work",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)",
+        "controller / control loop",
+        "kube-controller-manager"
+      ],
+      "conceptIDs": [
+        "k8s.hpa-algorithm"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.hpa-formula",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12120,
+      "front": "What basic formula does the HPA use for the desired number of replicas?",
+      "back": "desiredReplicas = ceil(currentReplicas × currentMetricValue ÷ desiredMetricValue).",
+      "explanation": "If the current value is double the target, replicas double; if half, they halve. The result is rounded up.",
+      "source": "Kubernetes documentation, “Horizontal Pod Autoscaling”, “Algorithm details”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/#algorithm-details",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)",
+        "replica"
+      ],
+      "conceptIDs": [
+        "k8s.hpa-algorithm"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.hpa-tolerance",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12130,
+      "front": "When does the HPA skip scaling even though the metric is not exactly on target?",
+      "back": "When current ÷ target is close enough to 1.0: by default, between 0.9 and 1.1 (a 10% tolerance).",
+      "explanation": "The tolerance stops constant small adjustments; it can be configured.",
+      "source": "Kubernetes documentation, “Horizontal Pod Autoscaling”, “Algorithm details” and “Tolerance”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/#algorithm-details",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)"
+      ],
+      "conceptIDs": [
+        "k8s.hpa-algorithm"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.hpa-downscale-window",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12140,
+      "front": "By default, how long a stabilisation window does the HPA use before scaling down?",
+      "back": "5 minutes (300 seconds). Scaling up has no stabilisation window by default.",
+      "explanation": "The window stops replica counts “flapping” when metrics fluctuate: recommendations from the last 5 minutes are taken into account.",
+      "source": "Kubernetes documentation, “Horizontal Pod Autoscaling”, “Default behavior”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/#default-behavior",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)",
+        "replica"
+      ],
+      "conceptIDs": [
+        "k8s.hpa-algorithm"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.vpa-what-it-changes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12150,
+      "front": "What does a VPA change on the workload it manages?",
+      "back": "The CPU and memory requests and limits of its Pods, not the number of replicas.",
+      "explanation": "It bases them on historical usage, available cluster resources and events such as out-of-memory kills.",
+      "source": "Kubernetes documentation, “Vertical Pod Autoscaling”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/vertical-pod-autoscale/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "VerticalPodAutoscaler (VPA)",
+        "workload",
+        "requests and limits",
+        "Pod",
+        "replica",
+        "cluster (k8s)",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.vertical-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.node-autoscalers-sponsor",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12160,
+      "front": "Which two node autoscalers are currently sponsored by the Kubernetes project’s SIG Autoscaling?",
+      "back": "Cluster Autoscaler and Karpenter.",
+      "explanation": "For users both should feel similar: they provision Nodes for unschedulable Pods and consolidate underused Nodes.",
+      "source": "Kubernetes documentation, “Node Autoscaling”, “Autoscaler implementations”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/cluster-administration/node-autoscaling/#autoscaler-implementations",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "uses": [
+        "Cluster Autoscaler and Karpenter",
+        "node (k8s)",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.node-autoscalers"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.cluster-autoscaler-node-groups",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12170,
+      "front": "How does Cluster Autoscaler add and remove Nodes?",
+      "back": "Within pre-configured node groups, usually cloud VM groups, adding Nodes to the group that best fits the pending Pods.",
+      "explanation": "When consolidating it removes specific chosen Nodes, rather than just resizing the group.",
+      "source": "Kubernetes documentation, “Node Autoscaling”, “Cluster Autoscaler”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/cluster-administration/node-autoscaling/#cluster-autoscaler",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Cluster Autoscaler and Karpenter",
+        "node (k8s)",
+        "virtual machine (VM)",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.node-autoscalers"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.karpenter-auto-provisions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12180,
+      "front": "How does Karpenter’s approach to Nodes differ from Cluster Autoscaler’s?",
+      "back": "It auto-provisions individual machines from NodePool configurations, without node groups, and manages the whole Node lifecycle.",
+      "explanation": "For example, it can refresh Nodes after a set lifetime and upgrade them when new node images are released.",
+      "source": "Kubernetes documentation, “Node Autoscaling”, “Karpenter”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/cluster-administration/node-autoscaling/#karpenter",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Cluster Autoscaler and Karpenter",
+        "node (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.node-autoscalers"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.node-autoscaler-uses-requests",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12190,
+      "front": "When deciding to add or remove Nodes, do node autoscalers look at Pods’ real resource usage or their resource requests?",
+      "back": "Their resource requests.",
+      "explanation": "To follow real usage, combine node autoscaling with workload autoscaling (HPA or VPA).",
+      "source": "Kubernetes documentation, “Node Autoscaling”, “Pod scheduling constraints” and “Node consolidation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/cluster-administration/node-autoscaling/#provisioning-pod-constraints",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node (k8s)",
+        "Pod",
+        "requests and limits",
+        "HorizontalPodAutoscaler (HPA)",
+        "VerticalPodAutoscaler (VPA)",
+        "workload"
+      ],
+      "conceptIDs": [
+        "k8s.node-autoscalers"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.keda-cron",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12200,
+      "front": "How can you scale workloads on a schedule, for example down at night?",
+      "back": "With KEDA and its Cron scaler.",
+      "explanation": "The Cron scaler lets you define schedules and time zones for scaling workloads in or out, for example to save resources off-peak.",
+      "source": "Kubernetes documentation, “Autoscaling Workloads”, “Autoscaling based on schedules”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/#autoscaling-based-on-schedules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "workload",
+        "KEDA"
+      ],
+      "conceptIDs": [
+        "k8s.keda"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.cpa-not-core",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12210,
+      "front": "Is the Cluster Proportional Autoscaler part of Kubernetes core?",
+      "back": "No. Like the VPA, it is hosted as its own project.",
+      "explanation": "It watches schedulable nodes and cores and scales the target workload’s replicas accordingly.",
+      "source": "Kubernetes documentation, “Autoscaling Workloads”, “Autoscaling based on cluster size”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/#autoscaling-based-on-cluster-size",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Cluster Proportional Autoscaler",
+        "VerticalPodAutoscaler (VPA)",
+        "node (k8s)",
+        "workload",
+        "replica"
+      ],
+      "conceptIDs": [
+        "k8s.cluster-proportional-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.scenario-cpu-spikes",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12220,
+      "front": "A stateless web Deployment gets lunchtime CPU spikes. You want more Pods during spikes and fewer afterwards. Which tool fits?",
+      "back": "A) HorizontalPodAutoscaler.",
+      "choices": "A) HorizontalPodAutoscaler\nB) VerticalPodAutoscaler\nC) Cluster Autoscaler or Karpenter\nD) KEDA",
+      "choicesExplained": "B changes each Pod’s resources, not the Pod count. C adds Nodes, not Pods. D scales on event counts, not CPU use.",
+      "explanation": "The HPA adjusts the replica count to match observed CPU utilisation.",
+      "source": "Kubernetes documentation, “Horizontal Pod Autoscaling”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "stateful vs stateless apps",
+        "Deployment",
+        "Pod",
+        "HorizontalPodAutoscaler (HPA)",
+        "VerticalPodAutoscaler (VPA)",
+        "Cluster Autoscaler and Karpenter",
+        "KEDA",
+        "node (k8s)",
+        "replica",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.horizontal-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.scenario-pending-pods",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12230,
+      "front": "The HPA has created new Pods, but they stay Pending because no Node has room for them. Which tool fits?",
+      "back": "C) Cluster Autoscaler or Karpenter.",
+      "choices": "A) HorizontalPodAutoscaler\nB) VerticalPodAutoscaler\nC) Cluster Autoscaler or Karpenter\nD) KEDA",
+      "choicesExplained": "A has already added Pods; more Pods would also stay Pending. B resizes Pods but adds no capacity. D creates more Pods, not Nodes.",
+      "explanation": "Node autoscalers provision new Nodes so that unschedulable Pods can be scheduled.",
+      "source": "Kubernetes documentation, “Node Autoscaling”, “Node provisioning”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/cluster-administration/node-autoscaling/#provisioning",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)",
+        "Pod",
+        "node (k8s)",
+        "VerticalPodAutoscaler (VPA)",
+        "Cluster Autoscaler and Karpenter",
+        "KEDA"
+      ],
+      "conceptIDs": [
+        "k8s.node-autoscalers"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.scenario-queue",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12240,
+      "front": "Worker Pods process messages from a queue. You want the number of workers to follow the number of waiting messages. Which tool fits?",
+      "back": "D) KEDA.",
+      "choices": "A) HorizontalPodAutoscaler\nB) VerticalPodAutoscaler\nC) Cluster Autoscaler or Karpenter\nD) KEDA",
+      "choicesExplained": "A: the HPA can use external metrics such as queue length, but KEDA is the project built to scale on events waiting to be processed. B resizes Pods. C adds Nodes.",
+      "explanation": "KEDA scales workloads on the number of events to be processed, with adapters for many event sources.",
+      "source": "Kubernetes documentation, “Autoscaling Workloads”, “Event driven Autoscaling”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/#event-driven-autoscaling",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "HorizontalPodAutoscaler (HPA)",
+        "VerticalPodAutoscaler (VPA)",
+        "Cluster Autoscaler and Karpenter",
+        "KEDA",
+        "workload",
+        "node (k8s)",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.keda"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.scenario-rightsizing",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12250,
+      "front": "A team set memory requests by guesswork; some Pods are OOM-killed and others waste memory. Which tool adjusts the requests automatically?",
+      "back": "B) VerticalPodAutoscaler.",
+      "choices": "A) HorizontalPodAutoscaler\nB) VerticalPodAutoscaler\nC) Cluster Autoscaler or Karpenter\nD) KEDA",
+      "choicesExplained": "A changes the number of Pods, not their requests. C changes the number of Nodes. D scales on events.",
+      "explanation": "The VPA rightsizes requests and limits from actual usage, including out-of-memory events.",
+      "source": "Kubernetes documentation, “Vertical Pod Autoscaling”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/vertical-pod-autoscale/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "requests and limits",
+        "Pod",
+        "HorizontalPodAutoscaler (HPA)",
+        "VerticalPodAutoscaler (VPA)",
+        "Cluster Autoscaler and Karpenter",
+        "KEDA",
+        "node (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.vertical-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.scenario-hpa-calc",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12260,
+      "front": "An HPA targets 60% CPU. There are 4 replicas, averaging 90% CPU. How many replicas does it ask for?",
+      "back": "6: ceil(4 × 90 ÷ 60) = ceil(6.0) = 6.",
+      "explanation": "The ratio 1.5 is well outside the default 0.1 tolerance, so the HPA scales.",
+      "source": "Kubernetes documentation, “Horizontal Pod Autoscaling”, “Algorithm details”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/#algorithm-details",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)",
+        "replica",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.hpa-algorithm"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.scenario-hpa-tolerance",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12270,
+      "front": "An HPA targets a value of 100 for a metric, and the current average is 105. Does it scale?",
+      "back": "No. The ratio 1.05 is within the default tolerance of 0.1, so no scaling action is taken.",
+      "explanation": "Scaling happens only when the ratio moves more than 10% away from 1.0 by default.",
+      "source": "Kubernetes documentation, “Horizontal Pod Autoscaling”, “Algorithm details”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/#algorithm-details",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)"
+      ],
+      "conceptIDs": [
+        "k8s.hpa-algorithm"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.scenario-hpa-daemonset",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12280,
+      "front": "Someone points an HPA at a log-collector DaemonSet to add Pods under load. Why will this not work?",
+      "back": "A DaemonSet cannot be scaled: it runs one Pod per node. HPAs only work on scalable resources like Deployments.",
+      "explanation": "The HPA works through a scale subresource, which scalable resources such as Deployments and StatefulSets have.",
+      "source": "Kubernetes documentation, “Horizontal Pod Autoscaling”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)",
+        "DaemonSet",
+        "Pod",
+        "node (k8s)",
+        "Deployment",
+        "StatefulSet"
+      ],
+      "conceptIDs": [
+        "k8s.horizontal-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.scenario-no-cpu-request",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12290,
+      "front": "An HPA targets 50% CPU utilisation but never scales. The Deployment’s containers have no CPU requests. What is wrong?",
+      "back": "Utilisation is measured against CPU requests; without them it is undefined, so the HPA takes no action.",
+      "explanation": "Set CPU requests on every container in the Pods the HPA targets.",
+      "source": "Kubernetes documentation, “Horizontal Pod Autoscaling”, “How does a HorizontalPodAutoscaler work?”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/#how-does-a-horizontalpodautoscaler-work",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)",
+        "Deployment",
+        "container",
+        "requests and limits",
+        "Pod",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.horizontal-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.scenario-vpa-missing",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12300,
+      "front": "You apply a VerticalPodAutoscaler manifest to a fresh cluster and the API server says the resource kind is unknown. Why?",
+      "back": "The VPA is not built in: its CustomResourceDefinition and components must be installed first.",
+      "explanation": "Unlike the HPA, the VPA is an add-on hosted in its own repository.",
+      "source": "Kubernetes documentation, “Vertical Pod Autoscaling”, “API object”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/vertical-pod-autoscale/#api-object",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "VerticalPodAutoscaler (VPA)",
+        "manifest",
+        "cluster (k8s)",
+        "kube-apiserver",
+        "CustomResourceDefinition (CRD)",
+        "HorizontalPodAutoscaler (HPA)",
+        "addons"
+      ],
+      "conceptIDs": [
+        "k8s.vertical-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.classify-cluster-autoscaler",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 12310,
+      "front": "An autoscaler scales a cloud VM group up or down and picks specific Nodes to remove. Is this Cluster Autoscaler or Karpenter?",
+      "back": "Cluster Autoscaler.",
+      "explanation": "Cluster Autoscaler works through pre-configured node groups; Karpenter works with individual machines from NodePools.",
+      "source": "Kubernetes documentation, “Node Autoscaling”, “Cluster Autoscaler”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/cluster-administration/node-autoscaling/#cluster-autoscaler",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "virtual machine (VM)",
+        "node (k8s)",
+        "Cluster Autoscaler and Karpenter"
+      ],
+      "conceptIDs": [
+        "k8s.node-autoscalers"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.classify-keda-schedule",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 12320,
+      "front": "A team wants its batch workers scaled down every night at 20:00 and back up at 07:00. Which tool and feature fit?",
+      "back": "KEDA with its Cron scaler.",
+      "explanation": "Scheduled scaling reduces resource use off-peak; KEDA’s Cron scaler defines the schedule and time zone.",
+      "source": "Kubernetes documentation, “Autoscaling Workloads”, “Autoscaling based on schedules”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/#autoscaling-based-on-schedules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "KEDA"
+      ],
+      "conceptIDs": [
+        "k8s.keda"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.classify-cpa",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 12330,
+      "front": "Cluster DNS replicas should grow as the cluster gains nodes, regardless of traffic. Which autoscaler fits?",
+      "back": "The Cluster Proportional Autoscaler.",
+      "explanation": "It scales replicas with the number of schedulable nodes and cores.",
+      "source": "Kubernetes documentation, “Autoscaling Workloads”, “Autoscaling based on cluster size”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/#autoscaling-based-on-cluster-size",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "DNS",
+        "replica",
+        "cluster (k8s)",
+        "node (k8s)",
+        "Cluster Proportional Autoscaler"
+      ],
+      "conceptIDs": [
+        "k8s.cluster-proportional-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.contrast-hpa-vpa",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 12340,
+      "front": "What does an HPA change, and what does a VPA change?",
+      "back": "The HPA changes the number of Pod replicas; the VPA changes each Pod’s CPU and memory requests and limits.",
+      "explanation": "Horizontal scaling adds instances; vertical scaling gives existing instances more or fewer resources.",
+      "source": "Kubernetes documentation, “Autoscaling Workloads”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/autoscaling/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)",
+        "VerticalPodAutoscaler (VPA)",
+        "Pod",
+        "replica",
+        "requests and limits",
+        "horizontal scaling",
+        "vertical scaling",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.horizontal-pod-autoscaler",
+        "k8s.vertical-pod-autoscaler"
+      ]
+    },
+    {
+      "id": "k8s.autoscaling.contrast-hpa-node-autoscaler",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 12350,
+      "front": "What is the difference between an HPA and a node autoscaler such as Cluster Autoscaler?",
+      "back": "The HPA scales Pods within the existing capacity; a node autoscaler scales the cluster’s capacity itself by adding or removing Nodes.",
+      "explanation": "They are often combined: the HPA adds Pods, and the node autoscaler adds Nodes when those Pods cannot be scheduled.",
+      "source": "Kubernetes documentation, “Node Autoscaling”, “Combine workload and Node autoscaling”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/cluster-administration/node-autoscaling/#horizontal-workload-autoscaling",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "HorizontalPodAutoscaler (HPA)",
+        "Cluster Autoscaler and Karpenter",
+        "Pod",
+        "cluster (k8s)",
+        "node (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.horizontal-pod-autoscaler",
+        "k8s.node-autoscalers"
+      ]
+    }
+  ]
+}

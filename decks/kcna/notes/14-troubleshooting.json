@@ -1,0 +1,798 @@
+{
+  "topic": "Troubleshooting and debugging",
+  "notes": [
+    {
+      "id": "k8s.troubleshooting.what-is-kubectl-describe",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14020,
+      "front": "What is `kubectl describe pods <name>` for?",
+      "back": "Showing a Pod’s current state and its recent events: the first step in debugging a Pod.",
+      "explanation": "Events carry messages from components such as the scheduler, which often name the cause directly.",
+      "example": "A Pod won’t start: `kubectl describe` shows a scheduler event saying no node has enough free CPU.",
+      "source": "Kubernetes documentation, “Debug Pods”, “Debugging Pods”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#debugging-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "kubectl describe"
+      ],
+      "uses": [
+        "kubectl describe",
+        "kubectl",
+        "Pod",
+        "event",
+        "kube-scheduler",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.first-debugging-step"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.what-is-kubectl-logs",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14030,
+      "front": "What does `kubectl logs` show?",
+      "back": "The logs of a container in a Pod; add `--previous` to see the log of the previous instance that crashed.",
+      "explanation": "The debugging guide’s advice is to look at the affected container’s logs first; `--previous` matters once the container has crashed and restarted.",
+      "example": "`kubectl logs web-7d9f -c app --previous` shows the stack trace from the run that crashed.",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Examining pod logs”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#examine-pod-logs",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "kubectl logs"
+      ],
+      "uses": [
+        "kubectl logs",
+        "kubectl",
+        "container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-logs"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.what-is-kubectl-exec",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14040,
+      "front": "What does `kubectl exec` do?",
+      "back": "Runs a command inside a running container; with `-it` and a shell command such as `sh`, you get an interactive shell.",
+      "explanation": "It only works if the container image includes the tools you want to run, such as a shell.",
+      "example": "`kubectl exec -it cassandra -- sh` gives you a shell inside the cassandra container.",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Debugging with container exec”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#container-exec",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "kubectl exec"
+      ],
+      "uses": [
+        "kubectl exec",
+        "kubectl",
+        "container",
+        "container image"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-exec"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.what-is-kubectl-debug",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14050,
+      "front": "What does `kubectl debug` do?",
+      "back": "Adds an ephemeral container to a running Pod, or creates a debugging copy of a Pod, or a debugging Pod on a node.",
+      "explanation": "It is the tool for when `kubectl exec` can’t help, because the container has crashed or its image has no debugging tools.",
+      "example": "`kubectl debug -it mypod --image=busybox:1.28 --target=app` attaches a busybox shell to a Pod whose image has no shell.",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Debugging with an ephemeral debug container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "kubectl debug"
+      ],
+      "uses": [
+        "kubectl debug",
+        "kubectl",
+        "ephemeral container",
+        "Pod",
+        "node (k8s)",
+        "kubectl exec",
+        "container image"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-debug"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.what-is-crictl",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 14060,
+      "front": "What is `crictl`?",
+      "back": "A command-line tool for inspecting and debugging CRI-compatible container runtimes, and the applications they run, on a Kubernetes node.",
+      "explanation": "It needs a Linux node with a CRI runtime; it can list Pods, images and containers, run commands in containers and fetch their logs.",
+      "example": "On a node running containerd, an administrator runs `crictl ps` to list the containers the runtime is running.",
+      "source": "Kubernetes documentation, “Debugging Kubernetes nodes with crictl”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "crictl"
+      ],
+      "uses": [
+        "crictl",
+        "CRI",
+        "container runtime",
+        "node (k8s)",
+        "Pod",
+        "container",
+        "container image",
+        "containerd"
+      ],
+      "conceptIDs": [
+        "k8s.crictl"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.what-is-metrics-server",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14070,
+      "front": "What is Metrics Server?",
+      "back": "A cluster add-on that collects CPU and memory usage from each kubelet and serves it through the Kubernetes Metrics API.",
+      "explanation": "It is the reference implementation of the Metrics API, whose main job is feeding usage figures to autoscalers.",
+      "example": "A HorizontalPodAutoscaler scaling on CPU reads its usage figures from the Metrics API that Metrics Server provides.",
+      "source": "Kubernetes documentation, “Resource metrics pipeline”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "metrics server"
+      ],
+      "uses": [
+        "metrics server",
+        "addons",
+        "kubelet",
+        "Kubernetes API",
+        "HorizontalPodAutoscaler (HPA)",
+        "VerticalPodAutoscaler (VPA)",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.metrics-server"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.what-is-kubectl-top",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 14080,
+      "front": "What does `kubectl top` show?",
+      "back": "Current CPU and memory usage of nodes and Pods, read from the Metrics API.",
+      "explanation": "It is a quick check for a Pod short of resources; it only works if Metrics Server, or another Metrics API implementation, is running.",
+      "example": "`kubectl top pods` shows one Pod using far more memory than its neighbours.",
+      "source": "Kubernetes documentation, “Observability”, “Metrics API”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/cluster-administration/observability/#metrics-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "kubectl top"
+      ],
+      "uses": [
+        "kubectl top",
+        "kubectl",
+        "metrics server",
+        "node (k8s)",
+        "Pod",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-top"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.pending-meaning",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14090,
+      "front": "A Pod stays in `Pending`. What does that mean?",
+      "back": "It cannot be scheduled onto a node.",
+      "explanation": "`kubectl describe` then shows messages from the scheduler explaining why.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod stays pending”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-stays-pending",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "Pod phases",
+        "node (k8s)",
+        "kube-scheduler",
+        "kubectl describe"
+      ],
+      "conceptIDs": [
+        "k8s.pod-stuck-pending"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.pending-causes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14100,
+      "front": "What are the two usual reasons a Pod stays `Pending`, according to the debugging guide?",
+      "back": "Not enough free CPU or memory in the cluster for it, or a `hostPort` that limits where it can be placed.",
+      "explanation": "A hostPort is a fixed port on the node itself. Fix the first by deleting Pods, lowering resource requests or adding nodes; for the second, expose the Pod through a Service instead.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod stays pending”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-stays-pending",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "Pod phases",
+        "requests and limits",
+        "Service",
+        "cluster (k8s)",
+        "node (k8s)",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.pod-stuck-pending"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.waiting-meaning",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14110,
+      "front": "A Pod’s container stays in `Waiting`. What does that mean, and what is the most common cause?",
+      "back": "It has been scheduled to a node but can’t run there; most often, the image can’t be pulled.",
+      "explanation": "`kubectl describe` usually shows the reason in the Pod’s events.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod stays waiting”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-stays-waiting",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container states",
+        "Pod",
+        "node (k8s)",
+        "container image",
+        "kubectl describe",
+        "event"
+      ],
+      "conceptIDs": [
+        "k8s.pod-stuck-waiting"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.image-pull-checks",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14120,
+      "front": "A container can’t pull its image. Which three things does the debugging guide tell you to check?",
+      "back": "That the image name is correct, that the image was pushed to the registry, and that it can be pulled manually.",
+      "explanation": "For the manual pull, the guide suggests `docker pull <image>` if you use Docker on your PC.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod stays waiting”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-stays-waiting",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "container image",
+        "node (k8s)",
+        "registry"
+      ],
+      "conceptIDs": [
+        "k8s.pod-stuck-waiting"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.terminating-cause",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 14130,
+      "front": "A Pod is stuck in `Terminating`. What is the typical cause?",
+      "back": "The Pod has a finalizer, and an admission webhook stops the control plane from removing that finalizer, so the Pod can’t be deleted.",
+      "explanation": "Look for validating or mutating webhooks that target `UPDATE` operations on Pods.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod stays terminating”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-stays-terminating",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "field selectors, owners and dependents, finalizers, garbage collection",
+        "admission controller",
+        "control plane",
+        "object"
+      ],
+      "conceptIDs": [
+        "k8s.pod-stuck-terminating"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.exec-not-enough",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14140,
+      "front": "When is `kubectl exec` not enough to debug a container?",
+      "back": "When the container has crashed, or when its image has no debugging tools, as with distroless images, which contain only the app.",
+      "explanation": "Then `kubectl debug` can add an ephemeral container that brings its own tools.",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Debugging with an ephemeral debug container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl exec",
+        "kubectl debug",
+        "container",
+        "container image",
+        "ephemeral container"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-debug",
+        "k8s.kubectl-exec"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.ephemeral-stable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 14150,
+      "front": "Since which Kubernetes version has debugging with ephemeral containers been stable?",
+      "back": "v1.25.",
+      "explanation": "You add them to a running Pod with `kubectl debug`.",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Debugging with an ephemeral debug container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ephemeral container",
+        "kubectl debug",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-debug"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.node-shell-host",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 14160,
+      "front": "You open a shell on a node with `kubectl debug node/<name> -it --image=ubuntu`. Where is the node’s root filesystem?",
+      "back": "Mounted at `/host` inside the debugging Pod.",
+      "explanation": "The debugging Pod shares the node’s network and can see its processes, but isn’t privileged unless you ask for it.",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Debugging via a shell on the node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#node-shell-session",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl debug",
+        "node (k8s)",
+        "Pod",
+        "root"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-debug"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.copy-to",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 14170,
+      "front": "What does `kubectl debug --copy-to` do?",
+      "back": "Creates a copy of the Pod with settings changed for debugging, such as an added container, a different command or different images.",
+      "explanation": "Useful when the original can’t be debugged in place, for example because the app crashes on startup.",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Debugging using a copy of the Pod”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#debugging-using-a-copy-of-the-pod",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl debug",
+        "Pod",
+        "container",
+        "container image"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-debug"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.service-check-endpoints",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14180,
+      "front": "Debugging a Service: what does the debugging guide tell you to verify first?",
+      "back": "That it has endpoints: its EndpointSlices should list one address for each Pod you expect behind it.",
+      "explanation": "The API server makes one or more EndpointSlices for every Service; three replicas should mean three addresses.",
+      "source": "Kubernetes documentation, “Debug Pods”, “Debugging Services”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#debugging-services",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "EndpointSlice",
+        "Pod",
+        "kube-apiserver",
+        "replica"
+      ],
+      "conceptIDs": [
+        "k8s.debug-services"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.service-no-endpoints-cause",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14190,
+      "front": "A Service’s EndpointSlices list no endpoints. What is the common mistake?",
+      "back": "The Service’s selector doesn’t match the Pods’ labels, often because of a typo.",
+      "explanation": "List Pods using the Service’s selector to confirm. Also check that the Pod’s `containerPort` matches the Service’s `targetPort`.",
+      "source": "Kubernetes documentation, “Debug Services”, “Does the Service have any EndpointSlices?”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/#does-the-service-have-any-endpointslices",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "EndpointSlice",
+        "selector",
+        "label",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.debug-services"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.validate-flag",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 14200,
+      "front": "A Pod runs but ignores a setting, perhaps because a key was misspelt in its manifest. How can kubectl catch this?",
+      "back": "Delete the Pod and recreate it with `kubectl apply --validate`, which reports unknown fields.",
+      "explanation": "A misspelt key, such as `commnd` for `command`, is otherwise silently ignored.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod is running but not doing what I told it to do”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-is-running-but-not-doing-what-i-told-it-to-do",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "manifest",
+        "kubectl apply",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "k8s.first-debugging-step"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.metrics-api-data",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 14210,
+      "front": "What data does the Metrics API provide, and which clients use it?",
+      "back": "CPU and memory usage for nodes and Pods, used by `kubectl top`, the HorizontalPodAutoscaler and the VerticalPodAutoscaler.",
+      "explanation": "You must deploy Metrics Server, or another adapter that serves the Metrics API, before any of them can use it.",
+      "source": "Kubernetes documentation, “Observability”, “Metrics API”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/cluster-administration/observability/#metrics-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "metrics server",
+        "kubectl top",
+        "HorizontalPodAutoscaler (HPA)",
+        "VerticalPodAutoscaler (VPA)",
+        "node (k8s)",
+        "Pod",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.metrics-server",
+        "k8s.kubectl-top"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.metrics-api-stable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 14220,
+      "front": "In which Kubernetes version is the Metrics API marked stable?",
+      "back": "v1.37.",
+      "explanation": "In v1.37 `kubectl top` prefers `metrics.k8s.io/v1`, while the HorizontalPodAutoscaler controller still supports only `v1beta1`.",
+      "source": "Kubernetes documentation, “Observability”, “Metrics API”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/cluster-administration/observability/#metrics-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "metrics server",
+        "kubectl top",
+        "HorizontalPodAutoscaler (HPA)"
+      ],
+      "conceptIDs": [
+        "k8s.metrics-server"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date"
+    },
+    {
+      "id": "k8s.troubleshooting.scenario-pending-cpu",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 14230,
+      "front": "`kubectl describe` on a `Pending` Pod shows a scheduler event: no node has enough free CPU. What are your options?",
+      "back": "Make room or add capacity: delete other Pods, lower the Pod’s CPU request, or add nodes.",
+      "explanation": "The scheduler places Pods by their requests, so a request larger than any node’s free CPU can never be scheduled.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod stays pending”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-stays-pending",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl describe",
+        "Pod",
+        "Pod phases",
+        "event",
+        "kube-scheduler",
+        "node (k8s)",
+        "requests and limits",
+        "cpu"
+      ],
+      "conceptIDs": [
+        "k8s.pod-stuck-pending",
+        "k8s.first-debugging-step"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.scenario-crash-logs",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 14240,
+      "front": "A container keeps restarting and shows `CrashLoopBackOff`. You want the error it printed just before its last crash. Which command do you use?",
+      "back": "A) `kubectl logs <pod> --previous` (add `-c <container>` in a multi-container Pod).",
+      "choices": "A) `kubectl logs <pod> --previous`\nB) `kubectl describe pod <pod>`\nC) `kubectl exec <pod> -- cat /dev/stdout`",
+      "choicesExplained": "B: describe shows state and events, not what the application printed. C: exec runs a command in the current container; it is not the documented way to read a crashed instance’s log.",
+      "explanation": "`--previous` retrieves the previous container’s crash log.",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Examining pod logs”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#examine-pod-logs",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl logs",
+        "CrashLoopBackOff",
+        "container",
+        "kubectl describe",
+        "kubectl exec"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-logs"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.scenario-no-shell",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 14250,
+      "front": "`kubectl exec -it api -- sh` fails with “executable file not found”: the image has no shell. How do you get a shell alongside the app?",
+      "back": "Add an ephemeral debug container: `kubectl debug -it api --image=busybox:1.28 --target=api`.",
+      "choices": "A) `kubectl logs api`\nB) `kubectl debug` with an ephemeral container\nC) `kubectl exec` with `-c` set to the same container",
+      "choicesExplained": "A: logs show output but give no shell. C: the same container still has no shell, so exec fails the same way.",
+      "explanation": "The ephemeral container brings its own tools, and `--target` lets it see the app container’s processes.",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Debugging with an ephemeral debug container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl exec",
+        "kubectl debug",
+        "ephemeral container",
+        "container image",
+        "kubectl logs"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-debug",
+        "k8s.kubectl-exec"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.scenario-exec",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 14260,
+      "front": "You want to read a configuration file inside a running nginx container whose image includes a shell. Which command do you use?",
+      "back": "`kubectl exec`, for example `kubectl exec -it <pod> -- sh`, then read the file.",
+      "choices": "A) `kubectl exec`\nB) `kubectl logs`\nC) `kubectl debug node/<node>`",
+      "choicesExplained": "B: logs show what the app wrote to its output, not files inside the container. C: a node shell reaches the node, not straight into the container.",
+      "explanation": "The image has the tools you need, so there is no need for an ephemeral container.",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Debugging with container exec”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#container-exec",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl exec",
+        "kubectl debug",
+        "kubectl logs",
+        "container",
+        "container image",
+        "ephemeral container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-exec"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.scenario-service-no-endpoints",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 14270,
+      "front": "A Service answers nothing. Its Pods are `Running`, but the Service’s EndpointSlices show no endpoints. What is the most likely cause?",
+      "back": "The Service’s selector doesn’t match the labels on the Pods.",
+      "choices": "A) Cluster DNS is broken\nB) The selector doesn’t match the Pods’ labels\nC) The cluster is out of CPU",
+      "choicesExplained": "A: broken DNS stops name lookups, but the EndpointSlices would still list the Pods. C: the Pods are already Running, so capacity is not the problem.",
+      "explanation": "A control loop fills EndpointSlices from the Service’s selector, so no match means no endpoints.",
+      "source": "Kubernetes documentation, “Debug Services”, “Does the Service have any EndpointSlices?”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/#does-the-service-have-any-endpointslices",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "Pod",
+        "Pod phases",
+        "EndpointSlice",
+        "selector",
+        "label",
+        "controller / control loop",
+        "cpu",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "k8s.debug-services"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.scenario-top-fails",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 14280,
+      "front": "`kubectl top pods` fails because the Metrics API is not available. What is missing from the cluster?",
+      "back": "An implementation of the Metrics API, usually Metrics Server.",
+      "explanation": "The Metrics API is served through an add-on; a cluster doesn’t provide it until one is deployed.",
+      "source": "Kubernetes documentation, “Resource metrics pipeline”, “Metrics API”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#metrics-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl top",
+        "metrics server",
+        "addons",
+        "cluster (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-top",
+        "k8s.metrics-server"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.classify-pending-or-waiting",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 14290,
+      "front": "A Pod has been assigned to node-2, but its container never starts. In the debugging guide’s terms, is it stuck “Pending” or stuck “Waiting”?",
+      "back": "Waiting: it has been scheduled, so the problem is running it on that node, not placing it.",
+      "explanation": "Check the image first: a failed image pull is the most common cause.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod stays waiting”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-stays-waiting",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "node (k8s)",
+        "container",
+        "container states",
+        "Pod phases",
+        "container image"
+      ],
+      "conceptIDs": [
+        "k8s.pod-stuck-waiting",
+        "k8s.pod-stuck-pending"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.scenario-crictl",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 14300,
+      "front": "You are logged in to a node and want to list the containers its CRI runtime is running, straight from the runtime. Which tool?",
+      "back": "`crictl`, for example `crictl ps`.",
+      "explanation": "`crictl` talks to CRI-compatible runtimes on the node itself.",
+      "source": "Kubernetes documentation, “Debugging Kubernetes nodes with crictl”, “Example crictl commands”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/#example-crictl-commands",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "crictl",
+        "node (k8s)",
+        "CRI",
+        "container"
+      ],
+      "conceptIDs": [
+        "k8s.crictl"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.contrast-pending-waiting",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 14310,
+      "front": "Stuck `Pending` versus stuck `Waiting`: what is the difference?",
+      "back": "Pending: it can’t be scheduled onto any node. Waiting: it is scheduled but can’t run there, often because the image won’t pull.",
+      "explanation": "Pending points at resources or placement; Waiting points at the node or the image.",
+      "source": "Kubernetes documentation, “Debug Pods”, “Debugging Pods”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#debugging-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod phases",
+        "container states",
+        "node (k8s)",
+        "container image"
+      ],
+      "conceptIDs": [
+        "k8s.pod-stuck-pending",
+        "k8s.pod-stuck-waiting"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.contrast-exec-debug",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 14320,
+      "front": "`kubectl exec` versus `kubectl debug`: what is the difference?",
+      "back": "`exec` runs a command in an existing container with that image’s tools; `debug` adds a new ephemeral container with tools you choose.",
+      "explanation": "Use `debug` when the container has crashed or its image lacks a shell.",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Debugging with an ephemeral debug container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl exec",
+        "kubectl debug",
+        "container",
+        "container image",
+        "ephemeral container"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-exec",
+        "k8s.kubectl-debug"
+      ]
+    },
+    {
+      "id": "k8s.troubleshooting.contrast-logs-describe",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 14330,
+      "front": "`kubectl logs` versus `kubectl describe`: what does each show?",
+      "back": "`logs` shows what the application wrote; `describe` shows Kubernetes’ view: the object’s state and recent events.",
+      "explanation": "Start with describe to see what Kubernetes did, then logs to see what the app did.",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Examining pod logs”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#examine-pod-logs",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl logs",
+        "kubectl describe",
+        "object",
+        "event"
+      ],
+      "conceptIDs": [
+        "k8s.kubectl-logs",
+        "k8s.first-debugging-step"
+      ]
+    }
+  ]
+}

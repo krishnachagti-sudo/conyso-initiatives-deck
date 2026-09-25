@@ -1,0 +1,2118 @@
+{
+  "topic": "Networking",
+  "notes": [
+    {
+      "id": "k8s.networking.what-is-the-network-model",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9010,
+      "front": "What does the Kubernetes network model promise about Pod addresses?",
+      "back": "Every Pod gets its own cluster-wide IP address and, unless deliberately segmented off, can reach any other Pod directly, without proxies or address translation.",
+      "explanation": "Because of this, Pods can be treated much like VMs or physical hosts for ports, naming and discovery; nobody has to map container ports to host ports.",
+      "example": "Like every flat in a block having its own direct phone line: any flat can ring any other without going through a switchboard.",
+      "source": "Kubernetes documentation, “Services, Load Balancing, and Networking”, “The Kubernetes network model”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/#the-kubernetes-network-model",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "network model"
+      ],
+      "uses": [
+        "Pod",
+        "cluster (k8s)",
+        "node (k8s)",
+        "virtual machine (VM)",
+        "network model",
+        "ip address",
+        "port",
+        "proxy"
+      ],
+      "conceptIDs": [
+        "k8s.network-model"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-cni",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9020,
+      "front": "What is a CNI plugin?",
+      "back": "A network plugin that follows the Container Network Interface (CNI) specification and implements the Kubernetes network model.",
+      "explanation": "Kubernetes defines the network model but does not build the Pod network itself; on Linux, most container runtimes use CNI to hand that job to a plugin.",
+      "example": "Kubernetes writes the rules of the phone system; the CNI plugin is the telephone company that actually lays the lines.",
+      "source": "Kubernetes documentation, “Network Plugins”; Kubernetes documentation, “Services, Load Balancing, and Networking”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "CNI"
+      ],
+      "uses": [
+        "network model",
+        "container runtime",
+        "Pod",
+        "CNI"
+      ],
+      "conceptIDs": [
+        "k8s.cni"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-clusterip",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9070,
+      "front": "What does a Service of type ClusterIP do?",
+      "back": "Exposes the Service on a cluster-internal IP address, so it is reachable only from inside the cluster.",
+      "explanation": "ClusterIP is the default type, and several other types build on it. To reach it from outside you need another type, or an entry point such as Ingress or Gateway (covered later).",
+      "example": "An internal office extension: colleagues can dial it, callers from outside cannot.",
+      "source": "Kubernetes documentation, “Service”, “Service type”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "ClusterIP"
+      ],
+      "uses": [
+        "Service",
+        "cluster (k8s)",
+        "ClusterIP",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-nodeport",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9080,
+      "front": "What does a Service of type NodePort do?",
+      "back": "Exposes the Service on every node’s IP address at the same static port, so it can be reached from outside the cluster.",
+      "explanation": "Each node listens on the allocated port and forwards traffic to one of the Service’s ready Pods; this lets you put your own load-balancing solution in front.",
+      "example": "Port 30080 opened on every node: connecting to any node’s IP on 30080 reaches the Service.",
+      "source": "Kubernetes documentation, “Service”, “type: NodePort”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "NodePort"
+      ],
+      "uses": [
+        "Service",
+        "node (k8s)",
+        "cluster (k8s)",
+        "load balancer",
+        "NodePort",
+        "ip address",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-loadbalancer-type",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9090,
+      "front": "What does a Service of type LoadBalancer do?",
+      "back": "Exposes the Service externally through an external load balancer, typically provisioned by a supported cloud provider.",
+      "explanation": "Kubernetes has no load-balancing component of its own: you provide one, or integrate the cluster with a cloud provider that creates it for you.",
+      "example": "On a public cloud, creating the Service makes the provider set up a load balancer and publish its address in the Service’s status.",
+      "source": "Kubernetes documentation, “Service”, “Service type” and “type: LoadBalancer”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "LoadBalancer"
+      ],
+      "uses": [
+        "Service",
+        "load balancer",
+        "LoadBalancer"
+      ],
+      "conceptIDs": [
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-externalname",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9100,
+      "front": "What does a Service of type ExternalName do?",
+      "back": "Maps the Service to an external DNS name: cluster DNS returns an alias (CNAME) record for it, with no proxying at all.",
+      "explanation": "The redirect happens in DNS, not by forwarding traffic. Later you can move the target into the cluster and change the Service type without changing clients.",
+      "example": "Looking up my-service in namespace prod returns a CNAME for my.database.example.com.",
+      "source": "Kubernetes documentation, “Service”, “type: ExternalName”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#externalname",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "ExternalName"
+      ],
+      "uses": [
+        "Service",
+        "DNS",
+        "namespace",
+        "ExternalName"
+      ],
+      "conceptIDs": [
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-a-headless-service",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9110,
+      "front": "What is a headless Service?",
+      "back": "A Service with .spec.clusterIP set to \"None\": no cluster IP, no proxying or load balancing, and DNS returns the Pods’ own IPs.",
+      "explanation": "Clients connect directly to whichever Pod they prefer. Use it when clients must reach particular Pods, or when you want your own service discovery instead of the built-in one.",
+      "example": "A database cluster whose members must talk to specific peers asks DNS for the headless Service and gets every member’s IP.",
+      "source": "Kubernetes documentation, “Service”, “Headless Services”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#headless-services",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "headless Service"
+      ],
+      "uses": [
+        "Service",
+        "ClusterIP",
+        "DNS",
+        "Pod",
+        "load balancer",
+        "service discovery",
+        "headless Service",
+        "ip address",
+        "workload"
+      ],
+      "conceptIDs": [
+        "k8s.headless-service"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-an-endpointslice",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9120,
+      "front": "What is an EndpointSlice?",
+      "back": "An object that tracks the IP addresses of the backend endpoints of a Service, which are usually Pods.",
+      "explanation": "The control plane normally manages EndpointSlices automatically, updating them whenever the set of Pods behind a Service changes.",
+      "example": "A Service selecting three Pods has an EndpointSlice listing those three Pod IPs; when one Pod is replaced, the slice is updated.",
+      "source": "Kubernetes glossary, “EndpointSlice”",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?all=true#term-endpoint-slice",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "EndpointSlice"
+      ],
+      "uses": [
+        "object",
+        "Service",
+        "Pod",
+        "control plane",
+        "EndpointSlice",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "k8s.endpoint-slice"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-ingress",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9130,
+      "front": "What is an Ingress?",
+      "back": "An API object that manages external access to Services in a cluster, typically HTTP and HTTPS, using routing rules.",
+      "explanation": "One Ingress can put several Services behind a single entry point, and may also give load balancing, decrypt HTTPS for the Services (TLS termination) and serve several website names from one IP (name-based virtual hosting).",
+      "example": "Requests for shop.example.com go to the “shop” Service and api.example.com to the “api” Service, through one entry point.",
+      "source": "Kubernetes documentation, “Ingress”, “What is Ingress?”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#what-is-ingress",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Ingress"
+      ],
+      "uses": [
+        "object",
+        "Service",
+        "cluster (k8s)",
+        "load balancer",
+        "TLS / mTLS",
+        "Ingress",
+        "http"
+      ],
+      "conceptIDs": [
+        "k8s.ingress"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-an-ingress-controller",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9140,
+      "front": "What is an ingress controller?",
+      "back": "The component that fulfils Ingress rules, usually by configuring a load balancer; without one, an Ingress has no effect.",
+      "explanation": "The Ingress object is only a description of the routing wanted; you must choose and run at least one ingress controller in the cluster.",
+      "example": "Creating an Ingress in a cluster with no ingress controller changes nothing: no traffic is routed.",
+      "source": "Kubernetes documentation, “Ingress”, “Prerequisites”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#prerequisites",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "ingress controller"
+      ],
+      "uses": [
+        "Ingress",
+        "load balancer",
+        "controller / control loop",
+        "ingress controller"
+      ],
+      "conceptIDs": [
+        "k8s.ingress"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-gateway-api",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9150,
+      "front": "What is the Gateway API?",
+      "back": "A newer, add-on set of Kubernetes APIs for routing traffic into Services. Different teams manage different parts, and it understands protocols such as HTTP.",
+      "explanation": "It offers routing features such as header matching and traffic weighting that Ingress could only do through custom annotations. Its kinds are custom resources.",
+      "example": "A platform team manages the Gateway (the load balancer); an app team attaches a route (an HTTPRoute) sending /cart to its Service.",
+      "source": "Kubernetes documentation, “Gateway API”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Gateway API"
+      ],
+      "uses": [
+        "addons",
+        "Ingress",
+        "Service",
+        "CustomResourceDefinition (CRD)",
+        "Gateway API",
+        "load balancer",
+        "http"
+      ],
+      "conceptIDs": [
+        "k8s.gateway-api"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-a-networkpolicy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9160,
+      "front": "What is a NetworkPolicy?",
+      "back": "An object specifying how selected Pods may communicate with other Pods, namespaces and IP ranges, at IP address or port level.",
+      "explanation": "NetworkPolicies use labels to select Pods and list the traffic allowed to or from them; they call incoming traffic “ingress” and outgoing traffic “egress” (not the Ingress object). The network plugin enforces them.",
+      "example": "A policy selecting Pods labelled role=db that allows incoming traffic only from Pods labelled role=api.",
+      "source": "Kubernetes documentation, “Network Policies”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "NetworkPolicy"
+      ],
+      "uses": [
+        "object",
+        "Pod",
+        "namespace",
+        "label",
+        "selector",
+        "CNI",
+        "NetworkPolicy",
+        "ip address",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.network-policy"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-dual-stack",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9170,
+      "front": "What is IPv4/IPv6 dual-stack networking in Kubernetes?",
+      "back": "Allocating both an IPv4 and an IPv6 address to Pods and Services.",
+      "explanation": "It lets workloads use IPv4 or IPv6, including for traffic leaving the cluster.",
+      "example": "A Pod gets 10.244.1.5 and fd00::5 at the same time.",
+      "source": "Kubernetes documentation, “IPv4/IPv6 dual-stack”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/dual-stack/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "dual-stack"
+      ],
+      "uses": [
+        "Pod",
+        "Service",
+        "dual-stack",
+        "workload"
+      ],
+      "conceptIDs": [
+        "k8s.dual-stack"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-a-service-mesh",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9190,
+      "front": "What is a service mesh?",
+      "back": "Infrastructure that manages the traffic between services, adding reliability, observability and security uniformly, without changing application code.",
+      "explanation": "With hundreds of microservices, building encryption, metrics and traffic insight into each one causes friction and bugs; the mesh does it once for all.",
+      "example": "Adding encryption and common request metrics to every service in a cluster by installing a mesh rather than editing each app.",
+      "source": "Cloud Native Glossary, “Service Mesh”",
+      "sourceURL": "https://glossary.cncf.io/service-mesh/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "service mesh"
+      ],
+      "uses": [
+        "microservices architecture",
+        "reliability",
+        "observability (concept)",
+        "service mesh",
+        "encryption"
+      ],
+      "conceptIDs": [
+        "k8s.service-mesh"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-a-service-proxy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9200,
+      "front": "What is a service proxy?",
+      "back": "A go-between that intercepts traffic to or from a service, applies logic such as rules or data collection, and forwards it on.",
+      "explanation": "It moves networking code out of each app into the platform. In the sidecar model, each Pod gets its own proxy container.",
+      "example": "A proxy container running beside an app container, encrypting its connections and recording its requests.",
+      "source": "Cloud Native Glossary, “Service Proxy”",
+      "sourceURL": "https://glossary.cncf.io/service-proxy/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "service proxy"
+      ],
+      "uses": [
+        "proxy",
+        "Pod",
+        "sidecar container",
+        "service mesh",
+        "service proxy",
+        "encryption"
+      ],
+      "conceptIDs": [
+        "k8s.service-proxy"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-an-api-gateway",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9210,
+      "front": "What is an API gateway?",
+      "back": "A tool that brings an application’s APIs together behind one entry point, where shared functions like authorisation and rate limiting are applied.",
+      "explanation": "External API consumers get a single address, and the organisation applies cross-cutting logic centrally without changing app code.",
+      "example": "All requests to api.example.com pass through one gateway that checks tokens and limits each client to 100 requests a minute.",
+      "source": "Cloud Native Glossary, “API Gateway”",
+      "sourceURL": "https://glossary.cncf.io/api-gateway/",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "API gateway"
+      ],
+      "uses": [
+        "API",
+        "API gateway"
+      ],
+      "conceptIDs": [
+        "k8s.api-gateway"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-istio",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9220,
+      "front": "What is Istio?",
+      "back": "An open platform, not specific to Kubernetes, that integrates microservices, manages traffic flow, enforces policies and collects traffic data (telemetry).",
+      "explanation": "Adding Istio does not require changing application code; combined with service deployments it is what is commonly called a service mesh.",
+      "example": "Installing Istio to control which services may call each other and to collect their traffic data.",
+      "source": "Kubernetes glossary, “Istio”",
+      "sourceURL": "https://kubernetes.io/docs/reference/glossary/?all=true#term-istio",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Istio"
+      ],
+      "uses": [
+        "microservices architecture",
+        "service mesh",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "k8s.istio"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-a-service",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9222,
+      "front": "Why do clients reach Pods through a Service rather than directly?",
+      "back": "Pods come and go and change IP addresses; a Service gives one stable IP address or name in front of them.",
+      "explanation": "Pods are created and destroyed all the time and change IPs; the Service picks its backend Pods with a selector, so clients never track individual Pods.",
+      "example": "Like a shop’s phone number: it stays the same while the staff who answer it change every shift.",
+      "source": "Kubernetes documentation, “Service”, overview and “Services in Kubernetes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "selector",
+        "Service",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "k8s.service"
+      ]
+    },
+    {
+      "id": "k8s.networking.what-is-dns-for-services",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9224,
+      "front": "What does DNS give Services and Pods inside a cluster?",
+      "back": "Consistent DNS names, so clients can reach Services by name instead of by IP address.",
+      "explanation": "Kubernetes creates DNS records for Services and Pods, and the kubelet configures each Pod’s DNS so its containers can look Services up by name.",
+      "example": "A frontend calls “my-service” rather than 10.0.0.11; if the IP changes, the name still works.",
+      "source": "Kubernetes documentation, “DNS for Services and Pods”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "Pod",
+        "kubelet",
+        "container",
+        "service discovery",
+        "DNS",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "k8s.service-dns-name"
+      ]
+    },
+    {
+      "id": "k8s.networking.statefulset-needs-headless-service",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9226,
+      "front": "Which kind of Service does a StatefulSet require, and who creates it?",
+      "back": "A headless Service, which gives the Pods their network identity; you must create it yourself.",
+      "explanation": "A headless Service lets DNS return each Pod’s own address, which is how each StatefulSet Pod keeps a stable network ID.",
+      "source": "Kubernetes documentation, “StatefulSets”, “Limitations”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#limitations",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "StatefulSet",
+        "headless Service",
+        "Service",
+        "Pod",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "k8s.statefulset",
+        "k8s.headless-service"
+      ]
+    },
+    {
+      "id": "k8s.networking.cn-list-service-meshes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9228,
+      "front": "The CNCF definition lists typical cloud native technologies: containers, ___, multi-tenancy, microservices, immutable infrastructure, serverless and declarative APIs. What is the missing one?",
+      "back": "Service meshes.",
+      "explanation": "It is one of the technologies the definition names; the list is non-exhaustive.",
+      "source": "CNCF Cloud Native Definition v1.1 (CNCF Technical Oversight Committee), “Definition”",
+      "sourceURL": "https://github.com/cncf/toc/blob/main/DEFINITION.md#definition",
+      "sourceLicence": "C · no licence stated; facts in our own words",
+      "uses": [
+        "CNCF",
+        "cloud native (cncf definition v1.1)",
+        "cloud native technologies (list)",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "k8s.cloud-native-technologies",
+        "k8s.service-mesh"
+      ]
+    },
+    {
+      "id": "k8s.networking.pods-talk-without-nat",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9230,
+      "front": "Under the Kubernetes network model, can a Pod on one node reach a Pod on another node directly?",
+      "back": "Yes: all Pods can communicate with all other Pods, on the same or different nodes, without proxies or address translation.",
+      "explanation": "This holds unless the network is intentionally segmented, for example by NetworkPolicy. Node agents such as the kubelet can also reach all Pods on their node.",
+      "source": "Kubernetes documentation, “Services, Load Balancing, and Networking”, “The Kubernetes network model”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/#the-kubernetes-network-model",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "network model",
+        "Pod",
+        "node (k8s)",
+        "NetworkPolicy",
+        "kubelet",
+        "proxy"
+      ],
+      "conceptIDs": [
+        "k8s.network-model"
+      ]
+    },
+    {
+      "id": "k8s.networking.who-implements-the-model",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9240,
+      "front": "Which parts of the network model are provided by components outside Kubernetes itself?",
+      "back": "Pod network namespace setup (the CRI runtime), the Pod network (a CNI plugin) and, generally, NetworkPolicy enforcement.",
+      "explanation": "Kubernetes defines the APIs and ships kube-proxy as the default service proxy; some network plugins replace kube-proxy with their own.",
+      "source": "Kubernetes documentation, “Services, Load Balancing, and Networking”, “The Kubernetes network model”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/#the-kubernetes-network-model",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "network model",
+        "CNI",
+        "CRI",
+        "NetworkPolicy",
+        "kube-proxy (optional)",
+        "Pod",
+        "proxy"
+      ],
+      "conceptIDs": [
+        "k8s.network-model",
+        "k8s.cni"
+      ]
+    },
+    {
+      "id": "k8s.networking.cni-required",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9250,
+      "front": "Without a {{c1::CNI plugin}}, a cluster has nothing to implement the Kubernetes network model for its Pods.",
+      "explanation": "Plugins must support CNI specification v0.4.0 or later; the project recommends v1.0.0-compatible plugins.",
+      "source": "Kubernetes documentation, “Network Plugins”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CNI",
+        "network model",
+        "cluster (k8s)",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.cni"
+      ]
+    },
+    {
+      "id": "k8s.networking.default-service-type",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9260,
+      "front": "If a Service manifest names no type, Kubernetes creates a Service of type {{c1::ClusterIP}}.",
+      "explanation": "ClusterIP is internal only. To expose it outside the cluster you choose another type or put an Ingress or Gateway in front.",
+      "source": "Kubernetes documentation, “Service”, “Service type”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "manifest",
+        "ClusterIP",
+        "Ingress",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.four-service-types",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9270,
+      "front": "ClusterIP, NodePort and LoadBalancer are three Service types. Which is the fourth?",
+      "back": "ExternalName.",
+      "explanation": "The four `type` values are ClusterIP (default), NodePort, LoadBalancer and ExternalName. Ingress and headless Services are not types.",
+      "source": "Kubernetes documentation, “Service”, “Service type”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "ClusterIP",
+        "NodePort",
+        "LoadBalancer",
+        "ExternalName",
+        "Ingress",
+        "headless Service",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.nodeport-range",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9280,
+      "front": "What is the default port range for NodePort Services?",
+      "back": "30000–32767.",
+      "explanation": "The control plane allocates a port from the range set by the --service-node-port-range flag. A port you pick yourself must be inside it.",
+      "source": "Kubernetes documentation, “Service”, “type: NodePort”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NodePort",
+        "control plane",
+        "kube-apiserver",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.nodeport-range"
+      ]
+    },
+    {
+      "id": "k8s.networking.nested-types",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9290,
+      "front": "How are the ClusterIP, NodePort and LoadBalancer types related?",
+      "back": "They nest: each adds to the previous one. A NodePort Service also gets a cluster IP; a LoadBalancer Service normally also gets a node port.",
+      "explanation": "The Service `type` field is designed as nested functionality. The one exception: a LoadBalancer can be defined with node port allocation disabled.",
+      "source": "Kubernetes documentation, “Service”, “Service type”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ClusterIP",
+        "NodePort",
+        "LoadBalancer",
+        "Service",
+        "ip address",
+        "port",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "k8s.nested-service-types"
+      ],
+      "image": {
+        "file": "media/service-types-nested.svg",
+        "alt": "Nested boxes: ClusterIP (the default, a cluster-internal virtual IP) sits inside NodePort (adds the same static port on every node, default range 30000–32767), which sits inside LoadBalancer (adds an external load balancer). ExternalName stands outside the nesting: DNS returns a CNAME to an external name, with no proxying.",
+        "credit": "Drawn for this deck from Kubernetes documentation, “Service”",
+        "licence": "B · CC BY-SA 4.0",
+        "side": "back"
+      }
+    },
+    {
+      "id": "k8s.networking.loadbalancer-not-built-in",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9300,
+      "front": "Does Kubernetes itself include the load-balancing component used by LoadBalancer Services?",
+      "back": "No. You must provide one, or integrate the cluster with a cloud provider that provisions it.",
+      "explanation": "The load balancer is created asynchronously, and its details are published in the Service’s .status.loadBalancer field.",
+      "source": "Kubernetes documentation, “Service”, “Service type” and “type: LoadBalancer”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "LoadBalancer",
+        "load balancer",
+        "cluster (k8s)",
+        "Service"
+      ],
+      "conceptIDs": [
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.externalname-dns-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9310,
+      "front": "At what level does an ExternalName Service redirect clients?",
+      "back": "At the DNS level: it returns a CNAME record; nothing proxies or forwards the traffic.",
+      "explanation": "The cluster’s DNS server is the only way to reach an ExternalName Service. HTTP and TLS can misbehave because the host name clients use differs from the target’s.",
+      "source": "Kubernetes documentation, “Service”, “type: ExternalName”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#externalname",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ExternalName",
+        "DNS",
+        "Service",
+        "TLS / mTLS",
+        "http",
+        "proxy"
+      ],
+      "conceptIDs": [
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.headless-none-not-unset",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9320,
+      "front": "Is setting .spec.clusterIP to \"None\" the same as leaving it unset?",
+      "back": "No. \"None\" makes a headless Service; leaving it unset gives a normal ClusterIP Service with an allocated IP.",
+      "explanation": "The string None is a special value. For headless Services no cluster IP is allocated and kube-proxy does not handle them.",
+      "source": "Kubernetes documentation, “Service”, “Headless Services”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#headless-services",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "headless Service",
+        "ClusterIP",
+        "kube-proxy (optional)",
+        "Service",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "k8s.headless-service"
+      ]
+    },
+    {
+      "id": "k8s.networking.headless-dns-records",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9330,
+      "front": "For a headless Service with a selector, what does a DNS lookup of the Service return?",
+      "back": "IPv4 (A) or IPv6 (AAAA) address records pointing directly at the IPs of the Pods backing the Service.",
+      "explanation": "A normal Service name resolves to its single cluster IP instead. The endpoints controller creates EndpointSlices for the headless Service too.",
+      "source": "Kubernetes documentation, “Service”, “Headless Services” › “With selectors”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#with-selectors",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "headless Service",
+        "selector",
+        "DNS",
+        "Pod",
+        "EndpointSlice",
+        "Service",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "k8s.headless-service"
+      ]
+    },
+    {
+      "id": "k8s.networking.endpointslice-updates",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9340,
+      "front": "What keeps a Service’s EndpointSlices up to date as Pods come and go?",
+      "back": "The controller for the Service, which continuously scans for Pods matching its selector and updates the EndpointSlices.",
+      "explanation": "Cloud-native apps can also query the API server for a Service’s EndpointSlices as a form of service discovery.",
+      "source": "Kubernetes documentation, “Service”, “Defining a Service” and “Cloud-native service discovery”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#defining-a-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "EndpointSlice",
+        "Service",
+        "controller / control loop",
+        "Pod",
+        "selector",
+        "kube-apiserver",
+        "service discovery"
+      ],
+      "conceptIDs": [
+        "k8s.endpoint-slice"
+      ]
+    },
+    {
+      "id": "k8s.networking.endpointslice-100",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9350,
+      "front": "By default, when does Kubernetes start a new EndpointSlice for a Service?",
+      "back": "Once all existing EndpointSlices for it hold at least 100 endpoints and another endpoint must be added.",
+      "explanation": "Splitting endpoints into slices keeps each object small for Services with many backends.",
+      "source": "Kubernetes documentation, “Service”, “EndpointSlices”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#endpointslices",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "EndpointSlice",
+        "Service"
+      ],
+      "conceptIDs": [
+        "k8s.endpoint-slice"
+      ]
+    },
+    {
+      "id": "k8s.networking.endpoints-deprecated",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9360,
+      "front": "What is the status of the older Endpoints API, and what replaces it?",
+      "back": "Deprecated since v1.33; clients should use the EndpointSlice API instead.",
+      "explanation": "Endpoints does not support dual-stack clusters, lacks data for newer features, and truncates long endpoint lists.",
+      "source": "Kubernetes documentation, “Service”, “Endpoints (deprecated)”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#endpoints",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "uses": [
+        "EndpointSlice",
+        "dual-stack",
+        "cluster (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.endpoints-deprecated",
+        "k8s.endpoint-slice"
+      ]
+    },
+    {
+      "id": "k8s.networking.service-dns-name-form",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9370,
+      "front": "What is the form of the DNS name of a normal Service?",
+      "back": "my-svc.my-namespace.svc.cluster-domain.example, which resolves to the Service’s cluster IP.",
+      "explanation": "The name joins the Service name, its namespace, “svc” and the cluster’s domain, usually cluster.local, e.g. my-svc.my-namespace.svc.cluster.local.",
+      "source": "Kubernetes documentation, “DNS for Services and Pods”, “A/AAAA records”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#a-aaaa-records",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "DNS",
+        "Service",
+        "namespace",
+        "ClusterIP",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "k8s.service-dns-name"
+      ]
+    },
+    {
+      "id": "k8s.networking.dns-short-names",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9380,
+      "front": "A Service my-service lives in namespace my-ns. What name must a Pod in another namespace look up?",
+      "back": "my-service.my-ns (a Pod inside my-ns can use just my-service).",
+      "explanation": "A DNS query that names no namespace is limited to the querying Pod’s own namespace.",
+      "source": "Kubernetes documentation, “Service”, “Discovering services” › “DNS”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#dns",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "namespace",
+        "Pod",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "k8s.service-dns-name"
+      ]
+    },
+    {
+      "id": "k8s.networking.two-discovery-modes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9390,
+      "front": "What are the two primary ways a client inside the cluster finds a Service?",
+      "back": "Environment variables and DNS.",
+      "explanation": "The kubelet adds variables such as REDIS_PRIMARY_SERVICE_HOST for each active Service; a cluster DNS add-on such as CoreDNS creates records per Service.",
+      "source": "Kubernetes documentation, “Service”, “Discovering services”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#discovering-services",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "service discovery",
+        "Service",
+        "kubelet",
+        "DNS",
+        "addons"
+      ],
+      "conceptIDs": [
+        "k8s.service-discovery"
+      ]
+    },
+    {
+      "id": "k8s.networking.env-var-ordering",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9400,
+      "front": "With environment-variable discovery, what must exist before the client Pods start?",
+      "back": "The Service. Pods created earlier do not get that Service’s variables.",
+      "explanation": "DNS-based discovery has no such ordering problem.",
+      "source": "Kubernetes documentation, “Service”, “Discovering services” › “Environment variables”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#environment-variables",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "service discovery",
+        "Service",
+        "Pod",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "k8s.service-discovery"
+      ]
+    },
+    {
+      "id": "k8s.networking.kube-proxy-linux-modes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9410,
+      "front": "Which proxy modes can kube-proxy use on Linux nodes?",
+      "back": "iptables, ipvs and nftables (on Windows the only mode is kernelspace): different kernel features for forwarding packets.",
+      "explanation": "If no mode is chosen, kube-proxy uses iptables today; the docs say a future version will make nftables the default.",
+      "source": "Kubernetes documentation, “Virtual IPs and Service Proxies”, “Proxy modes”",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/virtual-ips/#proxy-modes",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "uses": [
+        "kube-proxy (optional)",
+        "node (k8s)",
+        "kernel",
+        "proxy"
+      ],
+      "conceptIDs": [
+        "k8s.kube-proxy-modes"
+      ]
+    },
+    {
+      "id": "k8s.networking.ipvs-deprecated",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9420,
+      "front": "What is the status of kube-proxy’s ipvs mode?",
+      "back": "Deprecated since v1.35; planned to be off by default from v1.40 and removed in v1.43.",
+      "explanation": "The docs suggest trying the nftables mode instead, which is the successor to iptables.",
+      "source": "Kubernetes documentation, “Virtual IPs and Service Proxies”, “IPVS proxy mode”",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/virtual-ips/#proxy-mode-ipvs",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "uses": [
+        "kube-proxy (optional)"
+      ],
+      "conceptIDs": [
+        "k8s.kube-proxy-modes"
+      ]
+    },
+    {
+      "id": "k8s.networking.ingress-http-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9430,
+      "front": "Which protocols does an Ingress route?",
+      "back": "Only HTTP and HTTPS. Other ports and protocols are usually exposed with NodePort or LoadBalancer Services.",
+      "explanation": "Ingress rules match web concepts such as hosts and paths; an Ingress does not expose arbitrary ports.",
+      "source": "Kubernetes documentation, “Ingress”, “What is Ingress?”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#what-is-ingress",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "NodePort",
+        "LoadBalancer",
+        "Service",
+        "http",
+        "port",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "k8s.ingress"
+      ]
+    },
+    {
+      "id": "k8s.networking.ingress-not-service-type",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9440,
+      "front": "Is Ingress a Service type?",
+      "back": "No. It is a separate API object that acts as an entry point in front of Services.",
+      "explanation": "The Service types are ClusterIP, NodePort, LoadBalancer and ExternalName. An Ingress consolidates routing rules for several Services behind one listener.",
+      "source": "Kubernetes documentation, “Service”, “Services in Kubernetes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#services-in-kubernetes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "Service",
+        "object",
+        "ClusterIP",
+        "NodePort",
+        "LoadBalancer",
+        "ExternalName",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "k8s.ingress",
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.ingress-frozen",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9450,
+      "front": "What is the current status of the Ingress API?",
+      "back": "Frozen: still generally available and not planned for removal, but no longer developed. The project recommends Gateway API instead.",
+      "explanation": "Being GA, Ingress keeps its stability guarantees, but it will get no further changes.",
+      "source": "Kubernetes documentation, “Ingress” (note)",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "uses": [
+        "Ingress",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "k8s.ingress",
+        "k8s.gateway-api"
+      ]
+    },
+    {
+      "id": "k8s.networking.ingress-fanout-vs-name",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9460,
+      "front": "What is the difference between an Ingress “simple fanout” and “name-based virtual hosting”?",
+      "back": "Fanout routes one IP to several Services by URL path; name-based hosting routes by host name (the website name the client asked for).",
+      "explanation": "Both let one Ingress serve several Services, keeping the number of load balancers down.",
+      "source": "Kubernetes documentation, “Ingress”, “Simple fanout” and “Name based virtual hosting”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#simple-fanout",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "Service",
+        "load balancer",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "k8s.ingress"
+      ]
+    },
+    {
+      "id": "k8s.networking.gatewayclass",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9470,
+      "front": "In Gateway API, what does a GatewayClass define?",
+      "back": "A set of Gateways with common configuration, managed by the controller that implements the class.",
+      "explanation": "Every Gateway must reference a GatewayClass, which names the controller responsible for it.",
+      "source": "Kubernetes documentation, “Gateway API”, “Resource model”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#resource-model",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Gateway API",
+        "controller / control loop"
+      ],
+      "conceptIDs": [
+        "k8s.gateway-api"
+      ]
+    },
+    {
+      "id": "k8s.networking.gateway-kind",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9480,
+      "front": "In Gateway API, what does a Gateway describe?",
+      "back": "An instance of traffic-handling infrastructure, such as a cloud load balancer or an in-cluster proxy, with listeners (the ports and protocols it accepts traffic on).",
+      "explanation": "A Gateway is associated with exactly one GatewayClass. By default it accepts routes only from its own namespace.",
+      "source": "Kubernetes documentation, “Gateway API”, “Gateway”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#api-kind-gateway",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Gateway API",
+        "load balancer",
+        "proxy",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "k8s.gateway-api"
+      ]
+    },
+    {
+      "id": "k8s.networking.httproute",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9490,
+      "front": "In Gateway API, what does an HTTPRoute define?",
+      "back": "HTTP-specific rules for sending traffic from a Gateway listener to backends, often Services.",
+      "explanation": "Adding an HTTPRoute may, for example, add traffic routes to a cloud load balancer or an in-cluster proxy.",
+      "source": "Kubernetes documentation, “Gateway API”, “HTTPRoute”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#api-kind-httproute",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Gateway API",
+        "Service",
+        "load balancer",
+        "proxy",
+        "http"
+      ],
+      "conceptIDs": [
+        "k8s.gateway-api"
+      ]
+    },
+    {
+      "id": "k8s.networking.grpcroute",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9500,
+      "front": "Which is the fourth stable Gateway API kind, besides GatewayClass, Gateway and HTTPRoute?",
+      "back": "GRPCRoute: gRPC-specific rules for sending traffic from a Gateway listener to backends.",
+      "explanation": "The docs list four stable kinds: GatewayClass, Gateway, HTTPRoute and GRPCRoute.",
+      "source": "Kubernetes documentation, “Gateway API”, “Resource model”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#resource-model",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes docs as of that date",
+      "uses": [
+        "Gateway API",
+        "gRPC"
+      ],
+      "conceptIDs": [
+        "k8s.gateway-api"
+      ]
+    },
+    {
+      "id": "k8s.networking.gateway-roles",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9510,
+      "front": "Gateway API is “role-oriented”. Which three roles is it modelled on?",
+      "back": "Infrastructure provider, cluster operator and application developer.",
+      "explanation": "The cluster operator is typically concerned with policies, network access and application permissions; the application developer with application-level configuration and Service composition.",
+      "source": "Kubernetes documentation, “Gateway API”, “Design principles”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#design-principles",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "k8s.gateway-api"
+      ]
+    },
+    {
+      "id": "k8s.networking.networkpolicy-needs-plugin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9520,
+      "front": "What happens if you create a NetworkPolicy but your network plugin does not support NetworkPolicy?",
+      "back": "Nothing: the object is stored, but it has no effect.",
+      "explanation": "NetworkPolicies are implemented by the network plugin; without a controller that enforces them, the API is present but inert.",
+      "source": "Kubernetes documentation, “Network Policies”, “Prerequisites”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#prerequisites",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "CNI",
+        "object",
+        "controller / control loop"
+      ],
+      "conceptIDs": [
+        "k8s.network-policy"
+      ]
+    },
+    {
+      "id": "k8s.networking.networkpolicy-default-open",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9530,
+      "front": "With no NetworkPolicy selecting a Pod, what traffic is allowed to and from it?",
+      "back": "All of it: by default a Pod is non-isolated for both ingress and egress.",
+      "explanation": "A Pod becomes isolated in a direction only when some NetworkPolicy selects it and lists that direction in policyTypes.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.network-policy"
+      ]
+    },
+    {
+      "id": "k8s.networking.networkpolicy-additive",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9540,
+      "front": "If two NetworkPolicies apply to the same Pod, how are they combined?",
+      "back": "Additively: the allowed traffic is the union of what the policies allow; policies never conflict.",
+      "explanation": "So the order in which policies are evaluated does not matter.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.network-policy"
+      ]
+    },
+    {
+      "id": "k8s.networking.networkpolicy-both-ends",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9550,
+      "front": "For a connection from Pod A to Pod B to be allowed, which policies must permit it?",
+      "back": "Both: the egress policy on A and the ingress policy on B.",
+      "explanation": "If either side does not allow the connection, it does not happen.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "k8s.network-policy"
+      ]
+    },
+    {
+      "id": "k8s.networking.networkpolicy-empty-selector",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9560,
+      "front": "In a NetworkPolicy, what does an empty podSelector select?",
+      "back": "All Pods in the policy’s namespace.",
+      "explanation": "A policy with an empty podSelector and no ingress rules is the usual “default deny all ingress” for a namespace.",
+      "source": "Kubernetes documentation, “Network Policies”, “The NetworkPolicy resource” and “Default policies”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#default-policies",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "selector",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "k8s.network-policy"
+      ]
+    },
+    {
+      "id": "k8s.networking.dual-stack-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9570,
+      "front": "Since which Kubernetes version is IPv4/IPv6 dual-stack enabled by default?",
+      "back": "v1.21 (the feature became stable in v1.23).",
+      "explanation": "Dual-stack gives each Pod one IPv4 and one IPv6 address and allows IPv4 and IPv6 Services.",
+      "source": "Kubernetes documentation, “IPv4/IPv6 dual-stack”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/dual-stack/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "dual-stack",
+        "Pod",
+        "Service"
+      ],
+      "conceptIDs": [
+        "k8s.dual-stack"
+      ]
+    },
+    {
+      "id": "k8s.networking.sidecar-vs-sidecarless-mesh",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9580,
+      "front": "How does a “sidecarless” service mesh differ from the sidecar model?",
+      "back": "It drops the per-Pod proxy and moves mesh functions into the operating system, using kernel features such as eBPF.",
+      "explanation": "The sidecar model gives fine control but uses more resources as the system grows; sidecarless designs cut resource use and network hops.",
+      "source": "Cloud Native Glossary, “Service Mesh”",
+      "sourceURL": "https://glossary.cncf.io/service-mesh/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "service mesh",
+        "service proxy",
+        "Pod",
+        "eBPF",
+        "sidecar container",
+        "operating system",
+        "kernel",
+        "proxy"
+      ],
+      "conceptIDs": [
+        "k8s.service-mesh",
+        "k8s.service-proxy"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-no-port-mapping",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9590,
+      "front": "A team moving from an older container platform plans to map each container’s port to a host port so apps on different hosts can reach each other. Is this needed on Kubernetes?",
+      "back": "No. Each Pod has its own cluster-wide IP, and Pods reach each other directly across nodes.",
+      "explanation": "Older container systems had no automatic cross-host connectivity; the Kubernetes network model removes the need for explicit links and host-port mapping.",
+      "source": "Kubernetes documentation, “Services, Load Balancing, and Networking”, “The Kubernetes network model”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/#the-kubernetes-network-model",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "Pod",
+        "node (k8s)",
+        "network model",
+        "ip address",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.network-model"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-no-network-plugin",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9600,
+      "front": "A new cluster has its control plane and nodes running, but nothing yet implements the Pod network. What must be installed?",
+      "back": "A CNI plugin compatible with the cluster.",
+      "explanation": "Kubernetes defines the network model but relies on a CNI plugin, loaded by the container runtime, to implement it.",
+      "source": "Kubernetes documentation, “Network Plugins”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cluster (k8s)",
+        "control plane",
+        "node (k8s)",
+        "Pod",
+        "CNI",
+        "network model",
+        "container runtime"
+      ],
+      "conceptIDs": [
+        "k8s.cni"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-internal-backend",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9610,
+      "front": "A backend API must be reachable only by other Pods in the cluster, never from outside. Which Service type fits?",
+      "back": "A) ClusterIP, the default.",
+      "choices": "A) ClusterIP\nB) NodePort\nC) LoadBalancer\nD) ExternalName",
+      "choicesExplained": "B and C expose the Service outside the cluster. D maps the name to an external DNS name and sends no traffic to Pods.",
+      "explanation": "ClusterIP gives an internal-only virtual IP, which is exactly an internal backend’s need.",
+      "source": "Kubernetes documentation, “Service”, “Service type”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "cluster (k8s)",
+        "Service",
+        "ClusterIP",
+        "NodePort",
+        "LoadBalancer",
+        "ExternalName",
+        "DNS",
+        "ip address",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-own-load-balancer",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9620,
+      "front": "On bare-metal servers, you run your own external load balancer and want it to reach a Service on a fixed port on every node. Which Service type fits?",
+      "back": "B) NodePort.",
+      "choices": "A) ClusterIP\nB) NodePort\nC) LoadBalancer\nD) ExternalName",
+      "choicesExplained": "A is internal only. C expects a load balancer provisioned for the Service, usually by a cloud provider. D does no forwarding at all.",
+      "explanation": "NodePort opens the same port on every node, which gives you the freedom to set up your own load-balancing solution.",
+      "source": "Kubernetes documentation, “Service”, “type: NodePort”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "load balancer",
+        "Service",
+        "node (k8s)",
+        "ClusterIP",
+        "NodePort",
+        "LoadBalancer",
+        "ExternalName",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.service-types",
+        "k8s.nodeport-range"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-cloud-external",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9630,
+      "front": "On a public cloud, you want a Service to get its own external address with the provider’s load balancer in front. Which Service type fits?",
+      "back": "C) LoadBalancer.",
+      "choices": "A) ClusterIP\nB) NodePort\nC) LoadBalancer\nD) ExternalName",
+      "choicesExplained": "A is internal only. B exposes node ports, but provisions no load balancer. D is only a DNS alias.",
+      "explanation": "On providers that support it, type LoadBalancer provisions an external load balancer for the Service.",
+      "source": "Kubernetes documentation, “Service”, “type: LoadBalancer”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "load balancer",
+        "ClusterIP",
+        "NodePort",
+        "LoadBalancer",
+        "ExternalName",
+        "DNS",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-external-database",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9640,
+      "front": "Pods should reach a managed database at db.example.com through the in-cluster name “orders-db”, so the database can later move into the cluster. Which Service type fits?",
+      "back": "D) ExternalName.",
+      "choices": "A) ClusterIP\nB) NodePort\nC) LoadBalancer\nD) ExternalName",
+      "choicesExplained": "A, B and C send traffic to Pods selected in the cluster, not to an outside host name.",
+      "explanation": "ExternalName returns a CNAME for the external name. Later you can move the database into the cluster and change the type.",
+      "source": "Kubernetes documentation, “Service”, “type: ExternalName”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#externalname",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "Service",
+        "ClusterIP",
+        "NodePort",
+        "LoadBalancer",
+        "ExternalName",
+        "DNS",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-nodeport-out-of-range",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9650,
+      "front": "A developer sets nodePort: 8080 on a NodePort Service in a cluster with default settings. What happens?",
+      "back": "The request fails: 8080 is outside the default node port range of 30000–32767.",
+      "explanation": "A chosen nodePort must be valid and inside the configured range; otherwise the API transaction fails.",
+      "source": "Kubernetes documentation, “Service”, “type: NodePort” › “Choosing your own port”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#nodeport-custom-port",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NodePort",
+        "Service",
+        "cluster (k8s)",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.nodeport-range"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-nodeport-has-clusterip",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9660,
+      "front": "You create a NodePort Service. Can Pods inside the cluster still reach it on a cluster IP?",
+      "back": "Yes. Kubernetes sets up a cluster IP for it, just as for a ClusterIP Service.",
+      "explanation": "Service types nest: NodePort builds on ClusterIP, and LoadBalancer builds on NodePort.",
+      "source": "Kubernetes documentation, “Service”, “Service type”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NodePort",
+        "Service",
+        "Pod",
+        "cluster (k8s)",
+        "ClusterIP",
+        "LoadBalancer",
+        "ip address",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "k8s.nested-service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-peer-ips",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9670,
+      "front": "The members of a replicated database must each look up the individual IPs of all their peers through DNS, with no load balancing. What kind of Service should they use?",
+      "back": "A headless Service (.spec.clusterIP: None) with a selector.",
+      "explanation": "Its DNS name returns A/AAAA records for each backing Pod, instead of one virtual IP that load-balances.",
+      "source": "Kubernetes documentation, “Service”, “Headless Services”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#headless-services",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "DNS",
+        "load balancer",
+        "Service",
+        "headless Service",
+        "selector",
+        "Pod",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "k8s.headless-service"
+      ]
+    },
+    {
+      "id": "k8s.networking.classify-backend-tracking",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9680,
+      "front": "A monitoring tool needs the current list of Pod IPs behind a Service. Which object should it read?",
+      "back": "The Service’s EndpointSlices.",
+      "explanation": "EndpointSlices record the backend endpoints and are updated whenever the Pods behind the Service change. The older Endpoints API is deprecated.",
+      "source": "Kubernetes documentation, “Service”, “Cloud-native service discovery”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#cloud-native-service-discovery",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "Service",
+        "object",
+        "EndpointSlice",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "k8s.endpoint-slice",
+        "k8s.endpoints-deprecated"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-cross-namespace-dns",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9690,
+      "front": "A Pod in namespace “test” looks up “data”, but the data Service lives in namespace “prod”. The lookup finds nothing. What should it query?",
+      "back": "data.prod (or the full name data.prod.svc.<cluster-domain>).",
+      "explanation": "An unqualified name is searched only in the Pod’s own namespace, so other namespaces must be named.",
+      "source": "Kubernetes documentation, “DNS for Services and Pods”, “Namespaces of Services”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#namespaces-of-services",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "namespace",
+        "Service",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "k8s.service-dns-name"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-missing-env-vars",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9700,
+      "front": "A Pod started yesterday has no MY_API_SERVICE_HOST variable for a Service created this morning. Why, and what avoids the problem?",
+      "back": "Variables are added only when a Pod starts, for Services existing then. Use DNS names instead.",
+      "explanation": "Environment-variable discovery needs the Service to exist before the client Pods; DNS discovery does not.",
+      "source": "Kubernetes documentation, “Service”, “Discovering services” › “Environment variables”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#environment-variables",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "Service",
+        "DNS",
+        "service discovery"
+      ],
+      "conceptIDs": [
+        "k8s.service-discovery"
+      ]
+    },
+    {
+      "id": "k8s.networking.classify-discovery",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9710,
+      "front": "Clients call “payments” by name and reach whichever Pods currently back it. What is the general name for finding the current instances behind a service name?",
+      "back": "Service discovery.",
+      "explanation": "Kubernetes provides it through Services, DNS and EndpointSlices, so clients never track changing Pod addresses.",
+      "source": "Cloud Native Glossary, “Service Discovery”",
+      "sourceURL": "https://glossary.cncf.io/service-discovery/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "service discovery",
+        "Service",
+        "DNS",
+        "EndpointSlice"
+      ],
+      "conceptIDs": [
+        "k8s.service-discovery"
+      ]
+    },
+    {
+      "id": "k8s.networking.classify-load-balancer",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9720,
+      "front": "Three identical replicas of a web app sit behind one address, and each new request goes to a different replica. What is sharing out the requests?",
+      "back": "A load balancer.",
+      "explanation": "In Kubernetes a Service does this across its Pods; externally, a LoadBalancer Service uses a provider’s load balancer.",
+      "source": "Cloud Native Glossary, “Load Balancer”",
+      "sourceURL": "https://glossary.cncf.io/load-balancer/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "replica",
+        "load balancer",
+        "Service",
+        "Pod",
+        "LoadBalancer"
+      ],
+      "conceptIDs": [
+        "k8s.load-balancer"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-path-routing",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9730,
+      "front": "Requests to example.com/shop must reach the shop Service and example.com/blog the blog Service, all through one external IP. What provides this?",
+      "back": "An Ingress with path rules (a simple fanout), or a Gateway with an HTTPRoute.",
+      "explanation": "Both route HTTP by path to different Services behind one entry point; Service types alone cannot route by path.",
+      "source": "Kubernetes documentation, “Ingress”, “Simple fanout”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#simple-fanout",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "Ingress",
+        "Gateway API",
+        "http",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "k8s.ingress",
+        "k8s.gateway-api"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-ingress-does-nothing",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9740,
+      "front": "You apply a valid Ingress manifest, but no traffic is routed and nothing seems to happen. What is the most likely cause?",
+      "back": "No ingress controller is running in the cluster.",
+      "explanation": "An Ingress resource on its own has no effect; an ingress controller must fulfil it.",
+      "source": "Kubernetes documentation, “Ingress”, “Prerequisites”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#prerequisites",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "manifest",
+        "ingress controller",
+        "cluster (k8s)"
+      ],
+      "conceptIDs": [
+        "k8s.ingress"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-tcp-database",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9750,
+      "front": "You need to expose a PostgreSQL database (plain TCP, not HTTP) to clients outside the cluster. Is an Ingress the right tool?",
+      "back": "No: Ingress handles only HTTP and HTTPS. Use a NodePort or LoadBalancer Service.",
+      "explanation": "Exposing non-HTTP services usually uses one of those Service types.",
+      "source": "Kubernetes documentation, “Ingress”, “What is Ingress?”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#what-is-ingress",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "NodePort",
+        "LoadBalancer",
+        "Service",
+        "cluster (k8s)",
+        "http",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "k8s.ingress"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-new-http-routing",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9760,
+      "front": "A team designing new HTTP routing wants header-based matching and traffic weighting, with the platform team and app teams managing separate objects. Which API does the Kubernetes project recommend?",
+      "back": "Gateway API.",
+      "explanation": "Ingress is frozen and only did such routing through custom annotations; Gateway API is role-oriented and expressive.",
+      "source": "Kubernetes documentation, “Gateway API”, “Design principles”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#design-principles",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Gateway API",
+        "object",
+        "Ingress",
+        "http"
+      ],
+      "conceptIDs": [
+        "k8s.gateway-api",
+        "k8s.ingress"
+      ]
+    },
+    {
+      "id": "k8s.networking.classify-gateway-kind",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9770,
+      "front": "A cluster operator wants to declare “one cloud load balancer listening for HTTP on port 80”. Which Gateway API kind do they create?",
+      "back": "A Gateway.",
+      "explanation": "A Gateway is an instance of traffic-handling infrastructure; routes such as HTTPRoute attach to it, and a GatewayClass names its controller.",
+      "source": "Kubernetes documentation, “Gateway API”, “Gateway”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#api-kind-gateway",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cluster (k8s)",
+        "load balancer",
+        "Gateway API",
+        "controller / control loop",
+        "http",
+        "port"
+      ],
+      "conceptIDs": [
+        "k8s.gateway-api"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-db-lockdown",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9780,
+      "front": "Only Pods labelled app=api may connect to the database Pods; all other Pods must be blocked. Which Kubernetes object expresses this?",
+      "back": "A NetworkPolicy selecting the database Pods and allowing ingress only from Pods labelled app=api.",
+      "explanation": "Once a policy selects the database Pods for ingress, only the traffic its rules allow is let in. The network plugin must support NetworkPolicy.",
+      "source": "Kubernetes documentation, “Network Policies”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "label",
+        "object",
+        "NetworkPolicy",
+        "selector",
+        "CNI"
+      ],
+      "conceptIDs": [
+        "k8s.network-policy"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-policy-ignored",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9790,
+      "front": "A “deny all ingress” NetworkPolicy is applied, yet Pods in the namespace still accept every connection. What should you check first?",
+      "back": "Whether the cluster’s network plugin supports and enforces NetworkPolicy.",
+      "explanation": "Without an enforcing plugin a NetworkPolicy has no effect, even though the API accepts it.",
+      "source": "Kubernetes documentation, “Network Policies”, “Prerequisites”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#prerequisites",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "namespace",
+        "cluster (k8s)",
+        "CNI"
+      ],
+      "conceptIDs": [
+        "k8s.network-policy"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-egress-blocks",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9800,
+      "front": "Pod B’s ingress policy allows traffic from Pod A, but Pod A is selected by an egress policy that allows only DNS. Can A connect to B?",
+      "back": "No. The connection needs both A’s egress and B’s ingress to allow it.",
+      "explanation": "Isolation for egress and for ingress are declared independently, and both apply to a Pod-to-Pod connection.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "DNS",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "k8s.network-policy"
+      ]
+    },
+    {
+      "id": "k8s.networking.scenario-mesh",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9810,
+      "front": "A company with 300 microservices wants encrypted traffic, rerouting around failing services and uniform traffic metrics between them, without changing each service’s code. What cloud native technology fits?",
+      "back": "A service mesh.",
+      "explanation": "A mesh manages service-to-service traffic and adds security, reliability and observability features uniformly across services.",
+      "source": "Cloud Native Glossary, “Service Mesh”",
+      "sourceURL": "https://glossary.cncf.io/service-mesh/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "microservices architecture",
+        "service mesh",
+        "reliability",
+        "observability (concept)",
+        "encryption"
+      ],
+      "conceptIDs": [
+        "k8s.service-mesh"
+      ]
+    },
+    {
+      "id": "k8s.networking.classify-service-proxy",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9820,
+      "front": "A container beside each app container intercepts all its network traffic, encrypts it and records request counts. What is this container acting as?",
+      "back": "A service proxy, deployed in the sidecar pattern.",
+      "explanation": "Service proxies take networking logic out of the app; the sidecar model pairs each Pod with a proxy, as many service meshes do.",
+      "source": "Cloud Native Glossary, “Service Proxy” and “Service Mesh”",
+      "sourceURL": "https://glossary.cncf.io/service-proxy/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "container",
+        "service proxy",
+        "sidecar container",
+        "Pod",
+        "service mesh",
+        "encryption",
+        "proxy"
+      ],
+      "conceptIDs": [
+        "k8s.service-proxy"
+      ]
+    },
+    {
+      "id": "k8s.architecture.provides-dual-stack",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 9829,
+      "front": "Kubernetes can give Pods and Services both IPv4 and IPv6 addresses. Which capability is this?",
+      "back": "IPv4/IPv6 dual-stack.",
+      "explanation": "Both address families can be allocated at once.",
+      "source": "Kubernetes documentation, “Overview”, “Why you need Kubernetes and what it can do”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/overview/#why-you-need-kubernetes-and-what-can-it-do",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubernetes",
+        "Pod",
+        "Service"
+      ],
+      "conceptIDs": [
+        "k8s.kubernetes-provides"
+      ]
+    },
+    {
+      "id": "k8s.networking.classify-dual-stack",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 9830,
+      "front": "A cluster gives each Pod both a 10.x IPv4 address and an fd00:: IPv6 address. What feature is in use?",
+      "back": "IPv4/IPv6 dual-stack networking.",
+      "explanation": "Dual-stack allocates both an IPv4 and an IPv6 address to Pods and Services.",
+      "source": "Kubernetes documentation, “IPv4/IPv6 dual-stack”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/dual-stack/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cluster (k8s)",
+        "Pod",
+        "dual-stack",
+        "Service"
+      ],
+      "conceptIDs": [
+        "k8s.dual-stack"
+      ]
+    },
+    {
+      "id": "k8s.networking.contrast-ingress-vs-loadbalancer",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 9840,
+      "front": "What does an Ingress offer that a LoadBalancer Service does not?",
+      "back": "HTTP-aware routing: one entry point can send traffic to several Services by host name or path.",
+      "explanation": "A LoadBalancer Service exposes a single Service; an Ingress handles only HTTP and HTTPS but consolidates several Services behind one listener.",
+      "source": "Kubernetes documentation, “Ingress” and “Service”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#what-is-ingress",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "LoadBalancer",
+        "Service",
+        "http",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "k8s.ingress",
+        "k8s.service-types"
+      ]
+    },
+    {
+      "id": "k8s.networking.contrast-headless-vs-clusterip",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 9850,
+      "front": "What does DNS return for a normal ClusterIP Service, compared with a headless Service?",
+      "back": "Normal: the Service’s single cluster IP. Headless: the individual Pod IPs, with no proxying or load balancing.",
+      "explanation": "The normal Service load-balances through a virtual IP; the headless one lets clients choose a Pod directly.",
+      "source": "Kubernetes documentation, “DNS for Services and Pods”, “A/AAAA records”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#a-aaaa-records",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "DNS",
+        "ClusterIP",
+        "Service",
+        "headless Service",
+        "Pod",
+        "load balancer",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "k8s.headless-service",
+        "k8s.service-dns-name"
+      ]
+    },
+    {
+      "id": "k8s.networking.contrast-mesh-vs-api-gateway",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 9860,
+      "front": "How does an API gateway differ from a service mesh in the traffic it handles?",
+      "back": "An API gateway is one entry point for (often external) API consumers; a service mesh manages traffic between services inside the system.",
+      "explanation": "Both apply shared logic without app changes, but the gateway sits at the edge and the mesh sits between services.",
+      "source": "Cloud Native Glossary, “API Gateway” and “Service Mesh”",
+      "sourceURL": "https://glossary.cncf.io/api-gateway/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "API gateway",
+        "service mesh",
+        "API"
+      ],
+      "conceptIDs": [
+        "k8s.api-gateway",
+        "k8s.service-mesh"
+      ]
+    },
+    {
+      "id": "k8s.networking.contrast-kube-proxy-vs-cni",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 9870,
+      "front": "Which job belongs to the CNI plugin and which to kube-proxy?",
+      "back": "The CNI plugin provides the Pod network itself; kube-proxy programs rules that route Service traffic to backend Pods.",
+      "explanation": "Some network plugins also replace kube-proxy with their own, more tightly integrated service proxy.",
+      "source": "Kubernetes documentation, “Services, Load Balancing, and Networking”, “The Kubernetes network model”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/#the-kubernetes-network-model",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CNI",
+        "kube-proxy (optional)",
+        "Pod",
+        "Service",
+        "service proxy",
+        "proxy"
+      ],
+      "conceptIDs": [
+        "k8s.cni",
+        "k8s.network-model"
+      ]
+    }
+  ]
+}
