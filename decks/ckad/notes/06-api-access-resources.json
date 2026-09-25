@@ -1,0 +1,1498 @@
+{
+  "topic": "Extending the API, access control and resources",
+  "notes": [
+    {
+      "id": "ckad.api-access-resources.what-is-a-structural-schema",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6010,
+      "front": "What is a structural schema, and when must a CustomResourceDefinition have one?",
+      "back": "An OpenAPI v3.0 validation schema that gives a type to the root, every field and every array item. Mandatory in apiextensions.k8s.io/v1.",
+      "explanation": "The schema is checked when custom objects are created and updated; in the beta version of the CustomResourceDefinition it was optional.",
+      "example": "Like a form with a labelled box for every answer: each field of a custom object says whether it holds a string, an integer or an object.",
+      "evidence": "With apiextensions.k8s.io/v1 the definition of a structural schema is mandatory for CustomResourceDefinitions. In the beta version of CustomResourceDefinition, the structural schema was optional.",
+      "source": "Kubernetes documentation, “Extend the Kubernetes API with CustomResourceDefinitions”, “Specifying a structural schema”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#specifying-a-structural-schema",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "structural schema"
+      ],
+      "uses": [
+        "structural schema",
+        "CustomResourceDefinition"
+      ],
+      "conceptIDs": [
+        "ckad.crd-structural-schema"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.what-is-selfsubjectaccessreview",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6020,
+      "front": "What is the SelfSubjectAccessReview API?",
+      "back": "The API that answers whether the current user can perform a given action. `kubectl auth can-i` uses it.",
+      "explanation": "The page says it works regardless of the authorization mode the cluster uses.",
+      "example": "Like asking the door itself whether your badge opens it, rather than reading the building's rulebook.",
+      "evidence": "The command uses the SelfSubjectAccessReview API to determine if the current user can perform a given action, and works regardless of the authorization mode used.",
+      "source": "Kubernetes documentation, “Authorization”, “Checking API access”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "SelfSubjectAccessReview"
+      ],
+      "uses": [
+        "SelfSubjectAccessReview",
+        "authorization",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.auth-can-i"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.what-is-the-serviceaccount-username-prefix",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6030,
+      "front": "What prefix do ServiceAccount usernames carry, and what prefix do their groups carry?",
+      "back": "Usernames: `system:serviceaccount:` (singular). Groups: `system:serviceaccounts:` (plural).",
+      "explanation": "The `system:` prefix is reserved for Kubernetes system use, so ordinary users and groups should not start with it.",
+      "example": "Like staff badges that all start “staff-”: the prefix tells you the holder is an internal account, not a visitor.",
+      "evidence": "ServiceAccounts have names prefixed with system:serviceaccount: , and belong to groups that have names prefixed with system:serviceaccounts: .",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Referring to subjects”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "system:serviceaccount: prefix"
+      ],
+      "uses": [
+        "system:serviceaccount: prefix",
+        "ServiceAccount",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "ckad.rbac-sa-subject"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.crd-creates-a-resource-path",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6100,
+      "front": "What does the API server create when you create a CustomResourceDefinition?",
+      "back": "A new RESTful resource path for each version the CustomResourceDefinition specifies.",
+      "explanation": "That path is where you then create and manage the custom objects, just as with built-in kinds.",
+      "evidence": "When you create a new CustomResourceDefinition (CRD), the Kubernetes API Server creates a new RESTful resource path for each version you specify.",
+      "source": "Kubernetes documentation, “Extend the Kubernetes API with CustomResourceDefinitions”, “Create a CustomResourceDefinition”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-a-customresourcedefinition",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CustomResourceDefinition",
+        "custom resource"
+      ],
+      "conceptIDs": [
+        "ckad.create-crd"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.crd-established-before-use",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6110,
+      "front": "You have just applied a CustomResourceDefinition, and a `kubectl get` on its new kind fails straight away. What should you watch for before trying again?",
+      "back": "The CustomResourceDefinition's `Established` condition becoming true.",
+      "choices": "A) The Established condition becoming true\nB) A Pod named after the CustomResourceDefinition reaching Running\nC) A new namespace named after the group",
+      "choicesExplained": "B: a CustomResourceDefinition creates an API endpoint, not a Pod. C: no namespace is created; the endpoint appears in the API server.",
+      "explanation": "The endpoint can take a few seconds to appear; the Established condition, or the resource showing up in discovery, tells you it is ready.",
+      "evidence": "It might take a few seconds for the endpoint to be created. You can watch the Established condition of your CustomResourceDefinition to be true or watch the discovery information of the API server for your resource to show up.",
+      "source": "Kubernetes documentation, “Extend the Kubernetes API with CustomResourceDefinitions”, “Create a CustomResourceDefinition”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-a-customresourcedefinition",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CustomResourceDefinition",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.create-crd",
+        "ckad.create-custom-object"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.crd-name-form",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6120,
+      "front": "A CustomResourceDefinition's `metadata.name` must take the form {{c1::<plural>.<group>}}.",
+      "explanation": "The name must match the spec fields: the plural name and the API group declared further down the manifest.",
+      "evidence": "name must match the spec fields below, and be in the form: <plural>.<group>",
+      "source": "Kubernetes documentation, “Extend the Kubernetes API with CustomResourceDefinitions”, “Create a CustomResourceDefinition”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-a-customresourcedefinition",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CustomResourceDefinition",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "ckad.crd-name-rule"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.crd-name-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6130,
+      "front": "Your CustomResourceDefinition declares group `shop.acme.io`, plural `carts`, singular `cart` and kind `Cart`. What must `metadata.name` be?",
+      "back": "`carts.shop.acme.io`",
+      "choices": "A) carts.shop.acme.io\nB) cart.shop.acme.io\nC) Cart.shop.acme.io\nD) shop.acme.io.carts",
+      "choicesExplained": "B: the name uses the plural, not the singular. C: the kind is not part of the name. D: the plural comes first, then the group.",
+      "explanation": "The rule is plural, a dot, then the group, and the name must match those spec fields.",
+      "evidence": "name must match the spec fields below, and be in the form: <plural>.<group>",
+      "source": "Kubernetes documentation, “Extend the Kubernetes API with CustomResourceDefinitions”, “Create a CustomResourceDefinition”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-a-customresourcedefinition",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CustomResourceDefinition"
+      ],
+      "conceptIDs": [
+        "ckad.crd-name-rule"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.crd-scope-field",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6150,
+      "front": "Which field of a CustomResourceDefinition decides whether its custom objects are namespaced or cluster-scoped?",
+      "back": "`spec.scope`: `Namespaced` or `Cluster`.",
+      "explanation": "The custom resource made from a CustomResourceDefinition can be either; the choice is written in this one field.",
+      "evidence": "The custom resource created from a CRD object can be either namespaced or cluster-scoped, as specified in the CRD's spec.scope field.",
+      "source": "Kubernetes documentation, “Extend the Kubernetes API with CustomResourceDefinitions”, “Create a CustomResourceDefinition”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-a-customresourcedefinition",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CustomResourceDefinition",
+        "custom resource",
+        "namespace",
+        "CRD"
+      ],
+      "conceptIDs": [
+        "ckad.crd-scope"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.crd-itself-not-namespaced",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 6160,
+      "front": "A CustomResourceDefinition has `scope: Namespaced`. Is the CustomResourceDefinition object itself namespaced?",
+      "back": "No. CustomResourceDefinitions are non-namespaced and available to all namespaces; only their custom objects are namespaced.",
+      "explanation": "The scope field describes the custom objects. Deleting a namespace deletes the custom objects in it, as for built-in objects.",
+      "evidence": "As with existing built-in objects, deleting a namespace deletes all custom objects in that namespace. CustomResourceDefinitions themselves are non-namespaced and are available to all namespaces.",
+      "source": "Kubernetes documentation, “Extend the Kubernetes API with CustomResourceDefinitions”, “Create a CustomResourceDefinition”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-a-customresourcedefinition",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CustomResourceDefinition",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.crd-scope"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.custom-object-fields",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6180,
+      "front": "Once a CustomResourceDefinition exists, what can the custom objects you create from it contain?",
+      "back": "Custom fields, which can hold arbitrary JSON.",
+      "explanation": "The custom objects are created only after the CustomResourceDefinition object exists; their custom fields sit alongside apiVersion, kind and metadata.",
+      "evidence": "After the CustomResourceDefinition object has been created, you can create custom objects. Custom objects can contain custom fields. These fields can contain arbitrary JSON.",
+      "source": "Kubernetes documentation, “Extend the Kubernetes API with CustomResourceDefinitions”, “Create custom objects”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-custom-objects",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CustomResourceDefinition",
+        "custom resource"
+      ],
+      "conceptIDs": [
+        "ckad.create-custom-object"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.custom-object-names-on-cli",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6190,
+      "front": "A CustomResourceDefinition defines plural `backups`, singular `backup` and short name `bk`. Which of these list the custom objects: `kubectl get backups`, `kubectl get backup`, `kubectl get bk`?",
+      "back": "All three.",
+      "choices": "A) All three\nB) Only kubectl get backups\nC) Only backups and backup\nD) Only bk",
+      "choicesExplained": "B, C, D: kubectl accepts the singular, the plural and any short name defined in the CustomResourceDefinition.",
+      "explanation": "Resource names are not case-sensitive in kubectl, and each of the defined forms matches the resource.",
+      "evidence": "Resource names are not case-sensitive when using kubectl, and you can use either the singular or plural forms defined in the CRD, as well as any short names.",
+      "source": "Kubernetes documentation, “Extend the Kubernetes API with CustomResourceDefinitions”, “Create custom objects”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#create-custom-objects",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CustomResourceDefinition",
+        "kubectl",
+        "CRD"
+      ],
+      "conceptIDs": [
+        "ckad.create-custom-object"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.structural-schema-types",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6200,
+      "front": "A structural schema specifies a non-empty {{c1::type}} for the root, for each specified field of an object and for each item in an array.",
+      "explanation": "That is the first condition the page lists for a schema to count as structural; a few special nodes are exempt.",
+      "evidence": "specifies a non-empty type (via type in OpenAPI) for the root, for each specified field of an object node (via properties or additionalProperties in OpenAPI) and for each item in an array node",
+      "source": "Kubernetes documentation, “Extend the Kubernetes API with CustomResourceDefinitions”, “Specifying a structural schema”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#specifying-a-structural-schema",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "structural schema"
+      ],
+      "conceptIDs": [
+        "ckad.crd-structural-schema"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.delete-crd-deletes-objects",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6210,
+      "front": "What happens to the custom objects when you delete their CustomResourceDefinition?",
+      "back": "They are deleted: the server uninstalls the RESTful endpoint and deletes all custom objects stored in it.",
+      "explanation": "Afterwards a `kubectl get` on the kind fails with NotFound, because the resource no longer exists in the API.",
+      "evidence": "When you delete a CustomResourceDefinition, the server will uninstall the RESTful API endpoint and delete all custom objects stored in it.",
+      "source": "Kubernetes documentation, “Extend the Kubernetes API with CustomResourceDefinitions”, “Delete a CustomResourceDefinition”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#delete-a-customresourcedefinition",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CustomResourceDefinition"
+      ],
+      "conceptIDs": [
+        "ckad.crd-delete-cascade"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.recreated-crd-starts-empty",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 6220,
+      "front": "A colleague deletes a CustomResourceDefinition by mistake and applies the same file again a minute later. What do they find?",
+      "back": "The CustomResourceDefinition is back, but it starts out empty: the old custom objects are gone.",
+      "choices": "A) The definition is back but has no custom objects\nB) The definition and all its old objects are restored\nC) The apply fails until the old objects are removed",
+      "choicesExplained": "B: deleting the definition deleted its objects; reapplying does not bring them back. C: nothing is left to remove, so the apply succeeds.",
+      "explanation": "Deletion removed every stored custom object, so a recreated definition has nothing in it.",
+      "evidence": "If you later recreate the same CustomResourceDefinition, it will start out empty.",
+      "source": "Kubernetes documentation, “Extend the Kubernetes API with CustomResourceDefinitions”, “Delete a CustomResourceDefinition”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#delete-a-customresourcedefinition",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CustomResourceDefinition",
+        "kubectl apply"
+      ],
+      "conceptIDs": [
+        "ckad.crd-delete-cascade"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.api-resources-lists-types",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6230,
+      "front": "Which kubectl command lists the resource types the API server supports, custom ones included?",
+      "back": "`kubectl api-resources`",
+      "explanation": "The quick reference lists it for exploring API resources, with flags such as `--namespaced` and `--api-group` to narrow the list.",
+      "evidence": "kubectl api-resources --namespaced=true # All namespaced resources kubectl api-resources --namespaced=false # All non-namespaced resources",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Resource types”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#resource-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "custom resource"
+      ],
+      "conceptIDs": [
+        "ckad.discover-crds"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.api-resources-cluster-scoped",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6240,
+      "front": "You want to see only the resource types that are not namespaced, such as CustomResourceDefinitions themselves. Which command?",
+      "back": "`kubectl api-resources --namespaced=false`",
+      "choices": "A) kubectl api-resources --namespaced=false\nB) kubectl api-resources --namespaced=true\nC) kubectl get namespaces",
+      "choicesExplained": "B: this lists the namespaced resources, the opposite set. C: this lists namespace objects, not resource types.",
+      "explanation": "The `--namespaced` flag filters the list of resource types by scope.",
+      "evidence": "kubectl api-resources --namespaced=false # All non-namespaced resources",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Resource types”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#resource-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "namespace",
+        "CustomResourceDefinition"
+      ],
+      "conceptIDs": [
+        "ckad.discover-crds"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.operator-definition",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6250,
+      "front": "In Kubernetes terms, what is an operator?",
+      "back": "A client of the Kubernetes API that acts as a controller for a custom resource.",
+      "explanation": "Operators are software extensions that use custom resources to manage applications and their components, following the control loop.",
+      "evidence": "Operators are clients of the Kubernetes API that act as controllers for a Custom Resource .",
+      "source": "Kubernetes documentation, “Operator pattern”, “Operators in Kubernetes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/extend-kubernetes/operator/#operators-in-kubernetes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "operator pattern",
+        "controller / control loop",
+        "custom resource"
+      ],
+      "conceptIDs": [
+        "ckad.operator-custom-controller"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.operator-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6260,
+      "front": "A team defines a `PostgresCluster` custom resource and writes a program that watches these objects and takes and restores backups of each database. What have they built?",
+      "back": "An operator: a custom resource plus a controller for it.",
+      "choices": "A) An operator\nB) An admission controller\nC) A ResourceQuota",
+      "choicesExplained": "B: an admission controller changes or rejects API requests; it does not manage an application. C: a ResourceQuota caps resource totals in a namespace.",
+      "explanation": "Taking and restoring backups of an application's state is one of the tasks the page lists for operators to automate.",
+      "evidence": "Some of the things that you can use an operator to automate include: - deploying an application on demand - taking and restoring backups of that application's state",
+      "source": "Kubernetes documentation, “Operator pattern”, “An example operator”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/extend-kubernetes/operator/#example",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "operator pattern",
+        "custom resource",
+        "admission controller",
+        "ResourceQuota"
+      ],
+      "conceptIDs": [
+        "ckad.operator-custom-controller"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.stage-authentication",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6300,
+      "front": "Once the connection to the API server is secured, which access-control step does an HTTP request meet first, and what does it examine?",
+      "back": "Authentication. It receives the whole request but typically looks at the headers or the client certificate.",
+      "explanation": "The API server runs one or more authenticator modules, configured by the cluster admin, at this step.",
+      "evidence": "Once TLS is established, the HTTP request moves to the Authentication step. This is shown as step 1 in the diagram.",
+      "source": "Kubernetes documentation, “Controlling Access to the Kubernetes API”, “Authentication”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/controlling-access/#authentication",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authentication"
+      ],
+      "conceptIDs": [
+        "ckad.request-stages"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.stage-authorization",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6310,
+      "front": "Which access-control step decides whether an authenticated request is allowed or denied?",
+      "back": "Authorization, which takes place after authentication, inside the API server.",
+      "explanation": "Usually a client must be authenticated before its request can be allowed, though some anonymous requests are permitted.",
+      "evidence": "Kubernetes authorization takes place following authentication. Usually, a client making a request must be authenticated (logged in) before its request can be allowed",
+      "source": "Kubernetes documentation, “Authorization”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authorization",
+        "authentication"
+      ],
+      "conceptIDs": [
+        "ckad.request-stages"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.stage-admission",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6320,
+      "front": "Which access-control step can modify or reject a request after reading the object being created or changed?",
+      "back": "Admission control.",
+      "explanation": "Unlike authorization modules, admission modules see the contents of the object being created or modified.",
+      "evidence": "Admission Control modules are software modules that can modify or reject requests. In addition to the attributes available to Authorization modules, Admission Control modules can access the contents of the object that is being created or modified.",
+      "source": "Kubernetes documentation, “Controlling Access to the Kubernetes API”, “Admission control”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/controlling-access/#admission-control",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "admission controller",
+        "authorization"
+      ],
+      "conceptIDs": [
+        "ckad.request-stages"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.admission-skips-reads",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6330,
+      "front": "Which of these requests is never seen by admission controllers? `kubectl get pods`, `kubectl delete pod web`, `kubectl apply -f deploy.yaml`.",
+      "back": "`kubectl get pods`: it only reads objects.",
+      "choices": "A) kubectl get pods\nB) kubectl delete pod web\nC) kubectl apply -f deploy.yaml",
+      "choicesExplained": "B: deleting an object is a request admission controllers act on. C: applying creates or modifies objects, so admission runs.",
+      "explanation": "Admission acts on requests that create, modify, delete or connect to an object, not on those that merely read.",
+      "evidence": "Admission controllers act on requests that create, modify, delete, or connect to (proxy) an object. Admission controllers do not act on requests that merely read objects.",
+      "source": "Kubernetes documentation, “Controlling Access to the Kubernetes API”, “Admission control”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/controlling-access/#admission-control",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "admission controller",
+        "kubectl",
+        "kubectl apply",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.request-stages"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.two-categories-of-users",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6340,
+      "front": "What are the two categories of users in every Kubernetes cluster?",
+      "back": "Service accounts, managed by Kubernetes, and normal users.",
+      "explanation": "Normal users are assumed to be managed by a service outside the cluster, such as a user store or distributed private keys.",
+      "evidence": "All Kubernetes clusters have two categories of users: service accounts managed by Kubernetes, and normal users.",
+      "source": "Kubernetes documentation, “Authenticating”, “Users in Kubernetes”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#users-in-kubernetes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ServiceAccount",
+        "authentication"
+      ],
+      "conceptIDs": [
+        "ckad.users-vs-serviceaccounts"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.no-user-objects",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6350,
+      "front": "You can create a ServiceAccount with kubectl. Can you create a normal user the same way?",
+      "back": "No. Kubernetes has no objects for normal user accounts, and normal users cannot be added through an API call.",
+      "explanation": "A normal user is anyone who presents a valid certificate signed by the cluster's certificate authority, among other authentication methods.",
+      "evidence": "Kubernetes does not have objects which represent normal user accounts. Normal users cannot be added to a cluster through an API call.",
+      "source": "Kubernetes documentation, “Authenticating”, “Users in Kubernetes”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#users-in-kubernetes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ServiceAccount",
+        "kubectl",
+        "authentication"
+      ],
+      "conceptIDs": [
+        "ckad.users-vs-serviceaccounts"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.users-vs-sa-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6360,
+      "front": "A nightly report job running in a Pod needs its own identity to call the API. A new developer needs access too. Which of the two can you create as a Kubernetes object?",
+      "back": "The job's identity, as a ServiceAccount. The developer is a normal user, managed outside the cluster.",
+      "choices": "A) Only the job's ServiceAccount\nB) Only the developer's user\nC) Both, as User and ServiceAccount objects",
+      "choicesExplained": "B, C: Kubernetes has no object for a normal user; the developer authenticates, for example, with a certificate the cluster trusts.",
+      "explanation": "Service accounts are managed by Kubernetes; normal users cannot be added through an API call.",
+      "evidence": "All Kubernetes clusters have two categories of users: service accounts managed by Kubernetes, and normal users.",
+      "source": "Kubernetes documentation, “Authenticating”, “Users in Kubernetes”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#users-in-kubernetes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ServiceAccount",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.users-vs-serviceaccounts"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.mode-alwaysallow",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6400,
+      "front": "Which authorization mode allows every request, and when does the page say to use it?",
+      "back": "`AlwaysAllow`: only if you do not require authorization, for example for testing.",
+      "explanation": "The documentation warns that allowing all requests brings security risks.",
+      "evidence": "This mode allows all requests, which brings security risks. Use this authorization mode only if you do not require authorization for your API requests (for example, for testing).",
+      "source": "Kubernetes documentation, “Authorization”, “Authorization modes”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authorization"
+      ],
+      "conceptIDs": [
+        "ckad.authorization-modes"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.mode-alwaysdeny",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6405,
+      "front": "The authorization mode that blocks all requests, meant only for testing, is {{c1::AlwaysDeny}}.",
+      "explanation": "It is the mirror of AlwaysAllow; neither is a real policy for a working cluster.",
+      "evidence": "AlwaysDeny : This mode blocks all requests. Use this authorization mode only for testing.",
+      "source": "Kubernetes documentation, “Authorization”, “Authorization modes”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authorization"
+      ],
+      "conceptIDs": [
+        "ckad.authorization-modes"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.mode-abac",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6410,
+      "front": "Which authorization mode grants access through policies that combine attributes, such as user and resource attributes?",
+      "back": "Attribute-based access control (the `ABAC` mode).",
+      "explanation": "Its policies can use any type of attribute: user, resource, object or environment attributes.",
+      "evidence": "Kubernetes ABAC mode defines an access control paradigm whereby access rights are granted to users through the use of policies which combine attributes together.",
+      "source": "Kubernetes documentation, “Authorization”, “Authorization modes”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authorization"
+      ],
+      "conceptIDs": [
+        "ckad.authorization-modes"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.mode-node",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6415,
+      "front": "Which special-purpose authorization mode grants kubelets permissions based on the Pods scheduled to run on them?",
+      "back": "`Node`.",
+      "explanation": "It exists for kubelets only, not for users or applications.",
+      "evidence": "A special-purpose authorization mode that grants permissions to kubelets based on the pods they are scheduled to run.",
+      "source": "Kubernetes documentation, “Authorization”, “Authorization modes”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authorization",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.authorization-modes"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.mode-webhook",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6420,
+      "front": "Which authorization mode makes a synchronous HTTP callout and blocks the request until a remote service answers?",
+      "back": "`Webhook`.",
+      "explanation": "You can write your own software to answer the callout or use existing solutions.",
+      "evidence": "for authorization makes a synchronous HTTP callout, blocking the request until the remote HTTP service responds to the query.",
+      "source": "Kubernetes documentation, “Authorization”, “Authorization modes”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authorization"
+      ],
+      "conceptIDs": [
+        "ckad.authorization-modes"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.auth-can-i-own",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6430,
+      "front": "Before deploying, you want to know whether you yourself may create Deployments in the namespace `staging`. Which command answers yes or no?",
+      "back": "`kubectl auth can-i create deployments --namespace staging`",
+      "choices": "A) kubectl auth can-i create deployments --namespace staging\nB) kubectl get rolebindings --namespace staging\nC) kubectl create deployment test --dry-run=client",
+      "choicesExplained": "B: this lists bindings you would have to interpret yourself. C: a client-side dry run never asks the authorization layer.",
+      "explanation": "`auth can-i` queries the authorization layer directly and prints yes or no.",
+      "evidence": "kubectl provides the auth can-i subcommand for quickly querying the API authorization layer.",
+      "source": "Kubernetes documentation, “Authorization”, “Checking API access”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "SelfSubjectAccessReview",
+        "kubectl",
+        "Deployment",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.auth-can-i"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.auth-can-i-impersonate-user",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6440,
+      "front": "How can an administrator check what another user, say `dave`, may do with `kubectl auth can-i`?",
+      "back": "Add user impersonation: `--as dave`.",
+      "explanation": "Combining can-i with impersonation shows what actions other users can perform.",
+      "evidence": "Administrators can combine this with user impersonation to determine what action other users can perform.",
+      "source": "Kubernetes documentation, “Authorization”, “Checking API access”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "authorization"
+      ],
+      "conceptIDs": [
+        "ckad.auth-can-i"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.auth-can-i-as-serviceaccount",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6450,
+      "front": "The ServiceAccount `builder` in namespace `ci` must list Pods in namespace `apps`. Which command checks it?",
+      "back": "`kubectl auth can-i list pods --namespace apps --as system:serviceaccount:ci:builder`",
+      "choices": "A) kubectl auth can-i list pods --namespace apps --as system:serviceaccount:ci:builder\nB) kubectl auth can-i list pods --namespace ci --as builder\nC) kubectl auth can-i list pods --namespace apps --as system:serviceaccounts:ci",
+      "choicesExplained": "B: this asks about a normal user named builder, in the wrong namespace. C: the plural prefix names the group of all ServiceAccounts in ci, not this one.",
+      "explanation": "The `--namespace` flag is where the action happens; `--as` takes the ServiceAccount's username: the prefix, its own namespace, then its name.",
+      "evidence": "to check whether a ServiceAccount named dev-sa in Namespace dev can list Pods in the Namespace target",
+      "source": "Kubernetes documentation, “Authorization”, “Checking API access”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "SelfSubjectAccessReview",
+        "system:serviceaccount: prefix",
+        "ServiceAccount",
+        "namespace",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.auth-can-i-as-sa"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.create-role-command",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6460,
+      "front": "Which command creates a Role `pod-reader` that allows get, list and watch on Pods, imperatively?",
+      "back": "`kubectl create role pod-reader --verb=get --verb=list --verb=watch --resource=pods`",
+      "choices": "A) kubectl create role pod-reader --verb=get --verb=list --verb=watch --resource=pods\nB) kubectl create rolebinding pod-reader --verb=get --resource=pods\nC) kubectl create clusterrolebinding pod-reader --role=pods",
+      "choicesExplained": "B: a RoleBinding grants an existing role; it does not define verbs. C: a ClusterRoleBinding also only grants, and does so cluster-wide.",
+      "explanation": "`kubectl create role` defines permissions within a single namespace; each verb is its own `--verb` flag.",
+      "evidence": "Creates a Role object defining permissions within a single namespace. Examples: - Create a Role named \"pod-reader\" that allows users to perform get , watch and list on pods:",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Command-line utilities”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#command-line-utilities",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Role",
+        "RoleBinding",
+        "ClusterRoleBinding",
+        "kubectl",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.create-role-rolebinding"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.create-rolebinding-command",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6470,
+      "front": "Which command grants the user `bob` the `admin` ClusterRole's permissions, but only inside the namespace `acme`?",
+      "back": "`kubectl create rolebinding bob-admin-binding --clusterrole=admin --user=bob --namespace=acme`",
+      "choices": "A) kubectl create rolebinding bob-admin-binding --clusterrole=admin --user=bob --namespace=acme\nB) kubectl create clusterrolebinding bob-admin-binding --clusterrole=admin --user=bob\nC) kubectl create role bob-admin --clusterrole=admin --user=bob",
+      "choicesExplained": "B: a ClusterRoleBinding grants the permissions across the whole cluster. C: create role defines verbs and resources; it does not bind a user.",
+      "explanation": "`kubectl create rolebinding` grants a Role or ClusterRole within one namespace.",
+      "evidence": "kubectl create rolebinding Grants a Role or ClusterRole within a specific namespace. Examples: - Within the namespace \"acme\", grant the permissions in the \"admin\" ClusterRole to a user named \"bob\":",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Command-line utilities”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#command-line-utilities",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RoleBinding",
+        "ClusterRole",
+        "ClusterRoleBinding",
+        "Role",
+        "kubectl",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.create-role-rolebinding",
+        "ckad.rolebinding-clusterrole"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.rolebinding-to-clusterrole",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6480,
+      "front": "A RoleBinding in namespace `development` references a ClusterRole that can read Secrets. Where can the subject read Secrets?",
+      "back": "Only in `development`, the RoleBinding's namespace.",
+      "explanation": "This lets you define common roles once for the cluster and reuse them in several namespaces.",
+      "evidence": "A RoleBinding can also reference a ClusterRole to grant the permissions defined in that ClusterRole to resources inside the RoleBinding's namespace. This kind of reference lets you define a set of common roles across your cluster, then reuse them within multiple namespaces.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “RoleBinding and ClusterRoleBinding”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RoleBinding",
+        "ClusterRole",
+        "Secret",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.rolebinding-clusterrole"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.rbac-subject-kinds",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6490,
+      "front": "What three kinds of subject can a RoleBinding or ClusterRoleBinding name?",
+      "back": "Groups, users and ServiceAccounts.",
+      "explanation": "Users are plain strings to RBAC; only the `system:` prefix is reserved.",
+      "evidence": "Subjects can be groups, users or ServiceAccounts .",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Referring to subjects”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RoleBinding",
+        "ClusterRoleBinding",
+        "ServiceAccount",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "ckad.rbac-sa-subject"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.sa-user-or-group-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6500,
+      "front": "A RoleBinding's subject is `system:serviceaccounts:qa`. Who gets the permissions?",
+      "back": "The group of ServiceAccounts in the namespace `qa`: the plural prefix names a group, not one account.",
+      "choices": "A) Every ServiceAccount in the qa namespace\nB) Only the ServiceAccount named qa\nC) A normal user named qa",
+      "choicesExplained": "B: one ServiceAccount's username uses the singular prefix and ends with its name. C: the system: prefix is reserved for Kubernetes, not ordinary users.",
+      "explanation": "system:serviceaccount: (singular) prefixes usernames; system:serviceaccounts: (plural) prefixes groups.",
+      "evidence": "system:serviceaccount: (singular) is the prefix for service account usernames. - system:serviceaccounts: (plural) is the prefix for service account groups.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Referring to subjects”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "system:serviceaccount: prefix",
+        "RoleBinding",
+        "ServiceAccount",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.rbac-sa-subject"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.mutating-vs-validating",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6510,
+      "front": "What can a mutating admission controller do that a validating one cannot?",
+      "back": "Modify the data of the resource being changed. A validating controller can only accept or reject.",
+      "explanation": "A controller may be validating, mutating or both.",
+      "evidence": "Admission control mechanisms may be validating , mutating , or both. Mutating controllers may modify the data for the resource being modified; validating controllers may not.",
+      "source": "Kubernetes documentation, “Admission Control in Kubernetes”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "admission controller"
+      ],
+      "conceptIDs": [
+        "ckad.mutating-vs-validating"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.admission-phase-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6520,
+      "front": "In which order do the two admission phases run, and what happens if one controller rejects the request?",
+      "back": "Mutating first, then validating. Any rejection rejects the whole request at once, with an error to the user.",
+      "explanation": "Some controllers belong to both phases.",
+      "evidence": "In the first phase, mutating admission controllers are run. In the second phase, validating admission controllers are run. Note again that some of the controllers are both. If any of the controllers in either phase reject the request, the entire request is rejected immediately",
+      "source": "Kubernetes documentation, “Admission Control in Kubernetes”, “Admission control phases”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "admission controller"
+      ],
+      "conceptIDs": [
+        "ckad.mutating-vs-validating"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.mutating-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 6530,
+      "front": "A cluster fills in default resource requests on Pods that leave them out, and separately refuses Pods whose image comes from an unapproved registry. Which kind of admission does each need?",
+      "back": "Filling in defaults: mutating. Refusing Pods: validating is enough.",
+      "choices": "A) Defaults: mutating; refusing: validating\nB) Both validating\nC) Defaults: validating; refusing: mutating",
+      "choicesExplained": "B: a validating controller may not change the object, so it cannot add defaults. C: reversed; adding fields is modifying the data.",
+      "explanation": "Only mutating controllers may modify the resource; rejecting needs no change to it.",
+      "evidence": "Mutating controllers may modify the data for the resource being modified; validating controllers may not.",
+      "source": "Kubernetes documentation, “Admission Control in Kubernetes”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "admission controller",
+        "Pod",
+        "registry",
+        "requests and limits"
+      ],
+      "conceptIDs": [
+        "ckad.mutating-vs-validating"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.request-and-limit-meaning",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6600,
+      "front": "For memory, what does a container's request guarantee, and what does its limit forbid?",
+      "back": "It is guaranteed as much memory as it requests, and may not use more than its limit.",
+      "explanation": "Between the two, a container can use more than its request if the node has memory available.",
+      "evidence": "A Container is guaranteed to have as much memory as it requests, but is not allowed to use more memory than its limit.",
+      "source": "Kubernetes documentation, “Assign Memory Resources to Containers and Pods”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "requests and limits",
+        "memory units"
+      ],
+      "conceptIDs": [
+        "ckad.set-requests-limits"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.set-requests-limits-yaml",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6610,
+      "front": "In a container spec, where do you write a memory request of 100Mi and a memory limit of 200Mi?",
+      "back": "Under `resources:` — `requests: {memory: 100Mi}` and `limits: {memory: 200Mi}`.",
+      "choices": "A) resources.requests.memory and resources.limits.memory\nB) spec.memory.request and spec.memory.limit\nC) resources.memory.min and resources.memory.max",
+      "choicesExplained": "B: there is no memory field at that level; resources are set per container under resources. C: min and max belong to LimitRange, not to a container.",
+      "explanation": "Each container's `resources` field holds a `requests` map and a `limits` map.",
+      "evidence": "resources: requests: memory: 100Mi limits: memory: 200Mi",
+      "source": "Kubernetes documentation, “Assign Memory Resources to Containers and Pods”, “Specify a memory request and a memory limit”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/#specify-a-memory-request-and-a-memory-limit",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "requests and limits",
+        "yaml",
+        "LimitRange"
+      ],
+      "conceptIDs": [
+        "ckad.set-requests-limits"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.memory-over-limit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6620,
+      "front": "What happens to a container that keeps using more memory than its limit?",
+      "back": "It is terminated; if it can be restarted, the kubelet restarts it.",
+      "explanation": "Going over the limit first makes it a candidate for termination; continuing to go over gets it terminated, like any other runtime failure.",
+      "evidence": "If a Container allocates more memory than its limit, the Container becomes a candidate for termination. If the Container continues to consume memory beyond its limit, the Container is terminated. If a terminated Container can be restarted, the kubelet restarts it",
+      "source": "Kubernetes documentation, “Assign Memory Resources to Containers and Pods”, “Exceed a Container's memory limit”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/#exceed-a-container-s-memory-limit",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "requests and limits",
+        "OOM kill"
+      ],
+      "conceptIDs": [
+        "ckad.memory-limit-oom"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.memory-over-limit-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6630,
+      "front": "A container with a 256Mi memory limit loads a file that needs 400Mi of memory. What happens?",
+      "back": "The kernel kills it for running out of memory (an OOM kill); the kubelet may restart it.",
+      "choices": "A) It is OOM-killed\nB) It is throttled and keeps running slowly\nC) The Pod goes back to Pending",
+      "choicesExplained": "B: throttling is how CPU limits are enforced, not memory limits. C: Pending is for Pods not yet scheduled; this one is already running.",
+      "explanation": "Memory limits are enforced by the kernel with out-of-memory kills.",
+      "evidence": "memory limits are enforced by the kernel with out of memory (OOM) kills.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Requests and limits”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "OOM kill",
+        "requests and limits"
+      ],
+      "conceptIDs": [
+        "ckad.memory-limit-oom",
+        "ckad.cpu-limit-throttle"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.cpu-over-limit",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6640,
+      "front": "A container reaches its CPU limit. Unlike going over a memory limit, what happens?",
+      "back": "It is throttled: the kernel restricts its CPU access to the limit. It is not killed.",
+      "explanation": "A CPU limit is a hard limit the kernel enforces, so the container cannot use more CPU than it states.",
+      "evidence": "cpu limits are enforced by CPU throttling. When a container approaches its cpu limit, the kernel will restrict access to the CPU corresponding to the container's limit. Thus, a cpu limit is a hard limit the kernel enforces.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Requests and limits”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "requests and limits",
+        "CPU units",
+        "OOM kill"
+      ],
+      "conceptIDs": [
+        "ckad.cpu-limit-throttle"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.cpu-over-limit-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6650,
+      "front": "An image-resizing container with a CPU limit of 500m gets a burst of work. It keeps running, but slowly, with no restarts. Why?",
+      "back": "It is being throttled at its CPU limit.",
+      "choices": "A) CPU throttling at the limit\nB) It was OOM-killed and restarted\nC) Its request is larger than any node",
+      "choicesExplained": "B: there were no restarts, and OOM kills come from memory limits. C: that would leave the Pod Pending, not running slowly.",
+      "explanation": "Containers may not use more CPU than their CPU limit; the kernel restricts them to it.",
+      "evidence": "Containers may not use more CPU than is specified in their cpu limit.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Requests and limits”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CPU units",
+        "requests and limits",
+        "OOM kill",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.cpu-limit-throttle"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.request-too-big",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6660,
+      "front": "A Pod requests more memory than any node has. What is its status, and for how long?",
+      "back": "Pending, indefinitely: it is not scheduled on any node.",
+      "explanation": "No node satisfies the request, so the scheduler never places the Pod.",
+      "evidence": "the Pod status is PENDING. That is, the Pod is not scheduled to run on any Node, and it will remain in the PENDING state indefinitely",
+      "source": "Kubernetes documentation, “Assign Memory Resources to Containers and Pods”, “Specify a memory request that is too big for your Nodes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/#specify-a-memory-request-that-is-too-big-for-your-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "requests and limits",
+        "pod phases"
+      ],
+      "conceptIDs": [
+        "ckad.request-too-big"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.request-too-big-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6670,
+      "front": "A new Pod has sat in Pending for ten minutes. `kubectl describe pod` shows a FailedScheduling event saying “Insufficient memory”. What is the likely fix?",
+      "back": "Lower the container's memory request to something a node can fit.",
+      "choices": "A) Lower the memory request\nB) Raise the memory limit\nC) Delete the Pod so it restarts",
+      "choicesExplained": "B: scheduling is decided by the request; a bigger limit does not help. C: a recreated Pod with the same request stays Pending too.",
+      "explanation": "The event says no node has enough memory for the request, so the Pod will not be scheduled as it is.",
+      "evidence": "The output shows that the Container cannot be scheduled because of insufficient memory on the Nodes:",
+      "source": "Kubernetes documentation, “Assign Memory Resources to Containers and Pods”, “Specify a memory request that is too big for your Nodes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/#specify-a-memory-request-that-is-too-big-for-your-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl describe",
+        "event",
+        "Pod",
+        "requests and limits"
+      ],
+      "conceptIDs": [
+        "ckad.request-too-big"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.limit-without-request",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6680,
+      "front": "A container sets a CPU limit but no CPU request. What request does it get?",
+      "back": "A request equal to the limit. The same holds for memory.",
+      "explanation": "Kubernetes assigns a matching request automatically when only the limit is given.",
+      "evidence": "If you specify a CPU limit for a Container but do not specify a CPU request, Kubernetes automatically assigns a CPU request that matches the limit.",
+      "source": "Kubernetes documentation, “Assign CPU Resources to Containers and Pods”, “If you specify a CPU limit but do not specify a CPU request”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/#if-you-specify-a-cpu-limit-but-do-not-specify-a-cpu-request",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "requests and limits",
+        "CPU units"
+      ],
+      "conceptIDs": [
+        "ckad.limit-without-request"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.limit-without-request-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6690,
+      "front": "A container sets only `limits: {memory: 1Gi}`. The node it needs has 800Mi free. Can it be scheduled there?",
+      "back": "No. Its memory request becomes 1Gi, matching the limit, and 800Mi is not enough.",
+      "choices": "A) No: its request is taken to be 1Gi\nB) Yes: with no request it needs nothing\nC) Yes: requests default to zero",
+      "choicesExplained": "B, C: an unset request is not zero when a limit is set; Kubernetes copies the limit.",
+      "explanation": "With a memory limit but no memory request, the request is set to match the limit.",
+      "evidence": "if a Container specifies its own memory limit, but does not specify a memory request, Kubernetes automatically assigns a memory request that matches the limit.",
+      "source": "Kubernetes documentation, “Assign CPU Resources to Containers and Pods”, “If you specify a CPU limit but do not specify a CPU request”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/#if-you-specify-a-cpu-limit-but-do-not-specify-a-cpu-request",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "requests and limits",
+        "memory units"
+      ],
+      "conceptIDs": [
+        "ckad.limit-without-request"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.no-cpu-limit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6700,
+      "front": "A container sets no CPU limit. What are the two situations that can apply?",
+      "back": "No upper bound, so it could use all the node's CPU; or its namespace has a default CPU limit, which it is given.",
+      "explanation": "Which one applies depends on whether the namespace sets a default limit, for example with a LimitRange.",
+      "evidence": "The Container has no upper bound on the CPU resources it can use. The Container could use all of the CPU resources available on the Node where it is running. The Container is running in a namespace that has a default CPU limit, and the Container is automatically assigned the default limit.",
+      "source": "Kubernetes documentation, “Assign CPU Resources to Containers and Pods”, “If you do not specify a CPU limit”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/#if-you-do-not-specify-a-cpu-limit",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "requests and limits",
+        "CPU units",
+        "namespace",
+        "LimitRange"
+      ],
+      "conceptIDs": [
+        "ckad.no-limit"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.millicpu",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6710,
+      "front": "100m CPU, 100 milliCPU and {{c1::0.1}} CPU are all the same amount.",
+      "explanation": "The suffix m means milli, and precision finer than 1m is not allowed.",
+      "evidence": "You can use the suffix m to mean milli. For example 100m CPU, 100 milliCPU, and 0.1 CPU are all the same. Precision finer than 1m is not allowed.",
+      "source": "Kubernetes documentation, “Assign CPU Resources to Containers and Pods”, “CPU units”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/#cpu-units",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CPU units"
+      ],
+      "conceptIDs": [
+        "ckad.millicpu"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.millicpu-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6720,
+      "front": "A task asks for a CPU request of a quarter of a CPU, in millicores. What do you write?",
+      "back": "`cpu: 250m`",
+      "choices": "A) 250m\nB) 25m\nC) 0.25m\nD) 2500m",
+      "choicesExplained": "B: 25m is a fortieth of a CPU. C: precision finer than 1m is not allowed. D: 2500m is two and a half CPUs.",
+      "explanation": "The m suffix means thousandths of a CPU, so 0.25 CPU is 250m, the same on any machine.",
+      "evidence": "CPU is always requested as an absolute quantity, never as a relative quantity; 0.1 is the same amount of CPU on a single-core, dual-core, or 48-core machine.",
+      "source": "Kubernetes documentation, “Assign CPU Resources to Containers and Pods”, “CPU units”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/#cpu-units",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CPU units",
+        "requests and limits"
+      ],
+      "conceptIDs": [
+        "ckad.millicpu"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.memory-suffixes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6730,
+      "front": "How is memory measured in Kubernetes, and what two families of suffix can you use?",
+      "back": "In bytes. Decimal suffixes (E, P, T, G, M, K) and power-of-two suffixes (Ei, Pi, Ti, Gi, Mi, Ki).",
+      "explanation": "So 129M and 123Mi are roughly the same value; the letters are not interchangeable.",
+      "evidence": "The memory resource is measured in bytes. You can express memory as a plain integer or a fixed-point integer with one of these suffixes: E, P, T, G, M, K, Ei, Pi, Ti, Gi, Mi, Ki.",
+      "source": "Kubernetes documentation, “Assign Memory Resources to Containers and Pods”, “Memory units”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/#memory-units",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "memory units"
+      ],
+      "conceptIDs": [
+        "ckad.mi-vs-m"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.m-vs-mi-memory",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 6740,
+      "front": "For memory, what is the difference between `400m`, `400M` and `400Mi`?",
+      "back": "`400m` is 0.4 bytes (m is milli); `400M` is 400 megabytes; `400Mi` is 400 mebibytes.",
+      "explanation": "The page warns to pay attention to the case of the suffix: someone typing 400m probably meant one of the other two.",
+      "evidence": "\"M\" means megabytes, while \"m\" means millibytes. If you request 400m of memory, this is a request for 0.4 bytes. Someone who types that probably meant to ask for 400 mebibytes ( 400Mi ) or 400 megabytes ( 400M ).",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Meaning of memory”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "memory units"
+      ],
+      "conceptIDs": [
+        "ckad.mi-vs-m"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.m-vs-mi-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6750,
+      "front": "A manifest says `memory: 512m` and the container behaves as if it has almost no memory. What went wrong?",
+      "back": "Lower-case m means milli: 512m is about half a byte. It should be `512Mi` (or `512M`).",
+      "choices": "A) m means milli, not mega\nB) Memory must be given in millicores\nC) The limit must be larger than the node",
+      "choicesExplained": "B: millicores measure CPU, not memory. C: a limit larger than the node is not needed for anything.",
+      "explanation": "Memory is counted in bytes, and the case of the suffix changes the value.",
+      "evidence": "Pay attention to the case of the suffixes. \"M\" means megabytes, while \"m\" means millibytes.",
+      "source": "Kubernetes documentation, “Resource Management for Pods and Containers”, “Meaning of memory”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "memory units",
+        "manifest",
+        "CPU units"
+      ],
+      "conceptIDs": [
+        "ckad.mi-vs-m"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.quota-requirements",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6760,
+      "front": "A ResourceQuota sets totals for memory and CPU requests and limits. What does it then require of every container in the namespace?",
+      "back": "A memory request, a memory limit, a CPU request and a CPU limit.",
+      "explanation": "The quota also caps the totals of each of those across all Pods in the namespace.",
+      "evidence": "For every Pod in the namespace, each container must have a memory request, memory limit, cpu request, and cpu limit. The memory request total for all Pods in that namespace must not exceed 1 GiB.",
+      "source": "Kubernetes documentation, “Configure Memory and CPU Quotas for a Namespace”, “Create a ResourceQuota”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-memory-cpu-namespace/#create-a-resourcequota",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ResourceQuota",
+        "namespace",
+        "requests and limits"
+      ],
+      "conceptIDs": [
+        "ckad.create-resourcequota"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.create-quota-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6770,
+      "front": "You have a ResourceQuota manifest, `quota.yaml`, for the namespace `team-a`. How do you create it and then view what it enforces?",
+      "back": "`kubectl apply -f quota.yaml --namespace=team-a`, then `kubectl get resourcequota <name> --namespace=team-a --output=yaml`.",
+      "choices": "A) Apply it with --namespace=team-a, then get resourcequota with --output=yaml\nB) Apply it cluster-wide; quotas ignore namespaces\nC) Add it to each Pod's spec",
+      "choicesExplained": "B: a ResourceQuota belongs to one namespace and constrains that namespace. C: a quota is its own object, not a Pod field.",
+      "explanation": "The quota is created in the namespace it constrains, and its YAML shows the limits it sets.",
+      "evidence": "kubectl get resourcequota mem-cpu-demo --namespace=quota-mem-cpu-example --output=yaml",
+      "source": "Kubernetes documentation, “Configure Memory and CPU Quotas for a Namespace”, “Create a ResourceQuota”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-memory-cpu-namespace/#create-a-resourcequota",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ResourceQuota",
+        "kubectl apply",
+        "namespace",
+        "yaml",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.create-resourcequota"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.quota-needs-requests",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6780,
+      "front": "A namespace has a quota on cpu and memory. What must users do when they define a Pod there?",
+      "back": "Specify requests or limits for those values; otherwise the quota system may reject Pod creation.",
+      "explanation": "A LimitRange can supply defaults so that users don't have to remember to set them.",
+      "evidence": "If quotas are enabled in a namespace for resource such as cpu and memory , users must specify requests or limits for those values when they define a Pod; otherwise, the quota system may reject pod creation.",
+      "source": "Kubernetes documentation, “Resource Quotas”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/policy/resource-quotas/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ResourceQuota",
+        "requests and limits",
+        "Pod",
+        "namespace",
+        "LimitRange"
+      ],
+      "conceptIDs": [
+        "ckad.quota-forces-requests"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.quota-needs-requests-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6790,
+      "front": "In a namespace with a cpu and memory quota and no LimitRange, a Pod whose container sets no resources is refused. What are two ways to fix it?",
+      "back": "Add requests and limits to the container; or create a LimitRange that supplies defaults.",
+      "explanation": "The quota may reject Pods that set no requests or limits; a LimitRange can force defaults on such Pods.",
+      "evidence": "You can define a LimitRange to force defaults on pods that make no compute resource requirements (so that users don't have to remember to do that).",
+      "source": "Kubernetes documentation, “Resource Quotas”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/policy/resource-quotas/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ResourceQuota",
+        "LimitRange",
+        "requests and limits",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.quota-forces-requests",
+        "ckad.limitrange-defaults"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.quota-rejects-pod",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6800,
+      "front": "What happens when a new Pod's memory request would push the namespace's total past its ResourceQuota?",
+      "back": "The Pod is not created: the request is forbidden with “exceeded quota”.",
+      "explanation": "Quota is checked when the Pod is created, against the sum already used plus the new request.",
+      "evidence": "Notice that the sum of the used memory request and this new memory request exceeds the memory request quota: 600 MiB + 700 MiB > 1 GiB.",
+      "source": "Kubernetes documentation, “Configure Memory and CPU Quotas for a Namespace”, “Attempt to create a second Pod”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-memory-cpu-namespace/#attempt-to-create-a-second-pod",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ResourceQuota",
+        "Pod",
+        "namespace",
+        "requests and limits"
+      ],
+      "conceptIDs": [
+        "ckad.quota-rejects-pod"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.quota-rejects-pod-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6810,
+      "front": "A namespace's quota allows 2Gi of memory requests; 1.5Gi is in use. You create a Pod requesting 1Gi. What do you see?",
+      "back": "An error: the Pod is forbidden because it exceeded quota. It is never created.",
+      "choices": "A) Forbidden: exceeded quota\nB) The Pod is created and stays Pending\nC) The Pod starts and is OOM-killed",
+      "choicesExplained": "B: Pending is for Pods that exist but are not scheduled; a quota refusal stops creation. C: quota counts requests at creation; it does not kill running containers.",
+      "explanation": "1.5Gi plus 1Gi is more than the 2Gi allowed, so the create request is refused.",
+      "evidence": "pods \"quota-mem-cpu-demo-2\" is forbidden: exceeded quota: mem-cpu-demo, requested: requests.memory=700Mi,used: requests.memory=600Mi, limited: requests.memory=1Gi",
+      "source": "Kubernetes documentation, “Configure Memory and CPU Quotas for a Namespace”, “Attempt to create a second Pod”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-memory-cpu-namespace/#attempt-to-create-a-second-pod",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ResourceQuota",
+        "Pod",
+        "namespace",
+        "OOM kill"
+      ],
+      "conceptIDs": [
+        "ckad.quota-rejects-pod"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.limitrange-applies-defaults",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6820,
+      "front": "What does the LimitRange admission controller do first for Pods whose containers set no compute resource requirements?",
+      "back": "It applies default request and limit values to them.",
+      "explanation": "Second, it checks usage against any minimum, maximum and ratio the LimitRange defines in the namespace.",
+      "evidence": "First, the LimitRange admission controller applies default request and limit values for all Pods (and their containers) that do not set compute resource requirements.",
+      "source": "Kubernetes documentation, “Limit Ranges”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/policy/limit-range/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "LimitRange",
+        "admission controller",
+        "Pod",
+        "requests and limits"
+      ],
+      "conceptIDs": [
+        "ckad.limitrange-defaults"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.limitrange-default-conflict",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6830,
+      "front": "A LimitRange sets a default CPU limit of 500m. A Pod requests 700m of CPU and sets no limit. What happens?",
+      "back": "The Pod is invalid and is not scheduled: the request must be no more than the CPU limit, and the default limit is 500m.",
+      "choices": "A) It is rejected as invalid\nB) It runs with a 700m limit\nC) It runs with no limit",
+      "choicesExplained": "B, C: the LimitRange gives the missing limit its default of 500m, which is below the request.",
+      "explanation": "The default limit is applied because the Pod set none, and a request above the limit is invalid.",
+      "evidence": "then that Pod will not be scheduled, failing with an error similar to: Pod \"example-conflict-with-limitrange-cpu\" is invalid: spec.containers[0].resources.requests: Invalid value: \"700m\": must be less than or equal to cpu limit",
+      "source": "Kubernetes documentation, “Limit Ranges”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/policy/limit-range/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "LimitRange",
+        "Pod",
+        "CPU units",
+        "requests and limits"
+      ],
+      "conceptIDs": [
+        "ckad.limitrange-defaults"
+      ]
+    },
+    {
+      "id": "ckad.api-access-resources.qos-eviction-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6850,
+      "front": "When a node runs out of resources, in what order does Kubernetes evict Pods by QoS class?",
+      "back": "BestEffort first, then Burstable, and Guaranteed last.",
+      "explanation": "Kubernetes assigns every Pod a QoS class from its containers' requests and limits, and uses the class to choose what to evict.",
+      "evidence": "When a Node runs out of resources, Kubernetes will first evict BestEffort Pods running on that Node, followed by Burstable and finally Guaranteed Pods.",
+      "source": "Kubernetes documentation, “Pod Quality of Service Classes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "QoS classes",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.qos-from-resources"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1518 @@
+{
+  "topic": "Observability, debugging and API deprecations",
+  "notes": [
+    {
+      "id": "ckad.observability-debugging.what-is-imagepullbackoff",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5000,
+      "front": "What does the container status ImagePullBackOff mean?",
+      "back": "The container could not start because Kubernetes could not pull its container image.",
+      "explanation": "Causes include an invalid image name, or pulling from a private registry without an imagePullSecret.",
+      "example": "Like a delivery that keeps failing because the parcel is not at the depot: the driver retries, but nothing arrives.",
+      "evidence": "The status ImagePullBackOff means that a container could not start because Kubernetes could not pull a container image (for reasons such as invalid image name, or pulling from a private registry without imagePullSecret ).",
+      "source": "Kubernetes documentation, “Images”, “ImagePullBackOff”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#imagepullbackoff",
+      "introduces": [
+        "ImagePullBackOff"
+      ],
+      "uses": [
+        "ImagePullBackOff",
+        "container image",
+        "registry",
+        "container states"
+      ],
+      "conceptIDs": [
+        "ckad.imagepullbackoff"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.apis-deprecated-then-removed",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5100,
+      "front": "As the Kubernetes API evolves, what happens to an old API version?",
+      "back": "It is deprecated and eventually removed.",
+      "explanation": "The deprecation guide lists, release by release, which API versions each release stopped serving.",
+      "evidence": "As the Kubernetes API evolves, APIs are periodically reorganized or upgraded. When APIs evolve, the old API is deprecated and eventually removed.",
+      "source": "Kubernetes documentation, “Deprecated API Migration Guide”, “Overview”",
+      "sourceURL": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+      "uses": [
+        "api version",
+        "deprecation policy"
+      ],
+      "conceptIDs": [
+        "ckad.removed-apis-by-release"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.cronjob-v1beta1-removed",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5105,
+      "front": "From which release is the batch/v1beta1 CronJob no longer served, and which version replaces it?",
+      "back": "v1.25; use batch/v1, available since v1.21.",
+      "explanation": "Manifests and api clients must move to batch/v1; existing objects stay reachable through the new version.",
+      "evidence": "The **batch/v1beta1** API version of CronJob is no longer served as of v1.25. * Migrate manifests and API clients to use the **batch/v1** API version, available since v1.21. * All existing persisted objects are accessible via the new API",
+      "source": "Kubernetes documentation, “Deprecated API Migration Guide”, “v1.25: CronJob”",
+      "sourceURL": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/#cronjob-v125",
+      "uses": [
+        "CronJob",
+        "api version",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "ckad.removed-apis-by-release"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.latest-listed-removal",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5110,
+      "front": "What did the v1.32 release, the first entry in the guide’s list of removals, stop serving?",
+      "back": "flowcontrol.apiserver.k8s.io/v1beta3 of FlowSchema and PriorityLevelConfiguration.",
+      "explanation": "The list of removed APIs by release starts at v1.32 in the guide as of this deck’s date.",
+      "evidence": "## Removed APIs by release ### v1.32 The **v1.32** release stopped serving the following deprecated API versions: #### Flow control resources {#flowcontrol-resources-v132} The **flowcontrol.apiserver.k8s.io/v1beta3** API version of FlowSchema and PriorityLevelConfiguration is no longer served as of v1.32.",
+      "source": "Kubernetes documentation, “Deprecated API Migration Guide”, “v1.32: Flow control resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/#flowcontrol-resources-v132",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "api version"
+      ],
+      "conceptIDs": [
+        "ckad.latest-listed-removal"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.locate-deprecated-apis",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5115,
+      "front": "What does the deprecation guide say to use to locate use of deprecated APIs?",
+      "back": "Client warnings, metrics and audit information (available in 1.19+).",
+      "explanation": "The guide’s next step is to migrate those callers and your files to non-deprecated APIs.",
+      "evidence": "Use [client warnings, metrics, and audit information available in 1.19+](/blog/2020/09/03/warnings/#deprecation-warnings) to locate use of deprecated APIs.",
+      "source": "Kubernetes documentation, “Deprecated API Migration Guide”, “Locate use of deprecated APIs”",
+      "sourceURL": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/#locate-use-of-deprecated-apis",
+      "uses": [
+        "api version",
+        "deprecation policy"
+      ],
+      "conceptIDs": [
+        "ckad.locate-deprecated-apis"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.kubectl-convert",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5120,
+      "front": "What does `kubectl convert -f <file> --output-version <group>/<version>` do?",
+      "back": "Converts an existing object in the file to the given api version.",
+      "explanation": "The conversion may use non-ideal default values.",
+      "evidence": "For example, to convert an older Deployment to `apps/v1`, you can run: `kubectl convert -f ./my-deployment.yaml --output-version apps/v1` This conversion may use non-ideal default values.",
+      "source": "Kubernetes documentation, “Deprecated API Migration Guide”, “Migrate to non-deprecated APIs”",
+      "sourceURL": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/#migrate-to-non-deprecated-apis",
+      "uses": [
+        "kubectl",
+        "api version"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-convert"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.kubectl-convert-plugin",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5125,
+      "front": "Is `kubectl convert` part of a standard kubectl install?",
+      "back": "No. It is not installed by default, though it was once part of kubectl itself.",
+      "explanation": "You set it up separately, following the install page for your operating system.",
+      "evidence": "The `kubectl convert` tool is not installed by default, although in fact it once was part of `kubectl` itself.",
+      "source": "Kubernetes documentation, “Deprecated API Migration Guide”, “Migrate to non-deprecated APIs”",
+      "sourceURL": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/#migrate-to-non-deprecated-apis",
+      "uses": [
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-convert"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.kubectl-api-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5130,
+      "front": "Which command lists the resource types the cluster supports, and which flag limits it to namespaced ones?",
+      "back": "`kubectl api-resources`; add `--namespaced=true`.",
+      "explanation": "`--namespaced=false` lists the non-namespaced ones instead.",
+      "evidence": "kubectl api-resources --namespaced=true # All namespaced resources kubectl api-resources --namespaced=false # All non-namespaced resources",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Resource types”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#resource-types",
+      "uses": [
+        "kubectl",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.api-resources-versions"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.exec-probe-result",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5200,
+      "front": "How does the kubelet judge an `exec` liveness probe?",
+      "back": "Exit code 0 means alive and healthy; a non-zero value makes it kill and restart the container.",
+      "explanation": "The kubelet runs the probe’s command inside the target container.",
+      "evidence": "If the command succeeds, it returns 0, and the kubelet considers the container to be alive and healthy. If the command returns a non-zero value, the kubelet kills the container and restarts it.",
+      "source": "Kubernetes documentation, “Configure Liveness, Readiness and Startup Probes”, “Define a liveness command”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-liveness-command",
+      "uses": [
+        "liveness probe",
+        "probe mechanisms"
+      ],
+      "conceptIDs": [
+        "ckad.liveness-exec"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.http-probe-success-codes",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5205,
+      "front": "Which response codes count as success for an `httpGet` probe?",
+      "back": "Any code from 200 up to, but not including, 400.",
+      "explanation": "Any other code is a failure, and for a liveness probe the kubelet then kills and restarts the container.",
+      "evidence": "If the handler returns a failure code, the kubelet kills the container and restarts it. Any code greater than or equal to 200 and less than 400 indicates success. Any other code indicates failure.",
+      "source": "Kubernetes documentation, “Configure Liveness, Readiness and Startup Probes”, “Define a liveness HTTP request”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-liveness-http-request",
+      "uses": [
+        "liveness probe",
+        "probe mechanisms"
+      ],
+      "conceptIDs": [
+        "ckad.liveness-http"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.tcp-probe",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5210,
+      "front": "How does a `tcpSocket` probe decide whether a container is healthy?",
+      "back": "The kubelet tries to open a socket to the container on the given port; a connection means healthy.",
+      "explanation": "If it cannot establish a connection, the probe counts as a failure.",
+      "evidence": "With this configuration, the kubelet will attempt to open a socket to your container on the specified port. If it can establish a connection, the container is considered healthy, if it can't it is considered a failure.",
+      "source": "Kubernetes documentation, “Configure Liveness, Readiness and Startup Probes”, “Define a TCP liveness probe”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-tcp-liveness-probe",
+      "uses": [
+        "probes",
+        "probe mechanisms"
+      ],
+      "conceptIDs": [
+        "ckad.tcp-probe"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.grpc-probe",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5215,
+      "front": "When can you use a `grpc` probe?",
+      "back": "When the application implements the gRPC Health Checking Protocol.",
+      "explanation": "The same mechanism works for liveness, readiness and startup probes.",
+      "evidence": "If your application implements the [gRPC Health Checking Protocol](https://github.com/grpc/grpc/blob/master/doc/health-checking.md), this example shows how to configure Kubernetes to use it for application liveness checks. Similarly you can configure readiness and startup probes.",
+      "source": "Kubernetes documentation, “Configure Liveness, Readiness and Startup Probes”, “Define a gRPC liveness probe”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-grpc-liveness-probe",
+      "uses": [
+        "probes",
+        "probe mechanisms",
+        "liveness probe",
+        "readiness probe",
+        "startup probe"
+      ],
+      "conceptIDs": [
+        "ckad.grpc-probe"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.named-port-probe",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5220,
+      "front": "Which probe mechanisms can refer to a container port by name, and which cannot?",
+      "back": "`httpGet` and `tcpSocket` probes can; `grpc` probes cannot.",
+      "explanation": "Name the port in the container’s ports list, then give that name as the probe’s port.",
+      "evidence": "You can use a named [`port`](/docs/reference/kubernetes-api/workload-resources/pod-v1/#ports) for HTTP and TCP probes. gRPC probes do not support named ports.",
+      "source": "Kubernetes documentation, “Configure Liveness, Readiness and Startup Probes”, “Use a named port”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#use-a-named-port",
+      "uses": [
+        "probes",
+        "probe mechanisms"
+      ],
+      "conceptIDs": [
+        "ckad.named-port-probe"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.startup-probe-window",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5225,
+      "front": "Which two startup probe fields, multiplied, set the longest time an app gets to start?",
+      "back": "`failureThreshold` × `periodSeconds`",
+      "explanation": "Once the startup probe succeeds, the liveness probe takes over; if it never succeeds, the container is killed and follows the Pod’s restartPolicy.",
+      "evidence": "Once the startup probe has succeeded once, the liveness probe takes over to provide a fast response to container deadlocks. If the startup probe never succeeds, the container is killed after 300s and subject to the pod's `restartPolicy`.",
+      "source": "Kubernetes documentation, “Configure Liveness, Readiness and Startup Probes”, “Protect slow starting containers with startup probes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes",
+      "uses": [
+        "startup probe",
+        "liveness probe",
+        "restartPolicy"
+      ],
+      "conceptIDs": [
+        "ckad.startup-probe-window"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.startup-blocks-other-probes",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5230,
+      "front": "While a configured startup probe has not yet succeeded, do liveness and readiness probes run?",
+      "back": "No. They wait until the startup probe succeeds.",
+      "explanation": "This gives the application time to finish its initialization.",
+      "evidence": "If a startup probe is configured, Kubernetes does not execute liveness or readiness probes until the startup probe succeeds, allowing the application time to finish its initialization.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Startup probe”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#startup-probe",
+      "uses": [
+        "startup probe",
+        "liveness probe",
+        "readiness probe"
+      ],
+      "conceptIDs": [
+        "ckad.startup-probe-window"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.readiness-probe-config",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5240,
+      "front": "How does configuring a readiness probe differ from configuring a liveness probe?",
+      "back": "Only in the field name: `readinessProbe` instead of `livenessProbe`.",
+      "explanation": "The probe mechanisms and settings inside the field are written the same way.",
+      "evidence": "Readiness probes are configured similarly to liveness probes. The only difference is that you use the `readinessProbe` field instead of the `livenessProbe` field.",
+      "source": "Kubernetes documentation, “Configure Liveness, Readiness and Startup Probes”, “Define readiness probes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-readiness-probes",
+      "uses": [
+        "readiness probe",
+        "liveness probe"
+      ],
+      "conceptIDs": [
+        "ckad.readiness-probe-config"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.liveness-failure-restarts",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5245,
+      "front": "What happens when a container fails its liveness probe more times than the configured tolerance?",
+      "back": "The kubelet restarts that container.",
+      "explanation": "Liveness probes do not wait for readiness probes; to delay them, use initialDelaySeconds or a startup probe.",
+      "evidence": "If a container fails its liveness probe more times than the configured tolerance, the kubelet restarts that container. Liveness probes do not wait for readiness probes to succeed. If you want to wait before executing a liveness probe, you can either define initialDelaySeconds or use a startup probe .",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Liveness probe”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#liveness-probe",
+      "uses": [
+        "liveness probe",
+        "readiness probe",
+        "startup probe"
+      ],
+      "conceptIDs": [
+        "ckad.liveness-vs-readiness-failure"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.readiness-failure-endpoints",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5250,
+      "front": "What happens when a readiness probe returns a failed state?",
+      "back": "The Pod’s address is removed from the EndpointSlices of every Service that matches the Pod.",
+      "explanation": "Readiness probes run during the container’s whole lifecycle, so a Pod can lose and regain traffic.",
+      "evidence": "If the readiness probe returns a failed state, the EndpointSlice controller removes the Pod's IP address from the EndpointSlices of all Services that match the Pod. Readiness probes run on the container during its whole lifecycle.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Readiness probe”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#readiness-probe",
+      "uses": [
+        "readiness probe",
+        "EndpointSlice",
+        "Service",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.liveness-vs-readiness-failure"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.field-initial-delay",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5260,
+      "front": "Which probe field sets how long after the container starts the first probe waits, and what is its default?",
+      "back": "`initialDelaySeconds`; default 0 seconds.",
+      "explanation": "In current versions the delay is always honoured: the probe does not start before it ends.",
+      "evidence": "However, in current versions, initialDelaySeconds is always honored and the probe will not start until after this initial delay. Defaults to 0 seconds.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Configuration fields”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#configuration-fields",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "probes"
+      ],
+      "conceptIDs": [
+        "ckad.probe-fields"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.field-period",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5262,
+      "front": "Which probe field sets how often the probe runs, and what is its default?",
+      "back": "`periodSeconds`; default 10 seconds.",
+      "explanation": "Its minimum value is 1.",
+      "evidence": "periodSeconds How often (in seconds) to perform the probe. Default to 10 seconds. The minimum value is 1.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Configuration fields”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#configuration-fields",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "probes"
+      ],
+      "conceptIDs": [
+        "ckad.probe-fields"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.field-timeout",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5264,
+      "front": "Which probe field sets how long one probe may take before it times out, and what is its default?",
+      "back": "`timeoutSeconds`; default 1 second.",
+      "explanation": "Its minimum value is also 1.",
+      "evidence": "timeoutSeconds Number of seconds after which the probe times out. Defaults to 1 second. Minimum value is 1.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Configuration fields”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#configuration-fields",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "probes"
+      ],
+      "conceptIDs": [
+        "ckad.probe-fields"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.field-success-threshold",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5266,
+      "front": "Which probe field sets the consecutive successes needed after a failure, and what value must it have for liveness and startup probes?",
+      "back": "`successThreshold`; it defaults to 1 and must be 1 for liveness and startup probes.",
+      "explanation": "Only readiness probes can ask for more than one success in a row.",
+      "evidence": "successThreshold Minimum consecutive successes for the probe to be considered successful after having failed. Defaults to 1. Must be 1 for liveness and startup Probes.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Configuration fields”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#configuration-fields",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "probes"
+      ],
+      "conceptIDs": [
+        "ckad.probe-fields"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.field-failure-threshold",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5268,
+      "front": "Which probe field sets how many failures in a row make the overall check fail, and what is its default?",
+      "back": "`failureThreshold`; default 3.",
+      "explanation": "After that many failures in a row, the container counts as not ready, healthy or live.",
+      "evidence": "failureThreshold After a probe fails failureThreshold times in a row, Kubernetes considers that the overall check has failed: the container is not ready/healthy/live. Defaults to 3.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Configuration fields”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#configuration-fields",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "probes"
+      ],
+      "conceptIDs": [
+        "ckad.probe-fields"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.kubectl-top-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5300,
+      "front": "How do you show metrics for one Pod broken down by container, and how do you sort `kubectl top pod` output?",
+      "back": "`kubectl top pod POD_NAME --containers`; sort with `--sort-by=cpu` or `--sort-by=memory`.",
+      "explanation": "Plain `kubectl top pod` shows metrics for all Pods in the default namespace.",
+      "evidence": "kubectl top pod # Show metrics for all pods in the default namespace kubectl top pod POD_NAME --containers # Show metrics for a given pod and its containers kubectl top pod POD_NAME --sort-by=cpu # Show metrics for a given pod and sort it by 'cpu' or 'memory'",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "uses": [
+        "kubectl top",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-top-pod"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.kubectl-events",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5310,
+      "front": "How do you list events sorted by time, and how do you list only warning events?",
+      "back": "`kubectl get events --sort-by=.metadata.creationTimestamp`; `kubectl events --types=Warning`.",
+      "explanation": "The sort key is each event’s creation timestamp.",
+      "evidence": "# List Events sorted by timestamp kubectl get events --sort-by=.metadata.creationTimestamp # List all warning events kubectl events --types=Warning",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Viewing and finding resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#viewing-and-finding-resources",
+      "uses": [
+        "event",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-get-events"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.describe-events",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5315,
+      "front": "In `kubectl describe pod` output for a Pod that will not schedule, what event does the scheduler record?",
+      "back": "A FailedScheduling event, with the reason, such as a node not having enough resources.",
+      "explanation": "The Events section at the end of describe is where such scheduler messages appear.",
+      "evidence": "Here you can see the event generated by the scheduler saying that the Pod failed to schedule for reason FailedScheduling",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Example: debugging Pending Pods”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#example-debugging-pending-pods",
+      "uses": [
+        "kubectl describe",
+        "event",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-describe-pod"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.logs-container-flag",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5320,
+      "front": "For a Pod with several containers, how do you get the logs of one container?",
+      "back": "`kubectl logs my-pod -c my-container`",
+      "explanation": "The -c flag names the container in the multi-container case.",
+      "evidence": "kubectl logs my-pod -c my-container # dump pod container logs (stdout, multi-container case)",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "uses": [
+        "kubectl logs",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.logs-container-flag"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.logs-previous",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5325,
+      "front": "How do you read the crash log of a container that has previously crashed?",
+      "back": "`kubectl logs <pod> -c <container> --previous`",
+      "explanation": "--previous shows the previous container instance, the one that crashed, not the one running now.",
+      "evidence": "If your container has previously crashed, you can access the previous container's crash log with: kubectl logs ${ POD_NAME } -c ${ CONTAINER_NAME } --previous",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Examining pod logs”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#examine-pod-logs",
+      "uses": [
+        "kubectl logs",
+        "CrashLoopBackOff"
+      ],
+      "conceptIDs": [
+        "ckad.logs-previous"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.logs-follow",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5330,
+      "front": "Which `kubectl logs` flag streams the logs as they are written?",
+      "back": "`-f`",
+      "explanation": "Without it, kubectl logs dumps the logs so far and exits.",
+      "evidence": "kubectl logs -f my-pod # stream pod logs (stdout)",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "uses": [
+        "kubectl logs",
+        "label",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.logs-flags"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.logs-label",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5332,
+      "front": "Which `kubectl logs` flag gets the logs of every Pod carrying a given label?",
+      "back": "`-l`, e.g. `-l name=myLabel`",
+      "explanation": "It selects Pods by label instead of by name.",
+      "evidence": "kubectl logs -l name=myLabel # dump pod logs, with label name=myLabel (stdout)",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "uses": [
+        "kubectl logs",
+        "label",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.logs-flags"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.logs-all-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5334,
+      "front": "Which `kubectl logs` flag includes every container of the selected Pods?",
+      "back": "`--all-containers`",
+      "explanation": "It can be combined with -f and -l to stream all containers of all matching Pods.",
+      "evidence": "kubectl logs -f -l name=myLabel --all-containers # stream all pods logs with label name=myLabel (stdout)",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "uses": [
+        "kubectl logs",
+        "label",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.logs-flags"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.logs-deployment",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5336,
+      "front": "How do you dump Pod logs for a Deployment without naming a Pod?",
+      "back": "`kubectl logs deploy/my-deployment`",
+      "explanation": "Add -c when the Pods have more than one container.",
+      "evidence": "kubectl logs deploy/my-deployment # dump Pod logs for a Deployment (single-container case) kubectl logs deploy/my-deployment -c my-container # dump Pod logs for a Deployment (multi-container case)",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with Deployments and Services”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-deployments-and-services",
+      "uses": [
+        "kubectl logs",
+        "label",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.logs-flags"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.pending-meaning",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5400,
+      "front": "What does it mean when a Pod is stuck in Pending?",
+      "back": "It cannot be scheduled onto a node, generally because resources are insufficient.",
+      "explanation": "The scheduler’s messages in kubectl describe should say why it cannot schedule the Pod.",
+      "evidence": "If a Pod is stuck in Pending it means that it can not be scheduled onto a node. Generally this is because there are insufficient resources of one type or another that prevent scheduling.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod stays pending”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-stays-pending",
+      "uses": [
+        "pod phases",
+        "Pod",
+        "kubectl describe"
+      ],
+      "conceptIDs": [
+        "ckad.debug-pending"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.waiting-meaning",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5405,
+      "front": "A Pod is stuck in Waiting. What does that tell you, and what is the most common cause?",
+      "back": "It is scheduled to a node but cannot run there; most often the image failed to pull.",
+      "explanation": "The output of kubectl describe should be informative about why.",
+      "evidence": "If a Pod is stuck in the Waiting state, then it has been scheduled to a worker node, but it can't run on that machine. Again, the information from kubectl describe ... should be informative. The most common cause of Waiting pods is a failure to pull the image.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod stays waiting”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-stays-waiting",
+      "uses": [
+        "container states",
+        "Pod",
+        "kubectl describe",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.debug-waiting-imagepull"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.imagepullbackoff-retry",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5410,
+      "front": "In ImagePullBackOff, what does the “BackOff” part mean, and how long can the delay grow?",
+      "back": "Kubernetes keeps retrying the pull with an increasing delay, up to a limit of 300 seconds (5 minutes).",
+      "explanation": "So a fixed image may not start at once: the next retry can be up to five minutes away.",
+      "evidence": "The BackOff part indicates that Kubernetes will keep trying to pull the image, with an increasing back-off delay. Kubernetes raises the delay between each attempt until it reaches a compiled-in limit, which is 300 seconds (5 minutes).",
+      "source": "Kubernetes documentation, “Images”, “ImagePullBackOff”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#imagepullbackoff",
+      "uses": [
+        "ImagePullBackOff",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.imagepullbackoff"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.crashing-debug-running",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5415,
+      "front": "Once a crashing Pod has been scheduled, which debugging methods apply?",
+      "back": "Those for running Pods: its logs, kubectl exec, and debug containers.",
+      "explanation": "The Debug Running Pods page covers examining logs, kubectl exec and ephemeral debug containers.",
+      "evidence": "My pod is crashing or otherwise unhealthy Once your pod has been scheduled, the methods described in Debug Running Pods are available for debugging.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod is crashing or otherwise unhealthy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-is-crashing-or-otherwise-unhealthy",
+      "uses": [
+        "Pod",
+        "kubectl logs",
+        "kubectl exec",
+        "kubectl debug"
+      ],
+      "conceptIDs": [
+        "ckad.debug-crashing"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.misspelt-key-ignored",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5420,
+      "front": "A Pod runs but ignores part of your spec. What does the documentation suggest as a likely cause?",
+      "back": "A key typed wrongly or nested incorrectly in the Pod description, which was silently ignored.",
+      "explanation": "For example, commnd instead of command creates the Pod without the intended command line.",
+      "evidence": "Often a section of the pod description is nested incorrectly, or a key name is typed incorrectly, and so the key is ignored. For example, if you misspelled command as commnd then the pod will be created but will not use the command line you intended it to use.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod is running but not doing what I told it to do”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-is-running-but-not-doing-what-i-told-it-to-do",
+      "uses": [
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.debug-crashing"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.exec-shell",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5430,
+      "front": "Which command gives interactive shell access to a running single-container Pod?",
+      "back": "`kubectl exec --stdin --tty my-pod -- /bin/sh`",
+      "explanation": "The command to run comes after the --; for a multi-container Pod add -c with the container name.",
+      "evidence": "kubectl exec --stdin --tty my-pod -- /bin/sh # Interactive shell access to a running pod (1 container case) kubectl exec my-pod -c my-container -- ls / # Run command in existing pod (multi-container case)",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "uses": [
+        "kubectl exec",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-exec-shell"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.ephemeral-when",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5440,
+      "front": "When are ephemeral debug containers useful?",
+      "back": "When kubectl exec is not enough: the container has crashed, or its image has no debugging utilities.",
+      "explanation": "Distroless images are the documentation’s example of images without such utilities.",
+      "evidence": "Ephemeral containers are useful for interactive troubleshooting when kubectl exec is insufficient because a container has crashed or a container image doesn't include debugging utilities, such as with distroless images .",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Debugging with an ephemeral debug container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container",
+      "uses": [
+        "ephemeral container",
+        "kubectl exec",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-debug-ephemeral"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.debug-target",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5445,
+      "front": "In `kubectl debug -it mypod --image=busybox:1.28 --target=app`, what does `--target` do?",
+      "back": "It puts the new debug container in the process namespace of container app.",
+      "explanation": "It is needed when the Pod does not share its process namespace, and the container runtime must support it.",
+      "evidence": "The --target parameter targets the process namespace of another container. It's necessary here because kubectl run does not enable process namespace sharing in the pod it creates. Note: The --target parameter must be supported by the Container Runtime .",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Example debugging using ephemeral containers”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container-example",
+      "uses": [
+        "kubectl debug",
+        "ephemeral container"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-debug-ephemeral"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.debug-copy-to",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5450,
+      "front": "Which `kubectl debug` flag debugs a copy of a Pod, for example with its command changed to a shell?",
+      "back": "`--copy-to=<new-pod-name>`",
+      "explanation": "Here --container=myapp picks the container whose command becomes the shell.",
+      "evidence": "You can use kubectl debug to create a copy of this Pod with the command changed to an interactive shell: kubectl debug myapp -it --copy-to=myapp-debug --container=myapp -- sh",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Copying a Pod while changing its command”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#copying-a-pod-while-changing-its-command",
+      "uses": [
+        "kubectl debug",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-debug-copy"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.port-forward",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5455,
+      "front": "What does `kubectl port-forward my-pod 5000:6000` do?",
+      "back": "Listens on port 5000 on the local machine and forwards to port 6000 on my-pod.",
+      "explanation": "The local port comes first and the Pod’s port second.",
+      "evidence": "kubectl port-forward my-pod 5000:6000 # Listen on port 5000 on the local machine and forward to port 6000 on my-pod",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "uses": [
+        "kubectl",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-port-forward"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.kubectl-cp",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5460,
+      "front": "Which command copies the local directory /tmp/foo_dir to /tmp/bar_dir in Pod my-pod?",
+      "back": "`kubectl cp /tmp/foo_dir my-pod:/tmp/bar_dir`",
+      "explanation": "The Pod side is written pod:path; add -c to pick a container.",
+      "evidence": "kubectl cp /tmp/foo_dir my-pod:/tmp/bar_dir # Copy /tmp/foo_dir local directory to /tmp/bar_dir in a remote pod in the current namespace kubectl cp /tmp/foo my-pod:/tmp/bar -c my-container # Copy /tmp/foo local file to /tmp/bar in a remote pod in a specific container",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Copying files and directories to and from containers”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#copying-files-and-directories-to-and-from-containers",
+      "uses": [
+        "kubectl",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-cp"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.termination-message",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5465,
+      "front": "Where does Kubernetes read a container’s termination message from by default, and which field changes that?",
+      "back": "`/dev/termination-log`; change it with `terminationMessagePath`.",
+      "explanation": "Customising the field tells Kubernetes to read a different file.",
+      "evidence": "termination message file specified in the `terminationMessagePath` field of a Container, which has a default value of `/dev/termination-log`. By customizing this field, you can tell Kubernetes to use a different file.",
+      "source": "Kubernetes documentation, “Determine the Reason for Pod Failure”, “Customizing the termination message”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/determine-reason-pod-failure/#customizing-the-termination-message",
+      "uses": [
+        "container states"
+      ],
+      "conceptIDs": [
+        "ckad.termination-message"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.init-container-logs",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5470,
+      "front": "How do you read the logs of an init container?",
+      "back": "`kubectl logs <pod-name> -c <init-container-name>`",
+      "explanation": "You pass the init container’s name along with the Pod’s name.",
+      "evidence": "Pass the Init Container name along with the Pod name to access its logs.",
+      "source": "Kubernetes documentation, “Debug Init Containers”, “Accessing logs from Init Containers”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-init-containers/#accessing-logs-from-init-containers",
+      "uses": [
+        "init container",
+        "kubectl logs"
+      ],
+      "conceptIDs": [
+        "ckad.debug-init-containers"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.init-n-of-m",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5475,
+      "front": "A Pod shows status `Init:1/3`. What does that mean?",
+      "back": "The Pod has 3 init containers, and 1 has completed so far.",
+      "explanation": "The status counts completed init containers against the total.",
+      "evidence": "`Init:N/M` | The Pod has `M` Init Containers, and `N` have completed so far.",
+      "source": "Kubernetes documentation, “Debug Init Containers”, “Understanding Pod status”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-init-containers/#understanding-pod-status",
+      "uses": [
+        "init container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.init-status-values"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.init-error",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5477,
+      "front": "Which Pod status means an init container has failed to execute?",
+      "back": "`Init:Error`",
+      "explanation": "A single failure shows as Init:Error; repeated failure shows as Init:CrashLoopBackOff.",
+      "evidence": "`Init:Error` | An Init Container has failed to execute. `Init:CrashLoopBackOff` | An Init Container has failed repeatedly.",
+      "source": "Kubernetes documentation, “Debug Init Containers”, “Understanding Pod status”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-init-containers/#understanding-pod-status",
+      "uses": [
+        "init container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.init-status-values"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.init-crashloop",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5479,
+      "front": "Which Pod status means an init container has failed repeatedly?",
+      "back": "`Init:CrashLoopBackOff`",
+      "explanation": "It is the init-container form of CrashLoopBackOff.",
+      "evidence": "`Init:CrashLoopBackOff` | An Init Container has failed repeatedly.",
+      "source": "Kubernetes documentation, “Debug Init Containers”, “Understanding Pod status”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-init-containers/#understanding-pod-status",
+      "uses": [
+        "init container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.init-status-values"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.init-podinitializing",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5481,
+      "front": "What does the status `PodInitializing` tell you about a Pod’s init containers?",
+      "back": "The Pod has already finished executing them.",
+      "explanation": "Running tells you the same; Pending means init containers have not yet begun.",
+      "evidence": "`Pending` | The Pod has not yet begun executing Init Containers. `PodInitializing` or `Running` | The Pod has already finished executing Init Containers.",
+      "source": "Kubernetes documentation, “Debug Init Containers”, “Understanding Pod status”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-init-containers/#understanding-pod-status",
+      "uses": [
+        "init container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.init-status-values"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-cronjob-apiversion",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5500,
+      "front": "An old manifest declares a CronJob with apiVersion batch/v1beta1, and a v1.35 cluster rejects it. What do you change?",
+      "back": "The apiVersion to batch/v1.",
+      "explanation": "batch/v1beta1 CronJob has not been served since v1.25; batch/v1 replaces it.",
+      "evidence": "The **batch/v1beta1** API version of CronJob is no longer served as of v1.25. * Migrate manifests and API clients to use the **batch/v1** API version, available since v1.21.",
+      "source": "Kubernetes documentation, “Deprecated API Migration Guide”, “v1.25: CronJob”",
+      "sourceURL": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/#cronjob-v125",
+      "uses": [
+        "CronJob",
+        "api version",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "ckad.removed-apis-by-release"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-convert",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5505,
+      "front": "old-deploy.yaml holds a Deployment at an old api version. Which command rewrites it for apps/v1, once the plugin is installed?",
+      "back": "`kubectl convert -f old-deploy.yaml --output-version apps/v1`",
+      "explanation": "The output version is given as group/version; check the result, as defaults may be non-ideal.",
+      "evidence": "You can use the `kubectl convert` command to automatically convert an existing object: `kubectl convert -f <file> --output-version <group>/<version>`.",
+      "source": "Kubernetes documentation, “Deprecated API Migration Guide”, “Migrate to non-deprecated APIs”",
+      "sourceURL": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/#migrate-to-non-deprecated-apis",
+      "uses": [
+        "kubectl",
+        "Deployment",
+        "api version"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-convert"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-find-deprecated-callers",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5510,
+      "front": "Before an upgrade you find code and files still using a deprecated api version. Which two migration steps does the guide list?",
+      "back": "Update custom integrations and controllers to call the non-deprecated versions, and change yaml files to reference them.",
+      "explanation": "Locating the deprecated calls comes first, using client warnings, metrics and audit information.",
+      "evidence": "* Update custom integrations and controllers to call the non-deprecated APIs * Change YAML files to reference the non-deprecated APIs",
+      "source": "Kubernetes documentation, “Deprecated API Migration Guide”, “Migrate to non-deprecated APIs”",
+      "sourceURL": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/#migrate-to-non-deprecated-apis",
+      "uses": [
+        "api version",
+        "deprecation policy",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.locate-deprecated-apis"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-api-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5515,
+      "front": "You need to know whether PersistentVolume objects belong to a namespace. Which command answers it without reading docs?",
+      "back": "`kubectl api-resources --namespaced=false` (it lists the non-namespaced types).",
+      "explanation": "kubectl api-resources shows whether each type is namespaced; the flag filters by that.",
+      "evidence": "kubectl api-resources --namespaced=false # All non-namespaced resources",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Resource types”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#resource-types",
+      "uses": [
+        "kubectl",
+        "namespace",
+        "PersistentVolume"
+      ],
+      "conceptIDs": [
+        "ckad.api-resources-versions"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-probe-mechanism",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5520,
+      "front": "A database container has no health web page and no shell tools, but accepts connections on port 5432. Which probe mechanism fits a liveness check?",
+      "choices": "A) `tcpSocket` on port 5432\nB) `httpGet` on /healthz\nC) `exec` running a health script",
+      "back": "A: a `tcpSocket` probe on port 5432.",
+      "choicesExplained": "B: there is no web page to return a success code. C: an exec probe needs a command that can run inside the container.",
+      "explanation": "A tcpSocket probe only needs the kubelet to open a connection on the port.",
+      "evidence": "With this configuration, the kubelet will attempt to open a socket to your container on the specified port. If it can establish a connection, the container is considered healthy",
+      "source": "Kubernetes documentation, “Configure Liveness, Readiness and Startup Probes”, “Define a TCP liveness probe”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-tcp-liveness-probe",
+      "uses": [
+        "liveness probe",
+        "probe mechanisms"
+      ],
+      "conceptIDs": [
+        "ckad.tcp-probe",
+        "ckad.liveness-exec"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-http-redirect",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5525,
+      "front": "A liveness `httpGet` probe hits /status, which answers 302, redirecting to a different host. What does the kubelet do?",
+      "choices": "A) Counts it as success\nB) Counts it as failure and restarts the container\nC) Marks the container unready but does not restart it",
+      "back": "A: it does not follow a redirect to another host; it counts the probe as a success and records a ProbeWarning event.",
+      "choicesExplained": "B: a redirect to a different host is treated as success, not failure. C: the probe succeeded, so nothing is marked as failing.",
+      "explanation": "The kubelet follows redirects only to the same host, so a redirect to a different host is not followed and the probe is treated as successful.",
+      "evidence": "If the redirect is to a different hostname, the kubelet does not follow it. Instead, the kubelet treats the probe as successful and records a ProbeWarning event.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “HTTP probes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#http-probes",
+      "uses": [
+        "liveness probe",
+        "probe mechanisms"
+      ],
+      "conceptIDs": [
+        "ckad.liveness-http"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-startup-threshold",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5530,
+      "front": "An app can take up to 4 minutes to start. Its startup probe uses periodSeconds: 10. What is the smallest failureThreshold that covers the worst case?",
+      "back": "24 (24 × 10 s = 240 s).",
+      "explanation": "The startup window is failureThreshold × periodSeconds, and it must cover the worst-case startup time.",
+      "evidence": "The solution is to set up a startup probe with the same command, HTTP or TCP check, with a `failureThreshold * periodSeconds` long enough to cover the worst case startup time.",
+      "source": "Kubernetes documentation, “Configure Liveness, Readiness and Startup Probes”, “Protect slow starting containers with startup probes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes",
+      "uses": [
+        "startup probe"
+      ],
+      "conceptIDs": [
+        "ckad.startup-probe-window"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-readiness-warmup",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5535,
+      "front": "An app sometimes spends two minutes reloading large data files. Meanwhile it must get no requests, but it must not be killed. Which probe fits?",
+      "choices": "A) A readiness probe\nB) A liveness probe\nC) No probe: a Service waits on its own",
+      "back": "A: a readiness probe.",
+      "choicesExplained": "B: failing a liveness probe gets the container restarted. C: without a readiness probe, nothing removes the Pod from the Service’s endpoints.",
+      "explanation": "A failed readiness probe removes the Pod from its Services’ EndpointSlices while the container keeps running.",
+      "evidence": "Sometimes, applications are temporarily unable to serve traffic. For example, an application might need to load large data or configuration files during startup, or depend on external services after startup. In such cases, you don't want to kill the application, but you don't want to send it requests either.",
+      "source": "Kubernetes documentation, “Configure Liveness, Readiness and Startup Probes”, “Define readiness probes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-readiness-probes",
+      "uses": [
+        "readiness probe",
+        "liveness probe",
+        "Service",
+        "EndpointSlice",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.readiness-probe-config",
+        "ckad.liveness-vs-readiness-failure"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-probe-defaults-timing",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5540,
+      "front": "A liveness probe sets only its check, leaving all timing fields at their defaults. The app hangs. About how long after its first failed probe is the container restarted?",
+      "back": "About 20 seconds: 3 failures in a row are needed, 10 seconds apart.",
+      "explanation": "failureThreshold defaults to 3 and periodSeconds to 10, so the third failure comes two periods after the first.",
+      "evidence": "failureThreshold After a probe fails failureThreshold times in a row, Kubernetes considers that the overall check has failed: the container is not ready/healthy/live. Defaults to 3.",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Configuration fields”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#configuration-fields",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "liveness probe",
+        "probes"
+      ],
+      "conceptIDs": [
+        "ckad.probe-fields"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-top-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5545,
+      "front": "Pod web has three containers and is using too much memory. Which command shows how much each container uses?",
+      "back": "`kubectl top pod web --containers`",
+      "explanation": "--containers breaks the Pod’s metrics down by container.",
+      "evidence": "kubectl top pod POD_NAME --containers # Show metrics for a given pod and its containers",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "uses": [
+        "kubectl top",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-top-pod"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-warning-events",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5550,
+      "front": "A namespace shows hundreds of routine events and you only want the problems. Which command?",
+      "back": "`kubectl events --types=Warning`",
+      "explanation": "It lists only warning events.",
+      "evidence": "# List all warning events kubectl events --types=Warning",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Viewing and finding resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#viewing-and-finding-resources",
+      "uses": [
+        "event",
+        "kubectl",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-get-events"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-pending-describe",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5555,
+      "front": "A new Pod has sat in Pending for ten minutes. What do you run, and what do you look for?",
+      "back": "`kubectl describe pod <name>`; look for the scheduler’s messages on why it cannot schedule the Pod.",
+      "explanation": "Pending means the Pod cannot be scheduled, and the describe output should carry the scheduler’s reasons.",
+      "evidence": "Look at the output of the kubectl describe ... command above. There should be messages from the scheduler about why it can not schedule your pod.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod stays pending”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-stays-pending",
+      "uses": [
+        "kubectl describe",
+        "pod phases",
+        "event",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.debug-pending",
+        "ckad.kubectl-describe-pod"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-logs-previous-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5560,
+      "front": "Pod api has containers app and proxy. app crashed and was restarted. Which command shows why the crashed app instance failed?",
+      "choices": "A) `kubectl logs api -c app --previous`\nB) `kubectl logs api -c app`\nC) `kubectl logs api --previous`",
+      "back": "A: `kubectl logs api -c app --previous`",
+      "choicesExplained": "B: without --previous you see the new, running instance. C: with two containers, kubectl needs -c to know which one.",
+      "explanation": "-c picks the container in a multi-container Pod, and --previous picks its previous instance.",
+      "evidence": "kubectl logs my-pod -c my-container --previous # dump pod container logs (stdout, multi-container case) for a previous instantiation of a container",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "uses": [
+        "kubectl logs",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.logs-previous",
+        "ckad.logs-container-flag"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-logs-stream-label",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5565,
+      "front": "Which command streams live logs from every container of every Pod labelled app=web?",
+      "back": "`kubectl logs -f -l app=web --all-containers`",
+      "explanation": "-f streams, -l selects Pods by label, and --all-containers takes every container.",
+      "evidence": "kubectl logs -f -l name=myLabel --all-containers # stream all pods logs with label name=myLabel (stdout)",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "uses": [
+        "kubectl logs",
+        "label",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.logs-flags"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-imagepull-checks",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5570,
+      "front": "A Pod stays Waiting with ImagePullBackOff. You have confirmed the image name is spelt correctly. What two further checks does the documentation suggest?",
+      "back": "That the image was pushed to the registry, and that you can pull it by hand (for example with docker pull).",
+      "explanation": "A failure to pull the image is the most common cause of Waiting Pods.",
+      "evidence": "The most common cause of Waiting pods is a failure to pull the image. There are three things to check: - Make sure that you have the name of the image correct. - Have you pushed the image to the registry? - Try to manually pull the image to see if the image can be pulled.",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod stays waiting”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-stays-waiting",
+      "uses": [
+        "ImagePullBackOff",
+        "container states",
+        "registry",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.debug-waiting-imagepull",
+        "ckad.imagepullbackoff"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-validate",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5575,
+      "front": "Your Pod starts but does not run the command in mypod.yaml. What is the first thing the documentation suggests?",
+      "back": "Delete the Pod and create it again with `kubectl apply --validate -f mypod.yaml`.",
+      "explanation": "Validation reports a misspelt key, such as commnd, as an unknown field instead of silently ignoring it.",
+      "evidence": "The first thing to do is to delete your pod and try creating it again with the --validate option. For example, run kubectl apply --validate -f mypod.yaml .",
+      "source": "Kubernetes documentation, “Debug Pods”, “My pod is running but not doing what I told it to do”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/#my-pod-is-running-but-not-doing-what-i-told-it-to-do",
+      "uses": [
+        "kubectl apply",
+        "Pod",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.debug-crashing"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-exec-multi",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5580,
+      "front": "Pod web has containers app and sidecar. Which command lists the files in / of the app container?",
+      "back": "`kubectl exec web -c app -- ls /`",
+      "explanation": "With more than one container, -c names the one to run the command in.",
+      "evidence": "kubectl exec my-pod -c my-container -- ls / # Run command in existing pod (multi-container case)",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "uses": [
+        "kubectl exec",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-exec-shell"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-ephemeral-distroless",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5585,
+      "front": "Container app in Pod pay uses a distroless image with no shell. You need to see its running processes. What do you run?",
+      "choices": "A) `kubectl debug -it pay --image=busybox:1.28 --target=app`\nB) `kubectl exec -it pay -c app -- sh`\nC) `kubectl logs pay -c app`",
+      "back": "A: an ephemeral busybox container that targets app’s process namespace.",
+      "choicesExplained": "B: the image has no shell to run. C: logs show output, not running processes.",
+      "explanation": "Ephemeral containers help when the image lacks debugging utilities, and --target joins another container’s process namespace.",
+      "evidence": "Ephemeral containers are useful for interactive troubleshooting when kubectl exec is insufficient because a container has crashed or a container image doesn't include debugging utilities, such as with distroless images .",
+      "source": "Kubernetes documentation, “Debug Running Pods”, “Debugging with an ephemeral debug container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container",
+      "uses": [
+        "kubectl debug",
+        "ephemeral container",
+        "kubectl exec",
+        "kubectl logs",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-debug-ephemeral"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.app-port-forward",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5590,
+      "front": "Pod api serves on port 8080. Which command lets you test it from your laptop at localhost:9000?",
+      "back": "`kubectl port-forward api 9000:8080`",
+      "explanation": "The local port comes first, then the Pod’s port.",
+      "evidence": "kubectl port-forward my-pod 5000:6000 # Listen on port 5000 on the local machine and forward to port 6000 on my-pod",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "uses": [
+        "kubectl",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-port-forward"
+      ]
+    },
+    {
+      "id": "ckad.observability-debugging.contrast-liveness-readiness",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 5900,
+      "front": "Failed liveness probe versus failed readiness probe: what happens to the container?",
+      "back": "Liveness: the container is restarted. Readiness: it keeps running, but gets no traffic.",
+      "explanation": "For liveness and startup probes, reaching failureThreshold triggers a restart; for readiness, the kubelet keeps the container running.",
+      "evidence": "For the case of a startup or liveness probe, if at least failureThreshold probes have failed, Kubernetes treats the container as unhealthy and triggers a restart for that specific container. The kubelet honors the setting of terminationGracePeriodSeconds for that container. For a failed readiness probe, the kubelet continues running the container that failed checks",
+      "source": "Kubernetes documentation, “Liveness, Readiness, and Startup Probes”, “Configuration fields”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/probes/#configuration-fields",
+      "uses": [
+        "liveness probe",
+        "readiness probe",
+        "startup probe"
+      ],
+      "conceptIDs": [
+        "ckad.liveness-vs-readiness-failure"
+      ]
+    }
+  ]
+}

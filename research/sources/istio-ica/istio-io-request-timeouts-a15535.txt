@@ -1,0 +1,258 @@
+https://istio.io/latest/docs/tasks/traffic-management/request-timeouts/
+
+
+
+Documentation
+
+Tasks
+
+Traffic Management
+
+Request Timeouts
+
+# {#title} Request Timeouts
+
+ 5 minute read
+
+page test
+
+Before you begin
+Request timeouts
+Understanding what happened
+Cleanup
+See also
+
+This task shows you how to set up request timeouts in Envoy using Istio.
+
+Istio supports the Kubernetes Gateway API and intends to make it the default API for traffic management in the future.
+The following instructions allow you to choose to use either the Gateway API or the Istio configuration API when configuring
+traffic management in the mesh. Follow instructions under either the Gateway API or Istio APIs tab,
+according to your preference.
+
+Note that the Kubernetes Gateway API CRDs do not come installed by default on most Kubernetes clusters, so make sure they are
+installed before using the Gateway API:
+
+$ kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
+  kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.0/experimental-install.yaml
+
+## {#before-you-begin} Before you begin
+
+Setup Istio by following the instructions in the
+Installation guide.
+
+Deploy the Bookinfo sample application including the
+service versions.
+
+## {#request-timeouts} Request timeouts
+
+A timeout for HTTP requests can be specified using a timeout field in a route rule.
+By default, the request timeout is disabled, but in this task you override the reviews service
+timeout to half a second.
+To see its effect, however, you also introduce an artificial 2 second delay in calls
+to the ratings service.
+
+Route requests to v2 of the reviews service, i.e., a version that calls the ratings service:
+
+Istio APIs
+Gateway API
+
+$ kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+    - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v2
+EOF
+
+$ kubectl apply -f - <<EOF
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: reviews
+spec:
+  parentRefs:
+  - group: ""
+    kind: Service
+    name: reviews
+    port: 9080
+  rules:
+  - backendRefs:
+    - name: reviews-v2
+      port: 9080
+EOF
+
+Add a 2 second delay to calls to the ratings service:
+
+Istio APIs
+Gateway API
+
+$ kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - fault:
+      delay:
+        percentage:
+          value: 100
+        fixedDelay: 2s
+    route:
+    - destination:
+        host: ratings
+        subset: v1
+EOF
+
+Gateway API does not support fault injection yet, so we need to use an Istio VirtualService to
+add the delay for now:
+
+$ kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - fault:
+      delay:
+        percentage:
+          value: 100
+        fixedDelay: 2s
+    route:
+    - destination:
+        host: ratings
+EOF
+
+Open the Bookinfo URL http://$GATEWAY_URL/productpage in your browser, where $GATEWAY_URL is the External IP address of the ingress, as explained in
+the Bookinfo doc.
+
+You should see the Bookinfo application working normally (with ratings stars displayed),
+but there is a 2 second delay whenever you refresh the page.
+
+Now add a half second request timeout for calls to the reviews service:
+
+Istio APIs
+Gateway API
+
+$ kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+  - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v2
+    timeout: 0.5s
+EOF
+
+$ kubectl apply -f - <<EOF
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: reviews
+spec:
+  parentRefs:
+  - group: ""
+    kind: Service
+    name: reviews
+    port: 9080
+  rules:
+  - backendRefs:
+    - name: reviews-v2
+      port: 9080
+    timeouts:
+      request: 500ms
+EOF
+
+Refresh the Bookinfo web page.
+
+You should now see that it returns in about 1 second, instead of 2, and the reviews are unavailable.
+
+The reason that the response takes 1 second, even though the timeout is configured at half a second, is
+because there is a hard-coded retry in the productpage service, so it calls the timing out reviews service
+twice before returning.
+
+## {#understanding-what-happened} Understanding what happened
+
+In this task, you used Istio to set the request timeout for calls to the reviews
+microservice to half a second. By default the request timeout is disabled.
+Since the reviews service subsequently calls the ratings service when handling requests,
+you used Istio to inject a 2 second delay in calls to ratings to cause the
+reviews service to take longer than half a second to complete and consequently you could see the timeout in action.
+
+You observed that instead of displaying reviews, the Bookinfo product page (which calls the reviews service to populate the page) displayed
+the message: Sorry, product reviews are currently unavailable for this book.
+This was the result of it receiving the timeout error from the reviews service.
+
+If you examine the fault injection task, you’ll find out that the productpage
+microservice also has its own application-level timeout (3 seconds) for calls to the reviews microservice.
+Notice that in this task you used an Istio route rule to set the timeout to half a second.
+Had you instead set the timeout to something greater than 3 seconds (such as 4 seconds) the timeout
+would have had no effect since the more restrictive of the two takes precedence.
+More details can be found here.
+
+One more thing to note about timeouts in Istio is that in addition to overriding them in route rules,
+as you did in this task, they can also be overridden on a per-request basis if the application adds
+an x-envoy-upstream-rq-timeout-ms header on outbound requests. In the header,
+the timeout is specified in milliseconds instead of seconds.
+
+## {#cleanup} Cleanup
+
+Remove the application routing rules:
+
+Istio APIs
+Gateway API
+
+Zip
+$ kubectl delete -f @samples/bookinfo/networking/virtual-service-all-v1.yaml@
+
+$ kubectl delete httproute reviews
+$ kubectl delete virtualservice ratings
+
+If you are not planning to explore any follow-on tasks, see the
+Bookinfo cleanup instructions
+to shutdown the application.
+
+See also
+
+Simplifying Egress Routing to Wildcard Destinations
+
+Istio now supports wildcard ServiceEntry with DYNAMIC_DNS resolution, allowing sidecars to route traffic directly to wildcard HTTPS destinations while simplifying egress configuration.
+
+Routing egress traffic to wildcard destinations
+
+A generic approach to set up egress gateways that can route traffic to a restricted set of target remote hosts dynamically, including wildcard domains.
+
+Getting started with the Kubernetes Gateway API
+
+Using the Gateway API to configure ingress traffic for your Kubernetes cluster.
+
+Extending Gateway API support in Istio
+
+A standard API for service mesh, in Istio and in the broader community.
+
+Direct encrypted traffic from IBM Cloud Kubernetes Service Ingress to Istio Ingress Gateway
+
+Configure the IBM Cloud Kubernetes Service Application Load Balancer to direct traffic to the Istio Ingress gateway with mutual TLS.
+
+Multicluster Istio configuration and service discovery using Admiral
+
+Automating Istio configuration for Istio deployments (clusters) that work as a single mesh.
+

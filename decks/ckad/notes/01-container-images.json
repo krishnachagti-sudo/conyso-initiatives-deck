@@ -1,0 +1,808 @@
+{
+  "topic": "Container images",
+  "notes": [
+    {
+      "id": "ckad.container-images.what-is-a-dockerfile",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 1000,
+      "front": "What is a Dockerfile?",
+      "back": "A text document holding all the commands a user could call on the command line to assemble an image.",
+      "explanation": "Docker reads the instructions in it to build images automatically.",
+      "example": "Like a recipe card for an image: one line picks a base image, the next copies your code in, the last says what to start.",
+      "evidence": "Docker can build images automatically by reading the instructions from a Dockerfile. A Dockerfile is a text document that contains all the commands a user could call on the command line to assemble an image.",
+      "source": "Dockerfile reference (Docker Docs), introduction",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "Dockerfile"
+      ],
+      "uses": [
+        "Dockerfile",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.dockerfile"
+      ]
+    },
+    {
+      "id": "ckad.container-images.what-is-a-multi-stage-build",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 1008,
+      "front": "What is a multi-stage build?",
+      "back": "A Dockerfile with several `FROM` statements, each starting a new stage; you copy only chosen artifacts from one stage into another.",
+      "explanation": "Everything you do not copy forward is left behind, so it never reaches the final image.",
+      "example": "Like cooking in a messy test kitchen, then carrying only the finished dish to the dining room.",
+      "evidence": "With multi-stage builds, you use multiple FROM statements in your Dockerfile. Each FROM instruction can use a different base, and each of them begins a new stage of the build. You can selectively copy artifacts from one stage to another, leaving behind everything you don't want in the final image.",
+      "source": "Multi-stage builds (Docker Docs), “Use multi-stage builds”",
+      "sourceURL": "https://docs.docker.com/build/building/multi-stage/#use-multi-stage-builds",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "multi-stage build"
+      ],
+      "uses": [
+        "multi-stage build",
+        "Dockerfile",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.multi-stage-build"
+      ]
+    },
+    {
+      "id": "ckad.container-images.from-starts-stage",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 1016,
+      "front": "The `FROM` instruction initialises a new {{c1::build stage}} and sets the base image for the instructions that follow.",
+      "back": "Build stage.",
+      "explanation": "As a result, a valid Dockerfile must start with `FROM`.",
+      "evidence": "The FROM instruction initializes a new build stage and sets the base image for subsequent instructions. As such, a valid Dockerfile must start with a FROM instruction.",
+      "source": "Dockerfile reference (Docker Docs), “FROM”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#from",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.from-instruction"
+      ]
+    },
+    {
+      "id": "ckad.container-images.from-first-line",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 1024,
+      "front": "A colleague's Dockerfile opens with `RUN apt-get update` and has `FROM debian:12` on line two. Is that valid?",
+      "back": "No. A valid Dockerfile must start with `FROM`; only `ARG` may come before it.",
+      "explanation": "`FROM` sets the base image that every later instruction builds on, and the reference names `ARG` as the one exception.",
+      "evidence": "As such, a valid Dockerfile must start with a FROM instruction. The image can be any valid image. ARG is the only instruction that may precede FROM in the Dockerfile.",
+      "source": "Dockerfile reference (Docker Docs), “FROM”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#from",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.from-instruction"
+      ]
+    },
+    {
+      "id": "ckad.container-images.run-new-layer",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 1032,
+      "front": "What does the `RUN` instruction do?",
+      "back": "Executes commands to create a new layer on top of the current image; the next step uses that layer.",
+      "explanation": "The added layer is what the next instruction in the Dockerfile builds on.",
+      "evidence": "The RUN instruction will execute any commands to create a new layer on top of the current image. The added layer is used in the next step in the Dockerfile.",
+      "source": "Dockerfile reference (Docker Docs), “RUN”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#run",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.run-instruction"
+      ]
+    },
+    {
+      "id": "ckad.container-images.run-install-package",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 1040,
+      "front": "Your image must already contain `curl` when any container starts from it. Which instruction installs it?",
+      "choices": "A) `RUN apk add curl`\nB) `CMD apk add curl`\nC) `EXPOSE curl`",
+      "back": "A) `RUN`: it executes the command and adds the result as a new layer of the image.",
+      "explanation": "`RUN` creates a new layer on top of the current image, so the package is part of the image itself.",
+      "choicesExplained": "B: `CMD` only provides defaults for an executing container, so the install would happen at start-up, not in the image. C: `EXPOSE` only documents a port.",
+      "evidence": "The RUN instruction will execute any commands to create a new layer on top of the current image.",
+      "source": "Dockerfile reference (Docker Docs), “RUN”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#run",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.run-instruction"
+      ]
+    },
+    {
+      "id": "ckad.container-images.add-sources",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 1048,
+      "front": "Besides the build context, where can `ADD` copy files from?",
+      "back": "A remote web address or a Git repository.",
+      "explanation": "`ADD` and `COPY` are functionally similar but serve slightly different purposes; fetching remote sources is `ADD`'s.",
+      "contrast": "`ADD` reaches out to remote addresses and Git; `COPY` takes the build context, build stages, named contexts or images.",
+      "evidence": "Files and directories can be copied from the build context, a remote URL, or a Git repository. The ADD and COPY instructions are functionally similar, but serve slightly different purposes.",
+      "source": "Dockerfile reference (Docker Docs), “ADD”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#add",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.copy-vs-add"
+      ]
+    },
+    {
+      "id": "ckad.container-images.copy-sources",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 1056,
+      "front": "Besides the build context, where can `COPY` copy files from?",
+      "back": "A build stage, a named context, or an image.",
+      "explanation": "Copying from a build stage is what lets a multi-stage build carry only chosen artifacts into the final image.",
+      "contrast": "`COPY` works with local and build-time sources; `ADD` also accepts remote addresses and Git repositories.",
+      "evidence": "The COPY instruction copies new files or directories from <src> and adds them to the filesystem of the image at the path <dest>. Files and directories can be copied from the build context, build stage, named context, or an image.",
+      "source": "Dockerfile reference (Docker Docs), “COPY”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#copy",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile",
+        "multi-stage build",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.copy-vs-add"
+      ]
+    },
+    {
+      "id": "ckad.container-images.shell-form-uses-shell",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 1064,
+      "front": "Shell form or exec form: which one automatically runs the command through a command shell?",
+      "back": "Shell form. The exec form, written as an array like `[\"npm\", \"start\"]`, does not.",
+      "explanation": "The shell form emphasises ease of use and readability; in the exec form each array element is a command, flag or argument.",
+      "contrast": "Shell form: plain string, run by a shell. Exec form: array with double quotes, run directly.",
+      "evidence": "It uses a JSON array syntax, where each element in the array is a command, flag, or argument. The shell form is more relaxed, and emphasizes ease of use, flexibility, and readability. The shell form automatically uses a command shell, whereas the exec form does not.",
+      "source": "Dockerfile reference (Docker Docs), “Shell and exec form”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#shell-and-exec-form",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.shell-vs-exec-form"
+      ]
+    },
+    {
+      "id": "ckad.container-images.shell-entrypoint-signals",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 1072,
+      "front": "An image uses `ENTRYPOINT node server.js` (shell form), and the app never receives SIGTERM when `docker stop` runs. What change fixes it?",
+      "back": "Use the exec form: `ENTRYPOINT [\"node\", \"server.js\"]`.",
+      "explanation": "Shell form starts the program as a subcommand of `/bin/sh -c`, so it is not `PID 1`, and the shell does not pass signals on to it.",
+      "evidence": "It also starts your ENTRYPOINT as a subcommand of /bin/sh -c, which does not pass signals. This means that the executable will not be the container's PID 1, and will not receive Unix signals. In this case, your executable doesn't receive a SIGTERM from docker stop <container>.",
+      "source": "Dockerfile reference (Docker Docs), “ENTRYPOINT”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#entrypoint",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.shell-vs-exec-form"
+      ]
+    },
+    {
+      "id": "ckad.container-images.only-last-cmd",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 1080,
+      "front": "A Dockerfile lists three `CMD` instructions. Which one takes effect?",
+      "back": "Only the last one.",
+      "explanation": "There can be only one `CMD` in a Dockerfile, so the earlier ones are simply overridden.",
+      "evidence": "There can only be one CMD instruction in a Dockerfile. If you list more than one CMD, only the last one takes effect.",
+      "source": "Dockerfile reference (Docker Docs), “CMD”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#cmd",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.cmd-vs-entrypoint"
+      ]
+    },
+    {
+      "id": "ckad.container-images.cmd-vs-entrypoint-roles",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 1088,
+      "front": "What is the difference in role between `ENTRYPOINT` and `CMD`?",
+      "back": "`ENTRYPOINT` makes the container run as an executable; `CMD` gives default arguments for it, or an ad-hoc command.",
+      "explanation": "Both define what runs when a container starts, and a Dockerfile should specify at least one of them.",
+      "contrast": "`ENTRYPOINT` is the fixed executable; `CMD` is the default that alternative arguments override.",
+      "evidence": "Dockerfile should specify at least one of CMD or ENTRYPOINT commands. ENTRYPOINT should be defined when using the container as an executable. CMD should be used as a way of defining default arguments for an ENTRYPOINT command or for executing an ad-hoc command in a container. CMD will be overridden when running the container with alternative arguments.",
+      "source": "Dockerfile reference (Docker Docs), “Understand how CMD and ENTRYPOINT interact”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#understand-how-cmd-and-entrypoint-interact",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.cmd-vs-entrypoint"
+      ]
+    },
+    {
+      "id": "ckad.container-images.run-args-replace-cmd",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 1096,
+      "front": "An image has `ENTRYPOINT [\"ping\", \"-c\", \"3\"]` and `CMD [\"localhost\"]`. What runs for `docker run <image> example.org`?",
+      "back": "`ping -c 3 example.org`: the argument is appended to `ENTRYPOINT` and replaces `CMD`.",
+      "explanation": "Arguments to `docker run` go after every element of an exec-form `ENTRYPOINT` and override all of `CMD`.",
+      "evidence": "Command line arguments to docker run <image> will be appended after all elements in an exec form ENTRYPOINT, and will override all elements specified using CMD.",
+      "source": "Dockerfile reference (Docker Docs), “ENTRYPOINT”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#entrypoint",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.cmd-vs-entrypoint"
+      ]
+    },
+    {
+      "id": "ckad.container-images.override-entrypoint",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 1104,
+      "front": "How do you replace an image's `ENTRYPOINT` for one `docker run`?",
+      "back": "With the `docker run --entrypoint` flag.",
+      "explanation": "The flag replaces the `ENTRYPOINT` set in the image for that run.",
+      "evidence": "You can override the ENTRYPOINT instruction using the docker run --entrypoint flag.",
+      "source": "Dockerfile reference (Docker Docs), “ENTRYPOINT”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#entrypoint",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.cmd-vs-entrypoint"
+      ]
+    },
+    {
+      "id": "ckad.container-images.env-persists",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 1112,
+      "front": "Does a variable set with `ENV` still exist in containers run from the image?",
+      "back": "Yes. It persists at run time; `docker run --env <key>=<value>` changes it.",
+      "explanation": "`ENV` values live in the image itself, and you can see them with `docker inspect`.",
+      "evidence": "The environment variables set using ENV will persist when a container is run from the resulting image. You can view the values using docker inspect, and change them using docker run --env <key>=<value>.",
+      "source": "Dockerfile reference (Docker Docs), “ENV”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#env",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.env-instruction"
+      ]
+    },
+    {
+      "id": "ckad.container-images.workdir-relative",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 1120,
+      "front": "A Dockerfile has `WORKDIR /srv`, then `WORKDIR web`, then `COPY . .`. Where do the files land?",
+      "back": "In `/srv/web`.",
+      "explanation": "`WORKDIR` can appear several times, and a relative path is taken relative to the previous `WORKDIR`.",
+      "evidence": "The WORKDIR instruction can be used multiple times in a Dockerfile. If a relative path is provided, it will be relative to the path of the previous WORKDIR instruction.",
+      "source": "Dockerfile reference (Docker Docs), “WORKDIR”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#workdir",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.workdir-instruction"
+      ]
+    },
+    {
+      "id": "ckad.container-images.user-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 1128,
+      "front": "After `USER app` in a Dockerfile, what runs as `app`?",
+      "back": "Later `RUN` instructions in the stage, and at run time the `ENTRYPOINT` and `CMD` commands.",
+      "explanation": "`USER` sets the default user (and optionally group) for the remainder of the current stage.",
+      "evidence": "The USER instruction sets the user name (or UID) and optionally the user group (or GID) to use as the default user and group for the remainder of the current stage. The specified user is used for RUN instructions and at runtime runs the relevant ENTRYPOINT and CMD commands.",
+      "source": "Dockerfile reference (Docker Docs), “USER”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#user",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.user-instruction"
+      ]
+    },
+    {
+      "id": "ckad.container-images.user-placement",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 1136,
+      "front": "Your Dockerfile installs packages with a `RUN` that needs root, and the app should run as `svc`. Where do you put `USER svc`?",
+      "back": "After the root-needing `RUN`, so that `RUN` still runs as root while the app runs as `svc`.",
+      "explanation": "`USER` sets the default user for the rest of the stage, so it covers later `RUN` instructions and, at run time, the `ENTRYPOINT` and `CMD` commands.",
+      "evidence": "to use as the default user and group for the remainder of the current stage. The specified user is used for RUN instructions and at runtime runs the relevant ENTRYPOINT and CMD commands.",
+      "source": "Dockerfile reference (Docker Docs), “USER”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#user",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.user-instruction"
+      ]
+    },
+    {
+      "id": "ckad.container-images.expose-not-publish",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 1144,
+      "front": "Does `EXPOSE 8080` in a Dockerfile publish port 8080?",
+      "back": "No. It only documents the intended port; publish it with `docker run -p` (or `-P` for all exposed ports).",
+      "explanation": "The reference calls it documentation between whoever builds the image and whoever runs the container.",
+      "evidence": "The EXPOSE instruction doesn't actually publish the port. It functions as a type of documentation between the person who builds the image and the person who runs the container, about which ports are intended to be published.",
+      "source": "Dockerfile reference (Docker Docs), “EXPOSE”",
+      "sourceURL": "https://docs.docker.com/reference/dockerfile/#expose",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Dockerfile",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.expose-instruction"
+      ]
+    },
+    {
+      "id": "ckad.container-images.name-stages",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 1152,
+      "front": "In a multi-stage build, how do you name a stage, and what does naming protect?",
+      "back": "Add `AS <NAME>` to its `FROM`; a `COPY --from=<NAME>` then keeps working if instructions are re-ordered.",
+      "explanation": "Referring to the stage by name keeps the `COPY` pointing at the right stage.",
+      "evidence": "name your stages, by adding an AS <NAME> to the FROM instruction. This example improves the previous one by naming the stages and using the name in the COPY instruction. This means that even if the instructions in your Dockerfile are re-ordered later, the COPY doesn't break.",
+      "source": "Multi-stage builds (Docker Docs), “Name your build stages”",
+      "sourceURL": "https://docs.docker.com/build/building/multi-stage/#name-your-build-stages",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "multi-stage build",
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.multi-stage-build"
+      ]
+    },
+    {
+      "id": "ckad.container-images.target-stage",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 1160,
+      "front": "How do you build a multi-stage Dockerfile only up to its stage named `test`?",
+      "back": "`docker build --target test -t <name> .`",
+      "explanation": "The reference suggests this for cases such as debugging a specific stage or using a testing stage.",
+      "evidence": "$ docker build --target build -t hello . A few scenarios where this might be useful are: Debugging a specific build stage",
+      "source": "Multi-stage builds (Docker Docs), “Stop at a specific build stage”",
+      "sourceURL": "https://docs.docker.com/build/building/multi-stage/#stop-at-a-specific-build-stage",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "multi-stage build",
+        "Dockerfile"
+      ],
+      "conceptIDs": [
+        "ckad.multi-stage-build"
+      ]
+    },
+    {
+      "id": "ckad.container-images.shrink-with-stages",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 1168,
+      "front": "Your Go service's image carries the whole compiler toolchain, though only the compiled binary is needed to run. How do you drop the toolchain?",
+      "back": "Use a multi-stage build: compile in one stage, then `COPY --from` just the binary into a lean final stage.",
+      "explanation": "Artifacts are copied selectively between stages, leaving behind everything you don't want in the final image.",
+      "evidence": "You can selectively copy artifacts from one stage to another, leaving behind everything you don't want in the final image.",
+      "source": "Multi-stage builds (Docker Docs), “Use multi-stage builds”",
+      "sourceURL": "https://docs.docker.com/build/building/multi-stage/#use-multi-stage-builds",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "multi-stage build",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.multi-stage-build"
+      ]
+    },
+    {
+      "id": "ckad.container-images.build-tag-format",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 1176,
+      "front": "What does `-t` on `docker build` set, and in what format?",
+      "back": "The image identifier: `[registry/]repository[:tag]`. You can give `-t` more than once.",
+      "explanation": "Several tags let one build be both `latest` and a specific version.",
+      "evidence": "You can apply multiple tags to an image. For example, you can apply the latest tag to a newly built image and add another tag that references a specific version.",
+      "source": "docker buildx build (Docker Docs), “Tag an image (-t, --tag)”",
+      "sourceURL": "https://docs.docker.com/reference/cli/docker/buildx/build/#tag",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "container image",
+        "registry",
+        "image tag vs digest"
+      ],
+      "conceptIDs": [
+        "ckad.docker-build-tag"
+      ]
+    },
+    {
+      "id": "ckad.container-images.build-tag-command",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 1184,
+      "front": "What single command builds the Dockerfile in the current directory as both `shop:1.4` and `shop:latest`?",
+      "back": "`docker build -t shop:1.4 -t shop:latest .`",
+      "explanation": "Each `-t` adds one tag, and the final `.` is the build context.",
+      "evidence": "$ docker buildx build -t docker/fedora-jboss:latest -t docker/fedora-jboss:v2.1 .",
+      "source": "docker buildx build (Docker Docs), “Tag an image (-t, --tag)”",
+      "sourceURL": "https://docs.docker.com/reference/cli/docker/buildx/build/#tag",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "container image",
+        "image tag vs digest"
+      ],
+      "conceptIDs": [
+        "ckad.docker-build-tag"
+      ]
+    },
+    {
+      "id": "ckad.container-images.tag-private-registry",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 1200,
+      "front": "You must push local image `web:2.0` to a private registry at `reg.corp:5000`. What `docker tag` do you run first?",
+      "back": "`docker tag web:2.0 reg.corp:5000/web:2.0`",
+      "explanation": "To push to a private registry rather than the public one, the tag must include the registry hostname and port if needed.",
+      "evidence": "To push an image to a private registry and not the public Docker registry you must include the registry hostname and port (if needed).",
+      "source": "docker image tag (Docker Docs), “Tag an image for a private registry”",
+      "sourceURL": "https://docs.docker.com/reference/cli/docker/image/tag/#tag-an-image-for-a-private-registry",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "registry",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.docker-image-tag"
+      ]
+    },
+    {
+      "id": "ckad.container-images.save-output",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 1208,
+      "front": "What does `docker save` produce, and where does it go by default?",
+      "back": "A tar archive of the image with all parent layers and tags, written to standard output unless `-o` names a file.",
+      "explanation": "The archive is a backup that `docker load` can read back in.",
+      "evidence": "Produces a tarred repository to the standard output stream. Contains all parent layers, and all tags + versions, or specified repo:tag, for each argument provided.",
+      "source": "docker image save (Docker Docs), “Description”",
+      "sourceURL": "https://docs.docker.com/reference/cli/docker/image/save/#description",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.docker-save"
+      ]
+    },
+    {
+      "id": "ckad.container-images.save-to-file",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 1216,
+      "front": "How do you export image `api:3.1` to the file `/opt/out/api.tar`?",
+      "back": "`docker save -o /opt/out/api.tar api:3.1` (or `docker save api:3.1 > /opt/out/api.tar`).",
+      "explanation": "`-o` (`--output`) writes to a file instead of standard output; a redirect does the same job.",
+      "evidence": "$ docker save busybox > busybox.tar $ ls -sh busybox.tar 2.7M busybox.tar $ docker save --output busybox.tar busybox",
+      "source": "docker image save (Docker Docs), “Create a backup that can then be used with docker load”",
+      "sourceURL": "https://docs.docker.com/reference/cli/docker/image/save/#create-a-backup-that-can-then-be-used-with-docker-load",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.docker-save"
+      ]
+    },
+    {
+      "id": "ckad.container-images.bare-name-expands",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 1224,
+      "front": "In a Pod spec, `image: busybox` is equivalent to which full image name?",
+      "back": "`docker.io/library/busybox:latest`",
+      "explanation": "With no registry Kubernetes uses the Docker public registry, and with no tag it uses `latest`.",
+      "evidence": "busybox — Image name only, no tag or digest. Kubernetes will use the Docker public registry and latest tag. Equivalent to docker.io/library/busybox:latest .",
+      "source": "Images (Kubernetes docs), “Image names”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#image-names",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "Pod",
+        "container image",
+        "registry",
+        "image tag vs digest"
+      ],
+      "conceptIDs": [
+        "ckad.image-name-format"
+      ]
+    },
+    {
+      "id": "ckad.container-images.digest-wins",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 1232,
+      "front": "A container's image is `registry.example.com/shop/cart:2.3@sha256:9f1c…`. Which part decides what is pulled?",
+      "back": "Only the digest; the tag `2.3` is ignored for pulling.",
+      "explanation": "When a name has both a tag and a digest, Kubernetes pulls by the digest alone.",
+      "evidence": "Image name with tag and digest. Only the digest will be used for pulling.",
+      "source": "Images (Kubernetes docs), “Image names”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#image-names",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "container image",
+        "image tag vs digest"
+      ],
+      "conceptIDs": [
+        "ckad.image-name-format"
+      ]
+    },
+    {
+      "id": "ckad.container-images.no-tag-latest",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 1240,
+      "front": "A Deployment's container says `image: registry.example.com/team/redis` with no tag. Which tag does Kubernetes assume?",
+      "back": "`latest`.",
+      "explanation": "Kubernetes fills in `latest` whenever the image name carries no tag.",
+      "evidence": "If you don't specify a tag, Kubernetes assumes you mean the tag latest .",
+      "source": "Images (Kubernetes docs), “Image names”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#image-names",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "Deployment",
+        "container image",
+        "image tag vs digest"
+      ],
+      "conceptIDs": [
+        "ckad.default-latest-tag"
+      ]
+    },
+    {
+      "id": "ckad.container-images.pull-policy-set-once",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 1248,
+      "front": "If `imagePullPolicy` was defaulted and you later change the image to a `:latest` tag, does the policy change?",
+      "back": "No. It is set when the object is first created; you must change it yourself.",
+      "explanation": "The default is worked out from the tag only once, at creation, and is not updated when the tag or digest later changes.",
+      "evidence": "The value of imagePullPolicy of the container is always set when the object is first created , and is not updated if the image's tag or digest later changes.",
+      "source": "Images (Kubernetes docs), “Image pull policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "imagepullpolicy",
+        "image tag vs digest"
+      ],
+      "conceptIDs": [
+        "ckad.imagepullpolicy-defaulting"
+      ]
+    },
+    {
+      "id": "ckad.container-images.policy-version-tag",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 1256,
+      "front": "No `imagePullPolicy` is set and the image is `nginx:1.27`. What policy does Kubernetes set?",
+      "back": "`IfNotPresent`.",
+      "explanation": "A tag that is not `:latest` gets `IfNotPresent`, so the image is pulled only if it is not already on the node.",
+      "evidence": "if you omit the imagePullPolicy field, and you specify a tag for the container image that isn't :latest , the imagePullPolicy is automatically set to IfNotPresent .",
+      "source": "Images (Kubernetes docs), “Image pull policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "imagepullpolicy",
+        "image tag vs digest"
+      ],
+      "conceptIDs": [
+        "ckad.imagepullpolicy-defaulting"
+      ]
+    },
+    {
+      "id": "ckad.container-images.policy-latest-tag",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 1264,
+      "front": "No `imagePullPolicy` is set and the image is `nginx:latest`. What policy does Kubernetes set?",
+      "back": "`Always`.",
+      "explanation": "The `:latest` tag is the case that switches the default from `IfNotPresent` to `Always`.",
+      "evidence": "if you omit the imagePullPolicy field, and the tag for the container image is :latest , imagePullPolicy is automatically set to Always .",
+      "source": "Images (Kubernetes docs), “Image pull policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "imagepullpolicy",
+        "image tag vs digest"
+      ],
+      "conceptIDs": [
+        "ckad.imagepullpolicy-defaulting"
+      ]
+    },
+    {
+      "id": "ckad.container-images.policy-no-tag",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 1272,
+      "front": "No `imagePullPolicy` is set and the image is just `nginx`, with no tag or digest. What policy does Kubernetes set?",
+      "back": "`Always`.",
+      "explanation": "An untagged image is treated like `:latest`, so the default is `Always`, not `IfNotPresent`.",
+      "evidence": "if you omit the imagePullPolicy field, and you don't specify the tag for the container image, imagePullPolicy is automatically set to Always .",
+      "source": "Images (Kubernetes docs), “Image pull policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "imagepullpolicy",
+        "image tag vs digest"
+      ],
+      "conceptIDs": [
+        "ckad.imagepullpolicy-defaulting"
+      ]
+    },
+    {
+      "id": "ckad.container-images.policy-digest",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 1280,
+      "front": "No `imagePullPolicy` is set and the image is `nginx@sha256:3b7f…`. What policy does Kubernetes set?",
+      "back": "`IfNotPresent`.",
+      "explanation": "Like a non-latest tag, a digest reference defaults to `IfNotPresent`.",
+      "evidence": "if you omit the imagePullPolicy field, and you specify the digest for the container image, the imagePullPolicy is automatically set to IfNotPresent .",
+      "source": "Images (Kubernetes docs), “Image pull policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "imagepullpolicy",
+        "image tag vs digest"
+      ],
+      "conceptIDs": [
+        "ckad.imagepullpolicy-defaulting"
+      ]
+    },
+    {
+      "id": "ckad.container-images.pull-secret-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 1288,
+      "front": "A Pod lists a Secret under `imagePullSecrets`. Which namespace must that Secret be in?",
+      "back": "The Pod's own namespace.",
+      "explanation": "Pods can reference image pull secrets only in their own namespace, so the Secret is created once per namespace.",
+      "evidence": "Pods can only reference image pull secrets in their own namespace, so this process needs to be done one time per namespace.",
+      "source": "Images (Kubernetes docs), “Creating a Secret with a Docker config”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#creating-a-secret-with-a-docker-config",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "Secret",
+        "namespace",
+        "registry"
+      ],
+      "conceptIDs": [
+        "ckad.imagepullsecrets-pod"
+      ]
+    },
+    {
+      "id": "ckad.container-images.docker-registry-secret",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 1296,
+      "front": "Which kubectl command creates a Secret for pulling from one private registry, and how many registries does it cover?",
+      "back": "`kubectl create secret docker-registry` with `--docker-server`, `--docker-username`, `--docker-password`; it covers one registry.",
+      "explanation": "For several private registries, the docs point to importing an existing Docker credentials file instead.",
+      "evidence": "This is particularly useful if you are using multiple private container registries, as kubectl create secret docker-registry creates a Secret that only works with a single private registry.",
+      "source": "Images (Kubernetes docs), “Creating a Secret with a Docker config”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#creating-a-secret-with-a-docker-config",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "Secret",
+        "registry"
+      ],
+      "conceptIDs": [
+        "ckad.docker-registry-secret"
+      ]
+    }
+  ]
+}

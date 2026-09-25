@@ -1,0 +1,1299 @@
+{
+  "topic": "Services, Ingress and NetworkPolicies",
+  "notes": [
+    {
+      "id": "ckad.services-ingress-netpol.what-is-an-ingressclass",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8010,
+      "front": "What is an IngressClass?",
+      "back": "A resource an Ingress refers to as its class. It holds extra configuration, including the name of the controller that should implement the class.",
+      "explanation": "Ingresses can be implemented by different controllers, often configured differently, so each Ingress should say which class it belongs to.",
+      "example": "Like the carrier named on a parcel label: the address is the same kind of thing for every parcel, but the label decides which company delivers it.",
+      "evidence": "Each Ingress should specify a class, a reference to an IngressClass resource that contains additional configuration including the name of the controller that should implement the class.",
+      "source": "Kubernetes documentation, “Ingress”, “Ingress class”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "IngressClass"
+      ],
+      "uses": [
+        "IngressClass",
+        "Ingress",
+        "ingress controller"
+      ],
+      "conceptIDs": [
+        "ckad.ingressclassname"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.what-is-pod-isolation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8020,
+      "front": "In NetworkPolicy terms, what does it mean for a Pod to be “isolated” for ingress or egress?",
+      "back": "Some restrictions apply to its connections in that direction. Non-isolated means no restrictions apply.",
+      "explanation": "Isolation is not absolute, and it is declared separately for ingress and for egress.",
+      "example": "Like a building with a guest list at the front door: it is not sealed, but only listed visitors get in.",
+      "evidence": "There are two sorts of isolation for a pod: isolation for egress, and isolation for ingress. They concern what connections may be established. \"Isolation\" here is not absolute, rather it means \"some restrictions apply\".",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "pod isolation"
+      ],
+      "uses": [
+        "pod isolation",
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.pod-isolation"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.kubectl-expose-ports",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8030,
+      "front": "In `kubectl expose ... --port=80 --target-port=8000`, what do the two ports mean?",
+      "back": "The Service serves on port 80 and connects to the containers on port 8000.",
+      "explanation": "The quick reference's example creates a Service for replicated nginx this way.",
+      "evidence": "connects to the containers on port 8000 kubectl expose rc nginx --port=80 --target-port=8000",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Updating resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#updating-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-expose"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.kubectl-expose-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8040,
+      "front": "The Deployment `api` listens on 8080 inside its containers. Clients in the cluster should reach it on port 80. Which command creates the Service?",
+      "back": "`kubectl expose deployment api --port=80 --target-port=8080`",
+      "choices": "A) kubectl expose deployment api --port=80 --target-port=8080\nB) kubectl expose deployment api --port=8080 --target-port=80\nC) kubectl expose deployment api --node-port=80",
+      "choicesExplained": "B: reversed; clients would call 8080 and traffic would go to container port 80. C: this does not set the container port, and node ports come from a high range.",
+      "explanation": "`--port` is where the Service serves; `--target-port` is where the containers listen.",
+      "evidence": "connects to the containers on port 8000 kubectl expose rc nginx --port=80 --target-port=8000",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Updating resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#updating-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "Deployment",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-expose",
+        "ckad.port-targetport-nodeport"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.kubectl-create-service-nodeport",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8050,
+      "front": "Which kubectl subcommand creates a Service of type NodePort, and how do you see its flags?",
+      "back": "`kubectl create service nodeport <name>`; add `-h` to list its arguments and flags.",
+      "explanation": "The Service object has several subtypes, and create service has a subcommand for each.",
+      "evidence": "Here's an example that creates a Service with subtype NodePort: shell kubectl create service nodeport <myservicename>",
+      "source": "Kubernetes documentation, “Managing Kubernetes Objects Using Imperative Commands”, “How to create objects”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/imperative-command/#how-to-create-objects",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "NodePort",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-create-service"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.targetport-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8060,
+      "front": "If a Service port leaves out `targetPort`, it defaults to {{c1::the same value as `port`}}.",
+      "explanation": "The Service page describes this default as being for convenience.",
+      "evidence": "By default and for convenience, the targetPort is set to the same value as the port field.",
+      "source": "Kubernetes documentation, “Service”, “Defining a Service”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#defining-a-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service"
+      ],
+      "conceptIDs": [
+        "ckad.port-targetport-nodeport"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.port-targetport-nodeport",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8070,
+      "front": "In a NodePort Service, what are `port`, `targetPort` and `nodePort`?",
+      "back": "`port`: the Service's own port. `targetPort`: the Pods' port it forwards to. `nodePort`: the port opened on every node.",
+      "explanation": "If you leave nodePort out, the control plane allocates one from a range (by default 30000-32767).",
+      "evidence": "By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767) nodePort : 30007",
+      "source": "Kubernetes documentation, “Service”, “Type NodePort”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NodePort",
+        "Service",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.port-targetport-nodeport"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.ports-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8080,
+      "front": "A NodePort Service has `port: 80`, `targetPort: 8080`, `nodePort: 30080`. Which port does a client outside the cluster use on a node's address?",
+      "back": "30080, the nodePort.",
+      "choices": "A) 30080\nB) 80\nC) 8080",
+      "choicesExplained": "B: port 80 is the Service's port inside the cluster. C: 8080 is the container port the Service forwards to.",
+      "explanation": "The nodePort is the one opened on each node; traffic then reaches the Pods on targetPort.",
+      "evidence": "By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767) nodePort : 30007",
+      "source": "Kubernetes documentation, “Service”, “Type NodePort”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NodePort",
+        "Service"
+      ],
+      "conceptIDs": [
+        "ckad.port-targetport-nodeport"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.nodeport-default-range",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8090,
+      "front": "The default NodePort range is {{c1::30000-32767}}.",
+      "explanation": "The range is split into a static band for manual choices and a dynamic band for automatic assignment.",
+      "evidence": "When using the default NodePort range 30000-32767, the bands are partitioned as follows: - Static band: 30000-30085 - Dynamic band: 30086-32767",
+      "source": "Kubernetes documentation, “Service”, “Type NodePort”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "NodePort"
+      ],
+      "conceptIDs": [
+        "ckad.nodeport-range"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.nodeport-range-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8100,
+      "front": "A manifest sets `nodePort: 8080` on a cluster with the default range. Is that a valid choice?",
+      "back": "No. It is outside the default range 30000-32767; pick a port such as 30080, or leave it out to get one assigned.",
+      "choices": "A) No: outside 30000-32767\nB) Yes: any free port works\nC) Yes, if targetPort is also 8080",
+      "choicesExplained": "B: node ports come from the configured range, both when assigned automatically and when chosen. C: targetPort is unrelated to the node port range.",
+      "explanation": "A node port you choose yourself must still be a valid port number inside the range configured for NodePort use.",
+      "evidence": "You also have to use a valid port number, one that's inside the range configured for NodePort use.",
+      "source": "Kubernetes documentation, “Service”, “Type NodePort”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "NodePort",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "ckad.nodeport-range"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.nodeport-bands",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8110,
+      "front": "With the default NodePort range, which band should you choose from when setting a node port by hand, and why?",
+      "back": "The static band, 30000-30085: automatic assignment uses the upper band first, so collisions are less likely.",
+      "explanation": "Dynamic assignment may use the lower band only once the upper band is exhausted.",
+      "evidence": "Dynamic port assignment uses the upper band by default, and it may use the lower band once the upper band has been exhausted. Users can then allocate from the lower band with a lower risk of port collision.",
+      "source": "Kubernetes documentation, “Service”, “Type NodePort”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "NodePort"
+      ],
+      "conceptIDs": [
+        "ckad.nodeport-range"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.selector-to-endpointslices",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8120,
+      "front": "How does a Service keep track of which Pods it sends traffic to?",
+      "back": "Its selector is evaluated continuously and the matching Pods are written to EndpointSlices linked to the Service.",
+      "explanation": "A Pod that dies is removed from them, and new Pods matching the selector are added automatically.",
+      "evidence": "When a Pod dies, it is automatically removed from the EndpointSlices that contain it as an endpoint. New Pods that match the Service's selector will automatically get added to an EndpointSlice for that Service.",
+      "source": "Kubernetes documentation, “Connecting Applications with Services”, “Creating a Service”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/services/connect-applications-service/#creating-a-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "selector",
+        "EndpointSlice",
+        "Pod",
+        "label"
+      ],
+      "conceptIDs": [
+        "ckad.service-selector-endpoints"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.selector-scale-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8130,
+      "front": "A Deployment behind a Service scales from 2 to 5 replicas, all with the Service's selector labels. What must you do so the Service sends traffic to the new Pods?",
+      "back": "Nothing. New Pods that match the selector are added to the Service's EndpointSlices automatically.",
+      "choices": "A) Nothing\nB) Delete and recreate the Service\nC) Add the new Pod addresses to the Service by hand",
+      "choicesExplained": "B, C: the selector is evaluated continuously, so matching Pods join without any change to the Service.",
+      "explanation": "Membership follows the selector, not a fixed list.",
+      "evidence": "When a Pod dies, it is automatically removed from the EndpointSlices that contain it as an endpoint. New Pods that match the Service's selector will automatically get added to an EndpointSlice for that Service.",
+      "source": "Kubernetes documentation, “Connecting Applications with Services”, “Creating a Service”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/services/connect-applications-service/#creating-a-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "Deployment",
+        "selector",
+        "EndpointSlice",
+        "Pod",
+        "label"
+      ],
+      "conceptIDs": [
+        "ckad.service-selector-endpoints"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.service-dns-cross-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8140,
+      "front": "From which namespace can a Pod reach the Service `hostnames` by its short name, and what does a Pod in another namespace use?",
+      "back": "From the Service's own namespace. From another namespace, a namespace-qualified name such as `hostnames.default`.",
+      "explanation": "If the short name fails, the page suggests the Pod and Service may be in different namespaces.",
+      "evidence": "If this fails, perhaps your Pod and Service are in different Namespaces, try a namespace-qualified name (again, from within a Pod):",
+      "source": "Kubernetes documentation, “Debug Services”, “Does the Service work by DNS name?”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/#does-the-service-work-by-dns-name",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "DNS",
+        "namespace",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.service-dns-name"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.service-dns-fqdn",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8150,
+      "front": "What is the fully qualified DNS name of the Service `cart` in namespace `shop`, in a cluster using the domain `cluster.local`?",
+      "back": "`cart.shop.svc.cluster.local`",
+      "choices": "A) cart.shop.svc.cluster.local\nB) shop.cart.svc.cluster.local\nC) cart.svc.shop.cluster.local",
+      "choicesExplained": "B: the Service name comes first, then the namespace. C: svc follows the namespace.",
+      "explanation": "The pattern is service, namespace, svc, then the cluster domain.",
+      "evidence": "If this still fails, try a fully-qualified name: nslookup hostnames.default.svc.cluster.local",
+      "source": "Kubernetes documentation, “Debug Services”, “Does the Service work by DNS name?”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/#does-the-service-work-by-dns-name",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "DNS",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.service-dns-name"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.cluster-dns-addon",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8160,
+      "front": "What gives Services their DNS names, and how can you check it is running?",
+      "back": "A DNS cluster add-on Service, such as CoreDNS; check with `kubectl get services kube-dns --namespace=kube-system`.",
+      "explanation": "The add-on assigns DNS names to other Services automatically.",
+      "evidence": "Kubernetes offers a DNS cluster addon Service that automatically assigns dns names to other Services. You can check if it's running on your cluster:",
+      "source": "Kubernetes documentation, “Connecting Applications with Services”, “DNS”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/services/connect-applications-service/#dns",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "DNS",
+        "kubectl",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.service-dns-name"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.service-env-vars-ordering",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8170,
+      "front": "When does the kubelet add a Service's environment variables to a Pod, and what problem does that create?",
+      "back": "When the Pod runs on a node, for each Service active then. This introduces an ordering problem.",
+      "explanation": "Pods started before a Service is created get no variables for it, so the Service has to exist first.",
+      "evidence": "When a Pod runs on a Node, the kubelet adds a set of environment variables for each active Service. This introduces an ordering problem.",
+      "source": "Kubernetes documentation, “Connecting Applications with Services”, “Environment Variables”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/services/connect-applications-service/#environment-variables",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "container environment variables",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.service-env-vars"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.debug-endpointslices",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8180,
+      "front": "A Service is defined correctly and resolves by DNS, but requests fail. What does the Debug Services guide check next?",
+      "back": "Whether the Service has EndpointSlices: that the running Pods are actually selected by the Service's selector.",
+      "explanation": "The guide re-lists the Pods with the Service's selector labels to see whether they match.",
+      "evidence": "If you got this far, you have confirmed that your Service is correctly defined and is resolved by DNS. Now let's check that the Pods you ran are actually being selected by the Service.",
+      "source": "Kubernetes documentation, “Debug Services”, “Does the Service have any EndpointSlices?”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/#does-the-service-have-any-endpointslices",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "EndpointSlice",
+        "selector",
+        "Pod",
+        "DNS",
+        "label"
+      ],
+      "conceptIDs": [
+        "ckad.debug-service-endpoints"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.debug-endpointslices-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8190,
+      "front": "The Service `web` has selector `app=web`, but `kubectl get endpointslices -l kubernetes.io/service-name=web` shows no endpoints. The Pods are labelled `app=frontend` and are Running. What is wrong?",
+      "back": "The selector does not match the Pod labels, so no Pods are selected. Fix the selector or the labels.",
+      "choices": "A) The selector does not match the Pod labels\nB) The Pods are not ready yet\nC) The cluster DNS is down",
+      "choicesExplained": "B: the Pods are Running; the list is empty because none match. C: DNS resolves names; it does not choose endpoints.",
+      "explanation": "EndpointSlices hold the Pods that the Service's selector matches.",
+      "evidence": "When a Pod dies, it is automatically removed from the EndpointSlices that contain it as an endpoint. New Pods that match the Service's selector will automatically get added to an EndpointSlice for that Service.",
+      "source": "Kubernetes documentation, “Connecting Applications with Services”, “Creating a Service”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/services/connect-applications-service/#creating-a-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "selector",
+        "EndpointSlice",
+        "label",
+        "Pod",
+        "DNS",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.debug-service-endpoints"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.debug-dns-lookup",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8200,
+      "front": "How does the Debug Services guide test whether a Service works by DNS name?",
+      "back": "From a Pod in the same namespace, run `nslookup <service-name>`.",
+      "explanation": "The guide notes that a DNS name is one of the most common ways clients consume a Service.",
+      "evidence": "One of the most common ways that clients consume a Service is through a DNS name. From a Pod in the same Namespace: nslookup hostnames",
+      "source": "Kubernetes documentation, “Debug Services”, “Does the Service work by DNS name?”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/#does-the-service-work-by-dns-name",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "DNS",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.debug-service-dns"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.debug-dns-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8210,
+      "front": "From a Pod in `default`, `nslookup payments` fails but `nslookup payments.billing` succeeds. What does this tell you, and what are the two fixes?",
+      "back": "The Service is in another namespace. Use the cross-namespace name in the app, or run the app and Service in the same namespace.",
+      "explanation": "The short name only finds Services in the Pod's own namespace.",
+      "evidence": "If this works, you'll need to adjust your app to use a cross-namespace name, or run your app and Service in the same Namespace.",
+      "source": "Kubernetes documentation, “Debug Services”, “Does the Service work by DNS name?”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/#does-the-service-work-by-dns-name",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Service",
+        "DNS",
+        "namespace",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.debug-service-dns"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.temp-test-pod",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8220,
+      "front": "How do you get a throwaway shell in the cluster to test a Service, which is removed when you exit?",
+      "back": "`kubectl run busybox --rm -ti --image=busybox -- /bin/sh`",
+      "explanation": "From that shell, a command such as `wget --spider --timeout=1 nginx` checks the Service answers.",
+      "evidence": "To access the nginx Service from another Pod in the default namespace, start a busybox container: console kubectl run busybox --rm -ti --image=busybox -- /bin/sh",
+      "source": "Kubernetes documentation, “Declare Network Policy”, “Test the service by accessing it from another Pod”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/#test-the-service-by-accessing-it-from-another-pod",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "Service",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.test-from-temp-pod"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.temp-test-pod-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8230,
+      "front": "You want to check that the Service `nginx` answers, from a Pod carrying the label `access=true`. Which command starts the test shell?",
+      "back": "`kubectl run busybox --rm -ti --labels=\"access=true\" --image=busybox -- /bin/sh`",
+      "choices": "A) kubectl run busybox --rm -ti --labels=\"access=true\" --image=busybox -- /bin/sh\nB) kubectl exec nginx -- /bin/sh\nC) kubectl run busybox --image=busybox --port=80",
+      "choicesExplained": "B: this opens a shell in a Pod named nginx, which tests nothing from outside and has no access label. C: no shell and no label; it just starts a Pod.",
+      "explanation": "`--labels` gives the test Pod the label, `--rm -ti` gives an interactive shell that is cleaned up afterwards.",
+      "evidence": "kubectl run busybox --rm -ti --labels=\"access=true\" --image=busybox -- /bin/sh",
+      "source": "Kubernetes documentation, “Declare Network Policy”, “Limit access to the nginx service”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/#limit-access-to-the-nginx-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "kubectl exec",
+        "Service",
+        "label",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.test-from-temp-pod",
+        "ckad.allow-by-label"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.networkpolicy-needs-plugin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8240,
+      "front": "What is needed for a NetworkPolicy to have any effect?",
+      "back": "A network plugin that implements NetworkPolicy. Without one, creating the resource has no effect.",
+      "explanation": "Network policies are implemented by the network plugin, not by the API server.",
+      "evidence": "Network policies are implemented by the network plugin . To use network policies, you must be using a networking solution which supports NetworkPolicy. Creating a NetworkPolicy resource without a controller that implements it will have no effect.",
+      "source": "Kubernetes documentation, “Network Policies”, “Prerequisites”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#prerequisites",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "CNI"
+      ],
+      "conceptIDs": [
+        "ckad.networkpolicy-needs-plugin"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.networkpolicy-plugin-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8250,
+      "front": "You apply a correct default-deny NetworkPolicy, `kubectl get networkpolicy` lists it, yet every Pod still reaches every other. What is the likely cause?",
+      "back": "The cluster's network plugin does not implement NetworkPolicy.",
+      "choices": "A) The network plugin does not support NetworkPolicy\nB) Policies take effect only after Pods restart\nC) Default-deny needs a second, allow policy first",
+      "choicesExplained": "B: new and existing Pods are isolated once the plugin handles the policy. C: a default-deny works alone; allow policies only add exceptions.",
+      "explanation": "A NetworkPolicy without a controller that implements it has no effect.",
+      "evidence": "Creating a NetworkPolicy resource without a controller that implements it will have no effect.",
+      "source": "Kubernetes documentation, “Network Policies”, “Prerequisites”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#prerequisites",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.networkpolicy-needs-plugin"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.when-isolated-for-ingress",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8260,
+      "front": "By default, is a Pod isolated for ingress? What makes it isolated?",
+      "back": "No: all inbound connections are allowed. It becomes isolated once any NetworkPolicy selects it and has Ingress in its policyTypes.",
+      "explanation": "From then on, the only connections allowed in are from its node and those some applicable policy's ingress list allows.",
+      "evidence": "By default, a pod is non-isolated for ingress; all inbound connections are allowed. A pod is isolated for ingress if there is any NetworkPolicy that both selects the pod and has \"Ingress\" in its policyTypes ;",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "pod isolation",
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.pod-isolation"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.isolation-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8270,
+      "front": "The only NetworkPolicy in a namespace selects `app=db` Pods, with policyTypes `[Ingress]`. Can `app=web` Pods still make any outbound connection they like?",
+      "back": "Yes. The policy neither selects the web Pods nor covers egress, so they stay non-isolated.",
+      "choices": "A) Yes, they are not isolated\nB) No, every Pod in the namespace is now isolated\nC) No, only connections to db are allowed",
+      "choicesExplained": "B: isolation applies only to the Pods a policy selects. C: egress is not restricted unless a policy with Egress selects the Pod.",
+      "explanation": "A Pod is isolated in a direction only when a policy selects it and lists that direction.",
+      "evidence": "By default, a pod is non-isolated for egress; all outbound connections are allowed. A pod is isolated for egress if there is any NetworkPolicy that both selects the pod and has \"Egress\" in its policyTypes ;",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "pod isolation",
+        "NetworkPolicy",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.pod-isolation"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.empty-podselector",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8280,
+      "front": "In a NetworkPolicy, what does an empty `podSelector` select?",
+      "back": "All Pods in the policy's namespace.",
+      "explanation": "Each NetworkPolicy's podSelector chooses the Pods the policy applies to.",
+      "evidence": "Each NetworkPolicy includes a podSelector which selects the grouping of pods to which the policy applies. The example policy selects pods with the label \"role=db\". An empty podSelector selects all pods in the namespace.",
+      "source": "Kubernetes documentation, “Network Policies”, “The NetworkPolicy resource”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#networkpolicy-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "selector",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.default-deny-ingress"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.policies-additive",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8290,
+      "front": "Two NetworkPolicies apply to the same Pod for ingress, allowing different sources. Which connections are allowed?",
+      "back": "The union of what both allow. Policies do not conflict; they are additive.",
+      "explanation": "Because the result is a union, the order of evaluation does not matter.",
+      "evidence": "Network policies do not conflict; they are additive. If any policy or policies apply to a given pod for a given direction, the connections allowed in that direction from that pod is the union of what the applicable policies allow. Thus, order of evaluation does not affect the policy result.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.policies-additive"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.both-ends-must-allow",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8300,
+      "front": "For a connection from Pod A to Pod B, which policies must allow it?",
+      "back": "Both the egress policy on A and the ingress policy on B. If either side does not allow it, it does not happen.",
+      "explanation": "Isolation for egress and for ingress are declared independently and both matter for a Pod-to-Pod connection.",
+      "evidence": "For a connection from a source pod to a destination pod to be allowed, both the egress policy on the source pod and the ingress policy on the destination pod need to allow the connection. If either side does not allow the connection, it will not happen.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "pod isolation"
+      ],
+      "conceptIDs": [
+        "ckad.policies-additive"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.additive-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8310,
+      "front": "A namespace has a default-deny-ingress policy and a second policy allowing ingress to `app=api` from `app=web`. Can web reach api?",
+      "back": "Yes. Allowed connections are the union of the applicable policies, so the allow rule adds the exception.",
+      "choices": "A) Yes: the allow policy adds to the deny\nB) No: deny always wins\nC) It depends on which policy was created first",
+      "choicesExplained": "B: policies do not conflict; they only allow. C: order of evaluation does not affect the result.",
+      "explanation": "Because policies are additive, a default deny plus narrow allow rules is the usual pattern.",
+      "evidence": "Network policies do not conflict; they are additive.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.policies-additive"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.default-deny-ingress",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8320,
+      "front": "What does a “default deny all ingress” NetworkPolicy look like?",
+      "back": "`podSelector: {}` with `policyTypes: [Ingress]` and no ingress rules: it selects all Pods and allows no ingress.",
+      "explanation": "It gives the namespace a default ingress isolation policy.",
+      "evidence": "You can create a \"default\" ingress isolation policy for a namespace by creating a NetworkPolicy that selects all pods but does not allow any ingress traffic to those pods.",
+      "source": "Kubernetes documentation, “Network Policies”, “Default deny all ingress traffic”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#default-deny-all-ingress-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.default-deny-ingress"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.default-deny-ingress-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8330,
+      "front": "A security review asks that no Pod in `finance` accept any inbound connection unless a later policy allows it. What do you create?",
+      "back": "A NetworkPolicy in `finance` with `podSelector: {}` and `policyTypes: [Ingress]`, and no ingress rules.",
+      "choices": "A) podSelector {} with policyTypes Ingress and no rules\nB) podSelector {} with policyTypes Ingress and a rule allowing all sources\nC) policyTypes Egress with no rules",
+      "choicesExplained": "B: a rule allowing all sources lets every connection in, so nothing is denied. C: that isolates outbound traffic, not inbound.",
+      "explanation": "Selecting every Pod and allowing no ingress isolates them all for ingress.",
+      "evidence": "apiVersion : networking.k8s.io/v1 kind : NetworkPolicy metadata : name : default-deny-ingress spec : podSelector : {} policyTypes : - Ingress",
+      "source": "Kubernetes documentation, “Network Policies”, “Default deny all ingress traffic”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#default-deny-all-ingress-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.default-deny-ingress"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.default-deny-egress-dns",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8340,
+      "front": "What else does a default deny-all egress policy block that workloads usually need?",
+      "back": "DNS traffic. If the workloads need name resolution, you must add a rule allowing it.",
+      "explanation": "The policy selects all Pods and allows no egress, which includes lookups to the cluster DNS.",
+      "evidence": "Caution: A default deny-all egress policy also blocks DNS traffic. If your workloads need DNS resolution, you must add",
+      "source": "Kubernetes documentation, “Network Policies”, “Default deny all egress traffic”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#default-deny-all-egress-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "DNS",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.default-deny-egress"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.peer-podselector",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8350,
+      "front": "In a NetworkPolicy `from` or `to` section, which selector picks particular Pods in the policy's own namespace?",
+      "back": "`podSelector`.",
+      "explanation": "Those Pods are then allowed as ingress sources or egress destinations.",
+      "evidence": "podSelector : This selects particular Pods in the same namespace as the NetworkPolicy which should be allowed as ingress sources or egress destinations.",
+      "source": "Kubernetes documentation, “Network Policies”, “Behavior of to and from selectors”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "selector",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.peer-selectors"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.peer-namespaceselector",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8360,
+      "front": "In a NetworkPolicy `from` or `to` section, which selector allows all Pods in chosen namespaces?",
+      "back": "`namespaceSelector`.",
+      "explanation": "It picks namespaces, and every Pod in them is allowed as a source or destination.",
+      "evidence": "namespaceSelector : This selects particular namespaces for which all Pods should be allowed as ingress sources or egress destinations.",
+      "source": "Kubernetes documentation, “Network Policies”, “Behavior of to and from selectors”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "selector",
+        "namespace",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.peer-selectors"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.peer-ipblock",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8370,
+      "front": "Which NetworkPolicy selector allows address ranges, and what kind of addresses should it name?",
+      "back": "`ipBlock`. It should name cluster-external addresses, since Pod IPs are ephemeral and unpredictable.",
+      "explanation": "Pod addresses change as Pods come and go, so selectors are used for Pods instead.",
+      "evidence": "This selects particular IP CIDR ranges to allow as ingress sources or egress destinations. These should be cluster-external IPs, since Pod IPs are ephemeral and unpredictable.",
+      "source": "Kubernetes documentation, “Network Policies”, “Behavior of to and from selectors”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "ckad.peer-selectors"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.selector-and-vs-or",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8380,
+      "front": "In a `from` list, what is the difference between `namespaceSelector` and `podSelector` in one element, and the same two as separate elements?",
+      "back": "One element means “and”: matching Pods in matching namespaces. Two elements mean “or”: either one matches.",
+      "explanation": "The page suggests `kubectl describe` to see how Kubernetes has read a policy when in doubt.",
+      "evidence": "This policy contains a single from element allowing connections from Pods with the label role=client in namespaces with the label user=alice . But the following policy is different:",
+      "source": "Kubernetes documentation, “Network Policies”, “Behavior of to and from selectors”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "selector",
+        "namespace",
+        "Pod",
+        "label",
+        "kubectl describe"
+      ],
+      "conceptIDs": [
+        "ckad.selector-and-vs-or"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.selector-and-or-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8390,
+      "front": "An ingress rule has `from: [{namespaceSelector: {matchLabels: {team: ops}}}, {podSelector: {matchLabels: {role: probe}}}]` — two elements. Which Pods are allowed in?",
+      "back": "Any Pod in a namespace labelled team=ops, or any Pod labelled role=probe in the policy's own namespace.",
+      "choices": "A) Pods in team=ops namespaces, or role=probe Pods in the local namespace\nB) Only role=probe Pods inside team=ops namespaces\nC) Only role=probe Pods in any namespace",
+      "choicesExplained": "B: that is the AND meaning of a single element holding both selectors. C: a podSelector alone matches only in the policy's own namespace.",
+      "explanation": "Two elements in the from array are alternatives.",
+      "evidence": "It contains two elements in the from array, and allows connections from Pods in the local Namespace with the label role=client , or from any Pod in any namespace with the label user=alice .",
+      "source": "Kubernetes documentation, “Network Policies”, “Behavior of to and from selectors”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "selector",
+        "namespace",
+        "Pod",
+        "label"
+      ],
+      "conceptIDs": [
+        "ckad.selector-and-vs-or",
+        "ckad.peer-selectors"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.allow-by-label",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8400,
+      "front": "In the Declare Network Policy task, how is the `nginx` Service restricted to certain clients?",
+      "back": "A NetworkPolicy lets only Pods labelled `access: true` query it.",
+      "explanation": "A test Pod started with that label can then reach the Service; one without it cannot.",
+      "evidence": "To limit the access to the nginx service so that only Pods with the label access: true can query it, create a NetworkPolicy object as follows:",
+      "source": "Kubernetes documentation, “Declare Network Policy”, “Limit access to the nginx service”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/#limit-access-to-the-nginx-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NetworkPolicy",
+        "Service",
+        "label",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.allow-by-label"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.ingress-needs-controller",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8410,
+      "front": "What must a cluster have for an Ingress resource to do anything?",
+      "back": "An ingress controller. Creating only the Ingress resource has no effect.",
+      "explanation": "You can choose from a number of ingress controllers, which in reality operate slightly differently.",
+      "evidence": "You must have an Ingress controller to satisfy an Ingress. Only creating an Ingress resource has no effect.",
+      "source": "Kubernetes documentation, “Ingress”, “Prerequisites”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#prerequisites",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "ingress controller"
+      ],
+      "conceptIDs": [
+        "ckad.ingress-needs-controller"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.ingress-controller-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8420,
+      "front": "You create a valid Ingress on a fresh cluster. It is accepted, but no traffic ever reaches your Service through it. What is the first thing to check?",
+      "back": "That an ingress controller is installed and running.",
+      "choices": "A) Whether an ingress controller is running\nB) Whether the Service type is NodePort\nC) Whether the Ingress has a TLS section",
+      "choicesExplained": "B: an Ingress routes to Services; a NodePort type is not required. C: TLS is optional; plain HTTP rules work without it.",
+      "explanation": "An Ingress resource alone does nothing without a controller to satisfy it.",
+      "evidence": "You must have an Ingress controller to satisfy an Ingress. Only creating an Ingress resource has no effect.",
+      "source": "Kubernetes documentation, “Ingress”, “Prerequisites”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#prerequisites",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "ingress controller",
+        "Service",
+        "NodePort"
+      ],
+      "conceptIDs": [
+        "ckad.ingress-needs-controller"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.ingress-rule-parts",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8430,
+      "front": "What does each HTTP rule of an Ingress contain?",
+      "back": "An optional host, and a list of paths, each with a backend given as a Service name and port.",
+      "explanation": "With no host, the rule applies to all inbound HTTP traffic through the address; with a host, only to that host.",
+      "evidence": "An optional host. In this example, no host is specified, so the rule applies to all inbound HTTP traffic through the IP address specified. If a host is provided (for example, foo.bar.com), the rules apply to that host.",
+      "source": "Kubernetes documentation, “Ingress”, “Ingress rules”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "Service"
+      ],
+      "conceptIDs": [
+        "ckad.ingress-rules",
+        "ckad.ingress-resource"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.ingress-rules-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8440,
+      "front": "Requests for `shop.example.com/cart` must go to the Service `cart` on port 80, and nothing for other hosts. How is the rule shaped?",
+      "back": "`host: shop.example.com`, with a path `/cart` whose backend is `service: {name: cart, port: {number: 80}}` and a pathType.",
+      "choices": "A) host shop.example.com, path /cart, backend service cart port 80\nB) No host, path shop.example.com/cart\nC) host cart, path /shop.example.com",
+      "choicesExplained": "B: without a host the rule applies to all hosts, and a path holds only the path part. C: host and path are swapped.",
+      "explanation": "The host limits the rule to one name; each path maps to a Service backend.",
+      "evidence": "A list of paths (for example, /testpath ), each of which has an associated backend defined with a service.name and a service.port.name",
+      "source": "Kubernetes documentation, “Ingress”, “Ingress rules”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "Service"
+      ],
+      "conceptIDs": [
+        "ckad.ingress-rules",
+        "ckad.ingress-resource"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.pathtype-required",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8450,
+      "front": "An Ingress path has no `pathType`. What happens?",
+      "back": "It fails validation: every path must have a path type.",
+      "explanation": "There are three supported path types to choose from.",
+      "evidence": "Each path in an Ingress is required to have a corresponding path type. Paths that do not include an explicit pathType will fail validation.",
+      "source": "Kubernetes documentation, “Ingress”, “Path types”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "ckad.path-types"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.pathtype-exact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8460,
+      "front": "Which Ingress pathType matches the request path exactly, with case sensitivity?",
+      "back": "`Exact`.",
+      "explanation": "Nothing longer or differently cased matches it.",
+      "evidence": "Exact : Matches the URL path exactly and with case sensitivity.",
+      "source": "Kubernetes documentation, “Ingress”, “Path types”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "ckad.path-types"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.pathtype-prefix",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8470,
+      "front": "Which Ingress pathType matches on a path prefix, split by `/` and compared element by element?",
+      "back": "`Prefix`.",
+      "explanation": "Matching is case sensitive and done a path element at a time, not character by character.",
+      "evidence": "Prefix : Matches based on a URL path prefix split by / . Matching is case sensitive and done on a path element by element basis.",
+      "source": "Kubernetes documentation, “Ingress”, “Path types”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "ckad.path-types"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.pathtype-implementationspecific",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8480,
+      "front": "Which Ingress pathType leaves matching up to the IngressClass?",
+      "back": "`ImplementationSpecific`.",
+      "explanation": "Implementations can treat it as its own type or treat it like Prefix or Exact.",
+      "evidence": "ImplementationSpecific : With this path type, matching is up to the IngressClass. Implementations can treat this as a separate pathType or treat it identically to Prefix or Exact path types.",
+      "source": "Kubernetes documentation, “Ingress”, “Path types”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "IngressClass"
+      ],
+      "conceptIDs": [
+        "ckad.path-types"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.pathtype-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8490,
+      "front": "`/api/v1/users` and `/api/v2` should both go to the Service `api`, but `/apidocs` should not. Which pathType on the path `/api`?",
+      "back": "`Prefix`: it matches `/api` element by element, so `/api/...` matches and `/apidocs` does not.",
+      "choices": "A) Prefix\nB) Exact\nC) Leave pathType out",
+      "choicesExplained": "B: Exact would match only /api itself. C: a path without a pathType fails validation.",
+      "explanation": "Prefix compares whole path elements split by /, so apidocs is a different element from api.",
+      "evidence": "Prefix : Matches based on a URL path prefix split by / . Matching is case sensitive and done on a path element by element basis.",
+      "source": "Kubernetes documentation, “Ingress”, “Path types”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "Service"
+      ],
+      "conceptIDs": [
+        "ckad.path-types"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.default-ingressclass",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8500,
+      "front": "How do you make an IngressClass the default, and which Ingresses get it?",
+      "back": "Set the annotation `ingressclass.kubernetes.io/is-default-class: \"true\"` on it. New Ingresses without `ingressClassName` are assigned it.",
+      "explanation": "The project recommends defining a default IngressClass even if your controller can work without one.",
+      "evidence": "Setting the ingressclass.kubernetes.io/is-default-class annotation to true on an IngressClass resource will ensure that new Ingresses without an ingressClassName field specified will be assigned this default IngressClass.",
+      "source": "Kubernetes documentation, “Ingress”, “Default IngressClass”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#default-ingress-class",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "IngressClass",
+        "Ingress",
+        "annotation"
+      ],
+      "conceptIDs": [
+        "ckad.ingressclassname"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.ingressclass-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8510,
+      "front": "A cluster runs two ingress controllers, with IngressClasses `internal` and `public`, and neither is the default. Your Ingress must be served by the public one. What do you set?",
+      "back": "`spec.ingressClassName: public` on the Ingress.",
+      "choices": "A) spec.ingressClassName: public\nB) Nothing; both controllers serve every Ingress\nC) A label class=public on the Service",
+      "choicesExplained": "B: each Ingress should name its class so the right controller implements it. C: the class is chosen on the Ingress, not by labelling the Service.",
+      "explanation": "The ingressClassName field replaced the older annotation as the way to choose a class.",
+      "evidence": "The newer ingressClassName field on Ingresses is a replacement for that annotation, but is not a direct equivalent.",
+      "source": "Kubernetes documentation, “Ingress”, “Deprecated annotation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#deprecated-annotation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "IngressClass",
+        "Ingress",
+        "ingress controller",
+        "label",
+        "Service"
+      ],
+      "conceptIDs": [
+        "ckad.ingressclassname"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.two-default-classes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8520,
+      "front": "Two IngressClasses are both marked as default. What happens to a new Ingress that sets no `ingressClassName`?",
+      "back": "The admission controller prevents it from being created.",
+      "explanation": "The fix is to make sure at most one IngressClass is marked default.",
+      "evidence": "If you have more than one IngressClass marked as the default for your cluster, the admission controller prevents creating new Ingress objects that don't have an ingressClassName specified.",
+      "source": "Kubernetes documentation, “Ingress”, “Default IngressClass”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#default-ingress-class",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "IngressClass",
+        "Ingress",
+        "admission controller"
+      ],
+      "conceptIDs": [
+        "ckad.ingressclassname"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.ingress-tls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8530,
+      "front": "How do you secure an Ingress with TLS, and on which port?",
+      "back": "Reference a Secret holding a TLS private key and certificate. Ingress supports a single TLS port, 443.",
+      "explanation": "TLS ends at the ingress point; traffic on to the Service and its Pods is plaintext.",
+      "evidence": "You can secure an Ingress by specifying a Secret that contains a TLS private key and certificate. The Ingress resource only supports a single TLS port, 443, and assumes TLS termination at the ingress point",
+      "source": "Kubernetes documentation, “Ingress”, “TLS”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#tls",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "Secret",
+        "Service",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.ingress-tls"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.ingress-default-backend-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8540,
+      "front": "How can an Ingress expose a single Service with no rules at all?",
+      "back": "By specifying a default backend and no rules.",
+      "explanation": "Other Kubernetes features can also expose a single Service; this is the Ingress way.",
+      "evidence": "You can also do this with an Ingress by specifying a default backend with no rules.",
+      "source": "Kubernetes documentation, “Ingress”, “Ingress backed by a single Service”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#single-service-ingress",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "Service"
+      ],
+      "conceptIDs": [
+        "ckad.ingress-resource"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.ingress-frozen",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8550,
+      "front": "What is the status of the Ingress API, and what does the Kubernetes project recommend instead?",
+      "back": "Frozen: generally available and not being removed, but no longer developed. The project recommends Gateway.",
+      "explanation": "Frozen means it keeps the stability guarantees of a generally available API but will get no further changes.",
+      "evidence": "The Kubernetes project recommends using Gateway instead of Ingress . The Ingress API has been frozen.",
+      "source": "Kubernetes documentation, “Ingress”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "Ingress",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "ckad.ingress-frozen"
+      ]
+    },
+    {
+      "id": "ckad.services-ingress-netpol.ingress-frozen-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8560,
+      "front": "A colleague says Ingress manifests will stop working in the next Kubernetes release because the API is frozen. Are they right?",
+      "back": "No. The project has no plans to remove Ingress; frozen means it will get no further changes.",
+      "choices": "A) No: it stays, but gets no new features\nB) Yes: frozen APIs are removed next release\nC) Yes: Ingress is already beta again",
+      "choicesExplained": "B: the page says there are no plans to remove Ingress. C: Ingress is generally available.",
+      "explanation": "Frozen and deprecated are different: Ingress keeps its generally available stability guarantees.",
+      "evidence": "The Ingress API is generally available, and is subject to the stability guarantees for generally available APIs. The Kubernetes project has no plans to remove Ingress from Kubernetes.",
+      "source": "Kubernetes documentation, “Ingress”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "Ingress",
+        "alpha, beta, ga versions",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "ckad.ingress-frozen"
+      ]
+    }
+  ]
+}

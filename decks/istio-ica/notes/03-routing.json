@@ -1,0 +1,1624 @@
+{
+  "topic": "Routing and traffic shifting",
+  "notes": [
+    {
+      "id": "istio.routing.what-is-virtualservice",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a VirtualService in Istio?",
+      "back": "A resource of routing rules that decide how requests to a host are routed to real destinations in the mesh.",
+      "explanation": "Each VirtualService is a set of routing rules evaluated in order, matching each request to a specific real destination within the mesh.",
+      "source": "Istio docs, Traffic Management (concepts), “Virtual services”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#virtual-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Each virtual service consists of a set of routing rules that are evaluated in order, letting Istio match each given request to the virtual service to a specific real destination within the mesh.",
+      "uses": [
+        "VirtualService",
+        "Istio",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "istio.virtualservice"
+      ],
+      "introduces": [
+        "VirtualService"
+      ],
+      "example": "Like a switchboard for one phone number: callers dial the same number, and the switchboard decides which desk takes each call.",
+      "order": 3000
+    },
+    {
+      "id": "istio.routing.what-is-destinationrule",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a DestinationRule in Istio?",
+      "back": "A resource that configures what happens to traffic for a destination once routing has chosen it.",
+      "explanation": "The VirtualService decides where traffic goes; the DestinationRule then configures what happens to traffic for that destination.",
+      "source": "Istio docs, Traffic Management (concepts), “Destination rules”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#destination-rules",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You can think of virtual services as how you route your traffic to a given destination, and then you use destination rules to configure what happens to traffic for that destination.",
+      "uses": [
+        "DestinationRule",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.destinationrule"
+      ],
+      "introduces": [
+        "DestinationRule"
+      ],
+      "example": "Like handling instructions at a delivery address: the address says where the parcel goes, the instructions say how it is handed over there.",
+      "order": 3007
+    },
+    {
+      "id": "istio.routing.what-is-subset",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "In Istio, what is a subset?",
+      "back": "A named set of a service's endpoints, such as one version, that routing rules can send traffic to.",
+      "explanation": "Subsets let routing target a specific version of a service, for example for A/B testing, rather than all its instances.",
+      "source": "Istio docs, Destination Rule reference, “Subset”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#Subset",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A subset of endpoints of a service. Subsets can be used for scenarios like A/B testing, or routing to a specific version of a service.",
+      "uses": [
+        "subset",
+        "Service"
+      ],
+      "conceptIDs": [
+        "istio.subset"
+      ],
+      "introduces": [
+        "subset"
+      ],
+      "example": "Like the Pods of a shop Service that carry version v2, grouped under the name v2.",
+      "order": 3014
+    },
+    {
+      "id": "istio.routing.what-is-traffic-shifting",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is traffic shifting in Istio?",
+      "back": "Moving a percentage of traffic from one destination to another through a sequence of routing rules.",
+      "explanation": "A common use is to migrate traffic gradually from an older version of a microservice to a new one.",
+      "source": "Istio docs, Traffic Shifting task, “Traffic Shifting”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/traffic-shifting/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A common use case is to migrate traffic gradually from an older version of a microservice to a new one. In Istio, you accomplish this goal by configuring a sequence of routing rules that redirect a percentage of traffic from one destination to another.",
+      "uses": [
+        "traffic shifting",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.traffic-shifting"
+      ],
+      "introduces": [
+        "traffic shifting"
+      ],
+      "example": "Like moving diners to a new restaurant a few tables at a time, rather than closing the old one overnight.",
+      "order": 3021
+    },
+    {
+      "id": "istio.routing.what-is-rewrite",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does a rewrite do in a VirtualService route?",
+      "back": "It changes parts of the request, such as its path, before forwarding it to the destination.",
+      "explanation": "Because it acts on the request being forwarded, a rewrite can be used only on a route that forwards to a destination.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRewrite”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRewrite",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "HTTPRewrite can be used to rewrite specific parts of a HTTP request before forwarding the request to the destination. Rewrite primitive can be used only with HTTPRouteDestination.",
+      "uses": [
+        "rewrite",
+        "VirtualService",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.rewrite"
+      ],
+      "introduces": [
+        "rewrite"
+      ],
+      "example": "Like a post room that crosses out an old room number and writes in the new one before delivering the letter.",
+      "order": 3028
+    },
+    {
+      "id": "istio.routing.what-is-redirect",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does a redirect do in a VirtualService rule?",
+      "back": "It answers the caller with a 301 pointing to a different path or authority, instead of forwarding the request.",
+      "explanation": "A rule can return a direct response, redirect, or forward traffic; forwarding is the default.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRoute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A HTTP rule can either return a direct_response, redirect or forward (default) traffic. If traffic passthrough option is specified in the rule, route/redirect will be ignored. The redirect primitive can be used to send a HTTP 301 redirect to a different URI or Authority.",
+      "uses": [
+        "redirect",
+        "VirtualService",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.redirect"
+      ],
+      "introduces": [
+        "redirect"
+      ],
+      "example": "Like a shop sign saying “we have moved to number 12”: you are told the new address and walk there yourself.",
+      "order": 3035
+    },
+    {
+      "id": "istio.routing.what-is-direct-response",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a direct response in a VirtualService rule?",
+      "back": "A fixed response the rule sends straight back to clients, instead of forwarding the request.",
+      "explanation": "The reference's example returns a fixed 503 status with a body for requests to one path.",
+      "source": "Istio docs, Virtual Service reference, “HTTPDirectResponse”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPDirectResponse",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "HTTPDirectResponse can be used to send a fixed response to clients. For example, the following rule returns a fixed 503 status with a body to requests for /v1/getProductRatings API.",
+      "uses": [
+        "direct response",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.direct-response"
+      ],
+      "introduces": [
+        "direct response"
+      ],
+      "example": "Like a recorded message that says the line is closed, instead of putting the call through to anyone.",
+      "order": 3042
+    },
+    {
+      "id": "istio.routing.what-is-mirroring",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is mirroring in a VirtualService?",
+      "back": "Sending a copy of traffic to another destination as well as forwarding it to the intended one.",
+      "explanation": "Mirroring is best effort: the proxy does not wait for the mirror to reply before returning the original destination's response.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRoute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Mirror HTTP traffic to a another destination in addition to forwarding the requests to the intended destination. Mirrored traffic is on a best effort basis where the sidecar/gateway will not wait for the mirrored cluster to respond before returning the response from the original destination.",
+      "uses": [
+        "mirroring",
+        "VirtualService",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.mirroring"
+      ],
+      "introduces": [
+        "mirroring"
+      ],
+      "example": "Like copying a colleague on an email: they get it too, but the reply you wait for comes from the person you wrote to.",
+      "order": 3049
+    },
+    {
+      "id": "istio.routing.what-is-delegate",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a delegate in a VirtualService?",
+      "back": "A rule's pointer to another VirtualService whose route rules are merged into the current one.",
+      "explanation": "A delegate takes the place of a route or redirect on that rule: it can be set only when both are empty.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRoute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Delegate is used to specify the particular VirtualService which can be used to define delegate HTTPRoute. It can be set only when Route and Redirect are empty, and the route rules of the delegate VirtualService will be merged with that in the current one.",
+      "uses": [
+        "delegate",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.delegate"
+      ],
+      "introduces": [
+        "delegate"
+      ],
+      "example": "Like a head-office switchboard that passes every billing call to the billing team's own switchboard.",
+      "order": 3056
+    },
+    {
+      "id": "istio.routing.what-is-cors-policy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does a CORS policy on a VirtualService route describe?",
+      "back": "The Cross-Origin Resource Sharing rules for a service: which cross-origin requests are allowed.",
+      "explanation": "The reference's example restricts cross-origin requests to one domain and to chosen methods.",
+      "source": "Istio docs, Virtual Service reference, “CorsPolicy”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#CorsPolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Describes the Cross-Origin Resource Sharing (CORS) policy, for a given service. Refer to CORS for further details about cross origin resource sharing. For example, the following rule restricts cross origin requests to those originating from example.com domain using HTTP POST/GET",
+      "uses": [
+        "CORS policy",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.cors"
+      ],
+      "introduces": [
+        "CORS policy"
+      ],
+      "example": "Like a guest list at a door that names which other websites' pages may call this service.",
+      "order": 3063
+    },
+    {
+      "id": "istio.routing.what-is-traffic-policy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a traffic policy in a DestinationRule?",
+      "back": "Settings for traffic to a destination, such as load balancing, connection pool limits and outlier detection.",
+      "explanation": "A traffic policy applies to a specific destination across all of its ports.",
+      "source": "Istio docs, Destination Rule reference, “TrafficPolicy”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#TrafficPolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Traffic policies to apply for a specific destination, across all destination ports. See DestinationRule for examples. FieldDescription loadBalancer LoadBalancerSettings Settings controlling the load balancer algorithms. connectionPool ConnectionPoolSettings Settings controlling the volume of connections to an upstream service outlierDetection OutlierDetection Settings controlling eviction of unhealthy hosts from the load balancing pool",
+      "uses": [
+        "traffic policy",
+        "DestinationRule",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "istio.traffic-policy"
+      ],
+      "introduces": [
+        "traffic policy"
+      ],
+      "example": "Like house rules at a venue's entrance that apply to every room inside.",
+      "order": 3070
+    },
+    {
+      "id": "istio.routing.what-is-consistent-hash",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is consistent hash load balancing in Istio?",
+      "back": "A load balancing option giving soft session affinity based on HTTP headers, cookies or other properties.",
+      "explanation": "The affinity is soft: it may be lost when hosts are added to or removed from the destination service.",
+      "source": "Istio docs, Destination Rule reference, “ConsistentHashLB”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#LoadBalancerSettings-ConsistentHashLB",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Consistent Hash-based load balancing can be used to provide soft session affinity based on HTTP headers, cookies or other properties. The affinity to a particular destination host may be lost when one or more hosts are added/removed from the destination service.",
+      "uses": [
+        "consistent hash",
+        "load balancer",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.consistent-hash"
+      ],
+      "introduces": [
+        "consistent hash"
+      ],
+      "example": "Like a cloakroom where surnames A to F always go to the same attendant, until the attendants change.",
+      "order": 3077
+    },
+    {
+      "id": "istio.routing.default-balancing",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Without virtual services, how does Envoy spread traffic across a service's instances?",
+      "back": "With least requests load balancing across all the service's instances.",
+      "explanation": "Virtual services let you improve on this with what you know about the workloads, such as which ones are a different version.",
+      "source": "Istio docs, Traffic Management (concepts), “Why use virtual services?”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#why-use-virtual-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Without virtual services, Envoy distributes traffic using least requests load balancing between all service instances, as described in the introduction. You can improve this behavior with what you know about the workloads. For example, some might represent a different version.",
+      "uses": [
+        "Envoy",
+        "VirtualService",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "istio.vs-why"
+      ],
+      "order": 3084
+    },
+    {
+      "id": "istio.routing.hosts-field",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does a VirtualService's hosts field list?",
+      "back": "The user-addressable destinations its routing rules apply to: the addresses clients use when sending requests.",
+      "explanation": "It is the address the client calls, which the routing rules then map to real destinations.",
+      "source": "Istio docs, Traffic Management (concepts), “The hosts field”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#the-hosts-field",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The hosts field lists the virtual service’s hosts - in other words, the user-addressable destination or destinations that these routing rules apply to. This is the address or addresses the client uses when sending requests to the service.",
+      "uses": [
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.vs-hosts"
+      ],
+      "order": 3091
+    },
+    {
+      "id": "istio.routing.destination-host-real",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Unlike a VirtualService's hosts, what must a route's destination host be?",
+      "back": "A real destination in Istio's service registry: a mesh service, or a non-mesh service added with a service entry.",
+      "explanation": "Otherwise Envoy won't know where to send the traffic.",
+      "source": "Istio docs, Traffic Management (concepts), “Destination”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#destination",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Unlike the virtual service’s host(s), the destination’s host must be a real destination that exists in Istio’s service registry or Envoy won’t know where to send traffic to it. This can be a mesh service with proxies or a non-mesh service added using a service entry.",
+      "uses": [
+        "VirtualService",
+        "Envoy",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.vs-hosts"
+      ],
+      "order": 3098
+    },
+    {
+      "id": "istio.routing.mesh-gateway-word",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In a VirtualService's gateways field, what does the reserved word mesh mean?",
+      "back": "All the sidecars in the mesh.",
+      "explanation": "When the gateways field is omitted, the default gateway mesh is used, so the rule applies to all sidecars.",
+      "source": "Istio docs, Virtual Service reference, “VirtualService”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#VirtualService",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The reserved word mesh is used to imply all the sidecars in the mesh. When this field is omitted, the default gateway (mesh) will be used, which would apply the rule to all sidecars in the mesh.",
+      "uses": [
+        "VirtualService",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "istio.vs-gateways-field"
+      ],
+      "order": 3105
+    },
+    {
+      "id": "istio.routing.match-block-and",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Within one match block of a VirtualService rule, how are the conditions combined?",
+      "back": "All of them must hold (`AND`).",
+      "explanation": "Several match blocks in a list combine the other way: any one of them is enough.",
+      "source": "Istio docs, Virtual Service reference, “HTTPMatchRequest”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "All conditions inside a single match block have AND semantics, while the list of match blocks have OR semantics. The rule is matched if any one of the match blocks succeed.",
+      "uses": [
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.http-match"
+      ],
+      "order": 3112
+    },
+    {
+      "id": "istio.routing.match-blocks-or",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When a VirtualService rule lists several match blocks, when does the rule match?",
+      "back": "When any one of the match blocks succeeds (`OR`).",
+      "explanation": "Inside each block, by contrast, every condition must hold.",
+      "source": "Istio docs, Virtual Service reference, “HTTPMatchRequest”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "All conditions inside a single match block have AND semantics, while the list of match blocks have OR semantics. The rule is matched if any one of the match blocks succeed.",
+      "uses": [
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.http-match"
+      ],
+      "order": 3119
+    },
+    {
+      "id": "istio.routing.stringmatch-exact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which StringMatch type needs the value to equal the given string in full?",
+      "back": "`exact`.",
+      "explanation": "It is one of three StringMatch types, alongside prefix and regex matching.",
+      "source": "Istio docs, Virtual Service reference, “StringMatch”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#StringMatch",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "exact string (oneof) exact string match prefix string (oneof) prefix-based match regex string (oneof) RE2 style regex-based match.",
+      "uses": [
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.string-match"
+      ],
+      "order": 3126
+    },
+    {
+      "id": "istio.routing.stringmatch-prefix",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which StringMatch type matches values that begin with the given string?",
+      "back": "`prefix`.",
+      "explanation": "The reference describes it as prefix-based matching; like exact matching, it is case-sensitive.",
+      "source": "Istio docs, Virtual Service reference, “StringMatch”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#StringMatch",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Describes how to match a given string in HTTP headers. exact and prefix matching is case-sensitive. regex matching supports case-insensitive matches. FieldDescription exact string (oneof) exact string match prefix string (oneof) prefix-based match",
+      "uses": [
+        "VirtualService",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.string-match"
+      ],
+      "order": 3133
+    },
+    {
+      "id": "istio.routing.stringmatch-regex",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which StringMatch type takes a regular expression in `RE2` style?",
+      "back": "`regex`.",
+      "explanation": "It is the only StringMatch type that supports case-insensitive matches.",
+      "source": "Istio docs, Virtual Service reference, “StringMatch”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#StringMatch",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "exact and prefix matching is case-sensitive. regex matching supports case-insensitive matches. FieldDescription exact string (oneof) exact string match prefix string (oneof) prefix-based match regex string (oneof) RE2 style regex-based match.",
+      "uses": [
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.string-match"
+      ],
+      "order": 3140
+    },
+    {
+      "id": "istio.routing.rule-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In what order are a VirtualService's routing rules evaluated?",
+      "back": "Top to bottom: the first rule has the highest priority.",
+      "explanation": "A request is matched against the rules in sequence, so an earlier rule wins over a later one.",
+      "source": "Istio docs, Traffic Management (concepts), “Routing rule precedence”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#routing-rule-precedence",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Routing rules are evaluated in sequential order from top to bottom, with the first rule in the virtual service definition being given highest priority.",
+      "uses": [
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.route-order"
+      ],
+      "order": 3147
+    },
+    {
+      "id": "istio.routing.last-rule-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does Istio recommend as the last rule in each VirtualService?",
+      "back": "A default rule with no match condition, or a weight-based rule, so traffic always has a matching route.",
+      "explanation": "This ensures that traffic to the virtual service always has at least one matching route.",
+      "source": "Istio docs, Traffic Management (concepts), “Routing rule precedence”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#routing-rule-precedence",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "We recommend providing a default “no condition” or weight-based rule (described below) like this as the last rule in each virtual service to ensure that traffic to the virtual service always has at least one matching route.",
+      "uses": [
+        "VirtualService",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.default-route"
+      ],
+      "order": 3154
+    },
+    {
+      "id": "istio.routing.short-name-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How does Istio interpret a short host name, such as reviews, in a DestinationRule?",
+      "back": "Relative to the namespace of the rule, not the namespace of the service.",
+      "explanation": "A short name is read in the rule's own namespace, so a rule elsewhere may not refer to the service you meant.",
+      "source": "Istio docs, Destination Rule reference, “DestinationRule”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#DestinationRule",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When short names are used (e.g. “reviews” instead of “reviews.default.svc.cluster.local”), Istio will interpret the short name based on the namespace of the rule, not the service.",
+      "uses": [
+        "DestinationRule",
+        "namespace",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.destinationrule"
+      ],
+      "order": 3161
+    },
+    {
+      "id": "istio.routing.subset-labels",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How is each subset in a DestinationRule defined?",
+      "back": "By one or more labels, which pick out the matching endpoints, such as the Pods of one version.",
+      "explanation": "The labels are applied in the service's Deployment as metadata to identify different versions.",
+      "source": "Istio docs, Traffic Management (concepts), “Destination rule example”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#destination-rule-example",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Each subset is defined based on one or more labels, which in Kubernetes are key/value pairs that are attached to objects such as Pods. These labels are applied in the Kubernetes service’s deployment as metadata to identify different versions.",
+      "uses": [
+        "subset",
+        "DestinationRule",
+        "label",
+        "Pod",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "istio.subset"
+      ],
+      "order": 3168
+    },
+    {
+      "id": "istio.routing.subset-in-route",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which two names does a route rule use to split traffic to a subset?",
+      "back": "The service name and the subset name.",
+      "explanation": "Together they identify one group of a service's endpoints to send traffic to.",
+      "source": "Istio docs, Destination Rule reference, “Subset”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#Subset",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Name of the subset. The service name and the subset name can be used for traffic splitting in a route rule.",
+      "uses": [
+        "subset",
+        "Service"
+      ],
+      "conceptIDs": [
+        "istio.subset"
+      ],
+      "order": 3175
+    },
+    {
+      "id": "istio.routing.subset-policy-waits",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When do traffic policies set on a subset take effect?",
+      "back": "Only once a route rule explicitly sends traffic to that subset.",
+      "explanation": "Defining the subset and its policy is not enough: a route rule must name the subset explicitly.",
+      "source": "Istio docs, Destination Rule reference, “DestinationRule”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#DestinationRule",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note: Policies specified for subsets will not take effect until a route rule explicitly sends traffic to this subset.",
+      "uses": [
+        "subset",
+        "traffic policy"
+      ],
+      "conceptIDs": [
+        "istio.subset",
+        "istio.traffic-policy"
+      ],
+      "order": 3182
+    },
+    {
+      "id": "istio.routing.weight-share",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How much traffic does a route destination with a given weight receive?",
+      "back": "Its weight divided by the sum of all the weights in the rule.",
+      "explanation": "Weight sets a relative proportion of traffic, not an absolute number.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRouteDestination”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRouteDestination",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Weight specifies the relative proportion of traffic to be forwarded to the destination. A destination will receive weight/(sum of all weights) requests.",
+      "uses": [
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.weights-sum"
+      ],
+      "order": 3189
+    },
+    {
+      "id": "istio.routing.single-destination",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A route rule has a single destination and no weight. How much of its traffic does that destination get?",
+      "back": "All of it.",
+      "explanation": "With several destinations, by contrast, one whose weight is 0 receives no traffic.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRouteDestination”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRouteDestination",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If there is only one destination in a rule, it will receive all traffic. Otherwise, if weight is 0, the destination will not receive any traffic.",
+      "uses": [
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.weights-sum"
+      ],
+      "order": 3196
+    },
+    {
+      "id": "istio.routing.migration-steps",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In Istio's traffic shifting task, which two steps move the reviews service from v1 to v3?",
+      "back": "First 50% to v1 and 50% to v3; then 100% to v3.",
+      "explanation": "Each step is a routing rule with new weights, shifting a percentage of traffic from one version to the other.",
+      "source": "Istio docs, Traffic Shifting task, “Traffic Shifting”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/traffic-shifting/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In this task, you will use send 50% of traffic to reviews:v1 and 50% to reviews:v3. Then, you will complete the migration by sending 100% of traffic to reviews:v3.",
+      "uses": [
+        "traffic shifting",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.weighted-routing"
+      ],
+      "order": 3203
+    },
+    {
+      "id": "istio.routing.hundred-requests",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "With the Envoy sidecar, how many requests may be needed before a weighted split can be seen?",
+      "back": "Up to 100.",
+      "explanation": "A few test requests may not show the configured split yet.",
+      "source": "Istio docs, Traffic Management Problems, “Route rules don't seem to affect traffic flow”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#route-rules-dont-seem-to-affect-traffic-flow",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With the current Envoy sidecar implementation, up to 100 requests may be required for weighted version distribution to be observed.",
+      "uses": [
+        "Envoy",
+        "traffic shifting"
+      ],
+      "conceptIDs": [
+        "istio.traffic-shifting"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "order": 3210
+    },
+    {
+      "id": "istio.routing.rewrite-not-redirect",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Can a VirtualService route use a rewrite and a redirect together?",
+      "back": "No: rewrite cannot be used with the redirect primitive.",
+      "explanation": "The reference also notes that a rewrite is performed before forwarding.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRoute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Rewrite HTTP URIs and Authority headers. Rewrite cannot be used with Redirect primitive. Rewrite will be performed before forwarding.",
+      "uses": [
+        "rewrite",
+        "redirect",
+        "VirtualService",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.rewrite",
+        "istio.redirect"
+      ],
+      "order": 3217
+    },
+    {
+      "id": "istio.routing.mirror-percentage",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "If mirrorPercentage is left out, how much of the traffic is mirrored?",
+      "back": "All of it (100%).",
+      "explanation": "The field narrows mirroring to a share of traffic, up to a maximum of 100.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRoute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Percentage of the traffic to be mirrored by the mirror field. If this field is absent, all the traffic (100%) will be mirrored. Max value is 100.",
+      "uses": [
+        "mirroring"
+      ],
+      "conceptIDs": [
+        "istio.mirroring"
+      ],
+      "order": 3224
+    },
+    {
+      "id": "istio.routing.delegation-depth",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "How many levels of VirtualService delegation does Istio support?",
+      "back": "One.",
+      "explanation": "The delegate's match conditions must also be a strict subset of the root's, or the route will not take effect.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRoute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "NOTE: Only one level delegation is supported. The delegate’s HTTPMatchRequest must be a strict subset of the root’s, otherwise there is a conflict and the HTTPRoute will not take effect.",
+      "uses": [
+        "delegate",
+        "VirtualService",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.delegate"
+      ],
+      "order": 3231
+    },
+    {
+      "id": "istio.routing.header-manipulation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Where can a VirtualService's header manipulation rules be applied?",
+      "back": "To a specific route destination or to all destinations, on requests or on responses.",
+      "explanation": "Envoy applies them as it forwards requests to, or responses from, a destination service.",
+      "source": "Istio docs, Virtual Service reference, “Headers”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#Headers",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Message headers can be manipulated when Envoy forwards requests to, or responses from, a destination service. Header manipulation rules can be specified for a specific route destination or for all destinations.",
+      "uses": [
+        "VirtualService",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.headers-manipulation"
+      ],
+      "order": 3238
+    },
+    {
+      "id": "istio.routing.default-lb",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which load balancing policy does Istio use by default?",
+      "back": "Least requests: requests go to the instances with the fewest requests.",
+      "explanation": "Other models can be set in a DestinationRule for a service or a subset.",
+      "source": "Istio docs, Traffic Management (concepts), “Load balancing options”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#load-balancing-options",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, Istio uses a least requests load balancing policy, where requests are distributed among the instances with the least number of requests.",
+      "uses": [
+        "Istio",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "istio.lb-options"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "order": 3245
+    },
+    {
+      "id": "istio.routing.lb-random",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Istio load balancing model forwards each request to an instance picked at random?",
+      "back": "Random.",
+      "explanation": "It is one of the models you can set in a DestinationRule instead of the default.",
+      "source": "Istio docs, Traffic Management (concepts), “Load balancing options”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#load-balancing-options",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Random: Requests are forwarded at random to instances in the pool.",
+      "uses": [
+        "load balancer",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.lb-options"
+      ],
+      "order": 3252
+    },
+    {
+      "id": "istio.routing.lb-round-robin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Istio load balancing model forwards requests to each instance in turn?",
+      "back": "Round robin.",
+      "explanation": "It is one of the models you can set in a DestinationRule instead of the default.",
+      "source": "Istio docs, Traffic Management (concepts), “Load balancing options”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#load-balancing-options",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Round robin: Requests are forwarded to each instance in sequence.",
+      "uses": [
+        "load balancer",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.lb-options"
+      ],
+      "order": 3259
+    },
+    {
+      "id": "istio.routing.subset-inherits",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How do a subset's traffic policies relate to the DestinationRule's top-level policies?",
+      "back": "The subset inherits the top-level policies; any setting given on the subset overrides the matching one.",
+      "explanation": "This lets one version use, say, a different load balancer while sharing the rest.",
+      "source": "Istio docs, Destination Rule reference, “Subset”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#Subset",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Subsets inherit the traffic policies specified at the DestinationRule level. Settings specified at the subset level will override the corresponding settings specified at the DestinationRule level.",
+      "uses": [
+        "subset",
+        "traffic policy",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.dr-subset-policy-override"
+      ],
+      "order": 3266
+    },
+    {
+      "id": "istio.routing.port-level-override",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What happens to destination-level traffic settings on a port that has its own port-level policy?",
+      "back": "Port-level settings override them and they are not inherited: fields left out get default values.",
+      "explanation": "Unlike a subset, a port-level policy does not pick up omitted fields from the destination level.",
+      "source": "Istio docs, Destination Rule reference, “TrafficPolicy”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#TrafficPolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note that port level settings will override the destination-level settings. Traffic settings specified at the destination-level will not be inherited when overridden by port-level settings, i.e. default values will be applied to fields omitted in port-level traffic policies.",
+      "uses": [
+        "traffic policy",
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.port-traffic-policy"
+      ],
+      "order": 3273
+    },
+    {
+      "id": "istio.routing.tls-disable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which DestinationRule `TLS` mode sets up no `TLS` connection to the upstream endpoint?",
+      "back": "`DISABLE`.",
+      "explanation": "It is one of four client `TLS` modes, with `SIMPLE`, `MUTUAL` and `ISTIO_MUTUAL`.",
+      "source": "Istio docs, Destination Rule reference, “TLSmode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#ClientTLSSettings-TLSmode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "DISABLE Do not setup a TLS connection to the upstream endpoint. SIMPLE Originate a TLS connection to the upstream endpoint.",
+      "uses": [
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.client-tls-modes"
+      ],
+      "order": 3280
+    },
+    {
+      "id": "istio.routing.tls-simple",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which DestinationRule `TLS` mode originates a `TLS` connection to the upstream endpoint without mutual authentication?",
+      "back": "`SIMPLE`.",
+      "explanation": "The two mutual modes, by contrast, also present client certificates for authentication.",
+      "source": "Istio docs, Destination Rule reference, “TLSmode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#ClientTLSSettings-TLSmode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "SIMPLE Originate a TLS connection to the upstream endpoint. MUTUAL Secure connections to the upstream using mutual TLS by presenting client certificates for authentication.",
+      "uses": [
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.client-tls-modes"
+      ],
+      "order": 3287
+    },
+    {
+      "id": "istio.routing.tls-istio-mutual",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which DestinationRule `TLS` mode uses certificates that Istio generates automatically for mTLS?",
+      "back": "`ISTIO_MUTUAL`.",
+      "explanation": "Like `MUTUAL`, it presents client certificates, but it uses Istio's own automatically generated ones.",
+      "source": "Istio docs, Destination Rule reference, “TLSmode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#ClientTLSSettings-TLSmode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "ISTIO_MUTUAL Secure connections to the upstream using mutual TLS by presenting client certificates for authentication. Compared to Mutual mode, this mode uses certificates generated automatically by Istio for mTLS authentication.",
+      "uses": [
+        "DestinationRule",
+        "mtls",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.client-tls-modes"
+      ],
+      "order": 3294
+    },
+    {
+      "id": "istio.routing.gateway-api-mesh",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How do you use the Gateway API for mesh traffic, rather than traffic through a gateway?",
+      "back": "Point the route's parentRef at a Service instead of a gateway.",
+      "explanation": "The same route resource then configures calls to that in-cluster Service.",
+      "source": "Istio docs, Kubernetes Gateway API task, “Mesh Traffic”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/#mesh-traffic",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Gateway API can also be used to configure mesh traffic. This is done by configuring the parentRef to point to a service, instead of a gateway.",
+      "uses": [
+        "Gateway API",
+        "Service",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "istio.gateway-api-mesh"
+      ],
+      "order": 3301
+    },
+    {
+      "id": "istio.routing.ambient-needs-waypoint",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In ambient mode, what does the full Istio traffic management feature set require?",
+      "back": "A waypoint proxy.",
+      "explanation": "Sidecar mode has the full feature set directly; ambient mode reaches it through a waypoint.",
+      "source": "Istio docs, Sidecar or ambient?, “Choosing between sidecar and ambient”",
+      "sourceURL": "https://istio.io/latest/docs/overview/dataplane-modes/#choosing-between-sidecar-and-ambient",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Full Istio feature set (requires using waypoint)",
+      "uses": [
+        "ambient mode",
+        "waypoint proxy",
+        "sidecar mode",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.waypoint-routing"
+      ],
+      "order": 3308
+    },
+    {
+      "id": "istio.routing.ab-test-resource",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Your team wants 10% of requests to reach a new checkout version for an A/B test, without clients changing the address they call. What sets the percentages?",
+      "back": "A: a VirtualService with weighted routes.",
+      "explanation": "The docs give A/B testing by percentages across service versions as a use of virtual services.",
+      "source": "Istio docs, Traffic Management (concepts), “Why use virtual services?”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#why-use-virtual-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This can be useful in A/B testing, where you might want to configure traffic routes based on percentages across different service versions",
+      "uses": [
+        "VirtualService",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.vs-why",
+        "istio.virtualservice"
+      ],
+      "choices": "A) A VirtualService with weighted routes\nB) Nothing: Envoy's default balancing already splits traffic by version\nC) A DestinationRule that only sets a load balancer",
+      "choicesExplained": "B: by default Envoy balances by least requests across all instances, ignoring versions. C: a DestinationRule configures what happens after routing; the shares come from route weights.",
+      "order": 3315
+    },
+    {
+      "id": "istio.routing.unknown-destination",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A VirtualService has hosts: shop.example.internal and routes to destination host payments-v9, which no Service or service entry defines. What is the problem?",
+      "back": "B: the destination host is not in the service registry, so Envoy won't know where to send the traffic.",
+      "explanation": "A route's destination must be a real destination in Istio's service registry.",
+      "source": "Istio docs, Traffic Management (concepts), “Destination”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#destination",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the destination’s host must be a real destination that exists in Istio’s service registry or Envoy won’t know where to send traffic to it.",
+      "uses": [
+        "VirtualService",
+        "Service",
+        "Envoy",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "istio.vs-hosts"
+      ],
+      "choices": "A) The hosts field must name a Kubernetes Service\nB) The destination host is not in the service registry\nC) Nothing: the hosts field is enough",
+      "choicesExplained": "A: hosts are user-addressable names and can be a DNS name. C: the hosts are what clients call; the destination must still exist.",
+      "order": 3322
+    },
+    {
+      "id": "istio.routing.gateways-without-mesh",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A VirtualService for reviews lists only an edge gateway in its gateways field. Calls to reviews from other Pods in the mesh ignore its rules. Why?",
+      "back": "A: once gateways are listed, the rules apply only to them unless mesh is listed too.",
+      "explanation": "To apply the rules to both gateways and sidecars, list mesh as one of the gateway names.",
+      "source": "Istio docs, Virtual Service reference, “VirtualService”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#VirtualService",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If a list of gateway names is provided, the rules will apply only to the gateways. To apply the rules to both gateways and sidecars, specify mesh as one of the gateway names.",
+      "uses": [
+        "VirtualService",
+        "Pod",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "istio.vs-gateways-field"
+      ],
+      "choices": "A) A listed gateway limits the rules to that gateway; mesh must be listed as well\nB) VirtualServices never apply to sidecars\nC) The hosts field must be empty for in-mesh calls",
+      "choicesExplained": "B: with the field omitted, mesh is the default and the rules apply to all sidecars. C: an empty hosts field is required of a delegate VirtualService, not of in-mesh routing.",
+      "order": 3329
+    },
+    {
+      "id": "istio.routing.which-request-matches",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A rule has two match blocks. Block 1: path prefix `/api` and header `x-beta: on`. Block 2: path prefix `/beta`. Which request matches the rule?",
+      "back": "B: `/beta/home` matches block 2 on its own.",
+      "explanation": "Conditions in one block must all hold, but any one block is enough for the rule to match.",
+      "source": "Istio docs, Virtual Service reference, “HTTPMatchRequest”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "All conditions inside a single match block have AND semantics, while the list of match blocks have OR semantics. The rule is matched if any one of the match blocks succeed.",
+      "uses": [
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.http-match"
+      ],
+      "choices": "A) `/api/cart` with no `x-beta` header\nB) `/beta/home` with no `x-beta` header\nC) `/shop` with `x-beta: on`",
+      "choicesExplained": "A: block 1 also needs the header, and the path does not fit block 2. C: its path fits neither block.",
+      "order": 3336
+    },
+    {
+      "id": "istio.routing.case-insensitive-header",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "One condition must match a header value sent as beta, Beta or BETA. Which StringMatch type can do it?",
+      "back": "C: `regex`.",
+      "explanation": "Exact and prefix matching are case-sensitive; regex matching supports case-insensitive matches.",
+      "source": "Istio docs, Virtual Service reference, “StringMatch”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#StringMatch",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "exact and prefix matching is case-sensitive. regex matching supports case-insensitive matches.",
+      "uses": [
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.string-match"
+      ],
+      "choices": "A) `exact`\nB) `prefix`\nC) `regex`",
+      "choicesExplained": "A and B are case-sensitive, so one value cannot cover all three spellings.",
+      "order": 3343
+    },
+    {
+      "id": "istio.routing.catch-all-first",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Rule 1 of a VirtualService sends all inventory traffic to v1, with no match condition. Rule 2, below it, sends requests with header `x-team: qa` to v2. Where does a request with that header go?",
+      "back": "A: to v1, because rule 1 matches every request and is evaluated first.",
+      "explanation": "Rules are evaluated from top to bottom and the first rule has the highest priority.",
+      "source": "Istio docs, Traffic Management (concepts), “Routing rule precedence”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#routing-rule-precedence",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Routing rules are evaluated in sequential order from top to bottom, with the first rule in the virtual service definition being given highest priority.",
+      "uses": [
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.route-order"
+      ],
+      "choices": "A) To v1\nB) To v2\nC) To both v1 and v2",
+      "choicesExplained": "B would need the header rule placed above the catch-all. C: the first rule that matches is the one used.",
+      "order": 3350
+    },
+    {
+      "id": "istio.routing.add-default-route",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A VirtualService has one rule: requests with header `x-canary: yes` go to v2. Which change ensures every request to it has a matching route?",
+      "back": "A: add a final rule with no match condition that routes to v1.",
+      "explanation": "Istio recommends a default no-condition rule as the last rule, so traffic always has at least one matching route.",
+      "source": "Istio docs, Traffic Management (concepts), “Routing rule precedence”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#routing-rule-precedence",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "We recommend providing a default “no condition” or weight-based rule (described below) like this as the last rule in each virtual service to ensure that traffic to the virtual service always has at least one matching route.",
+      "uses": [
+        "VirtualService",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.default-route",
+        "istio.route-order"
+      ],
+      "choices": "A) Add a final rule with no match condition that routes to v1\nB) Add a no-condition rule above the canary rule\nC) Add a second match block to the canary rule",
+      "choicesExplained": "B: the first rule has the highest priority, so a catch-all at the top would take the canary requests too. C: the rule would still match only some requests.",
+      "order": 3357
+    },
+    {
+      "id": "istio.routing.short-name-wrong-namespace",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A DestinationRule in namespace team-a has host: ratings, meant for the ratings Service in namespace team-b. Its policies never apply to that Service. Why?",
+      "back": "A: the short name is interpreted in team-a, the rule's own namespace.",
+      "explanation": "Istio reads a short host name in the namespace of the rule, not the service.",
+      "source": "Istio docs, Destination Rule reference, “DestinationRule”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#DestinationRule",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When short names are used (e.g. “reviews” instead of “reviews.default.svc.cluster.local”), Istio will interpret the short name based on the namespace of the rule, not the service.",
+      "uses": [
+        "DestinationRule",
+        "namespace",
+        "Service",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.destinationrule"
+      ],
+      "choices": "A) The short name is interpreted in team-a\nB) A DestinationRule host must be an address, not a name\nC) A DestinationRule needs at least one subset to apply",
+      "choicesExplained": "B: names from the service registry are what the host field takes. C: top-level policies apply without subsets; the host is the problem here.",
+      "order": 3364
+    },
+    {
+      "id": "istio.routing.where-subset-defined",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A VirtualService routes to host ratings, subset canary, but nothing defines a subset named canary. Where do you define it?",
+      "back": "A: in a DestinationRule for ratings, with labels that select the canary Pods.",
+      "explanation": "Destination rules specify named service subsets, which the routing rules of virtual services then use.",
+      "source": "Istio docs, Traffic Management (concepts), “Destination rules”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#destination-rules",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In particular, you use destination rules to specify named service subsets, such as grouping all a given service’s instances by version. You can then use these service subsets in the routing rules of virtual services to control the traffic",
+      "uses": [
+        "subset",
+        "VirtualService",
+        "DestinationRule",
+        "label",
+        "Pod",
+        "Service"
+      ],
+      "conceptIDs": [
+        "istio.subset",
+        "istio.route-to-version"
+      ],
+      "choices": "A) In a DestinationRule for ratings, with labels selecting the canary Pods\nB) In the VirtualService's match block\nC) In the ports of the Kubernetes Service",
+      "choicesExplained": "B: match blocks select requests, not endpoints. C: a Service's ports do not name subsets; destination rules do.",
+      "order": 3371
+    },
+    {
+      "id": "istio.routing.route-one-version",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "You will send all traffic for the inventory service to its v1 subset only. What must be done before applying that route rule?",
+      "back": "Define the service versions (the subsets) that the rule refers to.",
+      "explanation": "Istio's routing task sends traffic to a default version, and first asks you to define the service versions.",
+      "source": "Istio docs, Request Routing task, “Route to version 1”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/request-routing/#route-to-version-1",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To route to one version only, you configure route rules that send traffic to default versions for the microservices. If you haven’t already, follow the instructions in define the service versions.",
+      "uses": [
+        "subset",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.route-to-version"
+      ],
+      "order": 3378
+    },
+    {
+      "id": "istio.routing.header-based-route",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Mobile clients send the header `x-client: mobile`. Only they should reach subset v2 of the api service; everyone else goes to v1. Which rule order works?",
+      "back": "A: a header-match rule to v2 first, then a no-condition rule to v1.",
+      "explanation": "Istio can route all traffic from a particular client to one version by matching a header; the catch-all must come last.",
+      "source": "Istio docs, Request Routing task, “Route based on user identity”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/request-routing/#route-based-on-user-identity",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Next, you will change the route configuration so that all traffic from a specific user is routed to a specific service version.",
+      "uses": [
+        "subset",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.route-by-header",
+        "istio.route-order"
+      ],
+      "choices": "A) Rule 1: header `x-client` exact mobile to v2; rule 2: no condition to v1\nB) Rule 1: no condition to v1; rule 2: header match to v2\nC) One rule with v1 and v2 weighted 50/50",
+      "choicesExplained": "B: the first rule catches every request, so the header rule is never reached. C: weights split by percentage, not by who sends the request.",
+      "order": 3385
+    },
+    {
+      "id": "istio.routing.weight-arithmetic",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A route lists v1 with weight 3 and v2 with weight 1. What share of requests goes to v2?",
+      "back": "A: 25%.",
+      "explanation": "Each destination gets its weight divided by the sum of all weights: 1 of 4.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRouteDestination”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRouteDestination",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Weight specifies the relative proportion of traffic to be forwarded to the destination. A destination will receive weight/(sum of all weights) requests.",
+      "uses": [
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.weights-sum"
+      ],
+      "choices": "A) 25%\nB) 33%\nC) 1%",
+      "choicesExplained": "B divides by 3, but the weights sum to 4. C treats the weight as a percentage, but weights are relative.",
+      "order": 3392
+    },
+    {
+      "id": "istio.routing.what-changes-per-step",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "You move payments from v1 to v2 in steps: 90/10, then 50/50, then all to v2. What do you change at each step?",
+      "back": "A: the weights on the VirtualService route.",
+      "explanation": "Traffic shifting is a sequence of routing rules that move a percentage of traffic from one destination to another.",
+      "source": "Istio docs, Traffic Shifting task, “Traffic Shifting”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/traffic-shifting/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In Istio, you accomplish this goal by configuring a sequence of routing rules that redirect a percentage of traffic from one destination to another.",
+      "uses": [
+        "traffic shifting",
+        "VirtualService",
+        "Deployment",
+        "subset",
+        "label"
+      ],
+      "conceptIDs": [
+        "istio.weighted-routing",
+        "istio.traffic-shifting"
+      ],
+      "choices": "A) The weights on the VirtualService route\nB) The replica counts of the two Deployments\nC) The subset labels in the DestinationRule",
+      "choicesExplained": "B: scaling instances is how orchestration platforms manage traffic; with Istio the split is set by routing. C: labels pick which Pods form each version; the shares come from the weights.",
+      "order": 3399
+    },
+    {
+      "id": "istio.routing.rewrite-or-redirect",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "Callers keep using the old path `/v1/list`, and the service should receive `/v2/list` without callers being sent anywhere else. Rewrite or redirect?",
+      "back": "A: rewrite.",
+      "explanation": "A rewrite changes the request before forwarding it; a redirect sends the caller a 301 to a different path instead.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRewrite”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRewrite",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "HTTPRewrite can be used to rewrite specific parts of a HTTP request before forwarding the request to the destination.",
+      "uses": [
+        "rewrite",
+        "redirect",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.rewrite",
+        "istio.redirect"
+      ],
+      "choices": "A) Rewrite\nB) Redirect",
+      "choicesExplained": "B answers the caller with a 301 and the new path, so the caller is sent to the new path.",
+      "order": 3406
+    },
+    {
+      "id": "istio.routing.retired-endpoint",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "extra",
+      "front": "A retired endpoint should answer every caller with a fixed status and a short message, without reaching any service. Which rule action fits?",
+      "back": "A: a direct response.",
+      "explanation": "A direct response sends a fixed response to clients; it can be set only when the rule has no route and no redirect.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRoute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Direct Response is used to specify a fixed response that should be sent to clients. It can be set only when Route and Redirect are empty.",
+      "uses": [
+        "direct response",
+        "redirect",
+        "mirroring"
+      ],
+      "conceptIDs": [
+        "istio.direct-response"
+      ],
+      "choices": "A) A direct response\nB) A redirect\nC) Mirroring",
+      "choicesExplained": "B sends the caller a 301 to another path or authority. C copies traffic while still forwarding it to the intended destination.",
+      "order": 3413
+    },
+    {
+      "id": "istio.routing.test-with-copies",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A new v2 should receive copies of live requests for testing, while users keep getting v1's answers. What do you configure?",
+      "back": "A: mirroring to v2 on the route to v1.",
+      "explanation": "Mirrored traffic goes to another destination in addition to the intended one, and the response comes from the original destination.",
+      "source": "Istio docs, Virtual Service reference, “HTTPRoute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Mirror HTTP traffic to a another destination in addition to forwarding the requests to the intended destination.",
+      "uses": [
+        "mirroring",
+        "redirect"
+      ],
+      "conceptIDs": [
+        "istio.mirroring"
+      ],
+      "choices": "A) Mirroring to v2 on the route to v1\nB) Weights of 50 for v1 and 50 for v2\nC) A redirect to v2",
+      "choicesExplained": "B sends half of the real requests, and their answers, to v2. C sends callers to v2 with a 301.",
+      "order": 3420
+    },
+    {
+      "id": "istio.routing.sticky-cart",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A cart service works best when each shopper's requests keep reaching the same instance, keyed on a cookie. Which load balancer setting fits?",
+      "back": "A: `consistentHash` with `httpCookie`.",
+      "explanation": "Consistent hash gives soft session affinity based on headers, cookies or other properties.",
+      "source": "Istio docs, Destination Rule reference, “ConsistentHashLB”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#LoadBalancerSettings-ConsistentHashLB",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Consistent Hash-based load balancing can be used to provide soft session affinity based on HTTP headers, cookies or other properties.",
+      "uses": [
+        "consistent hash",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "istio.lb-options",
+        "istio.consistent-hash"
+      ],
+      "choices": "A) `consistentHash` with `httpCookie`\nB) `simple: ROUND_ROBIN`\nC) `simple: RANDOM`",
+      "choicesExplained": "B sends requests to each instance in turn, and C picks one at random: neither keeps a shopper on one instance.",
+      "order": 3427
+    },
+    {
+      "id": "istio.routing.which-policy-applies",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A DestinationRule sets `loadBalancer.simple: RANDOM` at top level. Subset v2 sets `ROUND_ROBIN`; subset v1 sets nothing. What does each subset use?",
+      "back": "A: v1 uses random; v2 uses round robin.",
+      "explanation": "Subsets inherit the top-level traffic policy, and subset-level settings override it.",
+      "source": "Istio docs, Destination Rule reference, “Subset”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#Subset",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Subsets inherit the traffic policies specified at the DestinationRule level. Settings specified at the subset level will override the corresponding settings specified at the DestinationRule level.",
+      "uses": [
+        "subset",
+        "traffic policy",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.dr-subset-policy-override",
+        "istio.traffic-policy"
+      ],
+      "choices": "A) v1 random, v2 round robin\nB) Both random\nC) v1 the default least requests, v2 round robin",
+      "choicesExplained": "B ignores that subset settings override the top level. C ignores that subsets inherit the top-level policy.",
+      "order": 3434
+    },
+    {
+      "id": "istio.routing.dr-503-tls",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Automatic mutual `TLS` was disabled at install, and mutual `TLS` is on mesh-wide. Right after you apply a DestinationRule with only a load balancer setting, calls to the service get HTTP 503 until you remove it. Likely cause?",
+      "back": "A: the rule's `TLS` mode defaults to `DISABLE`, so sidecars send plain HTTP.",
+      "explanation": "With mutual `TLS` on globally, the DestinationRule must set `tls: mode: ISTIO_MUTUAL` in its traffic policy.",
+      "source": "Istio docs, Traffic Management Problems, “503 errors after setting destination rule”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#503-errors-after-setting-destination-rule",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "if you configure mutual TLS in the cluster globally, the DestinationRule must include the following trafficPolicy: trafficPolicy: tls: mode: ISTIO_MUTUAL Otherwise, the mode defaults to DISABLE causing client proxy sidecars to make plain HTTP requests instead of TLS encrypted requests.",
+      "uses": [
+        "DestinationRule",
+        "traffic policy",
+        "load balancer",
+        "mtls",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.client-tls-modes",
+        "istio.destinationrule"
+      ],
+      "choices": "A) The rule's `TLS` mode defaults to `DISABLE`\nB) The VirtualService rules are in the wrong order\nC) The subset labels select no Pods",
+      "choicesExplained": "B and C: the errors start when the DestinationRule is applied and stop when it is removed, which the docs tie to a `TLS` conflict.",
+      "order": 3441
+    },
+    {
+      "id": "istio.routing.gateway-api-parentref",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "An HTTPRoute should add a header to every in-cluster call to the Service orders. What should its parentRefs name?",
+      "back": "A: the Service orders.",
+      "explanation": "For mesh traffic, the Gateway API route's parentRef points to a service instead of a gateway.",
+      "source": "Istio docs, Kubernetes Gateway API task, “Mesh Traffic”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/#mesh-traffic",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This is done by configuring the parentRef to point to a service, instead of a gateway.",
+      "uses": [
+        "Gateway API",
+        "Service",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "istio.gateway-api-mesh"
+      ],
+      "choices": "A) The Service orders\nB) The cluster's ingress gateway\nC) The orders Deployment",
+      "choicesExplained": "B attaches the route to a gateway rather than to mesh calls to the Service. C: the parentRef for mesh traffic is a service, not a Deployment.",
+      "order": 3448
+    },
+    {
+      "id": "istio.routing.ambient-header-routing",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A namespace in ambient mode needs per-request, header-based routing for one service. What must be in place?",
+      "back": "A: a waypoint proxy for that traffic.",
+      "explanation": "Applications in ambient mode opt in to routing through an Envoy proxy, the waypoint, to get layer 7 features.",
+      "source": "Istio docs, Sidecar or ambient?, “Choosing between sidecar and ambient”",
+      "sourceURL": "https://istio.io/latest/docs/overview/dataplane-modes/#choosing-between-sidecar-and-ambient",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Applications can opt in to routing through an Envoy proxy to get Layer 7 features",
+      "uses": [
+        "ambient mode",
+        "waypoint proxy",
+        "Envoy",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.waypoint-routing"
+      ],
+      "choices": "A) A waypoint proxy\nB) Nothing beyond ambient mode itself",
+      "choicesExplained": "B: in ambient mode, the full traffic management feature set requires using a waypoint.",
+      "order": 3455
+    },
+    {
+      "id": "istio.routing.mutual-vs-istio-mutual",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How do the `MUTUAL` and `ISTIO_MUTUAL` `TLS` modes differ?",
+      "back": "Both use mutual `TLS` with client certificates; `ISTIO_MUTUAL` uses certificates Istio generates automatically.",
+      "explanation": "The reference describes `ISTIO_MUTUAL` by comparing it with `MUTUAL` mode.",
+      "source": "Istio docs, Destination Rule reference, “TLSmode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#ClientTLSSettings-TLSmode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "MUTUAL Secure connections to the upstream using mutual TLS by presenting client certificates for authentication. ISTIO_MUTUAL Secure connections to the upstream using mutual TLS by presenting client certificates for authentication. Compared to Mutual mode, this mode uses certificates generated automatically by Istio for mTLS authentication.",
+      "uses": [
+        "Istio",
+        "mtls"
+      ],
+      "conceptIDs": [
+        "istio.client-tls-modes"
+      ],
+      "order": 3462
+    },
+    {
+      "id": "istio.routing.least-request-vs-round-robin",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Which does the DestinationRule reference prefer, `ROUND_ROBIN` or `LEAST_REQUEST`?",
+      "back": "`LEAST_REQUEST`: it is generally safer and outperforms round robin in nearly all cases.",
+      "explanation": "Round robin can overburden endpoints in many scenarios, for example when endpoint weighting is used.",
+      "source": "Istio docs, Destination Rule reference, “SimpleLB”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#LoadBalancerSettings-SimpleLB",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This is generally unsafe for many scenarios (e.g. when endpoint weighting is used) as it can overburden endpoints. In general, prefer to use LEAST_REQUEST as a drop-in replacement for ROUND_ROBIN. LEAST_REQUEST The least request load balancer spreads load across endpoints, favoring endpoints with the least outstanding requests. This is generally safer and outperforms ROUND_ROBIN in nearly all cases.",
+      "uses": [
+        "DestinationRule",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "istio.lb-options"
+      ],
+      "order": 3469
+    },
+    {
+      "id": "istio.routing.hash-vs-sticky",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "front": "How does consistent hashing compare with common sticky-session implementations at keeping affinity?",
+      "back": "It is less reliable at maintaining affinity.",
+      "explanation": "Sticky-session implementations often encode a specific destination in a cookie.",
+      "source": "Istio docs, Destination Rule reference, “ConsistentHashLB”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#LoadBalancerSettings-ConsistentHashLB",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note: consistent hashing is less reliable at maintaining affinity than common “sticky sessions” implementations, which often encode a specific destination in a cookie",
+      "uses": [
+        "consistent hash"
+      ],
+      "conceptIDs": [
+        "istio.consistent-hash"
+      ],
+      "order": 3476
+    },
+    {
+      "id": "istio.routing.istio-vs-scaling",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does Istio's weighted routing differ from version migration using a container platform's deployment features?",
+      "back": "The platform uses instance scaling to manage traffic; with Istio, versions scale independently without changing the split.",
+      "explanation": "Istio's weights set the traffic distribution, so scaling either version up or down leaves it unchanged.",
+      "source": "Istio docs, Traffic Shifting task, “Understanding what happened”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/traffic-shifting/#understanding-what-happened",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note that this is very different than doing version migration using the deployment features of container orchestration platforms, which use instance scaling to manage the traffic. With Istio, you can allow the two versions of the reviews service to scale up and down independently, without affecting the traffic distribution between them.",
+      "uses": [
+        "traffic shifting",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.traffic-shifting"
+      ],
+      "order": 3483
+    },
+    {
+      "id": "istio.routing.tcp-vs-tls-routes",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "front": "How does a VirtualService's `tls` route section differ from its `tcp` section?",
+      "back": "`tls` routes unterminated `TLS` traffic, for example by `SNI`; `tcp` routes opaque `TCP` traffic on ports that are not HTTP or `TLS` ports.",
+      "explanation": "The reference's `tls` example forwards unterminated traffic on port 443 to mesh services based on the `SNI` value.",
+      "source": "Istio docs, Virtual Service reference, “TLSRoute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#TLSRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Describes match conditions and actions for routing unterminated TLS traffic (TLS/HTTPS) The following routing rule forwards unterminated TLS traffic arriving at port 443 of gateway called “mygateway” to internal services in the mesh based on the SNI value.",
+      "uses": [
+        "VirtualService",
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.tcp-tls-routes"
+      ],
+      "order": 3490
+    }
+  ]
+}

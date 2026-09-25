@@ -1,0 +1,1110 @@
+{
+  "topic": "Sandboxes and Pod-to-Pod encryption",
+  "notes": [
+    {
+      "id": "cks.sandboxes-encryption.runtimeclass-handler",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7000,
+      "front": "What is a RuntimeClass handler?",
+      "back": "The name of a runtime configuration set up in the node's CRI implementation, which a RuntimeClass refers to.",
+      "explanation": "A RuntimeClass has only two significant fields, its name and its handler, so the handler is what links it to the node's setup.",
+      "example": "Like a named printer queue on a print server: the document only names the queue, and the server must already have it set up.",
+      "introduces": [
+        "RuntimeClass handler"
+      ],
+      "source": "Kubernetes documentation, “Runtime Class”, “2. Create the corresponding RuntimeClass resources”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/runtime-class/#2-create-the-corresponding-runtimeclass-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The configurations setup in step 1 should each have an associated handler name, which identifies the configuration. For each handler, create a corresponding RuntimeClass object.",
+      "uses": [
+        "RuntimeClass handler",
+        "RuntimeClass",
+        "CRI",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.runtimeclass-handler"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.runsc",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7005,
+      "front": "What is `runsc`?",
+      "back": "gVisor's OCI runtime, which lets existing container tooling such as Docker and Kubernetes run sandboxed containers.",
+      "explanation": "Because it implements the OCI runtime specification, it can run OCI-compatible filesystem bundles.",
+      "example": "Like the usual program a container engine calls to start a container, but this one starts it inside gVisor's sandbox.",
+      "introduces": [
+        "runsc"
+      ],
+      "source": "gVisor documentation, “What is gVisor?”, “What is runsc?”",
+      "sourceURL": "https://gvisor.dev/docs/#what-is-runsc",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "gVisor includes an Open Container Initiative (OCI) runtime called runsc that makes it easy to work with existing container tooling.",
+      "uses": [
+        "runsc",
+        "gVisor",
+        "container runtime",
+        "sandboxed runtime"
+      ],
+      "conceptIDs": [
+        "cks.runsc"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.sentry",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7010,
+      "front": "In gVisor, what is the Sentry?",
+      "back": "The application kernel that runs the containers and intercepts and responds to their system calls.",
+      "explanation": "It is gVisor's largest component and implements the kernel functions the application needs.",
+      "example": "Like a receptionist who answers every request at the front desk so visitors never talk to the building manager directly.",
+      "introduces": [
+        "Sentry"
+      ],
+      "source": "gVisor documentation, “What is gVisor?”, “Sentry”",
+      "sourceURL": "https://gvisor.dev/docs/#sentry",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Sentry, which is a kernel that runs the containers and intercepts and responds to system calls made by the application.",
+      "uses": [
+        "Sentry",
+        "gVisor",
+        "system call",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cks.gvisor-sentry"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.gofer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7015,
+      "front": "In gVisor, what is the Gofer?",
+      "back": "A host process, one per container, that provides file system access to the container.",
+      "explanation": "It talks to the Sentry over the 9P protocol and mediates all access to file system resources.",
+      "example": "Like a clerk who fetches files from the archive room for someone who is not allowed in there.",
+      "introduces": [
+        "Gofer"
+      ],
+      "source": "gVisor documentation, “What is gVisor?”, “Gofer”",
+      "sourceURL": "https://gvisor.dev/docs/#gofer",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Gofer is a standard host process which is started with each container and communicates with the Sentry via the 9P protocol over a socket or shared memory channel.",
+      "uses": [
+        "Gofer",
+        "Sentry",
+        "gVisor",
+        "host"
+      ],
+      "conceptIDs": [
+        "cks.gvisor-gofer"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.transparent-encryption",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7020,
+      "front": "In Cilium, what is transparent encryption with WireGuard?",
+      "back": "Cilium encrypts traffic between the endpoints it manages, using WireGuard tunnels between the cluster's nodes.",
+      "explanation": "The Cilium agent on each node sets up a WireGuard tunnel to every other known node in the cluster.",
+      "example": "Like a secure courier van between branch offices: staff hand over letters as usual, and the van keeps them sealed in transit.",
+      "introduces": [
+        "transparent encryption"
+      ],
+      "source": "Cilium documentation, “WireGuard Transparent Encryption”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/encryption-wireguard/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When WireGuard is enabled in Cilium, the agent running on each cluster node will establish a secure WireGuard tunnel between it and all other known nodes in the cluster.",
+      "uses": [
+        "transparent encryption",
+        "encryption in cluster network",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.cilium-transparent-encryption"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.peerauthentication",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7025,
+      "front": "What does an Istio PeerAuthentication policy specify?",
+      "back": "The mutual TLS mode Istio enforces on the target workloads.",
+      "explanation": "Peer authentication is Istio's service-to-service authentication, verifying the client that makes the connection.",
+      "example": "Like a building rule that says whether visitors must show a pass at the door, applied to one floor or the whole building.",
+      "introduces": [
+        "PeerAuthentication"
+      ],
+      "source": "Istio documentation, “Security”, “Peer authentication”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#peer-authentication",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Peer authentication policies specify the mutual TLS mode Istio enforces on target workloads.",
+      "uses": [
+        "PeerAuthentication",
+        "Istio",
+        "mtls",
+        "workload"
+      ],
+      "conceptIDs": [
+        "cks.peer-authentication"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.permissive-mode",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7030,
+      "front": "In Istio, what does PERMISSIVE mode accept?",
+      "back": "Both mutual TLS and plain-text traffic.",
+      "explanation": "Istio says it is most useful during migrations, when workloads without a sidecar cannot yet use mutual TLS.",
+      "example": "Like a shop that takes both card and cash while it moves to card-only.",
+      "introduces": [
+        "PERMISSIVE mode"
+      ],
+      "source": "Istio documentation, “Security”, “Peer authentication”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#peer-authentication",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "PERMISSIVE: Workloads accept both mutual TLS and plain text traffic. This mode is most useful during migrations when workloads without sidecar cannot use mutual TLS.",
+      "uses": [
+        "PERMISSIVE mode",
+        "PeerAuthentication",
+        "mtls",
+        "sidecar container"
+      ],
+      "conceptIDs": [
+        "cks.istio-permissive"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.strict-mode",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7035,
+      "front": "In Istio, what does STRICT mode accept?",
+      "back": "Only mutual TLS traffic.",
+      "explanation": "Istio advises switching to it once workloads have been migrated with sidecar injection.",
+      "example": "Like the same shop once it has gone card-only.",
+      "introduces": [
+        "STRICT mode"
+      ],
+      "source": "Istio documentation, “Security”, “Peer authentication”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#peer-authentication",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Once workloads are migrated with sidecar injection, you should switch the mode to STRICT. STRICT: Workloads only accept mutual TLS traffic.",
+      "uses": [
+        "STRICT mode",
+        "PeerAuthentication",
+        "mtls"
+      ],
+      "conceptIDs": [
+        "cks.istio-strict",
+        "cks.istio-mtls",
+        "cks.peer-authentication"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.authorizationpolicy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7040,
+      "front": "What is Istio's AuthorizationPolicy?",
+      "back": "The single custom resource Istio uses for access control, made of a selector, an action and a list of rules.",
+      "explanation": "It is enforced on inbound traffic in the server-side Envoy proxy.",
+      "example": "Like a guest list at a venue door that says who may enter which room, checked by the doorman at each room.",
+      "introduces": [
+        "AuthorizationPolicy"
+      ],
+      "source": "Istio documentation, “Security”, “Authorization policies”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#authorization-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "An authorization policy includes a selector, an action, and a list of rules",
+      "uses": [
+        "AuthorizationPolicy",
+        "Istio",
+        "service proxy"
+      ],
+      "conceptIDs": [
+        "cks.istio-authz-policy"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.runtimeclass-fields",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7050,
+      "front": "What are the two significant fields of a RuntimeClass object?",
+      "back": "Its name (`metadata.name`) and its `handler`.",
+      "explanation": "Pods refer to the name; the handler points to the runtime configuration on the node. RuntimeClass is not namespaced.",
+      "source": "Kubernetes documentation, “Runtime Class”, “2. Create the corresponding RuntimeClass resources”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/runtime-class/#2-create-the-corresponding-runtimeclass-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The RuntimeClass resource currently only has 2 significant fields: the RuntimeClass name (metadata.name) and the handler (handler).",
+      "uses": [
+        "RuntimeClass",
+        "RuntimeClass handler"
+      ],
+      "conceptIDs": [
+        "cks.runtimeclass-handler"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.containerd-handler-config",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7055,
+      "front": "Where are RuntimeClass handlers configured for containerd, and for CRI-O?",
+      "back": "containerd: /etc/containerd/config.toml, under the runtimes section. CRI-O: /etc/crio/crio.conf, under the crio.runtime table.",
+      "explanation": "The handler has to exist in the node's runtime configuration before a RuntimeClass can use it.",
+      "source": "Kubernetes documentation, “Runtime Class”, “CRI Configuration”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/runtime-class/#cri-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "containerd Runtime handlers are configured through containerd's configuration at /etc/containerd/config.toml. Valid handlers are configured under the runtimes section",
+      "uses": [
+        "RuntimeClass handler",
+        "containerd",
+        "CRI-O"
+      ],
+      "conceptIDs": [
+        "cks.runtimeclass-cri-config"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.handler-mismatch-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7060,
+      "front": "RuntimeClass `sandboxed` has `handler: gvisor`, but containerd on the node only defines a `runsc` runtime. What happens to a Pod using `sandboxed`?",
+      "back": "C: the Pod enters the Failed phase, because the CRI cannot run that handler.",
+      "explanation": "The handler must match a runtime configured on the node; look for an event with the error message.",
+      "choices": "A) It runs with the default runtime instead\nB) The API server rejects the Pod\nC) It enters the Failed phase, because the CRI cannot run that handler",
+      "choicesExplained": "A: the default handler is used only when no runtimeClassName is set. B: the failure happens on the node, and the Pod ends in the Failed phase.",
+      "source": "Kubernetes documentation, “Runtime Class”, “Usage”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/runtime-class/#usage",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If the named RuntimeClass does not exist, or the CRI cannot run the corresponding handler, the pod will enter the Failed terminal phase. Look for a corresponding event for an error message.",
+      "uses": [
+        "RuntimeClass",
+        "RuntimeClass handler",
+        "runsc",
+        "CRI"
+      ],
+      "conceptIDs": [
+        "cks.runtimeclass-cri-config",
+        "cks.runtimeclass-handler"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.runtimeclassname",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7065,
+      "front": "Which Pod field selects a RuntimeClass?",
+      "back": "`spec.runtimeClassName`",
+      "explanation": "It tells the kubelet to use the named RuntimeClass to run the Pod.",
+      "source": "Kubernetes documentation, “Runtime Class”, “Usage”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/runtime-class/#usage",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "you can specify a runtimeClassName in the Pod spec to use it.",
+      "uses": [
+        "RuntimeClass",
+        "Pod",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "cks.runtimeclassname"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.no-runtimeclassname",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7070,
+      "front": "If a Pod sets no `runtimeClassName`, {{c1::the default runtime handler}} is used.",
+      "explanation": "That is the same behaviour as when the RuntimeClass feature is disabled.",
+      "source": "Kubernetes documentation, “Runtime Class”, “Usage”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/runtime-class/#usage",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If no runtimeClassName is specified, the default RuntimeHandler will be used, which is equivalent to the behavior when the RuntimeClass feature is disabled.",
+      "uses": [
+        "RuntimeClass",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.runtimeclassname"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.runtimeclassname-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7075,
+      "front": "RuntimeClass `gvisor` exists and its handler is set up on every node. How do you make Pod `untrusted-job` run with it?",
+      "back": "B: set `runtimeClassName: gvisor` in the Pod's `spec`.",
+      "explanation": "The field sits at Pod level in the spec, not on each container.",
+      "choices": "A) Set `runtimeClassName: gvisor` on each container\nB) Set `runtimeClassName: gvisor` in the Pod's `spec`\nC) Label the Pod `runtime=gvisor`",
+      "choicesExplained": "A: the docs' example sets it in the Pod spec, not per container. C: a label does not select a runtime.",
+      "source": "Kubernetes documentation, “Runtime Class”, “Usage”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/runtime-class/#usage",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This will instruct the kubelet to use the named RuntimeClass to run this pod.",
+      "uses": [
+        "RuntimeClass",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.runtimeclassname"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.runtimeclass-scheduling",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7080,
+      "front": "How does a RuntimeClass make sure its Pods land only on nodes that support it?",
+      "back": "With `scheduling.nodeSelector`, which is merged with the Pod's nodeSelector at admission.",
+      "explanation": "The result is the intersection of the two node sets; if they conflict, the Pod is rejected.",
+      "source": "Kubernetes documentation, “Runtime Class”, “Scheduling”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/runtime-class/#scheduling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The RuntimeClass's nodeSelector is merged with the pod's nodeSelector in admission, effectively taking the intersection of the set of nodes selected by each. If there is a conflict, the pod will be rejected.",
+      "uses": [
+        "RuntimeClass",
+        "nodeSelector",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.runtimeclass-scheduling"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.gvisor-application-kernel",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7085,
+      "front": "What kind of component is gVisor, and where does it run?",
+      "back": "An application kernel with a Linux-like interface, written in Go and running in userspace.",
+      "explanation": "It sits between running applications and the host operating system as a layer of isolation.",
+      "source": "gVisor documentation, “What is gVisor?”",
+      "sourceURL": "https://gvisor.dev/docs/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It is an application kernel that implements a Linux-like interface. Unlike Linux, it is written in a memory-safe language (Go) and runs in userspace.",
+      "uses": [
+        "gVisor",
+        "kernel",
+        "sandboxed runtime"
+      ],
+      "conceptIDs": [
+        "cks.gvisor-app-kernel"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.gvisor-purpose",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7090,
+      "front": "Why does gVisor move the system interfaces normally provided by the host kernel into a per-sandbox application kernel?",
+      "back": "To minimise the risk of a container escape exploit.",
+      "explanation": "The application's system calls are served by the sandbox's own kernel rather than by the host kernel.",
+      "source": "gVisor documentation, “What is gVisor?”, “What does gVisor do?”",
+      "sourceURL": "https://gvisor.dev/docs/#what-does-gvisor-do",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The system interfaces normally implemented by the host kernel are moved into a distinct, per-sandbox application kernel in order to minimize the risk of a container escape exploit.",
+      "uses": [
+        "gVisor",
+        "container escape",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cks.gvisor-app-kernel"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.gvisor-not-filter-contrast",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7095,
+      "front": "How is gVisor different from seccomp or AppArmor?",
+      "back": "It is not a syscall filter or a wrapper over Linux isolation primitives; it implements the kernel interface itself.",
+      "explanation": "gVisor also says it is not a virtual machine in the everyday sense of the term.",
+      "source": "gVisor documentation, “What is gVisor?”, “How is this different?”",
+      "sourceURL": "https://gvisor.dev/docs/#how-is-this-different",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "gVisor is not a syscall filter (e.g. seccomp-bpf), nor a wrapper over Linux isolation primitives (e.g. firejail, AppArmor, etc.).",
+      "uses": [
+        "gVisor",
+        "seccomp",
+        "AppArmor",
+        "virtual machine"
+      ],
+      "conceptIDs": [
+        "cks.gvisor-app-kernel"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.sandbox-untrusted-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7100,
+      "front": "Your platform lets customers upload and run their own scripts in a shared cluster. Which isolation does the Kubernetes guide point to?",
+      "back": "A: sandboxing, such as a RuntimeClass whose handler runs `runsc`.",
+      "explanation": "Sandboxing is often recommended for untrusted code, where workloads are assumed to be malicious.",
+      "choices": "A) Sandboxing, such as a RuntimeClass whose handler runs `runsc`\nB) A separate namespace per customer, and nothing more\nC) Running the scripts as root inside ordinary containers",
+      "choicesExplained": "B: namespaces isolate API resources, but containers still share the host kernel. C: that weakens isolation instead of adding it.",
+      "source": "Kubernetes documentation, “Multi-tenancy”, “Sandboxing containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#sandboxing-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Sandboxing is often recommended when you are running untrusted code, where workloads are assumed to be malicious.",
+      "uses": [
+        "sandboxed runtime",
+        "runsc",
+        "RuntimeClass",
+        "multitenancy"
+      ],
+      "conceptIDs": [
+        "cks.tenant-isolation-layers",
+        "cks.runsc",
+        "cks.gvisor-app-kernel"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.sentry-no-passthrough",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7105,
+      "front": "Does gVisor's Sentry pass an application's system calls through to the host kernel?",
+      "back": "No. The Sentry services them itself; it makes only some host system calls of its own to support its operation.",
+      "explanation": "The Platform redirects each system call to the Sentry, which does the work needed to service it.",
+      "source": "gVisor documentation, “What is gVisor?”, “Sentry”",
+      "sourceURL": "https://gvisor.dev/docs/#sentry",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It is important to note that the Sentry does not pass system calls through to the host kernel.",
+      "uses": [
+        "Sentry",
+        "system call",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cks.gvisor-sentry"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.gofer-mediates-files",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7110,
+      "front": "Why does gVisor need a Gofer for file access?",
+      "back": "The Sentry runs in a restricted seccomp container without file system access, so the Gofer mediates all access to those resources.",
+      "explanation": "gVisor describes this as an additional level of isolation.",
+      "source": "gVisor documentation, “What is gVisor?”, “Gofer”",
+      "sourceURL": "https://gvisor.dev/docs/#gofer",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Sentry process is started in a restricted seccomp container without access to file system resources. The Gofer mediates all access to these resources, providing an additional level of isolation.",
+      "uses": [
+        "Gofer",
+        "Sentry",
+        "seccomp"
+      ],
+      "conceptIDs": [
+        "cks.gvisor-gofer"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.tenancy-namespaces",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7115,
+      "front": "Which Kubernetes mechanism isolates groups of API resources within a single cluster, so tenants can reuse object names?",
+      "back": "Namespaces.",
+      "explanation": "Names in one namespace can overlap with names in another, like files in different folders.",
+      "source": "Kubernetes documentation, “Multi-tenancy”, “Namespaces”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#namespaces",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In Kubernetes, a Namespace provides a mechanism for isolating groups of API resources within a single cluster.",
+      "uses": [
+        "namespace",
+        "multitenancy",
+        "tenant"
+      ],
+      "conceptIDs": [
+        "cks.tenant-isolation-layers"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.tenancy-access-controls",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7120,
+      "front": "What does the multi-tenancy guide call the most important type of control plane isolation?",
+      "back": "Authorization (access controls such as RBAC).",
+      "explanation": "If tenants can change each other's API resources, they can disable every other policy that protects them.",
+      "source": "Kubernetes documentation, “Multi-tenancy”, “Access controls”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#access-controls",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The most important type of isolation for the control plane is authorization. If teams or their workloads can access or modify each others' API resources, they can change or disable all other types of policies",
+      "uses": [
+        "RBAC",
+        "multitenancy",
+        "tenant"
+      ],
+      "conceptIDs": [
+        "cks.tenant-isolation-layers"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.tenancy-quotas",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7125,
+      "front": "Which mechanism manages the resource usage of tenant workloads in a shared cluster?",
+      "back": "Resource quotas.",
+      "explanation": "For teams with API access, quotas can also cap how many objects, such as Pods, a tenant can create.",
+      "source": "Kubernetes documentation, “Multi-tenancy”, “Quotas”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#quotas",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In a multi-tenant environment, you can use Resource Quotas to manage resource usage of tenant workloads.",
+      "uses": [
+        "multitenancy",
+        "tenant",
+        "workload"
+      ],
+      "conceptIDs": [
+        "cks.tenant-isolation-layers"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.tenancy-network",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7130,
+      "front": "By default, which Pods may talk to each other, and is the traffic encrypted? What controls this?",
+      "back": "All Pods may communicate, unencrypted; NetworkPolicies restrict Pod-to-Pod communication.",
+      "explanation": "The guide warns traffic may otherwise be sent to an unintended destination or intercepted on a compromised node.",
+      "source": "Kubernetes documentation, “Multi-tenancy”, “Network isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#network-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, all pods in a Kubernetes cluster are allowed to communicate with each other, and all network traffic is unencrypted.",
+      "uses": [
+        "NetworkPolicy",
+        "multitenancy",
+        "encryption in cluster network"
+      ],
+      "conceptIDs": [
+        "cks.tenant-isolation-layers"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.tenancy-sandboxing",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7135,
+      "front": "Which isolation technique runs each Pod in a separate execution environment, such as a virtual machine or a userspace kernel?",
+      "back": "Sandboxing.",
+      "explanation": "Containers share the host kernel and mount /sys and /proc from it, which makes them less isolated than a virtual machine with its own kernel.",
+      "source": "Kubernetes documentation, “Multi-tenancy”, “Sandboxing containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#sandboxing-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Sandboxing provides a way to isolate workloads running in a shared cluster. It typically involves running each pod in a separate execution environment such as a virtual machine or a userspace kernel.",
+      "uses": [
+        "sandboxed runtime",
+        "virtual machine",
+        "multitenancy"
+      ],
+      "conceptIDs": [
+        "cks.tenant-isolation-layers"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.tenancy-node-isolation",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 7140,
+      "front": "Which technique dedicates a set of nodes to one tenant's Pods, forbidding mixing with other tenants?",
+      "back": "Node isolation.",
+      "explanation": "With every Pod on a node belonging to one tenant, the noisy-tenant problem is reduced.",
+      "source": "Kubernetes documentation, “Multi-tenancy”, “Node Isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/multi-tenancy/#node-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "With node isolation, a set of nodes is dedicated to running pods from a particular tenant and co-mingling of tenant pods is prohibited.",
+      "uses": [
+        "node isolation",
+        "tenant",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.tenant-isolation-layers"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.wireguard-keys",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7145,
+      "front": "With Cilium WireGuard encryption, how does each node share its public key?",
+      "back": "Each node creates its own key pair and publishes the public key in the `network.cilium.io/wg-pub-key` annotation on its CiliumNode object.",
+      "explanation": "Other nodes use that public key to encrypt and decrypt traffic to and from the endpoints on that node.",
+      "source": "Cilium documentation, “WireGuard Transparent Encryption”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/encryption-wireguard/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Each node automatically creates its own encryption key-pair and distributes its public key via the network.cilium.io/wg-pub-key annotation in the Kubernetes CiliumNode custom resource object.",
+      "uses": [
+        "transparent encryption",
+        "public and private key",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.cilium-transparent-encryption"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.wireguard-same-node",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7150,
+      "front": "Does Cilium's WireGuard encryption encrypt packets between two Pods on the same node?",
+      "back": "No, and this is intended.",
+      "explanation": "Cilium says encryption would bring no benefit there, since the raw traffic can be observed on the node anyway.",
+      "source": "Cilium documentation, “WireGuard Transparent Encryption”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/encryption-wireguard/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Packets are not encrypted when they are destined to the same node from which they were sent. This behavior is intended. Encryption would provide no benefits in that case",
+      "uses": [
+        "transparent encryption",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.cilium-which-traffic"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.enable-wireguard",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7155,
+      "front": "Which two Helm or Cilium command-line values turn on WireGuard transparent encryption?",
+      "back": "`encryption.enabled=true` and `encryption.type=wireguard`.",
+      "explanation": "The same two values are passed with `--set` whether Cilium is installed with its command-line tool or with Helm.",
+      "source": "Cilium documentation, “WireGuard Transparent Encryption”, “Enable WireGuard in Cilium”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/encryption-wireguard/#enable-wireguard-in-cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "--namespace kube-system \\ --set encryption.enabled=true \\ --set encryption.type=wireguard",
+      "uses": [
+        "transparent encryption"
+      ],
+      "conceptIDs": [
+        "cks.cilium-enable-wireguard"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Cilium 1.20 docs"
+    },
+    {
+      "id": "cks.sandboxes-encryption.enable-wireguard-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7160,
+      "front": "You install Cilium with Helm and must encrypt Pod-to-Pod traffic between nodes with WireGuard. Which options do you pass?",
+      "back": "C: `--set encryption.enabled=true --set encryption.type=wireguard`",
+      "explanation": "Both values are needed: one turns encryption on and the other picks WireGuard as the method.",
+      "choices": "A) `--set encryption.type=wireguard` only\nB) `--set encryption.enabled=true` only\nC) `--set encryption.enabled=true --set encryption.type=wireguard`",
+      "choicesExplained": "A and B: the docs pass both values together; each alone is only half of the setting.",
+      "source": "Cilium documentation, “WireGuard Transparent Encryption”, “Enable WireGuard in Cilium”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/encryption-wireguard/#enable-wireguard-in-cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "--namespace kube-system \\ --set encryption.enabled=true \\ --set encryption.type=wireguard",
+      "uses": [
+        "transparent encryption"
+      ],
+      "conceptIDs": [
+        "cks.cilium-enable-wireguard",
+        "cks.cilium-transparent-encryption"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Cilium 1.20 docs"
+    },
+    {
+      "id": "cks.sandboxes-encryption.validate-wireguard",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7165,
+      "front": "How do you check from inside a Cilium Pod that WireGuard encryption is on?",
+      "back": "Run `cilium-dbg status | grep Encryption`; it should show Wireguard with a peer count of the number of nodes minus one.",
+      "explanation": "The docs also capture traffic on the `cilium_wg0` device with tcpdump to confirm it goes through the tunnel.",
+      "source": "Cilium documentation, “WireGuard Transparent Encryption”, “Validate the Setup”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/encryption-wireguard/#validate-the-setup",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Check that WireGuard has been enabled (number of peers should correspond to a number of nodes subtracted by one): cilium-dbg status | grep Encryption",
+      "uses": [
+        "transparent encryption",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.cilium-validate-encryption"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Cilium 1.20 docs"
+    },
+    {
+      "id": "cks.sandboxes-encryption.validate-wireguard-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7170,
+      "front": "Your cluster has 6 nodes. `cilium-dbg status | grep Encryption` shows `Wireguard [cilium_wg0 (... Peers: 5)]`. What does that mean?",
+      "back": "B: WireGuard is on, with a tunnel peer for each of the other 5 nodes.",
+      "explanation": "The docs expect the peer count to equal the number of nodes minus one.",
+      "choices": "A) One node is missing from the mesh\nB) WireGuard is on, with a peer for each of the other 5 nodes\nC) Encryption is off, because Peers should equal 6",
+      "choicesExplained": "A and C: the docs expect nodes minus one peers, so 5 is right for 6 nodes.",
+      "source": "Cilium documentation, “WireGuard Transparent Encryption”, “Validate the Setup”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/encryption-wireguard/#validate-the-setup",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "number of peers should correspond to a number of nodes subtracted by one",
+      "uses": [
+        "transparent encryption",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.cilium-validate-encryption"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Cilium 1.20 docs"
+    },
+    {
+      "id": "cks.sandboxes-encryption.wireguard-traffic-table",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7175,
+      "front": "In Cilium's WireGuard table, is traffic not listed in it encrypted?",
+      "back": "No. Configurations or pairs not in the table are not encrypted by WireGuard and are assumed unencrypted.",
+      "explanation": "In the default mode the table covers Pod to remote Pod; traffic to or from nodes needs the node-to-node mode.",
+      "source": "Cilium documentation, “WireGuard Transparent Encryption”, “Which traffic is encrypted”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/encryption-wireguard/#which-traffic-is-encrypted",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Configurations or communication pairs not present in the following table are not subject to encryption with WireGuard and therefore assumed to be unencrypted.",
+      "uses": [
+        "transparent encryption",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.cilium-which-traffic"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.node-to-node-encryption",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7180,
+      "front": "By default, which traffic does Cilium's WireGuard encryption cover, and what does `encryption.nodeEncryption=true` add?",
+      "back": "By default, traffic between Cilium-managed Pods. The option adds node-to-node, Pod-to-node and node-to-Pod traffic.",
+      "explanation": "Cilium marks node-to-node encryption as a beta feature.",
+      "source": "Cilium documentation, “WireGuard Transparent Encryption”, “Node-to-Node Encryption (beta)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/encryption-wireguard/#node-to-node-encryption-beta",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, WireGuard-based encryption only encrypts traffic between Cilium-managed pods. To enable node-to-node encryption, which additionally also encrypts node-to-node, pod-to-node and node-to-pod traffic, use the following configuration options",
+      "uses": [
+        "transparent encryption",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.cilium-node-to-node"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Cilium 1.20 docs"
+    },
+    {
+      "id": "cks.sandboxes-encryption.istio-mtls-flow",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7185,
+      "front": "In Istio mutual TLS, which components carry out the TLS handshake between two workloads?",
+      "back": "The client-side and server-side Envoy sidecar proxies.",
+      "explanation": "Istio re-routes the client's outbound traffic to its local Envoy, which starts the handshake and also checks secure naming.",
+      "source": "Istio documentation, “Security”, “Mutual TLS authentication”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#mutual-tls-authentication",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio re-routes the outbound traffic from a client to the client’s local sidecar Envoy. The client side Envoy starts a mutual TLS handshake with the server side Envoy.",
+      "uses": [
+        "mtls",
+        "Istio",
+        "sidecar container",
+        "service proxy"
+      ],
+      "conceptIDs": [
+        "cks.istio-mtls"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.istio-mtls-min-tls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7190,
+      "front": "What minimum TLS version does Istio configure for mutual TLS?",
+      "back": "TLSv1_2, for both client and server.",
+      "explanation": "Istio pairs this minimum with a fixed list of cipher suites.",
+      "source": "Istio documentation, “Security”, “Mutual TLS authentication”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#mutual-tls-authentication",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio configures TLSv1_2 as the minimum TLS version for both client and server with the following cipher suites",
+      "uses": [
+        "mtls",
+        "Istio",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "cks.istio-mtls"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio latest docs"
+    },
+    {
+      "id": "cks.sandboxes-encryption.mode-inheritance",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7195,
+      "front": "What mode applies when a PeerAuthentication leaves its mode unset?",
+      "back": "The parent scope's mode is inherited; a mesh-wide policy with no mode uses PERMISSIVE.",
+      "explanation": "An unset mode can therefore take STRICT from a namespace or mesh policy above it.",
+      "source": "Istio documentation, “Security”, “Peer authentication”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#peer-authentication",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When the mode is unset, the mode of the parent scope is inherited. Mesh-wide peer authentication policies with an unset mode use the PERMISSIVE mode by default.",
+      "uses": [
+        "PeerAuthentication",
+        "PERMISSIVE mode"
+      ],
+      "conceptIDs": [
+        "cks.peer-authentication",
+        "cks.istio-permissive"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.migration-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7200,
+      "front": "You are adding Istio sidecars to services one at a time, and some clients have no sidecar yet. Which mode should the servers use for now?",
+      "back": "A: PERMISSIVE, then STRICT once every workload has a sidecar.",
+      "explanation": "PERMISSIVE lets a server take mutual TLS without breaking existing plain-text clients during the migration.",
+      "choices": "A) PERMISSIVE, then STRICT once every workload has a sidecar\nB) STRICT straight away\nC) DISABLE until the migration ends",
+      "choicesExplained": "B: STRICT would reject the plain-text clients that have no sidecar yet. C: Istio advises against DISABLE unless you provide your own security solution.",
+      "source": "Istio documentation, “Security”, “Permissive mode”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#permissive-mode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The server’s installed Istio sidecar takes mutual TLS traffic immediately without breaking existing plaintext traffic.",
+      "uses": [
+        "PERMISSIVE mode",
+        "STRICT mode",
+        "sidecar container"
+      ],
+      "conceptIDs": [
+        "cks.istio-permissive",
+        "cks.istio-strict"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.strict-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7205,
+      "front": "Namespace `shop` has a PeerAuthentication with `mtls: mode: STRICT`. A client without a sidecar sends plain HTTP to a `shop` Pod. What happens?",
+      "back": "C: the traffic is not accepted, because workloads in STRICT mode only accept mutual TLS.",
+      "explanation": "Plain text is only accepted in PERMISSIVE mode.",
+      "choices": "A) It is accepted and logged\nB) It is upgraded to mutual TLS automatically\nC) It is not accepted",
+      "choicesExplained": "A: accepting plain text is what PERMISSIVE does. B: the client has no sidecar to make the mutual TLS handshake.",
+      "source": "Istio documentation, “Security”, “Peer authentication”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#peer-authentication",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "STRICT: Workloads only accept mutual TLS traffic.",
+      "uses": [
+        "STRICT mode",
+        "PeerAuthentication",
+        "mtls"
+      ],
+      "conceptIDs": [
+        "cks.istio-strict",
+        "cks.istio-mtls",
+        "cks.peer-authentication"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.scope-mesh-wide",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7210,
+      "front": "Where does a mesh-wide PeerAuthentication policy live, and what selector does it have?",
+      "back": "In the root namespace, with no selector or an empty one.",
+      "explanation": "Such policies apply to all workloads in the mesh.",
+      "source": "Istio documentation, “Security”, “Policy storage”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#policy-storage",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio stores mesh-scope policies in the root namespace. These policies have an empty selector apply to all workloads in the mesh.",
+      "uses": [
+        "PeerAuthentication",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cks.peerauth-scope",
+        "cks.peer-authentication"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.scope-namespace-wide",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7215,
+      "front": "Which PeerAuthentication scope is a policy in a non-root namespace with no selector?",
+      "back": "Namespace-wide.",
+      "explanation": "Such a policy applies only to workloads within its own namespace.",
+      "source": "Istio documentation, “Security”, “Peer authentication”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#peer-authentication",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Namespace-wide policy: A policy specified for a non-root namespace without or with an empty selector field.",
+      "uses": [
+        "PeerAuthentication",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cks.peerauth-scope",
+        "cks.peer-authentication"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.scope-workload",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7220,
+      "front": "Which PeerAuthentication scope has a non-empty selector in a regular namespace?",
+      "back": "Workload-specific.",
+      "explanation": "The selector limits the policy to the workloads whose labels match it.",
+      "source": "Istio documentation, “Security”, “Peer authentication”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#peer-authentication",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Workload-specific policy: a policy defined in the regular namespace, with non-empty selector field.",
+      "uses": [
+        "PeerAuthentication",
+        "label",
+        "workload"
+      ],
+      "conceptIDs": [
+        "cks.peerauth-scope",
+        "cks.peer-authentication"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.authz-default-allow",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7225,
+      "front": "In Istio, what happens to requests to a workload with no authorization policy applied?",
+      "back": "Istio allows all of them.",
+      "explanation": "Authorization needs no separate switch; access control starts only when you apply a policy.",
+      "source": "Istio documentation, “Security”, “Implicit enablement”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#implicit-enablement",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To enforce access control to your workloads, you apply an authorization policy. For workloads without authorization policies applied, Istio allows all requests.",
+      "uses": [
+        "AuthorizationPolicy",
+        "Istio",
+        "workload"
+      ],
+      "conceptIDs": [
+        "cks.istio-authz-policy"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.permissive-vs-strict",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7230,
+      "front": "How does PERMISSIVE mode differ from STRICT mode in Istio?",
+      "back": "PERMISSIVE accepts mutual TLS and plain text; STRICT accepts only mutual TLS.",
+      "explanation": "Istio uses PERMISSIVE during migrations and advises switching to STRICT once sidecars are in place.",
+      "source": "Istio documentation, “Security”, “Peer authentication”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#peer-authentication",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "PERMISSIVE: Workloads accept both mutual TLS and plain text traffic.",
+      "uses": [
+        "PERMISSIVE mode",
+        "STRICT mode",
+        "mtls"
+      ],
+      "conceptIDs": [
+        "cks.istio-permissive",
+        "cks.istio-strict"
+      ]
+    },
+    {
+      "id": "cks.sandboxes-encryption.peerauth-vs-authz",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7235,
+      "front": "What does a PeerAuthentication control, compared with an AuthorizationPolicy?",
+      "back": "PeerAuthentication sets the mutual TLS mode for workloads; AuthorizationPolicy decides whether requests are allowed or denied.",
+      "explanation": "One governs how peers must connect; the other is evaluated by each Envoy proxy against the request context.",
+      "source": "Istio documentation, “Security”, “Authorization architecture”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#authorization-architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When a request comes to the proxy, the authorization engine evaluates the request context against the current authorization policies, and returns the authorization result, either ALLOW or DENY.",
+      "uses": [
+        "PeerAuthentication",
+        "AuthorizationPolicy",
+        "mtls"
+      ],
+      "conceptIDs": [
+        "cks.peer-authentication",
+        "cks.istio-authz-policy"
+      ]
+    }
+  ]
+}

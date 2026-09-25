@@ -1,0 +1,1679 @@
+{
+  "topic": "Deployment strategies, Helm and Kustomize",
+  "notes": [
+    {
+      "id": "ckad.rollouts-helm-kustomize.what-is-helm",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4000,
+      "front": "What is Helm?",
+      "back": "A client tool for managing packages, called charts, on a Kubernetes cluster.",
+      "explanation": "You install the Helm client yourself; the guide then assumes you know its three building blocks: charts, repositories and releases.",
+      "example": "Like a package manager such as apt, but what it installs is a set of Kubernetes objects in a cluster, not programs on one computer.",
+      "evidence": "This guide explains the basics of using Helm to manage packages on your Kubernetes cluster. It assumes that you have already installed the Helm client.",
+      "source": "Helm documentation, “Using Helm”, “Using Helm”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/",
+      "introduces": [
+        "Helm"
+      ],
+      "uses": [
+        "Helm",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "ckad.helm"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.what-is-a-release",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4010,
+      "front": "In Helm, what is a release?",
+      "back": "The object created when you install a chart. It has a name, which you choose or Helm generates.",
+      "explanation": "Every helm install creates a new release; later commands such as upgrade and rollback act on a release by its name.",
+      "example": "Installing a WordPress chart under the name blog-prod creates a release called blog-prod.",
+      "evidence": "Note that installing a chart creates a new release object. The release above is named happy-panda. (If you want Helm to generate a name for you, leave off the release name and use --generate-name.)",
+      "source": "Helm documentation, “Using Helm”, “helm install: Installing a Package”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-install-installing-a-package",
+      "introduces": [
+        "release"
+      ],
+      "uses": [
+        "release",
+        "Helm",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "ckad.helm-release"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.what-is-a-chart-repository",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4020,
+      "front": "What is a Helm chart repository?",
+      "back": "A source of charts that you add to your Helm client with helm repo add, then search and install from.",
+      "explanation": "Once added, a repository can be searched with helm search repo, which works on local data without a public network connection.",
+      "example": "Like registering a software mirror once, then installing packages from it by name.",
+      "evidence": "helm search repo searches the repositories that you have added to your local helm client (with helm repo add). This search is done over local data, and no public network connection is needed.",
+      "source": "Helm documentation, “Using Helm”, “helm search: Finding Charts”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-search-finding-charts",
+      "introduces": [
+        "chart repository"
+      ],
+      "uses": [
+        "chart repository",
+        "Helm",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "ckad.helm-repository"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.what-is-a-kustomization-file",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4030,
+      "front": "What is a kustomization file?",
+      "back": "A kustomization.yaml that Kustomize reads to customise Kubernetes objects; kubectl has supported it since 1.14.",
+      "explanation": "Because kubectl understands the file, you can view or apply a kustomization without installing Kustomize separately.",
+      "example": "A folder holding deployment.yaml, service.yaml and a kustomization.yaml that lists both files and adds a namespace to them.",
+      "evidence": "Kustomize is a standalone tool to customize Kubernetes objects through a kustomization file . Since 1.14, kubectl also supports the management of Kubernetes objects using a kustomization file.",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Overview”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/",
+      "introduces": [
+        "kustomization file"
+      ],
+      "uses": [
+        "kustomization file",
+        "Kustomize",
+        "kubectl",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.kustomization-file"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.what-is-an-overlay",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4040,
+      "front": "In Kustomize, what is an overlay?",
+      "back": "A directory with a kustomization.yaml that refers to other kustomization directories as its bases.",
+      "explanation": "The base knows nothing about the overlay, so one base can serve several overlays.",
+      "example": "A prod folder whose kustomization.yaml points at a shared base folder and raises its replica count.",
+      "evidence": "An overlay is a directory with a kustomization.yaml that refers to other kustomization directories as its bases . A base has no knowledge of an overlay and can be used in multiple overlays.",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Bases and Overlays”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays",
+      "introduces": [
+        "overlay"
+      ],
+      "uses": [
+        "overlay",
+        "Kustomize",
+        "kustomization file",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.bases-and-overlays"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.rollout-trigger",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4100,
+      "front": "A Deployment rollout is triggered if and only if its {{c1::Pod template (.spec.template)}} changes.",
+      "explanation": "Changing the template’s labels or container images counts; other updates, such as scaling, do not trigger a rollout.",
+      "evidence": "A Deployment's rollout is triggered if and only if the Deployment's Pod template (that is, .spec.template ) is changed, for example if the labels or container images of the template are updated. Other updates, such as scaling the Deployment, do not trigger a rollout.",
+      "source": "Kubernetes documentation, “Deployments”, “Updating a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment",
+      "uses": [
+        "Deployment",
+        "Pod",
+        "label",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.rollout-trigger"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.set-image-container-name",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4110,
+      "front": "In `kubectl set image deployment/web app=registry.example/app:2.1`, what does `app` (before the =) name?",
+      "back": "The container in the Deployment whose image is updated.",
+      "explanation": "The text after the = is the new image and its tag; the name before it picks which container changes.",
+      "evidence": "where deployment/nginx-deployment indicates the Deployment, nginx indicates the Container the update will take place and nginx:1.16.1 indicates the new image and its tag.",
+      "source": "Kubernetes documentation, “Deployments”, “Updating a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment",
+      "uses": [
+        "kubectl",
+        "Deployment",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-set-image"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.rollout-status",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4120,
+      "front": "Which command shows the progress of a Deployment’s rollout?",
+      "back": "`kubectl rollout status deployment/<name>`",
+      "explanation": "It reports how many new replicas have been updated, then says when the Deployment has successfully rolled out.",
+      "evidence": "To see the Deployment rollout status, run kubectl rollout status deployment/nginx-deployment . The output is similar to: Waiting for rollout to finish: 2 out of 3 new replicas have been updated... deployment \"nginx-deployment\" successfully rolled out",
+      "source": "Kubernetes documentation, “Deployments”, “Creating a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#creating-a-deployment",
+      "uses": [
+        "kubectl",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "ckad.rollout-status"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.rollout-history",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4130,
+      "front": "Which command lists a Deployment’s revisions?",
+      "back": "`kubectl rollout history deployment/<name>`",
+      "explanation": "Add `--revision=N` to see the details of one revision.",
+      "evidence": "First, check the revisions of this Deployment: kubectl rollout history deployment/nginx-deployment",
+      "source": "Kubernetes documentation, “Deployments”, “Checking Rollout History of a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#checking-rollout-history-of-a-deployment",
+      "uses": [
+        "kubectl",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "ckad.rollout-history"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.change-cause-annotation",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4140,
+      "front": "Where does the `CHANGE-CAUSE` column of `kubectl rollout history` get its text?",
+      "back": "From the Deployment’s kubernetes.io/change-cause annotation, copied to each revision when it is created.",
+      "explanation": "You can set it with kubectl annotate, by editing the manifest, or with tooling that sets the annotation for you.",
+      "evidence": "CHANGE-CAUSE is copied from the Deployment annotation kubernetes.io/change-cause to its revisions upon creation. You can specify the CHANGE-CAUSE message by:",
+      "source": "Kubernetes documentation, “Deployments”, “Checking Rollout History of a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#checking-rollout-history-of-a-deployment",
+      "uses": [
+        "annotation",
+        "Deployment",
+        "kubectl",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "ckad.change-cause"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.rollout-undo",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4150,
+      "front": "Which command rolls a Deployment back to its previous revision?",
+      "back": "`kubectl rollout undo deployment/<name>`",
+      "explanation": "Only the Pod template part is rolled back, because scaling never creates a revision.",
+      "evidence": "Other updates, such as scaling the Deployment, do not create a Deployment revision, so that you can facilitate simultaneous manual- or auto-scaling. This means that when you roll back to an earlier revision, only the Deployment's Pod template part is rolled back.",
+      "source": "Kubernetes documentation, “Deployments”, “Rolling Back a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-back-a-deployment",
+      "uses": [
+        "kubectl",
+        "Deployment",
+        "rollback",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.rollout-undo"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.rollout-undo-to-revision",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4155,
+      "front": "`kubectl rollout undo deployment/frontend {{c1::--to-revision}}=2` rolls back to a specific revision.",
+      "explanation": "Without the flag, undo rolls back to the previous revision.",
+      "evidence": "kubectl rollout undo deployment/frontend # Rollback to the previous deployment kubectl rollout undo deployment/frontend --to-revision=2 # Rollback to a specific revision",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Updating resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#updating-resources",
+      "uses": [
+        "kubectl",
+        "Deployment",
+        "rollback"
+      ],
+      "conceptIDs": [
+        "ckad.rollout-undo"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.rollout-pause",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4160,
+      "front": "While a Deployment’s rollout is paused with `kubectl rollout pause`, what happens to changes you make to it?",
+      "back": "They have no effect until you resume; the Deployment keeps running as it was before the pause.",
+      "explanation": "This lets you apply several fixes between pausing and resuming without triggering unnecessary rollouts.",
+      "evidence": "The initial state of the Deployment prior to pausing its rollout will continue its function, but new updates to the Deployment will not have any effect as long as the Deployment rollout is paused.",
+      "source": "Kubernetes documentation, “Deployments”, “Pausing and Resuming a rollout of a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pausing-and-resuming-a-deployment",
+      "uses": [
+        "kubectl",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "ckad.rollout-pause-resume"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.rollout-restart",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4165,
+      "front": "What does `kubectl rollout restart deployment/frontend` do?",
+      "back": "A rolling restart of the frontend Deployment.",
+      "explanation": "Compare `kubectl replace --force`, which deletes and re-creates the resource and, the reference warns, will cause a service outage.",
+      "evidence": "kubectl rollout restart deployment/frontend # Rolling restart of the \"frontend\" deployment cat pod.json | kubectl replace -f - # Replace a pod based on the JSON passed into stdin # Force replace, delete and then re-create the resource. Will cause a service outage.",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Updating resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#updating-resources",
+      "uses": [
+        "kubectl",
+        "Deployment",
+        "rolling update / Recreate"
+      ],
+      "conceptIDs": [
+        "ckad.rollout-restart"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.max-unavailable-default",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4170,
+      "front": "By default, maxUnavailable lets a rolling update take {{c1::25%}} of the desired Pods out of service.",
+      "explanation": "A percentage becomes a Pod count by rounding down, and the value cannot be 0 if maxSurge is 0.",
+      "evidence": "The absolute number is calculated from percentage by rounding down. The value cannot be 0 if .spec.strategy.rollingUpdate.maxSurge is 0. The default value is 25%.",
+      "source": "Kubernetes documentation, “Deployments”, “Max Unavailable”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#max-unavailable",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "maxUnavailable / maxSurge",
+        "rolling update / Recreate",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.rolling-update-defaults"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.max-surge-default",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4175,
+      "front": "By default, maxSurge lets a rolling update create up to {{c1::25%}} more Pods than desired.",
+      "explanation": "Here a percentage becomes a Pod count by rounding up, and the value cannot be 0 if maxUnavailable is 0.",
+      "evidence": "The value cannot be 0 if maxUnavailable is 0. The absolute number is calculated from the percentage by rounding up. The default value is 25%.",
+      "source": "Kubernetes documentation, “Deployments”, “Max Surge”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#max-surge",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "maxUnavailable / maxSurge",
+        "rolling update / Recreate",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.rolling-update-defaults"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.recreate-strategy",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4180,
+      "front": "With `.spec.strategy.type: Recreate`, in what order are old and new Pods handled?",
+      "back": "All existing Pods are killed before new ones are created.",
+      "explanation": "On an upgrade, removal of the old revision’s Pods is awaited before any Pod of the new revision is created.",
+      "evidence": "If you upgrade a Deployment, all Pods of the old revision will be terminated immediately. Successful removal is awaited before any Pod of the new revision is created.",
+      "source": "Kubernetes documentation, “Deployments”, “Recreate Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#recreate-deployment",
+      "uses": [
+        "rolling update / Recreate",
+        "Deployment",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.recreate-strategy"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.canary-service-selector",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4205,
+      "front": "In the canary pattern, how does one Service send traffic to both the stable and the canary Pods?",
+      "back": "Its selector uses only the labels both sets share, leaving out the `track` label that tells them apart.",
+      "explanation": "Selecting the common subset of labels makes the Service span both sets of replicas.",
+      "evidence": "The frontend service would span both sets of replicas by selecting the common subset of their labels (i.e. omitting the `track` label), so that the traffic will be redirected to both applications",
+      "source": "Kubernetes documentation, “Managing Workloads”, “Canary deployments”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/management/#canary-deployments",
+      "uses": [
+        "blue-green / canary deployment",
+        "Service",
+        "selector",
+        "label",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.canary-with-labels"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.canary-ratio",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4210,
+      "front": "In the canary pattern, what sets the share of live traffic each release receives?",
+      "back": "The replica counts of the stable and canary releases.",
+      "explanation": "Once you are confident, you update the stable track to the new release and remove the canary.",
+      "evidence": "You can tweak the number of replicas of the stable and canary releases to determine the ratio of each release that will receive live production traffic (in this case, 3:1). Once you're confident, you can update the stable track to the new application release and remove the canary one.",
+      "source": "Kubernetes documentation, “Managing Workloads”, “Canary deployments”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/management/#canary-deployments",
+      "uses": [
+        "blue-green / canary deployment"
+      ],
+      "conceptIDs": [
+        "ckad.canary-replica-ratio"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.blue-green-two-environments",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4220,
+      "front": "In blue-green deployment, what do the two environments do?",
+      "back": "One serves production traffic while the other is updated and tested; then traffic is switched over.",
+      "explanation": "The switch happens once testing on the non-active environment has concluded, often through a load balancer.",
+      "evidence": "The operator maintains two environments, dubbed “blue” and “green”. One serves production traffic (the version all users are currently using), whilst the other is updated. Once testing has concluded on the non-active (green) environment, production traffic is switched over (often via the use of a load balancer).",
+      "source": "Cloud Native Glossary (CNCF), “Blue Green Deployment”",
+      "sourceURL": "https://glossary.cncf.io/blue-green-deployment/",
+      "uses": [
+        "blue-green / canary deployment"
+      ],
+      "conceptIDs": [
+        "ckad.blue-green-selector-switch"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.service-selector-targets",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4225,
+      "front": "What usually decides which Pods a Service sends traffic to?",
+      "back": "The Service’s selector: the Pods whose labels match it.",
+      "explanation": "The Service’s controller keeps scanning for Pods that match the selector, so changing the selector changes the Pods it targets.",
+      "evidence": "The controller for that Service continuously scans for Pods that match its selector, and then makes any necessary updates to the set of EndpointSlices for the Service.",
+      "source": "Kubernetes documentation, “Service”, “Services in Kubernetes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/",
+      "uses": [
+        "Service",
+        "selector",
+        "Pod",
+        "label",
+        "EndpointSlice"
+      ],
+      "conceptIDs": [
+        "ckad.blue-green-selector-switch"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.helm-repo-update",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4305,
+      "front": "Which command brings your Helm client’s view of its chart repositories up to date?",
+      "back": "`helm repo update`",
+      "explanation": "Chart repositories change frequently; `helm repo add [NAME] [URL]` adds one and `helm repo remove` removes one.",
+      "evidence": "And new repositories can be added with helm repo add [NAME] [URL]: $ helm repo add dev https://example.com/dev-charts Because chart repositories change frequently, at any point you can make sure your Helm client is up to date by running helm repo update. Repositories can be removed with helm repo remove.",
+      "source": "Helm documentation, “Using Helm”, “helm repo: Working with Repositories”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-repo-working-with-repositories",
+      "uses": [
+        "Helm",
+        "chart repository"
+      ],
+      "conceptIDs": [
+        "ckad.helm-repo-add"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.helm-install-args",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4310,
+      "front": "At its simplest, what two arguments does `helm install` take?",
+      "back": "A release name that you pick, and the name of the chart to install.",
+      "explanation": "The release name comes first, then the chart, as in `helm install happy-panda bitnami/wordpress`.",
+      "evidence": "At its simplest, it takes two arguments: A release name that you pick, and the name of the chart you want to install. $ helm install happy-panda bitnami/wordpress",
+      "source": "Helm documentation, “Using Helm”, “helm install: Installing a Package”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-install-installing-a-package",
+      "uses": [
+        "Helm",
+        "release",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "ckad.helm-install"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.helm-show-values",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4315,
+      "front": "Which command shows the options you can configure on a chart?",
+      "back": "`helm show values <chart>`",
+      "explanation": "An install without your own values uses only the chart’s default configuration options.",
+      "evidence": "Installing the way we have here will only use the default configuration options for this chart. Many times, you will want to customize the chart to use your preferred configuration. To see what options are configurable on a chart, use helm show values:",
+      "source": "Helm documentation, “Using Helm”, “Customizing the Chart Before Installing”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing",
+      "uses": [
+        "Helm",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "ckad.helm-show-values"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.helm-values-rightmost",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4320,
+      "front": "When `-f` (`--values`) is given several times, the {{c1::rightmost}} file takes precedence.",
+      "explanation": "Each -f file is a yaml file of overrides, so later files override earlier ones.",
+      "evidence": "--values (or -f): Specify a YAML file with overrides. This can be specified multiple times and the rightmost file will take precedence",
+      "source": "Helm documentation, “Using Helm”, “Customizing the Chart Before Installing”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing",
+      "uses": [
+        "Helm",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.helm-values-precedence"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.helm-set-beats-values",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4325,
+      "front": "If `--set` and `-f` both give a value for the same key, which wins?",
+      "back": "`--set`: its values are merged into `--values` with higher precedence.",
+      "explanation": "Overrides given with --set are kept in a Secret; `helm get values <release-name>` shows them.",
+      "evidence": "If both are used, --set values are merged into --values with higher precedence. Overrides specified with --set are persisted in a Secret. Values that have been --set can be viewed for a given release with helm get values <release-name>.",
+      "source": "Helm documentation, “Using Helm”, “Customizing the Chart Before Installing”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing",
+      "uses": [
+        "Helm",
+        "Secret",
+        "release"
+      ],
+      "conceptIDs": [
+        "ckad.helm-values-precedence"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.helm-upgrade",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4330,
+      "front": "What does `helm upgrade` do, and how much does it change?",
+      "back": "Upgrades an existing release to a new chart version or configuration, updating only what changed since the last release.",
+      "explanation": "Helm tries the least invasive upgrade because charts can be large and complex.",
+      "evidence": "An upgrade takes an existing release and upgrades it according to the information you provide. Because Kubernetes charts can be large and complex, Helm tries to perform the least invasive upgrade. It will only update things that have changed since the last release.",
+      "source": "Helm documentation, “Using Helm”, “helm upgrade and helm rollback”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-upgrade-and-helm-rollback-upgrading-a-release-and-recovering-on-failure",
+      "uses": [
+        "Helm",
+        "release",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "ckad.helm-upgrade"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.helm-rollback-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4335,
+      "front": "What is the form of the `helm rollback` command?",
+      "back": "`helm rollback [RELEASE] [REVISION]`",
+      "explanation": "For example, `helm rollback happy-panda 1` returns that release to its very first version.",
+      "evidence": "it is easy to roll back to a previous release using helm rollback [RELEASE] [REVISION]. $ helm rollback happy-panda 1 The above rolls back our happy-panda to its very first release version.",
+      "source": "Helm documentation, “Using Helm”, “helm upgrade and helm rollback”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-upgrade-and-helm-rollback-upgrading-a-release-and-recovering-on-failure",
+      "uses": [
+        "Helm",
+        "release",
+        "rollback"
+      ],
+      "conceptIDs": [
+        "ckad.helm-rollback"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.helm-revision-numbers",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4340,
+      "front": "How does a Helm release’s revision number change?",
+      "back": "It starts at 1 and goes up by 1 on every install, upgrade or rollback.",
+      "explanation": "So a rollback makes a new revision; it does not reuse the old number.",
+      "evidence": "A release version is an incremental revision. Every time an install, upgrade, or rollback happens, the revision number is incremented by 1. The first revision number is always 1.",
+      "source": "Helm documentation, “Using Helm”, “helm upgrade and helm rollback”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-upgrade-and-helm-rollback-upgrading-a-release-and-recovering-on-failure",
+      "uses": [
+        "Helm",
+        "release",
+        "rollback"
+      ],
+      "conceptIDs": [
+        "ckad.helm-rollback"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.helm-status",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4345,
+      "front": "What is `helm status <release>` for?",
+      "back": "Keeping track of a release’s state, or re-reading its configuration information.",
+      "explanation": "The output includes the release’s namespace, status and current revision.",
+      "evidence": "To keep track of a release's state, or to re-read configuration information, you can use helm status: $ helm status happy-panda NAME: happy-panda LAST DEPLOYED: Tue Jan 26 10:27:17 2021 NAMESPACE: default STATUS: deployed REVISION: 1",
+      "source": "Helm documentation, “Using Helm”, “helm install: Installing a Package”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-install-installing-a-package",
+      "uses": [
+        "Helm",
+        "release",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.helm-list-status"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.helm-list-history",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4350,
+      "front": "Which command lists your currently deployed Helm releases?",
+      "back": "`helm list`",
+      "explanation": "A release removed with helm uninstall no longer appears in it.",
+      "evidence": "This will remove the release from the cluster. You can see all of your currently deployed releases with the helm list command:",
+      "source": "Helm documentation, “Using Helm”, “helm uninstall: Uninstalling a Release”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-uninstall-uninstalling-a-release",
+      "uses": [
+        "Helm",
+        "release"
+      ],
+      "conceptIDs": [
+        "ckad.helm-list-status"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.helm-uninstall-record",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4355,
+      "front": "After `helm uninstall`, is the release record kept?",
+      "back": "No, not by default; add `--keep-history` to keep it.",
+      "explanation": "Because releases are now deleted by default, an uninstalled release can no longer be rolled back.",
+      "evidence": "If you wish to keep a deletion release record, use helm uninstall --keep-history. Using helm list --uninstalled will only show releases that were uninstalled with the --keep-history flag.",
+      "source": "Helm documentation, “Using Helm”, “helm uninstall: Uninstalling a Release”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-uninstall-uninstalling-a-release",
+      "uses": [
+        "Helm",
+        "release",
+        "rollback"
+      ],
+      "conceptIDs": [
+        "ckad.helm-uninstall"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.helm-uninstall-no-rollback",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4360,
+      "front": "Can you `helm rollback` a release that was uninstalled without `--keep-history`?",
+      "back": "No. Releases are deleted by default, so an uninstalled one can no longer be rolled back.",
+      "explanation": "To keep the option, add --keep-history when you uninstall.",
+      "evidence": "Note that because releases are now deleted by default, it is no longer possible to rollback an uninstalled resource.",
+      "source": "Helm documentation, “Using Helm”, “helm uninstall: Uninstalling a Release”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-uninstall-uninstalling-a-release",
+      "uses": [
+        "Helm",
+        "release",
+        "rollback"
+      ],
+      "conceptIDs": [
+        "ckad.helm-uninstall"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.kubectl-kustomize-view",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4400,
+      "front": "Which command shows the resources a kustomization directory produces, and which applies them?",
+      "back": "`kubectl kustomize <dir>` to view; `kubectl apply -k <dir>` (or `--kustomize`) to apply.",
+      "explanation": "Both are built into kubectl, which supports kustomization files.",
+      "evidence": "To view resources found in a directory containing a kustomization file, run the following command: kubectl kustomize <kustomization_directory> To apply those resources, run kubectl apply with --kustomize or -k flag: kubectl apply -k <kustomization_directory>",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Overview”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/",
+      "uses": [
+        "kubectl",
+        "kubectl apply",
+        "kustomization file"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-apply-k"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.kustomize-resources-field",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4405,
+      "front": "Which field of kustomization.yaml lists the resource files to include?",
+      "back": "`resources`",
+      "explanation": "Each entry is the path to a resource’s configuration file.",
+      "evidence": "The resources field, in the kustomization.yaml file, defines the list of resources to include in a configuration. Set the path to a resource's configuration file in the resources list.",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Composing”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#composing-and-customizing-resources",
+      "uses": [
+        "kustomization file",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.kustomization-file"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.kustomize-generators",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4410,
+      "front": "Which two kustomization fields generate ConfigMaps and Secrets?",
+      "back": "`configMapGenerator` and `secretGenerator`, from files or literals.",
+      "explanation": "A `literals` list holds key=value pairs; a `files` list names files to turn into data items.",
+      "evidence": "Kustomize has secretGenerator and configMapGenerator , which generate Secret and ConfigMap from files or literals.",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Generating Resources”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#generating-resources",
+      "uses": [
+        "Kustomize",
+        "ConfigMap",
+        "Secret",
+        "kustomization file"
+      ],
+      "conceptIDs": [
+        "ckad.kustomize-generators"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.kustomize-hash-suffix",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4420,
+      "front": "Why does a ConfigMap generated by Kustomize get a suffix on its name, and how do you turn it off?",
+      "back": "It is a content hash, so a new ConfigMap is generated when the contents change; `generatorOptions` turns it off.",
+      "explanation": "The same applies to generated Secrets.",
+      "evidence": "The generated ConfigMaps and Secrets have a content hash suffix appended. This ensures that a new ConfigMap or Secret is generated when the contents are changed. To disable the behavior of appending a suffix, one can use generatorOptions .",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Generating Resources”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#generating-resources",
+      "uses": [
+        "Kustomize",
+        "ConfigMap",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "ckad.kustomize-hash-suffix"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.cross-namespace",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4425,
+      "front": "Which kustomization field puts every resource in the same namespace?",
+      "back": "`namespace`",
+      "explanation": "Setting the same namespace for all resources is one of the documented uses of cross-cutting fields.",
+      "evidence": "Some use cases for setting cross-cutting fields: - setting the same namespace for all resources - adding the same name prefix or suffix",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Setting cross-cutting fields”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#setting-cross-cutting-fields",
+      "uses": [
+        "kustomization file",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.kustomize-cross-cutting"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.cross-name-prefix",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4430,
+      "front": "Which kustomization field adds the same text to the start of every resource name?",
+      "back": "`namePrefix`",
+      "explanation": "Its value is prepended to the names of all resources.",
+      "evidence": "namePrefix string value of this field is prepended to the names of all resources",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Kustomize Feature List”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#kustomize-feature-list",
+      "uses": [
+        "kustomization file"
+      ],
+      "conceptIDs": [
+        "ckad.kustomize-cross-cutting"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.cross-name-suffix",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4435,
+      "front": "Which kustomization field adds the same text to the end of every resource name?",
+      "back": "`nameSuffix`",
+      "explanation": "Its value is appended to the names of all resources.",
+      "evidence": "nameSuffix string value of this field is appended to the names of all resources",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Kustomize Feature List”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#kustomize-feature-list",
+      "uses": [
+        "kustomization file"
+      ],
+      "conceptIDs": [
+        "ckad.kustomize-cross-cutting"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.cross-labels",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4440,
+      "front": "Which kustomization field adds the same labels to every resource and to selectors?",
+      "back": "`commonLabels`",
+      "explanation": "It reaches selectors as well as the resources themselves.",
+      "evidence": "commonLabels map[string]string labels to add to all resources and selectors",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Kustomize Feature List”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#kustomize-feature-list",
+      "uses": [
+        "kustomization file",
+        "label",
+        "selector"
+      ],
+      "conceptIDs": [
+        "ckad.kustomize-cross-cutting"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.cross-annotations",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4445,
+      "front": "Which kustomization field adds the same annotations to every resource?",
+      "back": "`commonAnnotations`",
+      "explanation": "It is a map of annotation keys and values added to all resources.",
+      "evidence": "commonAnnotations map[string]string annotations to add to all resources",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Kustomize Feature List”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#kustomize-feature-list",
+      "uses": [
+        "kustomization file",
+        "annotation"
+      ],
+      "conceptIDs": [
+        "ckad.kustomize-cross-cutting"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.kustomize-patches",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4450,
+      "front": "In a kustomization, which field holds patches, and in what order are they applied?",
+      "back": "`patches`; applied in the order they are listed.",
+      "explanation": "A patch may be a file or an inline string, and may use StrategicMerge or Json6902 patching.",
+      "evidence": "Kustomize supports different patching mechanisms through StrategicMerge and Json6902 using the patches field. patches may be a file or an inline string, targeting a single or multiple resources. The patches field contains a list of patches applied in the order they are specified.",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Customizing”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#customizing",
+      "uses": [
+        "Kustomize",
+        "kustomization file"
+      ],
+      "conceptIDs": [
+        "ckad.kustomize-patches"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.kustomize-base",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4460,
+      "front": "In Kustomize, what is a base?",
+      "back": "A directory with a kustomization.yaml holding a set of resources and their customisation; local or in a remote repo.",
+      "explanation": "An overlay can refer to several bases and combine all their resources into one configuration.",
+      "evidence": "A base is a directory with a kustomization.yaml , which contains a set of resources and associated customization. A base could be either a local directory or a directory from a remote repo, as long as a kustomization.yaml is present inside.",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Bases and Overlays”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays",
+      "uses": [
+        "Kustomize",
+        "kustomization file",
+        "overlay",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.bases-and-overlays"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-scale-no-rollout",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4500,
+      "front": "Which of these changes to a running Deployment starts a rollout?",
+      "choices": "A) Raising replicas from 3 to 5\nB) Changing a container image in `.spec.template`\nC) Adding an annotation to the Deployment’s own metadata",
+      "back": "B: changing the container image in the Pod template.",
+      "choicesExplained": "A: scaling is one of the other updates that never trigger a rollout. C: the Deployment’s own metadata is outside `.spec.template`.",
+      "explanation": "Only a change to the Pod template triggers a rollout.",
+      "evidence": "A Deployment's rollout is triggered if and only if the Deployment's Pod template (that is, .spec.template ) is changed, for example if the labels or container images of the template are updated.",
+      "source": "Kubernetes documentation, “Deployments”, “Updating a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment",
+      "uses": [
+        "Deployment",
+        "container image",
+        "annotation",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.rollout-trigger"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-set-image-one-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4505,
+      "front": "Deployment api has two containers, app and log-agent. Which one command moves only app to image registry.example/app:2.1?",
+      "choices": "A) `kubectl set image deployment/api app=registry.example/app:2.1`\nB) `kubectl set image deployment/api registry.example/app:2.1`\nC) `kubectl rollout restart deployment/api`",
+      "back": "A: `kubectl set image deployment/api app=registry.example/app:2.1`",
+      "choicesExplained": "B: it names no container, and the command needs container=image. C: a restart replaces Pods but changes no image.",
+      "explanation": "The name before the = selects the container, so log-agent keeps its image.",
+      "evidence": "where deployment/nginx-deployment indicates the Deployment, nginx indicates the Container the update will take place and nginx:1.16.1 indicates the new image and its tag.",
+      "source": "Kubernetes documentation, “Deployments”, “Updating a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment",
+      "uses": [
+        "kubectl",
+        "Deployment",
+        "container image",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-set-image"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-wait-for-rollout",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4510,
+      "front": "A deploy script applies a new manifest for Deployment web and must wait, for up to 5 minutes, until the rollout finishes. Which command does the waiting?",
+      "back": "`kubectl rollout status deployment/web --timeout 5m`",
+      "explanation": "The documentation uses rollout status right after kubectl apply to wait for the rollout, with --timeout as the limit.",
+      "evidence": "kubectl apply -f my-deployment.yaml # wait for rollout to finish kubectl rollout status deployment/my-deployment --timeout 10m # 10 minute timeout",
+      "source": "Kubernetes documentation, “Managing Workloads”, “Managing rollouts”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/management/#managing-rollouts",
+      "uses": [
+        "kubectl",
+        "kubectl apply",
+        "manifest",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "ckad.rollout-status"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-history-revision-detail",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4515,
+      "front": "Before rolling back Deployment shop, you want to check which image its revision 3 used. What do you run?",
+      "back": "`kubectl rollout history deployment/shop --revision=3`",
+      "explanation": "The --revision flag shows the details of one revision, including its container image.",
+      "evidence": "To see the details of each revision, run: kubectl rollout history deployment/nginx-deployment --revision = 2",
+      "source": "Kubernetes documentation, “Deployments”, “Checking Rollout History of a Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#checking-rollout-history-of-a-deployment",
+      "uses": [
+        "kubectl",
+        "Deployment",
+        "rollback",
+        "container image"
+      ],
+      "conceptIDs": [
+        "ckad.rollout-history"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-undo-to-good-revision",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4525,
+      "front": "Deployment shop is on revision 4, which crashes. Revision 3 was also bad; revision 2 was the last good one. What do you run?",
+      "choices": "A) `kubectl rollout undo deployment/shop --to-revision=2`\nB) `kubectl rollout undo deployment/shop`\nC) `kubectl rollout history deployment/shop --revision=2`",
+      "back": "A: `kubectl rollout undo deployment/shop --to-revision=2`",
+      "choicesExplained": "B: a plain undo goes to the previous revision, the bad revision 3. C: it only shows revision 2’s details.",
+      "explanation": "--to-revision picks a specific revision instead of the previous one.",
+      "evidence": "kubectl rollout undo deployment/frontend # Rollback to the previous deployment kubectl rollout undo deployment/frontend --to-revision=2 # Rollback to a specific revision",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Updating resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#updating-resources",
+      "uses": [
+        "kubectl",
+        "Deployment",
+        "rollback"
+      ],
+      "conceptIDs": [
+        "ckad.rollout-undo"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-max-surge-count",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4535,
+      "front": "A Deployment wants 10 replicas and uses the default maxSurge. At most how many Pods can exist during a rolling update?",
+      "back": "13: 25% of 10 is 2.5, rounded up to 3 extra Pods.",
+      "explanation": "maxSurge percentages round up to a whole number of Pods.",
+      "evidence": "The value cannot be 0 if maxUnavailable is 0. The absolute number is calculated from the percentage by rounding up. The default value is 25%.",
+      "source": "Kubernetes documentation, “Deployments”, “Max Surge”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#max-surge",
+      "uses": [
+        "maxUnavailable / maxSurge",
+        "rolling update / Recreate",
+        "Pod",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "ckad.rolling-update-defaults"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-no-capacity-loss",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4545,
+      "front": "During updates, a service must never have fewer Pods available than desired, though spare capacity is fine. Which rolling update settings fit?",
+      "choices": "A) maxUnavailable: 0, maxSurge: 25%\nB) maxUnavailable: 25%, maxSurge: 0\nC) maxUnavailable: 0, maxSurge: 0",
+      "back": "A: maxUnavailable 0 with a maxSurge above 0.",
+      "choicesExplained": "B: it lets a quarter of the Pods be unavailable. C: maxUnavailable cannot be 0 when maxSurge is 0.",
+      "explanation": "maxUnavailable caps how many Pods may be unavailable during the update process.",
+      "evidence": ".spec.strategy.rollingUpdate.maxUnavailable is an optional field that specifies the maximum number of Pods that can be unavailable during the update process.",
+      "source": "Kubernetes documentation, “Deployments”, “Max Unavailable”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#max-unavailable",
+      "uses": [
+        "maxUnavailable / maxSurge",
+        "rolling update / Recreate",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.rolling-update-defaults"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-recreate-incompatible",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4550,
+      "front": "Version 2 of an app rewrites a file format that version 1 cannot read, so the two versions must never run at once. Which Deployment strategy fits?",
+      "choices": "A) Recreate\nB) RollingUpdate with default settings\nC) RollingUpdate with maxSurge: 0",
+      "back": "A: Recreate.",
+      "choicesExplained": "B and C: a rolling update scales the old ReplicaSet down while the new one scales up, so old and new Pods run side by side.",
+      "explanation": "Recreate kills all existing Pods before new ones are created.",
+      "evidence": "All existing Pods are killed before new ones are created when .spec.strategy.type==Recreate .",
+      "source": "Kubernetes documentation, “Deployments”, “Recreate Deployment”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#recreate-deployment",
+      "uses": [
+        "rolling update / Recreate",
+        "maxUnavailable / maxSurge",
+        "Deployment",
+        "ReplicaSet",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.recreate-strategy"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-canary-selector-bug",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4555,
+      "front": "Deployments shop (labels app: shop, track: stable) and shop-canary (app: shop, track: canary) sit behind a Service selecting app: shop, track: stable. Why does the canary get no traffic?",
+      "back": "The selector includes `track: stable`, which the canary Pods lack; select only `app: shop` so both sets match.",
+      "explanation": "For a canary, the Service selects the labels both sets share and leaves out track.",
+      "evidence": "The frontend service would span both sets of replicas by selecting the common subset of their labels (i.e. omitting the `track` label), so that the traffic will be redirected to both applications",
+      "source": "Kubernetes documentation, “Managing Workloads”, “Canary deployments”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/management/#canary-deployments",
+      "uses": [
+        "blue-green / canary deployment",
+        "Service",
+        "selector",
+        "label",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "ckad.canary-with-labels"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-canary-share",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4560,
+      "front": "A stable Deployment runs 9 replicas and its canary 1, both behind one Service. Roughly what share of live traffic reaches the canary?",
+      "back": "About one in ten.",
+      "explanation": "The replica counts of the two releases set the ratio of live traffic each receives.",
+      "evidence": "You can tweak the number of replicas of the stable and canary releases to determine the ratio of each release that will receive live production traffic (in this case, 3:1).",
+      "source": "Kubernetes documentation, “Managing Workloads”, “Canary deployments”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/management/#canary-deployments",
+      "uses": [
+        "blue-green / canary deployment",
+        "Deployment",
+        "Service"
+      ],
+      "conceptIDs": [
+        "ckad.canary-replica-ratio"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-blue-green-switch",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4565,
+      "front": "Deployments web-blue (labels app: web, colour: blue) and web-green (app: web, colour: green) exist. The Service selects app: web, colour: blue, and green has passed testing. How do you move all traffic to green?",
+      "back": "Change the Service selector to app: web, colour: green.",
+      "explanation": "The Service targets the Pods its selector matches, so the switch moves all traffic in one step.",
+      "evidence": "The set of Pods targeted by a Service is usually determined by a selector that you define.",
+      "source": "Kubernetes documentation, “Service”, “Services in Kubernetes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/service/",
+      "uses": [
+        "blue-green / canary deployment",
+        "Service",
+        "selector",
+        "label",
+        "Deployment",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.blue-green-selector-switch"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-helm-search-offline",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4600,
+      "front": "You added the bitnami repository yesterday. Today, with no internet access, you want to find its redis chart. Which command works?",
+      "choices": "A) `helm search repo redis`\nB) `helm search hub redis`\nC) `helm repo update`",
+      "back": "A: `helm search repo redis`",
+      "choicesExplained": "B: hub searches Artifact Hub, which is online. C: update refreshes repositories from the network and searches nothing.",
+      "explanation": "helm search repo works over local data, so it needs no public network connection.",
+      "evidence": "helm search repo searches the repositories that you have added to your local helm client (with helm repo add). This search is done over local data, and no public network connection is needed.",
+      "source": "Helm documentation, “Using Helm”, “helm search: Finding Charts”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-search-finding-charts",
+      "uses": [
+        "Helm",
+        "chart repository",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "ckad.helm-search-hub-vs-repo"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-helm-repo-stale",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4605,
+      "front": "A chart version published an hour ago to your added repository dev does not show in `helm search repo`. What do you run first?",
+      "back": "`helm repo update`, then search again.",
+      "explanation": "Search uses your client’s local copy, and repositories change frequently, so the copy needs refreshing.",
+      "evidence": "Because chart repositories change frequently, at any point you can make sure your Helm client is up to date by running helm repo update.",
+      "source": "Helm documentation, “Using Helm”, “helm repo: Working with Repositories”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-repo-working-with-repositories",
+      "uses": [
+        "Helm",
+        "chart repository",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "ckad.helm-repo-add"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-helm-install",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4610,
+      "front": "Which command installs the chart bitnami/redis as a release named cache?",
+      "back": "`helm install cache bitnami/redis`",
+      "explanation": "The release name you pick comes first, then the chart.",
+      "evidence": "At its simplest, it takes two arguments: A release name that you pick, and the name of the chart you want to install.",
+      "source": "Helm documentation, “Using Helm”, “helm install: Installing a Package”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-install-installing-a-package",
+      "uses": [
+        "Helm",
+        "release",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "ckad.helm-install"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-helm-show-values",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4615,
+      "front": "Before installing bitnami/wordpress, you need the exact key name for its database username. Which command shows it?",
+      "back": "`helm show values bitnami/wordpress`",
+      "explanation": "The command lists the options that are configurable on the chart.",
+      "evidence": "To see what options are configurable on a chart, use helm show values:",
+      "source": "Helm documentation, “Using Helm”, “Customizing the Chart Before Installing”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing",
+      "uses": [
+        "Helm",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "ckad.helm-show-values"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-helm-precedence",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4620,
+      "front": "You run `helm install web ./chart -f base.yaml -f prod.yaml --set replicaCount=5`. base.yaml sets replicaCount 2 and prod.yaml sets 3. What does the release get?",
+      "choices": "A) 5\nB) 3\nC) 2",
+      "back": "A: 5.",
+      "choicesExplained": "B: prod.yaml beats base.yaml as the rightmost file, but --set beats both. C: base.yaml is overridden by the files and flags after it.",
+      "explanation": "--set values are merged into --values with higher precedence.",
+      "evidence": "This can be specified multiple times and the rightmost file will take precedence --set: Specify overrides on the command line. If both are used, --set values are merged into --values with higher precedence.",
+      "source": "Helm documentation, “Using Helm”, “Customizing the Chart Before Installing”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing",
+      "uses": [
+        "Helm",
+        "release",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.helm-values-precedence"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-helm-upgrade",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4625,
+      "front": "Release shop runs the chart acme/shop. Which command applies the settings in new.yaml to it, keeping the same chart?",
+      "back": "`helm upgrade -f new.yaml shop acme/shop`",
+      "explanation": "An upgrade can keep the same chart and change only the values file.",
+      "evidence": "$ helm upgrade -f panda.yaml happy-panda bitnami/wordpress In the above case, the happy-panda release is upgraded with the same chart, but with a new YAML file:",
+      "source": "Helm documentation, “Using Helm”, “helm upgrade and helm rollback”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-upgrade-and-helm-rollback-upgrading-a-release-and-recovering-on-failure",
+      "uses": [
+        "Helm",
+        "release",
+        "Helm chart",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.helm-upgrade"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-helm-rollback-revision",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4630,
+      "front": "Release shop was installed, then upgraded once. You now run `helm rollback shop 1`. What is shop’s revision number afterwards?",
+      "choices": "A) 3\nB) 1\nC) 2",
+      "back": "A: 3.",
+      "choicesExplained": "B: a rollback restores revision 1’s contents but gets a new number. C: 2 was the upgrade.",
+      "explanation": "Every install, upgrade or rollback adds 1 to the revision number: install 1, upgrade 2, rollback 3.",
+      "evidence": "Every time an install, upgrade, or rollback happens, the revision number is incremented by 1. The first revision number is always 1.",
+      "source": "Helm documentation, “Using Helm”, “helm upgrade and helm rollback”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-upgrade-and-helm-rollback-upgrading-a-release-and-recovering-on-failure",
+      "uses": [
+        "Helm",
+        "release",
+        "rollback"
+      ],
+      "conceptIDs": [
+        "ckad.helm-rollback"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-helm-which-command",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4635,
+      "front": "You want to roll back release api but do not know which revision numbers exist. Which command tells you?",
+      "choices": "A) `helm history api`\nB) `helm list`\nC) `helm status api`",
+      "back": "A: `helm history api`",
+      "choicesExplained": "B: it lists deployed releases, not one release’s revisions. C: it shows the release’s current state, not its full revision list.",
+      "explanation": "helm history shows the revision numbers for a release.",
+      "evidence": "And we can use helm history [RELEASE] to see revision numbers for a certain release.",
+      "source": "Helm documentation, “Using Helm”, “helm upgrade and helm rollback”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-upgrade-and-helm-rollback-upgrading-a-release-and-recovering-on-failure",
+      "uses": [
+        "Helm",
+        "release",
+        "rollback"
+      ],
+      "conceptIDs": [
+        "ckad.helm-list-status"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-helm-keep-history",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4640,
+      "front": "You must uninstall release test but keep its record so it still shows in `helm list --uninstalled`. What do you run?",
+      "back": "`helm uninstall test --keep-history`",
+      "explanation": "helm list --uninstalled shows only releases uninstalled with --keep-history.",
+      "evidence": "If you wish to keep a deletion release record, use helm uninstall --keep-history. Using helm list --uninstalled will only show releases that were uninstalled with the --keep-history flag.",
+      "source": "Helm documentation, “Using Helm”, “helm uninstall: Uninstalling a Release”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-uninstall-uninstalling-a-release",
+      "uses": [
+        "Helm",
+        "release"
+      ],
+      "conceptIDs": [
+        "ckad.helm-uninstall"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-kustomize-preview",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4700,
+      "front": "You want to see what the kustomization in overlays/prod renders, without changing the cluster. Which command?",
+      "choices": "A) `kubectl kustomize overlays/prod`\nB) `kubectl apply -k overlays/prod`\nC) `kubectl apply -f overlays/prod/kustomization.yaml`",
+      "back": "A: `kubectl kustomize overlays/prod`",
+      "choicesExplained": "B: -k applies the resources to the cluster. C: -f treats the kustomization file as a plain manifest instead of building it.",
+      "explanation": "kubectl kustomize views the resources in a directory with a kustomization file; kubectl apply -k applies them.",
+      "evidence": "To view resources found in a directory containing a kustomization file, run the following command: kubectl kustomize <kustomization_directory> To apply those resources, run kubectl apply with --kustomize or -k flag:",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Overview”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/",
+      "uses": [
+        "kubectl",
+        "kubectl apply",
+        "kustomization file",
+        "overlay",
+        "manifest",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-apply-k"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-kustomize-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4705,
+      "front": "A folder holds deploy.yaml and svc.yaml. What must its kustomization.yaml contain so that `kubectl apply -k .` creates both?",
+      "back": "A `resources` list naming deploy.yaml and svc.yaml.",
+      "explanation": "The resources field defines the list of resources the configuration includes.",
+      "evidence": "The resources field, in the kustomization.yaml file, defines the list of resources to include in a configuration.",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Composing”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#composing-and-customizing-resources",
+      "uses": [
+        "kustomization file",
+        "kubectl apply",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.kustomization-file"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-secret-generator",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4710,
+      "front": "How do you make a kustomization generate a Secret named db-creds holding user=app and pass=s3cret, without writing any file for it?",
+      "back": "A `secretGenerator` entry: name db-creds, with `literals` user=app and pass=s3cret.",
+      "explanation": "secretGenerator makes Secrets from files or from literal key-value pairs.",
+      "evidence": "secretGenerator You can generate Secrets from files or literal key-value pairs.",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Generating Resources”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#generating-resources",
+      "uses": [
+        "Secret",
+        "kustomization file"
+      ],
+      "conceptIDs": [
+        "ckad.kustomize-generators"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-cross-cutting",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "order": 4715,
+      "front": "Every resource in a kustomization must land in namespace staging with names starting stg-. Which two fields do you set?",
+      "back": "`namespace: staging` and `namePrefix: stg-`",
+      "explanation": "Both are cross-cutting fields: they apply to all resources in the kustomization.",
+      "evidence": "Some use cases for setting cross-cutting fields: - setting the same namespace for all resources - adding the same name prefix or suffix",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Setting cross-cutting fields”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#setting-cross-cutting-fields",
+      "uses": [
+        "kustomization file",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.kustomize-cross-cutting"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-kustomize-patches",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4720,
+      "front": "An overlay must raise a Deployment’s replicas and its memory limit. Following the documentation’s advice, how do you set up the patches?",
+      "back": "Two small patch files, one per change, both listed under `patches`.",
+      "explanation": "Small patches that do one thing are recommended, and patches apply in the order listed.",
+      "evidence": "Small patches that do one thing are recommended. For example, create one patch for increasing the deployment replica number and another patch for setting the memory limit.",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Customizing”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#customizing",
+      "uses": [
+        "overlay",
+        "Deployment",
+        "kustomization file"
+      ],
+      "conceptIDs": [
+        "ckad.kustomize-patches"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.app-base-overlays",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 4725,
+      "front": "Dev and prod copies of an app differ only in replica count and namespace. How do you lay them out with Kustomize?",
+      "back": "One shared base, plus a dev overlay and a prod overlay that each refer to it and add their own changes.",
+      "explanation": "A base has no knowledge of an overlay, so one base can be used in several overlays.",
+      "evidence": "A base has no knowledge of an overlay and can be used in multiple overlays.",
+      "source": "Kubernetes documentation, “Declarative Management of Kubernetes Objects Using Kustomize”, “Bases and Overlays”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays",
+      "uses": [
+        "Kustomize",
+        "overlay",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.bases-and-overlays"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.contrast-canary-blue-green",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4900,
+      "front": "Canary versus blue-green: how does live traffic reach the new version?",
+      "back": "Canary: both versions take live traffic at once, split by replica counts. Blue-green: traffic switches over in one go.",
+      "explanation": "Blue-green switches production traffic once testing on the non-active environment has concluded; the canary half comes from the Managing Workloads page taught earlier, where replica counts set each release's share of live traffic.",
+      "evidence": "One serves production traffic (the version all users are currently using), whilst the other is updated. Once testing has concluded on the non-active (green) environment, production traffic is switched over (often via the use of a load balancer).",
+      "source": "Cloud Native Glossary (CNCF), “Blue Green Deployment”",
+      "sourceURL": "https://glossary.cncf.io/blue-green-deployment/",
+      "uses": [
+        "blue-green / canary deployment"
+      ],
+      "conceptIDs": [
+        "ckad.blue-green-selector-switch",
+        "ckad.canary-replica-ratio"
+      ]
+    },
+    {
+      "id": "ckad.rollouts-helm-kustomize.contrast-helm-search",
+      "sourceLicence": "B · CC BY 4.0",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4905,
+      "front": "`helm search hub` versus `helm search repo`: what does each search?",
+      "back": "hub: Artifact Hub, across dozens of repositories. repo: only repositories you added, using local data.",
+      "explanation": "Only the repo search works without a public network connection.",
+      "evidence": "helm search hub searches the Artifact Hub, which lists helm charts from dozens of different repositories. helm search repo searches the repositories that you have added to your local helm client (with helm repo add). This search is done over local data, and no public network connection is needed.",
+      "source": "Helm documentation, “Using Helm”, “helm search: Finding Charts”",
+      "sourceURL": "https://helm.sh/docs/intro/using_helm/#helm-search-finding-charts",
+      "uses": [
+        "Helm",
+        "chart repository"
+      ],
+      "conceptIDs": [
+        "ckad.helm-search-hub-vs-repo"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Helm docs site v4.3.0 (the Using Helm page is not yet updated for Helm 4)"
+    }
+  ]
+}

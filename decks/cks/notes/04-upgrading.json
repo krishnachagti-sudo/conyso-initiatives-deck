@@ -1,0 +1,637 @@
+{
+  "topic": "Upgrading Kubernetes",
+  "notes": [
+    {
+      "id": "cks.upgrading.kubeadm-upgrade-plan",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4000,
+      "front": "What does `kubeadm upgrade plan` do?",
+      "back": "Checks that the cluster can be upgraded and fetches the versions you can upgrade to.",
+      "explanation": "You run it on the first control plane node, after upgrading the kubeadm package, to choose a target version.",
+      "example": "Like a mechanic's inspection that says \"this car can take these parts\" before any part is fitted.",
+      "evidence": "Verify the upgrade plan: sudo kubeadm upgrade plan This command checks that your cluster can be upgraded, and fetches the versions you can upgrade to.",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"Call kubeadm upgrade\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#call-kubeadm-upgrade",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "kubeadm upgrade plan"
+      ],
+      "uses": [
+        "kubeadm upgrade plan",
+        "kubeadm",
+        "cluster",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cks.kubeadm-upgrade-plan"
+      ]
+    },
+    {
+      "id": "cks.upgrading.kubeadm-upgrade-apply",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4010,
+      "front": "What is `kubeadm upgrade apply`?",
+      "back": "The command, run on the first control plane node with a target version (`kubeadm upgrade apply v<version>`), that upgrades the control plane.",
+      "explanation": "It checks the cluster is upgradeable, enforces the version skew policies and upgrades the control plane components, rolling back if any fails to come up.",
+      "example": "Like the head chef switching the kitchen to a new menu first, before the waiting staff are retrained.",
+      "evidence": "Upgrades the control plane components or rollbacks if any of them fails to come up.",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"How it works\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#how-it-works",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "kubeadm upgrade apply"
+      ],
+      "uses": [
+        "kubeadm upgrade apply",
+        "kubeadm",
+        "control plane",
+        "version skew"
+      ],
+      "conceptIDs": [
+        "cks.kubeadm-upgrade-apply"
+      ]
+    },
+    {
+      "id": "cks.upgrading.kubeadm-upgrade-node",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4020,
+      "front": "What is `kubeadm upgrade node`?",
+      "back": "The upgrade command for every node after the first control plane node: other control plane nodes and worker nodes.",
+      "explanation": "On a worker node it fetches the kubeadm ClusterConfiguration and upgrades the kubelet configuration for that node.",
+      "example": "Like each branch office installing the update head office has already rolled out.",
+      "evidence": "kubeadm upgrade node does the following on worker nodes: Fetches the kubeadm ClusterConfiguration from the cluster. Upgrades the kubelet configuration for this node.",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"How it works\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#how-it-works",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "kubeadm upgrade node"
+      ],
+      "uses": [
+        "kubeadm upgrade node",
+        "kubeadm",
+        "node",
+        "control plane",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "cks.kubeadm-upgrade-node"
+      ]
+    },
+    {
+      "id": "cks.upgrading.no-skip-minor",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4030,
+      "front": "Is skipping a minor version supported when upgrading a kubeadm cluster?",
+      "back": "No. Skipping minor versions when upgrading is unsupported.",
+      "explanation": "Each upgrade goes one minor version at a time, as the Version Skew Policy requires.",
+      "evidence": "Skipping MINOR versions when upgrading is unsupported. For more details, please visit Version Skew Policy.",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "version skew"
+      ],
+      "conceptIDs": [
+        "cks.no-skip-minor"
+      ]
+    },
+    {
+      "id": "cks.upgrading.apiserver-no-skip-single",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4040,
+      "front": "In a cluster with a single kube-apiserver instance, may the API server skip a minor version when upgraded?",
+      "back": "No. It must not skip minor versions, even in single-instance clusters.",
+      "explanation": "The rule comes from the project's policies for API deprecation and API change guidelines.",
+      "evidence": "Project policies for API deprecation and API change guidelines require kube-apiserver to not skip minor versions when upgrading, even in single-instance clusters.",
+      "source": "Kubernetes documentation, \"Version Skew Policy\", \"Supported component upgrade order\"",
+      "sourceURL": "https://kubernetes.io/releases/version-skew-policy/#supported-component-upgrade-order",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver",
+        "deprecation policy"
+      ],
+      "conceptIDs": [
+        "cks.no-skip-minor"
+      ]
+    },
+    {
+      "id": "cks.upgrading.apiserver-first",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4050,
+      "front": "In a highly available cluster, what must be upgraded before kube-controller-manager, kube-scheduler and cloud-controller-manager?",
+      "back": "All kube-apiserver instances.",
+      "explanation": "The supported upgrade order starts with kube-apiserver, then these control plane components, then kubelet and kube-proxy.",
+      "evidence": "all kube-apiserver instances must be upgraded before upgrading these components",
+      "source": "Kubernetes documentation, \"Version Skew Policy\", \"Supported component upgrade order\"",
+      "sourceURL": "https://kubernetes.io/releases/version-skew-policy/#supported-component-upgrade-order",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver",
+        "kube-controller-manager",
+        "kube-scheduler",
+        "cloud-controller-manager",
+        "kubelet",
+        "kube-proxy"
+      ],
+      "conceptIDs": [
+        "cks.upgrade-order"
+      ]
+    },
+    {
+      "id": "cks.upgrading.kubelet-after-apiserver",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4060,
+      "front": "What must be true before you upgrade a kubelet to the new minor version?",
+      "back": "The kube-apiserver instances it talks to must already be on that version.",
+      "explanation": "A kubelet must never be newer than kube-apiserver, so the API server always goes first.",
+      "evidence": "The kube-apiserver instances the kubelet communicates with are at 1.37 Optionally upgrade kubelet instances to 1.37",
+      "source": "Kubernetes documentation, \"Version Skew Policy\", \"Supported component upgrade order\"",
+      "sourceURL": "https://kubernetes.io/releases/version-skew-policy/#supported-component-upgrade-order",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cks.upgrade-order"
+      ]
+    },
+    {
+      "id": "cks.upgrading.drain-before-kubelet-minor",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4070,
+      "front": "Can a kubelet be upgraded by a minor version in place, with its Pods still running?",
+      "back": "No. In-place minor kubelet upgrades are not supported: drain the node's Pods first.",
+      "explanation": "Draining moves the node's Pods elsewhere first, so none is running while the kubelet changes minor version.",
+      "evidence": "Before performing a minor version kubelet upgrade, drain pods from that node. In-place minor version kubelet upgrades are not supported.",
+      "source": "Kubernetes documentation, \"Version Skew Policy\", \"Supported component upgrade order\"",
+      "sourceURL": "https://kubernetes.io/releases/version-skew-policy/#supported-component-upgrade-order",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "drain",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.drain-uncordon"
+      ]
+    },
+    {
+      "id": "cks.upgrading.apply-checks",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4080,
+      "front": "Before upgrading anything, what three cluster conditions does `kubeadm upgrade apply` check?",
+      "back": "The API server is reachable; all nodes are Ready; the control plane is healthy.",
+      "explanation": "These checks confirm the cluster is in an upgradeable state before any component changes.",
+      "evidence": "Checks that your cluster is in an upgradeable state:The API server is reachable All nodes are in the Ready state The control plane is healthy",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"How it works\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#how-it-works",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm upgrade apply",
+        "kube-apiserver",
+        "node",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cks.kubeadm-upgrade-apply"
+      ]
+    },
+    {
+      "id": "cks.upgrading.other-control-plane-nodes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4090,
+      "front": "On the second and later control plane nodes, how does the upgrade differ from the first?",
+      "back": "Run `kubeadm upgrade node` instead of `kubeadm upgrade apply`; `kubeadm upgrade plan` and the CNI plugin upgrade are no longer needed.",
+      "explanation": "On those nodes, `kubeadm upgrade node` upgrades the control plane static Pod manifests and the kubelet configuration.",
+      "evidence": "Same as the first control plane node but use: sudo kubeadm upgrade node instead of: sudo kubeadm upgrade apply Also calling kubeadm upgrade plan and upgrading the CNI provider plugin is no longer needed.",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"Call kubeadm upgrade\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#call-kubeadm-upgrade",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm upgrade node",
+        "kubeadm upgrade apply",
+        "kubeadm upgrade plan",
+        "CNI",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cks.kubeadm-upgrade-node"
+      ]
+    },
+    {
+      "id": "cks.upgrading.node-on-control-plane",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4100,
+      "front": "On an additional control plane node, what does `kubeadm upgrade node` upgrade, besides the kubelet configuration?",
+      "back": "The static Pod manifests for the control plane components.",
+      "explanation": "It first fetches the kubeadm ClusterConfiguration and may back up the kube-apiserver certificate.",
+      "evidence": "kubeadm upgrade node does the following on additional control plane nodes: Fetches the kubeadm ClusterConfiguration from the cluster. Optionally backups the kube-apiserver certificate. Upgrades the static Pod manifests for the control plane components. Upgrades the kubelet configuration for this node.",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"How it works\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#how-it-works",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm upgrade node",
+        "static Pod / mirror Pod",
+        "manifest",
+        "control plane",
+        "kubelet",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cks.kubeadm-upgrade-node"
+      ]
+    },
+    {
+      "id": "cks.upgrading.control-plane-one-at-a-time",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4110,
+      "front": "How many control plane nodes should you upgrade at once?",
+      "back": "One at a time.",
+      "explanation": "Since v1.28, kubeadm waits until all control plane instances are upgraded before upgrading the addons, so they must be done in sequence.",
+      "evidence": "The upgrade procedure on control plane nodes should be executed one node at a time.",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"Upgrading control plane nodes\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#upgrading-control-plane-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "control plane",
+        "node",
+        "kubeadm",
+        "addons"
+      ],
+      "conceptIDs": [
+        "cks.kubeadm-upgrade-apply"
+      ]
+    },
+    {
+      "id": "cks.upgrading.drain-command",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4120,
+      "front": "Which command prepares a node for its kubelet upgrade, marking it unschedulable and evicting its workloads?",
+      "back": "`kubectl drain <node> --ignore-daemonsets`",
+      "explanation": "A drain is needed before a minor kubelet upgrade, since in-place minor kubelet upgrades are not supported.",
+      "evidence": "Prepare the node for maintenance by marking it unschedulable and evicting the workloads: # replace <node-to-drain> with the name of your node you are draining kubectl drain <node-to-drain> --ignore-daemonsets",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"Drain the node\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#drain-the-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "drain",
+        "kubectl",
+        "node",
+        "DaemonSet",
+        "workload"
+      ],
+      "conceptIDs": [
+        "cks.drain-uncordon"
+      ]
+    },
+    {
+      "id": "cks.upgrading.restart-kubelet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4130,
+      "front": "After upgrading the kubelet and kubectl packages on a node, which two commands restart the kubelet?",
+      "back": "`sudo systemctl daemon-reload`, then `sudo systemctl restart kubelet`.",
+      "explanation": "The documentation restarts the kubelet straight after installing the new packages, before uncordoning the node.",
+      "evidence": "Restart the kubelet: sudo systemctl daemon-reload sudo systemctl restart kubelet",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"Upgrade kubelet and kubectl\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#upgrade-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "kubectl",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.upgrade-kubelet"
+      ]
+    },
+    {
+      "id": "cks.upgrading.uncordon",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4140,
+      "front": "After the kubelet restarts on the upgraded node, which command brings the node back online?",
+      "back": "`kubectl uncordon <node>`, which marks it schedulable again.",
+      "explanation": "Draining left the node unschedulable, so it takes no new Pods until uncordoned.",
+      "evidence": "Uncordon the node Bring the node back online by marking it schedulable: # replace <node-to-uncordon> with the name of your node kubectl uncordon <node-to-uncordon>",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"Uncordon the node\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#uncordon-the-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "node",
+        "drain",
+        "scheduling"
+      ],
+      "conceptIDs": [
+        "cks.drain-uncordon"
+      ]
+    },
+    {
+      "id": "cks.upgrading.workers-few-at-a-time",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4150,
+      "front": "How should worker nodes be upgraded?",
+      "back": "One or a few nodes at a time, without dropping below the minimum capacity your workloads need.",
+      "explanation": "The documentation ties how many nodes you take at once to keeping enough capacity for your workloads.",
+      "evidence": "The upgrade procedure on worker nodes should be executed one node at a time or few nodes at a time, without compromising the minimum required capacity for running your workloads.",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"Upgrade worker nodes\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#upgrade-worker-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node",
+        "workload",
+        "drain"
+      ],
+      "conceptIDs": [
+        "cks.kubeadm-upgrade-node",
+        "cks.upgrade-kubelet"
+      ]
+    },
+    {
+      "id": "cks.upgrading.package-repo-per-minor",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4160,
+      "front": "Using the community package repositories (`pkgs.k8s.io`), why might the target version not appear when you upgrade?",
+      "back": "The repository is per minor release: you must enable the repository for the new minor version.",
+      "explanation": "The documentation says to check the package repositories if the expected version is missing.",
+      "evidence": "If you're using the community-owned package repositories (pkgs.k8s.io), you need to enable the package repository for the desired Kubernetes minor release.",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"Changing the package repository\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#changing-the-package-repository",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cks.package-repo-minor"
+      ]
+    },
+    {
+      "id": "cks.upgrading.kubelet-skew",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4170,
+      "front": "How many minor versions older than kube-apiserver may a kubelet be, and may it be newer?",
+      "back": "Up to three minor versions older (two for kubelet older than 1.25); never newer.",
+      "explanation": "For kubelets older than 1.25 the limit was two minor versions.",
+      "evidence": "kubelet must not be newer than kube-apiserver. kubelet may be up to three minor versions older than kube-apiserver (kubelet < 1.25 may only be up to two minor versions older than kube-apiserver).",
+      "source": "Kubernetes documentation, \"Version Skew Policy\", \"kubelet\"",
+      "sourceURL": "https://kubernetes.io/releases/version-skew-policy/#kubelet",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "kube-apiserver",
+        "version skew"
+      ],
+      "conceptIDs": [
+        "cks.kubelet-skew"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.upgrading.apiserver-ha-skew",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4180,
+      "front": "In a highly available cluster, how far apart may the newest and oldest kube-apiserver instances be?",
+      "back": "Within one minor version.",
+      "explanation": "Skew between API servers also narrows which kubelet versions are supported.",
+      "evidence": "the newest and oldest kube-apiserver instances must be within one minor version.",
+      "source": "Kubernetes documentation, \"Version Skew Policy\", \"kube-apiserver\"",
+      "sourceURL": "https://kubernetes.io/releases/version-skew-policy/#kube-apiserver",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver",
+        "version skew"
+      ],
+      "conceptIDs": [
+        "cks.apiserver-ha-skew"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.upgrading.three-releases",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4190,
+      "front": "For how many recent minor releases does the Kubernetes project maintain release branches?",
+      "back": "The three most recent minor releases.",
+      "explanation": "Applicable fixes, including security fixes, may be backported to those three branches.",
+      "evidence": "The Kubernetes project maintains release branches for the most recent three minor releases",
+      "source": "Kubernetes documentation, \"Version Skew Policy\", \"Supported versions\"",
+      "sourceURL": "https://kubernetes.io/releases/version-skew-policy/#supported-versions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "support window",
+        "release cadence",
+        "patching and updates"
+      ],
+      "conceptIDs": [
+        "cks.three-releases-maintained"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.upgrading.scenario-skip-minor",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4200,
+      "front": "A kubeadm cluster runs 1.32 and must reach 1.34. What is the supported path?",
+      "choices": "A) `kubeadm upgrade apply v1.34.x` straight away\nB) Upgrade to 1.33 first, then from 1.33 to 1.34\nC) Upgrade the kubelets to 1.34 first, then the control plane\nD) Reinstall the cluster at 1.34",
+      "back": "B) Upgrade to 1.33 first, then to 1.34: one minor version at a time.",
+      "explanation": "Skipping minor versions when upgrading is unsupported.",
+      "choicesExplained": "A skips 1.33. C makes kubelets newer than kube-apiserver, which is never allowed. D is not an upgrade path.",
+      "evidence": "Skipping MINOR versions when upgrading is unsupported.",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "kubeadm upgrade apply",
+        "kubelet",
+        "kube-apiserver",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cks.no-skip-minor",
+        "cks.upgrade-order"
+      ]
+    },
+    {
+      "id": "cks.upgrading.scenario-worker-steps",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4210,
+      "front": "The control plane is upgraded. Which order is right for worker `node-2`, after upgrading its kubeadm package?",
+      "choices": "A) `kubeadm upgrade node`, drain, upgrade kubelet and kubectl, restart kubelet, uncordon\nB) Drain, upgrade kubelet, uncordon, then `kubeadm upgrade apply`\nC) Upgrade kubelet, restart it, then drain\nD) Uncordon, `kubeadm upgrade plan`, restart kubelet",
+      "back": "A) `kubeadm upgrade node`, drain, upgrade the kubelet and kubectl packages, restart the kubelet, uncordon.",
+      "explanation": "The drain must come before the kubelet upgrade, because in-place minor kubelet upgrades are not supported, and the node is made schedulable again only at the end.",
+      "choicesExplained": "B uses `apply`, which is for the first control plane node. C upgrades the kubelet in place before draining. D uncordons first and runs `plan`, which is not needed on workers.",
+      "evidence": "Before performing a minor version kubelet upgrade, drain pods from that node. In-place minor version kubelet upgrades are not supported.",
+      "source": "Kubernetes documentation, \"Version Skew Policy\", \"Supported component upgrade order\"",
+      "sourceURL": "https://kubernetes.io/releases/version-skew-policy/#supported-component-upgrade-order",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm upgrade node",
+        "kubeadm upgrade apply",
+        "kubeadm upgrade plan",
+        "drain",
+        "kubelet",
+        "kubectl",
+        "control plane",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.kubeadm-upgrade-node",
+        "cks.drain-uncordon",
+        "cks.upgrade-kubelet"
+      ]
+    },
+    {
+      "id": "cks.upgrading.scenario-kubelet-skew",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4220,
+      "front": "The API server runs 1.35. Which kubelet version is outside the supported skew?",
+      "choices": "A) 1.35\nB) 1.33\nC) 1.32\nD) 1.36",
+      "back": "D) 1.36: a kubelet must never be newer than kube-apiserver.",
+      "explanation": "Kubelets may be up to three minor versions older (1.32 to 1.35 here), but never newer.",
+      "choicesExplained": "A is the same version. B is two minors older. C is three minors older, the limit.",
+      "evidence": "kubelet must not be newer than kube-apiserver. kubelet may be up to three minor versions older than kube-apiserver",
+      "source": "Kubernetes documentation, \"Version Skew Policy\", \"kubelet\"",
+      "sourceURL": "https://kubernetes.io/releases/version-skew-policy/#kubelet",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "kube-apiserver",
+        "version skew"
+      ],
+      "conceptIDs": [
+        "cks.kubelet-skew"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.upgrading.scenario-first-node",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4230,
+      "front": "You have upgraded the kubeadm package on the first control plane node and want to see which versions you can move to. What do you run?",
+      "choices": "A) `sudo kubeadm upgrade plan`\nB) `sudo kubeadm upgrade node`\nC) `kubectl version`\nD) `sudo kubeadm upgrade apply --force`",
+      "back": "A) `sudo kubeadm upgrade plan`",
+      "explanation": "It checks the cluster can be upgraded and fetches the available versions, before you choose one for `kubeadm upgrade apply`.",
+      "choicesExplained": "B is for later nodes. C shows current versions only. D forces an apply, used to recover from a bad state, not to plan.",
+      "evidence": "This command checks that your cluster can be upgraded, and fetches the versions you can upgrade to.",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"Call kubeadm upgrade\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#call-kubeadm-upgrade",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm upgrade plan",
+        "kubeadm upgrade node",
+        "kubeadm upgrade apply",
+        "kubectl",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cks.kubeadm-upgrade-plan",
+        "cks.kubeadm-upgrade-apply"
+      ]
+    },
+    {
+      "id": "cks.upgrading.scenario-maintained-branch",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4235,
+      "front": "The newest Kubernetes minor release is 1.37. Which cluster runs a minor version that no longer has a maintained release branch?",
+      "choices": "A) A cluster on 1.37\nB) A cluster on 1.36\nC) A cluster on 1.35\nD) A cluster on 1.34",
+      "back": "D) 1.34: only the three most recent minors (1.37, 1.36, 1.35) have release branches.",
+      "explanation": "Applicable fixes, including security fixes, may be backported to those three branches only.",
+      "choicesExplained": "A, B and C are the three most recent minor releases, all still maintained.",
+      "evidence": "The Kubernetes project maintains release branches for the most recent three minor releases (1.37, 1.36, 1.35).",
+      "source": "Kubernetes documentation, \"Version Skew Policy\", \"Supported versions\"",
+      "sourceURL": "https://kubernetes.io/releases/version-skew-policy/#supported-versions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "support window",
+        "patching and updates"
+      ],
+      "conceptIDs": [
+        "cks.three-releases-maintained"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.upgrading.contrast-apply-node",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4240,
+      "front": "`kubeadm upgrade apply` versus `kubeadm upgrade node`: where is each run?",
+      "back": "`apply`: once, on the first control plane node. `node`: on every other control plane node and on worker nodes.",
+      "explanation": "Later nodes use `node` instead of `apply`, and no longer need `plan`.",
+      "evidence": "Same as the first control plane node but use: sudo kubeadm upgrade node instead of: sudo kubeadm upgrade apply",
+      "source": "Kubernetes documentation, \"Upgrading kubeadm clusters\", \"Call kubeadm upgrade\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#call-kubeadm-upgrade",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm upgrade apply",
+        "kubeadm upgrade node",
+        "kubeadm upgrade plan",
+        "control plane",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.kubeadm-upgrade-apply",
+        "cks.kubeadm-upgrade-node"
+      ]
+    }
+  ]
+}

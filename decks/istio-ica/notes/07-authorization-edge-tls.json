@@ -1,0 +1,1368 @@
+{
+  "topic": "Authorization and edge TLS",
+  "notes": [
+    {
+      "id": "istio.authorization-edge-tls.what-is-authorizationpolicy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7005,
+      "front": "What is an AuthorizationPolicy in Istio?",
+      "back": "The custom resource you create to configure access control: a selector, an action and a list of rules.",
+      "explanation": "Istio authorization is configured through this one resource: the selector picks the target, the action says allow or deny, and the rules say when to act.",
+      "introduces": [
+        "AuthorizationPolicy"
+      ],
+      "example": "Like a guest list at a venue door, but written per workload: who may come in, doing what, under which conditions.",
+      "source": "Istio / Security, “Authorization policies”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#authorization-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To configure an authorization policy, you create an AuthorizationPolicy custom resource. An authorization policy includes a selector, an action, and a list of rules:",
+      "uses": [
+        "AuthorizationPolicy",
+        "authorization"
+      ],
+      "conceptIDs": [
+        "istio.authorizationpolicy"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.what-is-sni",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 7010,
+      "front": "What is SNI (Server Name Indication), and what can Istio match it against?",
+      "back": "A value in HTTPS or TLS traffic that Istio matches against the hosts field, as it matches the Host/Authority header for HTTP.",
+      "explanation": "For plain HTTP the Host or Authority header plays this part; for HTTPS or TLS traffic, the SNI value is what gets matched against hosts.",
+      "introduces": [
+        "SNI"
+      ],
+      "example": "Like the name on an envelope that a mailroom can read without opening it, but for an encrypted connection.",
+      "source": "Istio / Service Entry (reference), “ServiceEntry”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/service-entry/#ServiceEntry",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For HTTPs or TLS traffic containing Server Name Indication (SNI), the SNI value will be matched against the hosts field.",
+      "uses": [
+        "SNI",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.sni"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.enforced-server-side",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7015,
+      "front": "Service A calls service B, and you want to control which callers may reach B. On which workload’s proxy is an AuthorizationPolicy enforced?",
+      "back": "On B’s: policies act on inbound traffic in the server-side Envoy proxy.",
+      "explanation": "Each Envoy proxy runs its own authorization engine, which evaluates requests at runtime against the current policies.",
+      "source": "Istio / Security, “Authorization architecture”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#authorization-architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The authorization policy enforces access control to the inbound traffic in the server side Envoy proxy. Each Envoy proxy runs an authorization engine that authorizes requests at runtime.",
+      "uses": [
+        "AuthorizationPolicy",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.authorizationpolicy"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.no-switch-needed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7030,
+      "front": "Do you have to switch on Istio’s authorization features before applying a policy?",
+      "back": "No. They are available after installation; you just apply an authorization policy.",
+      "explanation": "The docs call this implicit enablement: enforcing access control only needs a policy.",
+      "source": "Istio / Security, “Implicit enablement”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#implicit-enablement",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You don’t need to explicitly enable Istio’s authorization features; they are available after installation. To enforce access control to your workloads, you apply an authorization policy.",
+      "uses": [
+        "authorization",
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.implicit-enablement"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.new-namespace-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7040,
+      "front": "A team deploys a new inventory service into a fresh namespace. Nobody has written any AuthorizationPolicy for it, and nothing was switched on. Will a request from another workload be blocked by Istio authorization?",
+      "back": "No. With no policy applied, Istio allows all requests to it.",
+      "explanation": "Authorization needs no switching on, but it also enforces nothing until a policy targets the workload.",
+      "source": "Istio / Security, “Implicit enablement”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#implicit-enablement",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For workloads without authorization policies applied, Istio allows all requests.",
+      "uses": [
+        "AuthorizationPolicy",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.implicit-enablement"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.action-allow",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7045,
+      "front": "What does the `ALLOW` action do, and which action does a policy use when none is set?",
+      "back": "It allows a request only if it matches the rules. It is the default action.",
+      "explanation": "A policy with no action set behaves as `ALLOW`.",
+      "source": "Istio / Authorization Policy (reference), “Action”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#AuthorizationPolicy-Action",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "ALLOW Allow a request only if it matches the rules. This is the default type.",
+      "uses": [
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.authz-actions"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.action-deny",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7050,
+      "front": "You must block any request that matches a rule, whatever other policies allow. Which action does the policy need?",
+      "back": "`DENY`: it denies a request if it matches any of the rules.",
+      "explanation": "`DENY` rejects matching requests; `ALLOW`, by contrast, permits only matching requests.",
+      "source": "Istio / Authorization Policy (reference), “Action”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#AuthorizationPolicy-Action",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "DENY Deny a request if it matches any of the rules.",
+      "uses": [
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.authz-actions"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.action-audit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7055,
+      "front": "Does an `AUDIT` policy change whether a request is allowed or denied?",
+      "back": "No. It only marks matching requests to be audited; allow or deny still comes from `CUSTOM`, `DENY` and `ALLOW`.",
+      "explanation": "`AUDIT` decides whether to log requests and leaves the access decision untouched.",
+      "source": "Istio / Authorization Policy (reference), “AuthorizationPolicy”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#AuthorizationPolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "AUDIT policies do not affect whether requests are allowed or denied to the workload. Requests will be allowed or denied based solely on CUSTOM, DENY and ALLOW actions.",
+      "uses": [
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.authz-actions"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.action-custom",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7065,
+      "front": "What does the `CUSTOM` action do?",
+      "back": "It lets an extension handle the request when the matching rules evaluate to true.",
+      "explanation": "The extension is a named provider declared in MeshConfig; one example use is delegating the decision to an external authorization system.",
+      "source": "Istio / Authorization Policy (reference), “Action”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#AuthorizationPolicy-Action",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The CUSTOM action allows an extension to handle the user request if the matching rules evaluate to true.",
+      "uses": [
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.authz-actions"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.custom-cannot-bypass",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7070,
+      "front": "If a `CUSTOM` extension returns allow, can it override a `DENY` policy that matches the same request?",
+      "back": "No. A request is allowed only if all the actions return allow.",
+      "explanation": "The extension is evaluated before `ALLOW` and `DENY` but cannot bypass their decision.",
+      "source": "Istio / Authorization Policy (reference), “Action”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#AuthorizationPolicy-Action",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A request is allowed if and only if all the actions return allow, in other words, the extension cannot bypass the authorization decision made by ALLOW and DENY action.",
+      "uses": [
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.authz-actions"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.order-cloze",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7080,
+      "front": "Istio checks authorization policies in layers, in this order: {{c1::`CUSTOM`, `DENY`, and then `ALLOW`}}.",
+      "explanation": "If a request doesn’t match a policy in one layer, the check continues to the next.",
+      "source": "Istio / Security, “Implicit enablement”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#implicit-enablement",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio checks for matching policies in layers, in this order: CUSTOM, DENY, and then ALLOW.",
+      "uses": [
+        "authorization"
+      ],
+      "conceptIDs": [
+        "istio.authz-order"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.policies-additive",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7095,
+      "front": "When you apply several authorization policies to the same workload, Istio applies them {{c1::additively}}.",
+      "explanation": "Policies with different actions can be combined on one workload as needed.",
+      "source": "Istio / Security, “Implicit enablement”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#implicit-enablement",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When you apply multiple authorization policies to the same workload, Istio applies them additively.",
+      "uses": [
+        "authorization"
+      ],
+      "conceptIDs": [
+        "istio.authz-order"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.order-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7100,
+      "front": "A payments workload has one `ALLOW` policy permitting `GET` from the frontend service account, and one `DENY` policy blocking every request from the legacy namespace. The frontend’s account happens to run in the legacy namespace and sends a `GET`. Result?",
+      "back": "Denied: the matching `DENY` policy wins over the `ALLOW` policy.",
+      "explanation": "`DENY` is evaluated first, so an allow policy can’t bypass it.",
+      "source": "Istio / Security, “Authorization policies”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#authorization-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The deny policy takes precedence over the allow policy. Requests matching allow policies can be denied if they match a deny policy.",
+      "uses": [
+        "ServiceAccount",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.authz-order"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.deny-by-default-condition",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7105,
+      "front": "When does Istio’s “deny by default” behaviour apply to a workload?",
+      "back": "Only when the workload has at least one authorization policy with the `ALLOW` action.",
+      "explanation": "Without an `ALLOW` policy, requests that pass `CUSTOM` and `DENY` are allowed.",
+      "source": "Istio / Security, “allow-nothing, deny-all and allow-all policy”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#allow-nothing-deny-all-and-allow-all-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note the “deny by default” behavior applies only if the workload has at least one authorization policy with the ALLOW action.",
+      "uses": [
+        "authorization"
+      ],
+      "conceptIDs": [
+        "istio.allow-nothing"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.allow-nothing-what",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7110,
+      "front": "What does the allow-nothing policy look like, and what is its effect?",
+      "back": "An `ALLOW` policy with no rules. It never matches, so with no other `ALLOW` policies, requests are always denied.",
+      "explanation": "Leaving rules unspecified means the policy will never match, which triggers deny by default.",
+      "source": "Istio / Security, “allow-nothing, deny-all and allow-all policy”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#allow-nothing-deny-all-and-allow-all-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The following example shows an ALLOW policy that matches nothing. If there are no other ALLOW policies, requests will always be denied because of the “deny by default” behavior.",
+      "uses": [
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.allow-nothing"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.allow-nothing-practice",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7115,
+      "front": "What practice do the Istio docs recommend for starting access control on a workload?",
+      "back": "Start with the allow-nothing policy, then add `ALLOW` policies step by step to open access.",
+      "explanation": "The docs call this a good security practice.",
+      "source": "Istio / Security, “allow-nothing, deny-all and allow-all policy”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#allow-nothing-deny-all-and-allow-all-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It is a good security practice to start with the allow-nothing policy and incrementally add more ALLOW policies to open more access to the workload.",
+      "uses": [
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.allow-nothing"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.deny-all",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7125,
+      "front": "How is the deny-all policy written, and when is it useful?",
+      "back": "A `DENY` policy with one empty rule ({}), which always matches. Useful to disable all access temporarily.",
+      "explanation": "It denies even when another `ALLOW` policy would allow, because `DENY` takes precedence.",
+      "source": "Istio / Security, “allow-nothing, deny-all and allow-all policy”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#allow-nothing-deny-all-and-allow-all-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It will always deny the request even if there is another ALLOW policy allowing the request because the DENY policy takes precedence over the ALLOW policy. This is useful if you want to temporarily disable all access to the workload.",
+      "uses": [
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.allow-nothing"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.allow-all",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7130,
+      "front": "An `ALLOW` policy with one empty rule ({}) is applied. Can requests still be denied?",
+      "back": "Yes, by `CUSTOM` and `DENY` policies. It only makes other `ALLOW` policies useless.",
+      "explanation": "The allow-all policy always matches at the `ALLOW` layer, but the earlier layers still apply.",
+      "source": "Istio / Security, “allow-nothing, deny-all and allow-all policy”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#allow-nothing-deny-all-and-allow-all-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It will make other ALLOW policies useless as it will always allow the request. It might be useful if you want to temporarily expose full access to the workload. Note the request could still be denied due to CUSTOM and DENY policies.",
+      "uses": [
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.allow-nothing"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.empty-vs-no-rules",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7135,
+      "front": "How does an `ALLOW` policy with rules: [{}] differ from an `ALLOW` policy with no rules at all?",
+      "back": "rules: [{}] holds an empty rule, which always matches (allow-all); no rules never matches (allow-nothing).",
+      "explanation": "The reference states that an empty rule is always matched, while an unset rules field never matches.",
+      "source": "Istio / Authorization Policy (reference), “Rule”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#Rule",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A match occurs when at least one source, one operation and all conditions matches the request. An empty rule is always matched.",
+      "uses": [
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.allow-nothing",
+        "istio.authz-rule-parts"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.rule-from",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7140,
+      "front": "In an authorization rule, which field specifies the sources of the request?",
+      "back": "from.",
+      "explanation": "from holds a list of source entries; if it is not set, any source is allowed.",
+      "source": "Istio / Security, “Authorization policies”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#authorization-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The from field in the rules specifies the sources of the request",
+      "uses": [
+        "authorization"
+      ],
+      "conceptIDs": [
+        "istio.authz-rule-parts"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.rule-to",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7145,
+      "front": "In an authorization rule, which field specifies the operations of the request?",
+      "back": "to.",
+      "explanation": "to holds a list of operation entries, such as methods or paths; if it is not set, any operation is allowed.",
+      "source": "Istio / Security, “Authorization policies”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#authorization-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The to field in the rules specifies the operations of the request",
+      "uses": [
+        "authorization"
+      ],
+      "conceptIDs": [
+        "istio.authz-rule-parts"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.rule-when",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7150,
+      "front": "In an authorization rule, which field specifies the conditions needed to apply the rule?",
+      "back": "when.",
+      "explanation": "when lists extra conditions on Istio attributes, such as a request header or a JWT claim.",
+      "source": "Istio / Security, “Authorization policies”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#authorization-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The when field specifies the conditions needed to apply the rule",
+      "uses": [
+        "authorization"
+      ],
+      "conceptIDs": [
+        "istio.authz-rule-parts"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.rule-match-semantics",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7155,
+      "front": "A rule lists two sources, one operation and two when conditions. A request matches one source, the operation and only one condition. Does the rule match?",
+      "back": "No. It needs at least one source, one operation and all conditions.",
+      "explanation": "Sources and operations are alternatives within their lists; conditions must all hold.",
+      "source": "Istio / Authorization Policy (reference), “Rule”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#Rule",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A match occurs when at least one source, one operation and all conditions matches the request.",
+      "uses": [
+        "authorization"
+      ],
+      "conceptIDs": [
+        "istio.authz-rule-parts"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.source-principals",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7175,
+      "front": "What does the principals field of a Source match, and in what format?",
+      "back": "Peer identities from the peer certificate, as <TRUST_DOMAIN>/ns/<NAMESPACE>/sa/<SERVICE_ACCOUNT>.",
+      "explanation": "For example cluster.local/ns/default/sa/productpage; the field requires mTLS.",
+      "source": "Istio / Authorization Policy (reference), “Source”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#Source",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A list of peer identities derived from the peer certificate. The peer identity is in the format of \"<TRUST_DOMAIN>/ns/<NAMESPACE>/sa/<SERVICE_ACCOUNT>\", for example, \"cluster.local/ns/default/sa/productpage\". This field requires mTLS enabled",
+      "uses": [
+        "mtls",
+        "ServiceAccount"
+      ],
+      "conceptIDs": [
+        "istio.authz-source"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.source-namespaces",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7180,
+      "front": "Where does the namespaces field of a Source take its value from?",
+      "back": "From the peer certificate; it requires mTLS.",
+      "explanation": "It is the same as the source.namespace attribute.",
+      "source": "Istio / Authorization Policy (reference), “Source”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#Source",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A list of namespaces derived from the peer certificate. This field requires mTLS enabled and is the same as the source.namespace attribute.",
+      "uses": [
+        "namespace",
+        "mtls"
+      ],
+      "conceptIDs": [
+        "istio.authz-source"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.source-ipblocks",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7190,
+      "front": "Where does the ipBlocks field of a Source get its addresses from?",
+      "back": "From the source address of the IP packet; single IPs and CIDR ranges are supported.",
+      "explanation": "It is the same as the source.ip attribute.",
+      "source": "Istio / Authorization Policy (reference), “Source”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#Source",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A list of IP blocks, populated from the source address of the IP packet. Single IP (e.g. 203.0.113.4) and CIDR (e.g. 203.0.113.0/24) are supported. This is the same as the source.ip attribute.",
+      "uses": [
+        "authorization"
+      ],
+      "conceptIDs": [
+        "istio.authz-source"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.source-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7200,
+      "front": "A rule has one source entry: principals: [\"cluster.local/ns/shop/sa/cart\"] and namespaces: [\"billing\"]. A request arrives from the cart service account in the shop namespace. Does the source match?",
+      "back": "No. Both fields must match, and the namespace is shop, not billing.",
+      "explanation": "Fields within one source are ANDed, so every listed field must match.",
+      "source": "Istio / Authorization Policy (reference), “Source”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#Source",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Source specifies the source identities of a request. Fields in the source are ANDed together.",
+      "uses": [
+        "ServiceAccount",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.authz-source"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.operation-hosts",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7210,
+      "front": "In an Operation, how is the hosts field matched, and with which traffic may it be used?",
+      "back": "Case-insensitively against the host in the HTTP request; only with HTTP.",
+      "explanation": "If not set, any host is allowed.",
+      "source": "Istio / Authorization Policy (reference), “Operation”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#Operation",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A list of hosts as specified in the HTTP request. The match is case-insensitive.",
+      "uses": [
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.authz-operation"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.operation-ports",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7215,
+      "front": "In an Operation, what does the ports field match?",
+      "back": "The ports as specified in the connection.",
+      "explanation": "If ports is not set, any port is allowed.",
+      "source": "Istio / Authorization Policy (reference), “Operation”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#Operation",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A list of ports as specified in the connection. If not set, any port is allowed.",
+      "uses": [
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.authz-operation"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.operation-methods-grpc",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7220,
+      "front": "An `ALLOW` rule for a gRPC service sets methods: [\"`GET`\"]. Will gRPC calls match it?",
+      "back": "No. For a gRPC service the method is always `POST`.",
+      "explanation": "methods lists HTTP request methods, and gRPC calls always appear as `POST`.",
+      "source": "Istio / Authorization Policy (reference), “Operation”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#Operation",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A list of methods as specified in the HTTP request. For gRPC service, this will always be POST.",
+      "uses": [
+        "grpc"
+      ],
+      "conceptIDs": [
+        "istio.authz-operation"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.condition-header-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 7235,
+      "front": "You want a rule to apply only when the request carries a header named tier with the value gold or silver. Which rule part and key would you use?",
+      "back": "A when condition with key request.headers[tier] and values [\"gold\", \"silver\"].",
+      "explanation": "The request.headers attribute is a map, so each header is one entry you can name in the key.",
+      "source": "Istio / Security, “Custom conditions”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#custom-conditions",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In this case, the key is request.headers[version], which is an entry in the Istio attribute request.headers, which is a map.",
+      "uses": [
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.authz-condition"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.scope-root-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7240,
+      "front": "An AuthorizationPolicy is created in the root namespace. Where does it apply?",
+      "back": "To all namespaces in the mesh. The root namespace defaults to istio-system and is configurable.",
+      "explanation": "The policy’s metadata/namespace sets its scope, and the root namespace is mesh-wide.",
+      "source": "Istio / Security, “Policy Target”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#policy-target",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If set its value to the root namespace, the policy applies to all namespaces in a mesh. The value of the root namespace is configurable, and the default is istio-system.",
+      "uses": [
+        "AuthorizationPolicy",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.authz-selector-scope"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.scope-selector",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7250,
+      "front": "What does the selector field of an authorization policy do, and what happens if it is not set?",
+      "back": "It picks target workloads by label. If not set, the policy applies to all workloads in its namespace.",
+      "explanation": "The selector restricts a namespace-scoped policy to specific workloads.",
+      "source": "Istio / Security, “Policy Target”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#policy-target",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The selector uses labels to select the target workload. The selector contains a list of {key: value} pairs, where the key is the name of the label. If not set, the authorization policy applies to all workloads in the same namespace as the authorization policy.",
+      "uses": [
+        "label",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.authz-selector-scope"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.scope-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7255,
+      "front": "You put an `ALLOW` policy with selector app: reports in the istio-system namespace, which is your root namespace. Which workloads does it target?",
+      "back": "Workloads labelled app: reports in every namespace of the mesh.",
+      "explanation": "A root-namespace policy applies mesh-wide, and the selector then narrows it to matching labels.",
+      "source": "Istio / Security, “Policy Target”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#policy-target",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If set its value to the root namespace, the policy applies to all namespaces in a mesh.",
+      "uses": [
+        "label",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.authz-selector-scope"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.rbac-access-denied",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7270,
+      "front": "After an allow-nothing policy is applied, what error does a browser show for a blocked HTTP workload?",
+      "back": "“`RBAC: access denied`”.",
+      "explanation": "The task reads this error as proof that its allow-nothing policy works: Istio has no rules that allow any access to the workloads.",
+      "source": "Istio / HTTP Traffic (authorization task), “Configure access control for workloads using HTTP traffic”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/security/authorization/authz-http/#configure-access-control-for-workloads-using-http-traffic",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You should see \"RBAC: access denied\". The error shows that the configured deny-all policy is working as intended",
+      "uses": [
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.authz-http-task"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.from-unset-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7275,
+      "front": "A namespace has an allow-nothing policy. You add an `ALLOW` policy for the storefront workload with to: methods [\"`GET`\"] and no from field. Who can now send `GET` requests to storefront?",
+      "back": "Everyone: all users and workloads.",
+      "explanation": "Leaving from unset means all sources are allowed.",
+      "source": "Istio / HTTP Traffic (authorization task), “Configure access control for workloads using HTTP traffic”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/security/authorization/authz-http/#configure-access-control-for-workloads-using-http-traffic",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The policy does not set the from field in the rules which means all sources are allowed, effectively allowing all users and workloads:",
+      "uses": [
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.authz-http-task"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.requestprincipal-format",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7285,
+      "front": "How does Istio build a request principal from a JWT?",
+      "back": "It joins the token’s iss and sub with a / separator.",
+      "explanation": "For example, iss and sub both testing@secure.istio.io give testing@secure.istio.io/testing@secure.istio.io.",
+      "source": "Istio / JWT Token (authorization task), “Allow requests with valid JWT and list-typed claims”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/security/authorization/authz-jwt/#allow-requests-with-valid-jwt-and-list-typed-claims",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio constructs the requestPrincipal by combining the iss and sub of the JWT token with a / separator as shown:",
+      "uses": [
+        "JSON Web Token"
+      ],
+      "conceptIDs": [
+        "istio.authz-jwt-claims"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.jwt-no-token-allowed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7290,
+      "front": "A RequestAuthentication policy is in place but no AuthorizationPolicy. Is a request with no JWT rejected?",
+      "back": "No. It is allowed, because there is no authorization policy.",
+      "explanation": "The task shows invalid tokens are rejected, but requiring a token takes an authorization policy.",
+      "source": "Istio / JWT Token (authorization task), “Allow requests with valid JWT and list-typed claims”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/security/authorization/authz-jwt/#allow-requests-with-valid-jwt-and-list-typed-claims",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Verify that a request without a JWT is allowed because there is no authorization policy:",
+      "uses": [
+        "request authentication",
+        "JSON Web Token",
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.authz-jwt-claims"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.jwt-groups-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7300,
+      "front": "A policy requires the JWT claim groups to contain group1. One caller’s valid token has no groups claim at all. Is the request allowed?",
+      "back": "No. It is rejected.",
+      "explanation": "The task shows a token that lacks the required groups claim being rejected.",
+      "source": "Istio / JWT Token (authorization task), “Allow requests with valid JWT and list-typed claims”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/security/authorization/authz-jwt/#allow-requests-with-valid-jwt-and-list-typed-claims",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Verify that a request with a JWT, which doesn’t have the groups claim is rejected:",
+      "uses": [
+        "JSON Web Token"
+      ],
+      "conceptIDs": [
+        "istio.authz-jwt-claims"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.principals-vs-requestprincipals",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7305,
+      "front": "How do requestPrincipals differ from principals in a Source?",
+      "back": "requestPrincipals come from the JWT (`<ISS>/<SUB>`) and need request authentication; principals come from the peer certificate and need mTLS.",
+      "explanation": "One identifies the end user’s token, the other the calling workload.",
+      "source": "Istio / Authorization Policy (reference), “Source”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#Source",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A list of request identities derived from the JWT. The request identity is in the format of \"<ISS>/<SUB>\", for example, \"example.com/sub-1\". This field requires request authentication enabled",
+      "uses": [
+        "JSON Web Token",
+        "request authentication",
+        "mtls"
+      ],
+      "conceptIDs": [
+        "istio.request-principal"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.requestprincipals-classify",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7310,
+      "front": "You must admit only callers whose token was issued by idp.example.org. Which Source field do you use: principals or requestPrincipals?",
+      "back": "requestPrincipals, for example [\"idp.example.org/*\"].",
+      "explanation": "Token issuers appear in request identities, which come from the JWT; principals hold workload identities from certificates.",
+      "source": "Istio / Authorization Policy (reference), “Source”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#Source",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "requestPrincipals string[] A list of request identities derived from the JWT. The request identity is in the format of \"<ISS>/<SUB>\"",
+      "uses": [
+        "JSON Web Token"
+      ],
+      "conceptIDs": [
+        "istio.request-principal"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.tcp-http-only-fields",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7315,
+      "front": "Which authorization fields apply only to HTTP workloads, not plain TCP?",
+      "back": "request_principals in source; hosts, methods and paths in operation.",
+      "explanation": "Otherwise a TCP policy, such as one for MongoDB, is written the same way as for HTTP.",
+      "source": "Istio / Security, “Using Istio authorization on plain TCP protocols”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#using-istio-authorization-on-plain-tcp-protocols",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The request_principals field in the source section of the authorization policy object The hosts, methods and paths fields in the operation section of the authorization policy object",
+      "uses": [
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.authz-tcp"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.tcp-deny-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7325,
+      "front": "A `DENY` policy blocks method `POST` on port 5432, but the workload on port 5432 speaks plain TCP. What happens to its traffic?",
+      "back": "All TCP traffic on port 5432 is denied.",
+      "explanation": "The method can’t be processed on TCP, and for a `DENY` rule missing attributes are treated as matches.",
+      "source": "Istio / Authorization Policy (reference), “AuthorizationPolicy”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#AuthorizationPolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When this rule is applied to TCP traffic, the method field (as will all HTTP based attributes) cannot be processed. For a DENY rule, missing attributes are treated as matches.",
+      "uses": [
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.authz-tcp"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.scope-deny-to-port",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7330,
+      "front": "What do the Istio docs recommend for `DENY` policies, especially ones using HTTP attributes?",
+      "back": "Always scope them to a specific port.",
+      "explanation": "Without a ports match, a `DENY` rule with HTTP attributes would deny all TCP traffic.",
+      "source": "Istio / Authorization Policy (reference), “AuthorizationPolicy”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/security/authorization-policy/#AuthorizationPolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If we were to remove the ports match, all TCP traffic would be denied. As a result, it is recommended to always scope DENY policies to a specific port",
+      "uses": [
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.authz-tcp"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.mtls-dependent-fields",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7335,
+      "front": "Which authorization fields need mutual TLS enabled before you use them?",
+      "back": "principals/notPrincipals and namespaces/notNamespaces in source, plus the source.principal and source.namespace conditions.",
+      "explanation": "Istio uses mutual TLS to pass this information securely from client to server.",
+      "source": "Istio / Security, “Dependency on mutual TLS”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#dependency-on-mutual-tls",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio uses mutual TLS to securely pass some information from the client to the server. Mutual TLS must be enabled before using any of the following fields in the authorization policy:",
+      "uses": [
+        "mtls"
+      ],
+      "conceptIDs": [
+        "istio.authz-needs-mtls"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.strict-recommended",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7340,
+      "front": "A namespace runs PeerAuthentication in permissive mode, and you plan a policy keyed on source namespaces. What do the docs strongly recommend first?",
+      "back": "Switch to strict mutual TLS, to avoid unexpected rejections or policy bypass from plain-text traffic.",
+      "explanation": "The recommendation covers the principals and namespaces fields and their source conditions.",
+      "source": "Istio / Security, “Dependency on mutual TLS”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/security/#dependency-on-mutual-tls",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note it is strongly recommended to always use these fields with strict mutual TLS mode in the PeerAuthentication to avoid potential unexpected requests rejection or policy bypass when plain text traffic is used with the permissive mutual TLS mode.",
+      "uses": [
+        "peer authentication",
+        "permissive mode"
+      ],
+      "conceptIDs": [
+        "istio.authz-needs-mtls"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.ambient-l7-waypoint",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7345,
+      "front": "In ambient mode, which authorization comes without extra components, and what does L7 authorization need?",
+      "back": "Encryption and L4 authorization come built in; L7 authorization requires a waypoint.",
+      "explanation": "The comparison table lists this under security for ambient mode.",
+      "source": "Istio / Sidecar or ambient?, “Comparing sidecar and ambient”",
+      "sourceURL": "https://istio.io/latest/docs/overview/dataplane-modes/#security",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "encryption and L4 authorization in ambient mode. Requires waypoints for L7 authorization.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "ambient mode",
+        "waypoint proxy"
+      ],
+      "conceptIDs": [
+        "istio.ambient-authz-waypoint"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.ambient-path-policy-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7350,
+      "front": "In an ambient-mode namespace with no waypoint, you apply a policy allowing only `GET` on /api paths. What must you add for it to be enforced?",
+      "back": "A waypoint proxy: methods and paths are L7 rules.",
+      "explanation": "Without a waypoint, ambient mode enforces L4 authorization only.",
+      "source": "Istio / Sidecar or ambient?, “Comparing sidecar and ambient”",
+      "sourceURL": "https://istio.io/latest/docs/overview/dataplane-modes/#security",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "encryption and L4 authorization in ambient mode. Requires waypoints for L7 authorization.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "ambient mode",
+        "waypoint proxy"
+      ],
+      "conceptIDs": [
+        "istio.ambient-authz-waypoint"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.mode-passthrough",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7365,
+      "front": "In Gateway TLS mode `PASSTHROUGH`, how is the destination chosen?",
+      "back": "The client’s SNI is matched in a VirtualService TLS route.",
+      "explanation": "The gateway does not terminate TLS; it routes on the SNI string.",
+      "source": "Istio / Gateway (reference), “ServerTLSSettings.TLSmode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#ServerTLSSettings-TLSmode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "PASSTHROUGH The SNI string presented by the client will be used as the match criterion in a VirtualService TLS route to determine the destination service from the service registry.",
+      "uses": [
+        "SNI",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.gateway-tls-modes"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.mode-simple",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7370,
+      "front": "Which Gateway TLS mode gives standard TLS and does not request a client certificate?",
+      "back": "`SIMPLE`.",
+      "explanation": "It is the mode for a normal HTTPS endpoint.",
+      "source": "Istio / Gateway (reference), “ServerTLSSettings.TLSmode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#ServerTLSSettings-TLSmode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "SIMPLE Secure connections with standard TLS semantics. In this mode client certificate is not requested during handshake.",
+      "uses": [
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "istio.gateway-tls-modes"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.mode-mutual",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7375,
+      "front": "Which Gateway TLS mode requires the client to send at least one valid certificate?",
+      "back": "`MUTUAL`.",
+      "explanation": "The gateway presents its server certificate and also requests one from the client.",
+      "source": "Istio / Gateway (reference), “ServerTLSSettings.TLSmode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#ServerTLSSettings-TLSmode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A client certificate will also be requested during the handshake and at least one valid certificate is required to be sent by the client.",
+      "uses": [
+        "Gateway",
+        "mtls"
+      ],
+      "conceptIDs": [
+        "istio.gateway-tls-modes"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.mode-auto-passthrough",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7380,
+      "front": "Which Gateway TLS mode forwards on the SNI value without needing a VirtualService, because the destination is encoded in the SNI?",
+      "back": "`AUTO_PASSTHROUGH`.",
+      "explanation": "It assumes both source and destination use Istio mTLS; it typically links services in separate L3 networks.",
+      "source": "Istio / Gateway (reference), “ServerTLSSettings.TLSmode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#ServerTLSSettings-TLSmode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Similar to the passthrough mode, except servers with this TLS mode do not require an associated VirtualService to map from the SNI value to service in the registry.",
+      "uses": [
+        "SNI",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.gateway-tls-modes"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.mode-istio-mutual",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7385,
+      "front": "Which Gateway TLS mode uses mutual TLS with certificates Istio generates automatically for the gateway’s workload identity?",
+      "back": "`ISTIO_MUTUAL`.",
+      "explanation": "All other TLS option fields should be empty in this mode.",
+      "source": "Istio / Gateway (reference), “ServerTLSSettings.TLSmode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#ServerTLSSettings-TLSmode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Compared to Mutual mode, this mode uses certificates, representing gateway workload identity, generated automatically by Istio for mTLS authentication. When this mode is used, all other fields in TLSOptions should be empty.",
+      "uses": [
+        "Gateway",
+        "mtls"
+      ],
+      "conceptIDs": [
+        "istio.gateway-tls-modes"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.mode-optional-mutual",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7390,
+      "front": "Which Gateway TLS mode requests a client certificate but lets the client connect without one?",
+      "back": "`OPTIONAL_MUTUAL`.",
+      "explanation": "If a certificate is presented, it is validated.",
+      "source": "Istio / Gateway (reference), “ServerTLSSettings.TLSmode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#ServerTLSSettings-TLSmode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Similar to MUTUAL mode, except that the client certificate is optional. Unlike SIMPLE mode, A client certificate will still be explicitly requested during handshake, but the client is not required to send a certificate.",
+      "uses": [
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "istio.gateway-tls-modes"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.mode-classify",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7400,
+      "front": "A partner API at the edge must accept only callers that show a client certificate signed by your CA. Which Gateway TLS mode fits?",
+      "back": "`MUTUAL`.",
+      "explanation": "`OPTIONAL_MUTUAL` would let callers without a certificate through, and `SIMPLE` never asks for one.",
+      "source": "Istio / Gateway (reference), “ServerTLSSettings.TLSmode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#ServerTLSSettings-TLSmode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A client certificate will also be requested during the handshake and at least one valid certificate is required to be sent by the client.",
+      "uses": [
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "istio.gateway-tls-modes"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.credentialname-what",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7405,
+      "front": "On a Gateway running on Kubernetes, what does credentialName name?",
+      "back": "The secret holding the TLS certificates, including CA certificates.",
+      "explanation": "It applies only on Kubernetes.",
+      "source": "Istio / Gateway (reference), “ServerTLSSettings”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#ServerTLSSettings",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For gateways running on Kubernetes, the name of the secret that holds the TLS certs including the CA certificates. Applicable only on Kubernetes.",
+      "uses": [
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "istio.credential-name"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.single-host-setup",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7420,
+      "front": "To expose one HTTPS host through an Istio Gateway resource (the Istio APIs, not the Kubernetes Gateway API), what TLS settings go on the port 443 server?",
+      "back": "mode: `SIMPLE` and credentialName set to the secret’s name.",
+      "explanation": "The credentialName value must be the same as the secret’s name.",
+      "source": "Istio / Secure Gateways, “Configure a TLS ingress gateway for a single host”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/secure-ingress/#configure-a-tls-ingress-gateway-for-a-single-host",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "First, define a gateway with a servers: section for port 443, and specify values for credentialName to be httpbin-credential. The values are the same as the secret’s name. The TLS mode should have the value of SIMPLE.",
+      "uses": [
+        "Gateway",
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.tls-ingress-single"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.https-edge-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7430,
+      "front": "You store the certificate for shop.example.com in a secret named shop-cert. What goes in the Gateway server’s tls block?",
+      "back": "mode: `SIMPLE` and credentialName: shop-cert.",
+      "explanation": "For a plain HTTPS host the task uses `SIMPLE` mode and a credentialName equal to the secret’s name.",
+      "source": "Istio / Secure Gateways, “Configure a TLS ingress gateway for a single host”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/secure-ingress/#configure-a-tls-ingress-gateway-for-a-single-host",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The values are the same as the secret’s name. The TLS mode should have the value of SIMPLE.",
+      "uses": [
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "istio.tls-ingress-single",
+        "istio.credential-name"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.multi-host",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7435,
+      "front": "How do you give two HTTPS hosts their own certificates on one Istio ingress gateway?",
+      "back": "Define two server sections for port 443, each with its own credentialName, in `SIMPLE` mode.",
+      "explanation": "The gateway is configured with unique credentials for each host.",
+      "source": "Istio / Secure Gateways, “Configure a TLS ingress gateway for multiple hosts”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/secure-ingress/#configure-a-tls-ingress-gateway-for-multiple-hosts",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Define a gateway with two server sections for port 443. Set the value of credentialName on each port to httpbin-credential and helloworld-credential respectively. Set TLS mode to SIMPLE.",
+      "uses": [
+        "ingress gateway",
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.tls-ingress-multi"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.mtls-ingress-ca-key",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7440,
+      "front": "For a mutual TLS ingress gateway, which secret key holds the CA certificate used to verify clients?",
+      "back": "ca.crt.",
+      "explanation": "The server uses this CA certificate to verify its clients.",
+      "source": "Istio / Secure Gateways, “Configure a mutual TLS ingress gateway”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/secure-ingress/#configure-a-mutual-tls-ingress-gateway",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The server uses the CA certificate to verify its clients, and we must use the key ca.crt to hold the CA certificate.",
+      "uses": [
+        "ingress gateway"
+      ],
+      "conceptIDs": [
+        "istio.mtls-ingress"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.mtls-ingress-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7455,
+      "front": "After switching a gateway to `MUTUAL`, a curl call that passes only --cacert fails the handshake. What must the caller add?",
+      "back": "Its client certificate (--cert) and private key (--key).",
+      "explanation": "A `MUTUAL` gateway requests a client certificate; the task resends the request with both.",
+      "source": "Istio / Secure Gateways, “Configure a mutual TLS ingress gateway”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/secure-ingress/#configure-a-mutual-tls-ingress-gateway",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Pass your client’s certificate with the --cert flag and your private key with the --key flag to curl:",
+      "uses": [
+        "ingress gateway"
+      ],
+      "conceptIDs": [
+        "istio.mtls-ingress"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.https-sni-matching",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7460,
+      "front": "What does an HTTPS Gateway do with SNI before forwarding a request, and what can go wrong?",
+      "back": "It matches the SNI against its configured hosts, which may cause some requests to fail.",
+      "explanation": "A client whose SNI does not fit the gateway’s hosts can be refused before routing.",
+      "source": "Istio / Secure Gateways, “SNI Routing”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/secure-ingress/#sni-routing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "An HTTPS Gateway will perform SNI matching against its configured host(s) before forwarding a request, which may cause some requests to fail.",
+      "uses": [
+        "Gateway",
+        "SNI"
+      ],
+      "conceptIDs": [
+        "istio.sni"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.sni-passthrough-what",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7465,
+      "front": "What does a Gateway in `PASSTHROUGH` mode on port 443 do with incoming TLS traffic?",
+      "back": "Passes it “as is”, without terminating TLS.",
+      "explanation": "This gives HTTPS ingress to a service that is itself HTTPS.",
+      "source": "Istio / Ingress Gateway without TLS Termination, “Configure an ingress gateway”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-sni-passthrough/#configure-an-ingress-gateway",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Define a Gateway exposing port 443 with passthrough TLS mode. This instructs the gateway to pass the ingress traffic “as is”, without terminating TLS:",
+      "uses": [
+        "Gateway",
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.sni-passthrough"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.passthrough-vs-simple",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7475,
+      "front": "How does a `PASSTHROUGH` Gateway server differ from a `SIMPLE` one?",
+      "back": "`PASSTHROUGH` routes on the client’s SNI without terminating TLS; `SIMPLE` terminates standard TLS at the gateway.",
+      "explanation": "In `PASSTHROUGH` mode the client’s SNI is matched in a VirtualService TLS route.",
+      "source": "Istio / Gateway (reference), “ServerTLSSettings.TLSmode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#ServerTLSSettings-TLSmode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "TLS can be either used to terminate non-HTTP based connections on a specific port or to route traffic based on SNI header to the destination without terminating the TLS connection.",
+      "uses": [
+        "Gateway",
+        "SNI"
+      ],
+      "conceptIDs": [
+        "istio.sni-passthrough",
+        "istio.gateway-tls-modes"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.passthrough-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7480,
+      "front": "A vault service holds its own certificate and must terminate TLS itself; the ingress gateway must not decrypt the traffic. How do you set the gateway server on port 443?",
+      "back": "tls mode `PASSTHROUGH`, with a VirtualService TLS route matching the SNI host.",
+      "explanation": "Passthrough forwards traffic as is, and the route is chosen by the client’s SNI.",
+      "source": "Istio / Ingress Gateway without TLS Termination, “Configure an ingress gateway”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-sni-passthrough/#configure-an-ingress-gateway",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This instructs the gateway to pass the ingress traffic “as is”, without terminating TLS:",
+      "uses": [
+        "Gateway",
+        "VirtualService",
+        "SNI"
+      ],
+      "conceptIDs": [
+        "istio.sni-passthrough"
+      ]
+    },
+    {
+      "id": "istio.authorization-edge-tls.key-format-tls-secret",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7485,
+      "front": "What are two Secret formats Istio can read for gateway certificates?",
+      "back": "Any two of: a TLS Secret with tls.key and tls.crt; a generic Secret with key and cert.",
+      "explanation": "Istio reads several formats so that tools such as cert-manager can integrate.",
+      "source": "Istio / Secure Gateways, “Key formats”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/secure-ingress/#key-formats",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio supports reading a few different Secret formats, to support integration with various tools such as cert-manager: A TLS Secret with keys tls.key and tls.crt, as described above.",
+      "uses": [
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "istio.key-formats"
+      ]
+    }
+  ]
+}

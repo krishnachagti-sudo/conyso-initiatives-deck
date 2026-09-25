@@ -1,0 +1,851 @@
+{
+  "topic": "Multi-container Pods and volumes",
+  "notes": [
+    {
+      "id": "ckad.multi-container-pods.what-is-a-multi-container-pod",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3000,
+      "front": "What is a multi-container Pod, and why do Pods allow it?",
+      "back": "A Pod running more than one container, mainly so helper applications can assist a primary application.",
+      "explanation": "The docs name data pullers, data pushers and proxies as typical helpers.",
+      "example": "Like a shop counter staffed by a cashier plus a stock clerk who keeps the shelves filled behind them.",
+      "evidence": "The primary reason that Pods can have multiple containers is to support helper applications that assist a primary application. Typical examples of helper applications are data pullers, data pushers, and proxies.",
+      "source": "Communicate Between Containers in the Same Pod Using a Shared Volume (Kubernetes docs), “Discussion”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/access-application-cluster/communicate-containers-same-pod-shared-volume/#discussion",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "multi-container Pod"
+      ],
+      "uses": [
+        "multi-container Pod",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.multi-container-pod"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.what-is-the-ambassador-pattern",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3006,
+      "front": "What is the ambassador pattern?",
+      "back": "A helper container giving Pod-local services that simplify access to a network service, often sending requests on the app's behalf.",
+      "explanation": "It takes on challenges such as service discovery, peer identity verification or encryption in transit, so the app does not have to.",
+      "example": "Like a travel agent: you say where you want to go, and the agent deals with the airlines and the paperwork.",
+      "evidence": "An ambassador container provides Pod-local helper services that expose a simple way to access a network service. Commonly, ambassador containers send network requests on behalf of a an application container and take care of challenges such as service discovery, peer identity verification, or encryption in transit.",
+      "source": "Kubernetes Multicontainer Pods: An Overview (Kubernetes blog, 2025), “Ambassador pattern”",
+      "sourceURL": "https://kubernetes.io/blog/2025/04/22/multi-container-pods-overview/#ambassador-pattern",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "ambassador pattern"
+      ],
+      "uses": [
+        "ambassador pattern",
+        "multi-container Pod",
+        "app container"
+      ],
+      "conceptIDs": [
+        "ckad.ambassador-pattern"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.what-is-the-adapter-pattern",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3012,
+      "front": "What is the adapter pattern?",
+      "back": "A helper container (sometimes called a façade) that translates data formats, protocols or interfaces between the app and external services.",
+      "explanation": "The translation is what gives the main container interoperability with services it does not match.",
+      "example": "Like a travel plug adapter: the appliance and the wall socket stay as they are, and the adapter makes them fit.",
+      "evidence": "An adapter (or sometimes façade ) container enables interoperability between the main application container and external services. It does this by translating data formats, protocols, or APIs.",
+      "source": "Kubernetes Multicontainer Pods: An Overview (Kubernetes blog, 2025), “Adapter pattern”",
+      "sourceURL": "https://kubernetes.io/blog/2025/04/22/multi-container-pods-overview/#adapter-pattern",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "adapter pattern"
+      ],
+      "uses": [
+        "adapter pattern",
+        "multi-container Pod",
+        "app container"
+      ],
+      "conceptIDs": [
+        "ckad.adapter-pattern"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.what-is-a-configuration-helper",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 3018,
+      "front": "What is a configuration helper, in multi-container Pod patterns?",
+      "back": "A sidecar that gives the app configuration updates dynamically, often supplying an initial configuration before the app can start.",
+      "explanation": "The aim is that the app always has the latest settings without its service being disrupted.",
+      "example": "Like an assistant who swaps the notice on the staff board whenever the rota changes, so nobody has to go and ask.",
+      "evidence": "A configuration helper sidecar provides configuration updates to an application dynamically, ensuring it always has access to the latest settings without disrupting the service. Often the helper needs to provide an initial configuration before the application would be able to start successfully.",
+      "source": "Kubernetes Multicontainer Pods: An Overview (Kubernetes blog, 2025), “Configuration helper”",
+      "sourceURL": "https://kubernetes.io/blog/2025/04/22/multi-container-pods-overview/#configuration-helper",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "configuration helper"
+      ],
+      "uses": [
+        "configuration helper",
+        "sidecar container",
+        "multi-container Pod"
+      ],
+      "conceptIDs": [
+        "ckad.configuration-helper"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.what-is-a-generic-ephemeral-volume",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 3024,
+      "front": "What is a generic ephemeral volume?",
+      "back": "A per-Pod volume whose claim is defined inside the Pod: a PersistentVolumeClaim is created with the Pod and deleted with it.",
+      "explanation": "The ephemeral volume controller creates the claim in the Pod's namespace and makes sure it goes when the Pod goes.",
+      "example": "Like a hotel-room safe: it is yours for the stay and is cleared when you check out.",
+      "evidence": "When such a Pod gets created, the ephemeral volume controller then creates an actual PersistentVolumeClaim object in the same namespace as the Pod and ensures that the PersistentVolumeClaim gets deleted when the Pod gets deleted.",
+      "source": "Ephemeral Volumes (Kubernetes docs), “Lifecycle and PersistentVolumeClaim”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/#lifecycle-and-persistentvolumeclaim",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "generic ephemeral volume"
+      ],
+      "uses": [
+        "generic ephemeral volume",
+        "ephemeral volume",
+        "PersistentVolumeClaim",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "ckad.generic-ephemeral-volume"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.init-one-at-a-time",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3030,
+      "front": "How do a Pod's init containers run, compared with regular containers?",
+      "back": "Each runs to completion, and each must complete successfully before the next one starts.",
+      "explanation": "Apart from this, the docs say init containers are exactly like regular containers.",
+      "evidence": "Init containers are exactly like regular containers, except: - Init containers always run to completion. - Each init container must complete successfully before the next one starts.",
+      "source": "Init Containers (Kubernetes docs), “Understanding init containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#understanding-init-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "init container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.init-container-order"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.init-fails",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3036,
+      "front": "What happens when an init container fails, and how does `restartPolicy: Never` change that?",
+      "back": "The kubelet restarts it repeatedly until it succeeds. With `restartPolicy: Never`, the whole Pod is treated as failed.",
+      "explanation": "The Pod's restart policy decides whether a failing setup step is retried or ends the Pod.",
+      "evidence": "If a Pod's init container fails, the kubelet repeatedly restarts that init container until it succeeds. However, if the Pod has a restartPolicy of Never, and an init container fails during startup of that Pod, Kubernetes treats the overall Pod as failed.",
+      "source": "Init Containers (Kubernetes docs), “Understanding init containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#understanding-init-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "init container",
+        "restartPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.init-container-order"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.init-blocks-app",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3042,
+      "front": "A Pod has init containers `wait-for-db` then `seed-cache`. `wait-for-db` keeps failing. What state are `seed-cache` and the app container in?",
+      "back": "Neither has started: init containers run in order, and the main container waits for all of them to succeed.",
+      "explanation": "Init containers run to completion one after another, and the main container does not start until every one has succeeded.",
+      "evidence": "Init containers run to completion sequentially, and the main container does not start until all the init containers have successfully completed.",
+      "source": "Init Containers (Kubernetes docs), “Differences from sidecar containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#differences-from-sidecar-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "init container",
+        "app container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.init-container-order"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.pick-init-for-setup",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 3048,
+      "front": "Before an app starts, a one-time step must fetch a certificate bundle into a shared volume, then finish. Which container type?",
+      "choices": "A) Init container\nB) Sidecar container\nC) Ambassador container",
+      "back": "A) Init container: it runs a setup task to completion before the main container starts.",
+      "explanation": "The init container pattern exists for setup tasks that make sure the main application's preconditions are met, then terminate.",
+      "choicesExplained": "B: a sidecar keeps running alongside the app, which this step does not need. C: an ambassador handles the app's network requests while it runs.",
+      "evidence": "The Init container pattern is used to execute (often critical) setup tasks before the main application container starts. Unlike regular containers, init containers run to completion and then terminate, ensuring that preconditions for the main application are met.",
+      "source": "Kubernetes Multicontainer Pods: An Overview (Kubernetes blog, 2025), “Init container pattern”",
+      "sourceURL": "https://kubernetes.io/blog/2025/04/22/multi-container-pods-overview/#init-container-pattern",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "init container",
+        "sidecar container",
+        "ambassador pattern",
+        "volume",
+        "app container"
+      ],
+      "conceptIDs": [
+        "ckad.init-container-order",
+        "ckad.multi-container-pod"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.native-sidecar-spec",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3054,
+      "front": "How is a native sidecar container declared in a Pod spec?",
+      "back": "Under `spec.initContainers`, with `restartPolicy: Always`.",
+      "explanation": "The container-level `restartPolicy: Always` is what makes an init container a sidecar that keeps running.",
+      "evidence": "Sidecar containers can now be defined within a Pod manifest using the spec.initContainers field. What makes it a sidecar container is that you specify it with restartPolicy: Always .",
+      "source": "Kubernetes Multicontainer Pods: An Overview (Kubernetes blog, 2025), “Kubernetes implementation”",
+      "sourceURL": "https://kubernetes.io/blog/2025/04/22/multi-container-pods-overview/#kubernetes-implementation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "sidecar container",
+        "init container",
+        "restartPolicy",
+        "Pod",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "ckad.native-sidecar"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.native-sidecar-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3060,
+      "front": "The SidecarContainers feature, which lets you set a `restartPolicy` on init containers, is active by default since Kubernetes {{c1::v1.29}}.",
+      "back": "v1.29.",
+      "explanation": "From that version, a `restartPolicy` can be set on containers listed in a Pod's `initContainers`.",
+      "evidence": "(the feature is active by default since Kubernetes v1.29), you can specify a restartPolicy for containers listed in a Pod's initContainers field.",
+      "source": "Sidecar Containers (Kubernetes docs), “Sidecar containers in Kubernetes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/#pod-sidecar-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "sidecar container",
+        "init container",
+        "restartPolicy"
+      ],
+      "conceptIDs": [
+        "ckad.native-sidecar"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.sidecar-log-tailer",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3066,
+      "front": "A log-tailing helper must start before the app and keep running for the Pod's whole life. How do you declare it?",
+      "back": "As an init container with `restartPolicy: Always`: a native sidecar.",
+      "explanation": "An init container with `restartPolicy` set to `Always` starts and stays running for the entire life of the Pod.",
+      "evidence": "If an init container is created with its restartPolicy set to Always , it will start and remain running during the entire life of the Pod. This can be helpful for running supporting services separated from the main application containers.",
+      "source": "Sidecar Containers (Kubernetes docs), “Sidecar containers and Pod lifecycle”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/#sidecar-containers-and-pod-lifecycle",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "sidecar container",
+        "init container",
+        "restartPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.native-sidecar"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.init-vs-sidecar-running",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 3072,
+      "front": "Init container or sidecar container: which keeps running alongside the main containers?",
+      "back": "The sidecar. Init containers complete their tasks before the main application container starts.",
+      "explanation": "Both are listed under `initContainers`, so what they do after start-up is the difference that matters.",
+      "contrast": "Init: runs once, finishes, then the app starts. Sidecar: starts first, then runs beside the app.",
+      "evidence": "Init containers run and complete their tasks before the main application container starts. Unlike sidecar containers , init containers are not continuously running alongside the main containers.",
+      "source": "Init Containers (Kubernetes docs), “Differences from sidecar containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#differences-from-sidecar-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "init container",
+        "sidecar container",
+        "app container"
+      ],
+      "conceptIDs": [
+        "ckad.init-vs-sidecar"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.init-vs-sidecar-probes",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 3078,
+      "front": "Which support liveness, readiness and startup probes: init containers or sidecar containers?",
+      "back": "Sidecar containers. Init containers support none of them (nor `lifecycle`).",
+      "explanation": "Sidecars use these probes to control their lifecycle.",
+      "contrast": "Probes apply to containers that keep running; init containers finish instead.",
+      "evidence": "init containers do not support lifecycle , livenessProbe , readinessProbe , or startupProbe whereas sidecar containers support all these probes to control their lifecycle.",
+      "source": "Init Containers (Kubernetes docs), “Differences from sidecar containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#differences-from-sidecar-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "init container",
+        "sidecar container",
+        "liveness probe",
+        "readiness probe",
+        "startup probe"
+      ],
+      "conceptIDs": [
+        "ckad.init-vs-sidecar"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.sidecar-in-job",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3084,
+      "front": "A Job's Pod has a native sidecar that never exits. Does it stop the Job completing once the main container finishes?",
+      "back": "No. The sidecar does not prevent the Job from completing.",
+      "explanation": "This holds for sidecars defined the Kubernetes way, as init containers.",
+      "evidence": "If you define a Job that uses sidecar using Kubernetes-style init containers, the sidecar container in each Pod does not prevent the Job from completing after the main container has finished.",
+      "source": "Sidecar Containers (Kubernetes docs), “Jobs with sidecar containers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/#jobs-with-sidecar-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job",
+        "sidecar container",
+        "init container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.sidecar-in-jobs"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.pick-ambassador",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 3090,
+      "front": "An old app must reach a remote service over encrypted, identity-checked connections, and you cannot change its code. Which helper pattern fits?",
+      "choices": "A) Adapter\nB) Ambassador\nC) Configuration helper",
+      "back": "B) Ambassador: it sends the app's network requests and handles concerns like peer identity and encryption in transit.",
+      "explanation": "Ambassador containers take care of peer identity verification and encryption in transit on the app's behalf.",
+      "choicesExplained": "A: an adapter translates data formats or protocols between the app and external services. C: a configuration helper delivers settings, not connections.",
+      "evidence": "Commonly, ambassador containers send network requests on behalf of a an application container and take care of challenges such as service discovery, peer identity verification, or encryption in transit.",
+      "source": "Kubernetes Multicontainer Pods: An Overview (Kubernetes blog, 2025), “Ambassador pattern”",
+      "sourceURL": "https://kubernetes.io/blog/2025/04/22/multi-container-pods-overview/#ambassador-pattern",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ambassador pattern",
+        "adapter pattern",
+        "configuration helper"
+      ],
+      "conceptIDs": [
+        "ckad.ambassador-pattern"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.pick-adapter",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 3096,
+      "front": "A legacy app writes status in an old text format, and the monitoring system only reads a newer one. Which helper pattern fits?",
+      "choices": "A) Adapter\nB) Ambassador\nC) Init container",
+      "back": "A) Adapter: it translates data formats between the app and external services.",
+      "explanation": "Transforming legacy data formats is listed among the adapter pattern's strengths.",
+      "choicesExplained": "B: an ambassador simplifies the app's outgoing network access rather than reshaping its data. C: an init container runs once before the app starts, so it cannot translate ongoing output.",
+      "evidence": "An adapter (or sometimes façade ) container enables interoperability between the main application container and external services. It does this by translating data formats, protocols, or APIs. Strengths: - Transforming legacy data formats",
+      "source": "Kubernetes Multicontainer Pods: An Overview (Kubernetes blog, 2025), “Adapter pattern”",
+      "sourceURL": "https://kubernetes.io/blog/2025/04/22/multi-container-pods-overview/#adapter-pattern",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "adapter pattern",
+        "ambassador pattern",
+        "init container"
+      ],
+      "conceptIDs": [
+        "ckad.adapter-pattern"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.pick-config-helper",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 3102,
+      "front": "An app must pick up new feature flags from a central store while running, without a restart. Which helper pattern fits?",
+      "back": "A configuration helper sidecar.",
+      "explanation": "Polling configuration changes and decoupling configuration management from application logic are among its listed uses.",
+      "evidence": "Use cases: - Fetching environment variables and secrets - Polling configuration changes - Decoupling configuration management from application logic",
+      "source": "Kubernetes Multicontainer Pods: An Overview (Kubernetes blog, 2025), “Configuration helper”",
+      "sourceURL": "https://kubernetes.io/blog/2025/04/22/multi-container-pods-overview/#configuration-helper",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "configuration helper",
+        "sidecar container"
+      ],
+      "conceptIDs": [
+        "ckad.configuration-helper"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.how-containers-talk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3108,
+      "front": "What are the two usual ways a helper and a primary container in one Pod communicate?",
+      "back": "A shared filesystem (a shared volume), or the loopback network interface, `localhost`.",
+      "explanation": "The docs note that helper and primary applications often need to communicate with each other.",
+      "evidence": "Helper and primary applications often need to communicate with each other. Typically this is done through a shared filesystem, as shown in this exercise, or through the loopback network interface, localhost.",
+      "source": "Communicate Between Containers in the Same Pod Using a Shared Volume (Kubernetes docs), “Discussion”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/access-application-cluster/communicate-containers-same-pod-shared-volume/#discussion",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "multi-container Pod",
+        "volume",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.shared-volume-two-containers"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.share-emptydir",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3114,
+      "front": "Container `writer` saves reports to `/out`, and container `web` must serve them from `/usr/share/nginx/html`. How do you connect them?",
+      "back": "Declare one `emptyDir` volume in the Pod and mount it at `/out` in `writer` and at the web root in `web`.",
+      "explanation": "All containers in the Pod can read and write the same emptyDir files, even when each mounts it at a different path.",
+      "evidence": "All containers in the Pod can read and write the same files in the emptyDir volume, though that volume can be mounted at the same or different paths in each container.",
+      "source": "Volumes (Kubernetes docs), “emptyDir”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/volumes/#emptydir",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "emptyDir",
+        "volume",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.shared-volume-two-containers"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.volumes-and-mounts",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3120,
+      "front": "In a Pod spec, where do you declare the volumes, and where does each container say where to mount them?",
+      "back": "Volumes in `.spec.volumes`; mount points in each container's `volumeMounts` (`.spec.containers[*].volumeMounts`).",
+      "explanation": "The Pod provides the volumes once, and each container chooses which ones to mount and where.",
+      "evidence": "To use a volume, specify the volumes to provide for the Pod in .spec.volumes and declare where to mount those volumes into containers in .spec.containers[*].volumeMounts .",
+      "source": "Volumes (Kubernetes docs), “How volumes work”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/volumes/#how-volumes-work",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "volume",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.volume-and-mount"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.keep-across-restart",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3126,
+      "front": "A cache container writes to `/data`, and everything is lost each time the container restarts. What fixes it within the Pod?",
+      "back": "Mount a volume at `/data`, so the data no longer lives in the container's own filesystem.",
+      "explanation": "A container's filesystem lives only as long as the container; a volume gives storage independent of it.",
+      "evidence": "A Container's file system lives only as long as the Container does. So when a Container terminates and restarts, filesystem changes are lost. For more consistent storage that is independent of the Container, you can use a Volume.",
+      "source": "Configure a Pod to Use a Volume for Storage (Kubernetes docs), introduction",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-volume-storage/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "volume",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.volume-and-mount"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.emptydir-crash",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3132,
+      "front": "Is the data in a Pod's `emptyDir` lost when one of its containers crashes?",
+      "back": "No. A container crash does not remove the Pod from its node, so the data is safe.",
+      "explanation": "The data is deleted only when the Pod is removed from the node.",
+      "evidence": "When a Pod is removed from a node for any reason, the data in the emptyDir is deleted permanently. Note: A container crashing does not remove a Pod from a node. The data in an emptyDir volume is safe across container crashes.",
+      "source": "Volumes (Kubernetes docs), “emptyDir”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/volumes/#emptydir",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "emptyDir",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.emptydir-lifetime"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.emptydir-evicted",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 3138,
+      "front": "A Pod with an `emptyDir` is evicted, and its replacement starts on another node. Is the old `emptyDir` data there?",
+      "back": "No. It was deleted permanently when the Pod was removed from the node.",
+      "explanation": "`emptyDir` lives as long as the Pod stays on its node; removal for any reason deletes the data.",
+      "evidence": "When a Pod is removed from a node for any reason, the data in the emptyDir is deleted permanently.",
+      "source": "Volumes (Kubernetes docs), “emptyDir”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/volumes/#emptydir",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "emptyDir",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.emptydir-lifetime"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.emptydir-memory",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3144,
+      "front": "What does `medium: Memory` do to an `emptyDir`, and what is the catch?",
+      "back": "It is mounted as `tmpfs`, a memory-backed filesystem; files written count against the writing container's memory limit.",
+      "explanation": "`tmpfs` is very fast, but unlike disk it uses the container's memory.",
+      "evidence": "Kubernetes mounts a tmpfs (RAM-backed filesystem) for you instead. While tmpfs is very fast, be aware that, unlike disks, files you write count against the memory limit of the container that wrote them.",
+      "source": "Volumes (Kubernetes docs), “emptyDir”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/volumes/#emptydir",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "emptyDir"
+      ],
+      "conceptIDs": [
+        "ckad.emptydir-memory"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.subpath",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3150,
+      "front": "What does `subPath` on a volume mount do?",
+      "back": "Mounts a sub-path inside the volume instead of its root.",
+      "explanation": "It lets one volume be shared for several uses in a single Pod.",
+      "evidence": "Sometimes, it is useful to share one volume for multiple uses in a single Pod. The volumeMounts[*].subPath property specifies a sub-path inside the referenced volume instead of its root.",
+      "source": "Volumes (Kubernetes docs), “Using subPath”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/volumes/#using-subpath",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "volume",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.subpath"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.claim-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3156,
+      "front": "A Pod mounts storage through a PersistentVolumeClaim. Which namespace must the claim be in?",
+      "back": "The same namespace as the Pod.",
+      "explanation": "The cluster looks for the claim in the Pod's namespace, then uses it to find the PersistentVolume behind it.",
+      "evidence": "Pods access storage by using the claim as a volume. Claims must exist in the same namespace as the Pod using the claim. The cluster finds the claim in the Pod's namespace and uses it to get the PersistentVolume backing the claim.",
+      "source": "Persistent Volumes (Kubernetes docs), “Claims As Volumes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/#claims-as-volumes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "PersistentVolumeClaim",
+        "PersistentVolume",
+        "namespace",
+        "Pod",
+        "volume"
+      ],
+      "conceptIDs": [
+        "ckad.pvc-in-pod"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.claim-wrong-namespace",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3162,
+      "front": "A Pod in namespace `shop` refers to claim `orders-data`, which exists only in namespace `default`. What must you do?",
+      "back": "Create the claim in `shop`: a Pod can only use claims in its own namespace.",
+      "explanation": "The cluster finds the claim in the Pod's namespace, so a claim elsewhere is never found.",
+      "evidence": "Claims must exist in the same namespace as the Pod using the claim. The cluster finds the claim in the Pod's namespace and uses it to get the PersistentVolume backing the claim.",
+      "source": "Persistent Volumes (Kubernetes docs), “Claims As Volumes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/#claims-as-volumes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "PersistentVolumeClaim",
+        "namespace",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.pvc-in-pod"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.claim-unbound",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3168,
+      "front": "What happens to a PersistentVolumeClaim when no matching volume exists?",
+      "back": "It stays unbound indefinitely, and is bound once a matching volume becomes available.",
+      "explanation": "Binding needs a match; a claim waits rather than failing.",
+      "evidence": "Claims will remain unbound indefinitely if a matching volume does not exist. Claims will be bound as matching volumes become available.",
+      "source": "Persistent Volumes (Kubernetes docs), “Binding”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/#binding",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "PersistentVolumeClaim",
+        "PersistentVolume"
+      ],
+      "conceptIDs": [
+        "ckad.pvc-binding"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.claim-too-big",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 3174,
+      "front": "With no dynamic provisioning, a cluster has only 20Gi PersistentVolumes, and a claim asks for 40Gi. What happens to the claim?",
+      "back": "It stays unbound: no volume matches, so it waits until one that does becomes available.",
+      "explanation": "The docs give the same case: 50Gi volumes would not match a claim for 100Gi.",
+      "evidence": "Claims will remain unbound indefinitely if a matching volume does not exist. Claims will be bound as matching volumes become available. For example, a cluster provisioned with many 50Gi PVs would not match a PVC requesting 100Gi.",
+      "source": "Persistent Volumes (Kubernetes docs), “Binding”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/#binding",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "PersistentVolumeClaim",
+        "PersistentVolume"
+      ],
+      "conceptIDs": [
+        "ckad.pvc-binding"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.mode-rwo",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3180,
+      "front": "Which access mode (and abbreviation) lets a volume be mounted read-write by a single node?",
+      "back": "`ReadWriteOnce` (`RWO`). Several Pods on that one node can still use it.",
+      "explanation": "The limit is per node, not per Pod; for single-Pod access there is a separate mode.",
+      "evidence": "ReadWriteOnce the volume can be mounted as read-write by a single node. ReadWriteOnce access mode still can allow multiple pods to access (read from or write to) that volume when the pods are running on the same node. For single pod access, please see ReadWriteOncePod.",
+      "source": "Persistent Volumes (Kubernetes docs), “Access Modes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "access modes",
+        "volume"
+      ],
+      "conceptIDs": [
+        "ckad.access-mode-abbreviations"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.mode-rox",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3186,
+      "front": "Which access mode (and abbreviation) lets a volume be mounted read-only by many nodes?",
+      "back": "`ReadOnlyMany` (`ROX`).",
+      "explanation": "Many nodes may mount it, but only for reading.",
+      "evidence": "ReadOnlyMany the volume can be mounted as read-only by many nodes.",
+      "source": "Persistent Volumes (Kubernetes docs), “Access Modes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "access modes",
+        "volume"
+      ],
+      "conceptIDs": [
+        "ckad.access-mode-abbreviations"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.mode-rwx",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3192,
+      "front": "Which access mode (and abbreviation) lets a volume be mounted read-write by many nodes?",
+      "back": "`ReadWriteMany` (`RWX`).",
+      "explanation": "It is the only mode listed for read-write use from many nodes at once.",
+      "evidence": "ReadWriteMany the volume can be mounted as read-write by many nodes.",
+      "source": "Persistent Volumes (Kubernetes docs), “Access Modes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "access modes",
+        "volume"
+      ],
+      "conceptIDs": [
+        "ckad.access-mode-abbreviations"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.mode-rwop",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3198,
+      "front": "Which access mode (and abbreviation) lets a volume be mounted read-write by a single Pod?",
+      "back": "`ReadWriteOncePod` (`RWOP`).",
+      "explanation": "It is stable since Kubernetes v1.29.",
+      "evidence": "ReadWriteOncePod Feature state: Stable since Kubernetes v1.29 the volume can be mounted as read-write by a single Pod.",
+      "source": "Persistent Volumes (Kubernetes docs), “Access Modes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "access modes",
+        "volume",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.access-mode-abbreviations"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.pick-access-mode",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 3204,
+      "front": "Only one Pod in the whole cluster may ever read or write a claim's volume, even with other Pods on the same node. Which access mode?",
+      "choices": "A) `ReadWriteOnce`\nB) `ReadWriteOncePod`\nC) `ReadOnlyMany`",
+      "back": "B) `ReadWriteOncePod` (`RWOP`).",
+      "explanation": "The docs recommend it when only one Pod across the whole cluster should read or write the claim.",
+      "choicesExplained": "A: `ReadWriteOnce` limits the node, and several Pods on that node can still use it. C: `ReadOnlyMany` allows many nodes, read-only.",
+      "evidence": "Use ReadWriteOncePod access mode if you want to ensure that only one pod across the whole cluster can read that PVC or write to it.",
+      "source": "Persistent Volumes (Kubernetes docs), “Access Modes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "access modes",
+        "PersistentVolumeClaim",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.access-mode-abbreviations"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.generic-ephemeral-claim-name",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3210,
+      "front": "Pod `report` has a generic ephemeral volume named `scratch`. What is its PersistentVolumeClaim called?",
+      "back": "`report-scratch`: the Pod name and volume name joined by a hyphen.",
+      "explanation": "The naming is deterministic, so you can find the claim once you know the Pod and volume names.",
+      "evidence": "a combination of the Pod name and volume name, with a hyphen ( - ) in the middle.",
+      "source": "Ephemeral Volumes (Kubernetes docs), “PersistentVolumeClaim naming”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/#persistentvolumeclaim-naming",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "generic ephemeral volume",
+        "PersistentVolumeClaim",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.generic-ephemeral-volume"
+      ]
+    },
+    {
+      "id": "ckad.multi-container-pods.hostpath-risk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3216,
+      "front": "What do the Kubernetes docs advise about `hostPath` volumes?",
+      "back": "Avoid them if you can, because of their many security risks; for example, use a local PersistentVolume instead.",
+      "explanation": "The docs name a local PersistentVolume as the alternative.",
+      "evidence": "Using the hostPath volume type presents many security risks. If you can avoid using a hostPath volume, you should. For example, define a local PersistentVolume , and use that instead.",
+      "source": "Volumes (Kubernetes docs), “hostPath”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/volumes/#hostpath",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "hostPath",
+        "PersistentVolume",
+        "volume"
+      ],
+      "conceptIDs": [
+        "ckad.hostpath-risk"
+      ]
+    }
+  ]
+}

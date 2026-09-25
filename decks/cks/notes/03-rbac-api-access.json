@@ -1,0 +1,1046 @@
+{
+  "topic": "RBAC, service accounts and API access",
+  "notes": [
+    {
+      "id": "cks.rbac-api-access.auth-can-i",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3000,
+      "front": "What is `kubectl auth can-i`?",
+      "back": "A kubectl subcommand that asks the API server whether a user may perform a given action, such as `create deployments` in a namespace.",
+      "explanation": "It queries the authorization layer directly and works whatever authorization mode the cluster uses.",
+      "example": "Like asking the building's front desk \"would my badge open room 204?\" before walking up to the door.",
+      "evidence": "kubectl provides the auth can-i subcommand for quickly querying the API authorization layer. The command uses the SelfSubjectAccessReview API to determine if the current user can perform a given action, and works regardless of the authorization mode used.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Checking API access\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "kubectl auth can-i"
+      ],
+      "uses": [
+        "kubectl auth can-i",
+        "kubectl",
+        "authorization",
+        "authorization mode",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cks.auth-can-i"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.enable-admission-plugins",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3010,
+      "front": "What is the kube-apiserver flag `--enable-admission-plugins`?",
+      "back": "A flag listing admission plugins to turn on beyond the default set, comma-separated; their order in the list does not matter.",
+      "explanation": "Default plugins are already on, so the flag only needs the extra ones you want.",
+      "example": "`--enable-admission-plugins=NodeRestriction` switches on NodeRestriction, which is not in the default set.",
+      "evidence": "You can enable additional admission controllers beyond the default set using the --enable-admission-plugins flag (order doesn't matter).",
+      "source": "Kubernetes documentation, \"Admission Control in Kubernetes\", \"Which plugins are enabled by default?\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#which-plugins-are-enabled-by-default",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "--enable-admission-plugins"
+      ],
+      "uses": [
+        "--enable-admission-plugins",
+        "kube-apiserver",
+        "admission controller",
+        "default admission plugins"
+      ],
+      "conceptIDs": [
+        "cks.enable-admission-plugins"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.rbac-additive",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3020,
+      "front": "Can an RBAC Role or ClusterRole contain a \"deny\" rule?",
+      "back": "No. RBAC permissions are purely additive; there are no deny rules.",
+      "explanation": "A subject's access is the sum of what its bindings grant, so removing access means removing a grant.",
+      "evidence": "An RBAC Role or ClusterRole contains rules that represent a set of permissions. Permissions are purely additive (there are no \"deny\" rules).",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Role and ClusterRole\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RBAC",
+        "Role",
+        "ClusterRole"
+      ],
+      "conceptIDs": [
+        "cks.role-vs-clusterrole"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.role-namespaced",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3030,
+      "front": "A Role always sets permissions within {{c1::a particular namespace}}, which you must specify when you create it.",
+      "back": "A particular namespace.",
+      "explanation": "Role is a namespaced object, unlike ClusterRole.",
+      "evidence": "A Role always sets permissions within a particular namespace; when you create a Role, you have to specify the namespace",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Role and ClusterRole\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Role",
+        "namespace",
+        "ClusterRole"
+      ],
+      "conceptIDs": [
+        "cks.role-vs-clusterrole"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.clusterrole-non-namespaced",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3040,
+      "front": "Is a ClusterRole a namespaced object?",
+      "back": "No. ClusterRole is non-namespaced.",
+      "explanation": "An object must be either namespaced or not, which is why the two kinds have different names.",
+      "evidence": "ClusterRole, by contrast, is a non-namespaced resource. The resources have different names (Role and ClusterRole) because a Kubernetes object always has to be either namespaced or not namespaced; it can't be both.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Role and ClusterRole\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ClusterRole",
+        "Role",
+        "namespace",
+        "object"
+      ],
+      "conceptIDs": [
+        "cks.role-vs-clusterrole"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.rolebinding-clusterrole-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3050,
+      "front": "A RoleBinding in namespace `dev` references a ClusterRole. Where do the granted permissions apply?",
+      "back": "Only to resources inside the RoleBinding's namespace, `dev`.",
+      "explanation": "The binding's scope limits the ClusterRole's rules to that one namespace.",
+      "evidence": "A RoleBinding can also reference a ClusterRole to grant the permissions defined in that ClusterRole to resources inside the RoleBinding's namespace.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"RoleBinding and ClusterRoleBinding\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RoleBinding",
+        "ClusterRole",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cks.rolebinding-clusterrole"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.roleref-immutable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3070,
+      "front": "Can you change the `roleRef` of an existing RoleBinding?",
+      "back": "No. It is immutable: delete the binding and create a replacement.",
+      "explanation": "Trying to change it gives a validation error.",
+      "evidence": "After you create a binding, you cannot change the Role or ClusterRole that it refers to. If you try to change a binding's roleRef, you get a validation error. If you do want to change the roleRef for a binding, you need to remove the binding object and create a replacement.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"RoleBinding and ClusterRoleBinding\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RoleBinding",
+        "Role",
+        "ClusterRole"
+      ],
+      "conceptIDs": [
+        "cks.roleref-immutable"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.roleref-immutable-why",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3080,
+      "front": "What does an immutable `roleRef` let you safely delegate on a binding?",
+      "back": "Update permission on the binding, so someone can manage its subjects without being able to change the role it grants.",
+      "explanation": "The documentation also says a binding to a different role is a fundamentally different binding.",
+      "evidence": "Making roleRef immutable allows granting someone update permission on an existing binding object, so that they can manage the list of subjects, without being able to change the role that is granted to those subjects.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"RoleBinding and ClusterRoleBinding\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RoleBinding",
+        "ClusterRoleBinding",
+        "Role"
+      ],
+      "conceptIDs": [
+        "cks.roleref-immutable"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.least-privilege-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3090,
+      "front": "Following RBAC least privilege, which binding kind should you prefer when rights are only needed in one namespace?",
+      "back": "A RoleBinding, not a ClusterRoleBinding: assign permissions at namespace level where possible.",
+      "explanation": "A RoleBinding gives rights only within its namespace.",
+      "evidence": "Assign permissions at the namespace level where possible. Use RoleBindings as opposed to ClusterRoleBindings to give users rights only within a specific namespace.",
+      "source": "Kubernetes documentation, \"Role Based Access Control Good Practices\", \"Least privilege\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#least-privilege",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "least privilege",
+        "RBAC",
+        "RoleBinding",
+        "ClusterRoleBinding",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cks.rbac-least-privilege"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.avoid-wildcards",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3100,
+      "front": "Why does a wildcard over all resources in an RBAC rule grant more than it seems to?",
+      "back": "It covers every object type now in the cluster and also types created in future.",
+      "explanation": "Kubernetes is extensible, so new object types can appear after the rule is written.",
+      "evidence": "Avoid providing wildcard permissions when possible, especially to all resources. As Kubernetes is an extensible system, providing wildcard access gives rights not just to all object types that currently exist in the cluster, but also to all object types which are created in",
+      "source": "Kubernetes documentation, \"Role Based Access Control Good Practices\", \"Least privilege\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#least-privilege",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "wildcard permissions",
+        "RBAC",
+        "object"
+      ],
+      "conceptIDs": [
+        "cks.rbac-least-privilege"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.can-i-as-user",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3110,
+      "front": "How do you check whether user `dave` may list Secrets in namespace `dev`?",
+      "back": "`kubectl auth can-i list secrets --namespace dev --as dave`",
+      "explanation": "The `--as` option asks the question on another user's behalf, using impersonation.",
+      "evidence": "kubectl auth can-i list secrets --namespace dev --as dave",
+      "source": "Kubernetes documentation, \"Authorization\", \"Checking API access\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl auth can-i",
+        "user impersonation",
+        "Secret",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cks.auth-can-i"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.can-i-as-serviceaccount",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3120,
+      "front": "With `kubectl auth can-i --as`, how do you name ServiceAccount `dev-sa` in namespace `dev`?",
+      "back": "`--as system:serviceaccount:dev:dev-sa`",
+      "explanation": "ServiceAccounts are named as users in the form `system:serviceaccount:<namespace>:<name>`.",
+      "evidence": "kubectl auth can-i list pods \\ --namespace target \\ --as system:serviceaccount:dev:dev-sa",
+      "source": "Kubernetes documentation, \"Authorization\", \"Checking API access\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl auth can-i",
+        "ServiceAccount",
+        "namespace",
+        "user impersonation"
+      ],
+      "conceptIDs": [
+        "cks.auth-can-i"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.default-serviceaccount",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3130,
+      "front": "Which ServiceAccount does every namespace have from the start?",
+      "back": "One called `default`.",
+      "explanation": "So a new namespace already has one ServiceAccount before you create any of your own.",
+      "evidence": "Every namespace has at least one ServiceAccount: the default ServiceAccount resource, called default.",
+      "source": "Kubernetes documentation, \"Configure Service Accounts for Pods\", \"Use more than one ServiceAccount\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-multiple-service-accounts",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ServiceAccount",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cks.sa-per-workload"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.service-account-name",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3140,
+      "front": "How do you give a Pod a ServiceAccount other than `default`, and when can you set it?",
+      "back": "Set the Pod's `spec.serviceAccountName`; you can only set it when creating the Pod (or in a template).",
+      "explanation": "The documentation limits setting the field to Pod creation or a template.",
+      "evidence": "To use a non-default service account, set the spec.serviceAccountName field of a Pod to the name of the ServiceAccount you wish to use. You can only set the serviceAccountName field when creating a Pod, or in a",
+      "source": "Kubernetes documentation, \"Configure Service Accounts for Pods\", \"Use more than one ServiceAccount\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-multiple-service-accounts",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ServiceAccount",
+        "Pod",
+        "PodTemplate"
+      ],
+      "conceptIDs": [
+        "cks.sa-per-workload"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.automount-on-serviceaccount",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3150,
+      "front": "How do you stop a ServiceAccount's API credentials being automounted into the Pods that use it?",
+      "back": "Set `automountServiceAccountToken: false` on the ServiceAccount.",
+      "explanation": "The same field can also be set on a single Pod's spec.",
+      "evidence": "You can opt out of automounting API credentials on /var/run/secrets/kubernetes.io/serviceaccount/token for a service account by setting automountServiceAccountToken: false on the ServiceAccount:",
+      "source": "Kubernetes documentation, \"Configure Service Accounts for Pods\", \"Opt out of API credential automounting\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#opt-out-of-api-credential-automounting",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "automountServiceAccountToken",
+        "ServiceAccount",
+        "service account token",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.sa-automount-sa"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.automount-precedence",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3160,
+      "front": "If both the ServiceAccount and the Pod's `.spec` set `automountServiceAccountToken`, {{c1::the Pod spec}} takes precedence.",
+      "back": "The Pod spec.",
+      "explanation": "So a workload that really needs a token can still mount one even when its ServiceAccount opts out.",
+      "evidence": "If both the ServiceAccount and the Pod's .spec specify a value for automountServiceAccountToken, the Pod spec takes precedence.",
+      "source": "Kubernetes documentation, \"Configure Service Accounts for Pods\", \"Opt out of API credential automounting\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#opt-out-of-api-credential-automounting",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "automountServiceAccountToken",
+        "ServiceAccount",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.sa-automount-precedence"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.create-token",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3170,
+      "front": "Which command gets a time-limited API token for ServiceAccount `build-robot`?",
+      "back": "`kubectl create token build-robot` (add `--duration` to request a lifetime).",
+      "explanation": "The issued token's actual duration might be shorter, or even longer, than requested.",
+      "evidence": "You can get a time-limited API token for that ServiceAccount using kubectl: kubectl create token build-robot",
+      "source": "Kubernetes documentation, \"Configure Service Accounts for Pods\", \"Manually create an API token for a ServiceAccount\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#manually-create-an-api-token-for-a-serviceaccount",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "ServiceAccount",
+        "service account token",
+        "TokenRequest API"
+      ],
+      "conceptIDs": [
+        "cks.sa-create-token"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.long-lived-secret",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3180,
+      "front": "How do you manually create a long-lived API token for a ServiceAccount?",
+      "back": "Create a Secret of type `kubernetes.io/service-account-token` with the annotation `kubernetes.io/service-account.name: <account>`.",
+      "explanation": "The control plane then fills the Secret with an API token for that ServiceAccount.",
+      "evidence": "If you want to obtain an API token for a ServiceAccount, you create a new Secret with a special annotation, kubernetes.io/service-account.name.",
+      "source": "Kubernetes documentation, \"Configure Service Accounts for Pods\", \"Manually create a long-lived API token for a ServiceAccount\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#manually-create-a-long-lived-api-token-for-a-serviceaccount",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "legacy service account token Secret",
+        "Secret",
+        "annotation",
+        "ServiceAccount"
+      ],
+      "conceptIDs": [
+        "cks.sa-long-lived-secret"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.tokenrequest-preferred",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3190,
+      "front": "You can still create a service account token Secret, for example for a token that never expires. What does the documentation recommend instead?",
+      "back": "Getting tokens through the TokenRequest subresource.",
+      "explanation": "Tokens from TokenRequest have bounded lifetimes and are invalidated when the Pod they are mounted into is deleted.",
+      "evidence": "You can still manually create a service account token Secret; for example, if you need a token that never expires. However, using the TokenRequest subresource to obtain a token to access the API is recommended instead.",
+      "source": "Kubernetes documentation, \"Configure Service Accounts for Pods\", \"Manually create an API token for a ServiceAccount\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#manually-create-an-api-token-for-a-serviceaccount",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "TokenRequest API",
+        "legacy service account token Secret",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.sa-long-lived-secret",
+        "cks.sa-create-token"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.apiserver-anonymous-off",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3200,
+      "front": "How do you disable anonymous requests to the kube-apiserver?",
+      "back": "Pass `--anonymous-auth=false` to the API server.",
+      "explanation": "When anonymous access is on, requests no authenticator rejects become the user `system:anonymous` in group `system:unauthenticated`.",
+      "evidence": "can disable it by passing the --anonymous-auth=false command line option to the API server.",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Anonymous requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver",
+        "--anonymous-auth=false",
+        "anonymous request"
+      ],
+      "conceptIDs": [
+        "cks.apiserver-anonymous"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.anonymous-needs-rbac-grant",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3210,
+      "front": "Under the built-in RBAC authorizer, can anonymous requests do anything without a grant?",
+      "back": "No. RBAC needs explicit authorisation of the `system:anonymous` user or `system:unauthenticated` group.",
+      "explanation": "Anonymous access therefore reaches only what bindings to those subjects allow.",
+      "evidence": "The built-in ABAC and RBAC authorizers require explicit authorization of the system:anonymous user or the system:unauthenticated group",
+      "source": "Kubernetes documentation, \"Authenticating\", \"Anonymous requests\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RBAC",
+        "anonymous request",
+        "ABAC authorization mode"
+      ],
+      "conceptIDs": [
+        "cks.apiserver-anonymous"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.unauthenticated-bindings",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3220,
+      "front": "Why should you review and remove bindings for the `system:unauthenticated` group where possible?",
+      "back": "They give access to anyone who can contact the API server at a network level.",
+      "explanation": "Any such binding turns plain network reach into API access.",
+      "evidence": "Review bindings for the system:unauthenticated group and remove them where possible, as this gives access to anyone who can contact the API server at a network level.",
+      "source": "Kubernetes documentation, \"Role Based Access Control Good Practices\", \"Hardening\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#hardening",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RoleBinding",
+        "anonymous request",
+        "kube-apiserver",
+        "API server exposure"
+      ],
+      "conceptIDs": [
+        "cks.restrict-api-network",
+        "cks.apiserver-anonymous"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.api-first-line",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3230,
+      "front": "What does the \"Securing a Cluster\" guide call the first line of defence?",
+      "back": "Controlling and limiting who can access the cluster's API and what actions they may perform.",
+      "explanation": "Kubernetes is entirely API-driven, so access to the API is access to the cluster.",
+      "evidence": "As Kubernetes is entirely API-driven, controlling and limiting who can access the cluster and what actions they are allowed to perform is the first line of defense.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Controlling access to the Kubernetes API\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#controlling-access-to-the-kubernetes-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubernetes api",
+        "defense in depth",
+        "API server exposure"
+      ],
+      "conceptIDs": [
+        "cks.restrict-api-network"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.authz-alwaysallow-risk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3240,
+      "front": "Which kube-apiserver `--authorization-mode` value does the documentation flag as carrying security risks?",
+      "back": "`AlwaysAllow`, which allows every request.",
+      "explanation": "The documentation lists it among the modes with the note that it always allows requests.",
+      "evidence": "--authorization-mode=AlwaysAllow (always allows requests; carries security risks )",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization modes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authorization mode",
+        "AlwaysAllow mode",
+        "kube-apiserver",
+        "Node authorization",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "cks.apiserver-authz-node-rbac"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.authz-mode-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3250,
+      "front": "With `--authorization-mode=Node,RBAC,Webhook`, which module has the highest priority?",
+      "back": "Node: modules are checked in the order listed, so earlier ones have higher priority to allow or deny.",
+      "explanation": "The order on the API server's command line sets the order of checking.",
+      "evidence": "Kubernetes checks authorization modules based on the order that you specify them on the API server's command line, so an earlier module has higher priority to allow or deny a request.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization modes\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authorization mode",
+        "Node authorization",
+        "RBAC",
+        "Webhook authorization",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cks.apiserver-authz-node-rbac"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.noderestriction-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3260,
+      "front": "Under the NodeRestriction admission plugin, which API objects may a kubelet modify?",
+      "back": "Only its own Node object, and only Pods bound to its node.",
+      "explanation": "This limit applies to kubelets using credentials in the `system:nodes` group with a `system:node:<nodeName>` username.",
+      "evidence": "Such kubelets will only be allowed to modify their own Node API object, and only modify Pod API objects that are bound to their node.",
+      "source": "Kubernetes documentation, \"Admission Control in Kubernetes\", \"NodeRestriction\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NodeRestriction",
+        "kubelet",
+        "node",
+        "Pod",
+        "admission controller"
+      ],
+      "conceptIDs": [
+        "cks.noderestriction"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.noderestriction-taints",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3270,
+      "front": "With NodeRestriction on, may a kubelet update or remove taints on its own Node object?",
+      "back": "No. Kubelets are not allowed to update or remove taints from their Node object.",
+      "explanation": "The plugin also stops kubelets deleting their Node object and controls which labels they may set.",
+      "evidence": "kubelets are not allowed to update or remove taints from their Node API object. The NodeRestriction admission plugin prevents kubelets from deleting their Node API object",
+      "source": "Kubernetes documentation, \"Admission Control in Kubernetes\", \"NodeRestriction\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NodeRestriction",
+        "kubelet",
+        "taint",
+        "node",
+        "label"
+      ],
+      "conceptIDs": [
+        "cks.noderestriction"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.noderestriction-labels",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3280,
+      "front": "Under NodeRestriction, why can a kubelet not set a `node-role.kubernetes.io/` label on its Node?",
+      "back": "That prefix is restricted to prevent unprivileged nodes from self-declaring cluster roles.",
+      "explanation": "The `node-restriction.kubernetes.io/` prefix is likewise blocked, as it is reserved for administrators.",
+      "evidence": "Labels with a node-role.kubernetes.io/ prefix (for example: node-role.kubernetes.io/control-plane). These are restricted to prevent unprivileged nodes from self-declaring cluster roles.",
+      "source": "Kubernetes documentation, \"Admission Control in Kubernetes\", \"NodeRestriction\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "NodeRestriction",
+        "kubelet",
+        "label",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.noderestriction"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.apiserver-manifest-rescan",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3290,
+      "front": "On a kubeadm control plane node you add a flag to `/etc/kubernetes/manifests/kube-apiserver.yaml`. What applies the change?",
+      "back": "The kubelet, which periodically scans that directory for changes and recreates the static Pod.",
+      "explanation": "The file sits in the static Pod directory the kubelet watches, so no `kubectl` command is involved.",
+      "evidence": "The running kubelet periodically scans the configured directory ( /etc/kubernetes/manifests in our example) for changes and adds/removes Pods as files appear/disappear in this directory.",
+      "source": "Kubernetes documentation, \"Create static Pods\", \"Dynamic addition and removal of static pods\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/#dynamic-addition-and-removal-of-static-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "control plane",
+        "kube-apiserver",
+        "kubelet",
+        "static Pod / mirror Pod",
+        "manifest",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "cks.apiserver-manifest-edit"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.stage-transport",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3300,
+      "front": "In the API request path, what does the transport security stage provide by default?",
+      "back": "TLS: the API server listens on port 6443, protected by TLS, and presents a certificate.",
+      "explanation": "Transport security comes before authentication; the client can also present a TLS client certificate here.",
+      "evidence": "By default, the Kubernetes API server listens on port 6443 on the first non-localhost network interface, protected by TLS.",
+      "source": "Kubernetes documentation, \"Controlling Access to the Kubernetes API\", \"Transport security\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/controlling-access/#transport-security",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver",
+        "tls / mtls",
+        "port",
+        "digital certificate"
+      ],
+      "conceptIDs": [
+        "cks.api-access-stages"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.rbac-api-access.stage-authn-401",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3310,
+      "front": "Which API request stage rejects a request with HTTP 401, and when?",
+      "back": "Authentication, when no authenticator module can authenticate the request.",
+      "explanation": "Modules are tried in sequence until one succeeds; only if none does is the request rejected.",
+      "evidence": "Multiple authentication modules can be specified, in which case each one is tried in sequence, until one of them succeeds. If the request cannot be authenticated, it is rejected with HTTP status code 401.",
+      "source": "Kubernetes documentation, \"Controlling Access to the Kubernetes API\", \"Authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/controlling-access/#authentication",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authentication",
+        "authentication module",
+        "http"
+      ],
+      "conceptIDs": [
+        "cks.api-access-stages"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.stage-authz-403",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3320,
+      "front": "With several authorization modules configured, when is a request denied with HTTP 403?",
+      "back": "When no module allows it. The first module to allow or deny decides; if none has an opinion, the request is denied.",
+      "explanation": "Modules are checked in order and the first verdict is returned at once, so one module's deny ends the check without asking the rest.",
+      "evidence": "If any authorizer approves or denies a request, that decision is immediately returned and no other authorizer is consulted. If all modules have no opinion on the request, then the request is denied.",
+      "source": "Kubernetes documentation, \"Authorization\", \"Authorization verdicts\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-verdicts",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "authorization",
+        "authorization verdict",
+        "http"
+      ],
+      "conceptIDs": [
+        "cks.api-access-stages"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.stage-admission",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3330,
+      "front": "How does the admission control stage differ from authentication and authorization when one module rejects?",
+      "back": "If any admission controller rejects, the request is rejected immediately.",
+      "explanation": "Authentication and authorization need only one module to accept, but admission needs every controller to pass.",
+      "evidence": "Unlike Authentication and Authorization modules, if any admission controller module rejects, then the request is immediately rejected.",
+      "source": "Kubernetes documentation, \"Controlling Access to the Kubernetes API\", \"Admission control\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/controlling-access/#admission-control",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "admission controller",
+        "authentication",
+        "authorization"
+      ],
+      "conceptIDs": [
+        "cks.api-access-stages"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.scenario-reuse-clusterrole",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3350,
+      "front": "A team needs the permissions of an existing ClusterRole `pod-reader`, but only in namespace `team-a`. What do you create?",
+      "choices": "A) A ClusterRoleBinding to `pod-reader`\nB) A RoleBinding in `team-a` referencing ClusterRole `pod-reader`\nC) A copy of `pod-reader` as a ClusterRole named `team-a-reader`\nD) A RoleBinding in `default` referencing `pod-reader`",
+      "back": "B) A RoleBinding in `team-a` that references the ClusterRole.",
+      "explanation": "A RoleBinding grants a ClusterRole's permissions only inside its own namespace, and namespace-level grants follow least privilege.",
+      "choicesExplained": "A grants the rights in every namespace. C adds a second cluster-wide role without limiting where it applies. D grants the rights in `default`, not `team-a`.",
+      "evidence": "A RoleBinding can also reference a ClusterRole to grant the permissions defined in that ClusterRole to resources inside the RoleBinding's namespace.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"RoleBinding and ClusterRoleBinding\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RoleBinding",
+        "ClusterRole",
+        "ClusterRoleBinding",
+        "namespace",
+        "least privilege"
+      ],
+      "conceptIDs": [
+        "cks.rolebinding-clusterrole",
+        "cks.rbac-least-privilege",
+        "cks.role-vs-clusterrole"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.scenario-change-roleref",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3360,
+      "front": "RoleBinding `ci-binding` points at Role `deployer`; it should now point at Role `viewer`. You edit `roleRef` and `kubectl apply` fails. What now?",
+      "choices": "A) Retry with `--force-conflicts`\nB) Delete `ci-binding` and create a new binding that references `viewer`\nC) Rename Role `viewer` to `deployer`\nD) Add `viewer` as a subject of the binding",
+      "back": "B) Delete the binding and create a replacement that references `viewer`.",
+      "explanation": "`roleRef` cannot change after creation; changing it needs a new binding.",
+      "choicesExplained": "A does not lift the validation rule. C swaps a Role's contents under every binding that refers to it. D confuses subjects with the role being granted.",
+      "evidence": "If you do want to change the roleRef for a binding, you need to remove the binding object and create a replacement.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"RoleBinding and ClusterRoleBinding\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "RoleBinding",
+        "Role",
+        "kubectl apply"
+      ],
+      "conceptIDs": [
+        "cks.roleref-immutable"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.scenario-can-i-sa",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3370,
+      "front": "You bound a Role to ServiceAccount `reporter` in namespace `stats`. How do you confirm it can now `get` ConfigMaps there, without running its Pod?",
+      "choices": "A) `kubectl auth can-i get configmaps -n stats --as system:serviceaccount:stats:reporter`\nB) `kubectl auth can-i get configmaps -n stats --as reporter`\nC) `kubectl get configmaps -n stats`\nD) `kubectl describe serviceaccount reporter -n stats`",
+      "back": "A) `can-i` with `--as system:serviceaccount:stats:reporter`.",
+      "explanation": "`kubectl auth can-i` asks the authorization layer directly, and a ServiceAccount is named in its `system:serviceaccount:` form.",
+      "choicesExplained": "B checks a user called `reporter`, not the ServiceAccount. C runs as you, not as the ServiceAccount. D shows the account but not its permissions.",
+      "evidence": "kubectl auth can-i list pods \\ --namespace target \\ --as system:serviceaccount:dev:dev-sa",
+      "source": "Kubernetes documentation, \"Authorization\", \"Checking API access\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl auth can-i",
+        "ServiceAccount",
+        "Role",
+        "ConfigMap",
+        "user impersonation",
+        "kubectl describe"
+      ],
+      "conceptIDs": [
+        "cks.auth-can-i"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.scenario-automount-conflict",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3380,
+      "front": "ServiceAccount `batch` sets `automountServiceAccountToken: false`. A Pod using it sets `automountServiceAccountToken: true`. Is a token mounted in that Pod?",
+      "choices": "A) Yes, because the Pod spec takes precedence\nB) No, because the ServiceAccount setting wins\nC) No, because a conflict disables mounting\nD) Only if the Pod runs in the `default` namespace",
+      "back": "A) Yes. The Pod spec takes precedence.",
+      "explanation": "When both set the field, the Pod's value is the one used.",
+      "choicesExplained": "B reverses the precedence. C invents a conflict rule. D: the namespace plays no part in this rule.",
+      "evidence": "If both the ServiceAccount and the Pod's .spec specify a value for automountServiceAccountToken, the Pod spec takes precedence.",
+      "source": "Kubernetes documentation, \"Configure Service Accounts for Pods\", \"Opt out of API credential automounting\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#opt-out-of-api-credential-automounting",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "automountServiceAccountToken",
+        "ServiceAccount",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cks.sa-automount-precedence",
+        "cks.sa-automount-sa"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.scenario-own-serviceaccount",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3390,
+      "front": "A new Deployment in `shop` needs to read one ConfigMap through the API. Its Pods currently use the `default` ServiceAccount. What is the least-privilege setup?",
+      "choices": "A) Bind a Role to the `default` ServiceAccount\nB) Create ServiceAccount `shop-reader`, bind a Role that can read that ConfigMap, and set `serviceAccountName: shop-reader`\nC) Bind `cluster-admin` to `shop-reader`\nD) Mount a long-lived token Secret into the Pods",
+      "back": "B) A dedicated ServiceAccount with a narrow Role, named in the Pod template.",
+      "explanation": "RBAC least privilege means only the rights a workload needs, granted at namespace level where possible.",
+      "choicesExplained": "A also grants the rights to every other Pod using `default`. C grants far more than needed. D does not limit permissions and a TokenRequest token is recommended instead.",
+      "evidence": "Ideally, minimal RBAC rights should be assigned to users and service accounts. Only permissions explicitly required for their operation should be used.",
+      "source": "Kubernetes documentation, \"Role Based Access Control Good Practices\", \"Least privilege\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#least-privilege",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ServiceAccount",
+        "Role",
+        "RoleBinding",
+        "least privilege",
+        "Deployment",
+        "ConfigMap",
+        "PodTemplate",
+        "legacy service account token Secret",
+        "TokenRequest API"
+      ],
+      "conceptIDs": [
+        "cks.sa-per-workload",
+        "cks.rbac-least-privilege"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.scenario-short-token",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3400,
+      "front": "A script outside the cluster needs a token for ServiceAccount `deployer` for a one-hour job. What should you use?",
+      "choices": "A) `kubectl create token deployer --duration=1h`\nB) A `kubernetes.io/service-account-token` Secret\nC) The kubelet's client certificate\nD) An anonymous request",
+      "back": "A) `kubectl create token deployer --duration=1h`",
+      "explanation": "It issues a time-limited token, and the documentation recommends TokenRequest tokens over token Secrets.",
+      "choicesExplained": "B creates a long-lived token that outlasts the job. C is the node's identity, not the ServiceAccount's. D gives no ServiceAccount identity at all.",
+      "evidence": "You can request a specific token duration using the --duration command line argument to kubectl create token",
+      "source": "Kubernetes documentation, \"Configure Service Accounts for Pods\", \"Manually create an API token for a ServiceAccount\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#manually-create-an-api-token-for-a-serviceaccount",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "ServiceAccount",
+        "service account token",
+        "TokenRequest API",
+        "legacy service account token Secret",
+        "kubelet",
+        "anonymous request"
+      ],
+      "conceptIDs": [
+        "cks.sa-create-token"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.scenario-hardening-apiserver",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3410,
+      "front": "On a kubeadm cluster you must make the API server use Node and RBAC authorization and enable NodeRestriction. What do you change?",
+      "choices": "A) Edit `/etc/kubernetes/manifests/kube-apiserver.yaml`: `--authorization-mode=Node,RBAC` and `--enable-admission-plugins=NodeRestriction`\nB) `kubectl edit` the kube-apiserver Pod in `kube-system`\nC) Set `--authorization-mode=AlwaysAllow` and add a RoleBinding\nD) Create a NodeRestriction object with `kubectl apply`",
+      "back": "A) Edit the kube-apiserver static Pod manifest with both flags; the kubelet recreates the Pod.",
+      "explanation": "The kubelet picks up changes to files in the static Pod directory, and both settings are API server flags.",
+      "choicesExplained": "B edits the mirror Pod, not the file the kubelet runs. C allows every request. D: NodeRestriction is an admission plugin turned on by flag, not an object.",
+      "evidence": "You can enable additional admission controllers beyond the default set using the --enable-admission-plugins flag (order doesn't matter).",
+      "source": "Kubernetes documentation, \"Admission Control in Kubernetes\", \"Which plugins are enabled by default?\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#which-plugins-are-enabled-by-default",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "kube-apiserver",
+        "authorization mode",
+        "Node authorization",
+        "RBAC",
+        "NodeRestriction",
+        "--enable-admission-plugins",
+        "static Pod / mirror Pod",
+        "kubelet",
+        "AlwaysAllow mode",
+        "RoleBinding",
+        "kubectl apply"
+      ],
+      "conceptIDs": [
+        "cks.apiserver-manifest-edit",
+        "cks.apiserver-authz-node-rbac",
+        "cks.noderestriction",
+        "cks.enable-admission-plugins"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.scenario-anonymous",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3420,
+      "front": "An unauthenticated `curl` to the API server gets past authentication and is treated as `system:anonymous`. Which two settings close this path?",
+      "choices": "A) `--anonymous-auth=false`, and removing bindings for `system:unauthenticated`\nB) `--authorization-mode=AlwaysAllow` and more RoleBindings\nC) A default deny NetworkPolicy in `kube-system` only\nD) `automountServiceAccountToken: false` on all ServiceAccounts",
+      "back": "A) Disable anonymous auth and remove bindings for `system:unauthenticated`.",
+      "explanation": "The flag stops anonymous authentication, and bindings to that group grant access to anyone who can reach the API server.",
+      "choicesExplained": "B allows everything. C does not govern API authentication. D affects Pod tokens, not anonymous callers.",
+      "evidence": "Review bindings for the system:unauthenticated group and remove them where possible, as this gives access to anyone who can contact the API server at a network level.",
+      "source": "Kubernetes documentation, \"Role Based Access Control Good Practices\", \"Hardening\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/#hardening",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--anonymous-auth=false",
+        "anonymous request",
+        "kube-apiserver",
+        "AlwaysAllow mode",
+        "RoleBinding",
+        "default deny policy",
+        "automountServiceAccountToken"
+      ],
+      "conceptIDs": [
+        "cks.apiserver-anonymous",
+        "cks.restrict-api-network"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.classify-stage",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 3430,
+      "front": "A request is authenticated as `alice`, allowed by RBAC, then refused because a Pod it creates breaks a policy plugin. Which stage refused it?",
+      "choices": "A) Transport security\nB) Authentication\nC) Authorization\nD) Admission control",
+      "back": "D) Admission control.",
+      "explanation": "Admission runs after authentication and authorization, on requests that create, modify, delete or connect to objects.",
+      "choicesExplained": "A only secures the connection. B already succeeded as `alice`. C already allowed the request through RBAC.",
+      "evidence": "Admission controllers act on requests that create, modify, delete, or connect to (proxy) an object.",
+      "source": "Kubernetes documentation, \"Controlling Access to the Kubernetes API\", \"Admission control\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/security/controlling-access/#admission-control",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "admission controller",
+        "authentication",
+        "authorization",
+        "RBAC",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.api-access-stages"
+      ]
+    },
+    {
+      "id": "cks.rbac-api-access.contrast-role-clusterrole",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 3440,
+      "front": "Role versus ClusterRole: how do their scopes differ?",
+      "back": "A Role is namespaced and grants within one namespace; a ClusterRole is not namespaced.",
+      "explanation": "An object is either namespaced or not, which is why RBAC has two kinds.",
+      "evidence": "A Role always sets permissions within a particular namespace; when you create a Role, you have to specify the namespace it belongs in.",
+      "source": "Kubernetes documentation, \"Using RBAC Authorization\", \"Role and ClusterRole\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Role",
+        "ClusterRole",
+        "namespace",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "cks.role-vs-clusterrole"
+      ]
+    }
+  ]
+}

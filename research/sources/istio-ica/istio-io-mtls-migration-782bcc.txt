@@ -1,0 +1,185 @@
+https://istio.io/latest/docs/tasks/security/authentication/mtls-migration/
+
+
+
+Documentation
+
+Tasks
+
+Security
+
+Authentication
+
+Mutual TLS Migration
+
+# {#title} Mutual TLS Migration
+
+ 4 minute read
+
+page test
+
+Before you begin
+Set up the cluster
+Lock down to mutual TLS by namespace
+Lock down mutual TLS for the entire mesh
+Clean up the example
+See also
+
+This task shows how to ensure your workloads only communicate using mutual TLS as they are migrated to
+Istio.
+
+Istio automatically configures workload sidecars to use mutual TLS when calling other workloads. By default, Istio configures the destination workloads using PERMISSIVE mode.
+When PERMISSIVE mode is enabled, a service can accept both plaintext and mutual TLS traffic. In order to only allow
+mutual TLS traffic, the configuration needs to be changed to STRICT mode.
+
+You can use the Grafana dashboard to
+check which workloads are still sending plaintext traffic to the workloads in PERMISSIVE mode and choose to lock
+them down once the migration is done.
+
+## {#before-you-begin} Before you begin
+
+Understand Istio authentication policy and related mutual TLS authentication concepts.
+
+Read the authentication policy task to
+learn how to configure authentication policy.
+
+Have a Kubernetes cluster with Istio installed, without global mutual TLS enabled (for example, use the default configuration profile as described in installation steps).
+
+In this task, you can try out the migration process by creating sample workloads and modifying
+the policies to enforce STRICT mutual TLS between the workloads.
+
+## {#set-up-the-cluster} Set up the cluster
+
+Create two namespaces, foo and bar, and deploy httpbin and curl with sidecars on both of them:
+
+ZipZipZipZip
+$ kubectl create ns foo
+$ kubectl apply -f <(istioctl kube-inject -f @samples/httpbin/httpbin.yaml@) -n foo
+$ kubectl apply -f <(istioctl kube-inject -f @samples/curl/curl.yaml@) -n foo
+$ kubectl create ns bar
+$ kubectl apply -f <(istioctl kube-inject -f @samples/httpbin/httpbin.yaml@) -n bar
+$ kubectl apply -f <(istioctl kube-inject -f @samples/curl/curl.yaml@) -n bar
+
+Create another namespace, legacy, and deploy curl without a sidecar:
+
+Zip
+$ kubectl create ns legacy
+$ kubectl apply -f @samples/curl/curl.yaml@ -n legacy
+
+Verify the setup by sending http requests (using curl) from the curl pods, in namespaces foo, bar and legacy, to httpbin.foo and httpbin.bar.
+All requests should succeed with return code 200.
+
+$ for from in "foo" "bar" "legacy"; do for to in "foo" "bar"; do kubectl exec "$(kubectl get pod -l app=curl -n ${from} -o jsonpath={.items..metadata.name})" -c curl -n ${from} -- curl http://httpbin.${to}:8000/ip -s -o /dev/null -w "curl.${from} to httpbin.${to}: %{http_code}\n"; done; done
+curl.foo to httpbin.foo: 200
+curl.foo to httpbin.bar: 200
+curl.bar to httpbin.foo: 200
+curl.bar to httpbin.bar: 200
+curl.legacy to httpbin.foo: 200
+curl.legacy to httpbin.bar: 200
+
+If any of the curl commands fail, ensure that there are no existing authentication policies or destination rules
+that might interfere with requests to the httpbin service.
+
+$ kubectl get peerauthentication --all-namespaces
+No resources found
+
+$ kubectl get destinationrule --all-namespaces
+No resources found
+
+## {#lock-down-to-mutual-tls-by-namespace} Lock down to mutual TLS by namespace
+
+After migrating all clients to Istio and injecting the Envoy sidecar, you can lock down workloads in the foo namespace
+to only accept mutual TLS traffic.
+
+$ kubectl apply -n foo -f - <<EOF
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+spec:
+  mtls:
+    mode: STRICT
+EOF
+
+Now, you should see the request from curl.legacy to httpbin.foo failing.
+
+$ for from in "foo" "bar" "legacy"; do for to in "foo" "bar"; do kubectl exec "$(kubectl get pod -l app=curl -n ${from} -o jsonpath={.items..metadata.name})" -c curl -n ${from} -- curl http://httpbin.${to}:8000/ip -s -o /dev/null -w "curl.${from} to httpbin.${to}: %{http_code}\n"; done; done
+curl.foo to httpbin.foo: 200
+curl.foo to httpbin.bar: 200
+curl.bar to httpbin.foo: 200
+curl.bar to httpbin.bar: 200
+curl.legacy to httpbin.foo: 000
+command terminated with exit code 56
+curl.legacy to httpbin.bar: 200
+
+If you installed Istio with values.global.proxy.privileged=true, you can use tcpdump to verify
+traffic is encrypted or not.
+
+$ kubectl exec -nfoo "$(kubectl get pod -nfoo -lapp=httpbin -ojsonpath={.items..metadata.name})" -c istio-proxy -- sudo tcpdump dst port 80  -A
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+
+You will see plain text and encrypted text in the output when requests are sent from curl.legacy and curl.foo
+respectively.
+
+If you can’t migrate all your services to Istio (i.e., inject Envoy sidecar in all of them), you will need to continue to use PERMISSIVE mode.
+However, when configured with PERMISSIVE mode, no authentication or authorization checks will be performed for plaintext traffic by default.
+We recommend you use Istio Authorization to configure different paths with different authorization policies.
+
+## {#lock-down-mutual-tls-for-the-entire-mesh} Lock down mutual TLS for the entire mesh
+
+You can lock down workloads in all namespaces to only accept mutual TLS traffic by putting the policy in the system namespace of your Istio installation.
+
+$ kubectl apply -n istio-system -f - <<EOF
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+spec:
+  mtls:
+    mode: STRICT
+EOF
+
+Now, both the foo and bar namespaces enforce mutual TLS only traffic, so you should see requests from curl.legacy
+failing for both.
+
+$ for from in "foo" "bar" "legacy"; do for to in "foo" "bar"; do kubectl exec "$(kubectl get pod -l app=curl -n ${from} -o jsonpath={.items..metadata.name})" -c curl -n ${from} -- curl http://httpbin.${to}:8000/ip -s -o /dev/null -w "curl.${from} to httpbin.${to}: %{http_code}\n"; done; done
+
+## {#clean-up-the-example} Clean up the example
+
+Remove the mesh-wide authentication policy.
+
+$ kubectl delete peerauthentication -n foo default
+$ kubectl delete peerauthentication -n istio-system default
+
+Remove the test namespaces.
+
+$ kubectl delete ns foo bar legacy
+Namespaces foo bar legacy deleted.
+
+See also
+
+Authentication Policy
+
+Shows you how to use Istio authentication policy to set up mutual TLS and basic end-user authentication.
+
+Copy JWT Claims to HTTP Headers
+
+Shows how users can copy their JWT claims to HTTP headers.
+
+JWT claim based routing
+
+Shows you how to use Istio authentication policy to route requests based on JWT claims.
+
+Security
+
+Describes Istio's authorization and authentication functionality.
+
+Trust Domain Migration
+
+Shows how to migrate from one trust domain to another without changing authorization policy.
+
+Hardening Kubernetes Security with Istio Ambient Mode on Flat Networks
+
+How to use Istio Ambient mode to secure your flat on-prem network.
+

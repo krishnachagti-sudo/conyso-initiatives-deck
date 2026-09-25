@@ -1,0 +1,177 @@
+https://istio.io/latest/docs/setup/additional-setup/config-profiles/
+
+
+
+Documentation
+
+Sidecar Mode
+
+More Guides
+
+Installation Configuration Profiles
+
+# {#title} Installation Configuration Profiles
+
+ 4 minute read
+
+Deployment Profiles
+Platform Profiles
+See also
+
+This page describes the built-in configuration profiles that can be used when
+installing Istio.
+
+Configuration profiles are simply named groups of Helm chart value overrides that are built into the charts,
+and can be used when installing via either helm or istioctl.
+
+The profiles provide high-level customization of the Istio control plane and data plane for common deployment topologies and target platforms.
+
+Configuration profiles compose with other values overrides or flags, so any individual value a configuration profile sets can be manually overridden by specifying a --set flag after it in the command.
+
+There are 2 kinds of configuration profiles: deployment profiles and platform profiles, and using both is recommended.
+
+deployment profiles are intended to provide good defaults for a given deployment topology (default, remote, ambient, etc).
+
+platform profiles are intended to provide necessary platform-specific defaults, for a given target platform (eks, gke, openshift, etc).
+
+For example, if you are installing default sidecar dataplane on GKE, we recommend using the following deployment and platform profiles to get started:
+
+Helm
+istioctl
+
+For Helm, supply the same profile and platform for every chart you install, for example istiod:
+
+$ helm install istiod istio/istiod -n istio-system --set profile=default --set global.platform=gke --wait
+
+For istioctl, supply the same profile and platform as arguments:
+
+$ istioctl install --set profile=default --set values.global.platform=gke
+
+Note that a key difference between helm and istioctl install mechanisms is that istioctl configuration profiles also include a list of Istio components that will be installed automatically by istioctl.
+
+With helm, this is not the case - users are expected to install each required Istio component individually via helm install, and supply the desired configuration profile flags for each component manually.
+
+You can think of this as istioctl and helm sharing exactly the same configuration profiles with the same names, but when you use istioctl, it will additionally choose what components to install for you based on the configuration profile you select, so only one command is needed to achieve the same result.
+
+## {#deployment-profiles} Deployment Profiles
+
+The following built-in deployment profiles are currently available for both istioctl and helm install mechanisms. Note that as these are just sets of Helm values overrides, using them is not strictly required to install Istio, but they do provide a convenient baseline and are recommended for new installs. Additionally, you may customize the configuration
+beyond what the deployment profile includes, for your specific needs. The following built-in deployment profiles are currently available:
+
+default: enables components according to the default settings of the
+IstioOperator API.
+This profile is recommended for production deployments and for
+cluster with a
+control plane. A single
+mesh can have more than
+one primary cluster for HA or to reduce latency. Primary clusters can act as the
+control plane for remote clusters.
+
+'>primary clusters in a
+multicluster mesh.
+
+demo: configuration designed to showcase Istio functionality with modest resource requirements.
+It is suitable to run the Bookinfo application and associated tasks.
+This is the configuration that is installed with the quick start instructions.
+
+This profile enables high levels of tracing and access logging so it is not suitable for performance tests.
+
+minimal: same as the default profile, but only the control plane components are installed.
+This allows you to configure the control plane and data plane components (e.g., gateways) using separate profiles.
+
+remote: used for configuring a cluster that
+connects to a control plane
+residing outside of the cluster. A remote cluster can connect to a control plane
+running in a primary cluster
+or to an external control plane.
+
+'>remote cluster that is managed by an
+control plane
+that externally manages mesh workloads running in their own clusters
+or other infrastructure. The control plane may, itself, be deployed in a cluster, although not
+in one of the clusters that is part of the mesh it&rsquo;s controlling.
+Its purpose is to cleanly separate the control plane from the data plane of a mesh.
+
+'>external control plane or by a control plane in a cluster with a
+control plane. A single
+mesh can have more than
+one primary cluster for HA or to reduce latency. Primary clusters can act as the
+control plane for remote clusters.
+
+'>primary cluster
+of a multicluster mesh.
+
+ambient: the ambient profile is designed to help you get started with ambient mode.
+
+empty: deploys nothing. This can be useful as a base profile for custom configuration.
+
+preview: the preview profile contains features that are experimental. This is intended to explore new features
+coming to Istio. Stability, security, and performance are not guaranteed - use at your own risk.
+
+Istio’s deployment profile value sets are defined here, for both istioctl and helm.
+
+For istioctl only, specifying configuration profiles additionally automatically selects certain Istio components for installation, as marked with ✔ below:
+
+defaultdemominimalremoteemptypreviewambient
+
+Core components
+
+      istio-egressgateway✔
+
+      istio-ingressgateway✔✔✔
+
+      istiod✔✔✔✔✔
+
+      CNI✔
+
+      Ztunnel✔
+
+To further customize Istio, a number of addon components can also be installed.
+Refer to integrations for more details.
+
+## {#platform-profiles} Platform Profiles
+
+The following built-in platform profiles are currently available for both istioctl and helm install mechanisms. Note that as these are just sets of Helm values overrides, using them is not strictly required to install Istio in these environments, but they do provide a convenient baseline and are recommended for new installs:
+
+gke: Sets chart options required or recommended for installing Istio in Google Kubernetes Engine (GKE) environments.
+
+eks: Sets chart options required or recommended for installing Istio in Amazon’s Elastic Kubernetes Service (EKS) environments.
+
+openshift: Sets chart options required or recommended for installing Istio in OpenShift environments.
+
+k3d: Sets chart options required or recommended for installing Istio in k3d environments.
+
+k3s: Sets chart options required or recommended for installing Istio in K3s environments.
+
+microk8s: Sets chart options required or recommended for installing Istio in MicroK8s environments.
+
+minikube: Sets chart options required or recommended for installing Istio in minikube environments.
+
+Istio’s platform profiles are defined here, for both istioctl and helm.
+
+See also
+
+Advanced Helm Chart Customization
+
+Describes how to customize installation configuration options when installing with helm.
+
+Compatibility Versions
+
+How to configure "compatibility versions", to decouple behavioral changes from releases.
+
+Customizing the installation configuration
+
+Describes how to customize installation configuration options.
+
+Download the Istio release
+
+Get the files required to install and explore Istio.
+
+Deploying Istio Control Planes Outside the Mesh
+
+A new deployment model for Istio.
+
+Safely Upgrade Istio using a Canary Control Plane Deployment
+
+Simplifying Istio upgrades by offering safe canary deployments of the control plane.
+

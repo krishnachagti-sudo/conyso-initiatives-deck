@@ -1,0 +1,1398 @@
+{
+  "topic": "Supply chain: images, SBOM, signing and static analysis",
+  "notes": [
+    {
+      "id": "cks.supply-chain.what-is-multi-stage-build",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8000,
+      "front": "What is a multi-stage build?",
+      "back": "A Dockerfile split into separate stages, so that the final image carries only the files the application needs to run.",
+      "explanation": "Docker's guide presents it as a clean separation between building the image and its final output, which makes the final image smaller.",
+      "example": "Like baking in a busy kitchen but delivering only the cake: the flour, bowls and oven (compilers and build tools) stay behind in an earlier stage.",
+      "introduces": [
+        "multi-stage build"
+      ],
+      "source": "Docker Docs, Building best practices, “Use multi-stage builds”",
+      "sourceURL": "https://docs.docker.com/build/building/best-practices/#use-multi-stage-builds",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "multi-stage build",
+        "container image"
+      ],
+      "conceptIDs": [
+        "cks.multi-stage-build"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.what-is-bom",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8010,
+      "front": "What is bom?",
+      "back": "A command-line tool for SPDX Software Bill of Materials (SBOM) documents: it creates them, queries them and checks artifacts against them.",
+      "explanation": "Its command reference lists subcommands to create SPDX SBOMs and to check artifacts against SPDX manifests.",
+      "example": "Like a packing-list printer for a shipment, but the shipment is a container image and the list follows the SPDX format.",
+      "evidence": "bom generate → Create SPDX SBOMs bom validate bom validate → Check artifacts against SPDX manifests",
+      "introduces": [
+        "bom"
+      ],
+      "source": "bom documentation, command reference",
+      "sourceURL": "https://kubernetes-sigs.github.io/bom/cli-reference/",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "bom",
+        "Software Bill of Materials",
+        "SBOM",
+        "SPDX and CycloneDX"
+      ],
+      "conceptIDs": [
+        "cks.bom-generate"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.what-is-trivy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8020,
+      "front": "What is Trivy?",
+      "back": "A security scanner that, among other targets, scans container images: both the files inside the image and the image's metadata.",
+      "explanation": "Trivy's documentation names two targets for container images: the files inside them and the container image metadata.",
+      "example": "Like airport baggage screening, but for a container image: it looks inside the layers for known problems before the image is let through.",
+      "evidence": "Trivy supports two targets for container images. Files inside container images Container image metadata",
+      "introduces": [
+        "Trivy"
+      ],
+      "source": "Trivy documentation, Container Image",
+      "sourceURL": "https://trivy.dev/latest/docs/target/container_image/",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Trivy",
+        "container image",
+        "image scanning"
+      ],
+      "conceptIDs": [
+        "cks.trivy-image"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.what-is-kubesec",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8030,
+      "front": "What is Kubesec?",
+      "back": "A tool for security risk analysis of Kubernetes resources, such as a Pod or Deployment manifest.",
+      "explanation": "Its project documentation describes it as security risk analysis for Kubernetes resources: it reads the resource definition, not a running cluster or an image.",
+      "example": "Like a building inspector reading the blueprints, not the finished house: it judges the YAML before anything runs.",
+      "evidence": "Security risk analysis for Kubernetes resources",
+      "introduces": [
+        "Kubesec"
+      ],
+      "source": "Kubesec project page",
+      "sourceURL": "https://github.com/controlplaneio/kubesec/blob/master/README.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubesec",
+        "kubernetes",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cks.kubesec-scan"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.what-is-kubelinter",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8040,
+      "front": "What is KubeLinter?",
+      "back": "A static analysis tool that checks Kubernetes manifests against best practices, with a focus on production readiness and security.",
+      "explanation": "Its project page calls it static analysis for Kubernetes and says it checks files against a variety of best practices.",
+      "example": "Like a spell-checker for Kubernetes YAML, but it flags risky settings instead of typos.",
+      "evidence": "checks them against a variety of best practices, with a focus on production readiness and security",
+      "introduces": [
+        "KubeLinter"
+      ],
+      "source": "KubeLinter project page, “What is KubeLinter?”",
+      "sourceURL": "https://github.com/stackrox/kube-linter/blob/master/README.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "KubeLinter",
+        "kubernetes",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cks.kubelinter-lint"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.what-is-admission-control-config-file",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8050,
+      "front": "What is the kube-apiserver flag --admission-control-config-file?",
+      "back": "The flag naming the AdmissionConfiguration file, which gives admission plugins such as ImagePolicyWebhook their configuration.",
+      "explanation": "The ImagePolicyWebhook configuration is referenced from the file this flag points to, either by path or embedded.",
+      "example": "Like a building's master key register: the API server looks here to find each admission plugin's own settings file.",
+      "evidence": "Reference the ImagePolicyWebhook configuration file from the file provided to the API server's command line flag --admission-control-config-file",
+      "introduces": [
+        "--admission-control-config-file"
+      ],
+      "source": "Kubernetes docs, Admission Control in Kubernetes, “ImagePolicyWebhook”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagepolicywebhook",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--admission-control-config-file",
+        "kube-apiserver",
+        "ImagePolicyWebhook",
+        "admission controller"
+      ],
+      "conceptIDs": [
+        "cks.admission-config-file"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.what-is-defaultallow",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8060,
+      "front": "What is defaultAllow in an ImagePolicyWebhook configuration?",
+      "back": "The setting that decides what happens when the webhook backend fails: whether images are allowed by default or not.",
+      "explanation": "The configuration comment says it “determines behavior if the webhook backend fails”; the example sets it to true.",
+      "example": "Like a shop door when the card reader breaks: either it opens for everyone or it stays locked until the reader is back.",
+      "evidence": "# determines behavior if the webhook backend fails defaultAllow: true",
+      "introduces": [
+        "defaultAllow"
+      ],
+      "source": "Kubernetes docs, Admission Control in Kubernetes, “ImagePolicyWebhook: Configuration file format”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagereview-config-file-format",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "defaultAllow",
+        "ImagePolicyWebhook"
+      ],
+      "conceptIDs": [
+        "cks.ipw-defaultallow"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.multi-stage-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8070,
+      "front": "A Go service's image is nearly a gigabyte because it still contains the compiler and source code used to build the binary. Which change best shrinks the image while keeping the same build?",
+      "choices": [
+        "Compile in one stage, then copy only the binary into a small final stage",
+        "Add a USER instruction",
+        "Pin the base image to a digest",
+        "Scan the image with Trivy"
+      ],
+      "back": "Compile in one stage, then copy only the binary into a small final stage.",
+      "explanation": "A multi-stage build keeps the build tools in an earlier stage, so the final image holds only what the application needs to run.",
+      "choicesExplained": {
+        "Add a USER instruction": "It changes which user runs the process, not what files the image contains.",
+        "Pin the base image to a digest": "It makes builds repeatable but leaves the compiler and sources in the image.",
+        "Scan the image with Trivy": "Scanning reports problems; it does not remove anything from the image."
+      },
+      "source": "Docker Docs, Building best practices, “Use multi-stage builds”",
+      "sourceURL": "https://docs.docker.com/build/building/best-practices/#use-multi-stage-builds",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "multi-stage build",
+        "container image",
+        "Trivy"
+      ],
+      "conceptIDs": [
+        "cks.multi-stage-build"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.base-image-two-tests",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8080,
+      "front": "What two things does Docker's guide say to check when choosing a base image?",
+      "back": "That it comes from a trusted source, and that it is small.",
+      "explanation": "Docker calls the base image the first step towards a secure image; a smaller one also tends to bring fewer vulnerabilities in through its dependencies.",
+      "source": "Docker Docs, Building best practices, “Choose the right base image”",
+      "sourceURL": "https://docs.docker.com/build/building/best-practices/#choose-the-right-base-image",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "container image",
+        "minimal image",
+        "vulnerability"
+      ],
+      "conceptIDs": [
+        "cks.choose-base-image"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.base-image-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8090,
+      "front": "Your production image is based on a full operating-system image with build tools and a shell you never use at run time. Following Docker's advice, what should the production stage start from?",
+      "choices": [
+        "A smaller, minimal base image from a trusted source that still meets the app's needs",
+        "The same full image, with more packages added for debugging",
+        "Any image from a public registry, as long as it is tagged latest",
+        "No base image change; add a HEALTHCHECK instead"
+      ],
+      "back": "A smaller, minimal base image from a trusted source that still meets the app's needs.",
+      "explanation": "Docker suggests one image for building and testing and a typically slimmer one for production; the smaller image carries fewer dependencies that could bring in vulnerabilities.",
+      "choicesExplained": {
+        "The same full image, with more packages added for debugging": "Extra packages add dependencies and size, the opposite of the advice.",
+        "Any image from a public registry, as long as it is tagged latest": "The guide asks for a trusted source; a latest tag says nothing about trust.",
+        "No base image change; add a HEALTHCHECK instead": "A health check does not reduce what the image contains."
+      },
+      "source": "Docker Docs, Building best practices, “Choose the right base image”",
+      "sourceURL": "https://docs.docker.com/build/building/best-practices/#choose-the-right-base-image",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "container image",
+        "minimal image",
+        "registry",
+        "vulnerability"
+      ],
+      "conceptIDs": [
+        "cks.choose-base-image"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.unneeded-packages-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8100,
+      "front": "A colleague adds vim, curl and a compiler to a message-queue image “in case we need to debug”. The queue needs none of them to run. What does Docker's guide advise?",
+      "choices": [
+        "Leave them out: install only what the image needs",
+        "Keep them but run as non-root",
+        "Keep them but pin their versions",
+        "Keep them and delete them in a later build step"
+      ],
+      "back": "Leave them out: install only what the image needs.",
+      "explanation": "Docker says to avoid packages that are merely nice to have; leaving them out reduces complexity, dependencies, file size and build time.",
+      "choicesExplained": {
+        "Keep them but run as non-root": "Running as non-root is good practice, but the packages still add dependencies and size.",
+        "Keep them but pin their versions": "Pinning makes builds repeatable; the unnecessary packages are still there.",
+        "Keep them and delete them in a later build step": "The advice is not to install them at all, not to add them and tidy up later."
+      },
+      "source": "Docker Docs, Building best practices, “Don't install unnecessary packages”",
+      "sourceURL": "https://docs.docker.com/build/building/best-practices/#dont-install-unnecessary-packages",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "container image",
+        "minimal image"
+      ],
+      "conceptIDs": [
+        "cks.no-unneeded-packages"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.dockerfile-user-non-root",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8110,
+      "front": "In a Dockerfile, how does Docker advise running a service that does not need privileges?",
+      "back": "Create a user and group in the Dockerfile, then use the USER instruction to switch to that non-root user.",
+      "explanation": "Docker also suggests giving that user an explicit user and group number, because otherwise the next free numbers are assigned and may differ between rebuilds.",
+      "source": "Docker Docs, Building best practices, “USER”",
+      "sourceURL": "https://docs.docker.com/build/building/best-practices/#user",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "root",
+        "container image"
+      ],
+      "conceptIDs": [
+        "cks.dockerfile-user"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.dockerfile-user-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8120,
+      "front": "A web app's Dockerfile has no USER line, so the process runs as root, and the app needs no special privileges. The developer proposes installing sudo so an admin can raise privileges later. What fits Docker's guide?",
+      "choices": [
+        "Add a non-root user and a USER line; do not install sudo",
+        "Install sudo and keep running as root",
+        "Keep root but make the root filesystem larger",
+        "Switch USER back and forth between root and the app user in many steps"
+      ],
+      "back": "Add a non-root user and a USER line; do not install sudo.",
+      "explanation": "Docker advises USER for services that can run without privileges and warns against sudo because of its unpredictable terminal and signal-forwarding behaviour.",
+      "choicesExplained": {
+        "Install sudo and keep running as root": "Docker advises avoiding sudo, and the service does not need root.",
+        "Keep root but make the root filesystem larger": "Filesystem size has nothing to do with which user runs the process.",
+        "Switch USER back and forth between root and the app user in many steps": "Docker advises against switching USER back and forth frequently."
+      },
+      "source": "Docker Docs, Building best practices, “USER”",
+      "sourceURL": "https://docs.docker.com/build/building/best-practices/#user",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "root",
+        "container image"
+      ],
+      "conceptIDs": [
+        "cks.dockerfile-user"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.tags-are-mutable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8130,
+      "front": "Why can a Dockerfile based on python:3.12 get a different base image next month?",
+      "back": "Image tags are mutable: the publisher can move the tag to point to a newer image.",
+      "explanation": "Docker notes that publishers commonly move a version tag to the latest patch release, so rebuilding later may pull something different.",
+      "source": "Docker Docs, Building best practices, “Pin base image versions”",
+      "sourceURL": "https://docs.docker.com/build/building/best-practices/#pin-base-image-versions",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "container image",
+        "image tag vs digest"
+      ],
+      "conceptIDs": [
+        "cks.pin-image-version"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.pin-digest-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8140,
+      "front": "An auditor wants every build of your image to use exactly the same base image, even if the publisher re-tags it. Which base image reference does that?",
+      "choices": [
+        "debian:12@sha256:<digest>",
+        "debian:12",
+        "debian:latest",
+        "debian"
+      ],
+      "back": "debian:12@sha256:<digest>",
+      "explanation": "Pinning to a digest guarantees the same image version even if the tag is moved; Docker adds that you then have to update the digest yourself and miss automatic security fixes.",
+      "choicesExplained": {
+        "debian:12": "A tag can be moved by the publisher, so later builds may differ.",
+        "debian:latest": "latest is the tag most likely to move.",
+        "debian": "With no tag, the latest tag is used, which can change."
+      },
+      "source": "Docker Docs, Building best practices, “Pin base image versions”",
+      "sourceURL": "https://docs.docker.com/build/building/best-practices/#pin-base-image-versions",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "container image",
+        "image digest",
+        "image tag vs digest"
+      ],
+      "conceptIDs": [
+        "cks.pin-image-version",
+        "cks.image-digest"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.digest-vs-tag-k8s",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8150,
+      "front": "In Kubernetes image names, how does a digest differ from a tag?",
+      "back": "A digest is a hash of the image's content and is fixed; a tag can be moved to point to a different image.",
+      "explanation": "The Images page describes digests as immutable identifiers for a specific version of an image.",
+      "evidence": "Digests are hashes of the image's content, and are immutable. Tags can be moved to point to different images, but digests are fixed.",
+      "source": "Kubernetes docs, Images, “Image names”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#image-names",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "image digest",
+        "image tag vs digest",
+        "container image",
+        "hash"
+      ],
+      "conceptIDs": [
+        "cks.image-digest"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.tag-and-digest-pull",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8160,
+      "front": "An image is written as registry.example/app:2.1@sha256:<digest>. Which part does Kubernetes use to pull it?",
+      "back": "Only the digest.",
+      "explanation": "The Images page gives this form, image name with tag and digest, and says only the digest is used for pulling.",
+      "evidence": "Image name with tag and digest. Only the digest will be used for pulling.",
+      "source": "Kubernetes docs, Images, “Image names”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#image-names",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "image digest",
+        "image tag vs digest",
+        "registry"
+      ],
+      "conceptIDs": [
+        "cks.image-digest"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.digest-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8170,
+      "front": "After a registry re-tagged app:1.4, half of a Deployment's Pods ran old code and half ran new code. Which image field would have prevented the mix?",
+      "choices": [
+        "image: app@sha256:<digest>",
+        "image: app:latest",
+        "image: app:1.4 with imagePullPolicy: Always",
+        "image: app"
+      ],
+      "back": "image: app@sha256:<digest>",
+      "explanation": "Kubernetes says a digest pins the code you run, so a change at the registry cannot lead to a mix of versions.",
+      "evidence": "Specifying an image by digest pins the code that you run so that a change at the registry cannot lead to that mix of versions.",
+      "choicesExplained": {
+        "image: app:latest": "latest is a tag and can move; the docs advise avoiding it in production.",
+        "image: app:1.4 with imagePullPolicy: Always": "Always pulls whatever the tag points to now, which is exactly what changed.",
+        "image: app": "With no tag, Kubernetes assumes latest, which can move."
+      },
+      "source": "Kubernetes docs, Images, “Image pull policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "image digest",
+        "imagepullpolicy",
+        "Deployment",
+        "Pod",
+        "registry"
+      ],
+      "conceptIDs": [
+        "cks.image-digest"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.bom-generate",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8180,
+      "front": "Which bom subcommand creates an SPDX SBOM?",
+      "back": "bom generate",
+      "explanation": "The command reference lists bom generate as the command that creates SPDX SBOMs.",
+      "evidence": "bom generate → Create SPDX SBOMs",
+      "source": "bom documentation, command reference, “bom generate”",
+      "sourceURL": "https://kubernetes-sigs.github.io/bom/cli-reference/",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "bom",
+        "SBOM",
+        "SPDX and CycloneDX"
+      ],
+      "conceptIDs": [
+        "cks.bom-generate"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.bom-validate",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8190,
+      "front": "Which bom subcommand checks artifacts against an SPDX manifest?",
+      "back": "bom validate",
+      "explanation": "The command reference describes bom validate as checking artifacts against SPDX manifests.",
+      "evidence": "bom validate → Check artifacts against SPDX manifests",
+      "source": "bom documentation, command reference, “bom validate”",
+      "sourceURL": "https://kubernetes-sigs.github.io/bom/cli-reference/",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "bom",
+        "SPDX and CycloneDX"
+      ],
+      "conceptIDs": [
+        "cks.bom-generate"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.bom-image-flag",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8200,
+      "front": "Which bom generate flag adds container images to the SBOM, and where does the document go if you give no --output?",
+      "back": "-i / --image adds images; without -o / --output the document is written to standard output.",
+      "explanation": "bom generate can pull images from remote registries for analysis, and its --output flag defaults to standard output.",
+      "evidence": "-i, --image strings list of images",
+      "source": "bom project page, “bom generate”",
+      "sourceURL": "https://github.com/kubernetes-sigs/bom/blob/main/README.md#bom-generate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "bom",
+        "container image",
+        "SBOM",
+        "registry"
+      ],
+      "conceptIDs": [
+        "cks.bom-generate"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.bom-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8210,
+      "front": "You must save an SPDX SBOM of the image registry.example/shop:3.2 to /opt/shop.spdx. Which command does it?",
+      "choices": [
+        "bom generate --image registry.example/shop:3.2 --output /opt/shop.spdx",
+        "bom validate --image registry.example/shop:3.2 --output /opt/shop.spdx",
+        "trivy image --scanners license registry.example/shop:3.2",
+        "kubesec scan registry.example/shop:3.2 > /opt/shop.spdx"
+      ],
+      "back": "bom generate --image registry.example/shop:3.2 --output /opt/shop.spdx",
+      "explanation": "bom generate writes SPDX manifests from images among other sources, and --output names the file it writes to.",
+      "evidence": "path to the file where the document will be written (defaults to STDOUT)",
+      "choicesExplained": {
+        "bom validate --image registry.example/shop:3.2 --output /opt/shop.spdx": "validate checks artifacts against an existing SPDX manifest; it does not create one.",
+        "trivy image --scanners license registry.example/shop:3.2": "This reports licences found in the image; it does not write the SPDX file asked for.",
+        "kubesec scan registry.example/shop:3.2 > /opt/shop.spdx": "Kubesec scans Kubernetes resource manifests, not images, and does not produce SBOMs."
+      },
+      "source": "bom project page, “bom generate”",
+      "sourceURL": "https://github.com/kubernetes-sigs/bom/blob/main/README.md#bom-generate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "bom",
+        "SBOM",
+        "SPDX and CycloneDX",
+        "Trivy",
+        "Kubesec"
+      ],
+      "conceptIDs": [
+        "cks.bom-generate"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.k8s-release-sbom",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8220,
+      "front": "How can you verify the SBOM that Kubernetes publishes for a release?",
+      "back": "With its sigstore certificate and signature (cosign verify-blob), or with the matching checksum files.",
+      "explanation": "The Kubernetes docs give both routes for checking the release SBOM before you rely on it.",
+      "evidence": "You can verify the Kubernetes Software Bill of Materials (SBOM) by using the sigstore certificate and signature, or the corresponding SHA files",
+      "source": "Kubernetes docs, Verify Signed Kubernetes Artifacts, “Verify the Software Bill Of Materials”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/verify-signed-artifacts/#verify-the-software-bill-of-materials",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Software Bill of Materials",
+        "SBOM",
+        "Sigstore",
+        "cosign",
+        "digital certificate",
+        "digital signature"
+      ],
+      "conceptIDs": [
+        "cks.k8s-sbom"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.trivy-default-scanners",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8230,
+      "front": "Which two scanners does trivy image run on an image's files by default?",
+      "back": "Vulnerability scanning and secret scanning.",
+      "explanation": "Trivy can also look for misconfigurations and licences, but only vulnerability and secret scanning are on unless you change --scanners.",
+      "evidence": "By default, vulnerability and secret scanning are enabled, and you can configure that with --scanners.",
+      "source": "Trivy documentation, Container Image, “Files inside container images”",
+      "sourceURL": "https://trivy.dev/latest/docs/target/container_image/#files-inside-container-images",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Trivy",
+        "vulnerability",
+        "container image"
+      ],
+      "conceptIDs": [
+        "cks.trivy-scanners"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.trivy-vuln-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8240,
+      "front": "How do you make trivy image look only for vulnerabilities?",
+      "back": "Add --scanners vuln, e.g. trivy image --scanners vuln <image>.",
+      "explanation": "Setting --scanners to vuln alone switches off the secret scanning that is otherwise on by default.",
+      "evidence": "To enable only vulnerability scanning, you can specify --scanners vuln.",
+      "source": "Trivy documentation, Container Image, “Vulnerabilities”",
+      "sourceURL": "https://trivy.dev/latest/docs/target/container_image/#vulnerabilities",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Trivy",
+        "vulnerability"
+      ],
+      "conceptIDs": [
+        "cks.trivy-scanners",
+        "cks.trivy-image"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.trivy-misconfig-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8250,
+      "front": "An image ships Kubernetes YAML and Terraform files, and you want Trivy to check those files for misconfigurations too. What do you add?",
+      "choices": [
+        "--scanners misconfig",
+        "--scanners license",
+        "--input",
+        "Nothing: misconfiguration scanning of image files is on by default"
+      ],
+      "back": "--scanners misconfig",
+      "explanation": "Trivy mainly checks IaC files for misconfigurations, and asks you to enable it for images that contain such files.",
+      "evidence": "If your container image includes IaC files such as Kubernetes YAML files or Terraform files, you should enable this feature with --scanners misconfig.",
+      "choicesExplained": {
+        "--scanners license": "That scanner looks for software licences, not misconfigurations.",
+        "--input": "--input reads an image from a tar file; it does not choose scanners.",
+        "Nothing: misconfiguration scanning of image files is on by default": "Only vulnerability and secret scanning are on by default."
+      },
+      "source": "Trivy documentation, Container Image, “Misconfigurations”",
+      "sourceURL": "https://trivy.dev/latest/docs/target/container_image/#misconfigurations",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Trivy",
+        "infrastructure as code",
+        "IaC and manifest scanning",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "cks.trivy-scanners"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.trivy-license",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8260,
+      "front": "How do you make `trivy image` scan an image's files for software licences?",
+      "back": "Add `--scanners license`, for example `trivy image --scanners license <image>`; licence scanning is off by default.",
+      "explanation": "By default Trivy runs only vulnerability and secret scanning, so licence scanning, like misconfiguration scanning, has to be asked for.",
+      "evidence": "trivy image --scanners license [YOUR_IMAGE_NAME]",
+      "source": "Trivy documentation, Container Image, “Licenses”",
+      "sourceURL": "https://trivy.dev/latest/docs/target/container_image/#licenses",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Trivy"
+      ],
+      "conceptIDs": [
+        "cks.trivy-scanners"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.trivy-tar-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8270,
+      "front": "An image was exported with docker save to /tmp/billing.tar on a host with no registry access. Which command scans that file with Trivy?",
+      "choices": [
+        "trivy image --input /tmp/billing.tar",
+        "trivy image /tmp/billing.tar --scanners misconfig",
+        "kube-linter lint /tmp/billing.tar",
+        "bom validate /tmp/billing.tar"
+      ],
+      "back": "trivy image --input /tmp/billing.tar",
+      "explanation": "Trivy's docs scan a saved image tar file by passing it with --input.",
+      "evidence": "trivy image --input ruby-3.1.tar",
+      "choicesExplained": {
+        "trivy image /tmp/billing.tar --scanners misconfig": "Without --input the argument is read as an image name, and misconfig is not the default vulnerability scan.",
+        "kube-linter lint /tmp/billing.tar": "KubeLinter checks Kubernetes YAML, Helm charts and Kustomize, not image archives.",
+        "bom validate /tmp/billing.tar": "bom validate checks artifacts against an SPDX manifest; it does not scan for vulnerabilities."
+      },
+      "source": "Trivy documentation, Container Image, “Tar Files”",
+      "sourceURL": "https://trivy.dev/latest/docs/target/container_image/#tar-files",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Trivy",
+        "container image",
+        "registry",
+        "KubeLinter",
+        "bom"
+      ],
+      "conceptIDs": [
+        "cks.trivy-image"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.trivy-sbom",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8280,
+      "front": "Besides scanning for vulnerabilities, what can Trivy produce for a container image?",
+      "back": "A Software Bill of Materials (SBOM).",
+      "explanation": "Trivy both generates SBOMs for images and can search for existing SBOMs during vulnerability scanning.",
+      "evidence": "Trivy supports the generation of Software Bill of Materials (SBOM) for container images and the search for SBOMs during vulnerability scanning.",
+      "source": "Trivy documentation, Container Image, “SBOM”",
+      "sourceURL": "https://trivy.dev/latest/docs/target/container_image/#sbom",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Trivy",
+        "Software Bill of Materials",
+        "SBOM",
+        "container image"
+      ],
+      "conceptIDs": [
+        "cks.trivy-sbom"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.kubesec-scan-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8290,
+      "front": "You are asked for a security score for the Deployment in /root/web.yaml before it is applied. Which command gives it?",
+      "choices": [
+        "kubesec scan /root/web.yaml",
+        "kube-linter lint /root/web.yaml",
+        "trivy image /root/web.yaml",
+        "bom generate -f /root/web.yaml"
+      ],
+      "back": "kubesec scan /root/web.yaml",
+      "explanation": "Kubesec scans resources from local files or standard input and outputs a security score with a detailed analysis.",
+      "evidence": "will output a security score and a detailed analysis of your resource.",
+      "choicesExplained": {
+        "kube-linter lint /root/web.yaml": "KubeLinter reports failed checks and remediations, not a score.",
+        "trivy image /root/web.yaml": "trivy image expects a container image, not a manifest file.",
+        "bom generate -f /root/web.yaml": "This would list the file in an SBOM; it gives no security score."
+      },
+      "source": "Kubesec project page, “Quick Start”",
+      "sourceURL": "https://github.com/controlplaneio/kubesec/blob/master/README.md#-quick-start",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubesec",
+        "KubeLinter",
+        "Trivy",
+        "bom",
+        "Deployment",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cks.kubesec-scan",
+        "cks.kubesec-score"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.kubesec-multi-doc",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8300,
+      "front": "How can one file hold several resources for Kubesec to scan?",
+      "back": "As multiple YAML documents separated by ---.",
+      "explanation": "Kubesec scans every document in the input, or documents from several files at once, as long as they are correctly separated.",
+      "evidence": "Kubesec can scan multiple YAML documents in a single input file, or scan documents from multiple files at once, as long as they are correctly formatted as multiple documents separated by `---`.",
+      "source": "Kubesec project page, “Scanning”",
+      "sourceURL": "https://github.com/controlplaneio/kubesec/blob/master/README.md#scanning",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubesec",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "cks.kubesec-scan"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.kubesec-cap-sys-admin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8310,
+      "front": "In Kubesec's example output, what reason is given for the critical finding on a container that adds SYS_ADMIN?",
+      "back": "CAP_SYS_ADMIN is the most privileged capability and should always be avoided.",
+      "explanation": "In that example the finding costs -30 points, and the resource fails with a score of -30.",
+      "evidence": "\"reason\": \"CAP_SYS_ADMIN is the most privileged capability and should always be avoided\", \"points\": -30",
+      "source": "Kubesec project page, “Example JSON Output”",
+      "sourceURL": "https://github.com/controlplaneio/kubesec/blob/master/README.md#example-json-output",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubesec",
+        "CAP_SYS_ADMIN",
+        "Linux capabilities"
+      ],
+      "conceptIDs": [
+        "cks.kubesec-score"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.kubesec-print-rules",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8320,
+      "front": "Which Kubesec command lists every scanning rule with its point score?",
+      "back": "kubesec print-rules",
+      "explanation": "Add --format table for a table view of the same rules and points.",
+      "evidence": "Print all scanning rules with their associated point scores kubesec print-rules",
+      "source": "Kubesec project page, “Print Rules”",
+      "sourceURL": "https://github.com/controlplaneio/kubesec/blob/master/README.md#print-rules",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubesec"
+      ],
+      "conceptIDs": [
+        "cks.kubesec-score"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.kubelinter-lint",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8330,
+      "front": "What is the basic command to check a YAML file with KubeLinter?",
+      "back": "kube-linter lint <path-to-file.yaml>",
+      "explanation": "In its most basic form, KubeLinter needs only two steps: locate the YAML file, then run this command on it.",
+      "evidence": "Locate the YAML file you'd like to test for security and production readiness best practices",
+      "source": "KubeLinter project page, “Local YAML Linting”",
+      "sourceURL": "https://github.com/stackrox/kube-linter/blob/master/README.md#local-yaml-linting",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "KubeLinter",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "cks.kubelinter-lint"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.kubelinter-exit-code",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8340,
+      "front": "What does KubeLinter do when a lint check fails?",
+      "back": "It reports recommendations for fixing the issue and returns a non-zero exit code.",
+      "explanation": "Its report names each failed check with a remediation.",
+      "evidence": "When a lint check fails, KubeLinter reports recommendations for how to resolve any potential issues and returns a non-zero exit code.",
+      "source": "KubeLinter project page, “What is KubeLinter?”",
+      "sourceURL": "https://github.com/stackrox/kube-linter/blob/master/README.md#what-is-kubelinter",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "KubeLinter"
+      ],
+      "conceptIDs": [
+        "cks.kubelinter-lint"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.kubelinter-inputs",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8350,
+      "front": "KubeLinter analyses Kubernetes YAML files, {{c1::Helm charts}}, and Kustomize manifests.",
+      "back": "Helm charts",
+      "explanation": "Those are the three kinds of input its project page names.",
+      "evidence": "KubeLinter analyzes Kubernetes YAML files, Helm charts, and Kustomize manifests",
+      "source": "KubeLinter project page, “What is KubeLinter?”",
+      "sourceURL": "https://github.com/stackrox/kube-linter/blob/master/README.md#what-is-kubelinter",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "KubeLinter",
+        "Helm chart",
+        "Kustomize",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "cks.kubelinter-inputs"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.kubelinter-remediation-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8360,
+      "front": "KubeLinter reports check no-read-only-root-fs for container \"api\". What change clears it?",
+      "choices": [
+        "Set readOnlyRootFilesystem: true in the container's securityContext",
+        "Set a memory limit on the container",
+        "Replace the latest tag with a specific tag",
+        "Add the container to a NetworkPolicy"
+      ],
+      "back": "Set readOnlyRootFilesystem: true in the container's securityContext.",
+      "explanation": "KubeLinter's output for this check gives exactly that remediation.",
+      "evidence": "check: no-read-only-root-fs, remediation: Set readOnlyRootFilesystem to true in the container securityContext.",
+      "choicesExplained": {
+        "Set a memory limit on the container": "That answers a different check, unset-memory-requirements.",
+        "Replace the latest tag with a specific tag": "That answers the latest-tag check.",
+        "Add the container to a NetworkPolicy": "Network rules do not change whether the root filesystem is writable."
+      },
+      "source": "KubeLinter project page, “Example”",
+      "sourceURL": "https://github.com/stackrox/kube-linter/blob/master/README.md#example",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "KubeLinter",
+        "readOnlyRootFilesystem",
+        "security context",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cks.kubelinter-lint"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.ipw-disabled-by-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8370,
+      "front": "Is the ImagePolicyWebhook admission controller on by default, and what kind of controller is it?",
+      "back": "No, it is disabled by default. It is a validating controller: a backend webhook makes the admission decision.",
+      "explanation": "Because it is off by default, it has to be added to the kube-apiserver's --enable-admission-plugins list.",
+      "evidence": "The ImagePolicyWebhook admission controller allows a backend webhook to make admission decisions. This admission controller is disabled by default.",
+      "source": "Kubernetes docs, Admission Control in Kubernetes, “ImagePolicyWebhook”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagepolicywebhook",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ImagePolicyWebhook",
+        "admission controller",
+        "--enable-admission-plugins",
+        "kube-apiserver",
+        "mutating vs validating admission"
+      ],
+      "conceptIDs": [
+        "cks.ipw-enable"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.ipw-enable-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8380,
+      "front": "The kube-apiserver manifest has --admission-control-config-file=/etc/kubernetes/admission.yaml, whose plugins list has ImagePolicyWebhook, but --enable-admission-plugins=NodeRestriction. Pods with any image are still admitted. What is missing?",
+      "choices": [
+        "Add ImagePolicyWebhook to --enable-admission-plugins",
+        "Set defaultAllow: true",
+        "Delete --admission-control-config-file",
+        "Restart the kubelet on every worker node"
+      ],
+      "back": "Add ImagePolicyWebhook to --enable-admission-plugins.",
+      "explanation": "The plugin is disabled by default, and --enable-admission-plugins is the list of plugins the API server invokes; the config file only configures a plugin that is enabled.",
+      "evidence": "The Kubernetes API server flag enable-admission-plugins takes a comma-delimited list of admission control plugins to invoke prior to modifying objects in the cluster.",
+      "choicesExplained": {
+        "Set defaultAllow: true": "That only decides what happens when the backend fails, and it would admit more, not less.",
+        "Delete --admission-control-config-file": "The plugin needs that file to find its configuration.",
+        "Restart the kubelet on every worker node": "Admission runs in the API server, not in the kubelet."
+      },
+      "source": "Kubernetes docs, Admission Control in Kubernetes, “How do I turn on an admission controller?”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#how-do-i-turn-on-an-admission-controller",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ImagePolicyWebhook",
+        "--enable-admission-plugins",
+        "--admission-control-config-file",
+        "defaultAllow",
+        "kube-apiserver",
+        "kubelet",
+        "NodeRestriction"
+      ],
+      "conceptIDs": [
+        "cks.ipw-enable",
+        "cks.admission-config-file"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.admission-config-plugins-entry",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8390,
+      "front": "In the AdmissionConfiguration file, what are the two ways to give ImagePolicyWebhook its settings?",
+      "back": "A plugins entry named ImagePolicyWebhook with either a path to its config file or the configuration embedded under configuration.",
+      "explanation": "The docs show a path: imagepolicyconfig.yaml entry and, alternatively, the imagePolicy block embedded directly.",
+      "evidence": "Alternatively, you can embed the configuration directly in the file",
+      "source": "Kubernetes docs, Admission Control in Kubernetes, “ImagePolicyWebhook: Configuration file format”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagereview-config-file-format",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ImagePolicyWebhook",
+        "--admission-control-config-file"
+      ],
+      "conceptIDs": [
+        "cks.admission-config-file"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.ipw-kubeconfig",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8400,
+      "front": "In ImagePolicyWebhook's kubeConfigFile, what must the cluster entry and the user entry hold?",
+      "back": "cluster: the remote image-policy service (server address and certificate authority). user: the API server's credentials for calling it (client certificate and key).",
+      "explanation": "The config file must reference a kubeconfig-format file, which sets up the connection to the backend.",
+      "evidence": "The kubeconfig file's cluster field must point to the remote service, and the user field must contain the returned authorizer.",
+      "source": "Kubernetes docs, Admission Control in Kubernetes, “ImagePolicyWebhook: Configuration file format”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagereview-config-file-format",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ImagePolicyWebhook",
+        "kubeconfig",
+        "certificate authority",
+        "CA",
+        "digital certificate"
+      ],
+      "conceptIDs": [
+        "cks.ipw-kubeconfig"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.ipw-tls-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8410,
+      "front": "An ImagePolicyWebhook kubeconfig sets server: http://imagecheck.internal:8080/policy. Which change does the Kubernetes documentation require?",
+      "choices": [
+        "Serve the backend over TLS and use an https:// server address",
+        "Move the address into the user entry",
+        "Set allowTTL: 0",
+        "Remove certificate-authority from the cluster entry"
+      ],
+      "back": "Serve the backend over TLS and use an https:// server address.",
+      "explanation": "The docs require the backend to communicate over TLS, and the example server line is marked “Must use 'https'”.",
+      "evidence": "It is required that the backend communicate over TLS.",
+      "choicesExplained": {
+        "Move the address into the user entry": "The cluster entry points to the remote service; the user entry holds credentials.",
+        "Set allowTTL: 0": "That changes how long approvals are cached, not the transport.",
+        "Remove certificate-authority from the cluster entry": "The CA is how the API server verifies the remote service; removing it weakens TLS."
+      },
+      "source": "Kubernetes docs, Admission Control in Kubernetes, “ImagePolicyWebhook: Configuration file format”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagereview-config-file-format",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ImagePolicyWebhook",
+        "kubeconfig",
+        "encryption in transit",
+        "certificate authority"
+      ],
+      "conceptIDs": [
+        "cks.ipw-kubeconfig"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.ipw-ttls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8420,
+      "front": "In an ImagePolicyWebhook configuration, what do allowTTL, denyTTL and retryBackoff set?",
+      "back": "allowTTL and denyTTL: seconds to cache an approval or a denial. retryBackoff: milliseconds to wait between retries.",
+      "explanation": "These three sit beside kubeConfigFile and defaultAllow in the imagePolicy block.",
+      "evidence": "# time in s to cache approval allowTTL: 50 # time in s to cache denial denyTTL: 50 # time in ms to wait between retries retryBackoff: 500",
+      "source": "Kubernetes docs, Admission Control in Kubernetes, “ImagePolicyWebhook: Configuration file format”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagereview-config-file-format",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ImagePolicyWebhook",
+        "defaultAllow"
+      ],
+      "conceptIDs": [
+        "cks.ipw-kubeconfig"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.defaultallow-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8430,
+      "front": "Security policy says: if the image-policy backend cannot be reached, no new Pods may start with unchecked images. Which ImagePolicyWebhook setting meets it?",
+      "choices": [
+        "defaultAllow: false",
+        "defaultAllow: true",
+        "allowTTL: 0",
+        "retryBackoff: 0"
+      ],
+      "back": "defaultAllow: false",
+      "explanation": "defaultAllow determines behaviour when the webhook backend fails; setting it to false stops the default from being to allow.",
+      "evidence": "# determines behavior if the webhook backend fails defaultAllow: true",
+      "choicesExplained": {
+        "defaultAllow: true": "That allows images by default when the backend fails, which the policy forbids.",
+        "allowTTL: 0": "It only stops caching approvals; it says nothing about a failed backend.",
+        "retryBackoff: 0": "It changes the wait between retries, not the outcome when the backend stays down."
+      },
+      "source": "Kubernetes docs, Admission Control in Kubernetes, “ImagePolicyWebhook: Configuration file format”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagereview-config-file-format",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "defaultAllow",
+        "ImagePolicyWebhook",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.ipw-defaultallow"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.ipw-imagereview-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8440,
+      "front": "Which images does the ImageReview sent to an ImagePolicyWebhook backend include?",
+      "back": "All images in the Pod's containers, initContainers and ephemeralContainers; images under image volumes are not in scope.",
+      "explanation": "The backend answers by filling status.allowed with true or false, optionally with a reason.",
+      "evidence": "This covers images specified as part of the containers, initContainers, or ephemeralContainers fields in a Pod specification. As a result, images included under image volumes are not in scope for the ImagePolicyWebhook.",
+      "source": "Kubernetes docs, Admission Control in Kubernetes, “ImagePolicyWebhook: Request payloads”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#request-payloads",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ImagePolicyWebhook",
+        "Pod",
+        "init container",
+        "ephemeral container",
+        "container image"
+      ],
+      "conceptIDs": [
+        "cks.ipw-enable"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.vap-needs-binding",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8450,
+      "front": "What is the least you must create for a ValidatingAdmissionPolicy, such as an allowed-registries rule, to take effect?",
+      "back": "A ValidatingAdmissionPolicy and a corresponding ValidatingAdmissionPolicyBinding.",
+      "explanation": "The binding links the policy to its scope, for example only Pods or only certain namespaces.",
+      "evidence": "At least a ValidatingAdmissionPolicy and a corresponding ValidatingAdmissionPolicyBinding must be defined for a policy to have an effect.",
+      "source": "Kubernetes docs, Validating Admission Policy, “What Resources Make a Policy”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/#what-resources-make-a-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ValidatingAdmissionPolicy",
+        "registry"
+      ],
+      "conceptIDs": [
+        "cks.allowed-registries-policy"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.allowed-registries-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8460,
+      "front": "Only images from registry.corp.example/ may run in namespace prod. A ValidatingAdmissionPolicy on Deployments needs one validation expression. Which one fits?",
+      "choices": [
+        "object.spec.template.spec.containers.all(c, c.image.startsWith('registry.corp.example/'))",
+        "object.spec.template.spec.containers.exists(c, c.image.startsWith('registry.corp.example/'))",
+        "object.metadata.namespace == 'prod'",
+        "object.spec.template.spec.containers.all(c, c.image.contains(':latest'))"
+      ],
+      "back": "object.spec.template.spec.containers.all(c, c.image.startsWith('registry.corp.example/'))",
+      "explanation": "The docs' own image policy checks every container's image with all() and startsWith() against an allowed prefix; a binding with validationActions [Deny] then rejects failures.",
+      "evidence": "variables.containersToCheck.all(c, c.image.startsWith(variables.environment + '.'))",
+      "choicesExplained": {
+        "object.spec.template.spec.containers.exists(c, c.image.startsWith('registry.corp.example/'))": "exists passes if just one container matches, so others could use any registry.",
+        "object.metadata.namespace == 'prod'": "It checks the namespace, not where the images come from.",
+        "object.spec.template.spec.containers.all(c, c.image.contains(':latest'))": "It would require the latest tag, which says nothing about the registry."
+      },
+      "source": "Kubernetes docs, Validating Admission Policy, “Variable composition”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/#variable-composition",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ValidatingAdmissionPolicy",
+        "Common Expression Language",
+        "registry",
+        "Deployment",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cks.allowed-registries-policy"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.cosign-verify-image",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8470,
+      "front": "Which cosign command verifies a signed container image, and which two options must you give it for keyless signatures?",
+      "back": "cosign verify <image>, with --certificate-identity and --certificate-oidc-issuer.",
+      "explanation": "The Kubernetes docs verify a control plane image this way, and note that Cosign 2.0 requires both options.",
+      "evidence": "Cosign 2.0 requires the --certificate-identity and --certificate-oidc-issuer options.",
+      "source": "Kubernetes docs, Verify Signed Kubernetes Artifacts, “Verifying binary signatures”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/verify-signed-artifacts/#verifying-binary-signatures",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cosign",
+        "keyless signing",
+        "container image",
+        "OpenID Connect",
+        "OIDC"
+      ],
+      "conceptIDs": [
+        "cks.cosign-verify-image"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.cosign-verify-blob",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8480,
+      "front": "Which cosign command verifies a signed file, such as a kubectl binary, rather than an image?",
+      "back": "cosign verify-blob, given the file with its --signature and --certificate.",
+      "explanation": "Kubernetes signs its release binaries with cosign's keyless signing, so you download each file with its signature and certificate first.",
+      "evidence": "Then verify the blob by using cosign verify-blob:",
+      "source": "Kubernetes docs, Verify Signed Kubernetes Artifacts, “Verifying binary signatures”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/verify-signed-artifacts/#verifying-binary-signatures",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cosign",
+        "keyless signing",
+        "kubectl",
+        "digital signature",
+        "digital certificate"
+      ],
+      "conceptIDs": [
+        "cks.cosign-verify-image"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.cosign-then-digest-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8490,
+      "front": "You have just run cosign verify on registry.k8s.io/kube-proxy:v1.35.0 and it passed. How should the Pod manifest refer to the image so that it runs exactly what you verified?",
+      "choices": [
+        "By its digest: registry.k8s.io/kube-proxy@sha256:<digest>",
+        "By the same tag, v1.35.0",
+        "By the latest tag",
+        "By the image name alone"
+      ],
+      "back": "By its digest: registry.k8s.io/kube-proxy@sha256:<digest>",
+      "explanation": "The docs say that once you have verified an image you can specify it by its digest in your Pod manifests.",
+      "evidence": "Once you have verified an image, you can specify the image by its digest in your Pod manifests",
+      "choicesExplained": {
+        "By the same tag, v1.35.0": "A tag can later point to a different image from the one you verified.",
+        "By the latest tag": "latest can move and is hard to track.",
+        "By the image name alone": "With no tag or digest, Kubernetes uses latest."
+      },
+      "source": "Kubernetes docs, Verify Signed Kubernetes Artifacts, “Verifying images for all control plane components”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/verify-signed-artifacts/#verifying-images-for-all-control-plane-components",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cosign",
+        "image digest",
+        "Pod",
+        "manifest",
+        "kube-proxy"
+      ],
+      "conceptIDs": [
+        "cks.cosign-verify-image",
+        "cks.image-digest"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.policy-controller",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8500,
+      "front": "According to the Kubernetes docs, what can verify image signatures at deploy time, for images other than the control plane's?",
+      "back": "The sigstore policy-controller admission controller.",
+      "explanation": "The docs give it for non-control plane images, such as the conformance image.",
+      "evidence": "signatures can also be verified at deploy time using sigstore policy-controller admission controller.",
+      "source": "Kubernetes docs, Verify Signed Kubernetes Artifacts, “Verifying Image Signatures with Admission Controller”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/verify-signed-artifacts/#verifying-image-signatures-with-admission-controller",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "sigstore policy-controller",
+        "admission controller",
+        "image signing",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cks.cosign-verify-image"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.contrast-trivy-kubesec",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8510,
+      "front": "Trivy or Kubesec: which one scans a container image, and which scans a Kubernetes resource definition?",
+      "back": "Trivy scans the image (its files and metadata); Kubesec analyses the resource's YAML, such as a Pod or Deployment.",
+      "explanation": "Kubesec is described as security risk analysis for Kubernetes resources, while Trivy's image target covers files inside the image and its metadata.",
+      "evidence": "Security risk analysis for Kubernetes resources",
+      "source": "Kubesec project page",
+      "sourceURL": "https://github.com/controlplaneio/kubesec/blob/master/README.md",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Trivy",
+        "Kubesec",
+        "container image",
+        "Pod",
+        "Deployment",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "cks.kubesec-scan",
+        "cks.trivy-image"
+      ]
+    },
+    {
+      "id": "cks.supply-chain.contrast-kubesec-kubelinter",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8520,
+      "front": "Kubesec and KubeLinter both check manifests. How do their results differ?",
+      "back": "Kubesec gives a security score with a detailed analysis; KubeLinter lists failed checks with remediations and exits non-zero.",
+      "explanation": "KubeLinter's result is a set of recommendations per failed check and an exit code, not a score.",
+      "evidence": "When a lint check fails, KubeLinter reports recommendations for how to resolve any potential issues and returns a non-zero exit code.",
+      "source": "KubeLinter project page, “What is KubeLinter?”",
+      "sourceURL": "https://github.com/stackrox/kube-linter/blob/master/README.md#what-is-kubelinter",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Kubesec",
+        "KubeLinter",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cks.kubesec-score",
+        "cks.kubelinter-lint"
+      ]
+    }
+  ]
+}

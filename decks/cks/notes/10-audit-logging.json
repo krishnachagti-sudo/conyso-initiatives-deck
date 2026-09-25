@@ -1,0 +1,663 @@
+{
+  "topic": "Audit logging and investigation",
+  "notes": [
+    {
+      "id": "cks.audit-logging.what-is-audit-policy-file",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 10000,
+      "front": "What is the kube-apiserver flag --audit-policy-file?",
+      "back": "The flag that passes the audit policy file, the rules for what to record and at what level, to the kube-apiserver.",
+      "explanation": "The audit policy decides what is recorded; this flag is how the API server is given it.",
+      "example": "Like handing a security camera operator the list of doors to watch and how closely, but for API requests.",
+      "evidence": "You can pass a file with the policy to kube-apiserver using the --audit-policy-file flag.",
+      "introduces": [
+        "--audit-policy-file"
+      ],
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--audit-policy-file",
+        "kube-apiserver",
+        "audit policy"
+      ],
+      "conceptIDs": [
+        "cks.audit-policy-flag"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.what-is-omitstages",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 10010,
+      "front": "What is omitStages in an audit policy?",
+      "back": "A list of audit stages for which no events are generated, such as RequestReceived.",
+      "explanation": "The example policy uses it so that no audit events are generated for any request in the RequestReceived stage.",
+      "example": "Like telling a doorman not to note visitors as they step into the lobby, only when they leave, so each visit is not logged twice.",
+      "evidence": "# Don't generate audit events for all requests in RequestReceived stage. omitStages: - \"RequestReceived\"",
+      "introduces": [
+        "omitStages"
+      ],
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "omitStages",
+        "audit stages",
+        "audit policy"
+      ],
+      "conceptIDs": [
+        "cks.audit-omitstages"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.what-is-audit-log-path",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 10020,
+      "front": "What is the kube-apiserver flag --audit-log-path?",
+      "back": "The flag giving the file path where the log audit backend writes audit events.",
+      "explanation": "The log backend writes events to that file in JSONlines format.",
+      "example": "Like telling a till which roll of paper to print receipts on; with no roll given, it prints nothing.",
+      "evidence": "--audit-log-path specifies the log file path that log backend uses to write audit events.",
+      "introduces": [
+        "--audit-log-path"
+      ],
+      "source": "Kubernetes docs, Auditing, “Log backend”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#log-backend",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--audit-log-path",
+        "kube-apiserver",
+        "audit backends"
+      ],
+      "conceptIDs": [
+        "cks.audit-log-path"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.no-policy-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10030,
+      "front": "The kube-apiserver has --audit-log-path=/var/log/kubernetes/audit/audit.log with the directory mounted, but no audit events ever appear. Which flag is most likely missing?",
+      "back": "--audit-policy-file",
+      "explanation": "If the policy flag is omitted, no events are logged, whatever the log backend settings.",
+      "evidence": "You can pass a file with the policy to kube-apiserver using the --audit-policy-file flag. If the flag is omitted, no events are logged.",
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--audit-policy-file",
+        "--audit-log-path",
+        "kube-apiserver",
+        "--enable-admission-plugins"
+      ],
+      "conceptIDs": [
+        "cks.audit-policy-flag"
+      ],
+      "choices": [
+        "--audit-policy-file",
+        "--audit-log-maxbackup",
+        "--enable-admission-plugins",
+        "--audit-log-maxsize"
+      ],
+      "choicesExplained": {
+        "--audit-log-maxbackup": "It only limits how many old log files are kept.",
+        "--enable-admission-plugins": "Admission plugins are unrelated to whether audit events are recorded.",
+        "--audit-log-maxsize": "It only sets when the log file is rotated."
+      }
+    },
+    {
+      "id": "cks.audit-logging.policy-needs-rules",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10040,
+      "front": "Is an audit policy file with an empty rules list valid?",
+      "back": "No. The rules field must be given, and a policy with no rules is treated as illegal.",
+      "explanation": "The smallest policy the docs show has one rule: log everything at the Metadata level.",
+      "evidence": "Note that the rules field must be provided in the audit policy file. A policy with no (0) rules is treated as illegal.",
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit policy",
+        "audit levels"
+      ],
+      "conceptIDs": [
+        "cks.audit-policy-flag"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.first-match",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10050,
+      "front": "An event matches three rules in an audit policy. Which rule sets its audit level?",
+      "back": "The first matching rule, in the order the rules are listed.",
+      "explanation": "Events are compared against the rules in order, so later rules never apply to an event an earlier rule already matched.",
+      "evidence": "When an event is processed, it's compared against the list of rules in order. The first matching rule sets the audit level of the event.",
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit policy",
+        "audit levels"
+      ],
+      "conceptIDs": [
+        "cks.audit-first-match"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.first-match-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10060,
+      "front": "A policy's first rule is level: Metadata with no selectors; the second logs secrets at RequestResponse. Secret requests are only logged at Metadata. What fixes it?",
+      "choices": [
+        "Move the secrets rule above the catch-all Metadata rule",
+        "Change the catch-all to level: None",
+        "Add omitStages: [\"RequestReceived\"] to the secrets rule",
+        "Restart the kube-apiserver so the second rule loads"
+      ],
+      "back": "Move the secrets rule above the catch-all Metadata rule.",
+      "explanation": "The first matching rule sets the level, so the catch-all must come last, as in the docs' example policy.",
+      "evidence": "# A catch-all rule to log all other requests at the Metadata level. - level: Metadata",
+      "choicesExplained": {
+        "Change the catch-all to level: None": "The first rule would still match first, so secrets would not be logged at all.",
+        "Add omitStages: [\"RequestReceived\"] to the secrets rule": "It only drops a stage; the secrets rule is still never reached.",
+        "Restart the kube-apiserver so the second rule loads": "Both rules are loaded; order is the problem, not loading."
+      },
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit policy",
+        "audit levels",
+        "Secret",
+        "omitStages",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cks.audit-first-match"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.level-request",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10070,
+      "front": "Which audit level logs the request metadata and request body, but not the response body?",
+      "back": "Request",
+      "explanation": "RequestResponse adds the response body; Metadata leaves out both bodies.",
+      "evidence": "Request - log events with request metadata and body but not response body.",
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit levels"
+      ],
+      "conceptIDs": [
+        "cks.audit-first-match"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.level-metadata-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 10080,
+      "front": "You must record who read or changed Secrets, and when, but the log must never contain Secret data. Which level fits the secrets rule?",
+      "choices": [
+        "Metadata",
+        "Request",
+        "RequestResponse",
+        "None"
+      ],
+      "back": "Metadata",
+      "explanation": "Metadata records the requesting user, timestamp, resource and verb, but not the request or response body.",
+      "evidence": "Metadata - log events with metadata (requesting user, timestamp, resource, verb, etc.) but not request or response body.",
+      "choicesExplained": {
+        "Request": "It logs the request body, which would hold the Secret data on a create or update.",
+        "RequestResponse": "It logs both bodies, so the Secret data would be in the log.",
+        "None": "Nothing would be logged, so you could not tell who did it."
+      },
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit levels",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cks.audit-first-match",
+        "cks.audit-investigate"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.stage-request-received",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10090,
+      "front": "When is an audit event for the RequestReceived stage generated?",
+      "back": "As soon as the audit handler receives the request, before it is passed down the handler chain.",
+      "explanation": "It is the earliest stage; the example policy leaves it out with omitStages.",
+      "evidence": "RequestReceived - The stage for events generated as soon as the audit handler receives the request, and before it is delegated down the handler chain.",
+      "source": "Kubernetes docs, Auditing",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit stages",
+        "omitStages"
+      ],
+      "conceptIDs": [
+        "cks.audit-omitstages"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.omitstages-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10100,
+      "front": "Your audit log records each long-running watch request both when it is received and later. You want to drop the events from the moment of receipt, but only for requests hitting your catch-all rule. What do you add to that rule?",
+      "back": "omitStages: [\"RequestReceived\"]",
+      "explanation": "The docs' own catch-all rule sets omitStages to RequestReceived, so long-running requests such as watches that fall under it generate no event in that stage.",
+      "evidence": "# Long-running requests like watches that fall under this rule will not # generate an audit event in RequestReceived. omitStages: - \"RequestReceived\"",
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "omitStages",
+        "audit stages",
+        "audit policy",
+        "audit levels",
+        "watch",
+        "request verbs"
+      ],
+      "conceptIDs": [
+        "cks.audit-omitstages"
+      ],
+      "choices": [
+        "omitStages: [\"RequestReceived\"]",
+        "omitStages: [\"ResponseComplete\"]",
+        "level: None",
+        "verbs: [\"watch\"]"
+      ],
+      "choicesExplained": {
+        "omitStages: [\"ResponseComplete\"]": "That drops the event when the response is finished, not on receipt.",
+        "level: None": "That stops logging those requests entirely.",
+        "verbs: [\"watch\"]": "That narrows which requests the rule matches; it does not drop a stage."
+      }
+    },
+    {
+      "id": "cks.audit-logging.selectors-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10110,
+      "front": "You must log Secret requests in namespace payments with full request and response bodies. Which rule does it?",
+      "choices": [
+        "level: RequestResponse, resources: [{group: \"\", resources: [\"secrets\"]}], namespaces: [\"payments\"]",
+        "level: RequestResponse, resources: [{group: \"apps\", resources: [\"secrets\"]}], namespaces: [\"payments\"]",
+        "level: Request, resources: [{group: \"\", resources: [\"secrets\"]}], namespaces: [\"payments\"]",
+        "level: RequestResponse, users: [\"payments\"], verbs: [\"secrets\"]"
+      ],
+      "back": "level: RequestResponse, resources: [{group: \"\", resources: [\"secrets\"]}], namespaces: [\"payments\"]",
+      "explanation": "Secrets are in the core API group, written as \"\", and namespaces limits a rule to resources in the listed namespaces.",
+      "evidence": "- group: \"\" # core API group resources: [\"configmaps\"] # This rule only applies to resources in the \"kube-system\" namespace.",
+      "choicesExplained": {
+        "level: RequestResponse, resources: [{group: \"apps\", resources: [\"secrets\"]}], namespaces: [\"payments\"]": "Secrets are in the core group (\"\"), not apps, so this matches nothing.",
+        "level: Request, resources: [{group: \"\", resources: [\"secrets\"]}], namespaces: [\"payments\"]": "Request leaves out the response body.",
+        "level: RequestResponse, users: [\"payments\"], verbs: [\"secrets\"]": "users selects who makes the request and verbs selects actions; neither selects Secrets in a namespace."
+      },
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit policy",
+        "audit levels",
+        "Secret",
+        "namespace",
+        "api group and version"
+      ],
+      "conceptIDs": [
+        "cks.audit-rule-selectors"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.selector-empty-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10120,
+      "front": "In an audit rule's namespaces list, what does the empty string \"\" select?",
+      "back": "Non-namespaced resources.",
+      "explanation": "namespaces normally limits a rule to resources in the named namespaces; \"\" covers the cluster-wide ones.",
+      "evidence": "The empty string \"\" can be used to select non-namespaced resources.",
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit policy",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cks.audit-rule-selectors"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.selector-users-verbs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10130,
+      "front": "The example policy stops logging watch requests from system:kube-proxy on endpoints and services. Which rule fields select that traffic?",
+      "back": "level: None with users: [\"system:kube-proxy\"], verbs: [\"watch\"] and resources for endpoints and services.",
+      "explanation": "A rule can narrow by who (users or userGroups), by action (verbs) and by resources, and level: None drops what matches.",
+      "evidence": "# Don't log watch requests by the \"system:kube-proxy\" on endpoints or services - level: None users: [\"system:kube-proxy\"] verbs: [\"watch\"]",
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit policy",
+        "audit levels",
+        "kube-proxy",
+        "request verbs",
+        "watch"
+      ],
+      "conceptIDs": [
+        "cks.audit-rule-selectors"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.log-path-stdout-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10140,
+      "front": "You want the kube-apiserver to write audit events to standard out instead of a file. What do you set?",
+      "back": "--audit-log-path=-",
+      "explanation": "For --audit-log-path, a dash means standard out, while leaving the flag unset disables the log backend.",
+      "evidence": "Not specifying this flag disables log backend. - means standard out",
+      "source": "Kubernetes docs, Auditing, “Log backend”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#log-backend",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--audit-log-path",
+        "--audit-policy-file",
+        "kube-apiserver",
+        "audit backends"
+      ],
+      "conceptIDs": [
+        "cks.audit-log-path"
+      ],
+      "choices": [
+        "--audit-log-path=-",
+        "Leave --audit-log-path unset",
+        "--audit-log-path=/dev/null",
+        "--audit-policy-file=-"
+      ],
+      "choicesExplained": {
+        "Leave --audit-log-path unset": "Not specifying the flag disables the log backend.",
+        "--audit-log-path=/dev/null": "Events written there are thrown away.",
+        "--audit-policy-file=-": "That flag names the policy file, not where events go."
+      }
+    },
+    {
+      "id": "cks.audit-logging.maxage-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10150,
+      "front": "Policy says old audit log files may be kept for at most 30 days. Which kube-apiserver flag sets that?",
+      "choices": [
+        "--audit-log-maxage=30",
+        "--audit-log-maxbackup=30",
+        "--audit-log-maxsize=30",
+        "--audit-log-path=30"
+      ],
+      "back": "--audit-log-maxage=30",
+      "explanation": "maxage is the maximum number of days to retain old audit log files.",
+      "evidence": "--audit-log-maxage defined the maximum number of days to retain old audit log files",
+      "choicesExplained": {
+        "--audit-log-maxbackup=30": "That keeps at most 30 old files, whatever their age.",
+        "--audit-log-maxsize=30": "That rotates the log once it reaches 30 megabytes.",
+        "--audit-log-path=30": "That would write the log to a file named 30."
+      },
+      "source": "Kubernetes docs, Auditing, “Log backend”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#log-backend",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver",
+        "--audit-log-path"
+      ],
+      "conceptIDs": [
+        "cks.audit-log-rotation"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.maxbackup",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10160,
+      "front": "Which kube-apiserver flag sets the maximum number of audit log files to keep?",
+      "back": "--audit-log-maxbackup",
+      "explanation": "It limits the count of retained files, while maxage limits their age in days.",
+      "evidence": "--audit-log-maxbackup defines the maximum number of audit log files to retain",
+      "source": "Kubernetes docs, Auditing, “Log backend”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#log-backend",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cks.audit-log-rotation"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.maxsize",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10170,
+      "front": "Which kube-apiserver flag sets the size, in megabytes, at which the audit log file is rotated?",
+      "back": "--audit-log-maxsize",
+      "explanation": "Once the file reaches that size it is rotated.",
+      "evidence": "--audit-log-maxsize defines the maximum size in megabytes of the audit log file before it gets rotated",
+      "source": "Kubernetes docs, Auditing, “Log backend”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#log-backend",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cks.audit-log-rotation"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.mounts-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10180,
+      "front": "You add --audit-policy-file=/etc/kubernetes/audit-policy.yaml and --audit-log-path=/var/log/kubernetes/audit/audit.log to the static kube-apiserver Pod, and the API server fails to start. The files exist on the node. What is missing?",
+      "choices": [
+        "hostPath volumes and volumeMounts for the policy file and the log directory",
+        "A restart of the kubelet with --audit-policy-file",
+        "An audit policy with no rules",
+        "The --audit-log-maxage flag"
+      ],
+      "back": "hostPath volumes and volumeMounts for the policy file and the log directory.",
+      "explanation": "When the kube-apiserver runs as a Pod, the docs say to mount the hostPath to the policy file and log file locations so audit records are persisted.",
+      "evidence": "If your cluster's control plane runs the kube-apiserver as a Pod, remember to mount the hostPath to the location of the policy file and log file, so that audit records are persisted.",
+      "choicesExplained": {
+        "A restart of the kubelet with --audit-policy-file": "--audit-policy-file is a kube-apiserver flag, not a kubelet one.",
+        "An audit policy with no rules": "A policy with no rules is illegal.",
+        "The --audit-log-maxage flag": "Retention flags are optional and do not make files visible inside the Pod."
+      },
+      "source": "Kubernetes docs, Auditing, “Log backend”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#log-backend",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--audit-policy-file",
+        "--audit-log-path",
+        "kube-apiserver",
+        "static Pod / mirror Pod",
+        "hostPath",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "cks.audit-volume-mounts"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.mounts-readonly",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10190,
+      "front": "In the docs' kube-apiserver mounts for auditing, which mount is read-only and which is writable?",
+      "back": "The policy file (/etc/kubernetes/audit-policy.yaml) is readOnly: true; the log directory (/var/log/kubernetes/audit/) is readOnly: false.",
+      "explanation": "In the same example the policy file's hostPath has type File and the log directory's has type DirectoryOrCreate.",
+      "evidence": "- mountPath: /etc/kubernetes/audit-policy.yaml name: audit readOnly: true - mountPath: /var/log/kubernetes/audit/ name: audit-log readOnly: false",
+      "source": "Kubernetes docs, Auditing, “Log backend”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#log-backend",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver",
+        "hostPath",
+        "volume"
+      ],
+      "conceptIDs": [
+        "cks.audit-volume-mounts"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.investigate-questions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10200,
+      "front": "What are three questions Kubernetes auditing lets administrators answer?",
+      "back": "Any three, e.g. what happened, when it happened, and who initiated it (among others).",
+      "explanation": "The docs also list on what it happened, where it was observed, from where it was initiated and to where it was going.",
+      "evidence": "Auditing allows cluster administrators to answer the following questions: what happened? when did it happen? who initiated it? on what did it happen? where was it observed? from where was it initiated? to where was it going?",
+      "source": "Kubernetes docs, Auditing",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Kubernetes auditing",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cks.audit-investigate"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.investigate-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10210,
+      "front": "A ConfigMap in kube-system was deleted overnight. The log backend writes to /var/log/kubernetes/audit/audit.log with Metadata level for ConfigMaps. How do you find who did it?",
+      "choices": [
+        "Search audit.log for events with verb delete on that ConfigMap and read the requesting user",
+        "Run kubectl describe configmap on the deleted ConfigMap",
+        "Read the kubelet logs on each worker node",
+        "Check the Falco output for the delete"
+      ],
+      "back": "Search audit.log for events with verb delete on that ConfigMap and read the requesting user.",
+      "explanation": "At Metadata level each event records the requesting user, timestamp, resource and verb, written one event per line in JSONlines format.",
+      "evidence": "Metadata - log events with metadata (requesting user, timestamp, resource, verb, etc.) but not request or response body.",
+      "choicesExplained": {
+        "Run kubectl describe configmap on the deleted ConfigMap": "The object is gone, and describe does not show who deleted it.",
+        "Read the kubelet logs on each worker node": "Deletes go through the kube-apiserver, where audit records are made.",
+        "Check the Falco output for the delete": "Falco watches runtime events on nodes; the API request is recorded in the audit log."
+      },
+      "source": "Kubernetes docs, Auditing, “Audit policy”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ConfigMap",
+        "audit levels",
+        "kubectl describe",
+        "kubelet",
+        "Falco",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cks.audit-investigate"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.contrast-log-webhook",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 10220,
+      "front": "How does the log audit backend differ from the webhook audit backend?",
+      "back": "Log: writes events to a file (--audit-log-path). Webhook: sends them to a remote web API set by --audit-webhook-config-file, a kubeconfig-style file.",
+      "explanation": "These are the two backends the kube-apiserver provides out of the box.",
+      "evidence": "Out of the box, the kube-apiserver provides two backends: Log backend, which writes events into the filesystem Webhook backend, which sends events to an external HTTP API",
+      "source": "Kubernetes docs, Auditing, “Audit backends”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#audit-backends",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "audit backends",
+        "kube-apiserver",
+        "kubeconfig",
+        "--audit-log-path"
+      ],
+      "conceptIDs": [
+        "cks.audit-webhook",
+        "cks.audit-log-path"
+      ]
+    },
+    {
+      "id": "cks.audit-logging.attack-tactic-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 10230,
+      "front": "The audit log shows an unfamiliar service account creating exec sessions into several Pods, and Falco then reports shells in those containers. In MITRE ATT&CK for Containers, which tactic does running commands through the container administration interface belong to?",
+      "choices": [
+        "Execution",
+        "Initial Access",
+        "Impact",
+        "Discovery"
+      ],
+      "back": "Execution",
+      "explanation": "ATT&CK lists its Container Administration Command technique under the Execution tactic.",
+      "choicesExplained": {
+        "Initial Access": "ATT&CK lists Container Administration Command under Execution, not this tactic.",
+        "Impact": "ATT&CK lists Container Administration Command under Execution, not this tactic.",
+        "Discovery": "ATT&CK lists Container Administration Command under Execution, not this tactic."
+      },
+      "source": "MITRE ATT&CK, Containers matrix, Container Administration Command",
+      "sourceURL": "https://attack.mitre.org/matrices/enterprise/containers/",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "MITRE ATT&CK for Containers",
+        "ServiceAccount",
+        "kubectl exec",
+        "Falco",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.attack-phase-evidence"
+      ]
+    }
+  ]
+}

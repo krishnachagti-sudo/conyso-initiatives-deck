@@ -1,0 +1,1786 @@
+{
+  "topic": "Runtime security and immutability",
+  "notes": [
+    {
+      "id": "cks.runtime-security.what-is-falco-condition",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9000,
+      "front": "What is a Falco condition?",
+      "back": "The key part of a Falco rule: a Boolean predicate over event fields that decides whether an event matches the rule.",
+      "explanation": "Conditions are written in Falco's condition syntax and can test any supported event through its supported fields.",
+      "example": "Like a search filter in an email client (from = boss and subject contains urgent), but applied to system events such as a process starting in a container.",
+      "evidence": "The key part of a rule is the condition field. A condition is a Boolean predicate expressed using the condition syntax.",
+      "introduces": [
+        "Falco condition"
+      ],
+      "source": "Falco docs, Basic Elements of Falco Rules, “Conditions”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#conditions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco condition",
+        "Falco",
+        "event"
+      ],
+      "conceptIDs": [
+        "cks.falco-condition"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.what-is-falco-output",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9010,
+      "front": "What is a Falco output?",
+      "back": "The message a rule emits when it matches: a string that can include event fields written with a % prefix, filled in like printf.",
+      "explanation": "An output can use the same fields that conditions use, so the alert shows the values from the event that matched.",
+      "example": "Like a mail-merge letter with blanks for name and address, but the blanks are %user.name and %container.id.",
+      "evidence": "A rule output is a string that can use the same fields that conditions can use prepended by % to perform interpolation, akin to printf.",
+      "introduces": [
+        "Falco output"
+      ],
+      "source": "Falco docs, Basic Elements of Falco Rules, “Output”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#output",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco output",
+        "Falco condition",
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-output"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.what-is-falco-macro",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9020,
+      "front": "What is a Falco macro?",
+      "back": "A named, reusable piece of condition that rules (and other macros) can include instead of repeating it.",
+      "explanation": "Falco's docs describe macros as a way to define common sub-portions of rules in a reusable way.",
+      "example": "Like a named cell range in a spreadsheet that many formulas refer to, but holding a piece of condition such as “the event is in a container”.",
+      "evidence": "Macros provide a way to define common sub-portions of rules in a reusable way.",
+      "introduces": [
+        "Falco macro"
+      ],
+      "source": "Falco docs, Basic Elements of Falco Rules, “Macros”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#macros",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco macro",
+        "Falco condition"
+      ],
+      "conceptIDs": [
+        "cks.falco-macro"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.what-is-falco-list",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9030,
+      "front": "What is a Falco list?",
+      "back": "A named collection of items, such as process names, that rules, macros or other lists can include.",
+      "explanation": "Referring to a list inserts its items where it is used, so one list can be shared by many rules.",
+      "example": "Like a contacts group in an address book: name it once, then use the group wherever you would type each address.",
+      "evidence": "Lists are named collections of items that you can include in rules, macros, or even other lists.",
+      "introduces": [
+        "Falco list"
+      ],
+      "source": "Falco docs, Basic Elements of Falco Rules, “Lists”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#lists",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco list",
+        "Falco macro"
+      ],
+      "conceptIDs": [
+        "cks.falco-list"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.what-is-falco-rules-local",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9040,
+      "front": "What is falco_rules.local.yaml?",
+      "back": "The rules file, in /etc/falco, for your own custom rules; the default configuration loads it after the default falco_rules.yaml.",
+      "explanation": "The default falco.yaml loads falco_rules.yaml, then the custom rules in falco_rules.local.yaml, then the rules.d directory.",
+      "example": "Like a house-rules sheet pinned under the landlord's standard tenancy terms: read after them, and able to add to them.",
+      "evidence": "makes Falco load rules from the /etc/falco/falco_rules.yaml file, followed by any custom rules located in the /etc/falco/falco_rules.local.yaml file",
+      "introduces": [
+        "falco_rules.local.yaml"
+      ],
+      "source": "Falco docs, Default and Local Rules Files, “The configuration file”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/default-custom/#the-configuration-file",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "falco_rules.local.yaml",
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-rules-files"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.rule-key-rule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9050,
+      "front": "Which required Falco rule key holds a short, unique name for the rule?",
+      "back": "rule",
+      "explanation": "The rule key is one of five required keys; the other four are condition, desc, output and priority.",
+      "evidence": "rule yes A short, unique name for the rule.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Advanced Rule Syntax”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#advanced-rule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-rule-fields"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.rule-key-desc",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9055,
+      "front": "Which required Falco rule key holds a longer description of what the rule detects?",
+      "back": "desc",
+      "explanation": "desc is required, like rule, condition, output and priority.",
+      "evidence": "desc yes A longer description of what the rule detects.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Advanced Rule Syntax”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#advanced-rule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-rule-fields"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.rule-key-condition",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9060,
+      "front": "Which required Falco rule key holds the filtering expression applied to events?",
+      "back": "condition",
+      "explanation": "Events that satisfy this expression match the rule.",
+      "evidence": "condition yes A filtering expression that is applied against events to check whether they match the rule.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Advanced Rule Syntax”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#advanced-rule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco condition",
+        "event"
+      ],
+      "conceptIDs": [
+        "cks.falco-rule-fields"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.rule-key-output",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9065,
+      "front": "Which required Falco rule key specifies the message sent when a matching event occurs?",
+      "back": "output",
+      "explanation": "Without an output a rule is incomplete, since output is one of the five required keys.",
+      "evidence": "output yes Specifies the message that should be output if a matching event occurs.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Advanced Rule Syntax”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#advanced-rule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco output"
+      ],
+      "conceptIDs": [
+        "cks.falco-rule-fields"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.rule-key-priority",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9070,
+      "front": "Which required Falco rule key gives the severity of the event, and is it case-sensitive?",
+      "back": "priority; it is case-insensitive (emergency, alert, critical, error, warning, notice, informational or debug).",
+      "explanation": "The docs describe it as a case-insensitive representation of the event's severity.",
+      "evidence": "priority yes A case-insensitive representation of the severity of the event.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Advanced Rule Syntax”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#advanced-rule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-rule-fields"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.rule-key-enabled",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9075,
+      "front": "What happens to a Falco rule with enabled: false?",
+      "back": "It is neither loaded nor matched against any events. The default is true.",
+      "explanation": "enabled is an optional key, so leaving it out keeps the rule active.",
+      "evidence": "If set to false, a rule is neither loaded nor matched against any events.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Advanced Rule Syntax”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#advanced-rule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "event"
+      ],
+      "conceptIDs": [
+        "cks.falco-rule-fields"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.rule-key-exceptions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9080,
+      "front": "Which optional Falco rule key holds cases that stop the rule from generating an alert?",
+      "back": "exceptions",
+      "explanation": "exceptions is optional, like enabled and tags.",
+      "evidence": "exceptions no A set of exceptions that cause the rule to not generate an alert.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Advanced Rule Syntax”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#advanced-rule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-rule-fields"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.rule-missing-key-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9082,
+      "front": "A custom Falco rule has rule, condition, output and priority keys, but Falco rejects it as incomplete. Which required key is missing?",
+      "choices": [
+        "desc",
+        "exceptions",
+        "enabled",
+        "tags"
+      ],
+      "back": "desc",
+      "explanation": "rule, condition, desc, output and priority are the five required keys; the others are optional.",
+      "evidence": "desc yes A longer description of what the rule detects.",
+      "choicesExplained": {
+        "exceptions": "exceptions is optional.",
+        "enabled": "enabled is optional and defaults to true.",
+        "tags": "tags is optional."
+      },
+      "source": "Falco docs, Basic Elements of Falco Rules, “Advanced Rule Syntax”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#advanced-rule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "Falco condition",
+        "Falco output"
+      ],
+      "conceptIDs": [
+        "cks.falco-rule-fields"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.condition-metadata-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9090,
+      "front": "The condition container.id != host and proc.name = bash has no system-call clause. What happens when bash starts in a container?",
+      "back": "Falco outputs an event for every syscall that shell performs, because the condition only checks event metadata.",
+      "explanation": "With no event type in the condition, every syscall from that bash process matches.",
+      "evidence": "Since this condition does not include a clause with a system call it will only check event metadata. Because of that, if a bash shell does start up in a container, Falco outputs events for every syscall that is performed by that shell.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Conditions”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#conditions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco condition",
+        "system call",
+        "event",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.falco-condition"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.condition-container-clause",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9095,
+      "front": "In a Falco condition, what does the clause container.id != host check?",
+      "back": "That the event happened inside a container rather than on the host.",
+      "explanation": "For a process on the host, container.id is the string host, so any other value means a container.",
+      "evidence": "The first clause checks that the event happened in a container (where container.id is not equal to \"host\" as the event occurs in a container).",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Conditions”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#conditions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco condition",
+        "container",
+        "host"
+      ],
+      "conceptIDs": [
+        "cks.falco-condition"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.shell-spawn-cloze",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9100,
+      "front": "To alert only when a bash shell is spawned in a container, not on its every syscall, use: {{c1::(evt.type in (execve, execveat))}} and container.id != host and proc.name = bash",
+      "back": "(evt.type in (execve, execveat))",
+      "explanation": "Adding the event types for starting a program limits the rule to each successful spawn of the shell.",
+      "evidence": "If you want to be alerted only for each successful spawn of a shell in a container, add the appropriate event types to the condition: (evt.type in (execve, execveat)) and container.id != host and proc.name = bash",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Conditions”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#conditions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco condition",
+        "system call",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.falco-shell-condition"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.shell-condition-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9105,
+      "front": "You must alert once each time sh or bash is started inside any container, and never for shells on the node itself. Which condition fits?",
+      "choices": [
+        "evt.type in (execve, execveat) and container.id != host and proc.name in (sh, bash)",
+        "container.id != host and proc.name in (sh, bash)",
+        "evt.type in (execve, execveat) and container.id = host and proc.name in (sh, bash)",
+        "evt.type in (execve, execveat) and proc.name in (sh, bash)"
+      ],
+      "back": "evt.type in (execve, execveat) and container.id != host and proc.name in (sh, bash)",
+      "explanation": "It needs all three parts: the spawn event types, the in-a-container test, and the process names.",
+      "evidence": "(evt.type in (execve, execveat)) and container.id != host and proc.name = bash",
+      "choicesExplained": {
+        "container.id != host and proc.name in (sh, bash)": "With no event type it matches every syscall of the shell, not once per start.",
+        "evt.type in (execve, execveat) and container.id = host and proc.name in (sh, bash)": "container.id = host selects shells on the node, the opposite of what is asked.",
+        "evt.type in (execve, execveat) and proc.name in (sh, bash)": "Without the container clause it also alerts for shells on the node."
+      },
+      "source": "Falco docs, Basic Elements of Falco Rules, “Conditions”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#conditions",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco condition",
+        "container",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.falco-shell-condition",
+        "cks.falco-condition"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.shell-macro-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9110,
+      "front": "Your rules file already has the default macros spawned_process and container, and a macro shell_procs for proc.name in (shell_binaries). Which condition detects a shell spawned in a container?",
+      "choices": [
+        "spawned_process and container and shell_procs",
+        "shell_binaries and container",
+        "spawned_process or container or shell_procs",
+        "container and proc.name = shell_procs"
+      ],
+      "back": "spawned_process and container and shell_procs",
+      "explanation": "The docs build the same shell_in_container rule from these macros, joined with and.",
+      "evidence": "spawned_process and container and shell_procs",
+      "choicesExplained": {
+        "shell_binaries and container": "A list cannot be parsed as a filtering expression on its own.",
+        "spawned_process or container or shell_procs": "With or, any process spawn anywhere would match.",
+        "container and proc.name = shell_procs": "A macro is a condition, not a value to compare proc.name with."
+      },
+      "source": "Falco docs, Basic Elements of Falco Rules, “Lists”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#lists",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco macro",
+        "Falco list",
+        "Falco condition",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.falco-shell-condition",
+        "cks.falco-macro"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.output-missing-field",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9115,
+      "front": "A Falco output includes %container.image.repository, but the event happened on the host. What is printed for that field?",
+      "back": "`<NA>` (not available), because the field is not set for that event.",
+      "explanation": "Not every field has to be set in every event; for an unset field Falco prints this marker instead of a value.",
+      "evidence": "if the connection happens outside a container the field %container.image.repository would not be set and <NA> is displayed instead.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Output”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#output",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco output",
+        "host",
+        "event"
+      ],
+      "conceptIDs": [
+        "cks.falco-output"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.output-transform",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9120,
+      "front": "Can a Falco output use transform operators such as toupper(), as conditions can?",
+      "back": "Yes, e.g. user=%toupper(user.name).",
+      "explanation": "The docs show %toupper(user.name) turning root into ROOT in the alert.",
+      "evidence": "Outputs can also use the transform operators that are used in conditions.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Output”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#output",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco output",
+        "Falco condition"
+      ],
+      "conceptIDs": [
+        "cks.falco-output"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.output-pod-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9125,
+      "front": "An incident team wants each Falco alert to show the Kubernetes Pod name and namespace. Which output fragment does that?",
+      "choices": [
+        "pod=%k8s.pod.name ns=%k8s.ns.name",
+        "pod=k8s.pod.name ns=k8s.ns.name",
+        "pod=%proc.name ns=%container.name",
+        "pod=$k8s.pod.name ns=$k8s.ns.name"
+      ],
+      "back": "pod=%k8s.pod.name ns=%k8s.ns.name",
+      "explanation": "Output fields are interpolated only when prefixed with %, and k8s.pod.name and k8s.ns.name hold the Pod name and namespace.",
+      "evidence": "A rule output is a string that can use the same fields that conditions can use prepended by % to perform interpolation, akin to printf.",
+      "choicesExplained": {
+        "pod=k8s.pod.name ns=k8s.ns.name": "Without %, the field names are printed as plain text.",
+        "pod=%proc.name ns=%container.name": "These are the process name and container name, not the Pod and namespace.",
+        "pod=$k8s.pod.name ns=$k8s.ns.name": "Falco interpolates fields with %, not $."
+      },
+      "source": "Falco docs, Basic Elements of Falco Rules, “Output”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#output",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco output",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cks.falco-output",
+        "cks.falco-field-classes"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.priority-highest",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9130,
+      "front": "What is the most severe Falco priority?",
+      "back": "emergency",
+      "explanation": "The docs list the priorities from emergency down to debug.",
+      "evidence": "Here are the available priorities: EMERGENCY ALERT CRITICAL ERROR WARNING NOTICE INFORMATIONAL DEBUG",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Priority”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#priority",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-priorities"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.priority-alert-critical",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9135,
+      "front": "Which two Falco priorities come between emergency and error?",
+      "back": "alert, then critical.",
+      "explanation": "The full order is emergency, alert, critical, error, warning, notice, informational, debug.",
+      "evidence": "Here are the available priorities: EMERGENCY ALERT CRITICAL ERROR WARNING NOTICE INFORMATIONAL DEBUG",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Priority”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#priority",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-priorities"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.priority-lowest",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9140,
+      "front": "What is the least severe Falco priority?",
+      "back": "debug",
+      "explanation": "The docs give the fairly false-positive-prone rule “Run shell untrusted” this priority as an exception to the usual guidelines.",
+      "evidence": "One exception is that the rule \"Run shell untrusted\", which is fairly FP-prone, has a priority of DEBUG.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Priority”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#priority",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-priorities"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.priority-writing-state",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9145,
+      "front": "Under Falco's priority guidelines, what priority does a rule get if it detects a process writing below /etc?",
+      "choices": [
+        "error",
+        "warning",
+        "notice",
+        "informational"
+      ],
+      "back": "error",
+      "explanation": "The guidelines give error to rules about writing state, such as the filesystem.",
+      "evidence": "If a rule is related to writing state (i.e. filesystem, etc.), its priority is ERROR.",
+      "choicesExplained": {
+        "warning": "warning is for unauthorised reads of state, not writes.",
+        "notice": "notice is for unexpected behaviour such as an unexpected shell.",
+        "informational": "The informational level is for behaviour against good practice, such as privileged containers."
+      },
+      "source": "Falco docs, Basic Elements of Falco Rules, “Priority”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#priority",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-priorities"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.priority-sensitive-read",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9150,
+      "front": "Under Falco's priority guidelines, what priority does a rule get if it detects an unauthorised read of /etc/shadow?",
+      "choices": [
+        "warning",
+        "error",
+        "notice",
+        "debug"
+      ],
+      "back": "warning",
+      "explanation": "An unauthorised read of state, such as reading sensitive files, is given warning.",
+      "evidence": "If a rule is related to an unauthorized read of state (i.e. reading sensitive files, etc.), its priority is WARNING.",
+      "choicesExplained": {
+        "error": "error is for writing state.",
+        "notice": "notice is for unexpected behaviour such as an unexpected network connection.",
+        "debug": "debug is the lowest level, used as an exception for a noisy rule."
+      },
+      "source": "Falco docs, Basic Elements of Falco Rules, “Priority”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#priority",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-priorities"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.priority-unexpected-behaviour",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9155,
+      "front": "Under Falco's priority guidelines, what priority does a rule get if it detects an unexpected shell spawned in a container?",
+      "choices": [
+        "notice",
+        "warning",
+        "error",
+        "emergency"
+      ],
+      "back": "notice",
+      "explanation": "Unexpected behaviour, such as an unexpected shell or network connection, is given notice.",
+      "evidence": "If a rule is related to unexpected behavior (spawning an unexpected shell in a container, opening an unexpected network connection, etc.), its priority is NOTICE.",
+      "choicesExplained": {
+        "warning": "warning is for unauthorised reads of state.",
+        "error": "error is for writing state.",
+        "emergency": "The guidelines do not assign emergency to this kind of rule."
+      },
+      "source": "Falco docs, Basic Elements of Falco Rules, “Priority”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#priority",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.falco-priorities"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.priority-good-practice",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9160,
+      "front": "Under Falco's priority guidelines, what priority does a rule get if it flags an unexpected privileged container?",
+      "choices": [
+        "info (informational)",
+        "notice",
+        "warning",
+        "critical"
+      ],
+      "back": "info (informational)",
+      "explanation": "Behaving against good practices, such as privileged containers or sensitive mounts, is given info.",
+      "evidence": "If a rule is related to behaving against good practices (unexpected privileged containers, containers with sensitive mounts, running interactive commands as root), its priority is INFO.",
+      "choicesExplained": {
+        "notice": "notice is for unexpected behaviour such as a shell or a network connection.",
+        "warning": "warning is for unauthorised reads of state.",
+        "critical": "The guidelines do not assign critical to this kind of rule."
+      },
+      "source": "Falco docs, Basic Elements of Falco Rules, “Priority”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#priority",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "privileged container"
+      ],
+      "conceptIDs": [
+        "cks.falco-priorities"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.priority-is-not-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9165,
+      "front": "Does a Falco rule's priority decide which rule is triggered first, or let it override another rule?",
+      "back": "No. Priority is only severity; trigger order is controlled by the order in which rules are defined and loaded.",
+      "explanation": "The docs warn: “Don't let the priority field name mislead you.”",
+      "evidence": "In a Falco Rule, it has nothing to do with overriding another rule or choosing the order in which rules will be triggered. The way to control the latter is achieved by changing the order the rules are defined and therefore loaded.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Priority”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#priority",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-priority-not-order"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.priority-order-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9170,
+      "front": "A colleague sets a custom Falco rule to priority: emergency “so that it runs before the default rules”. What actually changes?",
+      "choices": [
+        "Only the severity shown in its alerts",
+        "It now runs before all other rules",
+        "It now overrides the default rule with the same condition",
+        "It is now loaded first from falco_rules.yaml"
+      ],
+      "back": "Only the severity shown in its alerts.",
+      "explanation": "Priority indicates how serious a violation is and appears in the output; order is set by where rules are defined and loaded.",
+      "evidence": "Every Falco rule has a priority which indicates how serious a violation of the rule is.",
+      "choicesExplained": {
+        "It now runs before all other rules": "Trigger order comes from the order rules are defined and loaded, not priority.",
+        "It now overrides the default rule with the same condition": "Priority has nothing to do with overriding another rule.",
+        "It is now loaded first from falco_rules.yaml": "Which file a rule is in, and the rules_files order, decide loading."
+      },
+      "source": "Falco docs, Basic Elements of Falco Rules, “Priority”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#priority",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "falco_rules.local.yaml"
+      ],
+      "conceptIDs": [
+        "cks.falco-priority-not-order"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.macro-defaults",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9175,
+      "front": "What conditions do Falco's default macros container and spawned_process stand for?",
+      "back": "container: container.id != host. spawned_process: evt.type in (execve, execveat).",
+      "explanation": "The docs define both as macros because many rules would repeat them, and note both are in the default list.",
+      "evidence": "- macro: container condition: (container.id != host) - macro: spawned_process condition: (evt.type in (execve, execveat))",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Macros”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#macros",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco macro",
+        "Falco condition"
+      ],
+      "conceptIDs": [
+        "cks.falco-macro"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.macro-visibility",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9180,
+      "front": "Can a Falco macro refer to another macro that is defined later in the rules files? Can it refer to a list defined later?",
+      "back": "Another macro: no, it must be defined before. A list: yes, a macro can reference any list.",
+      "explanation": "Visibility cascades: lists and macros must see same-kind objects defined earlier, but a macro can use any list and a rule any macro.",
+      "evidence": "A list can only reference lists defined before it. A macro can only reference macros defined before it. A macro can reference any list. A rule can reference any macro.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Visibility”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#visibility",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco macro",
+        "Falco list"
+      ],
+      "conceptIDs": [
+        "cks.falco-macro",
+        "cks.falco-list"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.macro-refactor-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9185,
+      "front": "Twelve of your custom rules each repeat fd.name startswith /etc and evt.is_open_write=true. What is the Falco way to avoid repeating it?",
+      "choices": [
+        "Define a macro with that condition and use its name in each rule",
+        "Define a list with that condition and use it in each rule",
+        "Raise the rules' priority",
+        "Put the clause in each rule's output"
+      ],
+      "back": "Define a macro with that condition and use its name in each rule.",
+      "explanation": "Macros hold common sub-portions of rules for reuse; lists hold items, not conditions.",
+      "evidence": "Macros provide a way to define common sub-portions of rules in a reusable way.",
+      "choicesExplained": {
+        "Define a list with that condition and use it in each rule": "Lists are collections of items and cannot be parsed as filtering expressions.",
+        "Raise the rules' priority": "Priority is severity; it does not share conditions.",
+        "Put the clause in each rule's output": "The output is the alert message; it does not filter events."
+      },
+      "source": "Falco docs, Basic Elements of Falco Rules, “Macros”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#macros",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco macro",
+        "Falco list",
+        "Falco output"
+      ],
+      "conceptIDs": [
+        "cks.falco-macro"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.list-not-expression",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9190,
+      "front": "Can a Falco list, such as shell_binaries, be used on its own as a filtering expression?",
+      "back": "No. Use it inside a condition, e.g. proc.name in (shell_binaries).",
+      "explanation": "Referring to a list inserts its items into the macro, rule or list that uses it.",
+      "evidence": "Please note that lists cannot be parsed as filtering expressions.",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Lists”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#lists",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco list",
+        "Falco condition"
+      ],
+      "conceptIDs": [
+        "cks.falco-list"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.list-keys",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9195,
+      "front": "Which two keys does a Falco list node have?",
+      "back": "list (its unique name) and items (the values).",
+      "explanation": "A list can also contain other lists that were defined before it.",
+      "evidence": "Each list node has the following keys: Key Description list The unique name for the list (as a slug) items The list of values",
+      "source": "Falco docs, Basic Elements of Falco Rules, “Lists”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#lists",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco list"
+      ],
+      "conceptIDs": [
+        "cks.falco-list"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.list-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9200,
+      "front": "A rule should fire for nc, ncat or socat, and three other rules need the same names. Which definition and condition fit Falco's syntax?",
+      "choices": [
+        "- list: netcat_bins with items: [nc, ncat, socat]; condition uses proc.name in (netcat_bins)",
+        "- macro: netcat_bins with items: [nc, ncat, socat]; condition uses netcat_bins",
+        "- list: netcat_bins with condition: nc or ncat or socat",
+        "- rule: netcat_bins with items: [nc, ncat, socat]"
+      ],
+      "back": "- list: netcat_bins with items: [nc, ncat, socat]; condition uses proc.name in (netcat_bins)",
+      "explanation": "A list node has list and items keys, and a condition uses it with in (...), which inserts its items.",
+      "evidence": "Referring to a list inserts the list items in the macro, rule, or list.",
+      "choicesExplained": {
+        "- macro: netcat_bins with items: [nc, ncat, socat]; condition uses netcat_bins": "A macro has a condition, not items.",
+        "- list: netcat_bins with condition: nc or ncat or socat": "A list has items, not a condition.",
+        "- rule: netcat_bins with items: [nc, ncat, socat]": "A rule needs condition, desc, output and priority; items belongs to lists."
+      },
+      "source": "Falco docs, Basic Elements of Falco Rules, “Lists”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/basic-elements/#lists",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco list",
+        "Falco macro",
+        "Falco condition"
+      ],
+      "conceptIDs": [
+        "cks.falco-list"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.rules-files-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9205,
+      "front": "In what order does Falco's default configuration load rules?",
+      "back": "falco_rules.yaml, then falco_rules.local.yaml, then the rules.d directory (all under /etc/falco).",
+      "explanation": "The order is set by the rules_files key in /etc/falco/falco.yaml; changing it changes location and loading order.",
+      "evidence": "followed by any custom rules located in the /etc/falco/falco_rules.local.yaml file, followed by any custom rules located in the /etc/falco/rules.d directory. This configuration is governed by the rules_files key",
+      "source": "Falco docs, Default and Local Rules Files, “The configuration file”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/default-custom/#the-configuration-file",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "falco_rules.local.yaml",
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-rules-files"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.falco-r-switch",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9210,
+      "front": "You start falco -r /root/myrules.yaml from the command line. What happens to the rules_files key in falco.yaml?",
+      "back": "It is ignored: once -r is given at least once, only the -r files and directories are loaded.",
+      "explanation": "Because `rules_files` is ignored, every rules file you need, the defaults included, must be named with `-r`, which can be repeated.",
+      "evidence": "The switch can be specified multiple times; if is specified at least once, the rules_files key in the configuration file is ignored.",
+      "source": "Falco docs, Default and Local Rules Files, “The configuration file”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/default-custom/#the-configuration-file",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-rules-files"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.custom-rule-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9215,
+      "front": "On a node with Falco's default configuration, you must add a new rule while keeping all the default rules. Where does it go?",
+      "choices": [
+        "In /etc/falco/falco_rules.local.yaml",
+        "In /etc/falco/falco.yaml under rules_files",
+        "At the top of /etc/falco/falco_rules.yaml, replacing its contents",
+        "In a file passed with -r, keeping the default rules loaded automatically"
+      ],
+      "back": "In /etc/falco/falco_rules.local.yaml",
+      "explanation": "That file is where the default configuration looks for custom rules, loaded after the default falco_rules.yaml.",
+      "evidence": "followed by any custom rules located in the /etc/falco/falco_rules.local.yaml file",
+      "choicesExplained": {
+        "In /etc/falco/falco.yaml under rules_files": "rules_files lists which rules files load; rules themselves go in a rules file.",
+        "At the top of /etc/falco/falco_rules.yaml, replacing its contents": "That would remove the default rules you must keep.",
+        "In a file passed with -r, keeping the default rules loaded automatically": "Any -r makes Falco ignore rules_files, so the defaults would not load unless also passed."
+      },
+      "source": "Falco docs, Default and Local Rules Files, “The configuration file”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/default-custom/#the-configuration-file",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "falco_rules.local.yaml",
+        "Falco",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.falco-custom-rule",
+        "cks.falco-rules-files"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.override-load-after",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9220,
+      "front": "You append to a default Falco rule from your own rules file. Which file must load first?",
+      "back": "The default rules file, /etc/falco/falco_rules.yaml; your custom file must load after it.",
+      "explanation": "When overriding existing lists, macros or rules, the order of the rules files matters.",
+      "evidence": "if you append to an existing default rule, you must ensure your custom rules file (e.g. /etc/falco/rules.d/custom-rules.yaml ) is loaded after the default rules file ( /etc/falco/falco_rules.yaml ).",
+      "source": "Falco docs, Overriding Rules, “Overview”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/overriding/#overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "falco_rules.local.yaml"
+      ],
+      "conceptIDs": [
+        "cks.falco-custom-rule"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.override-append-vs-replace",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 9225,
+      "front": "In a Falco override section, how does append differ from replace, and can you use both on one key?",
+      "back": "append adds values to a list, macro or rule key; replace swaps the value. Using both together is an error.",
+      "explanation": "The override section goes in your custom rules file, beside the name of the existing list, macro or rule.",
+      "evidence": "append allows you to add additional values to a list, macro, or rule key replace allows you to replace the value of a list, macro or macro key append and replace cannot be used together. Trying to apply both will result in an error.",
+      "source": "Falco docs, Overriding Rules, “Overview”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/overriding/#overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "Falco list",
+        "Falco macro"
+      ],
+      "conceptIDs": [
+        "cks.falco-custom-rule"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.override-list-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9230,
+      "front": "A default list trusted_images needs one more item, and every other default item must stay. What do you add to falco_rules.local.yaml?",
+      "choices": [
+        "- list: trusted_images, items: [new-image], override: {items: append}",
+        "- list: trusted_images, items: [new-image], override: {items: replace}",
+        "- list: trusted_images, items: [new-image], priority: emergency",
+        "Edit falco_rules.yaml and add enabled: false to the list"
+      ],
+      "back": "- list: trusted_images, items: [new-image], override: {items: append}",
+      "explanation": "append adds values to the list's items, while replace would drop the defaults; the local file loads after falco_rules.yaml.",
+      "evidence": "Within the override section you can specify whether you want to append or replace information for the given rule, list or macro.",
+      "choicesExplained": {
+        "- list: trusted_images, items: [new-image], override: {items: replace}": "replace would leave only the new item.",
+        "- list: trusted_images, items: [new-image], priority: emergency": "Lists have no priority; priority is a rule's severity.",
+        "Edit falco_rules.yaml and add enabled: false to the list": "enabled is a rule key, and disabling does not add an item."
+      },
+      "source": "Falco docs, Overriding Rules, “Append an item to a list”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/overriding/#append-an-item-to-a-list",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco list",
+        "falco_rules.local.yaml"
+      ],
+      "conceptIDs": [
+        "cks.falco-custom-rule"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.override-rule-replace-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9235,
+      "front": "You must raise a default Falco rule's priority to critical without editing falco_rules.yaml. What goes in your custom rules file?",
+      "choices": [
+        "The rule's name with priority: critical and override: {priority: replace}",
+        "The rule's name with priority: critical and override: {priority: append}",
+        "A new rule with the same condition and priority: critical",
+        "A macro named after the rule with priority: critical"
+      ],
+      "back": "The rule's name with priority: critical and override: {priority: replace}",
+      "explanation": "priority is among the rule keys that replace can change; append supports only condition, output, desc, tags and exceptions.",
+      "evidence": "Rules ( append ): condition , output , desc , tags , exceptions - Rules ( replace ): condition , output desc , priority , tags , exceptions , enabled",
+      "choicesExplained": {
+        "The rule's name with priority: critical and override: {priority: append}": "priority cannot be appended, only replaced.",
+        "A new rule with the same condition and priority: critical": "That adds a second rule; the default one still alerts at its old priority.",
+        "A macro named after the rule with priority: critical": "Macros hold conditions and have no priority."
+      },
+      "source": "Falco docs, Overriding Rules, “Overview”",
+      "sourceURL": "https://falco.org/docs/concepts/rules/overriding/#overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "Falco macro"
+      ],
+      "conceptIDs": [
+        "cks.falco-custom-rule"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.channels-http-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9240,
+      "front": "The security team runs a web service that collects alerts over HTTP. Which Falco output channel sends alerts straight to it, and where is it set up?",
+      "choices": [
+        "An HTTP endpoint (plain or secure), configured in falco.yaml",
+        "Syslog, configured in falco_rules.local.yaml",
+        "A spawned program, configured in each rule's output key",
+        "Standard output, configured with the -r switch"
+      ],
+      "back": "An HTTP endpoint (plain or secure), configured in falco.yaml.",
+      "explanation": "Falco lists an HTTP endpoint, plain or secure, among its output channels, and all channels are configured in falco.yaml.",
+      "evidence": "An HTTP/HTTPS endpoint The channels are configured via the Falco configuration file falco.yaml",
+      "choicesExplained": {
+        "Syslog, configured in falco_rules.local.yaml": "Syslog is a different channel, and rules files hold rules, not channel settings.",
+        "A spawned program, configured in each rule's output key": "A rule's output is the alert message; channels are set in falco.yaml.",
+        "Standard output, configured with the -r switch": "-r loads rules files; standard output does not reach a web service."
+      },
+      "source": "Falco docs, Falco Outputs",
+      "sourceURL": "https://falco.org/docs/concepts/outputs/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "http",
+        "Falco output"
+      ],
+      "conceptIDs": [
+        "cks.falco-outputs"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.channels-program",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9245,
+      "front": "Which Falco output channel hands each alert to a command that Falco starts?",
+      "back": "A spawned program.",
+      "explanation": "It is one of the five channels Falco lists, beside standard output, a file, syslog and an HTTP endpoint.",
+      "evidence": "Syslog - A spawned program - An HTTP/HTTPS endpoint",
+      "source": "Falco docs, Falco Outputs",
+      "sourceURL": "https://falco.org/docs/concepts/outputs/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "process"
+      ],
+      "conceptIDs": [
+        "cks.falco-outputs"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.channels-file-cloze",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9250,
+      "front": "Falco can send alerts to standard output, {{c1::a file}}, syslog, a spawned program, or an HTTP endpoint (plain or secure).",
+      "back": "a file",
+      "explanation": "These are the five output channels on Falco's outputs page.",
+      "evidence": "Falco can send alerts to one or more output channels: - Standard Output - A file - Syslog",
+      "source": "Falco docs, Falco Outputs",
+      "sourceURL": "https://falco.org/docs/concepts/outputs/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-outputs"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.channels-syslog-cloze",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9255,
+      "front": "Falco can send alerts to standard output, a file, {{c1::syslog}}, a spawned program, or an HTTP endpoint (plain or secure).",
+      "back": "syslog",
+      "explanation": "These are the five output channels on Falco's outputs page, all configured in falco.yaml.",
+      "evidence": "Falco can send alerts to one or more output channels: - Standard Output - A file - Syslog",
+      "source": "Falco docs, Falco Outputs",
+      "sourceURL": "https://falco.org/docs/concepts/outputs/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-outputs"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.channels-config",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9260,
+      "front": "Where are Falco's output channels configured?",
+      "back": "In the Falco configuration file, falco.yaml.",
+      "explanation": "The rules files decide what alerts are raised; falco.yaml decides where they are sent.",
+      "evidence": "The channels are configured via the Falco configuration file falco.yaml",
+      "source": "Falco docs, Falco Outputs",
+      "sourceURL": "https://falco.org/docs/concepts/outputs/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.falco-outputs"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.field-fd-name",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9265,
+      "front": "What does the Falco field fd.name hold for a file, and for a socket?",
+      "back": "For a file, its full path; for a socket, the connection tuple.",
+      "explanation": "fd fields are set for every syscall that has a file descriptor in its arguments.",
+      "evidence": "If the fd is a file, this field contains the full path. If the FD is a socket, this field contain the connection tuple.",
+      "source": "Falco docs, Supported Fields for Conditions and Outputs, “Field Class: fd”",
+      "sourceURL": "https://falco.org/docs/reference/rules/supported-fields/#field-class-fd",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "system call"
+      ],
+      "conceptIDs": [
+        "cks.falco-field-classes"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.field-container-id-host",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9270,
+      "front": "What value does the Falco field container.id have when the process runs on the host, not in a container?",
+      "back": "The string host.",
+      "explanation": "In a container it holds the container identifier, truncated to its first 12 characters.",
+      "evidence": "if the process occurs on the host, meaning not in the container PID namespace, this field is set to a string called 'host'.",
+      "source": "Falco docs, Supported Fields for Conditions and Outputs, “Field Class: container (plugin)”",
+      "sourceURL": "https://falco.org/docs/reference/rules/supported-fields/#field-class-container-plugin",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "container",
+        "host"
+      ],
+      "conceptIDs": [
+        "cks.falco-field-classes"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.field-proc-name-vs-cmdline",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 9275,
+      "front": "How do the Falco fields proc.name and proc.cmdline differ?",
+      "back": "proc.name is the process name (truncated after 16 characters); proc.cmdline is the name plus its arguments.",
+      "explanation": "proc.cmdline concatenates proc.name and proc.args, truncated after 4096 bytes.",
+      "evidence": "The concatenation of proc.name + proc.args (truncated after 4096 bytes) when starting the process generating the event.",
+      "source": "Falco docs, Supported Fields for Conditions and Outputs, “Field Class: process”",
+      "sourceURL": "https://falco.org/docs/reference/rules/supported-fields/#field-class-process",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Falco",
+        "process"
+      ],
+      "conceptIDs": [
+        "cks.falco-field-classes"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.nist-runtime-profiles",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9280,
+      "front": "What does NIST SP 800-190 say container-aware runtime tools should build, and use for what?",
+      "back": "Security profiles of containerised apps, learned from behaviour, used to prevent and detect anomalies at runtime.",
+      "explanation": "NIST says existing host-based intrusion detection is often unable to detect attacks within containers.",
+      "evidence": "These tools should be able to automatically profile containerized apps using behavioral learning and build security profiles for them to minimize human interaction. These profiles should then be able to prevent and detect anomalies at runtime",
+      "source": "NIST SP 800-190, §4.4.4 App vulnerabilities, p. 25",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=38",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "NIST SP 800-190",
+        "behavioural baseline",
+        "runtime detection"
+      ],
+      "conceptIDs": [
+        "cks.runtime-anomalies"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.anomaly-process",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9285,
+      "front": "An nginx container that only ever runs nginx suddenly starts /usr/bin/python3. Which NIST SP 800-190 runtime anomaly is this?",
+      "choices": [
+        "Invalid or unexpected process execution",
+        "Creation of unexpected network listeners",
+        "Changes to protected configuration files and binaries",
+        "Traffic sent to unexpected network destinations"
+      ],
+      "back": "Invalid or unexpected process execution",
+      "explanation": "A program the app never runs is an unexpected process, the first anomaly NIST lists.",
+      "evidence": "Invalid or unexpected process execution,",
+      "choicesExplained": {
+        "Creation of unexpected network listeners": "Nothing here opens a listening port.",
+        "Changes to protected configuration files and binaries": "No file is changed; a program is run.",
+        "Traffic sent to unexpected network destinations": "No network traffic is described."
+      },
+      "source": "NIST SP 800-190, §4.4.4 App vulnerabilities, p. 25",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=38",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "NIST SP 800-190",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.runtime-anomalies"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.anomaly-syscalls",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9290,
+      "front": "A web app's container, which has never done so, starts making ptrace and mount system calls. Which NIST SP 800-190 runtime anomaly is this?",
+      "choices": [
+        "Invalid or unexpected system calls",
+        "Writes to unexpected locations and file types",
+        "Malware storage or execution",
+        "Creation of unexpected network listeners"
+      ],
+      "back": "Invalid or unexpected system calls",
+      "explanation": "NIST lists unexpected system calls as its own class of runtime anomaly, separate from process execution.",
+      "evidence": "Invalid or unexpected system calls,",
+      "choicesExplained": {
+        "Writes to unexpected locations and file types": "No file write is described.",
+        "Malware storage or execution": "Nothing identifies malware; the anomaly is the calls themselves.",
+        "Creation of unexpected network listeners": "No listening socket is opened."
+      },
+      "source": "NIST SP 800-190, §4.4.4 App vulnerabilities, p. 25",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=38",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "NIST SP 800-190",
+        "system call",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.runtime-anomalies"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.anomaly-protected-files",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9295,
+      "front": "Inside a running container, /etc/passwd and /bin/ls are modified. Which NIST SP 800-190 runtime anomaly is this?",
+      "choices": [
+        "Changes to protected configuration files and binaries",
+        "Invalid or unexpected process execution",
+        "Traffic sent to unexpected network destinations",
+        "Invalid or unexpected system calls"
+      ],
+      "back": "Changes to protected configuration files and binaries",
+      "explanation": "A system configuration file and a binary have been changed, which NIST names directly.",
+      "evidence": "Changes to protected configuration files and binaries,",
+      "choicesExplained": {
+        "Invalid or unexpected process execution": "The event is a change to files, not a program being run.",
+        "Traffic sent to unexpected network destinations": "No network traffic is described.",
+        "Invalid or unexpected system calls": "NIST lists changes to protected files as their own anomaly."
+      },
+      "source": "NIST SP 800-190, §4.4.4 App vulnerabilities, p. 25",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=38",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "NIST SP 800-190",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.runtime-anomalies"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.anomaly-unexpected-writes",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9300,
+      "front": "A container that only writes logs to /var/log/app starts creating .so library files under /dev/shm. Which NIST SP 800-190 runtime anomaly is this?",
+      "choices": [
+        "Writes to unexpected locations and file types",
+        "Changes to protected configuration files and binaries",
+        "Creation of unexpected network listeners",
+        "Invalid or unexpected process execution"
+      ],
+      "back": "Writes to unexpected locations and file types",
+      "explanation": "Both the place and the kind of file are outside what the app normally writes.",
+      "evidence": "Writes to unexpected locations and file types,",
+      "choicesExplained": {
+        "Changes to protected configuration files and binaries": "New files are created; no existing protected file is changed.",
+        "Creation of unexpected network listeners": "No listening port is involved.",
+        "Invalid or unexpected process execution": "Nothing says a new program was run."
+      },
+      "source": "NIST SP 800-190, §4.4.4 App vulnerabilities, p. 25",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=38",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "NIST SP 800-190",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.runtime-anomalies"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.anomaly-listener",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9305,
+      "front": "A batch-job container that never serves traffic begins listening on port 4444. Which NIST SP 800-190 runtime anomaly is this?",
+      "choices": [
+        "Creation of unexpected network listeners",
+        "Traffic sent to unexpected network destinations",
+        "Invalid or unexpected system calls",
+        "Malware storage or execution"
+      ],
+      "back": "Creation of unexpected network listeners",
+      "explanation": "Opening a port to accept connections is a new listener; NIST treats outbound traffic separately.",
+      "evidence": "Creation of unexpected network listeners,",
+      "choicesExplained": {
+        "Traffic sent to unexpected network destinations": "That covers traffic going out, not a port waiting for connections.",
+        "Invalid or unexpected system calls": "NIST names new listeners as their own anomaly.",
+        "Malware storage or execution": "Nothing identifies malware here."
+      },
+      "source": "NIST SP 800-190, §4.4.4 App vulnerabilities, p. 25",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=38",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "NIST SP 800-190",
+        "container",
+        "port"
+      ],
+      "conceptIDs": [
+        "cks.runtime-anomalies"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.anomaly-egress",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9310,
+      "front": "A payments container that only talks to its database starts sending data to an unknown address abroad. Which NIST SP 800-190 runtime anomaly is this?",
+      "choices": [
+        "Traffic sent to unexpected network destinations",
+        "Creation of unexpected network listeners",
+        "Writes to unexpected locations and file types",
+        "Changes to protected configuration files and binaries"
+      ],
+      "back": "Traffic sent to unexpected network destinations",
+      "explanation": "The destination is outside what the app normally contacts.",
+      "evidence": "Traffic sent to unexpected network destinations, and",
+      "choicesExplained": {
+        "Creation of unexpected network listeners": "The container is sending, not listening.",
+        "Writes to unexpected locations and file types": "No file write is described.",
+        "Changes to protected configuration files and binaries": "No file is changed."
+      },
+      "source": "NIST SP 800-190, §4.4.4 App vulnerabilities, p. 25",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=38",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "NIST SP 800-190",
+        "container",
+        "egress control"
+      ],
+      "conceptIDs": [
+        "cks.runtime-anomalies"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.anomaly-malware-cloze",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9315,
+      "front": "NIST SP 800-190's list of runtime anomalies ends with traffic sent to unexpected network destinations, and {{c1::malware storage or execution}}.",
+      "back": "malware storage or execution",
+      "explanation": "It completes NIST's seven examples of events that runtime security profiles should detect.",
+      "evidence": "Traffic sent to unexpected network destinations, and Malware storage or execution.",
+      "source": "NIST SP 800-190, §4.4.4 App vulnerabilities, p. 25",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=38",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "NIST SP 800-190"
+      ],
+      "conceptIDs": [
+        "cks.runtime-anomalies"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.readonly-rootfs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9320,
+      "front": "What does readOnlyRootFilesystem: true in a container's securityContext do?",
+      "back": "Mounts the container's root filesystem as read-only.",
+      "explanation": "It is one of the container-level security context settings in the Kubernetes task page.",
+      "evidence": "readOnlyRootFilesystem: Mounts the container's root filesystem as read-only.",
+      "source": "Kubernetes docs, Configure a Security Context for a Pod or Container",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "readOnlyRootFilesystem",
+        "security context",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.readonly-rootfs"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.readonly-rootfs-why",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9325,
+      "front": "According to NIST SP 800-190, what does running containers with read-only root filesystems achieve?",
+      "back": "Writes are isolated to specifically defined directories that are easier to monitor, and any tampering is confined there.",
+      "explanation": "NIST adds that this makes containers more resilient to compromise.",
+      "evidence": "This approach isolates writes to specifically defined directories, which can then be more easily monitored by the aforementioned tools. Furthermore, using read-only filesystems makes the containers more resilient to compromise since any tampering is isolated to these specific locations",
+      "source": "NIST SP 800-190, §4.4.4 App vulnerabilities, p. 25",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=38",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "NIST SP 800-190",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.readonly-rootfs-why"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.readonly-monitoring-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9327,
+      "front": "Your runtime monitoring struggles because containers write files all over their filesystems. Following NIST SP 800-190, which change confines writes to places that are easy to watch?",
+      "choices": [
+        "Run containers with read-only root filesystems, allowing writes only to specific directories",
+        "Give containers larger root filesystems",
+        "Run containers as privileged so monitoring agents see more",
+        "Turn off runtime monitoring for write events"
+      ],
+      "back": "Run containers with read-only root filesystems, allowing writes only to specific directories.",
+      "explanation": "NIST says read-only roots isolate writes to specifically defined directories, which can then be more easily monitored.",
+      "evidence": "Containers should also be run with their root filesystems in read-only mode. This approach isolates writes to specifically defined directories, which can then be more easily monitored by the aforementioned tools.",
+      "choicesExplained": {
+        "Give containers larger root filesystems": "More space does not limit where writes happen.",
+        "Run containers as privileged so monitoring agents see more": "Privilege widens what the container can do; it does not confine writes.",
+        "Turn off runtime monitoring for write events": "That hides the problem instead of confining the writes."
+      },
+      "source": "NIST SP 800-190, §4.4.4 App vulnerabilities, p. 25",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=38",
+      "sourceLicence": "B · public domain (US Government work)",
+      "uses": [
+        "NIST SP 800-190",
+        "readOnlyRootFilesystem",
+        "privileged container",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.readonly-rootfs-why"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.readonly-emptydir-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9330,
+      "front": "After setting readOnlyRootFilesystem: true, an app crashes because it must write temporary files to /tmp. What keeps the root read-only and lets the app run?",
+      "choices": [
+        "Mount an emptyDir volume at /tmp",
+        "Set readOnlyRootFilesystem: false",
+        "Set privileged: true",
+        "Mount a hostPath volume of the node's /tmp"
+      ],
+      "back": "Mount an emptyDir volume at /tmp.",
+      "explanation": "An emptyDir is a writable scratch space for the Pod, so writes go to one defined directory while the root stays read-only.",
+      "evidence": "Some uses for an emptyDir are: - scratch space, such as for a disk-based merge sort",
+      "choicesExplained": {
+        "Set readOnlyRootFilesystem: false": "That gives up the read-only root the task requires.",
+        "Set privileged: true": "Privilege does not make a read-only root writable and weakens isolation.",
+        "Mount a hostPath volume of the node's /tmp": "It exposes the node's filesystem to the Pod, a risk the scratch space does not need."
+      },
+      "source": "Kubernetes docs, Volumes, “emptyDir”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/volumes/#emptydir",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "readOnlyRootFilesystem",
+        "emptyDir",
+        "hostPath",
+        "privileged container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.emptydir-writable",
+        "cks.readonly-rootfs"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.emptydir-lifetime",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9335,
+      "front": "What happens to data in an emptyDir when a container crashes, and when the Pod is removed from its node?",
+      "back": "A container crash keeps it; removing the Pod from the node deletes it permanently.",
+      "explanation": "A container crash does not remove the Pod from the node, so the volume survives.",
+      "evidence": "When a Pod is removed from a node for any reason, the data in the emptyDir is deleted permanently. Note: A container crashing does not remove a Pod from a node. The data in an emptyDir volume is safe across container crashes.",
+      "source": "Kubernetes docs, Volumes, “emptyDir”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/volumes/#emptydir",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "emptyDir",
+        "Pod",
+        "node",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.emptydir-writable"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.emptydir-memory",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9340,
+      "front": "What does setting emptyDir.medium to \"Memory\" do, and what is the catch?",
+      "back": "Kubernetes mounts a memory-backed tmpfs; files written there count against the writing container's memory limit.",
+      "explanation": "By default emptyDir uses whatever storage backs the node, such as disk.",
+      "evidence": "If you set the emptyDir.medium field to \"Memory\" , Kubernetes mounts a tmpfs (RAM-backed filesystem) for you instead. While tmpfs is very fast, be aware that, unlike disks, files you write count against the memory limit of the container that wrote them.",
+      "source": "Kubernetes docs, Volumes, “emptyDir”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/storage/volumes/#emptydir",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "emptyDir",
+        "requests and limits",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.emptydir-writable"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.ape-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9345,
+      "front": "If allowPrivilegeEscalation is not set in a container's securityContext, what is its value?",
+      "back": "true",
+      "explanation": "So an immutable, locked-down container has to set allowPrivilegeEscalation: false explicitly.",
+      "evidence": "If allowPrivilegeEscalation is not defined in the securityContext field of a container specification, then it will default to true.",
+      "source": "Kubernetes docs, Configure a Security Context for a Pod or Container",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "allowPrivilegeEscalation",
+        "security context"
+      ],
+      "conceptIDs": [
+        "cks.immutable-pod-checks"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.ape-conflicts",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9350,
+      "front": "allowPrivilegeEscalation: false cannot be combined with which two container settings?",
+      "back": "Running as privileged, or having the CAP_SYS_ADMIN capability.",
+      "explanation": "The docs call the combination inconsistent, so it cannot be set.",
+      "evidence": "allowPrivilegeEscalation: false is inconsistent, and therefore cannot be set in combination, with a container that: is run as privileged, or has the capability CAP_SYS_ADMIN",
+      "source": "Kubernetes docs, Configure a Security Context for a Pod or Container",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "allowPrivilegeEscalation",
+        "privileged container",
+        "CAP_SYS_ADMIN"
+      ],
+      "conceptIDs": [
+        "cks.immutable-pod-checks"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.immutable-pod-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9355,
+      "front": "You must delete every Pod that is not immutable. Which container securityContext passes the check (not privileged, no privilege escalation, read-only root)?",
+      "choices": [
+        "privileged: false, allowPrivilegeEscalation: false, readOnlyRootFilesystem: true",
+        "privileged: false, readOnlyRootFilesystem: true",
+        "privileged: true, readOnlyRootFilesystem: true",
+        "privileged: false, allowPrivilegeEscalation: false"
+      ],
+      "back": "privileged: false, allowPrivilegeEscalation: false, readOnlyRootFilesystem: true",
+      "explanation": "Only this one sets all three; an unset allowPrivilegeEscalation defaults to true, and an unset readOnlyRootFilesystem leaves the root writable.",
+      "evidence": "If allowPrivilegeEscalation is not defined in the securityContext field of a container specification, then it will default to true.",
+      "choicesExplained": {
+        "privileged: false, readOnlyRootFilesystem: true": "allowPrivilegeEscalation is unset, so it defaults to true.",
+        "privileged: true, readOnlyRootFilesystem: true": "A privileged container fails the check.",
+        "privileged: false, allowPrivilegeEscalation: false": "Without readOnlyRootFilesystem: true the root filesystem stays writable."
+      },
+      "source": "Kubernetes docs, Configure a Security Context for a Pod or Container",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "allowPrivilegeEscalation",
+        "readOnlyRootFilesystem",
+        "privileged container",
+        "security context",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.immutable-pod-checks"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.crictl-pods",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9360,
+      "front": "On a node, which crictl commands list Pods by name and by label?",
+      "back": "crictl pods --name <pod-name> and crictl pods --label <key>=<value>.",
+      "explanation": "crictl pods with no filter lists all Pods on the node.",
+      "evidence": "List pods by label: crictl pods --label run = nginx",
+      "source": "Kubernetes docs, Debugging Kubernetes nodes with crictl, “Example crictl commands”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/#example-crictl-commands",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "crictl",
+        "Pod",
+        "label",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.crictl-investigate"
+      ]
+    },
+    {
+      "id": "cks.runtime-security.crictl-ps",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9365,
+      "front": "What is the difference between crictl ps and crictl ps -a?",
+      "back": "crictl ps lists running containers; crictl ps -a lists all containers, including stopped ones.",
+      "explanation": "Without `-a`, containers that have exited are hidden, so `-a` is how you find a container that has already stopped.",
+      "evidence": "List all containers: crictl ps -a",
+      "source": "Kubernetes docs, Debugging Kubernetes nodes with crictl, “Example crictl commands”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/#example-crictl-commands",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "crictl",
+        "container",
+        "Falco"
+      ],
+      "conceptIDs": [
+        "cks.crictl-investigate"
+      ]
+    }
+  ]
+}

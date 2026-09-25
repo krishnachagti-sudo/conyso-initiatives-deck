@@ -1,0 +1,1351 @@
+{
+  "topic": "Workload resources and imperative kubectl",
+  "notes": [
+    {
+      "id": "ckad.workload-resources.what-is-a-dry-run",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 2000,
+      "front": "What does a client dry run (`--dry-run=client`) do on a kubectl command?",
+      "back": "It previews the object that would be sent to the cluster, without actually submitting it.",
+      "explanation": "Nothing reaches the cluster; you only see the object kubectl would have sent.",
+      "example": "Like filling in an online form and pressing Preview instead of Submit.",
+      "evidence": "You can use the `--dry-run=client` flag to preview the object that would be sent to your cluster, without really submitting it.",
+      "source": "kubectl Usage Conventions (Kubernetes docs), “Best Practices: kubectl run”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/conventions/#kubectl-run",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "dry run"
+      ],
+      "uses": [
+        "dry run",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.dry-run-client-yaml"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.what-is-cron-format",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 2006,
+      "front": "What are the five fields of the Cron format a CronJob's schedule uses, in order?",
+      "back": "Minute, hour, day of the month, month, day of the week.",
+      "explanation": "Each field has its own range, such as 0–59 for minutes and 0–6 (Sunday to Saturday) for the day of the week.",
+      "example": "Like a timetable row that reads left to right: which minute, which hour, which day, which month, which weekday.",
+      "evidence": "# ┌───────────── minute (0 - 59) # │ ┌───────────── hour (0 - 23) # │ │ ┌───────────── day of the month (1 - 31) # │ │ │ ┌───────────── month (1 - 12) # │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)",
+      "source": "CronJob (Kubernetes docs), “Schedule syntax”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#schedule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "Cron format"
+      ],
+      "uses": [
+        "Cron format",
+        "CronJob"
+      ],
+      "conceptIDs": [
+        "ckad.cron-schedule-syntax"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.fit-deployment",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2012,
+      "front": "Which workload resource fits a stateless application whose Pods are interchangeable and can be replaced?",
+      "back": "A Deployment.",
+      "explanation": "The docs call it the most common way to run an application on a cluster.",
+      "evidence": "Deployment (and, indirectly, ReplicaSet ), the most common way to run an application on your cluster. Deployment is a good fit for managing a stateless application workload on your cluster, where any Pod in the Deployment is interchangeable and can be replaced if needed.",
+      "source": "Workload Management (Kubernetes docs), introduction",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.choose-workload"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.fit-statefulset",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2018,
+      "front": "Which workload resource fits Pods that run the same code but each rely on a distinct identity?",
+      "back": "A StatefulSet.",
+      "explanation": "Unlike the interchangeable Pods of a Deployment, each StatefulSet Pod keeps its own identity.",
+      "evidence": "A StatefulSet lets you manage one or more Pods – all running the same application code – where the Pods rely on having a distinct identity. This is different from a Deployment where the Pods are expected to be interchangeable.",
+      "source": "Workload Management (Kubernetes docs), introduction",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "StatefulSet",
+        "Pod",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "ckad.choose-workload"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.fit-daemonset",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2024,
+      "front": "Which workload resource fits a node-level service that has to run on the node where it is useful?",
+      "back": "A DaemonSet.",
+      "explanation": "Its Pods provide facilities local to a specific node, such as a driver that gives containers on that node access to storage.",
+      "evidence": "A DaemonSet defines Pods that provide facilities that are local to a specific node ; for example, a driver that lets containers on that node access a storage system. You use a DaemonSet when the driver, or other node-level service, has to run on the node where it's useful.",
+      "source": "Workload Management (Kubernetes docs), introduction",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "DaemonSet",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.choose-workload"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.fit-job",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2030,
+      "front": "Which workload resource represents a one-off task that runs to completion and then stops?",
+      "back": "A Job.",
+      "explanation": "It runs to completion and then stops; a CronJob is the repeating version.",
+      "evidence": "define tasks that run to completion and then stop. A Job represents a one-off task, whereas each CronJob repeats according to a schedule.",
+      "source": "Workload Management (Kubernetes docs), introduction",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "ckad.choose-workload"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.fit-cronjob",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2036,
+      "front": "Which workload resource repeats a run-to-completion task according to a schedule?",
+      "back": "A CronJob.",
+      "explanation": "A Job alone is one-off; a CronJob adds the repeating schedule.",
+      "evidence": "A Job represents a one-off task, whereas each CronJob repeats according to a schedule.",
+      "source": "Workload Management (Kubernetes docs), introduction",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob",
+        "Job"
+      ],
+      "conceptIDs": [
+        "ckad.choose-workload"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.pick-log-agent",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 2042,
+      "front": "A log shipper must run on every node, including nodes added next month. Which resource?",
+      "choices": "A) Deployment with one replica per node\nB) DaemonSet\nC) CronJob",
+      "back": "B) DaemonSet: as nodes join the cluster, its Pods are added to them.",
+      "explanation": "A DaemonSet ensures all (or some) nodes run a copy of a Pod, and nodes that join later get one too.",
+      "choicesExplained": "A: a Deployment's Pods are interchangeable replicas, not tied one to each node. C: a CronJob runs tasks on a schedule, not a service on every node.",
+      "evidence": "A DaemonSet ensures that all (or some) Nodes run a copy of a Pod. As nodes are added to the cluster, Pods are added to them.",
+      "source": "DaemonSet (Kubernetes docs), introduction",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "DaemonSet",
+        "Deployment",
+        "CronJob",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.choose-workload",
+        "ckad.daemonset-one-per-node"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.pick-nightly-export",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 2048,
+      "front": "An invoice export must run at 01:00 every night and exit when done. Which resource?",
+      "choices": "A) Job\nB) CronJob\nC) DaemonSet",
+      "back": "B) CronJob: it repeats a run-to-completion task on a schedule.",
+      "explanation": "Each run is a task that completes and stops, and the repetition is what a CronJob adds over a Job.",
+      "choicesExplained": "A: a Job is a one-off task; nothing would start it again tomorrow. C: a DaemonSet runs node-local services, not scheduled tasks.",
+      "evidence": "You can use a Job and / or a CronJob to define tasks that run to completion and then stop. A Job represents a one-off task, whereas each CronJob repeats according to a schedule.",
+      "source": "Workload Management (Kubernetes docs), introduction",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob",
+        "Job",
+        "DaemonSet"
+      ],
+      "conceptIDs": [
+        "ckad.choose-workload"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.pick-replicated-db",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 2054,
+      "front": "Three database replicas each keep their own data volume, and a replaced replica must get its old volume back. Which resource?",
+      "choices": "A) StatefulSet\nB) Deployment\nC) Job",
+      "back": "A) StatefulSet: a replacement Pod is connected to the same PersistentVolume.",
+      "explanation": "Linking each Pod to its persistent storage is the most common use of a StatefulSet.",
+      "choicesExplained": "B: a Deployment's Pods are interchangeable, with no per-Pod identity. C: a Job runs a task to completion, not a long-lived database.",
+      "evidence": "The most common use for a StatefulSet is to be able to make a link between its Pods and their persistent storage. For example, you can run a StatefulSet that associates each Pod with a PersistentVolume . If one of the Pods in the StatefulSet fails, Kubernetes makes a replacement Pod that is connected to the same PersistentVolume.",
+      "source": "Workload Management (Kubernetes docs), introduction",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "StatefulSet",
+        "Deployment",
+        "Job",
+        "Pod",
+        "PersistentVolume"
+      ],
+      "conceptIDs": [
+        "ckad.choose-workload",
+        "ckad.statefulset-when"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.generate-pod-yaml",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2060,
+      "front": "How do you write the manifest for a Pod `nginx` (image `nginx`) to `pod.yaml` without creating the Pod?",
+      "back": "`kubectl run nginx --image=nginx --dry-run=client -o yaml > pod.yaml`",
+      "explanation": "The dry run stops the request reaching the cluster, and `-o yaml` prints the object so you can save it and edit it.",
+      "evidence": "kubectl run nginx --image=nginx --dry-run=client -o yaml > pod.yaml # Generate spec for running pod nginx and write it into a file called pod.yaml",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "dry run",
+        "Pod",
+        "manifest",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.dry-run-client-yaml"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.generate-deployment-yaml",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2066,
+      "front": "A task wants Deployment `web` (image `nginx:1.27`) with extra fields no flag sets. What is your first command?",
+      "back": "`kubectl create deployment web --image=nginx:1.27 --dry-run=client -o yaml > web.yaml`, then edit and apply the file.",
+      "explanation": "With `-o yaml --dry-run=client`, a `create` command prints the configuration as YAML instead of sending it to the API server.",
+      "evidence": "The `kubectl create service -o yaml --dry-run=client` command creates the configuration for the Service, but prints it to stdout as YAML instead of sending it to the Kubernetes API server.",
+      "source": "Managing Kubernetes Objects Using Imperative Commands (Kubernetes docs), “Using set commands to modify objects before creation”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/imperative-command/#using-set-commands-to-modify-objects-before-creation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "dry run",
+        "Deployment",
+        "yaml",
+        "kubectl apply"
+      ],
+      "conceptIDs": [
+        "ckad.dry-run-client-yaml",
+        "ckad.kubectl-create-deployment"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.run-creates-pod",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2072,
+      "front": "What does `kubectl run` create?",
+      "back": "A new Pod to run a container.",
+      "explanation": "Among kubectl's verb-driven creation commands, `run` is the one that makes a Pod.",
+      "evidence": "- `run`: Create a new Pod to run a Container.",
+      "source": "Managing Kubernetes Objects Using Imperative Commands (Kubernetes docs), “How to create objects”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/imperative-command/#how-to-create-objects",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-run"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.run-in-namespace",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2078,
+      "front": "What command starts a single Pod `cache` from image `redis:7` in namespace `ops`?",
+      "back": "`kubectl run cache --image=redis:7 -n ops`",
+      "explanation": "`-n` names the namespace the Pod is created in.",
+      "evidence": "kubectl run nginx --image=nginx -n mynamespace # Start a single instance of nginx pod in the namespace of mynamespace",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Interacting with running Pods”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-running-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "namespace",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-run"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.create-deployment-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2084,
+      "front": "What does `kubectl create deployment nginx --image=nginx` start?",
+      "back": "A Deployment named `nginx` running a single instance of the `nginx` image.",
+      "explanation": "With no replica count given, the quick reference describes the result as a single instance.",
+      "evidence": "kubectl create deployment nginx --image=nginx # start a single instance of nginx",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Creating objects”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#creating-objects",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-create-deployment"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.create-job-command",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2090,
+      "front": "What command creates a Job `once` from image `busybox:1.28` that runs `date`?",
+      "back": "`kubectl create job once --image=busybox:1.28 -- date`",
+      "explanation": "The command for the container goes after `--`, as in the quick reference's Job that prints Hello World.",
+      "evidence": "# create a Job which prints \"Hello World\" kubectl create job hello --image=busybox:1.28 -- echo \"Hello World\"",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Creating objects”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#creating-objects",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-create-job"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.create-cronjob-command",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2096,
+      "front": "What command creates a CronJob `tick` from `busybox:1.28` that runs `date` every five minutes?",
+      "back": "`kubectl create cronjob tick --image=busybox:1.28 --schedule=\"*/5 * * * *\" -- date`",
+      "explanation": "`--schedule` takes the Cron format string, quoted, and the command follows `--`.",
+      "evidence": "# create a CronJob that prints \"Hello World\" every minute kubectl create cronjob hello --image=busybox:1.28 --schedule=\"*/1 * * * *\" -- echo \"Hello World\"",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Creating objects”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#creating-objects",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob",
+        "Cron format",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-create-cronjob"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.explain-fields",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2102,
+      "front": "Mid-task, you need the documentation for the fields of a Pod manifest, without a browser. Which command?",
+      "back": "`kubectl explain pods`",
+      "explanation": "The quick reference lists it as the way to get the documentation for Pod manifests.",
+      "evidence": "kubectl explain pods # get the documentation for pod manifests",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Creating objects”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#creating-objects",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "manifest",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-explain"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.apply-recommended",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2108,
+      "front": "What does `kubectl apply` do, and how does the quick reference rate it for production?",
+      "back": "Creates and updates resources from files defining them; the recommended way of managing applications on production.",
+      "explanation": "It works from files, so the same manifests both create and later update the objects.",
+      "evidence": "`apply` manages applications through files defining Kubernetes resources. It creates and updates resources in a cluster through running `kubectl apply`. This is the recommended way of managing Kubernetes applications on production.",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Kubectl apply”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#kubectl-apply",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl apply",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-apply-f"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.apply-directory",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2114,
+      "front": "Folder `./k8s` holds five manifest files. What one command creates everything in them?",
+      "back": "`kubectl apply -f ./k8s`",
+      "explanation": "Given a directory, `apply -f` creates resources from all manifest files in it.",
+      "evidence": "kubectl apply -f ./dir # create resource(s) in all manifest files in dir",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Creating objects”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#creating-objects",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl apply",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-apply-f"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.edit-with-nano",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2120,
+      "front": "How do you edit the live Service `api` in `nano` rather than the default editor?",
+      "back": "`KUBE_EDITOR=\"nano\" kubectl edit svc/api`",
+      "explanation": "`kubectl edit` opens any API resource in an editor, and `KUBE_EDITOR` picks which one.",
+      "evidence": "Edit any API resource in your preferred editor. ```bash kubectl edit svc/docker-registry # Edit the service named docker-registry KUBE_EDITOR=\"nano\" kubectl edit svc/docker-registry # Use an alternative editor",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Editing resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#editing-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-edit"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.replace-force",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2126,
+      "front": "What does `kubectl replace --force -f pod.yaml` do, and what is the catch?",
+      "back": "It deletes the resource and re-creates it; this will cause a service outage.",
+      "explanation": "Forcing means the old object is removed first rather than updated in place.",
+      "evidence": "# Force replace, delete and then re-create the resource. Will cause a service outage. kubectl replace --force -f ./pod.json",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Updating resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#updating-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-replace-force"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.delete-now",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2132,
+      "front": "Which flag deletes a Pod with no grace period?",
+      "back": "`--now`, as in `kubectl delete pod unwanted --now`.",
+      "explanation": "The quick reference gives this as the way to delete a Pod with no grace period.",
+      "evidence": "kubectl delete pod unwanted --now # Delete a pod with no grace period",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Deleting resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#deleting-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-delete"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.scale-conditional",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2138,
+      "front": "What does `kubectl scale --current-replicas=2 --replicas=3 deployment/mysql` do?",
+      "back": "Scales `mysql` to 3 replicas, but only if its current size is 2.",
+      "explanation": "`--current-replicas` is a precondition checked before the new size is set.",
+      "evidence": "kubectl scale --current-replicas=2 --replicas=3 deployment/mysql # If the deployment named mysql's current size is 2, scale mysql to 3",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Scaling resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#scaling-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-scale"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.scale-deployment",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2144,
+      "front": "What command scales Deployment `web` to 5 replicas?",
+      "back": "`kubectl scale --replicas=5 deployment/web`",
+      "explanation": "`kubectl scale --replicas=N` takes the resource as type/name, as in the quick reference's ReplicaSet example.",
+      "evidence": "kubectl scale --replicas=3 rs/foo # Scale a replicaset named 'foo' to 3",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Scaling resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#scaling-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Deployment",
+        "ReplicaSet",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-scale"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.set-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2150,
+      "front": "Which command permanently saves a namespace for all later kubectl commands in the current context?",
+      "back": "`kubectl config set-context --current --namespace=<ns>`",
+      "explanation": "It saves the namespace in the current context, so every later command there uses it.",
+      "evidence": "# permanently save the namespace for all subsequent kubectl commands in that context. kubectl config set-context --current --namespace=ggckad-s2",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Kubectl context and configuration”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#kubectl-context-and-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "namespace",
+        "kubectl",
+        "kubeconfig"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-namespace-context"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.switch-context",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2156,
+      "front": "A task says it must be done on cluster context `k8s-c2`. Which command makes that the default context?",
+      "back": "`kubectl config use-context k8s-c2`",
+      "explanation": "`use-context` sets the default context, so later commands go to that cluster.",
+      "evidence": "kubectl config use-context my-cluster-name # set the default context to my-cluster-name",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Kubectl context and configuration”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#kubectl-context-and-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "kubeconfig"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-namespace-context"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.output-wide",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2162,
+      "front": "Which kubectl output format is plain text with additional information, including the node name for Pods?",
+      "back": "`-o wide`",
+      "explanation": "It keeps the normal table and adds columns.",
+      "evidence": "`-o=wide` | Output in the plain-text format with any additional information, and for pods, the node name is included",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Formatting output”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#formatting-output",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-output-formats"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.output-name",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2168,
+      "front": "Which kubectl output format prints only the resource name and nothing else?",
+      "back": "`-o name`",
+      "explanation": "Nothing but the name is printed: no table.",
+      "evidence": "`-o=name` | Print only the resource name and nothing else",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Formatting output”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#formatting-output",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-output-formats"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.output-yaml",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2174,
+      "front": "Which kubectl output format prints a YAML formatted API object?",
+      "back": "`-o yaml`",
+      "explanation": "It prints the full API object, formatted as YAML.",
+      "evidence": "`-o=yaml` | Output a YAML formatted API object",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Formatting output”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#formatting-output",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "yaml",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-output-formats"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.output-json",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2180,
+      "front": "Which kubectl output format prints the whole object in `JSON`?",
+      "back": "`-o json`",
+      "explanation": "It prints the full API object, formatted as `JSON`.",
+      "evidence": "`-o=json` | Output a JSON formatted API object",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Formatting output”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#formatting-output",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-output-formats"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.output-jsonpath",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2186,
+      "front": "Which kubectl output format prints just the fields picked by a path expression, such as `{.items[*].metadata.name}`?",
+      "back": "`-o jsonpath=<template>`",
+      "explanation": "It prints the fields defined in a jsonpath expression rather than the whole object.",
+      "evidence": "`-o=jsonpath=<template>` | Print the fields defined in a [jsonpath](/docs/reference/kubectl/jsonpath) expression",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Formatting output”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#formatting-output",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-output-formats"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.output-custom-columns",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2192,
+      "front": "Which kubectl output format prints a table from a comma-separated list of columns you define?",
+      "back": "`-o custom-columns=<spec>`",
+      "explanation": "You choose the columns instead of taking kubectl's default table.",
+      "evidence": "`-o=custom-columns=<spec>` | Print a table using a comma separated list of custom columns",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Formatting output”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#formatting-output",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-output-formats"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.which-node",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2198,
+      "front": "You must find which node each Pod in namespace `shop` landed on. Which command?",
+      "back": "`kubectl get pods -n shop -o wide`",
+      "explanation": "The wide format adds extra information, and for Pods that includes the node name.",
+      "evidence": "`-o=wide` | Output in the plain-text format with any additional information, and for pods, the node name is included",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Formatting output”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#formatting-output",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Pod",
+        "namespace",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-output-formats"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.show-labels",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2204,
+      "front": "Which flag shows the labels of every Pod in `kubectl get pods` output?",
+      "back": "`--show-labels`",
+      "explanation": "It works for Pods and any other object that supports labelling.",
+      "evidence": "# Show labels for all pods (or any other Kubernetes object that supports labelling) kubectl get pods --show-labels",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Viewing and finding resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#viewing-and-finding-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "label",
+        "Pod",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-label-selector-get"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.filter-by-label",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2210,
+      "front": "How do you list only the Pods labelled `tier=cache`?",
+      "back": "`kubectl get pods --selector=tier=cache` (short form `-l tier=cache`).",
+      "explanation": "`--selector` filters by label, as in the quick reference's `--selector=app=cassandra` example.",
+      "evidence": "kubectl get pods --selector=app=cassandra -o \\ jsonpath='{.items[*].metadata.labels.version}'",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Viewing and finding resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#viewing-and-finding-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "label",
+        "selector",
+        "Pod",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-label-selector-get"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.alias-k",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2216,
+      "front": "What two Bash lines make `k` a shorthand for kubectl that still has completion?",
+      "back": "`alias k=kubectl` and `complete -o default -F __start_kubectl k`.",
+      "explanation": "The quick reference gives this pair as a shorthand alias that also works with completion.",
+      "evidence": "You can also use a shorthand alias for `kubectl` that also works with completion: ```bash alias k=kubectl complete -o default -F __start_kubectl k",
+      "source": "kubectl Quick Reference (Kubernetes docs), “Kubectl autocomplete”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#kubectl-autocomplete",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-alias-completion"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.all-namespaces-short",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2222,
+      "front": "What is the shorthand for `--all-namespaces`?",
+      "back": "`-A`",
+      "explanation": "The quick reference notes that appending `--all-namespaces` happens often enough to learn the short form.",
+      "evidence": "Appending `--all-namespaces` happens frequently enough that you should be aware of the shorthand for `--all-namespaces`: ```kubectl -A```",
+      "source": "kubectl Quick Reference (Kubernetes docs), “A note on --all-namespaces”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#a-note-on-all-namespaces",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "namespace",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.kubectl-alias-completion"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.create-edit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2228,
+      "front": "Which kubectl flag opens an object's configuration in an editor and creates the object when you save?",
+      "back": "`kubectl create --edit -f <file>`",
+      "explanation": "It lets you make arbitrary changes to an object before it is created, for fields no `create` flag covers.",
+      "evidence": "You can use `kubectl create --edit` to make arbitrary changes to an object before it is created.",
+      "source": "Managing Kubernetes Objects Using Imperative Commands (Kubernetes docs), “Using --edit to modify objects before creation”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/imperative-command/#using-edit-to-modify-objects-before-creation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "ckad.imperative-set-commands"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.hourly-shortcut",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2234,
+      "front": "Which Cron format string does the CronJob macro `@hourly` stand for?",
+      "back": "`0 * * * *`: once an hour, at the beginning of the hour.",
+      "explanation": "The macros are shorthands for common schedules; `@daily` (or `@midnight`) is `0 0 * * *`.",
+      "evidence": "@daily (or @midnight) Run once a day at midnight 0 0 * * * @hourly Run once an hour at the beginning of the hour 0 * * * *",
+      "source": "CronJob (Kubernetes docs), “Schedule syntax”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#schedule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Cron format",
+        "CronJob"
+      ],
+      "conceptIDs": [
+        "ckad.cron-schedule-syntax"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.schedule-daily-time",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2240,
+      "front": "What CronJob schedule runs every Friday at 22:15?",
+      "back": "`15 22 * * 5`",
+      "explanation": "Fields run minute, hour, day of month, month, day of week, and Monday is 1, so Friday is 5.",
+      "evidence": "For example, 0 3 * * 1 means this task is scheduled to run weekly on a Monday at 3 AM.",
+      "source": "CronJob (Kubernetes docs), “Schedule syntax”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#schedule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Cron format",
+        "CronJob"
+      ],
+      "conceptIDs": [
+        "ckad.cron-schedule-syntax"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.schedule-step",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2246,
+      "front": "What CronJob schedule runs every 15 minutes?",
+      "back": "`*/15 * * * *`",
+      "explanation": "A step value after an asterisk, `*/N`, means every N units of that field.",
+      "evidence": "Steps are also permitted after an asterisk, so if you want to say \"every two hours\", just use */2 .",
+      "source": "CronJob (Kubernetes docs), “Schedule syntax”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#schedule-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Cron format",
+        "CronJob"
+      ],
+      "conceptIDs": [
+        "ckad.cron-schedule-syntax"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.concurrency-allow",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2252,
+      "front": "Which CronJob `concurrencyPolicy` value is the default?",
+      "back": "`Allow`: concurrently running Jobs are allowed.",
+      "explanation": "Unless you choose otherwise, a new run starts even if the previous one is still going.",
+      "evidence": "Allow (default): The CronJob allows concurrently running Jobs",
+      "source": "CronJob (Kubernetes docs), “Concurrency policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#concurrency-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob",
+        "Job"
+      ],
+      "conceptIDs": [
+        "ckad.cronjob-concurrency-policy"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.concurrency-forbid",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2258,
+      "front": "Which `concurrencyPolicy` value skips a new run when the previous Job has not finished?",
+      "back": "`Forbid`.",
+      "explanation": "The CronJob does not allow concurrent runs, so the due run is skipped rather than started alongside.",
+      "evidence": "Forbid : The CronJob does not allow concurrent runs; if it is time for a new Job run and the previous Job run hasn't finished yet, the CronJob skips the new Job run.",
+      "source": "CronJob (Kubernetes docs), “Concurrency policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#concurrency-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob",
+        "Job"
+      ],
+      "conceptIDs": [
+        "ckad.cronjob-concurrency-policy"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.concurrency-replace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2264,
+      "front": "Which `concurrencyPolicy` value swaps the still-running Job for a new one?",
+      "back": "`Replace`.",
+      "explanation": "When the next run is due and the previous one hasn't finished, the CronJob replaces it with the new run.",
+      "evidence": "Replace : If it is time for a new Job run and the previous Job run hasn't finished yet, the CronJob replaces the currently running Job run with a new Job run",
+      "source": "CronJob (Kubernetes docs), “Concurrency policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#concurrency-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob",
+        "Job"
+      ],
+      "conceptIDs": [
+        "ckad.cronjob-concurrency-policy"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.concurrency-pick",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 2270,
+      "front": "A CronJob syncs files every 10 minutes. Sometimes a run takes 15 minutes, and two syncs at once corrupt the target. Which `concurrencyPolicy`?",
+      "choices": "A) `Allow`\nB) `Forbid`\nC) `Replace`",
+      "back": "B) `Forbid`: the due run is skipped while the previous one is still running.",
+      "explanation": "Forbid never lets two runs overlap and lets the slow run finish.",
+      "choicesExplained": "A: `Allow` is the default and permits the overlapping runs that cause the damage. C: `Replace` would stop the slow sync part-way and start another.",
+      "evidence": "Forbid : The CronJob does not allow concurrent runs; if it is time for a new Job run and the previous Job run hasn't finished yet, the CronJob skips the new Job run.",
+      "source": "CronJob (Kubernetes docs), “Concurrency policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#concurrency-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob",
+        "Job"
+      ],
+      "conceptIDs": [
+        "ckad.cronjob-concurrency-policy"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.starting-deadline",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2276,
+      "front": "A CronJob has `startingDeadlineSeconds: 120`. What happens to a run that cannot start until 3 minutes after its scheduled time?",
+      "back": "It is skipped: the Job may be created at most 120 seconds after the schedule.",
+      "explanation": "The controller measures the delay since the Job was due, and skips that execution if it exceeds the limit.",
+      "evidence": "If the .spec.startingDeadlineSeconds field is set (not null), the CronJob controller measures the time between when a Job is expected to be created and now. If the difference is higher than that limit, it will skip this execution.",
+      "source": "CronJob (Kubernetes docs), “Deadline for delayed Job start”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#starting-deadline",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CronJob",
+        "Job"
+      ],
+      "conceptIDs": [
+        "ckad.cronjob-starting-deadline"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.history-defaults",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2282,
+      "front": "By default, how many successful and how many failed finished Jobs does a CronJob keep?",
+      "back": "3 successful (`successfulJobsHistoryLimit`) and 1 failed (`failedJobsHistoryLimit`).",
+      "explanation": "Both fields are optional; setting `successfulJobsHistoryLimit` to 0 keeps no successful Jobs.",
+      "evidence": ".spec.successfulJobsHistoryLimit : This field specifies the number of successful finished jobs to keep. The default value is 3 . Setting this field to 0 will not keep any successful jobs. - .spec.failedJobsHistoryLimit : This field specifies the number of failed finished jobs to keep. The default value is 1 .",
+      "source": "CronJob (Kubernetes docs), “Jobs history limits”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#jobs-history-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "CronJob",
+        "Job"
+      ],
+      "conceptIDs": [
+        "ckad.cronjob-history-limits"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.job-restart-values",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2288,
+      "front": "Which `restartPolicy` values are allowed in a Job's Pod template?",
+      "back": "Only `Never` or `OnFailure`.",
+      "explanation": "Any other value is not allowed in a Job's Pod template.",
+      "evidence": "Only a RestartPolicy equal to Never or OnFailure is allowed.",
+      "source": "Jobs (Kubernetes docs), “Pod Template”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-template",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "restartPolicy",
+        "Job",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.job-restart-policy"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.job-restart-always",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 2294,
+      "front": "You adapt a Pod manifest into a Job and leave `restartPolicy: Always` in the template. What happens, and what do you change?",
+      "choices": "A) The Job is accepted and restarts the Pod forever\nB) It is not allowed; set `Never` or `OnFailure`\nC) The Job silently switches it to `Never`",
+      "back": "B) Not allowed: a Job's template may use only `Never` or `OnFailure`.",
+      "explanation": "The Job documentation allows only those two restart policies.",
+      "choicesExplained": "A and C: `Always` is simply not one of the allowed values, so the Job does not run with it and it is not rewritten for you.",
+      "evidence": "Only a RestartPolicy equal to Never or OnFailure is allowed.",
+      "source": "Jobs (Kubernetes docs), “Pod Template”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-template",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "restartPolicy",
+        "Job",
+        "Pod",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "ckad.job-restart-policy"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.onfailure-vs-never",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 2300,
+      "front": "In a Job, what happens to a failed container under `OnFailure`, compared with `Never`?",
+      "back": "`OnFailure`: the Pod stays on the node and the container is re-run. `Never`: the Pod fails and the Job controller starts a new Pod.",
+      "explanation": "With `OnFailure`, your program has to handle being restarted locally; the alternative the docs give is `Never`.",
+      "contrast": "`OnFailure` retries in place; `Never` retries with a fresh Pod.",
+      "evidence": "then the Pod stays on the node, but the container is re-run. Therefore, your program needs to handle the case when it is restarted locally, or else specify .spec.template.spec.restartPolicy = \"Never\" .",
+      "source": "Jobs (Kubernetes docs), “Handling Pod and container failures”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#handling-pod-and-container-failures",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "restartPolicy",
+        "Job",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.job-restart-policy"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.completions-defaults",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2306,
+      "front": "In a Job with neither `completions` nor `parallelism` set, what are they defaulted to?",
+      "back": "Both default to 1: a non-parallel Job.",
+      "explanation": "Leaving both unset is how you describe a non-parallel Job.",
+      "evidence": "For a non-parallel Job, you can leave both .spec.completions and .spec.parallelism unset. When both are unset, both are defaulted to 1.",
+      "source": "Jobs (Kubernetes docs), “Parallel execution for Jobs”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#parallel-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job"
+      ],
+      "conceptIDs": [
+        "ckad.job-completions-parallelism"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.completions-complete-when",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2312,
+      "front": "When is a Job with a fixed completion count complete?",
+      "back": "When it has `.spec.completions` successful Pods.",
+      "explanation": "The Job stands for the overall task, and it counts successful Pods up to the target.",
+      "evidence": "Parallel Jobs with a fixed completion count : - specify a non-zero positive value for .spec.completions . - the Job represents the overall task, and is complete when there are .spec.completions successful Pods.",
+      "source": "Jobs (Kubernetes docs), “Parallel execution for Jobs”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#parallel-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.job-completions-parallelism"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.completions-pick",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2318,
+      "front": "A Job must finish 12 successful runs, with no more than 4 Pods at a time. What do you set?",
+      "back": "`completions: 12` and `parallelism: 4`.",
+      "explanation": "For a fixed completion count you set `completions` to the number needed; `parallelism` would otherwise default to 1.",
+      "evidence": "For a fixed completion count Job, you should set .spec.completions to the number of completions needed. You can set .spec.parallelism , or leave it unset and it will default to 1.",
+      "source": "Jobs (Kubernetes docs), “Parallel execution for Jobs”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#parallel-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.job-completions-parallelism"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.backoff-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2324,
+      "front": "What does a Job's `backoffLimit` count, and what is its default?",
+      "back": "The retries before the Job is considered failed; 6 by default.",
+      "explanation": "The default differs only when a per-index backoff limit is set on an Indexed Job.",
+      "evidence": "set .spec.backoffLimit to specify the number of retries before considering a Job as failed. The .spec.backoffLimit is set by default to 6, unless the backoff limit per index (only Indexed Job) is specified.",
+      "source": "Jobs (Kubernetes docs), “Pod backoff failure policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-backoff-failure-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (docs as of that date)",
+      "uses": [
+        "Job"
+      ],
+      "conceptIDs": [
+        "ckad.job-backoff-limit"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.backoff-pick",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2330,
+      "front": "A flaky import Job should be marked failed after 2 retries instead of the default. Which field and value?",
+      "back": "`spec.backoffLimit: 2`",
+      "explanation": "`backoffLimit` is the number of retries allowed before the Job counts as failed.",
+      "evidence": "set .spec.backoffLimit to specify the number of retries before considering a Job as failed.",
+      "source": "Jobs (Kubernetes docs), “Pod backoff failure policy”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-backoff-failure-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job"
+      ],
+      "conceptIDs": [
+        "ckad.job-backoff-limit"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.active-deadline",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2336,
+      "front": "What happens when a Job reaches its `activeDeadlineSeconds`?",
+      "back": "All its running Pods are terminated, and the Job fails with reason `DeadlineExceeded`.",
+      "explanation": "The deadline covers the Job's whole duration, however many Pods it has created.",
+      "evidence": "The activeDeadlineSeconds applies to the duration of the job, no matter how many Pods are created. Once a Job reaches activeDeadlineSeconds , all of its running Pods are terminated and the Job status will become type: Failed with reason: DeadlineExceeded .",
+      "source": "Jobs (Kubernetes docs), “Job termination and cleanup”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#job-termination-and-cleanup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.job-active-deadline"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.deadline-beats-backoff",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2342,
+      "front": "A Job has `backoffLimit: 5` and `activeDeadlineSeconds: 60`. At 60 seconds it has used 2 retries. Will it start another Pod?",
+      "back": "No. `activeDeadlineSeconds` takes precedence over `backoffLimit`.",
+      "explanation": "Once the time limit is reached, no more Pods are deployed even if retries remain.",
+      "evidence": "Note that a Job's .spec.activeDeadlineSeconds takes precedence over its .spec.backoffLimit . Therefore, a Job that is retrying one or more failed Pods will not deploy additional Pods once it reaches the time limit specified by activeDeadlineSeconds , even if the backoffLimit is not yet reached.",
+      "source": "Jobs (Kubernetes docs), “Job termination and cleanup”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#job-termination-and-cleanup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.job-active-deadline",
+        "ckad.job-backoff-limit"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.ttl-after-finished",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2348,
+      "front": "What do `ttlSecondsAfterFinished: 0` and an unset `ttlSecondsAfterFinished` each mean for a finished Job?",
+      "back": "0: eligible for deletion immediately after it finishes. Unset: never cleaned up by the time-to-live controller.",
+      "explanation": "The field sets how long after finishing a Job becomes eligible for automatic deletion.",
+      "evidence": "If the field is set to 0 , the Job will be eligible to be automatically deleted immediately after it finishes. If the field is unset, this Job won't be cleaned up by the TTL controller after it finishes.",
+      "source": "Jobs (Kubernetes docs), “Clean up finished jobs automatically”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/job/#clean-up-finished-jobs-automatically",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Job"
+      ],
+      "conceptIDs": [
+        "ckad.job-ttl-after-finished"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.daemonset-nodes-join",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2354,
+      "front": "What does a DaemonSet do as nodes are added to or removed from the cluster?",
+      "back": "Adds a copy of its Pod to each new node; the Pods on removed nodes are garbage collected.",
+      "explanation": "A DaemonSet ensures all (or some) nodes run a copy of a Pod, and deleting it cleans up the Pods it created.",
+      "evidence": "A DaemonSet ensures that all (or some) Nodes run a copy of a Pod. As nodes are added to the cluster, Pods are added to them. As nodes are removed from the cluster, those Pods are garbage collected. Deleting a DaemonSet will clean up the Pods it created.",
+      "source": "DaemonSet (Kubernetes docs), introduction",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "DaemonSet",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "ckad.daemonset-one-per-node"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.daemonset-some-nodes",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 2360,
+      "front": "A disk-health DaemonSet should run only on nodes labelled `disk=ssd`. What do you add?",
+      "back": "A `nodeSelector` of `disk: ssd` in the Pod template (`.spec.template.spec.nodeSelector`).",
+      "explanation": "With a node selector in the template, the DaemonSet controller creates Pods only on matching nodes.",
+      "evidence": "If you specify a .spec.template.spec.nodeSelector , then the DaemonSet controller will create Pods on nodes which match that node selector .",
+      "source": "DaemonSet (Kubernetes docs), “Running Pods on select Nodes”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/#running-pods-on-select-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "DaemonSet",
+        "Pod",
+        "label",
+        "selector"
+      ],
+      "conceptIDs": [
+        "ckad.daemonset-one-per-node"
+      ]
+    },
+    {
+      "id": "ckad.workload-resources.statefulset-needs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2366,
+      "front": "What are two needs that make a StatefulSet valuable for an application?",
+      "back": "Any two of: stable, unique network identifiers; stable, persistent storage; ordered, graceful deployment and scaling; ordered, automated rolling updates.",
+      "explanation": "Here, stable means persisting across Pod (re)scheduling.",
+      "evidence": "StatefulSets are valuable for applications that require one or more of the following: - Stable, unique network identifiers. - Stable, persistent storage. - Ordered, graceful deployment and scaling. - Ordered, automated rolling updates. In the above, stable is synonymous with persistence across Pod (re)scheduling.",
+      "source": "StatefulSets (Kubernetes docs), “Using StatefulSets”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#using-statefulsets",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "StatefulSet",
+        "Pod",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "ckad.statefulset-when"
+      ]
+    }
+  ]
+}

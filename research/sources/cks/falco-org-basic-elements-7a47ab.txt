@@ -1,0 +1,363 @@
+Basic Elements of Falco Rules | Falco
+Falco horizontal logo_teal2Falco
+AboutWhat is Falco?
+Learn about Falco and how it works
+Why choose Falco?
+Benefits of Falco for runtime security
+Falco use cases
+Threat detection and regulatory compliance
+Case studies
+Discover how the industry is adopting Falco
+Falco ecosystem
+Integrations and plugins
+FAQ
+The most common questions about the whole Falco
+ecosystem
+Docs
+Blog
+CommunityAbout the community
+For users and contributors
+Events
+Meet and learn about Falco
+Contributors
+The people who build Falco
+Roadmap
+The Project direction
+Falco brand Brand guidelines
+Enterprise
+Versions
+v0.45
+v0.44
+v0.43
+v0.42
+v0.41
+v0.40
+v0.39
+v0.38
+v0.37
+v0.36
+v0.35
+v0.34
+v0.33
+v0.32
+v0.31
+v0.30
+v0.29
+v0.28
+v0.27
+v0.26
+Try Falco
+About
+Docs
+Blog
+Community
+Enterprise
+Join the global cloud native community at KubeCon + CloudNativeCon North America 2026. Register Now!
+2026-09-13T00:00:00
+2026-11-12T18:00:00
+2
+The Falco Project
+Getting Started
+Try Falco with Docker
+Try Falco on Kubernetes
+Try Falco on Linux
+Learning Environments
+Additional Resources
+Setup
+Deploy on Kubernetes with the Operator
+Deploy on Kubernetes with Helm
+Deploy as a container
+Install on a host (DEB, RPM)
+Install on a host (tarball)
+Specific Environments
+Download
+Concepts
+Event Sources
+Kernel Events
+Kernel Events Architecture Overview
+Advanced Performance Tuning
+Dropped Syscall Events
+Generating sample events
+Plugin Events
+CloudTrail Events
+Kubernetes Audit Events
+Okta Events
+Rules
+Basics of Falco Rules
+Default and Local Rules
+Condition Syntax
+Overriding Rules
+Rule Exceptions
+Controlling Rules
+Custom Ruleset
+Escaping Special Characters
+Style Guide of Falco Rules
+Accessing File System Paths
+Adoption of Falco Rules in Production
+Resolving Domain Names
+Rules Versioning
+IDE Support
+Outputs
+Channels
+Formatting
+Forwarding
+Plugins
+Architecture
+Usage
+Registered Plugins
+Metrics
+Developer Guide
+Build Falco from source
+Plugins
+Development
+SDKs
+Distribution
+Public registry
+Troubleshooting
+Performance
+Falco Is Not Starting Up
+Falco Is Dropping Syscalls Events
+Missing Fields in Falco Logs
+Reference
+Glossary
+Falco Daemon
+Falco Arguments
+Config Options
+Falco Rules
+Rule fields
+Default Macros
+Macros to Override
+Supported Events
+Fields for Conditions and Outputs
+Rules Examples
+Default Rules
+Falco Plugins
+API Reference
+Go SDK Walkthrough
+Changelog
+Contribute
+How to Share Your Falco Rules
+Contributor of the Month
+Roadmap
+Available Documentation Versions
+Edit this page
+Create child page
+Create documentation issue
+Create project issue
+On this page
+RulesConditions
+Output
+Priority
+Advanced Rule Syntax
+Macros
+Lists
+Visibility
+Basic Elements of Falco Rules
+Understand Falco Rules, Lists and Macros
+Rules
+A rule is a YAML object, part of the rules file, whose definition contains at least the following fields:
+- rule: shell_in_container
+desc: notice shell activity within a container
+condition: >
+(evt.type in (execve, execveat)) and
+container.id != host and
+(proc.name = bash or
+proc.name = ksh)
+output: >
+shell in a container |
+user=%user.name container_id=%container.id container_name=%container.name
+shell=%proc.name parent=%proc.pname cmdline=%proc.cmdline
+priority: WARNING
+Conditions
+The key part of a rule is the condition field. A condition is a Boolean predicate expressed using the condition syntax. It is possible to express conditions on all supported events using their respective supported fields.
+Here's an example of a condition that alerts whenever a bash shell is run inside a container:
+container.id != host and proc.name = bash
+The first clause checks that the event happened in a container (where container.id is not equal to "host" as the event occurs in a container). The second clause checks that the process name is bash.
+Since this condition does not include a clause with a system call it will only check event metadata.
+Because of that, if a bash shell does start up in a container, Falco outputs events for every syscall that is performed by that shell.
+If you want to be alerted only for each successful spawn of a shell in a container, add the appropriate event types to the condition:
+(evt.type in (execve, execveat)) and container.id != host and proc.name = bash
+Therefore, a complete rule using the above condition might be:
+- rule: shell_in_container
+desc: notice shell activity within a container
+condition: >
+(evt.type in (execve, execveat)) and
+container.id != host and
+proc.name = bash
+output: >
+shell in a container |
+user=%user.name container_id=%container.id container_name=%container.name
+shell=%proc.name parent=%proc.pname cmdline=%proc.cmdline
+priority: WARNING
+Conditions allow you to check for many aspects of each supported event.
+To learn more, see the condition language.
+Output
+A rule output is a string that can use the same fields that conditions can use prepended by % to perform interpolation, akin to printf. For example:
+Disallowed SSH Connection
+(command=%proc.cmdline connection=%fd.name
+user=%user.name user_loginuid=%user.loginuid container_id=%container.id
+image=%container.image.repository)
+could output:
+Disallowed SSH Connection
+(command=sshd connection=127.0.0.1:34705->10.0.0.120:22
+user=root user_loginuid=-1 container_id=host
+image=<NA>)
+Outputs are usually written in a single line.
+Modifying this output we try to present it to you in a more human-readable way.
+Note that it's not necessary that all fields are set in the specific event. As you can see in the example above if the connection happens outside a container the field %container.image.repository would not be set and <NA> is displayed instead.
+Outputs can also use the transform operators that are used in conditions. For example:
+Disallowed SSH Connection
+(command=%proc.cmdline connection=%fd.name
+user=%toupper(user.name) user_loginuid=%user.loginuid container_id=%toupper(container.id)
+image=%container.image.repository)
+could output:
+Disallowed SSH Connection
+(command=sshd connection=127.0.0.1:34705->10.0.0.120:22
+user=ROOT user_loginuid=-1 container_id=HOST
+image=<NA>)
+To learn more about how Falco processes the output and related settings, see the output formatting page.
+Priority
+Don't let the priority field name mislead you.
+In a Falco Rule, it has nothing to do with overriding another rule or choosing the order in which rules will be triggered. The way to control the latter is achieved by changing the order the rules are defined and therefore loaded.
+Every Falco rule has a priority which indicates how serious a violation of the rule is. This is similar to what we know as the severity of a syslog message. The priority is included in the message/JSON output/etc.
+Here are the available priorities:
+EMERGENCY
+ALERT
+CRITICAL
+ERROR
+WARNING
+NOTICE
+INFORMATIONAL
+DEBUG
+The general guidelines used to assign priorities to rules are the following:
+If a rule is related to writing state (i.e. filesystem, etc.), its priority is ERROR.
+If a rule is related to an unauthorized read of state (i.e. reading sensitive files, etc.), its priority is WARNING.
+If a rule is related to unexpected behavior (spawning an unexpected shell in a container, opening an unexpected network connection, etc.), its priority is NOTICE.
+If a rule is related to behaving against good practices (unexpected privileged containers, containers with sensitive mounts, running interactive commands as root), its priority is INFO.
+One exception is that the rule "Run shell untrusted", which is fairly FP-prone, has a priority of DEBUG.
+Advanced Rule Syntax
+A Falco rule can contain several of the following keys:
+Key
+Required
+Description
+Default
+rule
+yes
+A short, unique name for the rule.
+condition
+yes
+A filtering expression that is applied against events to check whether they match the rule.
+desc
+yes
+A longer description of what the rule detects.
+output
+yes
+Specifies the message that should be output if a matching event occurs. See output.
+priority
+yes
+A case-insensitive representation of the severity of the event. Should be one of the following: emergency, alert, critical, error, warning, notice, informational, debug.
+exceptions
+no
+A set of exceptions that cause the rule to not generate an alert.
+enabled
+no
+If set to false, a rule is neither loaded nor matched against any events.
+true
+tags
+no
+A list of tags applied to the rule (more on this here).
+warn_evttypes
+no
+If set to false, Falco suppresses warnings related to a rule not having an event type (more on this here).
+true
+skip-if-unknown-filter
+no
+If set to true, if a rule conditions contains a filtercheck, e.g. fd.some_new_field, that is not known to this version of Falco, Falco silently accepts the rule but does not execute it; if set to false, Falco reports an error and exits when finding an unknown filtercheck.
+false
+source
+no
+The event source for which this rule should be evaluated. Typical values are syscall, k8s_audit, or the source advertised by a source plugin.
+syscall
+Macros
+Macros provide a way to define common sub-portions of rules in a reusable way.
+By looking at the condition above it looks like both evt.type in (execve, execveat) and container.id != host would be used by many other rules, so to make our job easier we can easily define macros for both:
+- macro: container
+condition: (container.id != host)
+- macro: spawned_process
+condition: (evt.type in (execve, execveat))
+With these macros defined, we can then rewrite the above rule's condition as spawned_process and container and proc.name = bash.
+- rule: shell_in_container
+desc: notice shell activity within a container
+condition: >
+spawned_process and
+container and
+proc.name = bash
+output: >
+shell in a container |
+user=%user.name container_id=%container.id container_name=%container.name
+shell=%proc.name parent=%proc.pname cmdline=%proc.cmdline
+priority: WARNING
+For more examples of rules and macros, take a look the documentation on default macros and the rules/falco_rules.yaml file. In fact, both the macros above are part of the default list!
+Macros can contain other macros that had been previously defined.
+Lists
+Lists are named collections of items that you can include in rules, macros, or even other lists.
+Please note that lists cannot be parsed as filtering expressions.
+Each list node has the following keys:
+Key
+Description
+list
+The unique name for the list (as a slug)
+items
+The list of values
+Here are some example lists as well as a macro that uses them:
+- list: shell_binaries
+items: [bash, csh, ksh, sh, tcsh, zsh, dash]
+- list: userexec_binaries
+items: [sudo, su]
+- list: known_binaries
+items: [shell_binaries, userexec_binaries]
+- macro: safe_procs
+condition: proc.name in (known_binaries)
+Lists can contain other lists that had been previously defined.
+Referring to a list inserts the list items in the macro, rule, or list. Therefore, our rule could become more general replacing proc.name = bash with proc.name in (shell_binaries), or even better, using the already included macro shell_procs:
+- list: shell_binaries
+items: [bash, csh, ksh, sh, tcsh, zsh, dash]
+- macro: shell_procs
+condition: proc.name in (shell_binaries)
+- rule: shell_in_container
+desc: notice shell activity within a container
+condition: >
+spawned_process and
+container and
+shell_procs
+output: >
+shell in a container |
+user=%user.name container_id=%container.id container_name=%container.name
+shell=%proc.name parent=%proc.pname cmdline=%proc.cmdline
+priority: WARNING
+Visibility
+As mentioned above, lists can reference other lists, and macros can reference other macros. The only requirement is that to reference an object of the same kind (a list including another list, or a macro including another macro) they must have been defined previously.
+However, if a macro included a list, this list might have been defined earlier or be defined at a later stage in the rules files. The same happens with a rule referencing a macro. This one doesn't need to be previously defined.
+In other words, visibility is defined in cascade and is quite important:
+A list can only reference lists defined before it.
+A macro can only reference macros defined before it.
+A macro can reference any list.
+A rule can reference any macro.
+The same load-order principle applies across multiple rules files. See Overriding Rules for details on how the order of rules files affects appending and overriding existing lists, macros, and rules.
+Was this page helpful?
+Let us know! You feedback will help us to improve the content and to stay in touch with our users.
+Yes
+No
+Glad to hear it! Please tell us how we can improve.
+Sorry to hear that. Please tell us how we can improve.
+Last modified May 18, 2026: docs: cross-link Visibility section to Overriding Rules (a653b6a)
+About
+Docs
+Blog
+Community
+Enterprise
+Falco was created by Sysdig
+© 2026 The Falco Authors | Documentation Distributed under CC BY 4.0
+Copyright Falco a Series of LF Projects, LLC
+For website terms of use, trademark policy and other project policies, please see
+https://lfprojects.org/policies/

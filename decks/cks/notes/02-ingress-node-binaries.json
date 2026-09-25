@@ -1,0 +1,830 @@
+{
+  "topic": "Ingress TLS, node endpoints and binary verification",
+  "notes": [
+    {
+      "id": "cks.ingress-node-binaries.tls-termination",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 2000,
+      "front": "What is TLS termination at the ingress point?",
+      "back": "The Ingress decrypts TLS where traffic enters; from there to the Service and its Pods, traffic is plaintext.",
+      "explanation": "The Kubernetes Ingress resource assumes this model, so the encrypted part of the journey ends at the ingress.",
+      "example": "Like a building's post room opening sealed envelopes at reception and carrying the letters upstairs unsealed.",
+      "evidence": "The Ingress resource only supports a single TLS port, 443, and assumes TLS termination at the ingress point (traffic to the Service and its Pods is in plaintext).",
+      "source": "Kubernetes documentation, \"Ingress\", \"TLS\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#tls",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "TLS termination"
+      ],
+      "uses": [
+        "TLS termination",
+        "Ingress",
+        "Service",
+        "Pod",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "cks.ingress-tls-termination"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.force-ssl-redirect",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 2010,
+      "front": "What is `force-ssl-redirect` in the ingress-nginx controller?",
+      "back": "A setting that forces a redirect to `HTTPS` even for Ingresses with no TLS block: a ConfigMap key, or a per-Ingress annotation.",
+      "explanation": "The normal redirect only happens for Ingresses that have a `tls:` section, so this setting covers the rest.",
+      "example": "Like a sign on every door telling visitors to use the secure entrance, even on doors that have no guard of their own.",
+      "evidence": "To force redirects for Ingresses that do not specify a TLS-block at all, take a look at force-ssl-redirect in ConfigMap.",
+      "source": "ingress-nginx documentation, \"TLS/HTTPS\", \"Default SSL Certificate\"",
+      "sourceURL": "https://kubernetes.github.io/ingress-nginx/user-guide/tls/#default-ssl-certificate",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "force-ssl-redirect"
+      ],
+      "uses": [
+        "force-ssl-redirect",
+        "Ingress",
+        "ingress controller",
+        "ConfigMap",
+        "annotation",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "cks.nginx-force-ssl-redirect"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.hsts",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 2020,
+      "front": "What is HTTP Strict Transport Security (HSTS)?",
+      "back": "A response header telling a supporting browser to send all later requests for that domain over `HTTPS`, never plain HTTP.",
+      "explanation": "Once the browser has the header, it stops sending anything over plain HTTP to that domain.",
+      "example": "Like a shop telling a regular customer \"from now on, always use the front door\", and the customer remembering it.",
+      "evidence": "HTTP Strict Transport Security (HSTS) is an opt-in security enhancement specified through the use of a special response header. Once a supported browser receives this header that browser will prevent any communications from being sent over HTTP to the specified domain and will instead send all communications over HTTPS.",
+      "source": "ingress-nginx documentation, \"TLS/HTTPS\", \"HTTP Strict Transport Security\"",
+      "sourceURL": "https://kubernetes.github.io/ingress-nginx/user-guide/tls/#http-strict-transport-security",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "HTTP Strict Transport Security",
+        "HSTS"
+      ],
+      "uses": [
+        "HTTP Strict Transport Security",
+        "HSTS",
+        "http"
+      ],
+      "conceptIDs": [
+        "cks.nginx-hsts"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.default-ssl-certificate",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 2030,
+      "front": "What is the default SSL certificate in ingress-nginx, and how is it set?",
+      "back": "The certificate served by the catch-all server for unmatched hostnames, set with the controller flag `--default-ssl-certificate=<namespace>/<secret>`.",
+      "explanation": "Requests that match no configured host still land on the catch-all server, which needs some certificate to answer over TLS.",
+      "example": "Like a hotel's front desk answering calls for guests it has no record of, using the hotel's general line.",
+      "evidence": "For HTTPS, a certificate is naturally required. For this reason the Ingress controller provides the flag --default-ssl-certificate. The secret referred to by this flag contains the default certificate to be used when accessing the catch-all server.",
+      "source": "ingress-nginx documentation, \"TLS/HTTPS\", \"Default SSL Certificate\"",
+      "sourceURL": "https://kubernetes.github.io/ingress-nginx/user-guide/tls/#default-ssl-certificate",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "default SSL certificate"
+      ],
+      "uses": [
+        "default SSL certificate",
+        "ingress controller",
+        "Secret",
+        "namespace",
+        "digital certificate",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "cks.nginx-default-cert"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.single-tls-port",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2040,
+      "front": "The Kubernetes Ingress resource supports only one TLS port: {{c1::443}}.",
+      "back": "443",
+      "explanation": "Different TLS hosts on one Ingress are multiplexed on that same port by hostname.",
+      "evidence": "The Ingress resource only supports a single TLS port, 443, and assumes TLS termination at the ingress point",
+      "source": "Kubernetes documentation, \"Ingress\", \"TLS\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#tls",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Ingress",
+        "port",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "cks.ingress-tls-port"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.tls-secret-keys",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2050,
+      "front": "Which two keys must the Secret referenced by an Ingress's TLS section contain?",
+      "back": "`tls.crt` (the certificate) and `tls.key` (the private key).",
+      "explanation": "Referencing a Secret with these keys tells the ingress controller to secure the channel from the client with TLS.",
+      "evidence": "The TLS secret must contain keys named tls.crt and tls.key that contain the certificate and private key to use for TLS.",
+      "source": "Kubernetes documentation, \"Ingress\", \"TLS\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#tls",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Secret",
+        "Ingress",
+        "Ingress TLS",
+        "digital certificate",
+        "public and private key"
+      ],
+      "conceptIDs": [
+        "cks.ingress-tls-secret"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.tls-secret-type",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2060,
+      "front": "A Secret holding a certificate and key for TLS has the type {{c1::`kubernetes.io/tls`}}.",
+      "back": "`kubernetes.io/tls`",
+      "explanation": "The documentation names configuring encryption in transit for an Ingress as one common use of this Secret type.",
+      "evidence": "The kubernetes.io/tls Secret type is for storing a certificate and its associated key that are typically used for TLS.",
+      "source": "Kubernetes documentation, \"Secrets\", \"TLS Secrets\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/secret/#tls-secrets",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Secret",
+        "Secret types",
+        "digital certificate",
+        "encryption in transit",
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cks.ingress-tls-secret"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.tls-secret-validation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2070,
+      "front": "For a `kubernetes.io/tls` Secret, does the API server check the certificate and key values themselves?",
+      "back": "No. It checks that the required keys are set, not what their values contain.",
+      "explanation": "The documentation separates the two: the keys must be provided, but their values are not validated.",
+      "evidence": "When using this type of Secret, the tls.key and the tls.crt key must be provided in the data (or stringData ) field of the Secret configuration, although the API server doesn't actually validate the values for each key.",
+      "source": "Kubernetes documentation, \"Secrets\", \"TLS Secrets\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/secret/#tls-secrets",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Secret",
+        "Secret types",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cks.ingress-tls-secret"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.create-secret-tls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2080,
+      "front": "Which `kubectl` command creates a TLS Secret from a certificate file and a key file?",
+      "back": "`kubectl create secret tls <name> --cert=<cert file> --key=<key file>`",
+      "explanation": "The key pair must already exist, and the certificate given with `--cert` must match the private key given with `--key`.",
+      "evidence": "To create a TLS Secret using kubectl , use the tls subcommand:",
+      "source": "Kubernetes documentation, \"Secrets\", \"TLS Secrets\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/secret/#tls-secrets",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "Secret",
+        "digital certificate",
+        "public and private key",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "cks.create-tls-secret"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.nginx-redirect-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2090,
+      "front": "By default, what does ingress-nginx do with a plain HTTP request to an Ingress that has TLS enabled?",
+      "back": "Redirects it to the `HTTPS` port 443 with a 308 Permanent Redirect.",
+      "explanation": "The redirect is the controller's default for any Ingress with TLS enabled, so no extra setting is needed.",
+      "evidence": "By default the controller redirects HTTP clients to the HTTPS port 443 using a 308 Permanent Redirect response if TLS is enabled for that Ingress.",
+      "source": "ingress-nginx documentation, \"TLS/HTTPS\", \"Server-side HTTPS enforcement through redirect\"",
+      "sourceURL": "https://kubernetes.github.io/ingress-nginx/user-guide/tls/#server-side-https-enforcement-through-redirect",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Ingress",
+        "ingress controller",
+        "http",
+        "port",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "cks.nginx-ssl-redirect"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.nginx-redirect-disable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2100,
+      "front": "How can the default `HTTPS` redirect be turned off in ingress-nginx, globally and for one Ingress?",
+      "back": "Globally: `ssl-redirect: \"false\"` in the controller ConfigMap. Per Ingress: the annotation `nginx.ingress.kubernetes.io/ssl-redirect: \"false\"`.",
+      "explanation": "Knowing both places helps you find why an Ingress with TLS is still answering over plain HTTP.",
+      "evidence": "This can be disabled globally using ssl-redirect: \"false\" in the NGINX config map, or per-Ingress with the nginx.ingress.kubernetes.io/ssl-redirect: \"false\" annotation in the particular resource.",
+      "source": "ingress-nginx documentation, \"TLS/HTTPS\", \"Server-side HTTPS enforcement through redirect\"",
+      "sourceURL": "https://kubernetes.github.io/ingress-nginx/user-guide/tls/#server-side-https-enforcement-through-redirect",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Ingress",
+        "ConfigMap",
+        "annotation",
+        "http"
+      ],
+      "conceptIDs": [
+        "cks.nginx-ssl-redirect"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.tls-section-without-secret",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2110,
+      "front": "An Ingress has a `tls:` section with no `secretName`. Does ingress-nginx still force the `HTTPS` redirect?",
+      "back": "Yes. With a `tls:` section set, even without `secretName`, it forces the redirect.",
+      "explanation": "Without any `tls:` section it would serve the default certificate but not force the redirect.",
+      "evidence": "If the tls: section is not set, NGINX will provide the default certificate but will not force HTTPS redirect. On the other hand, if the tls: section is set - even without specifying a secretName option - NGINX will force HTTPS redirect.",
+      "source": "ingress-nginx documentation, \"TLS/HTTPS\", \"Default SSL Certificate\"",
+      "sourceURL": "https://kubernetes.github.io/ingress-nginx/user-guide/tls/#default-ssl-certificate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Ingress",
+        "default SSL certificate",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cks.nginx-ssl-redirect",
+        "cks.nginx-default-cert"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.hsts-default-on",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2120,
+      "front": "Is HSTS on or off by default in ingress-nginx, and how is it turned off?",
+      "back": "On by default. Turn it off with `hsts: \"false\"` in the controller's ConfigMap.",
+      "explanation": "HSTS is opt-in in general, but ingress-nginx switches it on unless you set it off.",
+      "evidence": "HSTS is enabled by default. To disable this behavior use hsts: \"false\" in the configuration ConfigMap.",
+      "source": "ingress-nginx documentation, \"TLS/HTTPS\", \"HTTP Strict Transport Security\"",
+      "sourceURL": "https://kubernetes.github.io/ingress-nginx/user-guide/tls/#http-strict-transport-security",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "HSTS",
+        "ConfigMap",
+        "ingress controller"
+      ],
+      "conceptIDs": [
+        "cks.nginx-hsts"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.no-default-cert-self-signed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2130,
+      "front": "If ingress-nginx is started without `--default-ssl-certificate`, which certificate does its catch-all server use?",
+      "back": "A self-signed certificate.",
+      "explanation": "The flag is optional, and leaving it out makes ingress-nginx fall back to a certificate it signs itself.",
+      "evidence": "If this flag is not provided NGINX will use a self-signed certificate.",
+      "source": "ingress-nginx documentation, \"TLS/HTTPS\", \"Default SSL Certificate\"",
+      "sourceURL": "https://kubernetes.github.io/ingress-nginx/user-guide/tls/#default-ssl-certificate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "default SSL certificate",
+        "digital certificate"
+      ],
+      "conceptIDs": [
+        "cks.nginx-default-cert"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.metadata-contents",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2140,
+      "front": "What sensitive data can a cloud platform's metadata API hand to Pods on a node?",
+      "back": "Cloud credentials for that node, or provisioning data such as kubelet credentials.",
+      "explanation": "These credentials can be used to escalate within the cluster or to other cloud services under the same account.",
+      "evidence": "By default these APIs are accessible by pods running on an instance and can contain cloud credentials for that node, or provisioning data such as kubelet credentials. These credentials can be used to escalate within the cluster or to other cloud services under the same account.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Restricting cloud metadata API access\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-cloud-metadata-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cloud metadata API",
+        "credential",
+        "kubelet",
+        "Pod",
+        "node",
+        "privilege escalation"
+      ],
+      "conceptIDs": [
+        "cks.metadata-credentials-risk"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.metadata-default-reachable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2150,
+      "front": "Can Pods reach the cloud metadata API on their node by default?",
+      "back": "Yes. By default these APIs are accessible by Pods running on the instance.",
+      "explanation": "Nothing blocks them unless you add controls, which is why the documentation recommends restricting Pod access.",
+      "evidence": "By default these APIs are accessible by pods running on an instance",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Restricting cloud metadata API access\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-cloud-metadata-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cloud metadata API",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.metadata-credentials-risk"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.metadata-mitigations",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2160,
+      "front": "On a cloud platform, what three things does the Kubernetes documentation advise to protect the metadata API?",
+      "back": "Limit permissions given to instance credentials; restrict Pod access with network policies; avoid delivering secrets through provisioning data.",
+      "explanation": "Together they reduce what the metadata API holds and who can reach it.",
+      "evidence": "When running Kubernetes on a cloud platform, limit permissions given to instance credentials, use network policies to restrict pod access to the metadata API, and avoid using provisioning data to deliver secrets.",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Restricting cloud metadata API access\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-cloud-metadata-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cloud metadata API",
+        "NetworkPolicy",
+        "credential",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.metadata-netpol-block",
+        "cks.metadata-credentials-risk"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.kubelet-anonymous-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2170,
+      "front": "By default, how does the kubelet treat a request to its `HTTPS` endpoint that no authentication method rejects?",
+      "back": "As an anonymous request, with username `system:anonymous` and group `system:unauthenticated`.",
+      "explanation": "That is why the kubelet must be told to switch anonymous access off.",
+      "evidence": "By default, requests to the kubelet's HTTPS endpoint that are not rejected by other configured authentication methods are treated as anonymous requests, and given a username of system:anonymous and a group of system:unauthenticated.",
+      "source": "Kubernetes documentation, \"Kubelet authentication/authorization\", \"Kubelet authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/#kubelet-authentication",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "kubelet API",
+        "anonymous request",
+        "authentication"
+      ],
+      "conceptIDs": [
+        "cks.kubelet-anon-webhook"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.kubelet-anonymous-off",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2180,
+      "front": "Start the kubelet with {{c1::`--anonymous-auth=false`}} to disable anonymous access and answer unauthenticated requests with 401 Unauthorized.",
+      "back": "`--anonymous-auth=false`",
+      "explanation": "By default the kubelet treats unauthenticated requests as anonymous; this flag makes it refuse them with 401 Unauthorized instead.",
+      "evidence": "To disable anonymous access and send 401 Unauthorized responses to unauthenticated requests: start the kubelet with the --anonymous-auth=false flag",
+      "source": "Kubernetes documentation, \"Kubelet authentication/authorization\", \"Kubelet authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/#kubelet-authentication",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "--anonymous-auth=false",
+        "anonymous request"
+      ],
+      "conceptIDs": [
+        "cks.kubelet-anon-webhook"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.kubelet-token-webhook",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2190,
+      "front": "Which kubelet flags let API bearer tokens, including service account tokens, authenticate to the kubelet?",
+      "back": "`--authentication-token-webhook` and `--kubeconfig`, with the `authentication.k8s.io/v1` API group enabled on the API server.",
+      "explanation": "These are the steps the documentation lists for accepting API bearer tokens at the kubelet endpoint.",
+      "evidence": "To enable API bearer tokens (including service account tokens) to be used to authenticate to the kubelet's HTTPS endpoint: ensure the authentication.k8s.io/v1 API group is enabled in the API server start the kubelet with the --authentication-token-webhook and --kubeconfig flags",
+      "source": "Kubernetes documentation, \"Kubelet authentication/authorization\", \"Kubelet authentication\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/#kubelet-authentication",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "bearer token",
+        "service account token",
+        "webhook token authentication",
+        "kube-apiserver",
+        "api group and version"
+      ],
+      "conceptIDs": [
+        "cks.kubelet-anon-webhook"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.kubelet-authz-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2200,
+      "front": "What is the kubelet's default authorization mode?",
+      "back": "AlwaysAllow, which allows every request that has been authenticated, including anonymous ones.",
+      "explanation": "Authenticated requests, anonymous ones included, go on to authorization, and this default lets them all through.",
+      "evidence": "Any request that is successfully authenticated (including an anonymous request) is then authorized. The default authorization mode is AlwaysAllow, which allows all requests.",
+      "source": "Kubernetes documentation, \"Kubelet authentication/authorization\", \"Kubelet authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/#kubelet-authorization",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "AlwaysAllow mode",
+        "anonymous request",
+        "authorization"
+      ],
+      "conceptIDs": [
+        "cks.kubelet-authz-webhook"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.kubelet-authz-webhook",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2210,
+      "front": "With `--authorization-mode=Webhook` on the kubelet, how is each request authorised?",
+      "back": "The kubelet calls the SubjectAccessReview API on the API server to decide.",
+      "explanation": "This delegates kubelet authorisation to the API server, which is how access to the kubelet API gets subdivided.",
+      "evidence": "start the kubelet with the --authorization-mode=Webhook and the --kubeconfig flags the kubelet calls the SubjectAccessReview API on the configured API server to determine whether each request is authorized",
+      "source": "Kubernetes documentation, \"Kubelet authentication/authorization\", \"Kubelet authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/#kubelet-authorization",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "Webhook authorization",
+        "SubjectAccessReview",
+        "kube-apiserver",
+        "kubelet API"
+      ],
+      "conceptIDs": [
+        "cks.kubelet-authz-webhook"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.sha256-check",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2220,
+      "front": "You downloaded `kubectl` and `kubectl.sha256`. Which command checks the binary, and what does success print?",
+      "back": "`echo \"$(cat kubectl.sha256)  kubectl\" | sha256sum --check`, which prints `kubectl: OK`.",
+      "explanation": "A mismatch prints `kubectl: FAILED` and exits with a nonzero status.",
+      "evidence": "Validate the kubectl binary against the checksum file: echo \"$(cat kubectl.sha256) kubectl\" | sha256sum --check If valid, the output is: kubectl: OK",
+      "source": "Kubernetes documentation, \"Install and Set Up kubectl on Linux\", \"Install kubectl binary with curl on Linux\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-kubectl-binary-with-curl-on-linux",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "hash"
+      ],
+      "conceptIDs": [
+        "cks.verify-sha256"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.same-version-checksum",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2230,
+      "front": "Checking a binary against its checksum file: what must match between the two downloads?",
+      "back": "The version: download the binary and the checksum for the same version.",
+      "explanation": "The documentation adds this note right after the checksum check, so the check compares like with like.",
+      "evidence": "Download the same version of the binary and checksum.",
+      "source": "Kubernetes documentation, \"Install and Set Up kubectl on Linux\", \"Install kubectl binary with curl on Linux\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-kubectl-binary-with-curl-on-linux",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "hash"
+      ],
+      "conceptIDs": [
+        "cks.verify-sha256"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.changelog-checksums",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2240,
+      "front": "Where does the Kubernetes project link release component binaries together with their checksums?",
+      "back": "In the `CHANGELOG` files (the download page also lists current ones).",
+      "explanation": "Older patch versions in particular are found through the `CHANGELOG` rather than the download table.",
+      "evidence": "You can find links to download Kubernetes components (and their checksums) in the CHANGELOG files.",
+      "source": "Kubernetes documentation, \"Download Kubernetes\", \"Binaries\"",
+      "sourceURL": "https://kubernetes.io/releases/download/#binaries",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "hash",
+        "kubernetes"
+      ],
+      "conceptIDs": [
+        "cks.checksums-in-changelog"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.cosign-verify-blob",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 2250,
+      "front": "Which cosign command verifies a downloaded Kubernetes release binary, and which two files does it take besides the binary?",
+      "back": "`cosign verify-blob`, with the binary's `.sig` signature file and `.cert` certificate file.",
+      "explanation": "The signature and certificate are published beside each binary, and cosign checks the binary against them.",
+      "evidence": "Then verify the blob by using cosign verify-blob: cosign verify-blob \"$BINARY\" \\ --signature \"$BINARY\".sig \\ --certificate \"$BINARY\".cert",
+      "source": "Kubernetes documentation, \"Verify Signed Kubernetes Artifacts\", \"Verifying binary signatures\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/verify-signed-artifacts/#verifying-binary-signatures",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cosign",
+        "digital signature",
+        "digital certificate",
+        "signed Kubernetes release artefacts"
+      ],
+      "conceptIDs": [
+        "cks.verify-cosign-blob"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.cosign-identity-flags",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 2260,
+      "front": "Which two options does Cosign 2.0 require when verifying Kubernetes artefacts keylessly?",
+      "back": "`--certificate-identity` and `--certificate-oidc-issuer`.",
+      "explanation": "Earlier Cosign versions instead needed the `COSIGN_EXPERIMENTAL=1` setting.",
+      "evidence": "Note: Cosign 2.0 requires the --certificate-identity and --certificate-oidc-issuer options.",
+      "source": "Kubernetes documentation, \"Verify Signed Kubernetes Artifacts\", \"Verifying binary signatures\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/verify-signed-artifacts/#verifying-binary-signatures",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cosign",
+        "keyless signing"
+      ],
+      "conceptIDs": [
+        "cks.cosign-identity-flags"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.ingress-node-binaries.scenario-tls-secret",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 2270,
+      "front": "You have `shop.crt` and `shop.key` and must serve `shop.example` over TLS through an Ingress. What do you do first?",
+      "choices": "A) `kubectl create secret generic shop --from-file=shop.crt`\nB) `kubectl create secret tls shop-tls --cert=shop.crt --key=shop.key`, then name it in the Ingress `tls:` section\nC) Put both files in a ConfigMap\nD) Add port 8443 to the Ingress",
+      "back": "B) Create a TLS Secret from the pair, then reference it under the Ingress's `tls:` section.",
+      "explanation": "The Ingress's TLS Secret must hold `tls.crt` and `tls.key`, which the `tls` subcommand creates.",
+      "choicesExplained": "A stores only the certificate, under the wrong key name. C is not where an Ingress reads TLS material. D does not work: the Ingress supports only port 443 for TLS.",
+      "evidence": "The TLS secret must contain keys named tls.crt and tls.key that contain the certificate and private key to use for TLS.",
+      "source": "Kubernetes documentation, \"Ingress\", \"TLS\"",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#tls",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "Secret",
+        "Ingress",
+        "Ingress TLS",
+        "kubectl",
+        "ConfigMap",
+        "port"
+      ],
+      "conceptIDs": [
+        "cks.create-tls-secret",
+        "cks.ingress-tls-secret",
+        "cks.ingress-tls-port"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.scenario-metadata",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 2280,
+      "front": "An audit shows a web Pod in namespace `web` can read its node's cloud credentials from the metadata API. Which control does the Kubernetes documentation name for this?",
+      "choices": "A) A NetworkPolicy restricting the Pods' egress to the metadata API address\nB) A default deny all ingress policy in `web`\nC) Removing the Pod's labels\nD) Moving the credentials into a ConfigMap",
+      "back": "A) A network policy that restricts Pod access to the metadata API.",
+      "explanation": "The documentation names network policies for this, alongside limiting instance credential permissions.",
+      "choicesExplained": "B blocks incoming traffic, but the Pod reaches out to the metadata API. C does not stop the Pod reaching the API. D is still readable by the Pod and does not stop the metadata API serving credentials.",
+      "evidence": "use network policies to restrict pod access to the metadata API",
+      "source": "Kubernetes documentation, \"Securing a Cluster\", \"Restricting cloud metadata API access\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-cloud-metadata-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cloud metadata API",
+        "NetworkPolicy",
+        "egress control",
+        "default deny policy",
+        "ConfigMap",
+        "Pod",
+        "label"
+      ],
+      "conceptIDs": [
+        "cks.metadata-netpol-block",
+        "cks.metadata-credentials-risk"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.scenario-kubelet",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 2290,
+      "front": "An unauthenticated request to a node's kubelet endpoint returns its Pod list. Which pair of kubelet settings closes this properly?",
+      "choices": "A) `--anonymous-auth=false` and `--authorization-mode=Webhook`\nB) `--anonymous-auth=true` and `--authorization-mode=AlwaysAllow`\nC) `--authorization-mode=AlwaysAllow` only\nD) A NetworkPolicy in the `default` namespace",
+      "back": "A) Turn anonymous access off and delegate authorisation to the API server with Webhook mode.",
+      "explanation": "Anonymous requests are the default, and the default AlwaysAllow mode lets them all through.",
+      "choicesExplained": "B keeps both defaults, so nothing changes. C is the default mode that allows every request. D governs Pod traffic, not who may call the kubelet.",
+      "evidence": "The default authorization mode is AlwaysAllow, which allows all requests.",
+      "source": "Kubernetes documentation, \"Kubelet authentication/authorization\", \"Kubelet authorization\"",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/#kubelet-authorization",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "kubelet API",
+        "anonymous request",
+        "--anonymous-auth=false",
+        "Webhook authorization",
+        "AlwaysAllow mode",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cks.kubelet-anon-webhook",
+        "cks.kubelet-authz-webhook"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.scenario-checksum-fails",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 2300,
+      "front": "Before installing a new `kubelet` binary, `sha256sum --check` prints `kubelet: FAILED`. What do you do?",
+      "choices": "A) Install it anyway; checksums often differ\nB) Do not install it; download the binary and checksum again, for the same version\nC) Rename the file and check again\nD) Make it executable and run it to see if it works",
+      "back": "B) Do not install it; fetch the binary and its checksum again, for the same version.",
+      "explanation": "A failed check means the file does not match the published checksum, and the docs stress using the same version of both.",
+      "choicesExplained": "A defeats the check. C changes nothing about the file's contents. D runs an unverified binary.",
+      "evidence": "Download the same version of the binary and checksum.",
+      "source": "Kubernetes documentation, \"Install and Set Up kubectl on Linux\", \"Install kubectl binary with curl on Linux\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-kubectl-binary-with-curl-on-linux",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "hash"
+      ],
+      "conceptIDs": [
+        "cks.verify-sha256"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.scenario-verify-signature",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 2310,
+      "front": "You want to check that a downloaded `kube-apiserver` binary was signed by the Kubernetes release process, not just that it matches a checksum. Which tool do you use?",
+      "choices": "A) `sha256sum --check`\nB) `cosign verify-blob` with the `.sig` and `.cert` files and the identity options\nC) `kubectl version`\nD) `kube-bench`",
+      "back": "B) `cosign verify-blob`, with the signature, the certificate and the identity options.",
+      "explanation": "The documentation verifies release binaries' signatures with `cosign verify-blob`.",
+      "choicesExplained": "A checks integrity against a checksum, not who signed it. C reports versions only. D checks configuration against the CIS Benchmarks.",
+      "evidence": "Then verify the blob by using cosign verify-blob:",
+      "source": "Kubernetes documentation, \"Verify Signed Kubernetes Artifacts\", \"Verifying binary signatures\"",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/verify-signed-artifacts/#verifying-binary-signatures",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cosign",
+        "kube-apiserver",
+        "digital signature",
+        "hash",
+        "kube-bench",
+        "CIS Benchmarks",
+        "signed Kubernetes release artefacts"
+      ],
+      "conceptIDs": [
+        "cks.verify-cosign-blob",
+        "cks.cosign-identity-flags"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.scenario-plain-http",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 2315,
+      "front": "An Ingress for `api.example` has a `tls:` section and ingress-nginx runs with default settings. A client requests `http://api.example/`. What happens?",
+      "choices": "A) The page is served over plain HTTP\nB) The controller answers with a 308 redirect to port 443\nC) The request is refused with 401\nD) The controller serves its self-signed certificate on port 80",
+      "back": "B) A 308 Permanent Redirect to the `HTTPS` port 443.",
+      "explanation": "With TLS enabled for an Ingress, redirecting plain HTTP clients is the controller’s default behaviour.",
+      "choicesExplained": "A would need `ssl-redirect` set to false. C is an authentication response, not a redirect. D mixes up the catch-all certificate with the redirect.",
+      "evidence": "By default the controller redirects HTTP clients to the HTTPS port 443 using a 308 Permanent Redirect response if TLS is enabled for that Ingress.",
+      "source": "ingress-nginx documentation, \"TLS/HTTPS\", \"Server-side HTTPS enforcement through redirect\"",
+      "sourceURL": "https://kubernetes.github.io/ingress-nginx/user-guide/tls/#server-side-https-enforcement-through-redirect",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Ingress",
+        "ingress controller",
+        "http",
+        "port",
+        "default SSL certificate"
+      ],
+      "conceptIDs": [
+        "cks.nginx-ssl-redirect"
+      ]
+    },
+    {
+      "id": "cks.ingress-node-binaries.contrast-redirects",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 2320,
+      "front": "In ingress-nginx, `ssl-redirect` versus `force-ssl-redirect`: which Ingresses does each redirect?",
+      "back": "`ssl-redirect` (on by default): Ingresses with a `tls:` section. `force-ssl-redirect`: also Ingresses without one.",
+      "explanation": "Without a `tls:` section the controller serves the default certificate but does not force the redirect.",
+      "evidence": "If the tls: section is not set, NGINX will provide the default certificate but will not force HTTPS redirect. On the other hand, if the tls: section is set - even without specifying a secretName option - NGINX will force HTTPS redirect.",
+      "source": "ingress-nginx documentation, \"TLS/HTTPS\", \"Default SSL Certificate\"",
+      "sourceURL": "https://kubernetes.github.io/ingress-nginx/user-guide/tls/#default-ssl-certificate",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "force-ssl-redirect",
+        "Ingress",
+        "default SSL certificate"
+      ],
+      "conceptIDs": [
+        "cks.nginx-ssl-redirect",
+        "cks.nginx-force-ssl-redirect"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1568 @@
+{
+  "topic": "Troubleshooting",
+  "notes": [
+    {
+      "id": "istio.troubleshooting.what-is-istioctl-analyze",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8005,
+      "front": "What is istioctl analyze?",
+      "back": "A diagnostic tool that detects potential issues in Istio configuration, on a live cluster, local files, or both.",
+      "explanation": "Running it against files plus the cluster lets you catch problems before applying changes.",
+      "introduces": [
+        "istioctl analyze"
+      ],
+      "example": "Like a spell-checker run on a document before you send it, but for mesh configuration.",
+      "source": "Istio / Diagnose your Configuration with Istioctl Analyze, “Diagnose your Configuration with Istioctl Analyze”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/istioctl-analyze/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "istioctl analyze is a diagnostic tool that can detect potential issues with your Istio configuration. It can run against a live cluster or a set of local configuration files. It can also run against a combination of the two, allowing you to catch problems before you apply changes to a cluster.",
+      "uses": [
+        "istioctl analyze",
+        "istioctl"
+      ],
+      "conceptIDs": [
+        "istio.istioctl-analyze"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.what-is-proxy-status",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8010,
+      "front": "What is istioctl proxy-status for?",
+      "back": "An overview of the mesh: it tells you if a sidecar isn’t receiving configuration or is out of sync.",
+      "explanation": "It helps identify which proxy is causing a problem before you inspect that proxy in depth.",
+      "introduces": [
+        "istioctl proxy-status"
+      ],
+      "example": "Like a delivery tracker listing every parcel as delivered or pending, but for configuration sent to each proxy.",
+      "source": "Istio / Debugging Envoy and Istiod, “Get an overview of your mesh”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#get-an-overview-of-your-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The proxy-status command allows you to get an overview of your mesh. If you suspect one of your sidecars isn’t receiving configuration or is out of sync then proxy-status will tell you this.",
+      "uses": [
+        "istioctl proxy-status",
+        "sidecar container"
+      ],
+      "conceptIDs": [
+        "istio.proxy-status"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.what-is-proxy-config",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8015,
+      "front": "What is istioctl proxy-config for?",
+      "back": "Seeing how a given Envoy instance is configured, to pinpoint issues you can’t find from your Istio resources alone.",
+      "explanation": "proxy-status finds the problem proxy; proxy-config then inspects its Envoy configuration.",
+      "introduces": [
+        "istioctl proxy-config"
+      ],
+      "example": "Like reading the settings a router actually loaded, rather than the settings file you meant to give it.",
+      "source": "Istio / Debugging Envoy and Istiod, “Deep dive into Envoy configuration”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#deep-dive-into-envoy-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The proxy-config command can be used to see how a given Envoy instance is configured. This can then be used to pinpoint any issues you are unable to detect by just looking through your Istio configuration and custom resources.",
+      "uses": [
+        "istioctl proxy-config",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.proxy-config"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.what-is-logging-scope",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 8020,
+      "front": "What is a logging scope in an Istio component?",
+      "back": "A set of related log messages that you can control as a whole.",
+      "explanation": "Different components have different scopes, depending on the features they provide.",
+      "introduces": [
+        "logging scope"
+      ],
+      "example": "Like a volume slider for one channel on a mixing desk, but for one area of a component’s log messages.",
+      "source": "Istio / Component Logging, “Logging scopes”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/component-logging/#logging-scopes",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Logging messages output by a component are categorized by scopes. A scope represents a set of related log messages which you can control as a whole.",
+      "uses": [
+        "logging scope"
+      ],
+      "conceptIDs": [
+        "istio.logging-scopes"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.analyze-injection-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8025,
+      "front": "You run istioctl analyze on a namespace where pods came up without sidecars. What kind of message would you expect about the namespace?",
+      "back": "An Info message (IST0102): the namespace is not enabled for Istio injection.",
+      "explanation": "The docs call a forgotten injection label a very common issue; the message suggests the kubectl label command to fix it.",
+      "source": "Istio / Diagnose your Configuration with Istioctl Analyze, “Getting started in under a minute”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/istioctl-analyze/#getting-started-in-under-a-minute",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For example, if you forgot to enable Istio injection (a very common issue), you would get the following ‘Info’ message: Info [IST0102] (Namespace default) The namespace is not enabled for Istio injection.",
+      "uses": [
+        "istioctl analyze",
+        "sidecar injection",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.istioctl-analyze"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.analyze-local-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8035,
+      "front": "Which flag makes istioctl analyze check local files only, without the live cluster, and what must those files be?",
+      "back": "--use-kube=false; the file set must be fully self-contained.",
+      "explanation": "This is typically used on the whole set of configuration files intended for a cluster.",
+      "source": "Istio / Diagnose your Configuration with Istioctl Analyze, “Analyzing live clusters, local files, or both”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/istioctl-analyze/#analyzing-live-clusters-local-files-or-both",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When analyzing a set of local files, the file-set is expected to be fully self-contained. Typically, this is used to analyze the entire set of configuration files that are intended to be deployed to a cluster. To use this feature, simply add the --use-kube=false flag.",
+      "uses": [
+        "istioctl analyze"
+      ],
+      "conceptIDs": [
+        "istio.analyze-live-files"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.analyze-simulate-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8040,
+      "front": "Before applying a new Gateway and DestinationRule file, you want to know whether they would break anything already running. How can istioctl analyze help?",
+      "back": "Analyse the live cluster together with the new files, simulating their effect before you apply them.",
+      "explanation": "In the docs’ own run of this, the tool reports errors such as a referenced host not found.",
+      "source": "Istio / Diagnose your Configuration with Istioctl Analyze, “Analyzing live clusters, local files, or both”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/istioctl-analyze/#analyzing-live-clusters-local-files-or-both",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Analyze the current live cluster, simulating the effect of applying additional yaml files",
+      "uses": [
+        "istioctl analyze",
+        "Gateway",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.analyze-live-files"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.analyze-suppress",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8045,
+      "front": "istioctl analyze reports a message about a namespace you have no permission to change. How can you hide it?",
+      "back": "Tell istioctl analyze to suppress that message on the resource (the --suppress argument).",
+      "explanation": "Without permission to update the namespace, you cannot fix the message by annotating it.",
+      "source": "Istio / Diagnose your Configuration with Istioctl Analyze, “Ignoring specific analyzer messages via CLI”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/istioctl-analyze/#ignoring-specific-analyzer-messages-via-cli",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Because you don’t have permissions to update the namespace, you cannot resolve the message by annotating the namespace. Instead, you can direct istioctl analyze to suppress the above message on the resource:",
+      "uses": [
+        "istioctl analyze",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.analyze-ignore"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.enable-analysis-status",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8055,
+      "front": "With istiod.enableAnalysis set, where do validation messages appear?",
+      "back": "In the status subresource of the affected Istio resource.",
+      "explanation": "It uses the same logic and messages as istioctl analyze; the docs mark it experimental and not a replacement for it.",
+      "source": "Istio / Diagnose your Configuration with Istioctl Analyze, “Enabling validation messages for resource status”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/istioctl-analyze/#enabling-validation-messages-for-resource-status",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This analysis uses the same logic and error messages as when using istioctl analyze. Validation messages from the analysis are written to the status subresource of the affected Istio resource.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "istiod",
+        "istioctl analyze"
+      ],
+      "conceptIDs": [
+        "istio.analyzer-status"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.proxy-missing",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8060,
+      "front": "A pod’s proxy is missing from the istioctl proxy-status list. What does that mean?",
+      "back": "It is not connected to an istiod instance, so it gets no configuration.",
+      "explanation": "proxy-status lists only proxies currently connected to istiod.",
+      "source": "Istio / Debugging Envoy and Istiod, “Get an overview of your mesh”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#get-an-overview-of-your-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If a proxy is missing from this list it means that it is not currently connected to a Istiod instance so will not be receiving any configuration.",
+      "uses": [
+        "istioctl proxy-status",
+        "istiod"
+      ],
+      "conceptIDs": [
+        "istio.proxy-status"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.proxy-status-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8065,
+      "front": "After a VirtualService change, one pod still routes the old way while others follow the new rule. Which command gives a first, mesh-wide view of whether that pod’s sidecar is out of sync?",
+      "back": "istioctl proxy-status.",
+      "explanation": "It tells you if a sidecar isn’t receiving configuration or is out of sync.",
+      "source": "Istio / Debugging Envoy and Istiod, “Get an overview of your mesh”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#get-an-overview-of-your-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If you suspect one of your sidecars isn’t receiving configuration or is out of sync then proxy-status will tell you this.",
+      "uses": [
+        "istioctl proxy-status",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.proxy-status"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.state-synced",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8070,
+      "front": "In istioctl proxy-status, what does `SYNCED` mean?",
+      "back": "Envoy has acknowledged the last configuration istiod sent to it.",
+      "explanation": "The status is shown separately for each xDS type.",
+      "source": "Istio / Debugging Envoy and Istiod, “Get an overview of your mesh”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#get-an-overview-of-your-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "SYNCED means that Envoy has acknowledged the last configuration",
+      "uses": [
+        "istioctl proxy-status",
+        "Envoy",
+        "istiod",
+        "xDS"
+      ],
+      "conceptIDs": [
+        "istio.sync-states"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.state-not-sent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8075,
+      "front": "In istioctl proxy-status, what does `NOT SENT` mean, and what is the usual reason?",
+      "back": "istiod hasn’t sent anything to Envoy, usually because it has nothing to send.",
+      "explanation": "`STALE`, by contrast, means an update was sent but not acknowledged.",
+      "source": "Istio / Debugging Envoy and Istiod, “Get an overview of your mesh”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#get-an-overview-of-your-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "NOT SENT means that Istiod hasn’t sent anything to Envoy. This usually is because Istiod has nothing to send.",
+      "uses": [
+        "istioctl proxy-status",
+        "istiod",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.sync-states"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.state-stale",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8080,
+      "front": "In istioctl proxy-status, what does `STALE` mean?",
+      "back": "istiod has sent Envoy an update but has had no acknowledgement.",
+      "explanation": "This usually points to a networking issue between Envoy and istiod, or a bug in Istio.",
+      "source": "Istio / Debugging Envoy and Istiod, “Get an overview of your mesh”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#get-an-overview-of-your-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "STALE means that Istiod has sent an update to Envoy but has not received an acknowledgement. This usually indicates a networking issue between Envoy and Istiod or a bug with Istio itself.",
+      "uses": [
+        "istioctl proxy-status",
+        "istiod",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.sync-states"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.state-classify",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8085,
+      "front": "One sidecar shows `STALE` for clusters, while every other proxy shows `SYNCED`. What should you suspect first?",
+      "back": "A networking issue between that Envoy and istiod (or, less often, an Istio bug).",
+      "explanation": "`STALE` means an update was sent and never acknowledged.",
+      "source": "Istio / Debugging Envoy and Istiod, “Get an overview of your mesh”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#get-an-overview-of-your-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This usually indicates a networking issue between Envoy and Istiod or a bug with Istio itself.",
+      "uses": [
+        "istioctl proxy-status",
+        "Envoy",
+        "istiod"
+      ],
+      "conceptIDs": [
+        "istio.sync-states"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.proxy-status-diff",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8090,
+      "front": "What does istioctl proxy-status show when you give it one proxy (pod.namespace)?",
+      "back": "A diff between the configuration Envoy has loaded and the configuration istiod would send.",
+      "explanation": "This helps you see exactly what is out of sync and where the issue may lie.",
+      "source": "Istio / Debugging Envoy and Istiod, “Retrieve diffs between Envoy and Istiod”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#retrieve-diffs-between-envoy-and-istiod",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The proxy-status command can also be used to retrieve a diff between the configuration Envoy has loaded and the configuration Istiod would send, by providing a proxy ID.",
+      "uses": [
+        "istioctl proxy-status",
+        "Envoy",
+        "istiod"
+      ],
+      "conceptIDs": [
+        "istio.proxy-status-diff"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.proxy-status-diff-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8095,
+      "front": "A pod named cart-7f9c in namespace shop seems out of sync. How do you see exactly which part of its configuration differs from istiod’s?",
+      "back": "Run istioctl proxy-status cart-7f9c.shop and read the diff.",
+      "explanation": "Naming one proxy (pod.namespace) returns a diff; the docs’ example shows listeners and routes matching while clusters are out of sync.",
+      "source": "Istio / Debugging Envoy and Istiod, “Retrieve diffs between Envoy and Istiod”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#retrieve-diffs-between-envoy-and-istiod",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This can help you determine exactly what is out of sync and where the issue may lie.",
+      "uses": [
+        "istioctl proxy-status",
+        "istiod"
+      ],
+      "conceptIDs": [
+        "istio.proxy-status-diff"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.pc-listeners",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8100,
+      "front": "Which istioctl proxy-config subcommand shows the addresses and ports on which a pod’s Envoy accepts traffic, such as 0.0.0.0:15006?",
+      "back": "listeners.",
+      "explanation": "The listener summary shows the listeners Istio generates for the pod.",
+      "source": "Istio / Debugging Envoy and Istiod, “Deep dive into Envoy configuration”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#deep-dive-into-envoy-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If you query the listener summary on a pod you will notice Istio generates the following listeners:",
+      "uses": [
+        "istioctl proxy-config",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.proxy-config-types"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.pc-routes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8105,
+      "front": "Which istioctl proxy-config subcommand shows the route configuration a listener looks up, with one virtual host per service?",
+      "back": "routes.",
+      "explanation": "An outbound HTTP listener looks up its route configuration, served by istiod.",
+      "source": "Istio / Debugging Envoy and Istiod, “Deep dive into Envoy configuration”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#deep-dive-into-envoy-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This listener then looks up the route configuration in its configured RDS.",
+      "uses": [
+        "istioctl proxy-config",
+        "istiod"
+      ],
+      "conceptIDs": [
+        "istio.proxy-config-types"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.pc-clusters",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8110,
+      "front": "Which istioctl proxy-config subcommand summarises upstream service FQDNs with their port, subset, direction and DestinationRule?",
+      "back": "cluster (clusters).",
+      "explanation": "The docs use it as their first basic summary, swapping in listeners or routes when needed.",
+      "source": "Istio / Debugging Envoy and Istiod, “Deep dive into Envoy configuration”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#deep-dive-into-envoy-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To get a basic summary of clusters, listeners or routes for a given pod use the command as follows (changing clusters for listeners or routes when required):",
+      "uses": [
+        "istioctl proxy-config",
+        "subset",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.proxy-config-types"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.pc-endpoints",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8115,
+      "front": "Which istioctl proxy-config subcommand lists the endpoints currently available for a cluster, with their health?",
+      "back": "endpoints.",
+      "explanation": "Envoy uses the cluster to look up endpoints from istiod and proxies the request to one of them.",
+      "source": "Istio / Debugging Envoy and Istiod, “Deep dive into Envoy configuration”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#deep-dive-into-envoy-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To see the endpoints currently available for this cluster use the proxy-config endpoints command.",
+      "uses": [
+        "istioctl proxy-config",
+        "istiod"
+      ],
+      "conceptIDs": [
+        "istio.proxy-config-types"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.pc-secret",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8120,
+      "front": "Which istioctl proxy-config subcommand lets you inspect the keys and certificates a pod’s proxy holds?",
+      "back": "secret.",
+      "explanation": "The output lists the certificate chain and root CA with validity; -o json gives the full certificate for openssl.",
+      "source": "Istio / Security Problems, “Keys and certificates errors”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#keys-and-certificates-errors",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If you suspect that some of the keys and/or certificates used by Istio aren’t correct, you can inspect the contents from any pod: $ istioctl proxy-config secret curl-8f795f47d-4s4t7",
+      "uses": [
+        "istioctl proxy-config",
+        "digital certificate"
+      ],
+      "conceptIDs": [
+        "istio.proxy-config-types",
+        "istio.cert-errors"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.inbound-outbound-listeners",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8125,
+      "front": "On a sidecar, which listener receives all inbound pod traffic and which receives all outbound pod traffic?",
+      "back": "0.0.0.0:15006 for inbound; 0.0.0.0:15001 for outbound.",
+      "explanation": "iptables routes pod traffic to these listeners; 15001 hands requests to the best-matching virtual listener or the PassthroughCluster.",
+      "source": "Istio / Debugging Envoy and Istiod, “Deep dive into Envoy configuration”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#deep-dive-into-envoy-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "every sidecar has a listener bound to 0.0.0.0:15006 which is where IP tables routes all inbound pod traffic to and a listener bound to 0.0.0.0:15001 which is where IP tables routes all outbound pod traffic to.",
+      "uses": [
+        "sidecar container"
+      ],
+      "conceptIDs": [
+        "istio.proxy-config-types"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.follow-a-request",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8135,
+      "front": "You trace why the orders pod’s call to payments:8080 goes to the wrong place. In what order do you inspect its Envoy with istioctl proxy-config?",
+      "back": "listeners, then routes, then cluster, then endpoints.",
+      "explanation": "The docs follow a request the same way: listener, route lookup, cluster, then the endpoints behind it.",
+      "source": "Istio / Debugging Envoy and Istiod, “Deep dive into Envoy configuration”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#deep-dive-into-envoy-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In order to debug Envoy you need to understand Envoy clusters/listeners/routes/endpoints and how they all interact.",
+      "uses": [
+        "istioctl proxy-config",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.proxy-config-types"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.bootstrap",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8140,
+      "front": "What does istioctl proxy-config bootstrap show that the other proxy-config views don’t?",
+      "back": "Envoy’s bootstrap configuration, including where istiod can be found.",
+      "explanation": "The other views show configuration retrieved (mostly) from istiod.",
+      "source": "Istio / Debugging Envoy and Istiod, “Inspecting bootstrap configuration”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#inspecting-bootstrap-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "So far we have looked at configuration retrieved (mostly) from Istiod, however Envoy requires some bootstrap configuration that includes information like where Istiod can be found.",
+      "uses": [
+        "istioctl proxy-config",
+        "Envoy",
+        "istiod"
+      ],
+      "conceptIDs": [
+        "istio.bootstrap-config"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.istiod-connectivity-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8150,
+      "front": "You curl istiod’s version endpoint on port 15014 from a test pod in the mesh. What result shows connectivity is fine?",
+      "back": "A response listing the version of istiod.",
+      "explanation": "The docs’ check invokes istiod’s v1 registration API with default settings and mutual TLS enabled.",
+      "source": "Istio / Debugging Envoy and Istiod, “Verifying connectivity to Istiod”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#verifying-connectivity-to-istiod",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You should receive a response listing the version of Istiod.",
+      "uses": [
+        "istiod",
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.istiod-connectivity"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.envoy-version",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8155,
+      "front": "How can you find out which Envoy version a deployment’s proxy is running?",
+      "back": "Exec into the istio-proxy container and query the server_info endpoint (`pilot-agent request GET server_info`).",
+      "explanation": "The output’s version field includes the Envoy release number.",
+      "source": "Istio / Debugging Envoy and Istiod, “What Envoy version is Istio using?”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/proxy-cmd/#what-envoy-version-is-istio-using",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To find out the Envoy version used in deployment, you can exec into the container and query the server_info endpoint:",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.envoy-version"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.output-levels",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8165,
+      "front": "What are the output levels of a logging scope, and which is the default?",
+      "back": "none, error, warn, info, debug; the default is info.",
+      "explanation": "none produces no output and debug the most; info suits normal operation.",
+      "source": "Istio / Component Logging, “Logging scopes”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/component-logging/#logging-scopes",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The default level for all scopes is info which is intended to provide the right amount of logging information for operating Istio in normal conditions.",
+      "uses": [
+        "logging scope"
+      ],
+      "conceptIDs": [
+        "istio.logging-scopes"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.log-output-level-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8170,
+      "front": "You want istioctl analyze to print nothing from its klog scope but keep info-level messages from its cli scope. What option do you pass?",
+      "back": "--log_output_level klog:none,cli:info",
+      "explanation": "This option sets the output level per scope from the command line.",
+      "source": "Istio / Component Logging, “Logging scopes”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/component-logging/#logging-scopes",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To control the output level, you use the --log_output_level command-line option. For example: $ istioctl analyze --log_output_level klog:none,cli:info",
+      "uses": [
+        "istioctl analyze",
+        "logging scope"
+      ],
+      "conceptIDs": [
+        "istio.logging-scopes"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.log-target-json",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8180,
+      "front": "Which two options change where an Istio component’s logs go and what format they take?",
+      "back": "--log_target (stdout, stderr or file paths) and --log_as_json.",
+      "explanation": "JSON output can be easier for tools to process than the default human-friendly format.",
+      "source": "Istio / Component Logging, “Controlling output”",
+      "sourceURL": "https://istio.io/latest/docs/ops/diagnostic-tools/component-logging/#controlling-output",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The --log_as_json option can be used to force the output into JSON, which can be easier for tools to process.",
+      "uses": [
+        "logging scope"
+      ],
+      "conceptIDs": [
+        "istio.log-levels"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.proxy-rbac-debug",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8185,
+      "front": "How do you turn on authorization debug logging in a workload’s proxy?",
+      "back": "istioctl proxy-config log <workload> --level \"rbac:debug\"",
+      "explanation": "The proxy logs then show whether each request was enforced allowed or enforced denied.",
+      "source": "Istio / Security Problems, “Ensure proxies enforce policies correctly”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#ensure-proxies-enforce-policies-correctly",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Turn on the authorization debug logging in proxy with the following command:",
+      "uses": [
+        "istioctl proxy-config",
+        "authorization"
+      ],
+      "conceptIDs": [
+        "istio.proxy-log-level"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.istiod-debug-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8190,
+      "front": "You suspect istiod is not processing your authorization policies. What logging do you turn on first, and where?",
+      "back": "Debug logging for the authorization scope in istiod (istioctl admin log --level authorization:debug).",
+      "explanation": "You may need to delete and re-apply the policies so the debug output is generated for them.",
+      "source": "Istio / Security Problems, “Ensure Istiod accepts the policies”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#ensure-istiod-accepts-the-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Run the following command to enable the debug logging in istiod:",
+      "uses": [
+        "istiod",
+        "logging scope",
+        "authorization"
+      ],
+      "conceptIDs": [
+        "istio.proxy-log-level",
+        "istio.istiod-accepts"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.access-logs-first",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8195,
+      "front": "What is the best way to understand why Envoy rejects requests, and where are those logs by default?",
+      "back": "Inspect Envoy’s access logs; by default they go to the container’s standard output.",
+      "explanation": "You read them with kubectl logs on the istio-proxy container.",
+      "source": "Istio / Traffic Management Problems, “Requests are rejected by Envoy”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#requests-are-rejected-by-envoy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The best way to understand why requests are being rejected is by inspecting Envoy’s access logs. By default, access logs are output to the standard output of the container.",
+      "uses": [
+        "Envoy",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "istio.envoy-rejects"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.flag-nr",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8200,
+      "front": "Which Envoy response flag means no route is configured, and what should you check?",
+      "back": "`NR`; check your DestinationRule or VirtualService.",
+      "explanation": "Response flags follow the response code in the default access log format.",
+      "source": "Istio / Traffic Management Problems, “Requests are rejected by Envoy”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#requests-are-rejected-by-envoy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "NR: No route configured, check your DestinationRule or VirtualService.",
+      "uses": [
+        "Envoy",
+        "DestinationRule",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.envoy-rejects"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.flag-uo",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8205,
+      "front": "Which Envoy response flag means upstream overflow with circuit breaking?",
+      "back": "`UO`; check the circuit breaker settings in the DestinationRule.",
+      "explanation": "Circuit breakers are configured in the DestinationRule.",
+      "source": "Istio / Traffic Management Problems, “Requests are rejected by Envoy”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#requests-are-rejected-by-envoy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "UO: Upstream overflow with circuit breaking, check your circuit breaker configuration in DestinationRule.",
+      "uses": [
+        "Envoy",
+        "circuit breaking",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.envoy-rejects"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.flag-uf",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8210,
+      "front": "Which Envoy response flag means failure to connect upstream, and what should you check if you use Istio authentication?",
+      "back": "`UF`; check for a mutual TLS configuration conflict.",
+      "explanation": "The docs pair this flag with mTLS conflicts when Istio authentication is in use.",
+      "source": "Istio / Traffic Management Problems, “Requests are rejected by Envoy”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#requests-are-rejected-by-envoy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "UF: Failed to connect to upstream, if you’re using Istio authentication, check for a mutual TLS configuration conflict.",
+      "uses": [
+        "Envoy",
+        "mtls"
+      ],
+      "conceptIDs": [
+        "istio.envoy-rejects"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.flags-classify",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8215,
+      "front": "Under load, a client’s access log shows 503s with the flag `UO` for calls to inventory. Which resource do you look at?",
+      "back": "The inventory DestinationRule’s circuit breaker settings.",
+      "explanation": "`UO` is upstream overflow from circuit breaking, configured in the DestinationRule.",
+      "source": "Istio / Traffic Management Problems, “Requests are rejected by Envoy”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#requests-are-rejected-by-envoy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "UO: Upstream overflow with circuit breaking, check your circuit breaker configuration in DestinationRule.",
+      "uses": [
+        "DestinationRule",
+        "circuit breaking"
+      ],
+      "conceptIDs": [
+        "istio.envoy-rejects"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.eventual-consistency",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8220,
+      "front": "A new route rule seems to have no effect yet. Which property of Istio on Kubernetes may explain it?",
+      "back": "Configuration is eventually consistent: it takes time to reach all sidecars, longer in large deployments.",
+      "explanation": "The lag may be on the order of seconds.",
+      "source": "Istio / Traffic Management Problems, “Route rules don’t seem to affect traffic flow”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#route-rules-dont-seem-to-affect-traffic-flow",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A configuration change will take some time to propagate to all the sidecars. With large deployments the propagation will take longer and there may be a lag time on the order of seconds.",
+      "uses": [
+        "sidecar container"
+      ],
+      "conceptIDs": [
+        "istio.route-rules-no-effect"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.weighted-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8230,
+      "front": "You set a 90/10 split between v1 and v2, send 15 requests, and every one reaches v1. Is the rule broken?",
+      "back": "Not necessarily: up to 100 requests may be needed to see the weighted distribution.",
+      "explanation": "Too small a sample can hide the split; propagation delay is another possible cause.",
+      "source": "Istio / Traffic Management Problems, “Route rules don’t seem to affect traffic flow”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#route-rules-dont-seem-to-affect-traffic-flow",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "up to 100 requests may be required for weighted version distribution to be observed.",
+      "uses": [
+        "traffic shifting"
+      ],
+      "conceptIDs": [
+        "istio.route-rules-no-effect"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.503-after-dr",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8235,
+      "front": "Requests to a service start returning 503 as soon as you apply a DestinationRule, and stop when you remove it. What is the likely cause?",
+      "back": "The DestinationRule is causing a TLS conflict for the service.",
+      "explanation": "You should only see this if automatic mutual TLS was disabled during install.",
+      "source": "Istio / Traffic Management Problems, “503 errors after setting destination rule”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#503-errors-after-setting-destination-rule",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If requests to a service immediately start generating HTTP 503 errors after you applied a DestinationRule and the errors continue until you remove or revert the DestinationRule, then the DestinationRule is probably causing a TLS conflict for the service.",
+      "uses": [
+        "DestinationRule",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.503-after-dr"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.503-dr-fix-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8245,
+      "front": "Auto mutual TLS is off and mesh-wide mutual TLS is on. You add a DestinationRule with only a load-balancing policy, and 503s start. What do you add to it?",
+      "back": "trafficPolicy tls mode `ISTIO_MUTUAL`.",
+      "explanation": "The DestinationRule’s TLS mode must match the global server configuration.",
+      "source": "Istio / Traffic Management Problems, “503 errors after setting destination rule”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#503-errors-after-setting-destination-rule",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Whenever you apply a DestinationRule, ensure the trafficPolicy TLS mode matches the global server configuration.",
+      "uses": [
+        "auto mutual TLS",
+        "DestinationRule",
+        "traffic policy"
+      ],
+      "conceptIDs": [
+        "istio.503-after-dr"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.ingress-fix-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8255,
+      "front": "Traffic from the gateway for shop.example.com keeps round-robining across versions, though an internal VirtualService pins the service to subset v1. How do you fix it?",
+      "back": "Add the subset rule to the VirtualService bound to the gateway, or merge the two VirtualServices.",
+      "explanation": "The gateway VirtualService is the one that controls traffic from the gateway.",
+      "source": "Istio / Traffic Management Problems, “Route rules have no effect on ingress gateway requests”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#route-rules-have-no-effect-on-ingress-gateway-requests",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To control the traffic from the gateway, you need to also include the subset rule in the myapp VirtualService:",
+      "uses": [
+        "Gateway",
+        "VirtualService",
+        "subset"
+      ],
+      "conceptIDs": [
+        "istio.ingress-rules-no-effect"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.https-to-http-port",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8260,
+      "front": "An app sends encrypted requests to a port declared as HTTP. What goes wrong, and what is the fix?",
+      "back": "The sidecar tries to parse it as HTTP and fails (access log may show 400 `DPE`). Change the port protocol to HTTPS.",
+      "explanation": "The request fails because the HTTP is unexpectedly encrypted.",
+      "source": "Istio / Traffic Management Problems, “Sending HTTPS to an HTTP port”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#sending-https-to-an-http-port",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the Envoy sidecar will attempt to parse the request as HTTP while forwarding the request, which will fail because the HTTP is unexpectedly encrypted.",
+      "uses": [
+        "http",
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.tls-mistakes"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.gw-terminate-vs-tls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8265,
+      "front": "A Gateway terminates TLS (`SIMPLE`) but its VirtualService uses tls routes. What happens?",
+      "back": "404 responses: after termination the request is HTTP, and no HTTP routes exist. Switch the VirtualService to http routing.",
+      "explanation": "Routing rules are evaluated after the gateway terminates TLS.",
+      "source": "Istio / Traffic Management Problems, “Gateway with TLS termination”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#gateway-with-tls-termination",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With this misconfiguration, you will end up getting 404 responses because the requests will be sent to HTTP routing but there are no HTTP routes configured.",
+      "uses": [
+        "Gateway",
+        "VirtualService",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.tls-mistakes"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.gw-passthrough-vs-http",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8270,
+      "front": "A Gateway passes TLS through, but its VirtualService has only http routes. What happens, and how do you fix it?",
+      "back": "The VirtualService has no effect. Switch it to tls routing, or terminate TLS at the gateway.",
+      "explanation": "HTTP rules cannot match TLS traffic passed through the gateway; proxy-config listener and route show the HTTP route is not applied.",
+      "source": "Istio / Traffic Management Problems, “Gateway with TLS passthrough”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#gateway-with-tls-passthrough",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In this configuration, the virtual service is attempting to match HTTP traffic against TLS traffic passed through the gateway. This will result in the virtual service configuration having no effect.",
+      "uses": [
+        "Gateway",
+        "VirtualService",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.tls-mistakes"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.double-tls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8275,
+      "front": "A DestinationRule originates TLS to an external host, and the app itself also sends HTTPS. What is the result, and the fix?",
+      "back": "Double encryption (a “wrong version number” error). Declare the ServiceEntry port as HTTP and have the app send plaintext.",
+      "explanation": "With TLS origination the application must send plaintext to the sidecar, which then originates the TLS.",
+      "source": "Istio / Traffic Management Problems, “Double TLS (TLS origination for a TLS request)”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#double-tls",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With this configuration, the sidecar expects the application to send TLS traffic on port 443 (e.g., curl https://httpbin.org), but it will also perform TLS origination before forwarding requests. This will cause the requests to be double encrypted.",
+      "uses": [
+        "TLS origination",
+        "ServiceEntry",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.tls-mistakes"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.shared-cert-404",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8280,
+      "front": "Two Gateways on the same ingress workload share one wildcard certificate. Why might browsers get 404s on the second host, and what is the fix?",
+      "back": "Browsers reuse the HTTP/2 connection made for the first host. Use one wildcard Gateway and bind both VirtualServices to it.",
+      "explanation": "The first gateway has no route for the second host, so it returns 404.",
+      "source": "Istio / Traffic Management Problems, “404 errors occur when multiple gateways configured with same TLS certificate”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#404-errors-occur-when-multiple-gateways-configured-with-same-tls-certificate",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Configuring more than one gateway using the same TLS certificate will cause browsers that leverage HTTP/2 connection reuse (i.e., most browsers) to produce 404 errors when accessing a second host after a connection to another host has already been established.",
+      "uses": [
+        "Gateway",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.tls-mistakes"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.no-sni-sent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8285,
+      "front": "Why can curl 1.2.3.4 -H \"Host: app.example.com\" fail against an HTTPS Gateway that lists hosts?",
+      "back": "No SNI is set, and the Gateway performs an SNI match on incoming requests.",
+      "explanation": "Set up DNS or use curl’s --resolve flag instead.",
+      "source": "Istio / Traffic Management Problems, “Configuring SNI routing when not sending SNI”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#configuring-sni-routing-when-not-sending-sni",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "if you do not have DNS set up and are instead directly setting the host header, such as curl 1.2.3.4 -H \"Host: app.example.com\", no SNI will be set, causing the request to fail.",
+      "uses": [
+        "SNI",
+        "Gateway",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "istio.tls-mistakes"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.lb-sni-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 8290,
+      "front": "TLS is terminated at a cloud load balancer in front of an HTTPS Gateway. Health checks pass, but real traffic fails. Which TLS mistake is this likely to be, and what are two fixes?",
+      "back": "The load balancer doesn’t forward SNI. Pass TLS through at the load balancer, or set the Gateway hosts to *.",
+      "explanation": "The docs name health checks succeeding while real traffic fails as a common symptom.",
+      "source": "Istio / Traffic Management Problems, “Configuring SNI routing when not sending SNI”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#configuring-sni-routing-when-not-sending-sni",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Most cloud load balancers will not forward the SNI, so if you are terminating TLS in your cloud load balancer you may need to do one of the following:",
+      "uses": [
+        "load balancer",
+        "SNI",
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "istio.tls-mistakes"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.headless-503",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8295,
+      "front": "Calling a headless service’s pod by IP on an http-named port returns 503 `UC`. What are two ways to avoid it?",
+      "back": "Any two of: set the right Host header; name the port tcp or tcp-<name>; call it by domain name.",
+      "explanation": "The server-side sidecar fails to find a route entry for a request addressed by pod IP.",
+      "source": "Istio / Traffic Management Problems, “503 error while accessing headless services”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#503-error-while-accessing-headless-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the request goes via the PassthroughCluster to the server-side, but the sidecar proxy on the server-side fails to find the route entry to nginx and fails with HTTP 503 UC.",
+      "uses": [
+        "Service",
+        "port",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.headless-503"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.jwksuri-issuer",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8300,
+      "front": "A RequestAuthentication policy has no jwksUri. What must be true of the JWT issuer?",
+      "back": "It must be a URL, and issuer + /.well-known/openid-configuration must open in a browser.",
+      "explanation": "This is one of the first checks the docs list for end-user authentication failures.",
+      "source": "Istio / Security Problems, “End-user authentication fails”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#end-user-authentication-fails",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If jwksUri isn’t set, make sure the JWT issuer is of url format and url + /.well-known/openid-configuration can be opened in browser;",
+      "uses": [
+        "request authentication",
+        "JSON Web Token"
+      ],
+      "conceptIDs": [
+        "istio.authn-fails"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.yaml-extra-dash",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8305,
+      "front": "In an AuthorizationPolicy, an extra - before from: turns one rule into two. How does that change the policy?",
+      "back": "The rules are ORed, so the policy allows requests on the path or from the namespace, instead of needing both: more permissive.",
+      "explanation": "In authorization policy, multiple rules have the semantics of `OR`.",
+      "source": "Istio / Security Problems, “Make sure there are no typos in the policy YAML file”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#make-sure-there-are-no-typos-in-the-policy-yaml-file",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In the YAML syntax, the - in front of the from: means it’s a new element in the list. This creates 2 rules in the policy instead of 1. In authorization policy, multiple rules have the semantics of OR.",
+      "uses": [
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.authz-too-restrictive"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.http-fields-on-tcp",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8310,
+      "front": "On a raw TCP port, how are HTTP-only fields treated in `ALLOW` versus `DENY` and `CUSTOM` policies?",
+      "back": "In `ALLOW` they never match; in `DENY` and `CUSTOM` they always match. Either way the policy gets more restrictive.",
+      "explanation": "The fields (host, path, headers, JWT and so on) do not exist in raw TCP connections.",
+      "source": "Istio / Security Problems, “Make sure you are NOT using HTTP-only fields on TCP ports”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#make-sure-you-are-not-using-http-only-fields-on-tcp-ports",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In the case of ALLOW policy, these fields are never matched. In the case of DENY and CUSTOM action, these fields are considered always matched. The final effect is a more restrictive policy that could cause unexpected denies.",
+      "uses": [
+        "AuthorizationPolicy",
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.authz-too-restrictive"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.http-port-prefix-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8315,
+      "front": "An `ALLOW` policy on paths [\"/api/*\"] denies every request to a web app whose Service port is named \"web\". What should you check?",
+      "back": "The port name: for HTTP-only fields it must have the http- prefix, e.g. http-web.",
+      "explanation": "Without it the port is not treated as HTTP, so the path field is never matched under `ALLOW`.",
+      "source": "Istio / Security Problems, “Make sure you are NOT using HTTP-only fields on TCP ports”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#make-sure-you-are-not-using-http-only-fields-on-tcp-ports",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If you are using HTTP-only fields on the port, make sure the port name has the http- prefix.",
+      "uses": [
+        "Service",
+        "port",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.authz-too-restrictive"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.authz-check-target",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8320,
+      "front": "Which command shows the authorization policies in effect for a pod?",
+      "back": "istioctl x authz check POD-NAME.POD-NAMESPACE",
+      "explanation": "It helps confirm the workload selector and namespace hit the intended targets.",
+      "source": "Istio / Security Problems, “Make sure the policy is applied to the correct target”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#make-sure-the-policy-is-applied-to-the-correct-target",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You can determine the authorization policy in effect by running istioctl x authz check POD-NAME.POD-NAMESPACE.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "istioctl",
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.authz-too-restrictive"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.all-actions-must-allow",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8325,
+      "front": "A workload has `CUSTOM`, `ALLOW` and `DENY` policies at once. When is a request allowed?",
+      "back": "Only if all actions allow; it is denied if any action denies.",
+      "explanation": "A policy with no action set uses `ALLOW`, and `AUDIT` never denies.",
+      "source": "Istio / Security Problems, “Pay attention to the action specified in the policy”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#pay-attention-to-the-action-specified-in-the-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When a workload has multiple actions (CUSTOM, ALLOW and DENY) applied at the same time, all actions must be satisfied to allow a request.",
+      "uses": [
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.authz-too-restrictive"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.istiod-converts",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8330,
+      "front": "What does istiod do with your authorization policies?",
+      "back": "It converts them and distributes them to the proxies.",
+      "explanation": "The docs then check that istiod accepts the policies, distributes them, and that proxies enforce them.",
+      "source": "Istio / Security Problems, “Ensure Istiod accepts the policies”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#ensure-istiod-accepts-the-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istiod converts and distributes your authorization policies to the proxies.",
+      "uses": [
+        "istiod",
+        "AuthorizationPolicy"
+      ],
+      "conceptIDs": [
+        "istio.istiod-accepts"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.cert-san",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8345,
+      "front": "When inspecting a workload certificate, what should its Subject Alternative Name look like?",
+      "back": "`URI:spiffe://cluster.local/ns/<namespace>/sa/<service-account>`",
+      "explanation": "The docs name this field as the one to check for valid information.",
+      "source": "Istio / Security Problems, “Keys and certificates errors”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#keys-and-certificates-errors",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In particular, the Subject Alternative Name field should be URI:spiffe://cluster.local/ns/my-ns/sa/my-sa.",
+      "uses": [
+        "digital certificate",
+        "ServiceAccount"
+      ],
+      "conceptIDs": [
+        "istio.cert-errors"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.mtls-error-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8350,
+      "front": "What do you check first and second when you suspect mutual TLS problems?",
+      "back": "First that istiod is healthy; second that keys and certificates reach the sidecars.",
+      "explanation": "After that, verify the authentication policy and destination rules.",
+      "source": "Istio / Security Problems, “Mutual TLS errors”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#mutual-tls-errors",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If you suspect problems with mutual TLS, first ensure that istiod is healthy, and second ensure that keys and certificates are being delivered to sidecars properly.",
+      "uses": [
+        "mtls",
+        "istiod"
+      ],
+      "conceptIDs": [
+        "istio.mtls-errors"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.mtls-error-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8355,
+      "front": "istiod is healthy and proxy-config secret shows valid certificates on both sidecars, yet mutual TLS still fails between two services. What do you check next?",
+      "back": "That the right authentication policy is applied and the right destination rules are in place.",
+      "explanation": "The docs order the checks: istiod, certificates, then policies and destination rules.",
+      "source": "Istio / Security Problems, “Mutual TLS errors”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/security-issues/#mutual-tls-errors",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If everything appears to be working so far, the next step is to verify that the right authentication policy is applied and the right destination rules are in place.",
+      "uses": [
+        "mtls",
+        "DestinationRule",
+        "peer authentication"
+      ],
+      "conceptIDs": [
+        "istio.mtls-errors"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.kube-system-ignored",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8360,
+      "front": "In which two namespaces is automatic sidecar injection always ignored?",
+      "back": "kube-system and kube-public.",
+      "explanation": "The docs list this as the first thing to check when injection is not what you expected.",
+      "source": "Istio / Sidecar Injection Problems, “The result of sidecar injection was not what I expected”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/injection/#the-result-of-sidecar-injection-was-not-what-i-expected",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Ensure your pod is not in the kube-system or kube-public namespace. Automatic sidecar injection will be ignored for pods in these namespaces.",
+      "uses": [
+        "sidecar injection",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.injection-unexpected"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.inject-label-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8370,
+      "front": "You add sidecar.istio.io/inject: \"false\" to a Deployment’s own metadata, yet its pods still get sidecars. Why?",
+      "back": "The override label must be in the pod template’s metadata; the Deployment’s metadata is ignored.",
+      "explanation": "In the pod template, true forces injection and false prevents it.",
+      "source": "Istio / Sidecar Injection Problems, “The result of sidecar injection was not what I expected”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/injection/#the-result-of-sidecar-injection-was-not-what-i-expected",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The default policy can be overridden with the sidecar.istio.io/inject label in the pod template spec’s metadata. The deployment’s metadata is ignored.",
+      "uses": [
+        "sidecar injection",
+        "label",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "istio.injection-unexpected"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.pods-not-created",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8375,
+      "front": "Pods for a Deployment are not created at all after enabling injection. Where do you look first?",
+      "back": "kubectl describe on the Deployment: webhook invocation failures typically show in the event log.",
+      "explanation": "The event log typically captures a failure to invoke the injection webhook.",
+      "source": "Istio / Sidecar Injection Problems, “Pods cannot be created at all”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/injection/#pods-cannot-be-created-at-all",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Run kubectl describe -n namespace deployment name on the failing pod’s deployment. Failure to invoke the injection webhook will typically be captured in the event log.",
+      "uses": [
+        "kubectl",
+        "Deployment",
+        "sidecar injection"
+      ],
+      "conceptIDs": [
+        "istio.pods-not-created"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.x509-cabundle",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8380,
+      "front": "Pod creation fails with “x509: certificate signed by unknown authority” when calling sidecar-injector.istio.io. What is the typical cause?",
+      "back": "An empty caBundle in the webhook configuration.",
+      "explanation": "Check that the caBundle in the mutating webhook configuration matches the root certificate mounted in the istiod pod.",
+      "source": "Istio / Sidecar Injection Problems, “x509 certificate related errors”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/injection/#x509-certificate-related-errors",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "x509: certificate signed by unknown authority errors are typically caused by an empty caBundle in the webhook configuration.",
+      "uses": [
+        "admission controller",
+        "istiod"
+      ],
+      "conceptIDs": [
+        "istio.pods-not-created"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.hold-app",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8385,
+      "front": "An app container hangs at startup because it needs the network before istio-proxy is ready. Which setting helps?",
+      "back": "holdApplicationUntilProxyStarts: true.",
+      "explanation": "The injector puts the sidecar first and blocks other containers until the proxy is ready.",
+      "source": "Istio / Sidecar Injection Problems, “Pod or containers start with network issues if istio-proxy is not ready”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/injection/#pod-or-containers-start-with-network-issues-if-istio-proxy-is-not-ready",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To avoid this, set holdApplicationUntilProxyStarts to true. This causes the sidecar injector to inject the sidecar at the start of the pod’s container list, and configures it to block the start of all other containers until the proxy is ready.",
+      "uses": [
+        "sidecar injection"
+      ],
+      "conceptIDs": [
+        "istio.hold-app-until-proxy"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.ztunnel-config",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8390,
+      "front": "Which istioctl command shows the workloads a ztunnel proxy has discovered, with their protocol and waypoint?",
+      "back": "istioctl ztunnel-config (for example, its workload view).",
+      "explanation": "ztunnel gets this configuration and discovery information from istiod over xDS.",
+      "source": "Istio / Troubleshoot connectivity issues with ztunnel, “Viewing ztunnel proxy state”",
+      "sourceURL": "https://istio.io/latest/docs/ambient/usage/troubleshoot-ztunnel/#viewing-ztunnel-proxy-state",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The ztunnel proxy gets configuration and discovery information from the istiod control plane via xDS APIs. The istioctl ztunnel-config command allows you to view discovered workloads as seen by a ztunnel proxy.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "ztunnel",
+        "istiod",
+        "xDS"
+      ],
+      "conceptIDs": [
+        "istio.ztunnel-state"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.ztunnel-config-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8395,
+      "front": "In an ambient namespace you want to confirm that ztunnel will use HBONE to reach the ratings pod and see its mTLS certificates. What do you run?",
+      "back": "istioctl ztunnel-config: the workload view for protocol, and its certificate view for the secrets.",
+      "explanation": "The same command can show the TLS certificates ztunnel received from istiod for mTLS.",
+      "source": "Istio / Troubleshoot connectivity issues with ztunnel, “Viewing ztunnel proxy state”",
+      "sourceURL": "https://istio.io/latest/docs/ambient/usage/troubleshoot-ztunnel/#viewing-ztunnel-proxy-state",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The ztunnel-config command can be used to view the secrets holding the TLS certificates that the ztunnel proxy has received from the istiod control plane to use for mTLS.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "ztunnel",
+        "HBONE",
+        "ambient mode"
+      ],
+      "conceptIDs": [
+        "istio.ztunnel-state"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.ztunnel-same-node",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 8400,
+      "front": "If source and destination pods sit on the same node, does traffic still pass through ztunnel?",
+      "back": "Yes. Traffic always traverses the ztunnel pod.",
+      "explanation": "If the expected ztunnel logs are missing, traffic redirection may not be working.",
+      "source": "Istio / Troubleshoot connectivity issues with ztunnel, “Verifying ztunnel traffic through logs”",
+      "sourceURL": "https://istio.io/latest/docs/ambient/usage/troubleshoot-ztunnel/#verifying-ztunnel-traffic-through-logs",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Traffic always traverses the ztunnel pod, even when the source and destination of the traffic are on the same compute node.",
+      "uses": [
+        "ztunnel"
+      ],
+      "conceptIDs": [
+        "istio.ztunnel-logs"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.waypoint-analyze-first",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8405,
+      "front": "Your L7 configuration for a waypoint isn’t applied. What do the docs say to run first?",
+      "back": "istioctl analyze, to check for validation issues.",
+      "explanation": "Then find which waypoint implements the configuration for your service or pod.",
+      "source": "Istio / Troubleshoot issues with waypoints, “Problems with traffic routing or security policy”",
+      "sourceURL": "https://istio.io/latest/docs/ambient/usage/troubleshoot-waypoint/#problems-with-traffic-routing-or-security-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If your L7 configuration isn’t applied, run istioctl analyze first to check if your configuration has a validation issue.",
+      "uses": [
+        "istioctl analyze",
+        "waypoint proxy"
+      ],
+      "conceptIDs": [
+        "istio.waypoint-troubleshoot"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.waypoint-which",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 8410,
+      "front": "How do you confirm which waypoint handles traffic to a service, versus to a pod called by IP?",
+      "back": "By service: istioctl experimental ztunnel-config service. By pod IP: istioctl ztunnel-config workload.",
+      "explanation": "Which view to use depends on how the source calls the destination.",
+      "source": "Istio / Troubleshoot issues with waypoints, “Problems with traffic routing or security policy”",
+      "sourceURL": "https://istio.io/latest/docs/ambient/usage/troubleshoot-waypoint/#problems-with-traffic-routing-or-security-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If your source calls the destination using the service’s hostname or IP, use the istioctl experimental ztunnel-config service command to confirm your waypoint is used by the destination service.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "waypoint proxy",
+        "ztunnel"
+      ],
+      "conceptIDs": [
+        "istio.waypoint-troubleshoot"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.waypoint-label-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 8415,
+      "front": "A pod labelled istio.io/use-waypoint: pay-wp shows no waypoint in ztunnel-config workload. The pay-wp Gateway has istio.io/waypoint-for: service. What is wrong?",
+      "back": "That waypoint only handles service traffic; for a pod it must be all or workload.",
+      "explanation": "A pod’s waypoint must be one that can process workload traffic.",
+      "source": "Istio / Troubleshoot issues with waypoints, “Problems with traffic routing or security policy”",
+      "sourceURL": "https://istio.io/latest/docs/ambient/usage/troubleshoot-waypoint/#problems-with-traffic-routing-or-security-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "verify that the Gateway resource for your waypoint is labeled with a compatible value for istio.io/waypoint-for. In the case of a pod, suitable values would be all or workload.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "waypoint proxy",
+        "label",
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "istio.waypoint-troubleshoot"
+      ]
+    },
+    {
+      "id": "istio.troubleshooting.waypoint-is-envoy",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 8420,
+      "front": "Which tools apply when debugging a waypoint proxy but not ztunnel, and why?",
+      "back": "istioctl proxy-status and istioctl proxy-config, because waypoints are based on Envoy; ztunnel has istioctl ztunnel-config.",
+      "explanation": "The waypoint guide points to the Envoy deep-dive section for this reason.",
+      "source": "Istio / Troubleshoot issues with waypoints, “Problems with traffic routing or security policy”",
+      "sourceURL": "https://istio.io/latest/docs/ambient/usage/troubleshoot-waypoint/#problems-with-traffic-routing-or-security-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Refer to the deep dive into Envoy configuration section for more information regarding how to debug Envoy since waypoint proxies are based on Envoy.",
+      "uses": [
+        "waypoint proxy",
+        "ztunnel",
+        "istioctl proxy-config",
+        "istioctl proxy-status",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.waypoint-troubleshoot"
+      ]
+    }
+  ]
+}

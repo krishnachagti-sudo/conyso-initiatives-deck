@@ -1,0 +1,1522 @@
+{
+  "topic": "Ingress, egress and external services",
+  "notes": [
+    {
+      "id": "istio.ingress-egress.what-is-gateway",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a Gateway in Istio's networking API?",
+      "back": "A resource describing a load balancer at the edge of the mesh that receives incoming or outgoing connections.",
+      "explanation": "Its specification lists the ports to expose and the protocol to use, among other settings.",
+      "source": "Istio docs, Gateway reference, “Gateway”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#Gateway",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Gateway describes a load balancer operating at the edge of the mesh receiving incoming or outgoing HTTP/TCP connections. The specification describes a set of ports that should be exposed, the type of protocol to use, SNI configuration for the load balancer, etc.",
+      "uses": [
+        "Gateway",
+        "load balancer",
+        "Istio",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "istio.gateway"
+      ],
+      "introduces": [
+        "Gateway"
+      ],
+      "example": "Like the doors of a shopping centre: which ones are open, and what may come through each.",
+      "order": 4000
+    },
+    {
+      "id": "istio.ingress-egress.what-is-ingress-gateway",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an ingress gateway in Istio?",
+      "back": "A gateway defining entry points into the mesh that all incoming traffic flows through.",
+      "explanation": "Istio uses ingress and egress gateways to configure load balancers running at the edge of a service mesh.",
+      "source": "Istio docs, Egress Gateways task, “Egress Gateways”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio uses ingress and egress gateways to configure load balancers executing at the edge of a service mesh. An ingress gateway allows you to define entry points into the mesh that all incoming traffic flows through.",
+      "uses": [
+        "ingress gateway",
+        "load balancer",
+        "service mesh",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.ingress-gateway"
+      ],
+      "introduces": [
+        "ingress gateway"
+      ],
+      "example": "Like the arrivals hall of an airport, which every incoming passenger passes through.",
+      "order": 4007
+    },
+    {
+      "id": "istio.ingress-egress.what-is-egress",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "In Istio, what is egress traffic?",
+      "back": "Outbound traffic from the mesh, such as calls to external services that are not in Istio's service registry.",
+      "explanation": "How sidecars handle calls to such external services is set by an installation option.",
+      "source": "Istio docs, Accessing External Services task, “Envoy passthrough to external services”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/#envoy-passthrough-to-external-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio has an installation option, meshConfig.outboundTrafficPolicy.mode, that configures the sidecar handling of external services, that is, those services that are not defined in Istio’s internal service registry.",
+      "uses": [
+        "egress",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.egress"
+      ],
+      "introduces": [
+        "egress"
+      ],
+      "example": "Like outgoing post from an office: letters addressed to people outside the company.",
+      "order": 4014
+    },
+    {
+      "id": "istio.ingress-egress.what-is-serviceentry",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a ServiceEntry?",
+      "back": "A resource that adds an entry to Istio's internal service registry, so services in the mesh can route to it.",
+      "explanation": "The entry describes a service's properties, and the service may be external to the mesh, such as a web API.",
+      "source": "Istio docs, Service Entry reference, “ServiceEntry”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/service-entry/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "ServiceEntry enables adding additional entries into Istio’s internal service registry, so that auto-discovered services in the mesh can access/route to these manually specified services. A service entry describes the properties of a service (DNS name, VIPs, ports, protocols, endpoints). These services could be external to the mesh (e.g., web APIs)",
+      "uses": [
+        "ServiceEntry",
+        "Istio",
+        "service mesh",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "istio.serviceentry"
+      ],
+      "introduces": [
+        "ServiceEntry"
+      ],
+      "example": "Like adding an outside supplier to the company phone book, so staff can reach them through the switchboard.",
+      "order": 4021
+    },
+    {
+      "id": "istio.ingress-egress.what-is-egress-gateway",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an egress gateway in Istio?",
+      "back": "A gateway that defines exit points from the mesh for traffic leaving it.",
+      "explanation": "It lets Istio features, such as monitoring and route rules, apply to traffic exiting the mesh.",
+      "source": "Istio docs, Egress Gateways task, “Egress Gateways”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Egress gateway is a symmetrical concept; it defines exit points from the mesh. Egress gateways allow you to apply Istio features, for example, monitoring and route rules, to traffic exiting the mesh.",
+      "uses": [
+        "egress gateway",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.egress-gateway"
+      ],
+      "introduces": [
+        "egress gateway"
+      ],
+      "example": "Like a single staffed exit from a building, where everyone who leaves is seen.",
+      "order": 4028
+    },
+    {
+      "id": "istio.ingress-egress.what-is-tls-origination",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is TLS origination for egress traffic in Istio?",
+      "back": "Istio opening `HTTPS` connections to an external service while the application's own requests stay plain HTTP.",
+      "explanation": "The application sends unencrypted requests and Istio encrypts them, so no application code has to change.",
+      "source": "Istio docs, Egress TLS Origination task, “Egress TLS Origination”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-tls-origination/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With Istio, this requirement can be achieved just by configuration, without changing any code in the application. The application can send unencrypted HTTP requests and Istio will then encrypt them for the application.",
+      "uses": [
+        "TLS origination",
+        "egress",
+        "Istio",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.tls-origination"
+      ],
+      "introduces": [
+        "TLS origination"
+      ],
+      "example": "Like a courier who seals your open postcard into an envelope before it leaves the building.",
+      "order": 4035
+    },
+    {
+      "id": "istio.ingress-egress.what-is-sidecar-resource",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What can the Sidecar resource configure?",
+      "back": "A workload's sidecar proxy: the ports and protocols it accepts, and the services it can reach.",
+      "explanation": "By default, every proxy accepts traffic on all its workload's ports and can reach every workload in the mesh.",
+      "source": "Istio docs, Traffic Management (concepts), “Sidecars”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#sidecars",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, Istio configures every Envoy proxy to accept traffic on all the ports of its associated workload, and to reach every workload in the mesh when forwarding traffic. You can use a sidecar configuration to do the following: Fine-tune the set of ports and protocols that an Envoy proxy accepts.",
+      "uses": [
+        "Sidecar resource",
+        "Envoy",
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.sidecar-resource"
+      ],
+      "introduces": [
+        "Sidecar resource"
+      ],
+      "example": "Like giving a receptionist a short phone list for their own team instead of the whole company directory.",
+      "order": 4042
+    },
+    {
+      "id": "istio.ingress-egress.what-is-workloadselector",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is the workloadSelector in a Sidecar resource?",
+      "back": "Criteria, such as labels, that pick the Pods or virtual machines the Sidecar configuration applies to.",
+      "explanation": "If it is left out, the Sidecar configuration applies to every workload in the same namespace.",
+      "source": "Istio docs, Sidecar reference, “Sidecar”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/sidecar/#Sidecar",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Criteria used to select the specific set of pods/VMs on which this Sidecar configuration should be applied. If omitted, the Sidecar configuration will be applied to all workload instances in the same namespace.",
+      "uses": [
+        "workloadSelector",
+        "Sidecar resource",
+        "label",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.workloadselector"
+      ],
+      "introduces": [
+        "workloadSelector"
+      ],
+      "example": "Like addressing a memo to staff with a blue badge instead of the whole floor.",
+      "order": 4049
+    },
+    {
+      "id": "istio.ingress-egress.gateway-edge-proxies",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which proxies are Istio Gateway configurations applied to?",
+      "back": "Standalone Envoy proxies at the edge of the mesh, not the sidecar proxies beside workloads.",
+      "explanation": "Sidecar proxies, by contrast, run alongside the service workloads.",
+      "source": "Istio docs, Traffic Management (concepts), “Gateways”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#gateways",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Gateway configurations are applied to standalone Envoy proxies that are running at the edge of the mesh, rather than sidecar Envoy proxies running alongside your service workloads.",
+      "uses": [
+        "Gateway",
+        "Envoy",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.gateway"
+      ],
+      "order": 4056
+    },
+    {
+      "id": "istio.ingress-egress.gateway-layers",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does an Istio Gateway resource configure, and where does layer 7 routing for its traffic come from?",
+      "back": "Layer 4 to 6 settings such as ports and TLS; the routing comes from a VirtualService bound to the gateway.",
+      "explanation": "Binding a VirtualService lets you manage gateway traffic like any other data plane traffic in the mesh.",
+      "source": "Istio docs, Traffic Management (concepts), “Gateways”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#gateways",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio’s Gateway resource just lets you configure layer 4-6 load balancing properties such as ports to expose, TLS settings, and so on. Then instead of adding application-layer traffic routing (L7) to the same API resource, you bind a regular Istio virtual service to the gateway.",
+      "uses": [
+        "Gateway",
+        "VirtualService",
+        "TLS origination",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.gateway"
+      ],
+      "order": 4063
+    },
+    {
+      "id": "istio.ingress-egress.bind-virtualservice",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How do you bind a VirtualService to an Istio Gateway?",
+      "back": "Name the gateway in the VirtualService's gateways field.",
+      "explanation": "The binding is needed for routing and for the gateway to work as intended.",
+      "source": "Istio docs, Traffic Management (concepts), “Gateway example”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#gateway-example",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To specify routing and for the gateway to work as intended, you must also bind the gateway to a virtual service. You do this using the virtual service’s gateways field",
+      "uses": [
+        "VirtualService",
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "istio.gateway-vs-binding"
+      ],
+      "order": 4070
+    },
+    {
+      "id": "istio.ingress-egress.default-profile-gateways",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which preconfigured gateway deployments does Istio provide, and which one does the default profile install?",
+      "back": "istio-ingressgateway and istio-egressgateway; the default profile installs only the ingress gateway.",
+      "explanation": "Both are deployed with the demo installation; you can also deploy and configure your own gateway proxies.",
+      "source": "Istio docs, Traffic Management (concepts), “Gateways”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#gateways",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio provides some preconfigured gateway proxy deployments (istio-ingressgateway and istio-egressgateway) that you can use - both are deployed if you use our demo installation, while just the ingress gateway is deployed with our default profile.",
+      "uses": [
+        "ingress gateway",
+        "egress gateway",
+        "configuration profile",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.ingress-gateway"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "order": 4077
+    },
+    {
+      "id": "istio.ingress-egress.server-hosts",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In an Istio Gateway server, what does the hosts field list?",
+      "back": "The hosts exposed by the gateway, each a DNS name with an optional namespace/ prefix.",
+      "explanation": "The field is typically used for HTTP services, but can also serve `TCP` services using TLS with `SNI`.",
+      "source": "Istio docs, Gateway reference, “Server”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#Server",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "One or more hosts exposed by this gateway. While typically applicable to HTTP services, it can also be used for TCP services using TLS with SNI. A host is specified as a dnsName with an optional namespace/ prefix.",
+      "uses": [
+        "Gateway",
+        "namespace",
+        "TLS origination",
+        "http",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "istio.gateway-server"
+      ],
+      "order": 4084
+    },
+    {
+      "id": "istio.ingress-egress.server-restrict-binding",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How can a Gateway server limit which virtual services may bind to it?",
+      "back": "With the namespace/hostname syntax in its hosts field.",
+      "explanation": "Each entry names a namespace and the hostnames that virtual services from it may bind for.",
+      "source": "Istio docs, Gateway reference, “Gateway”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#Gateway",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It is possible to restrict the set of virtual services that can bind to a gateway server using the namespace/hostname syntax in the hosts field.",
+      "uses": [
+        "Gateway",
+        "VirtualService",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.gateway-server",
+        "istio.gateway-vs-binding"
+      ],
+      "order": 4091
+    },
+    {
+      "id": "istio.ingress-egress.selector-picks-pods",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does an Istio Gateway's selector choose?",
+      "back": "By labels, the gateway Pods or virtual machines that the Gateway configuration is applied to.",
+      "explanation": "By default the label search covers all namespaces, and a nil selector applies the Gateway to all workloads.",
+      "source": "Istio docs, Gateway reference, “Gateway”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#Gateway",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "One or more labels that indicate a specific set of pods/VMs on which this gateway configuration should be applied. By default workloads are searched across all namespaces based on label selectors.",
+      "uses": [
+        "Gateway",
+        "label",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.gateway-selector"
+      ],
+      "order": 4098
+    },
+    {
+      "id": "istio.ingress-egress.gateway-load-balancer-service",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What backs every Istio ingress Gateway, giving clients the external address and ports to use?",
+      "back": "A Kubernetes Service of type LoadBalancer.",
+      "explanation": "The external load balancer address and ports of that Service are used to access the gateway.",
+      "source": "Istio docs, Ingress Gateways task, “Determining the ingress IP and ports”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Every Gateway is backed by a service of type LoadBalancer. The external load balancer IP and ports for this service are used to access the gateway.",
+      "uses": [
+        "Gateway",
+        "Service",
+        "load balancer",
+        "ingress gateway"
+      ],
+      "conceptIDs": [
+        "istio.ingress-ip-ports"
+      ],
+      "order": 4105
+    },
+    {
+      "id": "istio.ingress-egress.gateway-api-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which API does Istio intend to make its default for traffic management in the future?",
+      "back": "The Kubernetes Gateway API.",
+      "explanation": "Istio supports it alongside its own traffic management API.",
+      "source": "Istio docs, Kubernetes Gateway API task, “Kubernetes Gateway API”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In addition to its own traffic management API, Istio supports the Kubernetes Gateway API and intends to make it the default API for traffic management in the future.",
+      "uses": [
+        "Gateway API",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.gateway-api-ingress"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "order": 4112
+    },
+    {
+      "id": "istio.ingress-egress.allow-any-mode",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "With outboundTrafficPolicy mode `ALLOW_ANY`, what happens to calls to unknown services?",
+      "back": "The Istio proxy lets them pass through.",
+      "explanation": "Unknown services are those not defined in Istio's internal service registry.",
+      "source": "Istio docs, Accessing External Services task, “Envoy passthrough to external services”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/#envoy-passthrough-to-external-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If this option is set to ALLOW_ANY, the Istio proxy lets calls to unknown services pass through.",
+      "uses": [
+        "Istio",
+        "proxy",
+        "egress"
+      ],
+      "conceptIDs": [
+        "istio.outbound-policy"
+      ],
+      "order": 4119
+    },
+    {
+      "id": "istio.ingress-egress.registry-only-mode",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "With outboundTrafficPolicy mode `REGISTRY_ONLY`, what does the proxy do with a host that has no HTTP service or service entry in the mesh?",
+      "back": "It blocks it.",
+      "explanation": "Only destinations known to the mesh stay reachable in this mode.",
+      "source": "Istio docs, Accessing External Services task, “Envoy passthrough to external services”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/#envoy-passthrough-to-external-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If the option is set to REGISTRY_ONLY, then the Istio proxy blocks any host without an HTTP service or service entry defined within the mesh.",
+      "uses": [
+        "Istio",
+        "proxy",
+        "ServiceEntry",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.outbound-policy"
+      ],
+      "order": 4126
+    },
+    {
+      "id": "istio.ingress-egress.outbound-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What is the default outboundTrafficPolicy mode?",
+      "back": "`ALLOW_ANY`.",
+      "explanation": "The default lets you start evaluating Istio quickly and decide on controlling access to external services later.",
+      "source": "Istio docs, Accessing External Services task, “Envoy passthrough to external services”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/#envoy-passthrough-to-external-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "ALLOW_ANY is the default value, allowing you to start evaluating Istio quickly, without controlling access to external services. You can then decide to configure access to external services later.",
+      "uses": [
+        "Istio",
+        "egress"
+      ],
+      "conceptIDs": [
+        "istio.outbound-default"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "order": 4133
+    },
+    {
+      "id": "istio.ingress-egress.registry-only-not-firewall",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Is `REGISTRY_ONLY` an outbound security policy or firewall?",
+      "back": "No: it exists mainly to detect missing ServiceEntry configurations by failing explicitly.",
+      "explanation": "The Sidecar reference says Istio does not offer an outbound traffic security policy at all.",
+      "source": "Istio docs, Sidecar reference, “OutboundTrafficPolicy.Mode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/sidecar/#OutboundTrafficPolicy-Mode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note: Istio does not offer an outbound traffic security policy. This option does not act as one, or as any form of an outbound firewall. Instead, this option exists primarily to offer users a way to detect missing ServiceEntry configurations by explicitly failing.",
+      "uses": [
+        "ServiceEntry",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.outbound-policy"
+      ],
+      "order": 4140
+    },
+    {
+      "id": "istio.ingress-egress.serviceentry-uses",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two things service entries let you do for traffic to services outside the mesh?",
+      "back": "Redirect and forward traffic to external destinations; define retry, timeout and fault injection policies for them.",
+      "explanation": "Once registered, external destinations can be managed with the same traffic features as mesh services.",
+      "source": "Istio docs, Traffic Management (concepts), “Service entries”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#service-entries",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Redirect and forward traffic for external destinations, such as APIs consumed from the web, or traffic to services in legacy infrastructure. Define retry, timeout, and fault injection policies for external destinations.",
+      "uses": [
+        "ServiceEntry"
+      ],
+      "conceptIDs": [
+        "istio.serviceentry"
+      ],
+      "order": 4147
+    },
+    {
+      "id": "istio.ingress-egress.recommended-approach",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Of the ways to call external services from an Istio mesh, which does the Istio task recommend?",
+      "back": "Registering the external service inside the mesh with a service entry.",
+      "explanation": "It is one of three ways the task shows for calling external services from the mesh.",
+      "source": "Istio docs, Accessing External Services task, “Understanding what happened”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/#understanding-what-happened",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Use a service entry to register an accessible external service inside the mesh. This is the recommended approach.",
+      "uses": [
+        "ServiceEntry",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.serviceentry"
+      ],
+      "order": 4154
+    },
+    {
+      "id": "istio.ingress-egress.location-external",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which ServiceEntry location marks a service as outside the mesh, typically one consumed through APIs?",
+      "back": "`MESH_EXTERNAL`.",
+      "explanation": "The other location value marks a service as part of the mesh.",
+      "source": "Istio docs, Service Entry reference, “ServiceEntry.Location”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/service-entry/#ServiceEntry-Location",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "MESH_EXTERNAL Signifies that the service is external to the mesh. Typically used to indicate external services consumed through APIs.",
+      "uses": [
+        "ServiceEntry"
+      ],
+      "conceptIDs": [
+        "istio.se-location"
+      ],
+      "order": 4161
+    },
+    {
+      "id": "istio.ingress-egress.location-internal",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which ServiceEntry location marks a service as part of the mesh, such as unmanaged virtual machines added to it?",
+      "back": "`MESH_INTERNAL`.",
+      "explanation": "It is typically used when the mesh is expanded to include unmanaged infrastructure.",
+      "source": "Istio docs, Service Entry reference, “ServiceEntry.Location”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/service-entry/#ServiceEntry-Location",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "MESH_INTERNAL Signifies that the service is part of the mesh. Typically used to indicate services added explicitly as part of expanding the service mesh to include unmanaged infrastructure (e.g., VMs added to a Kubernetes based service mesh).",
+      "uses": [
+        "ServiceEntry",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "istio.se-location"
+      ],
+      "order": 4168
+    },
+    {
+      "id": "istio.ingress-egress.resolution-dns",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which ServiceEntry resolution mode queries DNS asynchronously and, with no endpoints listed, resolves the name in the hosts field?",
+      "back": "`DNS`.",
+      "explanation": "If endpoints are listed, their DNS addresses are resolved instead.",
+      "source": "Istio docs, Service Entry reference, “ServiceEntry.Resolution”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/service-entry/#ServiceEntry-Resolution",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "DNS Attempt to resolve the IP address by querying the ambient DNS, asynchronously. If no endpoints are specified, the proxy will resolve the DNS address specified in the hosts field, if wildcards are not used.",
+      "uses": [
+        "ServiceEntry",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "istio.se-resolution"
+      ],
+      "order": 4175
+    },
+    {
+      "id": "istio.ingress-egress.resolution-static",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which ServiceEntry resolution mode uses the addresses listed in endpoints as the service's backing instances?",
+      "back": "`STATIC`.",
+      "explanation": "The addresses come from the entry itself rather than from a lookup.",
+      "source": "Istio docs, Service Entry reference, “ServiceEntry.Resolution”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/service-entry/#ServiceEntry-Resolution",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "STATIC Use the static IP addresses specified in endpoints (see below) as the backing instances associated with the service.",
+      "uses": [
+        "ServiceEntry"
+      ],
+      "conceptIDs": [
+        "istio.se-resolution"
+      ],
+      "order": 4182
+    },
+    {
+      "id": "istio.ingress-egress.resolution-none",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which ServiceEntry resolution mode assumes incoming connections are already resolved to a specific destination address?",
+      "back": "`NONE`.",
+      "explanation": "The proxy forwards such a connection to the address it was bound to.",
+      "source": "Istio docs, Service Entry reference, “ServiceEntry.Resolution”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/service-entry/#ServiceEntry-Resolution",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "NONE Assume that incoming connections have already been resolved (to a specific destination IP address). Such connections are typically routed via the proxy using mechanisms such as IP table REDIRECT/ eBPF. After performing any routing related transformations, the proxy will forward the connection to the IP address to which the connection was bound.",
+      "uses": [
+        "ServiceEntry",
+        "proxy"
+      ],
+      "conceptIDs": [
+        "istio.se-resolution"
+      ],
+      "order": 4189
+    },
+    {
+      "id": "istio.ingress-egress.create-serviceentry-http",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Under `REGISTRY_ONLY`, what do you create to allow access to an external HTTP service?",
+      "back": "A ServiceEntry for the external host.",
+      "explanation": "In this mode, traffic destinations must be declared in the service registry through service entries.",
+      "source": "Istio docs, Accessing External Services task, “Access an external HTTP service”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/#access-an-external-http-service",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Create a ServiceEntry to allow access to an external HTTP service.",
+      "uses": [
+        "ServiceEntry",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.external-http"
+      ],
+      "order": 4196
+    },
+    {
+      "id": "istio.ingress-egress.gateway-needs-dns",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why must the ServiceEntry for an external host reached through an egress gateway use `DNS` resolution, not `NONE`?",
+      "back": "With `NONE`, the gateway would direct the traffic to itself in an infinite loop.",
+      "explanation": "Sidecars send the request to the gateway, so its original destination address is the gateway’s own service address; with `NONE` the gateway would forward it there.",
+      "source": "Istio docs, Egress Gateways task, “Egress gateway for HTTP traffic”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/#egress-gateway-for-http-traffic",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "DNS resolution must be used in the service entry below. If the resolution is NONE, the gateway will direct the traffic to itself in an infinite loop. This is because the gateway receives a request with the original destination IP address which is equal to the serv",
+      "uses": [
+        "ServiceEntry",
+        "egress gateway",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "istio.egress-gateway-http",
+        "istio.se-resolution"
+      ],
+      "order": 4203
+    },
+    {
+      "id": "istio.ingress-egress.egress-gateway-routes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "After the ServiceEntry, what do you create to send HTTP traffic for an external host through an egress gateway?",
+      "back": "An egress Gateway for the host, and route rules sending traffic to the egress gateway and from it to the external service.",
+      "explanation": "Both hops need rules: sidecar to gateway, then gateway to the external service.",
+      "source": "Istio docs, Egress Gateways task, “Egress gateway for HTTP traffic”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/#egress-gateway-for-http-traffic",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Create an egress Gateway for edition.cnn.com and route rules to direct the traffic through the egress gateway and from the egress gateway to the external service.",
+      "uses": [
+        "egress gateway",
+        "Gateway",
+        "ServiceEntry",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.egress-gateway-http"
+      ],
+      "order": 4210
+    },
+    {
+      "id": "istio.ingress-egress.egress-https-port",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "When sending application-originated `HTTPS` through an egress gateway, which port and protocol go in the ServiceEntry and egress Gateway?",
+      "back": "Port 443 with protocol TLS.",
+      "explanation": "In this case the TLS is originated by the application itself.",
+      "source": "Istio docs, Egress Gateways task, “Egress gateway for HTTPS traffic”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/#egress-gateway-for-https-traffic",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In this section you direct HTTPS traffic (TLS originated by the application) through an egress gateway. You need to specify port 443 with protocol TLS in a corresponding ServiceEntry and egress Gateway.",
+      "uses": [
+        "egress gateway",
+        "ServiceEntry",
+        "Gateway",
+        "port",
+        "TLS origination"
+      ],
+      "conceptIDs": [
+        "istio.egress-gateway-https"
+      ],
+      "order": 4217
+    },
+    {
+      "id": "istio.ingress-egress.egress-dedicated-nodes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In the egress gateway task's first use case, what security requirement leads to an egress gateway?",
+      "back": "All traffic leaving the mesh must flow through a set of dedicated nodes.",
+      "explanation": "Those nodes run on dedicated machines, separate from the nodes running applications.",
+      "source": "Istio docs, Egress Gateways task, “Use case”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/#use-case",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Consider an organization that has a strict security requirement that all traffic leaving the service mesh must flow through a set of dedicated nodes. These nodes will run on dedicated machines, separated from the rest of the nodes running applications in the cluster.",
+      "uses": [
+        "egress gateway",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "istio.egress-gateway-use-case"
+      ],
+      "order": 4224
+    },
+    {
+      "id": "istio.ingress-egress.egress-security",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Can Istio on its own securely enforce that all egress traffic goes through the egress gateway?",
+      "back": "No: Istio only enables that flow through its sidecars, and traffic that bypasses a sidecar can skip the gateway.",
+      "explanation": "Attackers who bypass the sidecar proxy could reach external services directly, escaping Istio's control and monitoring.",
+      "source": "Istio docs, Egress Gateways task, “Additional security considerations”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/#additional-security-considerations",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio cannot securely enforce that all egress traffic actually flows through the egress gateways. Istio only enables such flow through its sidecar proxies. If attackers bypass the sidecar proxy, they could directly access external services without traversing the egress gateway.",
+      "uses": [
+        "egress gateway",
+        "egress",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.egress-security"
+      ],
+      "order": 4231
+    },
+    {
+      "id": "istio.ingress-egress.tls-origination-benefit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Besides encryption, what benefit does letting Istio perform the TLS upgrade on egress bring?",
+      "back": "Istio can produce better telemetry and more routing control for requests that are not encrypted.",
+      "explanation": "The application sends unencrypted HTTP requests from the source, and Istio performs the upgrade.",
+      "source": "Istio docs, Egress TLS Origination task, “Use case”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-tls-origination/#use-case",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Another benefit of sending unencrypted HTTP requests from the source, and letting Istio perform the TLS upgrade, is that Istio can produce better telemetry and provide more routing control for requests that are not encrypted.",
+      "uses": [
+        "TLS origination",
+        "Istio",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.tls-origination"
+      ],
+      "order": 4238
+    },
+    {
+      "id": "istio.ingress-egress.mtls-origination-sidecar",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "In Istio’s egress TLS origination task, what makes the client’s sidecar originate mutual TLS to an external server?",
+      "back": "A DestinationRule with `tls` mode `MUTUAL`, the client certificate secret in credentialName, and a workloadSelector choosing the client.",
+      "explanation": "The task's DestinationRule sets `tls` mode `MUTUAL` and names the secret that holds the client certificates; its comment says credentialName works only when the rule has a workloadSelector.",
+      "source": "Istio docs, Egress TLS Origination task, “Mutual TLS origination for egress traffic”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-tls-origination/#mutual-tls-origination-for-egress-traffic",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "tls: mode: MUTUAL credentialName: client-credential # this must match the secret created earlier to hold client certs, and works only when DR has a workloadSelector",
+      "uses": [
+        "TLS origination",
+        "mtls",
+        "egress"
+      ],
+      "conceptIDs": [
+        "istio.mtls-origination"
+      ],
+      "order": 4245
+    },
+    {
+      "id": "istio.ingress-egress.proxy-bypass-cost",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What do you give up by bypassing the sidecar for external address ranges?",
+      "back": "Monitoring of access to external services and Istio features on that traffic; it also needs cluster-provider-specific setup.",
+      "explanation": "The bypass gives services direct access to any external server, outside the proxy.",
+      "source": "Istio docs, Accessing External Services task, “Understanding what happened”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/#understanding-what-happened",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "However, configuring the proxy this way does require cluster-provider specific knowledge and configuration. Similar to the first approach, you also lose monitoring of access to external services and you can’t apply Istio features on traffic to external services.",
+      "uses": [
+        "proxy",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.proxy-bypass"
+      ],
+      "order": 4252
+    },
+    {
+      "id": "istio.ingress-egress.limit-reachability",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why might you limit which services each sidecar can reach in a larger application?",
+      "back": "Configuring every proxy to reach every other service can potentially hurt mesh performance through high memory use.",
+      "explanation": "A Sidecar resource can limit the set of services an Envoy proxy can reach.",
+      "source": "Istio docs, Traffic Management (concepts), “Sidecars”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#sidecars",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You might want to limit sidecar reachability like this in larger applications, where having every proxy configured to reach every other service in the mesh can potentially affect mesh performance due to high memory usage.",
+      "uses": [
+        "Sidecar resource",
+        "proxy",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.sidecar-resource"
+      ],
+      "order": 4259
+    },
+    {
+      "id": "istio.ingress-egress.scope-not-block",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Does limiting a Sidecar's egress hosts block traffic to destinations outside that scope?",
+      "back": "No: such traffic is treated as unmatched traffic, which is often still allowed.",
+      "explanation": "The sidecar is not able to enforce an outbound traffic restriction; the reference points to egress gateways for that.",
+      "source": "Istio docs, Sidecar reference, “Sidecar”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/sidecar/#Sidecar",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A common misunderstanding is that restricting the configuration amounts to blocking the traffic. If requests are sent to destinations not included in the scoping, the traffic will be treated as unmatched traffic, which is often still allowed. The sidecar is not able to enforce an outbound traffic restriction",
+      "uses": [
+        "Sidecar resource",
+        "egress",
+        "egress gateway"
+      ],
+      "conceptIDs": [
+        "istio.sidecar-egress-scope"
+      ],
+      "order": 4266
+    },
+    {
+      "id": "istio.ingress-egress.one-default-sidecar",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "How many Sidecar resources without a workloadSelector may one namespace have?",
+      "back": "One, which sets the default for all Pods in the namespace; its recommended name is default.",
+      "explanation": "The behaviour is undefined if a namespace has more than one selector-less Sidecar.",
+      "source": "Istio docs, Sidecar reference, “Sidecar”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/sidecar/#Sidecar",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Each namespace can have only one Sidecar configuration without any workloadSelector that specifies the default for all pods in that namespace. It is recommended to use the name default for the namespace-wide sidecar. The behavior of the system is undefined if more than one selector-less Sidecar configurations exist in a given namespace.",
+      "uses": [
+        "Sidecar resource",
+        "workloadSelector",
+        "namespace",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "istio.workloadselector"
+      ],
+      "order": 4273
+    },
+    {
+      "id": "istio.ingress-egress.exportto-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "If a VirtualService sets no exportTo, which namespaces can use it?",
+      "back": "All namespaces.",
+      "explanation": "The value “.” limits the export to the VirtualService's own namespace, and “*” means all namespaces.",
+      "source": "Istio docs, Virtual Service reference, “VirtualService”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#VirtualService",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If no namespaces are specified then the virtual service is exported to all namespaces by default. The value “.” is reserved and defines an export to the same namespace that the virtual service is declared in.",
+      "uses": [
+        "VirtualService",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.exportto"
+      ],
+      "order": 4280
+    },
+    {
+      "id": "istio.ingress-egress.unbound-gateway",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "You define an Istio Gateway on port 80 for shop.example.com, but no VirtualService names that gateway. What is missing for routing through it?",
+      "back": "A: a VirtualService that lists the gateway in its gateways field.",
+      "explanation": "The Gateway sets ports and similar settings; routing comes from a VirtualService bound to it.",
+      "source": "Istio docs, Traffic Management (concepts), “Gateway example”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#gateway-example",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To specify routing and for the gateway to work as intended, you must also bind the gateway to a virtual service. You do this using the virtual service’s gateways field",
+      "uses": [
+        "Gateway",
+        "VirtualService",
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.gateway",
+        "istio.gateway-vs-binding"
+      ],
+      "choices": "A) A VirtualService that lists the gateway in its gateways field\nB) Route rules written inside the Gateway resource\nC) A second Gateway for the same host",
+      "choicesExplained": "B: the Gateway resource has no application-layer routing; that goes in a VirtualService. C: another Gateway still has nothing bound to it.",
+      "order": 4287
+    },
+    {
+      "id": "istio.ingress-egress.deploy-egress-gateway",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Istio was installed with the default profile. You now want traffic to leave through istio-egressgateway. What must you do first?",
+      "back": "A: deploy the egress gateway, because the default profile installs only the ingress gateway.",
+      "explanation": "Both preconfigured gateways come with the demo installation, but the default profile deploys just the ingress gateway.",
+      "source": "Istio docs, Traffic Management (concepts), “Gateways”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#gateways",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "both are deployed if you use our demo installation, while just the ingress gateway is deployed with our default profile.",
+      "uses": [
+        "egress gateway",
+        "ingress gateway",
+        "configuration profile",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.ingress-gateway",
+        "istio.egress-gateway"
+      ],
+      "choices": "A) Deploy the egress gateway\nB) Nothing: the default profile installs both gateways\nC) Relabel the ingress gateway Pods as egress",
+      "choicesExplained": "B: only the demo installation deploys both. C: the preconfigured egress gateway is a deployment of its own.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "order": 4294
+    },
+    {
+      "id": "istio.ingress-egress.unexposed-path",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A VirtualService bound to an ingress Gateway routes only the prefix `/status` to an app. A client asks the gateway for `/admin` on the same host. What does it get?",
+      "back": "A: an HTTP 404 error.",
+      "explanation": "Paths that the bound VirtualService has not explicitly exposed are not routed.",
+      "source": "Istio docs, Ingress Gateways task, “Accessing ingress services”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#accessing-ingress-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Access any other URL that has not been explicitly exposed. You should see an HTTP 404 error",
+      "uses": [
+        "VirtualService",
+        "Gateway",
+        "ingress gateway",
+        "redirect",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.gateway-vs-binding"
+      ],
+      "choices": "A) An HTTP 404 error\nB) The app's answer for `/admin`\nC) A 301 redirect to `/status`",
+      "choicesExplained": "B: only the exposed prefix is routed to the app. C: a redirect happens only when a rule sets one.",
+      "order": 4301
+    },
+    {
+      "id": "istio.ingress-egress.restricted-binding",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A Gateway server lists hosts `shop/*` and `blog/www.example.org`. A VirtualService in namespace blog, for host api.example.org, tries to bind. Can it?",
+      "back": "A: no; from blog, only a VirtualService for www.example.org may bind.",
+      "explanation": "The namespace/hostname syntax restricts which virtual services can bind to the server.",
+      "source": "Istio docs, Gateway reference, “Gateway”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#Gateway",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It is possible to restrict the set of virtual services that can bind to a gateway server using the namespace/hostname syntax in the hosts field.",
+      "uses": [
+        "Gateway",
+        "VirtualService",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "istio.gateway-server"
+      ],
+      "choices": "A) No: from blog, only www.example.org may bind\nB) Yes: any VirtualService in blog may bind\nC) Yes: any VirtualService in any namespace may bind",
+      "choicesExplained": "B would need `blog/*`. C: the server lists only shop and blog, each with its own hostnames.",
+      "order": 4308
+    },
+    {
+      "id": "istio.ingress-egress.selector-no-match",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Your ingress gateway Pods carry the label `istio: ingressgateway`. A new Gateway has selector `app: edge`, a label no Pod has. What is wrong?",
+      "back": "A: the selector picks no gateway Pods; it should match the gateway Pods' labels.",
+      "explanation": "The selector's labels decide which Pods or virtual machines receive the Gateway configuration.",
+      "source": "Istio docs, Gateway reference, “Gateway”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/gateway/#Gateway",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "One or more labels that indicate a specific set of pods/VMs on which this gateway configuration should be applied.",
+      "uses": [
+        "Gateway",
+        "label",
+        "Pod",
+        "ingress gateway"
+      ],
+      "conceptIDs": [
+        "istio.gateway-selector"
+      ],
+      "choices": "A) The selector picks no gateway Pods\nB) Nothing: the Gateway applies to all workloads anyway\nC) Nothing: Gateways always apply to istio-ingressgateway",
+      "choicesExplained": "B: a Gateway applies to all workloads only when its selector is nil. C: the selector, not the gateway's name, decides where it applies.",
+      "order": 4315
+    },
+    {
+      "id": "istio.ingress-egress.pending-external-ip",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "`kubectl get svc` shows the ingress gateway's `EXTERNAL-IP` stuck at pending. What does that tell you, and what can you try?",
+      "back": "A: the environment has no external load balancer for the gateway; try its node ports.",
+      "explanation": "A perpetually pending value means no external load balancer is provided for the ingress gateway.",
+      "source": "Istio docs, Ingress Gateways task, “Determining the ingress IP and ports”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If the EXTERNAL-IP value is <none> (or perpetually <pending>), your environment does not provide an external load balancer for the ingress gateway. If your environment does not support external load balancers, you can try accessing the ingress gateway using node ports.",
+      "uses": [
+        "kubectl",
+        "ingress gateway",
+        "load balancer",
+        "Gateway",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.ingress-ip-ports",
+        "istio.ingress-nodeport"
+      ],
+      "choices": "A) No external load balancer; try the node ports\nB) The Gateway has no selector\nC) No VirtualService is bound yet",
+      "choicesExplained": "B and C are Istio configuration issues; the external address comes from the gateway's LoadBalancer Service.",
+      "order": 4322
+    },
+    {
+      "id": "istio.ingress-egress.gateway-api-provision",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "You create a Gateway API Gateway named web with the GatewayClass istio, and nothing else. What does Istio do by default?",
+      "back": "A: it provisions a Service and a Deployment named web-istio.",
+      "explanation": "Each Gateway automatically provisions a Service and Deployment named after the Gateway and its GatewayClass.",
+      "source": "Istio docs, Kubernetes Gateway API task, “Automated deployment”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/#automated-deployment",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, each Gateway will automatically provision a Service and Deployment. These will be named <Gateway name>-<GatewayClass name> (with the exception of the istio-waypoint GatewayClass, which does not append a suffix).",
+      "uses": [
+        "Gateway API",
+        "Service",
+        "Deployment",
+        "VirtualService",
+        "ingress gateway",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.gateway-api-ingress",
+        "istio.gateway-api-deploy"
+      ],
+      "choices": "A) Provisions a Service and Deployment named web-istio\nB) Nothing until you install istio-ingressgateway\nC) Creates a VirtualService named web",
+      "choicesExplained": "B: in the Gateway API the Gateway resource deploys the gateway itself. C: routes come from separate route resources, not generated VirtualServices.",
+      "order": 4329
+    },
+    {
+      "id": "istio.ingress-egress.registry-only-fix",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "The mesh uses `REGISTRY_ONLY`. A Pod's calls to api.partner.example fail, while calls to services in the mesh work. What fixes it?",
+      "back": "A: a ServiceEntry for api.partner.example.",
+      "explanation": "In this mode unknown outbound traffic is dropped, so destinations must be declared through ServiceEntry configurations.",
+      "source": "Istio docs, Sidecar reference, “OutboundTrafficPolicy.Mode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/sidecar/#OutboundTrafficPolicy-Mode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In REGISTRY_ONLY mode, unknown outbound traffic will be dropped. Traffic destinations must be explicitly declared into the service registry through ServiceEntry configurations.",
+      "uses": [
+        "ServiceEntry",
+        "Pod",
+        "DestinationRule",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.outbound-policy",
+        "istio.serviceentry",
+        "istio.external-http"
+      ],
+      "choices": "A) A ServiceEntry for api.partner.example\nB) A DestinationRule for api.partner.example\nC) A VirtualService for api.partner.example on its own",
+      "choicesExplained": "B: DestinationRule rules for services not in the service registry are ignored. C: a route's destination must exist in the service registry.",
+      "order": 4336
+    },
+    {
+      "id": "istio.ingress-egress.default-install-external",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "On an install with default settings, a Pod calls an external site that has no ServiceEntry. What happens?",
+      "back": "A: the call is allowed, with limited functionality such as reduced observability.",
+      "explanation": "The default mode is `ALLOW_ANY`, which allows traffic to unknown destinations.",
+      "source": "Istio docs, Sidecar reference, “OutboundTrafficPolicy.Mode”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/sidecar/#OutboundTrafficPolicy-Mode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "ALLOW_ANY In ALLOW_ANY mode, any traffic to unknown destinations will be allowed. Unknown destination traffic will have limited functionality, however, such as reduced observability.",
+      "uses": [
+        "ServiceEntry",
+        "Pod",
+        "egress gateway",
+        "observability"
+      ],
+      "conceptIDs": [
+        "istio.outbound-default",
+        "istio.egress"
+      ],
+      "choices": "A) It is allowed, with limited functionality\nB) It is dropped\nC) It is sent through the egress gateway",
+      "choicesExplained": "B describes `REGISTRY_ONLY`, which is not the default. C: traffic goes through an egress gateway only when route rules send it there.",
+      "order": 4343
+    },
+    {
+      "id": "istio.ingress-egress.external-timeout",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "Calls from the mesh to api.weather.example need a timeout rule. What do you configure?",
+      "back": "A: a ServiceEntry for the host, plus a VirtualService rule with the timeout.",
+      "explanation": "Routing rules can be configured for external services that are accessed using ServiceEntry configurations.",
+      "source": "Istio docs, Accessing External Services task, “Manage traffic to external services”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/#manage-traffic-to-external-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Similar to inter-cluster requests, routing rules can also be configured for external services that are accessed using ServiceEntry configurations. In this example, you set a timeout rule on calls to the httpbin.org service.",
+      "uses": [
+        "ServiceEntry",
+        "VirtualService",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "istio.external-traffic-mgmt",
+        "istio.serviceentry"
+      ],
+      "choices": "A) A ServiceEntry plus a VirtualService rule with the timeout\nB) A timeout field on the calling Deployment\nC) Nothing extra: passthrough traffic takes routing rules too",
+      "choicesExplained": "B: the timeout is a routing rule in the mesh. C: Istio features cannot control traffic to destinations that are not registered in the mesh.",
+      "order": 4350
+    },
+    {
+      "id": "istio.ingress-egress.vm-database-location",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A database on unmanaged virtual machines is being brought into the mesh as a mesh service. Which ServiceEntry location fits?",
+      "back": "A: `MESH_INTERNAL`.",
+      "explanation": "This location signifies that the service is part of the mesh, such as unmanaged machines added to it.",
+      "source": "Istio docs, Service Entry reference, “ServiceEntry.Location”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/service-entry/#ServiceEntry-Location",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "MESH_INTERNAL Signifies that the service is part of the mesh. Typically used to indicate services added explicitly as part of expanding the service mesh to include unmanaged infrastructure",
+      "uses": [
+        "ServiceEntry",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "istio.se-location"
+      ],
+      "choices": "A) `MESH_INTERNAL`\nB) `MESH_EXTERNAL`",
+      "choicesExplained": "B is for services external to the mesh, typically consumed through APIs.",
+      "order": 4357
+    },
+    {
+      "id": "istio.ingress-egress.resolution-none-risk",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A ServiceEntry for an external HTTP API uses resolution `NONE`. What risk do Istio's docs point out?",
+      "back": "A client could claim the external host in its Host header while really connecting somewhere else.",
+      "explanation": "The docs use `DNS` resolution for their external HTTP example as a security measure.",
+      "source": "Istio docs, Accessing External Services task, “Access an external HTTP service”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/#access-an-external-http-service",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "DNS resolution is used in the service entry below as a security measure. Setting the resolution to NONE opens a possibility for attack. A malicious client could pretend that it’s accessing httpbin.org by setting it in the HOST header, while really connecting to a different IP",
+      "uses": [
+        "ServiceEntry",
+        "DNS",
+        "Istio",
+        "http",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "istio.se-resolution",
+        "istio.external-http"
+      ],
+      "order": 4364
+    },
+    {
+      "id": "istio.ingress-egress.https-serviceentry",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "The mesh uses `REGISTRY_ONLY`, and an app calls `https://api.maps.example` on port 443. Which ServiceEntry settings fit?",
+      "back": "A: host api.maps.example, port 443 with protocol `HTTPS`, location `MESH_EXTERNAL`, resolution `DNS`.",
+      "explanation": "The docs' external `HTTPS` entry uses port 443, protocol `HTTPS`, `DNS` resolution and the `MESH_EXTERNAL` location.",
+      "source": "Istio docs, Accessing External Services task, “Access an external HTTPS service”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-control/#access-an-external-https-service",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "ports: - number: 443 name: https protocol: HTTPS resolution: DNS location: MESH_EXTERNAL",
+      "uses": [
+        "ServiceEntry",
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.external-https",
+        "istio.se-location"
+      ],
+      "choices": "A) Port 443, protocol `HTTPS`, `MESH_EXTERNAL`, `DNS`\nB) Port 443, `MESH_INTERNAL`, resolution `NONE`\nC) No ServiceEntry: the mode allows encrypted traffic",
+      "choicesExplained": "B marks the service as part of the mesh, and `NONE` opens a possibility for attack. C: `REGISTRY_ONLY` blocks any host without a service entry.",
+      "order": 4371
+    },
+    {
+      "id": "istio.ingress-egress.no-public-addresses",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Your application nodes have no public addresses, yet some services must call an external API. What design does the egress gateway task describe?",
+      "back": "Send all egress traffic through an egress gateway whose nodes are given public addresses.",
+      "explanation": "This lets the application nodes reach external services in a controlled way.",
+      "source": "Istio docs, Egress Gateways task, “Use case”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/#use-case",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Another use case is a cluster where the application nodes don’t have public IPs, so the in-mesh services that run on them cannot access the Internet. Defining an egress gateway, directing all the egress traffic through it, and allocating public IPs to the egress gateway nodes allows the application nodes to access external services in a controlled way.",
+      "uses": [
+        "egress gateway",
+        "egress",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "istio.egress-gateway-use-case",
+        "istio.egress-gateway"
+      ],
+      "order": 4378
+    },
+    {
+      "id": "istio.ingress-egress.missing-egress-routes",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Egress to api.partner.example must pass the egress gateway. The ServiceEntry and the egress Gateway exist, but traffic still goes straight from sidecars to the host. What is missing?",
+      "back": "A: route rules sending traffic from sidecars to the egress gateway, and from it to the host.",
+      "explanation": "The egress Gateway needs route rules for both hops to direct traffic through it.",
+      "source": "Istio docs, Egress Gateways task, “Egress gateway for HTTP traffic”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/#egress-gateway-for-http-traffic",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Create an egress Gateway for edition.cnn.com and route rules to direct the traffic through the egress gateway and from the egress gateway to the external service.",
+      "uses": [
+        "egress gateway",
+        "ServiceEntry",
+        "Gateway",
+        "Sidecar resource",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.egress-gateway-http"
+      ],
+      "choices": "A) Route rules for both hops\nB) A DestinationRule with round robin load balancing\nC) A Sidecar resource for the calling namespace",
+      "choicesExplained": "B: load balancing acts after routing and does not choose the gateway. C: limiting a sidecar's scope does not route or restrict its traffic.",
+      "order": 4385
+    },
+    {
+      "id": "istio.ingress-egress.egress-enforcement",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A reviewer says: “We have an egress gateway, so Pods cannot reach the Internet any other way.” What else is needed to make that true?",
+      "back": "A: controls outside Istio, such as a firewall or Kubernetes network policies, that deny egress not coming from the gateway.",
+      "explanation": "Mechanisms external to Istio must ensure no traffic leaves the mesh bypassing the egress gateway.",
+      "source": "Istio docs, Egress Gateways task, “Additional security considerations”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-gateway/#additional-security-considerations",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For example, the cluster administrator can configure a firewall to deny all traffic not coming from the egress gateway. The Kubernetes network policies can also forbid all the egress traffic not originating from the egress gateway",
+      "uses": [
+        "egress gateway",
+        "Pod",
+        "egress"
+      ],
+      "conceptIDs": [
+        "istio.egress-security"
+      ],
+      "choices": "A) Controls outside Istio, such as a firewall or network policies\nB) Nothing more\nC) Setting `REGISTRY_ONLY`",
+      "choicesExplained": "B: Istio cannot securely enforce that all egress flows through the gateway. C: `REGISTRY_ONLY` is not any form of outbound firewall.",
+      "order": 4392
+    },
+    {
+      "id": "istio.ingress-egress.encrypt-without-code",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A billing job calls a partner's API over plain HTTP. Auditors now require that traffic to be encrypted, and the job's code cannot change. What can Istio do?",
+      "back": "A: TLS origination: the job keeps sending HTTP, and Istio opens `HTTPS` to the partner.",
+      "explanation": "Configuration alone meets the requirement: Istio encrypts the job’s plain requests. The hop from the job to its own sidecar on the node stays unencrypted.",
+      "source": "Istio docs, Egress TLS Origination task, “Egress TLS Origination”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/egress/egress-tls-origination/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Istio will open HTTPS connections to the external service while the original traffic is HTTP.",
+      "uses": [
+        "TLS origination",
+        "ingress gateway",
+        "Istio",
+        "http",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "istio.tls-origination"
+      ],
+      "choices": "A) TLS origination\nB) `SNI` passthrough at the ingress gateway\nC) Setting `REGISTRY_ONLY`",
+      "choicesExplained": "B concerns incoming `HTTPS`, where the gateway passes TLS through instead of terminating it. C only blocks destinations not in the registry.",
+      "order": 4399
+    },
+    {
+      "id": "istio.ingress-egress.trim-sidecar-config",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "In a very large mesh, proxies use a lot of memory. The payments team only calls services in its own namespace and istio-system. What helps?",
+      "back": "A: a Sidecar resource in payments that limits its egress hosts to those namespaces.",
+      "explanation": "Scoping outbound configuration with a Sidecar prunes unneeded configuration to improve the mesh's scalability.",
+      "source": "Istio docs, Sidecar reference, “Sidecar”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/sidecar/#Sidecar",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "common usages of Sidecar is to limit the set of configuration for outbound traffic. This configuration scoping, among other options, is useful to prune out unneeded configuration, to improve scalability of the mesh.",
+      "uses": [
+        "Sidecar resource",
+        "namespace",
+        "egress gateway",
+        "proxy"
+      ],
+      "conceptIDs": [
+        "istio.sidecar-resource",
+        "istio.workloadselector"
+      ],
+      "choices": "A) A Sidecar resource limiting payments' egress hosts\nB) Setting `REGISTRY_ONLY`\nC) An egress gateway",
+      "choicesExplained": "B blocks unknown external hosts but does not trim the in-mesh configuration each proxy holds. C handles traffic leaving the mesh, not proxy configuration size.",
+      "order": 4406
+    },
+    {
+      "id": "istio.ingress-egress.scoped-still-reaches",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "After a Sidecar limits the payments namespace's egress hosts to its own namespace, a developer expects calls to an external site to be blocked. Are they?",
+      "back": "B: not necessarily; traffic outside the scope is treated as unmatched, which is often still allowed.",
+      "explanation": "The sidecar is not able to enforce an outbound traffic restriction; the reference points to egress gateways for that.",
+      "source": "Istio docs, Sidecar reference, “Sidecar”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/sidecar/#Sidecar",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If requests are sent to destinations not included in the scoping, the traffic will be treated as unmatched traffic, which is often still allowed.",
+      "uses": [
+        "Sidecar resource",
+        "namespace",
+        "egress gateway"
+      ],
+      "conceptIDs": [
+        "istio.sidecar-egress-scope"
+      ],
+      "choices": "A) Yes: out-of-scope calls are blocked\nB) Not necessarily: they are treated as unmatched, which is often still allowed",
+      "choicesExplained": "A is the common misunderstanding that restricting configuration amounts to blocking traffic.",
+      "order": 4413
+    },
+    {
+      "id": "istio.ingress-egress.gateway-vs-k8s-ingress",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does an Istio ingress Gateway differ from a Kubernetes Ingress resource?",
+      "back": "It sets exposed ports and protocols but no traffic routing; routing comes from routing rules.",
+      "explanation": "Ingress traffic is routed with routing rules exactly as internal service requests are.",
+      "source": "Istio docs, Ingress Gateways task, “Configuring ingress using a gateway”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#configuring-ingress-using-a-gateway",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It configures exposed ports, protocols, etc. but, unlike Kubernetes Ingress Resources, does not include any traffic routing configuration. Traffic routing for ingress traffic is instead configured using routing rules, exactly in the same way as for internal service requests.",
+      "uses": [
+        "Gateway",
+        "Ingress",
+        "ingress gateway",
+        "port"
+      ],
+      "conceptIDs": [
+        "istio.ingress-gateway",
+        "istio.gateway"
+      ],
+      "order": 4420
+    },
+    {
+      "id": "istio.ingress-egress.who-deploys-gateway",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Who deploys the gateway, with an Istio Gateway compared with a Gateway API Gateway?",
+      "back": "An Istio Gateway configures an already deployed gateway; a Gateway API Gateway both configures and deploys one.",
+      "explanation": "With the Istio API you deploy the gateway Deployment and Service separately and point the Gateway at it.",
+      "source": "Istio docs, Kubernetes Gateway API task, “Differences from Istio APIs”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/#differences-from-istio-apis",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In Istio APIs, a Gateway configures an existing gateway Deployment/Service that has been deployed. In the Gateway APIs, the Gateway resource both configures and deploys a gateway.",
+      "uses": [
+        "Gateway",
+        "Gateway API",
+        "Deployment",
+        "Service",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.gateway-api-vs-istio"
+      ],
+      "order": 4427
+    },
+    {
+      "id": "istio.ingress-egress.protocols-per-resource",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How are protocols spread across resources in Istio's VirtualService compared with the Gateway API?",
+      "back": "A VirtualService configures all protocols in one resource; the Gateway API has a resource per protocol, such as HTTPRoute and TCPRoute.",
+      "explanation": "The Gateway API does not yet cover all of Istio's feature set, although its routing is rich.",
+      "source": "Istio docs, Kubernetes Gateway API task, “Differences from Istio APIs”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/#differences-from-istio-apis",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In the Istio VirtualService, all protocols are configured within a single resource. In the Gateway APIs, each protocol type has its own resource, such as HTTPRoute and TCPRoute. While the Gateway APIs offer a lot of rich routing functionality, it does not yet cover 100% of Istio’s feature set.",
+      "uses": [
+        "VirtualService",
+        "Gateway API",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "istio.gateway-api-vs-istio"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "order": 4434
+    },
+    {
+      "id": "istio.ingress-egress.origination-vs-passthrough",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does TLS origination on egress differ from `SNI` passthrough at an ingress gateway?",
+      "back": "Origination: Istio opens TLS to an external service for plain HTTP traffic. Passthrough: the gateway does not terminate incoming TLS.",
+      "explanation": "Passthrough is how the docs give ingress access to an `HTTPS` service, instead of terminating TLS at the gateway.",
+      "source": "Istio docs, Ingress Gateway without TLS Termination task, “Ingress Gateway without TLS Termination”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-sni-passthrough/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "configure HTTPS ingress access to an HTTPS service, i.e., configure an ingress gateway to perform SNI passthrough, instead of TLS termination on incoming requests.",
+      "uses": [
+        "TLS origination",
+        "ingress gateway",
+        "egress",
+        "Istio",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.tls-origination"
+      ],
+      "order": 4441
+    }
+  ]
+}

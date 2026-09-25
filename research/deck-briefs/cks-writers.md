@@ -1,0 +1,25 @@
+# CKS: notes for every writer (read after DIGEST.md)
+
+- **Slug:** `cks`. **Family prefix:** `cks` (card ids `cks.<topic-slug>.<card-slug>`, concept ids `cks.<concept-slug>`). Use the concept ids in `cks-concepts.json`; add new ones only when a card needs them.
+- **Builds on:** `kcna`, `kcsa`. Their registry terms (topic 0) count as taught: never re-introduce them.
+- **Sources, their tiers and licence labels.** The label must match src/licences.json for the host. Tier A or B: "B · <licence>", with evidence. Tier C: "C · facts only, in our own words", with no evidence.
+  - github.com → tier B ("The Curriculum is available under the [CC-BY 4.0+ License]" (cncf/curriculum RE)
+  - training.linuxfoundation.org → tier C ("© 2026 Linux Foundation - Education. The Linux Foundation®. All rights reserved)
+  - docs.linuxfoundation.org → tier C (No licence stated)
+  - www.linuxfoundation.org → tier C (No licence stated (naming facts only))
+  - kubernetes.io → tier B ("© 2026 The Kubernetes Authors | Documentation Distributed under CC BY 4.0" (liv)
+  - falco.org → tier B (falco-website repo LICENSE: "Attribution 4.0 International"; page footer "© 2026)
+  - trivy.dev → tier B (aquasecurity/trivy repo LICENSE: "Apache License Version 2.0, January 2004" (doc)
+  - kubernetes-sigs.github.io → tier B (kubernetes-sigs/bom LICENSE: "Apache License Version 2.0, January 2004")
+  - kubernetes.github.io → tier B (kubernetes/ingress-nginx LICENSE: "Apache License Version 2.0, January 2004")
+  - etcd.io → tier B (etcd-io/website LICENSE: "Except as otherwise noted, the content of this reposit)
+  - docs.cilium.io → tier B (Page: "© Copyright Cilium Authors." cilium/cilium LICENSE: "Apache License Versi)
+  - istio.io → tier B (Page: "© 2026 the Istio Authors." istio/istio.io LICENSE: "Apache License Versio)
+  - gvisor.dev → tier B (google/gvisor LICENSE: "Apache License Version 2.0, January 2004"; no licence li)
+  - docs.docker.com → tier C (Page footer: "Copyright © 2013-2026 Docker Inc. All rights reserved." (docker/do)
+  - nvlpubs.nist.gov → tier B (B · public domain (US Government work) (KCSA manifest))
+  - attack.mitre.org → tier C (C · facts only, in our own words (KCSA manifest))
+- **Evidence is required.** The texts are in `research/sources/cks/`; the slice prints a passage under each concept.
+- **Volatile facts:** `volatile: true`, `validAsOf: "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"`.
+- **Scenarios:** your own. Never reuse a source's worked examples or exercises.
+- **Deck notice:** already in deck.json.

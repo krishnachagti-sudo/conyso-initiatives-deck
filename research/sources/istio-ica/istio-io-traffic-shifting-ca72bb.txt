@@ -1,0 +1,222 @@
+https://istio.io/latest/docs/tasks/traffic-management/traffic-shifting/
+
+
+
+Documentation
+
+Tasks
+
+Traffic Management
+
+Traffic Shifting
+
+# {#title} Traffic Shifting
+
+ 4 minute read
+
+page test
+
+Before you begin
+Apply weight-based routing
+Understanding what happened
+Cleanup
+See also
+
+This task shows you how to shift traffic from one version of a microservice to another.
+
+A common use case is to migrate traffic gradually from an older version of a microservice to a new one.
+In Istio, you accomplish this goal by configuring a sequence of routing rules that redirect a percentage of traffic
+from one destination to another.
+
+In this task, you will use send 50% of traffic to reviews:v1 and 50% to reviews:v3. Then, you will
+complete the migration by sending 100% of traffic to reviews:v3.
+
+Istio supports the Kubernetes Gateway API and intends to make it the default API for traffic management in the future.
+The following instructions allow you to choose to use either the Gateway API or the Istio configuration API when configuring
+traffic management in the mesh. Follow instructions under either the Gateway API or Istio APIs tab,
+according to your preference.
+
+Note that the Kubernetes Gateway API CRDs do not come installed by default on most Kubernetes clusters, so make sure they are
+installed before using the Gateway API:
+
+$ kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
+  kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.0/experimental-install.yaml
+
+## {#before-you-begin} Before you begin
+
+Setup Istio by following the instructions in the
+Installation guide.
+
+Deploy the Bookinfo sample application.
+
+Review the Traffic Management concepts doc.
+
+## {#apply-weight-based-routing} Apply weight-based routing
+
+If you haven’t already, follow the instructions in define the service versions.
+
+To get started, run this command to route all traffic to the v1 version:
+
+Istio APIs
+Gateway API
+
+Zip
+$ kubectl apply -f @samples/bookinfo/networking/virtual-service-all-v1.yaml@
+
+Zip
+$ kubectl apply -f @samples/bookinfo/gateway-api/route-reviews-v1.yaml@
+
+Open the Bookinfo site in your browser. The URL is http://$GATEWAY_URL/productpage, where $GATEWAY_URL is the External IP address of the ingress, as explained in
+the Bookinfo doc.
+
+Notice that the reviews part of the page displays with no rating stars, no
+matter how many times you refresh. This is because you configured Istio to route
+all traffic for the reviews service to the version reviews:v1 and this
+version of the service does not access the star ratings service.
+
+Transfer 50% of the traffic from reviews:v1 to reviews:v3 with the following command:
+
+Istio APIs
+Gateway API
+
+Zip
+$ kubectl apply -f @samples/bookinfo/networking/virtual-service-reviews-50-v3.yaml@
+
+Zip
+$ kubectl apply -f @samples/bookinfo/gateway-api/route-reviews-50-v3.yaml@
+
+Wait a few seconds for the new rules to propagate and then
+confirm the rule was replaced:
+
+Istio APIs
+Gateway API
+
+$ kubectl get virtualservice reviews -o yaml
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+...
+spec:
+  hosts:
+  - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+      weight: 50
+    - destination:
+        host: reviews
+        subset: v3
+      weight: 50
+
+$ kubectl get httproute reviews -o yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+...
+spec:
+  parentRefs:
+  - group: ""
+    kind: Service
+    name: reviews
+    port: 9080
+  rules:
+  - backendRefs:
+    - group: ""
+      kind: Service
+      name: reviews-v1
+      port: 9080
+      weight: 50
+    - group: ""
+      kind: Service
+      name: reviews-v3
+      port: 9080
+      weight: 50
+    matches:
+    - path:
+        type: PathPrefix
+        value: /
+status:
+  parents:
+  - conditions:
+    - lastTransitionTime: "2022-11-10T18:13:43Z"
+      message: Route was valid
+      observedGeneration: 14
+      reason: Accepted
+      status: "True"
+      type: Accepted
+...
+
+Refresh the /productpage in your browser and you now see red colored star ratings approximately 50% of the time. This is because the v3 version of reviews accesses
+the star ratings service, but the v1 version does not.
+
+With the current Envoy sidecar implementation, you may need to refresh the
+/productpage many times –perhaps 15 or more–to see the proper distribution.
+You can modify the rules to route 90% of the traffic to v3 to see red stars
+more often.
+
+Assuming you decide that the reviews:v3 microservice is stable, you can
+route 100% of the traffic to reviews:v3 by applying this virtual service:
+
+Istio APIs
+Gateway API
+
+Zip
+$ kubectl apply -f @samples/bookinfo/networking/virtual-service-reviews-v3.yaml@
+
+Zip
+$ kubectl apply -f @samples/bookinfo/gateway-api/route-reviews-v3.yaml@
+
+Refresh the /productpage several times. Now you will always see book reviews
+with red colored star ratings for each review.
+
+## {#understanding-what-happened} Understanding what happened
+
+In this task you migrated traffic from an old to new version of the reviews service using Istio’s weighted routing feature. Note that this is very different than doing version migration using the deployment features of container orchestration platforms, which use instance scaling to manage the traffic.
+
+With Istio, you can allow the two versions of the reviews service to scale up and down independently, without affecting the traffic distribution between them.
+
+For more information about version routing with autoscaling, check out the blog
+article Canary Deployments using Istio.
+
+## {#cleanup} Cleanup
+
+Remove the application routing rules:
+
+Istio APIs
+Gateway API
+
+Zip
+$ kubectl delete -f @samples/bookinfo/networking/virtual-service-all-v1.yaml@
+
+$ kubectl delete httproute reviews
+
+If you are not planning to explore any follow-on tasks, refer to the
+Bookinfo cleanup instructions
+to shutdown the application.
+
+See also
+
+Simplifying Egress Routing to Wildcard Destinations
+
+Istio now supports wildcard ServiceEntry with DYNAMIC_DNS resolution, allowing sidecars to route traffic directly to wildcard HTTPS destinations while simplifying egress configuration.
+
+Routing egress traffic to wildcard destinations
+
+A generic approach to set up egress gateways that can route traffic to a restricted set of target remote hosts dynamically, including wildcard domains.
+
+Getting started with the Kubernetes Gateway API
+
+Using the Gateway API to configure ingress traffic for your Kubernetes cluster.
+
+Extending Gateway API support in Istio
+
+A standard API for service mesh, in Istio and in the broader community.
+
+Direct encrypted traffic from IBM Cloud Kubernetes Service Ingress to Istio Ingress Gateway
+
+Configure the IBM Cloud Kubernetes Service Application Load Balancer to direct traffic to the Istio Ingress gateway with mutual TLS.
+
+Multicluster Istio configuration and service discovery using Admiral
+
+Automating Istio configuration for Istio deployments (clusters) that work as a single mesh.
+

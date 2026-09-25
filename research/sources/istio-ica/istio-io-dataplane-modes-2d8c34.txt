@@ -1,0 +1,215 @@
+https://istio.io/latest/docs/overview/dataplane-modes/
+
+
+
+Documentation
+
+Overview
+
+Sidecar or ambient?
+
+# {#title} Sidecar or ambient?
+
+ 5 minute read
+
+Sidecar mode
+Ambient mode
+Choosing between sidecar and ambient
+Layer 4 vs Layer 7 features
+
+Security
+Observability
+Traffic management
+
+Unsupported features
+See also
+
+An Istio service mesh is logically split into a data plane and a control plane.
+
+The sidecar mode, Istio&rsquo;s data plane uses Envoy proxies deployed as sidecars to mediate and control all traffic that your mesh services send and receive.
+
+In ambient mode, Istio&rsquo;s data plane uses node-level ztunnel proxies deployed as a DaemonSet to mediate and control all traffic that your mesh services send and receive.
+
+'>data plane is the set of proxies that mediate and control all network communication between microservices. They also collect and report telemetry on all mesh traffic.
+
+The control plane manages and configures the proxies in the data plane.
+
+Istio supports two main data plane is using.
+Istio currently supports three modes: sidecar mode, ambient mode, and proxyless.
+
+'>data plane modes:
+
+sidecar mode, which deploys an Envoy proxy along with each pod that you start in your cluster, or running alongside services running on VMs.
+
+ambient mode, which uses a per-node Layer 4 proxy, and optionally a per-namespace Envoy proxy for Layer 7 features.
+
+You can opt certain namespaces or workloads into each mode.
+
+## {#sidecar-mode} Sidecar mode
+
+Istio has been built on the sidecar pattern from its first release in 2017. Sidecar mode is well understood and thoroughly battle-tested, but comes with a resource cost and operational overhead.
+
+Each application you deploy has an Envoy proxy mutating webhooks to modify pod specifications at creation time.
+
+Injection can be used to add the Envoy sidecar configuration for mesh services or to configure the Envoy proxy of gateways.
+
+See Installing the sidecar for more information.
+
+'>injected as a sidecar
+
+All proxies can process both Layer 4 and Layer 7
+
+## {#ambient-mode} Ambient mode
+
+Launched in 2022, ambient mode was built to address the shortcomings reported by users of sidecar mode. As of Istio 1.22, it is production-ready for single cluster use cases.
+
+All traffic is proxied through a Layer 4-only node proxy
+
+Applications can opt in to routing through an Envoy proxy to get Layer 7 features
+
+## {#choosing-between-sidecar-and-ambient} Choosing between sidecar and ambient
+
+Users often deploy a mesh to enable a zero-trust security posture as a first-step and then selectively enable L7 capabilities as needed. Ambient mesh allows those users to bypass the cost of L7 processing entirely when it’s not needed.
+
+SidecarAmbient
+
+Traffic managementFull Istio feature setFull Istio feature set (requires using waypoint)
+
+SecurityFull Istio feature setFull Istio feature set: encryption and L4 authorization in ambient mode. Requires waypoints for L7 authorization.
+
+ObservabilityFull Istio feature setFull Istio feature set: L4 telemetry in ambient mode; L7 observability when using waypoint
+
+ExtensibilityFull Istio feature setVia WebAssembly plugins (requires using waypoint)
+The EnvoyFilter API is not supported.
+
+Adding workloads to the meshLabel a namespace and restart all pods to have sidecars addedLabel a namespace - no pod restart required
+
+Incremental deploymentBinary: sidecar is injected or it isn'tGradual: L4 is always on, L7 can be added by configuration
+
+Lifecycle managementProxies managed by application developerPlatform administrator
+
+Utilization of resourcesWasteful; CPU and memory resources must be provisioned for worst case usage of each individual podWaypoint proxies can be auto-scaled like any other Kubernetes deployment.
+A workload with many replicas can use one waypoint, vs. each one having its own sidecar.
+
+Average resource costLargeSmall
+
+Average latency (p90/p99)0.63ms-0.88msAmbient: 0.16ms-0.20ms
+Waypoint: 0.40ms-0.50ms
+
+L7 processing steps2 (source and destination sidecar)1 (destination waypoint)
+
+Configuration at scaleRequires configuration of the scope of each sidecar to reduce configurationWorks without custom configuration
+
+Supports "server-first" protocolsRequires configurationYes
+
+Support for Kubernetes JobsComplicated by long life of sidecarTransparent
+
+Security modelStrongest: each workload has its own keysStrong: each node agent has only the keys for workloads on that node
+
+Compromised application pod
+gives access to mesh keysYesNo
+
+SupportStable, including multi-clusterStable, only single-cluster
+
+Platforms supportedKubernetes (any CNI)
+Virtual machinesKubernetes (any CNI)
+
+## {#layer-4-vs-layer-7-features} Layer 4 vs Layer 7 features
+
+The overhead for processing protocols at Layer 7 is substantially higher than processing network packets at Layer 4. For a given service, if your requirements can be met at L4, service mesh can be delivered at substantially lower cost.
+
+### {#security} Security
+
+L4L7
+
+EncryptionAll traffic between pods is encrypted using Learn more about mutual TLS authentication.
+
+'>mTLS.N/A—service identity in Istio is based on TLS.
+
+Service-to-service authenticationLearn more about SPIFFE.
+
+'>SPIFFE, via mTLS certificates. Istio issues a short-lived X.509 certificate that encodes the pod's service account identity.N/A—service identity in Istio is based on TLS.
+
+Service-to-service authorizationNetwork-based authorization, plus identity-based policy, e.g.:
+
+A can accept inbound calls from only "10.2.0.0/16";
+
+A can call B.
+
+Full policy, e.g.:
+
+A can GET /foo on B only with valid end-user credentials containing the READ scope.
+
+End-user authenticationN/A—we can't apply per-user settings.Local authentication of JWTs, support for remote authentication via OAuth and OIDC flows.
+
+End-user authorizationN/A—see above.Service-to-service policies can be extended to require end-user credentials with specific scopes, issuers, principal, audiences, etc.
+Full user-to-resource access can be implemented using external authorization, allowing per-request policy with decisions from an external service, e.g. OPA.
+
+### {#observability} Observability
+
+L4L7
+
+LoggingBasic network information: network 5-tuple, bytes sent/received, etc. See Envoy docs.Full request metadata logging, in addition to basic network information.
+
+TracingNot today; possible eventually with HBONE.Envoy participates in distributed tracing. See Istio overview on tracing.
+
+MetricsTCP only (bytes sent/received, number of packets, etc.).L7 RED metrics: rate of requests, rate of errors, request duration (latency).
+
+### {#traffic-management} Traffic management
+
+L4L7
+
+Load balancingConnection level only. See TCP traffic shifting task.Per request, enabling e.g. canary deployments, gRPC traffic, etc. See HTTP traffic shifting task.
+
+Circuit breakingTCP only.HTTP settings in addition to TCP.
+
+Outlier detectionOn connection establishment/failure.On request success/failure.
+
+Rate limitingRate limit on L4 connection data only, on connection establishment, with global and local rate limiting options.Rate limit on L7 request metadata, per request.
+
+TimeoutsConnection establishment only (connection keep-alive is configured via circuit breaking settings).Per request.
+
+RetriesRetry connection establishmentRetry per request failure.
+
+Fault injectionN/A—fault injection cannot be configured on TCP connections.Full application and connection-level faults (timeouts, delays, specific response codes).
+
+Traffic mirroringN/A—HTTP onlyPercentage-based mirroring of requests to multiple backends.
+
+## {#unsupported-features} Unsupported features
+
+The following features are available in sidecar mode, but not yet implemented in ambient mode:
+
+Sidecar-to-waypoint interoperability
+
+Multi-cluster installations
+
+Multi-network support
+
+VM support
+
+See also
+
+Deep Dive into the Network Traffic Path of the Coexistence of Ambient and Sidecar
+
+Deep Dive into the Traffic Path of the Coexistence of Ambient and Sidecar.
+
+Hardening Kubernetes Security with Istio Ambient Mode on Flat Networks
+
+How to use Istio Ambient mode to secure your flat on-prem network.
+
+Introducing the TrafficExtension API
+
+A new unified API for extending Envoy proxies in Istio with WebAssembly and Lua, supporting both sidecar and ambient mode.
+
+Simplifying Egress Routing to Wildcard Destinations
+
+Istio now supports wildcard ServiceEntry with DYNAMIC_DNS resolution, allowing sidecars to route traffic directly to wildcard HTTPS destinations while simplifying egress configuration.
+
+Ambient multi-network multicluster support is now Beta
+
+Istio 1.29 arrives with ambient multi-network multicluster in Beta, with improvements in telemetry, connectivity and reliability.
+
+Introducing multicluster support for ambient mode (alpha)
+
+Istio 1.27 adds alpha ambient multicluster support, extending ambient's familiar lightweight, modular architecture to deliver secure connectivity, discovery and load balancing across clusters.
+

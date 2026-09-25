@@ -1,0 +1,1202 @@
+{
+  "topic": "Resilience and fault injection",
+  "notes": [
+    {
+      "id": "istio.resilience.what-is-a-timeout",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5000,
+      "front": "What is a timeout, in Istio traffic management?",
+      "back": "The amount of time an Envoy proxy should wait for replies from a given service.",
+      "explanation": "It stops services hanging around waiting for replies indefinitely, so calls succeed or fail within a predictable timeframe.",
+      "example": "Like a caller who hangs up after ten minutes on hold, but set per service by the mesh instead of by each caller.",
+      "evidence": "A timeout is the amount of time that an Envoy proxy should wait for replies from a given service, ensuring that services don’t hang around waiting for replies indefinitely and that calls succeed or fail within a predictable timeframe.",
+      "source": "Istio / Traffic Management, “Timeouts”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#timeouts",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "timeout"
+      ],
+      "uses": [
+        "timeout",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.timeouts"
+      ]
+    },
+    {
+      "id": "istio.resilience.what-is-a-retry",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5010,
+      "front": "What does a retry setting specify, in Istio?",
+      "back": "The maximum number of times an Envoy proxy attempts to connect to a service if the initial call fails.",
+      "explanation": "Retries stop calls failing permanently because of transient problems, which can improve availability and performance.",
+      "example": "Like redialling a busy number a couple of times before giving up, but done by the proxy, not the caller's code.",
+      "evidence": "A retry setting specifies the maximum number of times an Envoy proxy attempts to connect to a service if the initial call fails. Retries can enhance service availability and application performance by making sure that calls don’t fail permanently because of transient problems",
+      "source": "Istio / Traffic Management, “Retries”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#retries",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "retry"
+      ],
+      "uses": [
+        "retry",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.retries"
+      ]
+    },
+    {
+      "id": "istio.resilience.what-is-a-retry-budget",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 5020,
+      "front": "What is a retry budget, in a DestinationRule traffic policy?",
+      "back": "A limit on concurrent retries, as a percentage of active requests plus active pending requests (20% by default).",
+      "explanation": "It ties the number of retries in flight to the current load, not to a fixed count per request.",
+      "example": "Like a call centre allowing redials only up to a fifth of the calls currently in progress.",
+      "evidence": "Specifies the limit on concurrent retries as a percentage of the sum of active requests and active pending requests. Defaults to 20%.",
+      "source": "Istio / Destination Rule, “RetryBudget”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#TrafficPolicy-RetryBudget",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "introduces": [
+        "retry budget"
+      ],
+      "uses": [
+        "retry budget",
+        "retry",
+        "DestinationRule",
+        "traffic policy"
+      ],
+      "conceptIDs": [
+        "istio.retry-budget"
+      ]
+    },
+    {
+      "id": "istio.resilience.what-is-circuit-breaking",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5030,
+      "front": "What is circuit breaking, in Istio?",
+      "back": "Setting limits on calls to each host of a service; once a limit is reached, the breaker trips and stops further connections to that host.",
+      "explanation": "Tripping the breaker gives callers fast failure for that host.",
+      "example": "Like a fuse that cuts one overloaded socket, but for one backend Pod, leaving the others in service.",
+      "evidence": "In a circuit breaker, you set limits for calls to individual hosts within a service, such as the number of concurrent connections or how many times calls to this host have failed. Once that limit has been reached the circuit breaker “trips” and stops further connections to that host. Using a circuit breaker pattern enables fast failure",
+      "source": "Istio / Traffic Management, “Circuit breakers”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#circuit-breakers",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "circuit breaking"
+      ],
+      "uses": [
+        "circuit breaking",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "istio.circuit-breaker"
+      ]
+    },
+    {
+      "id": "istio.resilience.what-is-outlier-detection",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5040,
+      "front": "What is outlier detection, in a DestinationRule?",
+      "back": "A circuit breaker that tracks each host of the upstream service and ejects hosts that keep failing from the pool for a set period.",
+      "explanation": "It works for both HTTP and TCP services; for HTTP, hosts that continually return 5xx errors are ejected.",
+      "example": "Like benching a player who keeps fumbling for a few minutes, but for a backend endpoint in a load-balancing pool.",
+      "evidence": "A Circuit breaker implementation that tracks the status of each individual host in the upstream service. Applicable to both HTTP and TCP services. For HTTP services, hosts that continually return 5xx errors for API calls are ejected from the pool for a pre-defined period of time.",
+      "source": "Istio / Destination Rule, “OutlierDetection”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#OutlierDetection",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "outlier detection"
+      ],
+      "uses": [
+        "outlier detection",
+        "DestinationRule",
+        "circuit breaking",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.outlier-detection"
+      ]
+    },
+    {
+      "id": "istio.resilience.what-is-locality-load-balancing",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5050,
+      "front": "What is locality load balancing?",
+      "back": "Controlling how traffic is spread over endpoints according to the localities where the traffic starts and where it ends.",
+      "explanation": "The DestinationRule reference describes it as a way for administrators to control traffic distribution by locality.",
+      "example": "Like a courier preferring the depot in your own town, but for endpoints grouped by region and zone.",
+      "evidence": "Locality-weighted load balancing allows administrators to control the distribution of traffic to endpoints based on the localities of where the traffic originates and where it will terminate.",
+      "source": "Istio / Destination Rule, “LocalityLoadBalancerSetting”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#LocalityLoadBalancerSetting",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "locality load balancing"
+      ],
+      "uses": [
+        "locality load balancing",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.locality-lb"
+      ]
+    },
+    {
+      "id": "istio.resilience.what-is-failover",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5060,
+      "front": "What is locality failover, in Istio?",
+      "back": "Sending traffic on to the next locality once the sidecar proxies know that a service's endpoints are unhealthy.",
+      "explanation": "The locality failover task has outlier detection tell the sidecar proxies when endpoints are unhealthy, which eventually triggers the failover.",
+      "example": "Like a call centre rerouting calls to the next site when its local site goes down, but for mesh endpoints.",
+      "evidence": "In particular, it configures the sidecar proxies to know when endpoints for a service are unhealthy, eventually triggering a failover to the next locality.",
+      "source": "Istio / Locality failover, “Configure locality failover”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/locality-load-balancing/failover/#configure-locality-failover",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "failover"
+      ],
+      "uses": [
+        "failover",
+        "outlier detection",
+        "locality load balancing"
+      ],
+      "conceptIDs": [
+        "istio.failover"
+      ]
+    },
+    {
+      "id": "istio.resilience.what-is-fault-injection",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5070,
+      "front": "What is fault injection?",
+      "back": "A testing method that introduces errors into a system to check that it can withstand and recover from error conditions.",
+      "explanation": "In Istio it tests the failure recovery capacity of the application as a whole, after failure recovery policies are configured.",
+      "example": "Like a fire drill for services: the fire is fake, but the response to it is real.",
+      "evidence": "you can use Istio’s fault injection mechanisms to test the failure recovery capacity of your application as a whole. Fault injection is a testing method that introduces errors into a system to ensure that it can withstand and recover from error conditions.",
+      "source": "Istio / Traffic Management, “Fault injection”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#fault-injection",
+      "sourceLicence": "B · Apache 2.0",
+      "introduces": [
+        "fault injection"
+      ],
+      "uses": [
+        "fault injection"
+      ],
+      "conceptIDs": [
+        "istio.fault-injection"
+      ]
+    },
+    {
+      "id": "istio.resilience.http-timeout-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5100,
+      "front": "The timeout for HTTP requests on a VirtualService HTTP route is {{c1::disabled}} by default.",
+      "back": "disabled",
+      "explanation": "Retries differ: if you set none, a default cluster-wide retry policy still applies.",
+      "evidence": "Timeout for HTTP requests, default is disabled. retries HTTPRetry Retry policy for HTTP requests. Note: the default cluster-wide retry policy, if not specified, is: attempts: 2",
+      "source": "Istio / Virtual Service, “HTTPRoute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "timeout",
+        "retry",
+        "VirtualService",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.timeout-default"
+      ]
+    },
+    {
+      "id": "istio.resilience.timeout-too-long-too-short",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5105,
+      "front": "What can go wrong with a timeout that is too long, and with one that is too short?",
+      "back": "Too long: excessive latency waiting on failing services. Too short: calls fail unnecessarily while a multi-service operation completes.",
+      "explanation": "Each extreme has its own cost: one wastes time on services that are failing, the other cuts off work that was still on its way.",
+      "evidence": "a timeout that is too long could result in excessive latency from waiting for replies from failing services, while a timeout that is too short could result in calls failing unnecessarily while waiting for an operation involving multiple services to return.",
+      "source": "Istio / Traffic Management, “Timeouts”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#timeouts",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "timeout"
+      ],
+      "conceptIDs": [
+        "istio.timeouts"
+      ]
+    },
+    {
+      "id": "istio.resilience.timeouts-per-service",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5110,
+      "front": "Where does Istio let you adjust timeouts, and do you need to edit service code?",
+      "back": "Per service, in virtual services; no change to the service code is needed.",
+      "explanation": "The proxy applies the setting, so it can be changed dynamically from configuration.",
+      "evidence": "Istio lets you easily adjust timeouts dynamically on a per-service basis using virtual services without having to edit your service code.",
+      "source": "Istio / Traffic Management, “Timeouts”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#timeouts",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "timeout",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.timeouts"
+      ]
+    },
+    {
+      "id": "istio.resilience.retry-default-twice",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5120,
+      "front": "By default, Istio retries a failed HTTP request {{c1::twice}} before returning the error.",
+      "back": "twice",
+      "explanation": "Istio also picks a variable interval of 25ms or more between retries, to avoid overwhelming the called service.",
+      "evidence": "The interval between retries (25ms+) is variable and determined automatically by Istio, preventing the called service from being overwhelmed with requests. The default retry behavior for HTTP requests is to retry twice before returning the error.",
+      "source": "Istio / Traffic Management, “Retries”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#retries",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "retry",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.retries"
+      ]
+    },
+    {
+      "id": "istio.resilience.attempts-max-requests",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5125,
+      "front": "In a VirtualService retry policy, what is the most requests made for one call, and what does attempts: 0 do?",
+      "back": "At most 1 + attempts requests; attempts: 0 disables retries.",
+      "explanation": "attempts counts only the retries, so the first call comes on top of it.",
+      "evidence": "MUST be >= 0. If 0, retries will be disabled. The maximum possible number of requests made will be 1 + attempts.",
+      "source": "Istio / Virtual Service, “HTTPRetry”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRetry",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "retry",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.retry-fields"
+      ]
+    },
+    {
+      "id": "istio.resilience.attempts-limited-by-timeouts",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5130,
+      "front": "Besides attempts, what else decides how many retries actually happen?",
+      "back": "The route's request timeout and the perTryTimeout, when either is configured.",
+      "explanation": "Retries are made within those time limits, so attempts is a ceiling, not a promise.",
+      "evidence": "When request timeout of the HTTP route or per_try_timeout is configured, the actual number of retries attempted also depends on the specified request timeout and per_try_timeout values.",
+      "source": "Istio / Virtual Service, “HTTPRetry”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRetry",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "retry",
+        "timeout"
+      ],
+      "conceptIDs": [
+        "istio.retry-fields"
+      ]
+    },
+    {
+      "id": "istio.resilience.per-try-timeout",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5135,
+      "front": "What does perTryTimeout limit, and what is its default?",
+      "back": "Each attempt, including the initial call; by default it equals the route's request timeout, which means no timeout.",
+      "explanation": "It inherits the route's timeout, and the reference says that default means no timeout at all.",
+      "evidence": "Timeout per attempt for a given request, including the initial call and any retries. Format: 1h/1m/1s/1ms. MUST be >=1ms. Default is same value as request timeout of the HTTP route, which means no timeout.",
+      "source": "Istio / Virtual Service, “HTTPRetry”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRetry",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "retry",
+        "timeout"
+      ],
+      "conceptIDs": [
+        "istio.retry-fields"
+      ]
+    },
+    {
+      "id": "istio.resilience.retry-on-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5140,
+      "front": "If a retry policy leaves retryOn unset, on which conditions does Istio retry?",
+      "back": "connect-failure, refused-stream, unavailable and cancelled.",
+      "explanation": "These conditions apply to every retry policy that does not name its own in retryOn.",
+      "evidence": "If not specified, this defaults to connect-failure,refused-stream,unavailable,cancelled.",
+      "source": "Istio / Virtual Service, “HTTPRetry”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRetry",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "retry"
+      ],
+      "conceptIDs": [
+        "istio.retry-fields"
+      ]
+    },
+    {
+      "id": "istio.resilience.retry-budget-minimum",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5150,
+      "front": "A retry budget is 20% with a minimum retry concurrency of 3. How many active retries are allowed with 25 active requests, and with 2?",
+      "back": "5 with 25 active requests; still 3 with 2, because of the minimum retry concurrency.",
+      "explanation": "The percentage sets the budget under load, and the minimum keeps a floor when few requests are active.",
+      "evidence": "For example, a budget of 20% with a minimum retry concurrency of 3 will allow 5 active retries while there are 25 active requests. If there are 2 active requests, there are still 3 active retries allowed because of the minimum retry concurrency.",
+      "source": "Istio / Destination Rule, “RetryBudget”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#TrafficPolicy-RetryBudget",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "retry budget",
+        "retry"
+      ],
+      "conceptIDs": [
+        "istio.retry-budget"
+      ]
+    },
+    {
+      "id": "istio.resilience.circuit-breaker-in-destination-rule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5160,
+      "front": "Where do you configure circuit breaker thresholds, and to what do the settings apply?",
+      "back": "In destination rules; the settings apply to each individual host in the service.",
+      "explanation": "The source ties this to circuit breaking acting on “real” mesh destinations in a load balancing pool.",
+      "evidence": "As circuit breaking applies to “real” mesh destinations in a load balancing pool, you configure circuit breaker thresholds in destination rules, with the settings applying to each individual host in the service.",
+      "source": "Istio / Traffic Management, “Circuit breakers”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#circuit-breakers",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "circuit breaking",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.circuit-breaker"
+      ]
+    },
+    {
+      "id": "istio.resilience.connection-pool-levels",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5165,
+      "front": "In a DestinationRule, at which levels can connectionPool settings be applied, and to what?",
+      "back": "At TCP level and HTTP level; they apply to each individual host in the upstream service.",
+      "explanation": "The reference points to Envoy’s circuit breaker for the details, since these are circuit-breaking limits.",
+      "evidence": "Connection pool settings for an upstream host. The settings apply to each individual host in the upstream service. See Envoy’s circuit breaker for more details. Connection pool settings can be applied at the TCP level as well as at HTTP level.",
+      "source": "Istio / Destination Rule, “ConnectionPoolSettings”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#ConnectionPoolSettings",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "DestinationRule",
+        "circuit breaking",
+        "Envoy",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.connection-pool"
+      ]
+    },
+    {
+      "id": "istio.resilience.max-connections",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5170,
+      "front": "In connectionPool.tcp, {{c1::maxConnections}} sets the maximum number of HTTP/1 and TCP connections to a destination host.",
+      "back": "maxConnections",
+      "explanation": "Its default is 2^32-1, so the cap only matters once you set a lower value.",
+      "evidence": "Maximum number of HTTP1 /TCP connections to a destination host. Default 2^32-1.",
+      "source": "Istio / Destination Rule, “TCPSettings”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#ConnectionPoolSettings-TCPSettings",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "circuit breaking"
+      ],
+      "conceptIDs": [
+        "istio.connection-pool"
+      ]
+    },
+    {
+      "id": "istio.resilience.http1-max-pending-requests",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5175,
+      "front": "In connectionPool.http, {{c1::http1MaxPendingRequests}} caps the requests queued while waiting for a ready connection pool connection.",
+      "back": "http1MaxPendingRequests",
+      "explanation": "Its default is 2^32-1, so the queue is capped only once you set a lower value.",
+      "evidence": "Maximum number of requests that will be queued while waiting for a ready connection pool connection. Default 2^32-1.",
+      "source": "Istio / Destination Rule, “HTTPSettings”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#ConnectionPoolSettings-HTTPSettings",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "circuit breaking",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.connection-pool"
+      ]
+    },
+    {
+      "id": "istio.resilience.circuit-breaker-istio-mutual",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5180,
+      "front": "Your mesh runs with mutual TLS. What must a circuit-breaking DestinationRule also include?",
+      "back": "A TLS traffic policy with mode: ISTIO_MUTUAL.",
+      "explanation": "Without it, the circuit breaking task warns, requests will generate 503 errors.",
+      "evidence": "If you installed/configured Istio with mutual TLS authentication enabled, you must add a TLS traffic policy mode: ISTIO_MUTUAL to the DestinationRule before applying it. Otherwise requests will generate 503 errors",
+      "source": "Istio / Circuit Breaking, “Configuring the circuit breaker”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/#configuring-the-circuit-breaker",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "circuit breaking",
+        "DestinationRule",
+        "mtls",
+        "traffic policy"
+      ],
+      "conceptIDs": [
+        "istio.cb-task"
+      ]
+    },
+    {
+      "id": "istio.resilience.pending-overflow-stat",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5185,
+      "front": "Which istio-proxy statistic shows how many calls have been flagged for circuit breaking?",
+      "back": "upstream_rq_pending_overflow.",
+      "explanation": "Querying the proxy's stats after a load test shows how many calls the breaker turned away.",
+      "evidence": "You can see 21 for the upstream_rq_pending_overflow value which means 21 calls so far have been flagged for circuit breaking.",
+      "source": "Istio / Circuit Breaking, “Tripping the circuit breaker”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/#tripping-the-circuit-breaker",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "circuit breaking"
+      ],
+      "conceptIDs": [
+        "istio.cb-overflow-stats"
+      ]
+    },
+    {
+      "id": "istio.resilience.outlier-tcp-errors",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5195,
+      "front": "For a TCP service, what counts as an error for outlier detection?",
+      "back": "Connection timeouts or connection failures to a given host.",
+      "explanation": "These count towards the consecutive errors metric, as 5xx errors do for HTTP services.",
+      "evidence": "For HTTP services, hosts that continually return 5xx errors for API calls are ejected from the pool for a pre-defined period of time. For TCP services, connection timeouts or connection failures to a given host counts as an error when measuring the consecutive errors metric.",
+      "source": "Istio / Destination Rule, “OutlierDetection”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#OutlierDetection",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "outlier detection",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.outlier-fields"
+      ]
+    },
+    {
+      "id": "istio.resilience.consecutive-5xx-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5200,
+      "front": "By default, how many 5xx errors eject a host under outlier detection, and how do you turn this off?",
+      "back": "5 (consecutive5xxErrors); set it to 0 to disable it.",
+      "explanation": "Over an opaque TCP connection, connect timeouts and connection or request failures also count as 5xx errors.",
+      "evidence": "Number of 5xx errors before a host is ejected from the connection pool. When the upstream host is accessed over an opaque TCP connection, connect timeouts, connection error/failure and request failure events qualify as a 5xx error. This feature defaults to 5 but can be disabled by setting the value to 0.",
+      "source": "Istio / Destination Rule, “OutlierDetection”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#OutlierDetection",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "outlier detection"
+      ],
+      "conceptIDs": [
+        "istio.outlier-fields"
+      ]
+    },
+    {
+      "id": "istio.resilience.base-ejection-time",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 5205,
+      "front": "baseEjectionTime is 30s and a host is ejected for the third time. How long does it stay ejected?",
+      "back": "90 seconds: the minimum ejection duration times the number of times the host has been ejected.",
+      "explanation": "Multiplying by the ejection count automatically lengthens the ejection for hosts that stay unhealthy.",
+      "evidence": "A host will remain ejected for a period equal to the product of minimum ejection duration and the number of times the host has been ejected. This technique allows the system to automatically increase the ejection period for unhealthy upstream servers.",
+      "source": "Istio / Destination Rule, “OutlierDetection”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#OutlierDetection",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "outlier detection"
+      ],
+      "conceptIDs": [
+        "istio.outlier-fields"
+      ]
+    },
+    {
+      "id": "istio.resilience.outlier-activates-failover",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5210,
+      "front": "With Istio's default mesh configuration, what else does adding outlierDetection to a DestinationRule switch on?",
+      "back": "Locality-aware failover, because the default mesh configuration enables locality load balancing.",
+      "explanation": "Envoy uses the outlier detection state to decide when endpoints are unhealthy and should fail over to the next locality.",
+      "evidence": "Note: Istio’s default mesh configuration enables locality load balancing (localityLbSetting.enabled: true). As a result, configuring OutlierDetection in a DestinationRule will automatically activate locality-aware failover behavior — Envoy uses the outlier detection state to determine when endpoints are unhealthy and should be failed over to the next locality.",
+      "source": "Istio / Destination Rule, “OutlierDetection”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#OutlierDetection",
+      "sourceLicence": "B · Apache 2.0",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Istio docs 1.31 (exam targets 1.26)",
+      "uses": [
+        "outlier detection",
+        "failover",
+        "locality load balancing",
+        "DestinationRule",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.outlier-fields",
+        "istio.locality-lb"
+      ]
+    },
+    {
+      "id": "istio.resilience.locality-hierarchy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5220,
+      "front": "How are localities written for locality load balancing?",
+      "back": "As a hierarchy of arbitrary labels in region/zone/sub-zone form.",
+      "explanation": "Each level sits inside the one before it, which is what makes it a hierarchy.",
+      "evidence": "These localities are specified using arbitrary labels that designate a hierarchy of localities in {region}/{zone}/{sub-zone} form.",
+      "source": "Istio / Destination Rule, “LocalityLoadBalancerSetting”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#LocalityLoadBalancerSetting",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "locality load balancing",
+        "label"
+      ],
+      "conceptIDs": [
+        "istio.locality-lb"
+      ]
+    },
+    {
+      "id": "istio.resilience.one-of-distribute-failover",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5225,
+      "front": "In localityLbSetting, how many of distribute, failover and failoverPriority can you set at once?",
+      "back": "Only one of them.",
+      "explanation": "distribute, for example, sets explicit load-balancing weights across zones and locations, a different approach from the other two.",
+      "evidence": "only one of distribute, failover or failoverPriority can be set. Explicitly specify loadbalancing weight across different zones and geographical locations.",
+      "source": "Istio / Destination Rule, “LocalityLoadBalancerSetting”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#LocalityLoadBalancerSetting",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "locality load balancing",
+        "failover"
+      ],
+      "conceptIDs": [
+        "istio.locality-lb"
+      ]
+    },
+    {
+      "id": "istio.resilience.distribute-missing-locality",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5230,
+      "front": "In a distribute entry, what happens to a locality left out of the 'to' map?",
+      "back": "It receives no traffic. The weights in the map should sum to 100.",
+      "explanation": "The map lists each upstream locality with its share of traffic, so a locality without a weight gets none.",
+      "evidence": "Map of upstream localities to traffic distribution weights. The sum of all weights should be 100. Any locality not present will receive no traffic.",
+      "source": "Istio / Destination Rule, “Distribute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#LocalityLoadBalancerSetting-Distribute",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "locality load balancing"
+      ],
+      "conceptIDs": [
+        "istio.locality-distribute"
+      ]
+    },
+    {
+      "id": "istio.resilience.failover-field-needs-outlier",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5240,
+      "front": "A failover setting in localityLbSetting does not take effect unless {{c1::OutlierDetection}} is also specified.",
+      "back": "OutlierDetection",
+      "explanation": "Outlier detection is what detects the unhealthy endpoints that failover reacts to.",
+      "evidence": "Should be used together with OutlierDetection to detect unhealthy endpoints. Note: if no OutlierDetection specified, this will not take effect.",
+      "source": "Istio / Destination Rule, “LocalityLoadBalancerSetting”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#LocalityLoadBalancerSetting",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "failover",
+        "outlier detection"
+      ],
+      "conceptIDs": [
+        "istio.failover-needs-outlier"
+      ]
+    },
+    {
+      "id": "istio.resilience.envoy-priorities-failover",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5245,
+      "front": "What does Envoy use internally to control locality failover?",
+      "back": "Envoy priorities, assigned to localities.",
+      "explanation": "The priorities are assigned relative to where the traffic originates.",
+      "evidence": "Internally, Envoy priorities are used to control failover. These priorities will be assigned as follows for traffic originating from the curl pod",
+      "source": "Istio / Locality failover",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/locality-load-balancing/failover/",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "failover",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.failover"
+      ]
+    },
+    {
+      "id": "istio.resilience.delay-timing-failure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5255,
+      "front": "Which kind of Istio fault is a timing failure?",
+      "back": "A delay: it mimics increased network latency or an overloaded upstream service.",
+      "explanation": "Delays, like aborts, are configured in a virtual service.",
+      "evidence": "You can inject two types of faults, both configured using a virtual service: Delays: Delays are timing failures. They mimic increased network latency or an overloaded upstream service.",
+      "source": "Istio / Traffic Management, “Fault injection”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#fault-injection",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "fault injection",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.fault-injection",
+        "istio.fault-delay"
+      ]
+    },
+    {
+      "id": "istio.resilience.abort-crash-failure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5260,
+      "front": "Which kind of Istio fault is a crash failure?",
+      "back": "An abort: it mimics failures in upstream services, usually as HTTP error codes or TCP connection failures.",
+      "explanation": "The request fails outright, the way it would if the upstream service had failed.",
+      "evidence": "Aborts: Aborts are crash failures. They mimic failures in upstream services. Aborts usually manifest in the form of HTTP error codes or TCP connection failures.",
+      "source": "Istio / Traffic Management, “Fault injection”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#fault-injection",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "fault injection",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.fault-injection",
+        "istio.fault-abort"
+      ]
+    },
+    {
+      "id": "istio.resilience.faults-application-layer",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5265,
+      "front": "Unlike delaying packets or killing pods at the network layer, at which layer does Istio inject faults?",
+      "back": "At the application layer, so it can inject failures such as HTTP error codes.",
+      "explanation": "Application-layer faults are more relevant failures, which give more relevant results.",
+      "evidence": "Unlike other mechanisms for introducing errors, such as delaying packets or killing pods at the network layer, Istio lets you inject faults at the application layer. This lets you inject more relevant failures, such as HTTP error codes, to get more relevant results.",
+      "source": "Istio / Traffic Management, “Fault injection”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#fault-injection",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "fault injection",
+        "http",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "istio.fault-injection"
+      ]
+    },
+    {
+      "id": "istio.resilience.fault-percentage-unset",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5270,
+      "front": "A delay fault leaves out the percentage field. Which requests are delayed?",
+      "back": "None: if percentage is left unspecified, no request is delayed.",
+      "explanation": "percentage is what picks the share of requests that get the fault, so leaving it out picks none.",
+      "evidence": "The optional percentage field can be used to only delay a certain percentage of requests. If left unspecified, no request will be delayed.",
+      "source": "Istio / Virtual Service, “Delay”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPFaultInjection-Delay",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "fault injection"
+      ],
+      "conceptIDs": [
+        "istio.fault-percentage"
+      ]
+    },
+    {
+      "id": "istio.resilience.fault-with-retries-same-vs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5275,
+      "front": "A VirtualService route has both a fault and a retry policy. What happens to the retries, and what is the workaround?",
+      "back": "The retries do not take effect. Remove the fault and inject it at the upstream Envoy proxy with an EnvoyFilter.",
+      "explanation": "In the documented example, the aborted requests are not retried, so users see the full 50% failure rate.",
+      "evidence": "the retry configuration does not take effect, resulting in a 50% failure rate. To work around this issue, you may remove the fault config from your VirtualService and inject the fault to the upstream Envoy proxy using EnvoyFilter instead",
+      "source": "Istio / Traffic Management Problems, “Virtual service with fault injection and retry/timeout policies not working as expected”",
+      "sourceURL": "https://istio.io/latest/docs/ops/common-problems/network-issues/#virtual-service-with-fault-injection-and-retrytimeout-policies-not-working-as-expected",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "fault injection",
+        "retry",
+        "VirtualService",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "istio.fault-disables-retry"
+      ]
+    },
+    {
+      "id": "istio.resilience.fault-rules-without-end-users",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5280,
+      "front": "In Istio's fault injection task, the delay rule is matched to one logged-in test user. What does fault injection let you find this way?",
+      "back": "Anomalies such as clashing hard-coded timeouts between services, without impacting end users.",
+      "explanation": "The task notes such bugs arise where different teams develop microservices independently.",
+      "evidence": "Bugs like this can occur in typical enterprise applications where different teams develop different microservices independently. Istio’s fault injection rules help you identify such anomalies without impacting end users. Notice that the fault injection test is restricted to when the logged in user is jason.",
+      "source": "Istio / Fault Injection, “Understanding what happened”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/fault-injection/#understanding-what-happened",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "fault injection",
+        "timeout"
+      ],
+      "conceptIDs": [
+        "istio.fault-delay"
+      ]
+    },
+    {
+      "id": "istio.resilience.apps-need-fallbacks",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5290,
+      "front": "Istio's failure recovery is in place. Must the application still handle failures?",
+      "back": "Yes: applications must handle failures or errors and take appropriate fallback actions.",
+      "explanation": "For example, when every instance in a load balancing pool has failed, Envoy returns an HTTP 503 that the application has to deal with.",
+      "evidence": "While Istio failure recovery features improve the reliability and availability of services in the mesh, applications must handle the failure or errors and take appropriate fallback actions. For example, when all instances in a load balancing pool have failed, Envoy returns an HTTP 503 code.",
+      "source": "Istio / Traffic Management, “Working with your applications”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#working-with-your-applications",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "Envoy",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.app-resilience"
+      ]
+    },
+    {
+      "id": "istio.resilience.scenario-hanging-caller",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5400,
+      "front": "A caller sometimes waits minutes for a stuck backend. The backend's VirtualService route has no timeout field. What explains the wait, and what fixes it?",
+      "back": "B: the HTTP request timeout is disabled by default, so set a timeout on the route rule.",
+      "choices": "A) Istio's default timeout is too long, so shorten it in MeshConfig\nB) The request timeout is disabled by default; set the route's timeout field\nC) Timeouts only work when set in the DestinationRule",
+      "choicesExplained": "A: there is no default HTTP request timeout to shorten. C: the request timeout is the timeout field of a route rule.",
+      "explanation": "With the default disabled, only a timeout on the route rule puts a limit on the wait.",
+      "evidence": "A timeout for HTTP requests can be specified using a timeout field in a route rule. By default, the request timeout is disabled",
+      "source": "Istio / Request Timeouts, “Request timeouts”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/request-timeouts/#request-timeouts",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "timeout",
+        "VirtualService",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.request-timeout-task",
+        "istio.timeout-default",
+        "istio.timeouts"
+      ]
+    },
+    {
+      "id": "istio.resilience.scenario-two-timeouts",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5410,
+      "front": "An app gives up on a call to the stock service after 2 seconds. You set timeout: 5s on the stock service's VirtualService route. The service hangs. When does the call end?",
+      "back": "B: after 2 seconds; the more restrictive of the two timeouts takes precedence.",
+      "choices": "A) After 5 seconds: Istio's timeout overrides the app\nB) After 2 seconds: the stricter timeout wins\nC) After 7 seconds: the timeouts add up",
+      "choicesExplained": "A: the longer Istio timeout has no effect here. C: the timeouts do not add; whichever is stricter ends the call first.",
+      "explanation": "A longer timeout in Istio has no effect when the application's own timeout is shorter.",
+      "evidence": "Had you instead set the timeout to something greater than 3 seconds (such as 4 seconds) the timeout would have had no effect since the more restrictive of the two takes precedence.",
+      "source": "Istio / Request Timeouts, “Understanding what happened”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/request-timeouts/#understanding-what-happened",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "timeout",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.request-timeout-task",
+        "istio.app-resilience",
+        "istio.timeouts"
+      ]
+    },
+    {
+      "id": "istio.resilience.scenario-four-requests",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5420,
+      "front": "You want a call to the pricing service to be sent at most four times in total, counting the first try. What should retries.attempts be?",
+      "back": "B: 3, because the most requests made is 1 + attempts.",
+      "choices": "A) 4\nB) 3\nC) 5",
+      "choicesExplained": "A allows up to five requests in total; C allows up to six.",
+      "explanation": "The first call is not counted in attempts, so attempts is one less than the total you want.",
+      "evidence": "The maximum possible number of requests made will be 1 + attempts.",
+      "source": "Istio / Virtual Service, “HTTPRetry”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRetry",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "retry"
+      ],
+      "conceptIDs": [
+        "istio.retry-fields",
+        "istio.retries"
+      ]
+    },
+    {
+      "id": "istio.resilience.scenario-cap-connections",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5430,
+      "front": "You want each Pod of a payments service to receive at most 50 concurrent connections from the mesh. Where do you set this?",
+      "back": "B: in a DestinationRule, under trafficPolicy.connectionPool.tcp.maxConnections.",
+      "choices": "A) In the VirtualService retries block\nB) In a DestinationRule connectionPool\nC) In the VirtualService timeout field",
+      "choicesExplained": "A and C: retries and timeouts belong to VirtualService routes; circuit breaker thresholds such as connection limits go in destination rules.",
+      "explanation": "Connection limits are circuit breaker thresholds, and those are set per host in destination rules.",
+      "evidence": "you configure circuit breaker thresholds in destination rules, with the settings applying to each individual host in the service. The following example limits the number of concurrent connections for the reviews service workloads of the v1 subset to 100",
+      "source": "Istio / Traffic Management, “Circuit breakers”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#circuit-breakers",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "circuit breaking",
+        "DestinationRule",
+        "VirtualService",
+        "Pod",
+        "retry",
+        "timeout"
+      ],
+      "conceptIDs": [
+        "istio.circuit-breaker",
+        "istio.connection-pool"
+      ]
+    },
+    {
+      "id": "istio.resilience.scenario-load-test-failures",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5440,
+      "front": "You set maxConnections: 10 and http1MaxPendingRequests: 5 for an orders service, then load-test it with 60 concurrent connections. Some calls fail at once. What is happening?",
+      "back": "A: the limits are exceeded, so the istio-proxy opens the circuit for further requests and connections.",
+      "choices": "A) The circuit breaker is tripping on the excess requests\nB) Istio is injecting an abort fault\nC) The retry policy has run out of attempts",
+      "choicesExplained": "B: no fault is configured on the route. C: retries only repeat failed calls; they do not cause the failures.",
+      "explanation": "Going beyond the connection and pending-request limits is what makes the proxy open the circuit.",
+      "evidence": "These rules indicate that if you exceed more than one connection and request concurrently, you should see some failures when the istio-proxy opens the circuit for further requests and connections.",
+      "source": "Istio / Circuit Breaking, “Tripping the circuit breaker”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/#tripping-the-circuit-breaker",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "circuit breaking",
+        "fault injection",
+        "retry"
+      ],
+      "conceptIDs": [
+        "istio.cb-task"
+      ]
+    },
+    {
+      "id": "istio.resilience.scenario-failing-pod",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5450,
+      "front": "One of six Pods behind a service keeps answering with 5xx errors while the others are healthy. Which DestinationRule setting takes it out of the pool for a while?",
+      "back": "A: outlierDetection.",
+      "choices": "A) outlierDetection\nB) connectionPool\nC) loadBalancer with a consistent hash",
+      "choicesExplained": "B caps connections and requests per host but does not eject a failing one. C chooses how requests are spread, not which hosts are removed.",
+      "explanation": "Outlier detection ejects HTTP hosts that continually return 5xx errors for a set period.",
+      "evidence": "For HTTP services, hosts that continually return 5xx errors for API calls are ejected from the pool for a pre-defined period of time.",
+      "source": "Istio / Destination Rule, “OutlierDetection”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#OutlierDetection",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "outlier detection",
+        "DestinationRule",
+        "Pod",
+        "consistent hash"
+      ],
+      "conceptIDs": [
+        "istio.outlier-detection",
+        "istio.outlier-fields"
+      ]
+    },
+    {
+      "id": "istio.resilience.scenario-failover-without-outlier",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5460,
+      "front": "A DestinationRule sets a locality failover from region eu-west to eu-central but has no outlier detection. The eu-west endpoints become unhealthy. What happens?",
+      "back": "B: failover does not work properly; outlier detection is required for it.",
+      "choices": "A) Traffic fails over to eu-central as configured\nB) Failover does not work properly without outlier detection\nC) All traffic to the service is dropped",
+      "choicesExplained": "A: without outlier detection the proxies are not told the endpoints are unhealthy. C: nothing is dropped by design; failover is simply not triggered.",
+      "explanation": "The locality failover task calls outlier detection required for failover to function properly.",
+      "evidence": "Outlier detection for the HelloWorld service. This is required in order for failover to function properly.",
+      "source": "Istio / Locality failover, “Configure locality failover”",
+      "sourceURL": "https://istio.io/latest/docs/tasks/traffic-management/locality-load-balancing/failover/#configure-locality-failover",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "failover",
+        "outlier detection",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.failover-needs-outlier",
+        "istio.failover"
+      ]
+    },
+    {
+      "id": "istio.resilience.scenario-zone-weights",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5470,
+      "front": "Clients in eu-west/zone-a should send 70% of a service's traffic to their own zone and 30% to eu-west/zone-b. Which localityLbSetting field do you use?",
+      "back": "A: distribute, with from eu-west/zone-a and weights for the two zones.",
+      "choices": "A) distribute\nB) failover\nC) failoverPriority",
+      "choicesExplained": "B names where traffic goes when the local region is unhealthy; C sorts endpoints by labels for priority-based failover. Neither sets weights.",
+      "explanation": "distribute describes how traffic from a 'from' zone is spread over a set of 'to' zones.",
+      "evidence": "Describes how traffic originating in the ‘from’ zone or sub-zone is distributed over a set of ’to’ zones.",
+      "source": "Istio / Destination Rule, “Distribute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/destination-rule/#LocalityLoadBalancerSetting-Distribute",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "locality load balancing",
+        "failover",
+        "label"
+      ],
+      "conceptIDs": [
+        "istio.locality-lb",
+        "istio.locality-distribute"
+      ]
+    },
+    {
+      "id": "istio.resilience.scenario-slow-inventory",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5480,
+      "front": "You want to see how checkout copes when 10% of calls to the inventory service take 4 extra seconds. What do you add to the inventory route?",
+      "back": "A: a fault delay with fixedDelay: 4s and percentage 10.",
+      "choices": "A) fault.delay with fixedDelay 4s and percentage 10\nB) fault.abort with percentage 10\nC) timeout: 4s",
+      "choicesExplained": "B makes calls fail, not arrive late. C limits how long callers wait; it does not slow any calls down.",
+      "explanation": "fixedDelay sets how long the delay is, and percentage limits it to a share of requests.",
+      "evidence": "The fixedDelay field is used to indicate the amount of delay in seconds. The optional percentage field can be used to only delay a certain percentage of requests.",
+      "source": "Istio / Virtual Service, “Delay”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPFaultInjection-Delay",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "fault injection",
+        "timeout"
+      ],
+      "conceptIDs": [
+        "istio.fault-delay",
+        "istio.fault-percentage",
+        "istio.fault-injection"
+      ]
+    },
+    {
+      "id": "istio.resilience.scenario-failing-recommendations",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5490,
+      "front": "To test a fallback, you want 5% of calls to the recommendations service to fail with HTTP 503. What do you configure?",
+      "back": "A: a fault abort with httpStatus: 503 and percentage 5.",
+      "choices": "A) fault.abort with httpStatus 503 and percentage 5\nB) fault.delay with percentage 5\nC) outlierDetection with consecutive5xxErrors: 5",
+      "choicesExplained": "B slows calls instead of failing them. C ejects hosts that return errors; it does not create errors.",
+      "explanation": "httpStatus sets the code returned to the caller, and percentage limits the abort to a share of requests.",
+      "evidence": "The httpStatus field is used to indicate the HTTP status code to return to the caller. The optional percentage field can be used to only abort a certain percentage of requests.",
+      "source": "Istio / Virtual Service, “Abort”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPFaultInjection-Abort",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "fault injection",
+        "outlier detection",
+        "http"
+      ],
+      "conceptIDs": [
+        "istio.fault-abort",
+        "istio.fault-percentage",
+        "istio.fault-injection"
+      ]
+    },
+    {
+      "id": "istio.resilience.scenario-timeout-with-delay",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5500,
+      "front": "A route injects a 6s delay into half its requests. You add timeout: 3s to the same route, expecting delayed calls to be cut off at 3s. Are they?",
+      "back": "B: no. Timeouts or retries are not enabled when faults are enabled on the client side.",
+      "choices": "A) Yes, every delayed call ends at 3s\nB) No: the timeout is not enabled alongside the fault\nC) Only the requests without the delay get the timeout",
+      "choicesExplained": "A and C both assume the timeout works on this route; with a client-side fault on it, the timeout is not enabled at all.",
+      "explanation": "The VirtualService reference notes this for the fault field of an HTTP route.",
+      "evidence": "Fault injection policy to apply on HTTP traffic at the client side. Note that timeouts or retries will not be enabled when faults are enabled on the client side.",
+      "source": "Istio / Virtual Service, “HTTPRoute”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRoute",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "fault injection",
+        "timeout",
+        "retry",
+        "VirtualService"
+      ],
+      "conceptIDs": [
+        "istio.fault-disables-retry"
+      ]
+    },
+    {
+      "id": "istio.resilience.connection-limits-vs-failure-counts",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 5600,
+      "front": "Circuit breaking can limit two kinds of thing per host. What are they?",
+      "back": "The number of concurrent connections, and how many times calls to that host have failed.",
+      "explanation": "In a DestinationRule the first is a connectionPool limit and the second is outlier detection, both applied per host.",
+      "evidence": "In a circuit breaker, you set limits for calls to individual hosts within a service, such as the number of concurrent connections or how many times calls to this host have failed.",
+      "source": "Istio / Traffic Management, “Circuit breakers”",
+      "sourceURL": "https://istio.io/latest/docs/concepts/traffic-management/#circuit-breakers",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "circuit breaking",
+        "outlier detection",
+        "DestinationRule"
+      ],
+      "conceptIDs": [
+        "istio.circuit-breaker",
+        "istio.outlier-detection"
+      ]
+    },
+    {
+      "id": "istio.resilience.delay-and-abort-together",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 5610,
+      "front": "Can one fault rule have both a delay and an abort, and how do the two interact?",
+      "back": "Yes: a rule must have a delay, an abort or both, and the two are independent even when both are set.",
+      "explanation": "Each fault type applies on its own terms, so setting both does not link them.",
+      "evidence": "A fault rule MUST HAVE delay or abort or both. Note: Delay and abort faults are independent of one another, even if both are specified simultaneously.",
+      "source": "Istio / Virtual Service, “HTTPFaultInjection”",
+      "sourceURL": "https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPFaultInjection",
+      "sourceLicence": "B · Apache 2.0",
+      "uses": [
+        "fault injection"
+      ],
+      "conceptIDs": [
+        "istio.fault-injection"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,985 @@
+{
+  "topic": "Host OS and kernel hardening",
+  "notes": [
+    {
+      "id": "cks.host-hardening.apparmor-parser",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5000,
+      "front": "What is `apparmor_parser` used for in the Kubernetes AppArmor tutorial?",
+      "back": "Loading an AppArmor profile into the kernel of each node, before any Pod asks for that profile.",
+      "explanation": "The tutorial's first step is to load the profile onto the nodes, running `sudo apparmor_parser -q` on each one through a remote shell.",
+      "example": "Like copying a firewall rule set onto every server before any service relies on it, but the rules limit what one program may do.",
+      "introduces": [
+        "apparmor_parser"
+      ],
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”, “Example”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/#example",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "First, load the profile you want to use onto your Nodes. This profile blocks all file write operations",
+      "uses": [
+        "apparmor_parser",
+        "AppArmor",
+        "node",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-load-profile"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.apparmor-profile-field",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5005,
+      "front": "Which securityContext field sets AppArmor confinement, and where can it go?",
+      "back": "`appArmorProfile`, on either a Pod's or a container's securityContext.",
+      "explanation": "Set at Pod level, it becomes the default for all the Pod's containers; if both are set, the container's own profile is used.",
+      "example": "Like a building-wide rule that every room follows unless a room has its own posted rule, but for a container's AppArmor profile.",
+      "introduces": [
+        "appArmorProfile"
+      ],
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”, “AppArmor profile within security context”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/#specifying-apparmor-confinement",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can specify the appArmorProfile on either a container's securityContext or on a Pod's securityContext.",
+      "uses": [
+        "appArmorProfile",
+        "security context",
+        "AppArmor",
+        "Pod",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-field"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.seccomp-profile-field",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5010,
+      "front": "Which securityContext field sets a seccomp profile, and what two fields does it hold?",
+      "back": "`seccompProfile`, holding `type` and `localhostProfile`.",
+      "explanation": "It can go in the securityContext of a Pod or of a container, like the AppArmor field.",
+      "example": "Like choosing which phone numbers a work phone may dial, but for the system calls a process may make.",
+      "introduces": [
+        "seccompProfile"
+      ],
+      "source": "Kubernetes documentation, “Configure a Security Context for a Pod or Container”, “Set the Seccomp Profile for a Container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "include the seccompProfile field in the securityContext section of your Pod or Container manifest. The seccompProfile field is a SeccompProfile object consisting of type and localhostProfile.",
+      "uses": [
+        "seccompProfile",
+        "seccomp",
+        "security context",
+        "Pod",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-field"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.seccomp-default-flag",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 5015,
+      "front": "What does the kubelet flag `--seccomp-default` change?",
+      "back": "The kubelet uses the RuntimeDefault seccomp profile by default, instead of Unconfined (seccomp disabled).",
+      "explanation": "The default profile is defined by the container runtime, and the flag has to be enabled on each node where you want it.",
+      "example": "Like a building that locks every new door by default rather than leaving it open until someone fits a lock.",
+      "introduces": [
+        "--seccomp-default"
+      ],
+      "source": "Kubernetes documentation, “Restrict a Container's Syscalls with seccomp”, “Enable the use of RuntimeDefault as the default seccomp profile for all workloads”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If enabled, the kubelet will use the RuntimeDefault seccomp profile by default, which is defined by the container runtime, instead of using the Unconfined (seccomp disabled) mode.",
+      "uses": [
+        "--seccomp-default",
+        "kubelet",
+        "seccomp",
+        "container runtime"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-default"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.host-hardening.minimal-host-os",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5025,
+      "front": "What kind of host operating system does NIST SP 800-190 advise organisations to use for containers, whenever possible?",
+      "back": "A minimal, container-specific host operating system, to reduce the attack surface.",
+      "explanation": "Such systems are designed only to host containers, with other services disabled, and typically have read-only file systems.",
+      "source": "NIST SP 800-190, Application Container Security Guide, §4.5.1 Large attack surface",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=38",
+      "sourceLicence": "B · public domain (US Government work)",
+      "evidence": "Whenever possible, organizations should use these minimalistic OSs to reduce their attack surfaces and mitigate the typical risks and hardening activities associated with general-purpose OSs.",
+      "uses": [
+        "container-specific operating system",
+        "attack surface",
+        "host"
+      ],
+      "conceptIDs": [
+        "cks.host-os-minimal"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.minimal-host-os-choice",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5030,
+      "front": "You are choosing the operating system for a new pool of nodes that will only run containers. Which choice fits NIST's advice?",
+      "back": "B: a minimal, container-specific operating system.",
+      "explanation": "NIST notes that container-specific systems typically have read-only file systems and other hardening by default, so using them reduces the attack surface.",
+      "choices": "A) A general-purpose server distribution with every package group installed\nB) A minimal, container-specific operating system\nC) A desktop distribution, so operators can log in easily",
+      "choicesExplained": "A: every extra service widens the attack surface that NIST advises reducing. C: a desktop system is general-purpose and carries even more unneeded functionality.",
+      "source": "NIST SP 800-190, Application Container Security Guide, §4.5.1 Large attack surface",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=38",
+      "sourceLicence": "B · public domain (US Government work)",
+      "evidence": "they typically feature read-only file systems and employ other hardening practices by default.",
+      "uses": [
+        "container-specific operating system",
+        "attack surface",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.host-os-minimal"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.no-mixed-workloads",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5035,
+      "front": "Should a node that runs a web server container also run a web server installed directly on its host operating system?",
+      "back": "No. NIST advises not mixing containerized and non-containerized workloads on the same host.",
+      "explanation": "NIST says keeping containers on container-specific hosts makes it simpler and safer to apply defences optimised for containers.",
+      "source": "NIST SP 800-190, Application Container Security Guide, §4.5.2",
+      "sourceURL": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf#page=39",
+      "sourceLicence": "B · public domain (US Government work)",
+      "evidence": "organizations should not mix containerized and non-containerized workloads on the same host instance.",
+      "uses": [
+        "host",
+        "workload",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.no-mixed-workloads"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.kernel-module-risk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5040,
+      "front": "How can an unprivileged process in a container cause a kernel module to load?",
+      "back": "By creating a socket of the right type, which can load certain network-protocol kernel modules.",
+      "explanation": "The page warns this may let an attacker exploit a hole in a module the administrator assumed was not in use.",
+      "source": "Kubernetes documentation, “Securing a Cluster”, “Preventing containers from loading unwanted kernel modules”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "even unprivileged processes can cause certain network-protocol-related kernel modules to be loaded, just by creating a socket of the appropriate type.",
+      "uses": [
+        "kernel module auto-loading",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cks.block-kernel-modules"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.kernel-module-block",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5045,
+      "front": "What two ways does Securing a Cluster give to stop specific kernel modules loading automatically on a node?",
+      "back": "Uninstall them from the node, or add rules that block them (for example `blacklist` lines under /etc/modprobe.d/).",
+      "explanation": "On most Linux distributions the blocking rules go in a file such as /etc/modprobe.d/kubernetes-blacklist.conf.",
+      "source": "Kubernetes documentation, “Securing a Cluster”, “Preventing containers from loading unwanted kernel modules”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To prevent specific modules from being automatically loaded, you can uninstall them from the node, or add rules to block them.",
+      "uses": [
+        "kernel module auto-loading",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.block-kernel-modules"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.kernel-module-lsm",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5050,
+      "front": "How can a Linux security module block kernel module loading for containers more generically?",
+      "back": "By denying containers the `module_request` permission, so the kernel never loads modules for them.",
+      "explanation": "Pods could still use modules loaded manually, or loaded by the kernel for a more privileged process.",
+      "source": "Kubernetes documentation, “Securing a Cluster”, “Preventing containers from loading unwanted kernel modules”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "you can use a Linux Security Module (such as SELinux) to completely deny the module_request permission to containers, preventing the kernel from loading modules for containers under any circumstances.",
+      "uses": [
+        "Linux security module",
+        "SELinux",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cks.block-kernel-modules"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.kernel-module-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5055,
+      "front": "None of your workloads use the `sctp` protocol. How do you stop a container from loading the `sctp` module on a node?",
+      "back": "A: add `blacklist sctp` to a file under /etc/modprobe.d/ on the node.",
+      "explanation": "The page's own example blocking file lists `blacklist sctp`, noting that `SCTP` is not used in most Kubernetes clusters.",
+      "choices": "A) Add `blacklist sctp` to a file under /etc/modprobe.d/ on the node\nB) Set `runAsNonRoot: true` on every Pod\nC) Nothing: unprivileged processes cannot load kernel modules",
+      "choicesExplained": "B: non-root processes can still trigger network-protocol module loading by opening a socket. C: the page says unprivileged processes can cause such modules to load.",
+      "source": "Kubernetes documentation, “Securing a Cluster”, “Preventing containers from loading unwanted kernel modules”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "SCTP is not used in most Kubernetes clusters, and has also had",
+      "uses": [
+        "kernel module auto-loading",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.block-kernel-modules"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.port-api-server",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5060,
+      "front": "On which inbound port does the Kubernetes API server listen, per the Ports and Protocols reference?",
+      "back": "6443.",
+      "explanation": "The reference lists ports so they are known in environments with strict network boundaries, such as physical firewalls.",
+      "source": "Kubernetes documentation, “Ports and Protocols”, “Control plane”",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/#control-plane",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "TCP Inbound 6443 Kubernetes API server All",
+      "uses": [
+        "kube-apiserver",
+        "control plane ports",
+        "port"
+      ],
+      "conceptIDs": [
+        "cks.node-ports-minimal"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.host-hardening.port-kubelet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5065,
+      "front": "Which inbound port does the kubelet API use, on control plane and worker nodes alike?",
+      "back": "10250.",
+      "explanation": "Both the control plane and worker node tables list 10250 for the Kubelet API, used by the node itself and the control plane.",
+      "source": "Kubernetes documentation, “Ports and Protocols”, “Worker node(s)”",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/#node",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "TCP Inbound 10250 Kubelet API Self, Control plane",
+      "uses": [
+        "kubelet API",
+        "port",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.node-ports-minimal"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.host-hardening.port-etcd",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5070,
+      "front": "Which inbound port range does the etcd server client API use on the control plane?",
+      "back": "2379-2380, used by kube-apiserver and etcd.",
+      "explanation": "The reference adds that etcd can also be hosted externally or on custom ports.",
+      "source": "Kubernetes documentation, “Ports and Protocols”, “Control plane”",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/#control-plane",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "TCP Inbound 2379-2380 etcd server client API kube-apiserver, etcd",
+      "uses": [
+        "etcd",
+        "control plane ports",
+        "port"
+      ],
+      "conceptIDs": [
+        "cks.node-ports-minimal"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.host-hardening.ports-worker-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5075,
+      "front": "A worker node's firewall allows inbound traffic on 10250, 10256, 30000-32767 and 2379. Which one is not in the worker node list?",
+      "back": "D: 2379.",
+      "explanation": "The worker list covers the kubelet API, kube-proxy and NodePort Services; 2379 is the etcd client port on the control plane.",
+      "choices": "A) 10250\nB) 10256\nC) 30000-32767\nD) 2379",
+      "choicesExplained": "A: the kubelet API port. B: the kube-proxy port. C: the NodePort Services range.",
+      "source": "Kubernetes documentation, “Ports and Protocols”, “Worker node(s)”",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/#node",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "TCP Inbound 10250 Kubelet API Self, Control plane TCP Inbound 10256 kube-proxy Self, Load balancers TCP Inbound 30000-32767 NodePort Services",
+      "uses": [
+        "port",
+        "firewall",
+        "kube-proxy",
+        "NodePort"
+      ],
+      "conceptIDs": [
+        "cks.node-ports-minimal"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.host-hardening.metadata-api-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5090,
+      "front": "A node's cloud role can create and delete any storage bucket in the account, though the node only needs to pull images. What does the guidance say to change?",
+      "back": "C: limit the permissions given to the instance credentials.",
+      "explanation": "Pods can reach the metadata API by default, so broad instance credentials become broad credentials for any compromised Pod.",
+      "choices": "A) Nothing: instance credentials are only visible to the kubelet\nB) Move the credentials into a ConfigMap\nC) Limit the permissions given to the instance credentials",
+      "choicesExplained": "A: the page says metadata APIs are accessible by Pods on the instance by default. B: a ConfigMap does not reduce what the credentials allow.",
+      "source": "Kubernetes documentation, “Securing a Cluster”, “Restricting cloud metadata API access”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-cloud-metadata-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "These credentials can be used to escalate within the cluster or to other cloud services under the same account.",
+      "uses": [
+        "cloud metadata API",
+        "least privilege",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.instance-credentials-least"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.capabilities-field",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5095,
+      "front": "Where in a manifest do you add or drop Linux capabilities for a container?",
+      "back": "In the `capabilities` field of the container's `securityContext`, with `add` and `drop` lists.",
+      "explanation": "Capabilities give a process some of the root user's privileges, but not all of them.",
+      "source": "Kubernetes documentation, “Configure a Security Context for a Pod or Container”, “Set capabilities for a Container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To add or drop Linux capabilities for a Container, include the capabilities field in the securityContext section of the Container manifest.",
+      "uses": [
+        "Linux capabilities",
+        "security context",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.drop-capabilities"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.capabilities-prefix-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5100,
+      "front": "A manifest lists `capabilities: add: [\"CAP_SYS_TIME\"]`. What is wrong with it?",
+      "back": "B: the `CAP_` prefix must be left out; write `SYS_TIME`.",
+      "explanation": "Linux capability constants have the form CAP_XXX, but the manifest takes them without that part.",
+      "choices": "A) Nothing: the full constant name is required\nB) The `CAP_` prefix must be left out\nC) Capabilities can only be dropped, never added",
+      "choicesExplained": "A: the page says to omit the CAP_ part. C: the page's own example adds capabilities with an `add` list.",
+      "source": "Kubernetes documentation, “Configure a Security Context for a Pod or Container”, “Set capabilities for a Container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "But when you list capabilities in your container manifest, you must omit the CAP_ portion of the constant.",
+      "uses": [
+        "Linux capabilities",
+        "security context"
+      ],
+      "conceptIDs": [
+        "cks.drop-capabilities"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.apparmor-no-builtin-loading",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5105,
+      "front": "Does Kubernetes itself load AppArmor profiles onto nodes?",
+      "back": "No. Profiles are loaded through custom infrastructure or tools such as the Kubernetes Security Profiles Operator.",
+      "explanation": "The scheduler does not know which profiles are on which node, so the full set must be on every node, or nodes labelled and selected.",
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”, “Setting up Nodes with profiles”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/#setting-up-nodes-with-profiles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "does not provide any built-in mechanisms for loading AppArmor profiles onto Nodes. Profiles can be loaded through custom infrastructure or tools like the Kubernetes Security Profiles Operator.",
+      "uses": [
+        "AppArmor",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-load-profile"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.host-hardening.apparmor-scheduling-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5110,
+      "front": "Your custom AppArmor profile is loaded on only two of five nodes. How do you make sure Pods that need it only run where it exists?",
+      "back": "B: label those nodes for the profile and use a node selector on the Pods.",
+      "explanation": "The scheduler is not aware of which profiles are loaded where, so either every node gets the full set or placement is steered with labels.",
+      "choices": "A) Nothing: the scheduler only picks nodes that have the profile\nB) Label those nodes and use a node selector on the Pods\nC) Put the profile text in the Pod's appArmorProfile field",
+      "choicesExplained": "A: the page says the scheduler is not aware of which profiles are loaded on which node. C: the Pod names a profile; the profile itself must already be loaded on the node.",
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”, “Setting up Nodes with profiles”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/#setting-up-nodes-with-profiles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "An alternative approach is to add a Node label for each profile (or class of profiles) on the Node, and use a node selector to ensure the Pod is run on a Node with the required profile.",
+      "uses": [
+        "AppArmor",
+        "label",
+        "nodeSelector",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-load-profile"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.apparmor-loaded-list",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5115,
+      "front": "Which file on a node lists the AppArmor profiles loaded in its kernel?",
+      "back": "/sys/kernel/security/apparmor/profiles",
+      "explanation": "The tutorial reads it on the node with `sudo cat` to check a profile is loaded before a Pod depends on it.",
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”, “Securing a Pod”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/#securing-a-pod",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can view which profiles are loaded on a node by checking the /sys/kernel/security/apparmor/profiles file.",
+      "uses": [
+        "AppArmor",
+        "node",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-check-loaded"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.apparmor-verify-container",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5120,
+      "front": "How can you check which AppArmor profile a running container's root process has?",
+      "back": "Read its proc attribute: `kubectl exec <pod_name> -- cat /proc/1/attr/current`.",
+      "explanation": "The output names the profile and its mode, for example `(enforce)`.",
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”, “Securing a Pod”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/#securing-a-pod",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To verify that the profile was applied, you can check that the container's root process is running with the correct profile by examining its proc attr",
+      "uses": [
+        "AppArmor",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-field"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.apparmor-type-localhost",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5125,
+      "front": "Which AppArmor profile `type` uses a profile pre-loaded on the node, named in `localhostProfile`?",
+      "back": "Localhost",
+      "explanation": "It is the only type that points at a profile you loaded yourself, so it is the one that needs the node set up first.",
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”, “AppArmor profile within security context”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/#specifying-apparmor-confinement",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Localhost a profile pre-loaded on the node (specified by localhostProfile). RuntimeDefault the container runtime's default profile. Unconfined no AppArmor enforcement.",
+      "uses": [
+        "appArmorProfile",
+        "AppArmor",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-types",
+        "cks.apparmor-field",
+        "cks.apparmor-localhost"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.apparmor-type-runtimedefault",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5130,
+      "front": "Which AppArmor profile `type` applies the container runtime's default profile?",
+      "back": "RuntimeDefault",
+      "explanation": "The security context page lists it as the default among the valid types.",
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”, “AppArmor profile within security context”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/#specifying-apparmor-confinement",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Localhost a profile pre-loaded on the node (specified by localhostProfile). RuntimeDefault the container runtime's default profile. Unconfined no AppArmor enforcement.",
+      "uses": [
+        "appArmorProfile",
+        "AppArmor",
+        "container runtime"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-types",
+        "cks.apparmor-field"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.apparmor-type-unconfined",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5135,
+      "front": "Which AppArmor profile `type` means no AppArmor enforcement at all?",
+      "back": "Unconfined",
+      "explanation": "It runs the container without AppArmor, so none of a profile's limits apply.",
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”, “AppArmor profile within security context”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/#specifying-apparmor-confinement",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Localhost a profile pre-loaded on the node (specified by localhostProfile). RuntimeDefault the container runtime's default profile. Unconfined no AppArmor enforcement.",
+      "uses": [
+        "appArmorProfile",
+        "AppArmor"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-types"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.apparmor-precedence",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5140,
+      "front": "If both a Pod and its container set an AppArmor profile, {{c1::the container's profile}} is used.",
+      "explanation": "A Pod-level profile is only the default for containers that do not set their own.",
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”, “AppArmor profile within security context”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/#specifying-apparmor-confinement",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If both a pod & container AppArmor profile are set, the container's profile will be used.",
+      "uses": [
+        "appArmorProfile",
+        "Pod",
+        "container"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-field"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.apparmor-localhost-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5145,
+      "front": "When may `localhostProfile` be set in an `appArmorProfile`, and what does it name?",
+      "back": "Only when `type` is Localhost; it names the pre-configured profile on the node.",
+      "explanation": "The profile must be loaded on every node the Pod could be scheduled to, since you do not know where it will land.",
+      "source": "Kubernetes documentation, “Configure a Security Context for a Pod or Container”, “Set the AppArmor Profile for a Container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-apparmor-profile-for-a-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "localhostProfile must only be set if type is Localhost. It indicates the name of the pre-configured profile on the node.",
+      "uses": [
+        "appArmorProfile",
+        "AppArmor",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-localhost"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.apparmor-stable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 5150,
+      "front": "Since which Kubernetes release has AppArmor support been a stable feature?",
+      "back": "1.31. Its feature gate has been removed, so it can no longer be toggled.",
+      "explanation": "Being stable means the securityContext field is the supported way to use it.",
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This is a stable feature in Kubernetes, and has been since the 1.31 release. You can no longer toggle this feature",
+      "uses": [
+        "AppArmor"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-ga"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.host-hardening.apparmor-annotations-legacy",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5155,
+      "front": "An older course sets a Pod's AppArmor profile with an annotation. What does a current cluster expect instead?",
+      "back": "B: the `appArmorProfile` field in the securityContext.",
+      "explanation": "AppArmor was specified through annotations only before Kubernetes v1.30; that API is now deprecated.",
+      "choices": "A) The same annotation: nothing has changed\nB) The `appArmorProfile` field in the securityContext\nC) A seccompProfile with type Localhost",
+      "choicesExplained": "A: the docs call the annotation API deprecated since v1.30. C: seccomp is a separate mechanism and does not apply an AppArmor profile.",
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”, “Specifying AppArmor confinement”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/#specifying-apparmor-confinement",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Prior to Kubernetes v1.30, AppArmor was specified through annotations. Use the documentation version selector to view the documentation with this deprecated API.",
+      "uses": [
+        "AppArmor",
+        "appArmorProfile"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-annotation"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.host-hardening.apparmor-not-loaded-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5160,
+      "front": "A Pod asks for the Localhost AppArmor profile `k8s-deny-net`, which was never loaded on the node it lands on. What happens?",
+      "back": "A: the kubelet rejects the Pod.",
+      "explanation": "The kubelet rejects a Pod whose profiles are not loaded in the kernel; the node's /sys/kernel/security/apparmor/profiles file shows which are.",
+      "choices": "A) The kubelet rejects the Pod\nB) The Pod runs Unconfined\nC) The Pod runs with the RuntimeDefault profile instead",
+      "choicesExplained": "B and C: the kubelet does not fall back to another profile; the page says it rejects the Pod.",
+      "source": "Kubernetes documentation, “Restrict a Container's Access to Resources with AppArmor”, “Securing a Pod”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/apparmor/#securing-a-pod",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If any of the specified profiles are not loaded in the kernel, the kubelet will reject the Pod. You can view which profiles are loaded on a node by checking the /sys/kernel/security/apparmor/profiles file.",
+      "uses": [
+        "AppArmor",
+        "kubelet",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-not-loaded",
+        "cks.apparmor-check-loaded"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.seccomp-type-runtimedefault",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5165,
+      "front": "Which seccomp profile `type` uses the profile defined by the container runtime?",
+      "back": "RuntimeDefault",
+      "explanation": "It is the profile `--seccomp-default` makes the kubelet apply when a workload sets none.",
+      "source": "Kubernetes documentation, “Restrict a Container's Syscalls with seccomp”, “Enable the use of RuntimeDefault as the default seccomp profile for all workloads”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "the kubelet will use the RuntimeDefault seccomp profile by default, which is defined by the container runtime",
+      "uses": [
+        "seccompProfile",
+        "seccomp profile types",
+        "container runtime"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-types"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.seccomp-type-unconfined",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5170,
+      "front": "Which seccomp profile `type` means seccomp is disabled?",
+      "back": "Unconfined",
+      "explanation": "Without `--seccomp-default`, this is the mode the kubelet uses when no profile is set.",
+      "source": "Kubernetes documentation, “Restrict a Container's Syscalls with seccomp”, “Enable the use of RuntimeDefault as the default seccomp profile for all workloads”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "instead of using the Unconfined (seccomp disabled) mode.",
+      "uses": [
+        "seccompProfile",
+        "seccomp profile types",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-types"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.seccomp-type-localhost",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5175,
+      "front": "Which seccomp profile `type` points to a pre-configured profile file on the node?",
+      "back": "Localhost, with the file given in `localhostProfile`.",
+      "explanation": "`localhostProfile` may only be set with this type.",
+      "source": "Kubernetes documentation, “Configure a Security Context for a Pod or Container”, “Set the Seccomp Profile for a Container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "localhostProfile must only be set if type: Localhost. It indicates the path of the pre-configured profile on the node",
+      "uses": [
+        "seccompProfile",
+        "seccomp profile types",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-types"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.seccomp-localhost-path",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 5180,
+      "front": "A seccomp `localhostProfile` path is relative to what?",
+      "back": "The kubelet's configured seccomp profile location, which depends on the kubelet's `--root-dir` flag.",
+      "explanation": "The page's example resolves `my-profiles/profile-allow.json` to `<kubelet-root-dir>/seccomp/my-profiles/profile-allow.json`.",
+      "source": "Kubernetes documentation, “Configure a Security Context for a Pod or Container”, “Set the Seccomp Profile for a Container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "It indicates the path of the pre-configured profile on the node, relative to the kubelet's configured Seccomp profile location (configured with the --root-dir flag).",
+      "uses": [
+        "seccompProfile",
+        "kubelet",
+        "node"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-localhost-path"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.seccomp-localhost-path-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5185,
+      "front": "The kubelet's root directory is /var/lib/kubelet and your profile is at /var/lib/kubelet/seccomp/team-a/deny-net.json. What goes in `localhostProfile`?",
+      "back": "B: `team-a/deny-net.json`",
+      "explanation": "The path is written relative to the seccomp folder under the kubelet's root directory, not as an absolute path.",
+      "choices": "A) `/var/lib/kubelet/seccomp/team-a/deny-net.json`\nB) `team-a/deny-net.json`\nC) `seccomp/team-a/deny-net.json`",
+      "choicesExplained": "A: the path must be relative, not absolute. C: the `seccomp` folder is already part of the kubelet's profile location.",
+      "source": "Kubernetes documentation, “Configure a Security Context for a Pod or Container”, “Set the Seccomp Profile for a Container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Here is an example that sets the Seccomp profile to a pre-configured file at <kubelet-root-dir>/seccomp/my-profiles/profile-allow.json",
+      "uses": [
+        "seccompProfile",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-localhost-path"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.seccomp-default-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5190,
+      "front": "You want every workload on a node to get RuntimeDefault seccomp, without editing any manifests. What do you do?",
+      "back": "C: run that node's kubelet with `--seccomp-default`.",
+      "explanation": "The flag has to be enabled on each node where you want it, and it does not change the workloads' `seccompProfile` field.",
+      "choices": "A) Set `type: Unconfined` in a namespace label\nB) Nothing: RuntimeDefault already applies to every Pod\nC) Run that node's kubelet with `--seccomp-default`",
+      "choicesExplained": "A: there is no namespace label for a seccomp profile; Unconfined disables seccomp. B: without the flag the kubelet uses Unconfined.",
+      "source": "Kubernetes documentation, “Restrict a Container's Syscalls with seccomp”, “Enable the use of RuntimeDefault as the default seccomp profile for all workloads”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/seccomp/#enable-the-use-of-runtimedefault-as-the-default-seccomp-profile-for-all-workloads",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "you must run the kubelet with the --seccomp-default command line flag enabled for each node where you want to use it.",
+      "uses": [
+        "--seccomp-default",
+        "kubelet",
+        "seccomp"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-default"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 docs (CKS curriculum v1.34)"
+    },
+    {
+      "id": "cks.host-hardening.seccomp-action-log",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5195,
+      "front": "In the seccomp tutorial, which `defaultAction` does the audit.json profile use, and what does it do?",
+      "back": "`SCMP_ACT_LOG`: it logs every syscall of the process without blocking any.",
+      "explanation": "The tutorial notes this profile does not restrict any syscalls, so the Pod starts normally.",
+      "source": "Kubernetes documentation, “Restrict a Container's Syscalls with seccomp”, “Create a Pod with a seccomp profile for syscall auditing”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/seccomp/#create-a-pod-with-a-seccomp-profile-for-syscall-auditing",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "apply the audit.json profile, which will log all syscalls of the process, to a new Pod.",
+      "uses": [
+        "seccomp",
+        "system call"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-actions",
+        "cks.seccomp-audit-profile"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.seccomp-action-errno",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5200,
+      "front": "Which seccomp `defaultAction` makes every syscall not otherwise allowed return an error?",
+      "back": "`SCMP_ACT_ERRNO`",
+      "explanation": "Used alone, the tutorial calls it extremely secure but says it removes the ability to do anything meaningful.",
+      "source": "Kubernetes documentation, “Restrict a Container's Syscalls with seccomp”, “Create a Pod with a seccomp profile that causes violation”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/seccomp/#create-a-pod-with-a-seccomp-profile-that-causes-violation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Here seccomp has been instructed to error on any syscall by setting \"defaultAction\": \"SCMP_ACT_ERRNO\". This is extremely secure, but removes the ability to do anything meaningful.",
+      "uses": [
+        "seccomp",
+        "system call"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-actions"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.seccomp-action-allow",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 5205,
+      "front": "In a fine-grained seccomp profile with `defaultAction: SCMP_ACT_ERRNO`, which `action` lets the listed syscalls through?",
+      "back": "`SCMP_ACT_ALLOW`",
+      "explanation": "Everything else errors, so the workload gets only the syscalls it needs, which the tutorial says is what you really want.",
+      "source": "Kubernetes documentation, “Restrict a Container's Syscalls with seccomp”, “Create a Pod with a seccomp profile that only allows necessary syscalls”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/seccomp/#create-a-pod-with-a-seccomp-profile-that-only-allows-necessary-syscalls",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "What you really want is to give workloads only the privileges they need.",
+      "uses": [
+        "seccomp",
+        "system call",
+        "least privilege"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-actions"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.seccomp-errno-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 5210,
+      "front": "A Pod uses a Localhost seccomp profile containing only `{\"defaultAction\": \"SCMP_ACT_ERRNO\"}`. The Pod is created but sits in CrashLoopBackOff. Why?",
+      "back": "A: every syscall is refused, so the process cannot start.",
+      "explanation": "The tutorial's violation Pod behaves the same way: it is created, but its status shows it failed to start.",
+      "choices": "A) Every syscall is refused, so the process cannot start\nB) The profile file was not found on the node\nC) SCMP_ACT_ERRNO only logs syscalls, so the crash is unrelated",
+      "choicesExplained": "B: the Pod was created with the profile, and the tutorial's own violation Pod fails the same way. C: that describes SCMP_ACT_LOG, not SCMP_ACT_ERRNO.",
+      "source": "Kubernetes documentation, “Restrict a Container's Syscalls with seccomp”, “Create a Pod with a seccomp profile that causes violation”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/seccomp/#create-a-pod-with-a-seccomp-profile-that-causes-violation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The Pod creates, but there is an issue. If you check the status of the Pod, you should see that it failed to start.",
+      "uses": [
+        "seccomp",
+        "system call",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-actions"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.localhost-apparmor-vs-seccomp",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 5215,
+      "front": "What does `localhostProfile` hold for AppArmor, and what does it hold for seccomp?",
+      "back": "AppArmor: the name of a profile loaded on the node. Seccomp: a file path relative to the kubelet's seccomp profile folder.",
+      "explanation": "Both are set only with `type: Localhost`, but AppArmor profiles live in the kernel while seccomp profiles are files the kubelet reads.",
+      "source": "Kubernetes documentation, “Configure a Security Context for a Pod or Container”, “Set the AppArmor Profile for a Container”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-apparmor-profile-for-a-container",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "localhostProfile must only be set if type is Localhost. It indicates the name of the pre-configured profile on the node.",
+      "uses": [
+        "appArmorProfile",
+        "seccompProfile",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "cks.apparmor-localhost",
+        "cks.seccomp-localhost-path"
+      ]
+    },
+    {
+      "id": "cks.host-hardening.log-vs-errno",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 5220,
+      "front": "In a seccomp profile, how does `SCMP_ACT_LOG` differ from `SCMP_ACT_ERRNO` as a `defaultAction`?",
+      "back": "`SCMP_ACT_LOG` only records syscalls and lets them run; `SCMP_ACT_ERRNO` makes them fail.",
+      "explanation": "The tutorial uses the logging profile to see which syscalls a program makes, and the erroring one to show a violation.",
+      "source": "Kubernetes documentation, “Restrict a Container's Syscalls with seccomp”, “Create a Pod with a seccomp profile for syscall auditing”",
+      "sourceURL": "https://kubernetes.io/docs/tutorials/security/seccomp/#create-a-pod-with-a-seccomp-profile-for-syscall-auditing",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This profile does not restrict any syscalls, so the Pod should start successfully.",
+      "uses": [
+        "seccomp",
+        "system call"
+      ],
+      "conceptIDs": [
+        "cks.seccomp-actions",
+        "cks.seccomp-audit-profile"
+      ]
+    }
+  ]
+}

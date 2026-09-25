@@ -1,0 +1,403 @@
+Falco
+
+- About What is Falco?
+Learn about Falco and how it works
+Why choose Falco?
+Benefits of Falco for runtime security
+Falco use cases
+Threat detection and regulatory compliance
+Case studies
+Discover how the industry is adopting Falco
+Falco ecosystem
+Integrations and plugins
+FAQ
+The most common questions about the whole Falco
+ecosystem
+
+- Docs
+
+- Blog
+
+- Community About the community
+For users and contributors
+Events
+Meet and learn about Falco
+Contributors
+The people who build Falco
+Roadmap
+The Project direction
+Falco brand Brand guidelines
+
+- Enterprise
+
+- Versions
+v0.45
+v0.44
+v0.43
+v0.42
+v0.41
+v0.40
+v0.39
+v0.38
+v0.37
+v0.36
+v0.35
+v0.34
+v0.33
+v0.32
+v0.31
+v0.30
+v0.29
+v0.28
+v0.27
+v0.26
+
+Try Falco
+
+About
+Docs
+Blog
+Community
+Enterprise
+
+Join the global cloud native community at KubeCon + CloudNativeCon North America 2026. Register Now!
+2026-09-13T00:00:00
+2026-11-12T18:00:00
+2
+
+- The Falco Project
+-
+Getting Started
+-
+Try Falco with Docker
+
+-
+Try Falco on Kubernetes
+
+-
+Try Falco on Linux
+
+-
+Learning Environments
+
+-
+Additional Resources
+
+-
+Setup
+-
+Deploy on Kubernetes with the Operator
+
+-
+Deploy on Kubernetes with Helm
+
+-
+Deploy as a container
+
+-
+Install on a host (DEB, RPM)
+
+-
+Install on a host (tarball)
+
+-
+Specific Environments
+
+-
+Download
+
+-
+Concepts
+-
+Event Sources
+-
+Kernel Events
+-
+Kernel Events Architecture Overview
+
+-
+Advanced Performance Tuning
+
+-
+Dropped Syscall Events
+
+-
+Generating sample events
+
+-
+Plugin Events
+-
+CloudTrail Events
+
+-
+Kubernetes Audit Events
+
+-
+Okta Events
+
+-
+Rules
+-
+Basics of Falco Rules
+
+-
+Default and Local Rules
+
+-
+Condition Syntax
+
+-
+Overriding Rules
+
+-
+Rule Exceptions
+
+-
+Controlling Rules
+
+-
+Custom Ruleset
+
+-
+Escaping Special Characters
+
+-
+Style Guide of Falco Rules
+
+-
+Accessing File System Paths
+
+-
+Adoption of Falco Rules in Production
+
+-
+Resolving Domain Names
+
+-
+Rules Versioning
+
+-
+IDE Support
+
+-
+Outputs
+-
+Channels
+
+-
+Formatting
+
+-
+Forwarding
+
+-
+Plugins
+-
+Architecture
+
+-
+Usage
+
+-
+Registered Plugins
+
+-
+Metrics
+
+-
+Developer Guide
+-
+Build Falco from source
+
+-
+Plugins
+-
+Development
+
+-
+SDKs
+
+-
+Distribution
+
+-
+Public registry
+
+-
+Troubleshooting
+-
+Performance
+
+-
+Falco Is Not Starting Up
+
+-
+Falco Is Dropping Syscalls Events
+
+-
+Missing Fields in Falco Logs
+
+-
+Reference
+-
+Glossary
+
+-
+Falco Daemon
+-
+Falco Arguments
+
+-
+Config Options
+
+-
+Falco Rules
+-
+Rule fields
+
+-
+Default Macros
+
+-
+Macros to Override
+
+-
+Supported Events
+
+-
+Fields for Conditions and Outputs
+
+-
+Rules Examples
+
+-
+Default Rules
+
+-
+Falco Plugins
+-
+API Reference
+
+-
+Go SDK Walkthrough
+
+-
+Changelog
+
+-
+Contribute
+-
+How to Share Your Falco Rules
+
+-
+Contributor of the Month
+
+-
+Roadmap
+
+-
+Available Documentation Versions
+
+Edit this page
+Create child page
+Create documentation issue
+Create project issue
+On this page
+
+- The configuration file
+
+- Falcoctl
+
+- Rules installed via the Helm chart
+- Use the rules embedded in the Falco image
+
+- Add custom rules with a configmap
+
+- Only use rules supplied via configmap
+
+Default and Local Rules Files
+Falco provides default rules, but you can add your own
+Falco comes with a default rules file that is loaded if no specific configuration is provided. However, that can be completely customized in several ways, depending on how Falco is installed. There are several ways to specify the location of your custom rules, download them, and keep them up to date.
+The configuration file
+The default configuration file, /etc/falco/falco.yaml makes Falco load rules from the /etc/falco/falco_rules.yaml file, followed by any custom rules located in the /etc/falco/falco_rules.local.yaml file, followed by any custom rules located in the /etc/falco/rules.d directory. This configuration is governed by the rules_files key:
+rules_files:
+- /etc/falco/falco_rules.yaml
+- /etc/falco/falco_rules.local.yaml
+- /etc/falco/rules.d
+
+Changing these configuration entries will affect the location and loading order of the rules files.
+You can find the details of the available default rules in this page or in the Falco rules auto-generated documentation .
+If you are running Falco directly from the command line, you can use the -r switch to load as many rules files as needed. Is it possible to provide -r with the path of a single file or directory (in this latter case, all the rules files in the directory will be loaded). The switch can be specified multiple times; if is specified at least once, the rules_files key in the configuration file is ignored.
+e.g.:
+# falco -r /path/to/my/rules1.yaml -r /path/to/my/rules2.yaml
+
+Falcoctl
+The falcoctl tool provides functionality to download and update rules files distributed as OCI artifacts. The install command of the falcoctl tool will download rules files to a configurable directory (by default, that is /etc/falco ). For instance, to install a specific version of the default rules file in /etc/falco you can run the following commands:
+# falcoctl index add falcosecurity https://falcosecurity.github.io/falcoctl/index.yaml
+# falcoctl artifact install falco-rules:3.2.0
+
+Falcoctl is available as a standalone tool, included in Falco packages and container images, automatically installed as a systemd unit or deployed as an init container via the Helm chart.
+Rules installed via the Helm chart
+If you install the Helm chart , at least version 3.0.0 with:
+helm install falco
+
+Falco, by default, will load the latest rules file that is compatible with your Falco version and keep it up to date automatically via falcoctl. These are published on GitHub Packages .
+Use the rules embedded in the Falco image
+The Falco image ships with a snapshot of the latest version of the official Falco rules. If you wish to use that without downloading anything at runtime, you can install Falco with:
+helm install falco \
+--set falcoctl.artifact.install.enabled=false \
+--set falcoctl.artifact.follow.enabled=false
+
+Add custom rules with a configmap
+You can always use the customRules value to add your own custom rules in a configmap. For instance, if we create a file as described in the documentation , and then add it to our install command above as follows:
+helm install falco \
+--set falcoctl.artifact.install.enabled=false \
+--set falcoctl.artifact.follow.enabled=false \
+-f custom_rules.yaml
+
+or if you have already installed falco, you can use the helm upgrade -i
+helm upgrade -i falco \
+--set falcoctl.artifact.install.enabled=false \
+--set falcoctl.artifact.follow.enabled=false \
+-f custom_rules.yaml
+
+it will be loaded and configured in our Falco instance and you can verify changes by checking the falco daemonset container logs with the command below:
+kubectl logs -n falco daemonsets/falco
+
+Notice: the new rule files described in customRules will be placed in the /etc/falco/rules.d directory, and will be loaded following the order specified in the configuration file: in the default configuration, this means that will be loaded after /etc/falco/falco.yaml and /etc/falco/falco_rules.local.yaml rules files.
+Only use rules supplied via configmap
+If you only want to use the rules that you add via configmap, discarding all automated updates and default rules shipped in the image, you have to remove the falco_rules.yaml and falco_rules.local.yaml entries from the Falco configuration. Assuming you have your custom rules in custom_rules.yaml :
+helm install falco -f ./custom_rules.yaml \
+--set "falco.rules_files={/etc/falco/rules.d}" \
+--set falcoctl.artifact.install.enabled=false \
+--set falcoctl.artifact.follow.enabled=false
+
+Was this page helpful?
+Let us know! You feedback will help us to improve the content and to stay in touch with our users.
+
+Yes
+
+No
+Glad to hear it! Please tell us how we can improve .
+Sorry to hear that. Please tell us how we can improve .
+
+Last modified Jul 12, 2025: Update default-custom.md (ba5b970)
+
+-
+
+-
+
+-
+
+About
+Docs
+Blog
+Community
+Enterprise
+
+Falco was created by Sysdig
+
+&copy; 2026 The Falco Authors | Documentation Distributed under CC BY 4.0
+Copyright Falco a Series of LF Projects, LLC
+For website terms of use, trademark policy and other project policies, please see
+https://lfprojects.org/policies/
