@@ -36,6 +36,21 @@ export function loadDeck(dir) {
   };
 }
 
+/**
+ * Terms taught by the decks this deck builds on (deck.json "prerequisiteDecks":
+ * slugs under the same decks/ root). They count as known to the checker.
+ */
+export function prerequisiteTerms(root, meta) {
+  const out = [];
+  for (const slug of meta.prerequisiteDecks || []) {
+    const dir = join(root, slug);
+    if (!existsSync(join(dir, 'deck.json'))) throw new Error(`prerequisite deck "${slug}" not found under ${root}`);
+    const d = loadDeck(dir);
+    out.push(...d.notes.flatMap((n) => n.introduces || []), ...(d.meta.assumedTerms || []));
+  }
+  return out;
+}
+
 /** @returns {Map<string, object>} concept id -> concept */
 export function loadConcepts(conceptsDir, family) {
   const p = join(conceptsDir, `${family}.json`);
