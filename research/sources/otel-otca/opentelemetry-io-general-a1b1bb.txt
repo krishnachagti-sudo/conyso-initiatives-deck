@@ -1,0 +1,171 @@
+https://opentelemetry.io/docs/languages/sdk-configuration/general/
+ General SDK Configuration
+Note
+Support for environment-variable configuration varies across languages. For
+the list of variables supported by each language, see the environment
+variable compliance matrix.
+
+## [#otel_service_name] OTEL_SERVICE_NAME
+Sets the value of the service.name
+resource attribute.
+Default value: unknown_service
+If service.name is also provided in OTEL_RESOURCE_ATTRIBUTES, then
+OTEL_SERVICE_NAME takes precedence.
+Example:
+export OTEL_SERVICE_NAME="your-service-name"
+
+## [#otel_resource_attributes] OTEL_RESOURCE_ATTRIBUTES
+Key-value pairs to be used as resource attributes.
+Default value: empty
+Example:
+export OTEL_RESOURCE_ATTRIBUTES="key1=value1,key2=value2"
+
+References:
+
+- Resource SDK
+
+- Resource semantic conventions
+for common resource type semantic conventions
+
+## [#otel_traces_sampler] OTEL_TRACES_SAMPLER
+Specifies the Sampler used to sample traces by the SDK.
+Default value: parentbased_always_on
+Example:
+export OTEL_TRACES_SAMPLER="traceidratio"
+
+Accepted values for OTEL_TRACES_SAMPLER are:
+
+- always_on: AlwaysOnSampler
+
+- always_off: AlwaysOffSampler
+
+- traceidratio: TraceIdRatioBased
+
+- parentbased_always_on: ParentBased(root=AlwaysOnSampler)
+
+- parentbased_always_off: ParentBased(root=AlwaysOffSampler)
+
+- parentbased_traceidratio: ParentBased(root=TraceIdRatioBased)
+
+- parentbased_jaeger_remote: ParentBased(root=JaegerRemoteSampler)
+
+- jaeger_remote: JaegerRemoteSampler
+
+- xray: AWS X-Ray Centralized Sampling (third party)
+
+## [#otel_traces_sampler_arg] OTEL_TRACES_SAMPLER_ARG
+Specifies arguments, if applicable, to the sampler defined by
+OTEL_TRACES_SAMPLER. The specified value will only be used if
+OTEL_TRACES_SAMPLER is set. Each Sampler type defines its own expected input,
+if any. Invalid or unrecognized input is logged as an error.
+Default value: empty
+Example:
+export OTEL_TRACES_SAMPLER="traceidratio"
+export OTEL_TRACES_SAMPLER_ARG="0.5"
+
+Depending on the value of OTEL_TRACES_SAMPLER, OTEL_TRACES_SAMPLER_ARG may
+be set as follows:
+
+- For traceidratio and parentbased_traceidratio samplers: Sampling
+probability, a number in the [0..1] range, e.g. “0.25”. Default is 1.0 if
+unset.
+
+- For jaeger_remote and parentbased_jaeger_remote: The value is a comma
+separated list:
+- Example:
+endpoint=http://localhost:14250,pollingIntervalMs=5000,initialSamplingRate=0.25
+
+- endpoint: the endpoint in form of scheme://host:port of gRPC server that
+serves the sampling strategy for the service
+(sampling.proto).
+
+- pollingIntervalMs: in milliseconds indicating how often the sampler will
+poll the backend for updates to sampling strategy.
+
+- initialSamplingRate: in the [0..1] range, which is used as the sampling
+probability when the backend cannot be reached to retrieve a sampling
+strategy. This value stops having an effect once a sampling strategy is
+retrieved successfully, as the remote strategy will be used until a new
+update is retrieved.
+
+## [#otel_propagators] OTEL_PROPAGATORS
+Specifies Propagators to be used in a comma-separated list.
+Default value: tracecontext,baggage
+Example:
+export OTEL_PROPAGATORS="b3"
+Accepted values for OTEL_PROPAGATORS are:
+
+- tracecontext: W3C Trace Context
+
+- baggage: W3C Baggage
+
+- b3: B3 Single
+
+- b3multi: B3 Multi
+
+- jaeger: Jaeger
+
+- xray:
+AWS X-Ray
+(third party)
+
+- ottrace: OT Trace
+(third party)
+
+- none: No automatically configured propagator.
+
+## [#otel_traces_exporter] OTEL_TRACES_EXPORTER
+Specifies which exporter is used for traces. Depending on the implementation it
+may be a comma-separated list.
+Default value: otlp
+Example:
+export OTEL_TRACES_EXPORTER="jaeger"
+Accepted values for are:
+
+- otlp: OTLP
+
+- jaeger: Export in Jaeger data model.
+
+- zipkin: Zipkin
+
+- console: Standard Output
+
+- none: No automatically configured exporter for traces.
+
+## [#otel_metrics_exporter] OTEL_METRICS_EXPORTER
+Specifies which exporter is used for metrics. Depending on the implementation it
+may be a comma-separated list.
+Default value: otlp
+Example:
+export OTEL_METRICS_EXPORTER="prometheus"
+Accepted values for OTEL_METRICS_EXPORTER are:
+
+- otlp: OTLP
+
+- prometheus:
+Prometheus
+
+- console: Standard Output
+
+- none: No automatically configured exporter for metrics.
+
+## [#otel_logs_exporter] OTEL_LOGS_EXPORTER
+Specifies which exporter is used for logs. Depending on the implementation it
+may be a comma-separated list.
+Default value: otlp
+Example:
+export OTEL_LOGS_EXPORTER="otlp"
+Accepted values for OTEL_LOGS_EXPORTER are:
+
+- otlp: OTLP
+
+- console: Standard Output
+
+- none: No automatically configured exporter for logs.
+ Feedback
+Was this page helpful?
+Yes
+NoThank you. Your feedback is appreciated!
+Please let us know how we can improve this page. Your feedback is appreciated!
+
+Last modified February 25, 2026: Remove incorrect statement on ENV variable and minor improvements (#9275) (c8d0756f)

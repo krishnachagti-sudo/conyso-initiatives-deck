@@ -1,0 +1,143 @@
+https://opentelemetry.io/docs/languages/sdk-configuration/declarative-configuration/
+ Declarative configuration
+Declarative configuration uses a YAML file instead of environment variables.
+This approach is useful when:
+
+- You have many configuration options to set.
+
+- You want to use configuration options that are not available as environment
+variables.
+Warning
+The declarative configuration schema is stable. The parts of it that are still
+experimental are suffixed with /development. Support for declarative
+configuration in various implementations is still experimental.
+
+## [#supported-languages] Supported languages
+The following OpenTelemetry SDKs support declarative configuration:
+
+- Java
+For details, refer to the
+Compliance Matrix
+
+## [#getting-started] Getting started
+
+- Save the following configuration file as otel-config.yaml.
+
+- Set the environment variable OTEL_CONFIG_FILE=/path/to/otel-config.yaml
+Recommended configuration file:
+# otel-getting-started.yaml is a good starting point for configuring the SDK, including exporting to
+# localhost via OTLP.
+#
+# NOTE: With the exception of env var substitution syntax (i.e. ${MY_ENV}), SDKs ignore
+# environment variables when interpreting config files. This including ignoring all env
+# vars defined in https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/.
+#
+# For schema documentation, including required properties, semantics, default behavior, etc,
+# see: https://opentelemetry.io/docs/specs/otel-config/types/
+
+file_format: "1.2"
+
+resource:
+  # Read resource attributes from the OTEL_RESOURCE_ATTRIBUTES environment variable.
+  # This aligns well with the OpenTelemetry Operator and other deployment methods.
+  attributes_list: ${OTEL_RESOURCE_ATTRIBUTES}
+  detection/development: # /development properties may not be supported in all SDKs
+    detectors:
+      - service: # will add "service.instance.id" and "service.name" from the OTEL_SERVICE_NAME env var
+      - host:
+      - process:
+      - container:
+
+propagator:
+  composite:
+    - tracecontext:
+    - baggage:
+
+# Read backend endpoint from the OTEL_EXPORTER_OTLP_ENDPOINT environment variable.
+# This aligns well with the OpenTelemetry Operator and other deployment methods.
+
+tracer_provider:
+  sampler:
+    parent_based:
+      root:
+        always_on:
+  processors:
+    - batch:
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/traces
+
+meter_provider:
+  readers:
+    - periodic:
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/metrics
+
+logger_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/logs
+
+## [#environment-variables] Environment variables
+
+- Declarative configuration supports syntax to read environment variables.
+
+- All environment variables are ignored unless you explicitly add them to the
+config file.
+For example, if you set:
+OTEL_RESOURCE_ATTRIBUTES=service.version=1.1,deployment.environment.name=staging
+
+The following config will create a resource with service.version=1.1 and
+deployment.environment.name=staging:
+resource:
+  attributes_list: ${OTEL_RESOURCE_ATTRIBUTES}
+
+Warning
+All environment variables are ignored unless you explicitly add them to the
+config file.
+
+## [#migration-configuration] Migration configuration
+If your existing configuration relies on environment variables, you can use the
+migration configuration
+as a starting point to migrate to declarative configuration.
+
+## [#available-config-options] Available config options
+A complete list of config options can be found in the configuration
+example.
+
+## [#endpoint-per-signal] Endpoint per signal
+If you have different endpoints for traces, metrics, and logs, use the following
+config when using otlp_http:
+OTLP HTTP ExporterEndpoint value
+Traces${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://localhost:4318/v1/traces}
+Metrics${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:-http://localhost:4318/v1/metrics}
+Logs${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT:-http://localhost:4318/v1/logs}
+
+## [#grpc-exporter] gRPC Exporter
+Instead of otlp_http, you can also use otlp_grpc to export via gRPC:
+otlp_grpc:
+  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4317}
+
+## [#resource-attributes] Resource Attributes
+The recommended approach to set resource attributes is via environment
+variables, because it works well with tools that set environment variables, such
+as
+OpenTelemetry Operator for Kubernetes.
+However, you can also set resource attributes directly in the config file:
+resource:
+  attributes:
+    - name: service.name
+      value: shopping_cart
+    - name: deployment.environment.name
+      value: staging
+
+ Feedback
+Was this page helpful?
+Yes
+NoThank you. Your feedback is appreciated!
+Please let us know how we can improve this page. Your feedback is appreciated!
+
+Last modified September 11, 2026: Update opentelemetry-configuration version to v1.2.0 (#11682) (b39cf54e)

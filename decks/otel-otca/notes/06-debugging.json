@@ -1,0 +1,1363 @@
+{
+  "topic": "Maintaining and debugging pipelines",
+  "notes": [
+    {
+      "id": "otel.debugging.debug-exporter",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6015,
+      "front": "What is the debug exporter?",
+      "back": "A Collector exporter for live troubleshooting that confirms the Collector is receiving, processing and exporting data.",
+      "explanation": "It is a local exporter: it lets you inspect the data the Collector is processing.",
+      "example": "Like a glass panel on a machine that lets you watch items pass through it.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, Local exporters",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#local-exporters",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Using a local exporter, you can inspect the data being processed by the Collector. For live troubleshooting, consider using the debug exporter, which can confirm that the Collector is receiving, processing, and exporting data.",
+      "introduces": [
+        "debug exporter"
+      ],
+      "uses": [
+        "debug exporter",
+        "Collector exporter",
+        "OpenTelemetry Collector"
+      ],
+      "conceptIDs": [
+        "otel.debug-exporter"
+      ]
+    },
+    {
+      "id": "otel.debugging.zpages",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6025,
+      "front": "What is the zPages extension?",
+      "back": "A Collector extension, on local port 55679, for inspecting live data from the Collector’s receivers and exporters.",
+      "explanation": "Its TraceZ page, at /debug/tracez, is for debugging trace operations.",
+      "example": "Like a live departures board showing what is moving through a station right now.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, zPages",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#zpages",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The zPages extension, which is exposed locally on port 55679, can be used to inspect live data from the Collector’s receivers and exporters. The TraceZ page, exposed at /debug/tracez, is useful for debugging trace operations, such as:",
+      "introduces": [
+        "zPages extension"
+      ],
+      "uses": [
+        "zPages extension",
+        "extension",
+        "receiver",
+        "Collector exporter"
+      ],
+      "conceptIDs": [
+        "otel.zpages"
+      ]
+    },
+    {
+      "id": "otel.debugging.health-check",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 6035,
+      "front": "What is the health_check extension, and how is it enabled?",
+      "back": "A Collector extension for health monitoring; you enable it by listing `health_check` under the service section’s extensions.",
+      "explanation": "The docs give Collector health monitoring as one of the jobs extensions do.",
+      "example": "Like a heartbeat monitor clipped to the Collector: it reports on the Collector, not on the data.",
+      "source": "OpenTelemetry docs, Collector “Configuration”, Service: Extensions",
+      "sourceURL": "https://opentelemetry.io/docs/collector/configuration/#service-extensions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The extensions subsection consists of a list of desired extensions to be enabled. For example: service: extensions: [health_check, pprof, zpages]",
+      "introduces": [
+        "health_check extension"
+      ],
+      "uses": [
+        "health_check extension",
+        "extension"
+      ],
+      "conceptIDs": [
+        "otel.health-check"
+      ]
+    },
+    {
+      "id": "otel.debugging.internal-telemetry",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6045,
+      "front": "What is the Collector’s internal telemetry?",
+      "back": "The Collector’s own telemetry about itself: internal metrics and logs, used to monitor and troubleshoot it.",
+      "explanation": "By default the metrics are exposed on a Prometheus interface on port 8888, and the logs go to stderr.",
+      "example": "Like a car’s dashboard warning lights: they report on the car itself, not on the journey.",
+      "source": "OpenTelemetry docs, Collector “Internal telemetry”, Activate internal telemetry in the Collector",
+      "sourceURL": "https://opentelemetry.io/docs/collector/internal-telemetry/#activate-internal-telemetry-in-the-collector",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, the Collector exposes its own telemetry in two ways: - Internal metrics are exposed using a Prometheus interface which defaults to port 8888. - Logs are emitted to stderr by default.",
+      "introduces": [
+        "Collector internal telemetry"
+      ],
+      "uses": [
+        "Collector internal telemetry",
+        "OpenTelemetry Collector",
+        "Prometheus",
+        "metric",
+        "log"
+      ],
+      "conceptIDs": [
+        "otel.internal-telemetry"
+      ]
+    },
+    {
+      "id": "otel.debugging.sending-queue",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6055,
+      "front": "What is an exporter’s sending queue?",
+      "back": "An in-memory buffer where the exporter holds data, instead of dropping it, while the endpoint is unavailable.",
+      "explanation": "The endpoint may be unavailable because of network issues or a backend restart, for example.",
+      "example": "Like a waiting room that holds patients while the doctor is called away, instead of sending them home.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Sending queue (in-memory buffering)",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#sending-queue-in-memory-buffering",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Handling Endpoint Unavailability: If the endpoint becomes unavailable, for example due to network issues or a backend restart, the exporter cannot send data immediately. Instead of dropping the data, it adds it to the in-memory sending queue.",
+      "introduces": [
+        "sending queue"
+      ],
+      "uses": [
+        "sending queue",
+        "Collector exporter"
+      ],
+      "conceptIDs": [
+        "otel.sending-queue"
+      ]
+    },
+    {
+      "id": "otel.debugging.persistent-queue",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6065,
+      "front": "What is persistent storage (write-ahead log, WAL) for the sending queue?",
+      "back": "The sending queue writes data to a write-ahead log on disk before exporting it, so the data survives a Collector crash.",
+      "explanation": "It is turned on with the file_storage extension.",
+      "example": "Like a kitchen writing each order in a ledger before cooking it, so a power cut loses nothing.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Persistent storage (write-ahead log - WAL)",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#persistent-storage-write-ahead-log---wal",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "you can enable persistent storage for the sending queue using the file_storage extension. - How it works: Instead of just buffering in memory, the sending queue writes data to a Write-Ahead Log (WAL) on disk before attempting to export it.",
+      "introduces": [
+        "persistent storage",
+        "WAL"
+      ],
+      "uses": [
+        "persistent storage",
+        "WAL",
+        "sending queue",
+        "extension"
+      ],
+      "conceptIDs": [
+        "otel.persistent-queue"
+      ]
+    },
+    {
+      "id": "otel.debugging.message-queue",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 6075,
+      "front": "What is a message queue between Collectors?",
+      "back": "A dedicated queue, such as Kafka, placed between Collector tiers or before a vendor backend for the highest resilience.",
+      "explanation": "One Collector exports to a Kafka topic, and another consumes from that topic.",
+      "example": "Like a warehouse between factory and shops: either side can pause while the goods wait safely.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Message queues",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#message-queues",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For the highest level of resilience, especially between different Collector tiers (like Agent to Gateway) or between your infrastructure and a vendor backend, you can introduce a dedicated message queue like Kafka. - How it works: One Collector instance (Agent) exports data to a Kafka topic using the Kafka exporter.",
+      "introduces": [
+        "message queue between Collectors"
+      ],
+      "uses": [
+        "message queue between Collectors",
+        "agent-to-gateway pattern"
+      ],
+      "conceptIDs": [
+        "otel.message-queue-buffer"
+      ]
+    },
+    {
+      "id": "otel.debugging.telemetry-schema",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6085,
+      "front": "In OpenTelemetry, what is a telemetry schema?",
+      "back": "The shape and composition that consumers assume emitted telemetry has, such as which attributes it contains.",
+      "explanation": "When consumers rely on that shape, changing the telemetry can break them.",
+      "example": "Like the column layout a monthly report depends on: rename a column and the report breaks.",
+      "source": "OpenTelemetry specification, “Telemetry Schemas”, Motivation",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/schemas/#motivation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "They assume that the telemetry will contain certain attributes or otherwise have a certain shape and composition of data (this is referred to as “telemetry schema” throughout this document). This makes it difficult or impossible to change the composition of the emitted telemetry data without breaking the consumers.",
+      "introduces": [
+        "telemetry schema"
+      ],
+      "uses": [
+        "telemetry schema",
+        "attribute"
+      ],
+      "conceptIDs": [
+        "otel.telemetry-schema"
+      ]
+    },
+    {
+      "id": "otel.debugging.schema-url",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 6095,
+      "front": "What is a schema URL?",
+      "back": "The identifier of a telemetry schema: a location from which its schema file can be retrieved over http or https.",
+      "explanation": "The spec stresses it is a real, fetchable location, not just a name.",
+      "example": "Like a versioned link to a style guide, which anyone can open to read the rules.",
+      "source": "OpenTelemetry specification, “Telemetry Schemas”, Schema URL",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/schemas/#schema-url",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Schema URL is an identifier of a Schema. The URL specifies a location of a Schema File that can be retrieved (so it is a URL and not just a URI) using HTTP or HTTPS protocol.",
+      "introduces": [
+        "schema URL"
+      ],
+      "uses": [
+        "schema URL",
+        "telemetry schema",
+        "http"
+      ],
+      "conceptIDs": [
+        "otel.schema-url"
+      ]
+    },
+    {
+      "id": "otel.debugging.incoming-context-risk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6105,
+      "front": "What risk do the docs flag in accepting context from external sources?",
+      "back": "Forged trace headers that manipulate tracing data or exploit weaknesses in context parsing.",
+      "explanation": "For this reason the docs suggest ignoring or sanitising incoming context from untrusted sources.",
+      "source": "OpenTelemetry docs, “Context propagation”, External services",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/context-propagation/#external-services",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Malicious actors could send forged trace headers to manipulate your tracing data or potentially exploit vulnerabilities in context parsing. You might want to ignore or sanitize incoming context from untrusted sources.",
+      "uses": [
+        "context",
+        "context propagation"
+      ],
+      "conceptIDs": [
+        "otel.untrusted-incoming-context"
+      ]
+    },
+    {
+      "id": "otel.debugging.incoming-context-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6115,
+      "front": "Your public endpoint receives requests from the internet that carry traceparent headers. What do the docs suggest you consider?",
+      "back": "A: ignore or sanitise the untrusted incoming context.",
+      "choices": "A) Ignoring or sanitising incoming context from these untrusted sources\nB) Always trusting it, so traces stay joined\nC) Copying it into baggage for downstream services",
+      "choicesExplained": "B leaves your tracing data open to forged headers. C spreads the untrusted data further.",
+      "explanation": "Forged headers could manipulate tracing data or exploit weaknesses in context parsing.",
+      "source": "OpenTelemetry docs, “Context propagation”, External services",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/context-propagation/#external-services",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Be cautious when accepting context from external sources. Malicious actors could send forged trace headers to manipulate your tracing data",
+      "uses": [
+        "W3C Trace Context and traceparent",
+        "context",
+        "baggage"
+      ],
+      "conceptIDs": [
+        "otel.untrusted-incoming-context"
+      ]
+    },
+    {
+      "id": "otel.debugging.outgoing-context-risk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6125,
+      "front": "Why be careful about the context you send to external services?",
+      "back": "Internal trace and span identifiers or baggage items might reveal your internal architecture or business logic.",
+      "explanation": "You may want to configure propagators not to send context to external or public-facing endpoints.",
+      "source": "OpenTelemetry docs, “Context propagation”, External services",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/context-propagation/#external-services",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Internal trace IDs, span IDs, or baggage items might reveal sensitive information about your internal architecture or business logic. You may want to configure your propagators to not send context to external or public-facing endpoints.",
+      "uses": [
+        "context",
+        "baggage",
+        "propagator"
+      ],
+      "conceptIDs": [
+        "otel.outgoing-context-leak"
+      ]
+    },
+    {
+      "id": "otel.debugging.outgoing-context-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6135,
+      "front": "Your checkout service calls a third-party payment provider you do not control. What might you configure for those calls?",
+      "back": "A: stop propagators sending context to the external endpoint.",
+      "choices": "A) Propagators that do not send context to that external endpoint\nB) Extra baggage describing your internal services\nC) The debug exporter on the provider’s side",
+      "choicesExplained": "B leaks exactly the internal detail the docs warn about. C: you cannot configure the provider’s side, and it is not about propagation.",
+      "explanation": "Internal identifiers and baggage may reveal sensitive details about your architecture.",
+      "source": "OpenTelemetry docs, “Context propagation”, External services",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/context-propagation/#external-services",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You may want to configure your propagators to not send context to external or public-facing endpoints.",
+      "uses": [
+        "propagator",
+        "context",
+        "baggage",
+        "debug exporter"
+      ],
+      "conceptIDs": [
+        "otel.outgoing-context-leak"
+      ]
+    },
+    {
+      "id": "otel.debugging.no-metadata-field",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6145,
+      "front": "You propagate context over a protocol that has no dedicated metadata field. What must the receiving side do?",
+      "back": "Extract the context and remove it before the data is processed.",
+      "explanation": "Otherwise, the docs warn, you may create undefined behaviour.",
+      "source": "OpenTelemetry docs, “Context propagation”, Custom Context Propagation",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/context-propagation/#custom-context-propagation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Note that it is possible to propagate context in protocols that do not have a dedicated field for metadata, but you have to make sure that on the receiving side they are extracted and removed before the data is processed, otherwise you may create undefined behavior.",
+      "uses": [
+        "context",
+        "context propagation"
+      ],
+      "conceptIDs": [
+        "otel.custom-propagation"
+      ]
+    },
+    {
+      "id": "otel.debugging.local-test-data",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6155,
+      "front": "For which kinds of issues do the docs suggest sending a little test data to a Collector that outputs to local logs?",
+      "back": "Issues such as configuration verification and network debugging.",
+      "explanation": "A local exporter lets you inspect the data the Collector is processing.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, Local exporters",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#local-exporters",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For certain types of issues, such as configuration verification and network debugging, you can send a small amount of test data to a Collector configured to output to local logs.",
+      "uses": [
+        "OpenTelemetry Collector"
+      ],
+      "conceptIDs": [
+        "otel.debug-exporter"
+      ]
+    },
+    {
+      "id": "otel.debugging.debug-exporter-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6165,
+      "front": "You changed a Collector configuration and want to confirm spans really pass through it before pointing it at production. Which exporter do you add?",
+      "back": "A: the debug exporter.",
+      "choices": "A) The debug exporter\nB) The load-balancing exporter\nC) No exporter: extensions show the spans",
+      "choicesExplained": "B routes spans to other Collectors; it shows you nothing. C: the docs name the debug exporter, not an extension, as the way to confirm data is received, processed and exported.",
+      "explanation": "The debug exporter can confirm the Collector is receiving, processing and exporting data.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, Local exporters",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#local-exporters",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For live troubleshooting, consider using the debug exporter, which can confirm that the Collector is receiving, processing, and exporting data.",
+      "uses": [
+        "debug exporter",
+        "load-balancing exporter",
+        "extension",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.debug-exporter"
+      ]
+    },
+    {
+      "id": "otel.debugging.debug-verbosity",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6175,
+      "front": "Which debug exporter setting prints the entire payload?",
+      "back": "`verbosity: detailed`.",
+      "explanation": "With it, the log shows each span’s identifiers, name, times and attributes.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, Local exporters",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#local-exporters",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can also configure the debug exporter so the entire payload is printed: exporters: debug: verbosity: detailed",
+      "uses": [
+        "debug exporter"
+      ],
+      "conceptIDs": [
+        "otel.debug-verbosity"
+      ]
+    },
+    {
+      "id": "otel.debugging.otelcol-validate",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6185,
+      "front": "Which command validates a Collector configuration file?",
+      "back": "`otelcol validate --config=<file>`.",
+      "explanation": "The docs give it as the way to validate a configuration file.",
+      "source": "OpenTelemetry docs, Collector “Configuration”, Location",
+      "sourceURL": "https://opentelemetry.io/docs/collector/configuration/#location",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To validate a configuration file, use the validate command. For example: otelcol validate --config=customconfig.yaml",
+      "uses": [
+        "OpenTelemetry Collector"
+      ],
+      "conceptIDs": [
+        "otel.config-validate"
+      ]
+    },
+    {
+      "id": "otel.debugging.validate-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6195,
+      "front": "Before rolling a new configuration out to 200 Collectors, you want to check the file itself for errors. What do you run?",
+      "back": "A: `otelcol validate` on the new file.",
+      "choices": "A) `otelcol validate --config=new.yaml`\nB) `otelcol components`\nC) Start one Collector with the debug exporter and wait",
+      "choicesExplained": "B lists the components in the distribution; it does not check your file. C tests data flow, not the file as such.",
+      "explanation": "The validate command is the documented way to validate a configuration file.",
+      "source": "OpenTelemetry docs, Collector “Configuration”, Location",
+      "sourceURL": "https://opentelemetry.io/docs/collector/configuration/#location",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To validate a configuration file, use the validate command.",
+      "uses": [
+        "debug exporter"
+      ],
+      "conceptIDs": [
+        "otel.config-validate"
+      ]
+    },
+    {
+      "id": "otel.debugging.print-config",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6205,
+      "front": "By default, when does `otelcol print-config` print the final configuration, and what does it hide?",
+      "back": "Only when the configuration is valid; sensitive information is redacted.",
+      "explanation": "To print a configuration that may be invalid, add --validate=false.",
+      "source": "OpenTelemetry docs, Collector “Configuration”, How to examine the final configuration",
+      "sourceURL": "https://opentelemetry.io/docs/collector/configuration/#how-to-examine-the-final-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Note that by default the configuration will only print when it is valid, and that sensitive information will be redacted. To print a potentially invalid configuration, use --validate=false.",
+      "uses": [
+        "OpenTelemetry Collector"
+      ],
+      "conceptIDs": [
+        "otel.print-final-config"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · OpenTelemetry docs as of that date"
+    },
+    {
+      "id": "otel.debugging.tracez-uses",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6215,
+      "front": "What are two kinds of problem the zPages TraceZ page helps you debug?",
+      "back": "Latency issues and errors.",
+      "explanation": "It also helps find deadlocks and instrumentation problems, by showing running spans that do not end.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, zPages",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#zpages",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Latency issues. Find the slow parts of an application. - Deadlocks and instrumentation problems. Identify running spans that don’t end. - Errors. Determine what types of errors are occurring and where they happen.",
+      "uses": [
+        "zPages extension",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.zpages"
+      ]
+    },
+    {
+      "id": "otel.debugging.tracez-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6225,
+      "front": "Some spans in your pipeline seem never to end. Where can you look for running spans that don’t end?",
+      "back": "A: the TraceZ page of the zPages extension.",
+      "choices": "A) The zPages TraceZ page at /debug/tracez\nB) The pprof extension on port 1777\nC) The health_check extension",
+      "choicesExplained": "B profiles the Collector’s own performance. C reports whether the Collector is healthy, not on individual spans.",
+      "explanation": "TraceZ is meant for deadlocks and instrumentation problems such as spans that never end.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, zPages",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#zpages",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Deadlocks and instrumentation problems. Identify running spans that don’t end.",
+      "uses": [
+        "zPages extension",
+        "health_check extension",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.zpages"
+      ]
+    },
+    {
+      "id": "otel.debugging.zpages-port",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6235,
+      "front": "The zPages extension is exposed locally on port {{c1::55679}}.",
+      "explanation": "In containers, the docs note you might expose this port on a public interface instead of only locally.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, zPages",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#zpages",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For containerized environments, you might want to expose this port on a public interface instead of just locally.",
+      "uses": [
+        "zPages extension"
+      ],
+      "conceptIDs": [
+        "otel.zpages-port"
+      ]
+    },
+    {
+      "id": "otel.debugging.pprof",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6245,
+      "front": "What does the Collector’s pprof extension do, and on which local port?",
+      "back": "It profiles the Collector as it runs, on port 1777.",
+      "explanation": "The docs call it an advanced use that should not be needed in most circumstances.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, Performance Profiler (pprof)",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#performance-profiler-pprof",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The pprof extension, which is available locally on port 1777, allows you to profile the Collector as it runs. This is an advanced use-case that should not be needed in most circumstances.",
+      "uses": [
+        "extension",
+        "OpenTelemetry Collector"
+      ],
+      "conceptIDs": [
+        "otel.pprof"
+      ]
+    },
+    {
+      "id": "otel.debugging.internal-metrics-endpoint",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6255,
+      "front": "By default, where does the Collector expose its internal metrics for scraping?",
+      "back": "At http://127.0.0.1:8888/metrics, through a Prometheus exporter.",
+      "explanation": "The Collector can instead push its internal metrics to an OTLP backend.",
+      "source": "OpenTelemetry docs, Collector “Internal telemetry”, OTLP exporter for internal metrics",
+      "sourceURL": "https://opentelemetry.io/docs/collector/internal-telemetry/#otlp-exporter-for-internal-metrics",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, the Collector generates basic metrics about itself and exposes them using the OpenTelemetry Go Prometheus exporter for scraping at http://127.0.0.1:8888/metrics. The Collector can push its internal metrics to an OTLP backend via the following configuration:",
+      "uses": [
+        "Collector internal telemetry",
+        "Prometheus",
+        "scrape",
+        "OTLP"
+      ],
+      "conceptIDs": [
+        "otel.internal-metrics-port"
+      ]
+    },
+    {
+      "id": "otel.debugging.internal-metrics-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6265,
+      "front": "Your Prometheus server should scrape a Collector’s own health metrics. Which port on the Collector does it scrape by default?",
+      "back": "A: 8888.",
+      "choices": "A) 8888\nB) 55679\nC) 1777",
+      "choicesExplained": "B is the zPages extension. C is the pprof extension.",
+      "explanation": "Internal metrics are exposed on a Prometheus interface that defaults to port 8888.",
+      "source": "OpenTelemetry docs, Collector “Internal telemetry”, Activate internal telemetry in the Collector",
+      "sourceURL": "https://opentelemetry.io/docs/collector/internal-telemetry/#activate-internal-telemetry-in-the-collector",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Internal metrics are exposed using a Prometheus interface which defaults to port 8888.",
+      "uses": [
+        "Prometheus",
+        "scrape",
+        "zPages extension"
+      ],
+      "conceptIDs": [
+        "otel.internal-metrics-port"
+      ]
+    },
+    {
+      "id": "otel.debugging.internal-logs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6275,
+      "front": "Where are the Collector’s internal logs written, and what is the default log level?",
+      "back": "To stderr, at level `INFO`.",
+      "explanation": "Logs are configured under service::telemetry::logs, where the level sets the minimum enabled logging level.",
+      "source": "OpenTelemetry docs, Collector “Internal telemetry”, Configure internal logs",
+      "sourceURL": "https://opentelemetry.io/docs/collector/internal-telemetry/#configure-internal-logs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Log output is found in stderr. You can configure logs in the config service::telemetry::logs. The configuration options are: Field nameDefault valueDescription levelINFOSets the minimum enabled logging level. Other possible values are DEBUG, WARN, and ERROR.",
+      "uses": [
+        "Collector internal telemetry",
+        "log"
+      ],
+      "conceptIDs": [
+        "otel.internal-logs-stderr"
+      ]
+    },
+    {
+      "id": "otel.debugging.internal-resource-attrs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6285,
+      "front": "Which resource attributes does the Collector attach to its internal telemetry automatically?",
+      "back": "service.name, service.version and a randomly generated service.instance.id.",
+      "explanation": "Each can be disabled by setting its value to null.",
+      "source": "OpenTelemetry docs, Collector “Internal telemetry”, Configure resource attributes",
+      "sourceURL": "https://opentelemetry.io/docs/collector/internal-telemetry/#configure-resource-attributes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The Collector’s automatically attaches the service.name, service.version, and service.instance.id (randomly generated) resource attributes to its internal telemetry signals. These can be disabled by setting the attribute value to null (ex. service.name: null).",
+      "uses": [
+        "Collector internal telemetry",
+        "resource",
+        "attribute"
+      ],
+      "conceptIDs": [
+        "otel.internal-telemetry"
+      ]
+    },
+    {
+      "id": "otel.debugging.queue-metrics-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6295,
+      "front": "You suspect a Collector’s sending queue cannot keep up with the workload. Which two internal metrics do you compare?",
+      "back": "A: queue size against queue capacity.",
+      "choices": "A) `otelcol_exporter_queue_size` and `otelcol_exporter_queue_capacity`\nB) `otelcol_processor_refused_spans` and port 55679\nC) The service.name and service.version attributes",
+      "choicesExplained": "B mixes a memory_limiter metric with the zPages port. C are resource attributes, not queue measures.",
+      "explanation": "Together these show whether the queue capacity can support the workload.",
+      "source": "OpenTelemetry docs, Collector “Internal telemetry”, Queue length",
+      "sourceURL": "https://opentelemetry.io/docs/collector/internal-telemetry/#queue-length",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The otelcol_exporter_queue_capacity metric indicates the capacity, in batches, of the sending queue. The otelcol_exporter_queue_size metric indicates the current size of the sending queue. Use these two metrics to check if the queue capacity can support your workload.",
+      "uses": [
+        "Collector internal telemetry",
+        "sending queue",
+        "memory_limiter processor",
+        "zPages extension"
+      ],
+      "conceptIDs": [
+        "otel.internal-telemetry",
+        "otel.sending-queue"
+      ]
+    },
+    {
+      "id": "otel.debugging.metric-level-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6305,
+      "front": "The default verbosity level for the Collector’s internal metrics is {{c1::normal}}.",
+      "explanation": "It adds standard indicators on top of the basic level’s essential service telemetry.",
+      "source": "OpenTelemetry docs, Collector “Internal telemetry”, Metric verbosity",
+      "sourceURL": "https://opentelemetry.io/docs/collector/internal-telemetry/#metric-verbosity",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "normal: the default level, adds standard indicators on top of basic.",
+      "uses": [
+        "Collector internal telemetry"
+      ],
+      "conceptIDs": [
+        "otel.metric-verbosity"
+      ]
+    },
+    {
+      "id": "otel.debugging.metric-level-detailed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6315,
+      "front": "Which internal metrics verbosity level is the most verbose, and which collects nothing?",
+      "back": "detailed is the most verbose; none collects no telemetry.",
+      "explanation": "Between them sit basic, for essential service telemetry, and normal, the default.",
+      "source": "OpenTelemetry docs, Collector “Internal telemetry”, Metric verbosity",
+      "sourceURL": "https://opentelemetry.io/docs/collector/internal-telemetry/#metric-verbosity",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "none: no telemetry is collected. - basic: essential service telemetry. - normal: the default level, adds standard indicators on top of basic. - detailed: the most verbose level, includes dimensions and views.",
+      "uses": [
+        "Collector internal telemetry"
+      ],
+      "conceptIDs": [
+        "otel.metric-verbosity"
+      ]
+    },
+    {
+      "id": "otel.debugging.checklist-per-hop",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6325,
+      "front": "When telemetry flows through several Collectors, at what points does the debugging checklist say to verify things?",
+      "back": "At each hop through a Collector or other component in the pipeline.",
+      "explanation": "Problems are hard to isolate across multiple Collectors and networks, so each hop is checked in turn.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, Checklist for debugging complex pipelines",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#checklist-for-debugging-complex-pipelines",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "It can be difficult to isolate problems when telemetry flows through multiple Collectors and networks. For each “hop” of telemetry through a Collector or other component in your pipeline, it’s important to verify the following:",
+      "uses": [
+        "OpenTelemetry Collector",
+        "Collector pipeline"
+      ],
+      "conceptIDs": [
+        "otel.debug-checklist"
+      ]
+    },
+    {
+      "id": "otel.debugging.checklist-questions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6335,
+      "front": "What are two questions the checklist asks at each hop?",
+      "back": "Are there error messages in the Collector’s logs; and how is the telemetry exported from this component?",
+      "explanation": "Others ask how telemetry is ingested and modified, its format, the next hop’s configuration and network policies.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, Checklist for debugging complex pipelines",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#checklist-for-debugging-complex-pipelines",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Are there error messages in the logs of the Collector? - How is the telemetry being ingested into this component? - How is the telemetry being modified (for example, sampling or redacting) by this component? - How is the telemetry being exported from this component?",
+      "uses": [
+        "OpenTelemetry Collector"
+      ],
+      "conceptIDs": [
+        "otel.debug-checklist"
+      ]
+    },
+    {
+      "id": "otel.debugging.checklist-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6345,
+      "front": "Spans leave your agent Collectors cleanly but never reach the backend through the gateway. The agents’ logs show no errors. Following the checklist, what do you check next?",
+      "back": "A: move to the next hop and check its configuration and any blocking network policies.",
+      "choices": "A) The next hop: the gateway’s configuration, and network policies between the tiers\nB) Nothing: clean agent logs prove the pipeline works\nC) Only the application code",
+      "choicesExplained": "B: the checklist is applied at every hop, not just the first. C: the agents already receive the spans.",
+      "explanation": "The checklist asks how the next hop is configured and whether network policies block data.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, Checklist for debugging complex pipelines",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#checklist-for-debugging-complex-pipelines",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "How is the next hop configured? - Are there any network policies that prevent data from getting in or out?",
+      "uses": [
+        "agent deployment pattern",
+        "gateway deployment pattern",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.debug-checklist"
+      ]
+    },
+    {
+      "id": "otel.debugging.dropping-data",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6355,
+      "front": "What are the two most common reasons the Collector drops data?",
+      "back": "It is improperly sized; or the exporter destination is unavailable or accepting data too slowly.",
+      "explanation": "To reduce drops, the docs advise configuring queued retry options on exporters, especially the sending queue.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, Collector is dropping data",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#collector-is-dropping-data",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The Collector is improperly sized, resulting in an inability to process and export the data as fast as it is received. - The exporter destination is unavailable or accepting the data too slowly. To mitigate drops, configure the queued retry options on enabled exporters, in particular the Sending queue batch settings.",
+      "uses": [
+        "OpenTelemetry Collector",
+        "sending queue"
+      ],
+      "conceptIDs": [
+        "otel.common-issues"
+      ]
+    },
+    {
+      "id": "otel.debugging.not-receiving",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6365,
+      "front": "What are two reasons the Collector might not receive data?",
+      "back": "A network configuration issue; or a receiver defined but not enabled in any pipeline.",
+      "explanation": "Incorrect receiver or client configuration are the other causes; the docs suggest checking logs and zPages.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, Collector is not receiving data",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#collector-is-not-receiving-data",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A network configuration issue. - An incorrect receiver configuration. - An incorrect client configuration. - The receiver is defined in the receivers section but not enabled in any pipelines. Check the Collector’s logs as well as zPages for potential issues.",
+      "uses": [
+        "receiver",
+        "Collector pipeline",
+        "zPages extension"
+      ],
+      "conceptIDs": [
+        "otel.common-issues"
+      ]
+    },
+    {
+      "id": "otel.debugging.not-exporting",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6375,
+      "front": "What most often stops the Collector from exporting data, according to the docs?",
+      "back": "A network configuration issue, such as a firewall or proxy problem.",
+      "explanation": "The docs point out that the Collector does have proxy support.",
+      "source": "OpenTelemetry docs, Collector “Troubleshooting”, Collector is not exporting data",
+      "sourceURL": "https://opentelemetry.io/docs/collector/troubleshooting/#collector-is-not-exporting-data",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Exporting data often does not work because of a network configuration issue, such as a firewall, DNS, or proxy issue. Note that the Collector does have proxy support.",
+      "uses": [
+        "OpenTelemetry Collector"
+      ],
+      "conceptIDs": [
+        "otel.common-issues"
+      ]
+    },
+    {
+      "id": "otel.debugging.api-forgiving",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6385,
+      "front": "How does the OpenTelemetry API behave when given invalid arguments?",
+      "back": "It does not fail, never throws, and swallows exceptions: it is forgiving at runtime.",
+      "explanation": "This way instrumentation issues do not affect the application’s logic.",
+      "source": "OpenTelemetry docs, “Libraries”, Error handling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/instrumentation/libraries/#error-handling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "OpenTelemetry API does not fail on invalid arguments, never throws, and swallows exceptions, which means it’s forgiving at runtime. This way instrumentation issues do not affect application logic.",
+      "uses": [
+        "OpenTelemetry API"
+      ],
+      "conceptIDs": [
+        "otel.api-never-throws"
+      ]
+    },
+    {
+      "id": "otel.debugging.test-instrumentation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6395,
+      "front": "Since the API hides problems at runtime, what do the docs tell you to do?",
+      "back": "Test the instrumentation, to notice the issues OpenTelemetry hides.",
+      "explanation": "A silent failure shows up only as missing or wrong telemetry, never as an exception.",
+      "source": "OpenTelemetry docs, “Libraries”, Error handling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/instrumentation/libraries/#error-handling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Test the instrumentation to notice issues OpenTelemetry hides at runtime.",
+      "uses": [
+        "OpenTelemetry API",
+        "instrumentation"
+      ],
+      "conceptIDs": [
+        "otel.api-never-throws"
+      ]
+    },
+    {
+      "id": "otel.debugging.api-silent-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6405,
+      "front": "A developer passes an invalid argument to an OpenTelemetry API call. The app runs normally, but the expected telemetry is missing. Why was there no exception?",
+      "back": "A: the API is forgiving at runtime and swallows exceptions.",
+      "choices": "A) The API never throws and swallows exceptions\nB) The SDK retried the call until it succeeded\nC) The exception went to the Collector’s stderr",
+      "choicesExplained": "B: nothing in the docs says the SDK retries API calls. C: the Collector’s logs cover the Collector, not your app’s API calls.",
+      "explanation": "The design keeps instrumentation issues from affecting application logic, which is why testing matters.",
+      "source": "OpenTelemetry docs, “Libraries”, Error handling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/instrumentation/libraries/#error-handling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "OpenTelemetry API does not fail on invalid arguments, never throws, and swallows exceptions",
+      "uses": [
+        "OpenTelemetry API",
+        "OpenTelemetry SDK",
+        "OpenTelemetry Collector"
+      ],
+      "conceptIDs": [
+        "otel.api-never-throws"
+      ]
+    },
+    {
+      "id": "otel.debugging.retry-behaviour",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6415,
+      "front": "While the endpoint is unavailable, how does the Collector retry, and for how long by default?",
+      "back": "With exponential backoff and jitter, for up to 5 minutes.",
+      "explanation": "It keeps trying to send the buffered data after waiting intervals.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Sending queue (in-memory buffering)",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#sending-queue-in-memory-buffering",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The Collector employs a retry mechanism with exponential backoff and jitter. It will repeatedly attempt to send the buffered data after waiting intervals. By default, it retries for up to 5 minutes.",
+      "uses": [
+        "OpenTelemetry Collector"
+      ],
+      "conceptIDs": [
+        "otel.retry-default"
+      ]
+    },
+    {
+      "id": "otel.debugging.retry-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6425,
+      "front": "A backend is down for 20 minutes. The sending queue has room, and retry settings are default. What happens to the oldest queued data?",
+      "back": "A: after the default 5 minutes of retrying, the oldest data is dropped.",
+      "choices": "A) It is dropped once the 5-minute retry limit passes\nB) It waits in the queue until the backend returns\nC) It is written to disk automatically",
+      "choicesExplained": "B: retries stop at the maximum duration. C: disk storage needs the file_storage extension configured.",
+      "explanation": "The retry time-out is one of the ways data is lost.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Sending queue (in-memory buffering)",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#sending-queue-in-memory-buffering",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If the endpoint remains unavailable for longer than the configured maximum retry duration (default 5 minutes), the Collector will stop retrying for the oldest data in the queue and drop it.",
+      "uses": [
+        "sending queue",
+        "extension"
+      ],
+      "conceptIDs": [
+        "otel.retry-default"
+      ]
+    },
+    {
+      "id": "otel.debugging.queue-full",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6435,
+      "front": "What happens when the in-memory sending queue is full, and what is its default size?",
+      "back": "Incoming data is dropped. The default size is often 1000 batches or requests.",
+      "explanation": "Dropping protects the Collector from running out of memory.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Sending queue (in-memory buffering)",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#sending-queue-in-memory-buffering",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The in-memory queue has a configurable size (default is often 1000 batches/requests). If the endpoint remains unavailable and new data keeps arriving, the queue can fill up. Once the queue is full, incoming data is dropped to prevent the Collector from running out of memory.",
+      "uses": [
+        "sending queue"
+      ],
+      "conceptIDs": [
+        "otel.queue-full-drops"
+      ]
+    },
+    {
+      "id": "otel.debugging.queue-full-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6445,
+      "front": "The backend is down and traffic is heavy; the sending queue fills in two minutes, before the backend recovers. What happens to new data?",
+      "back": "A: new data is dropped.",
+      "choices": "A) It is dropped\nB) It is held in the receiver until space frees up\nC) The Collector grows the queue without limit",
+      "choicesExplained": "B and C: the queue has a fixed capacity, and data beyond it is dropped to protect memory.",
+      "explanation": "This is the “network unavailability plus queue overflow” case of data loss.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Circumstances of data loss",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#circumstances-of-data-loss",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Network Unavailability + Queue Overflow: The downstream endpoint is unavailable, and the sending queue (in-memory or persistent) fills to capacity before the endpoint recovers. New data is dropped.",
+      "uses": [
+        "sending queue",
+        "receiver"
+      ],
+      "conceptIDs": [
+        "otel.queue-full-drops",
+        "otel.data-loss-circumstances"
+      ]
+    },
+    {
+      "id": "otel.debugging.queue-recommended",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6455,
+      "front": "For which deployments do the docs recommend the exporters’ queue and retry mechanisms?",
+      "back": "Any production deployment of the Collector.",
+      "explanation": "Most exporters provide a queue, retry mechanism or both.",
+      "source": "OpenTelemetry docs, Collector “Internal telemetry”, Queue length",
+      "sourceURL": "https://opentelemetry.io/docs/collector/internal-telemetry/#queue-length",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Most exporters provide a queue and/or retry mechanism that is recommended for use in any production deployment of the Collector.",
+      "uses": [
+        "Collector exporter",
+        "OpenTelemetry Collector"
+      ],
+      "conceptIDs": [
+        "otel.sending-queue"
+      ]
+    },
+    {
+      "id": "otel.debugging.enable-wal",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6465,
+      "front": "What two steps enable the persistent sending queue?",
+      "back": "Define the file_storage extension, and reference its storage in the exporter’s sending_queue settings.",
+      "explanation": "The extension provides the disk storage; the exporter’s queue then uses it.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Persistent storage (write-ahead log - WAL)",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#persistent-storage-write-ahead-log---wal",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Define the file_storage extension. - Reference the storage ID in the exporter’s sending_queue configuration.",
+      "uses": [
+        "persistent storage",
+        "extension",
+        "sending queue"
+      ],
+      "conceptIDs": [
+        "otel.persistent-queue"
+      ]
+    },
+    {
+      "id": "otel.debugging.wal-restart",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6475,
+      "front": "With the WAL enabled, what happens to queued data when the Collector crashes and restarts?",
+      "back": "It was persisted on disk; on restart the Collector reads it from the WAL and resumes sending.",
+      "explanation": "An in-memory queue alone would lose that data in a crash.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Persistent storage (write-ahead log - WAL)",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#persistent-storage-write-ahead-log---wal",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If the Collector crashes while data is in its queue, the data is persisted on disk. When the Collector restarts, it reads the data from the WAL and resumes attempts to send it to the endpoint.",
+      "uses": [
+        "WAL",
+        "OpenTelemetry Collector"
+      ],
+      "conceptIDs": [
+        "otel.persistent-queue"
+      ]
+    },
+    {
+      "id": "otel.debugging.wal-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6485,
+      "front": "Your Collectors are sometimes killed and restarted, and you cannot afford to lose the data waiting in their queues. What do you add?",
+      "back": "A: the persistent, write-ahead-log queue.",
+      "choices": "A) Persistent storage (WAL) for the sending queue\nB) A larger in-memory queue\nC) A longer retry duration",
+      "choicesExplained": "B and C still keep the data only in memory, which is lost when the Collector is terminated.",
+      "explanation": "With only an in-memory queue, a crash or termination loses the data in memory.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Circumstances of data loss",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#circumstances-of-data-loss",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Collector Crash (No Persistence): The Collector instance crashes or is terminated, and it was only using an in-memory sending queue. Data in memory is lost.",
+      "uses": [
+        "persistent storage",
+        "WAL",
+        "sending queue"
+      ],
+      "conceptIDs": [
+        "otel.persistent-queue",
+        "otel.data-loss-circumstances"
+      ]
+    },
+    {
+      "id": "otel.debugging.kafka-gateway-down",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6495,
+      "front": "With Kafka between agent and gateway Collectors, what happens while the gateway is down?",
+      "back": "Messages accumulate in the Kafka topic, up to its retention limits; the agent is unaffected while Kafka is up.",
+      "explanation": "If Kafka itself is down, the agent needs its own resilience, such as a sending queue.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Message queues",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#message-queues",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If the consuming Collector (Gateway) is down, messages simply accumulate in the Kafka topic (up to Kafka’s retention limits). The producing Collector (Agent) is unaffected as long as Kafka is up.",
+      "uses": [
+        "message queue between Collectors",
+        "sending queue"
+      ],
+      "conceptIDs": [
+        "otel.message-queue-buffer"
+      ]
+    },
+    {
+      "id": "otel.debugging.loss-timeout",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6505,
+      "front": "Which data-loss case is an endpoint staying unavailable for longer than max_elapsed_time in the retry_on_failure settings?",
+      "back": "Network unavailability plus timeout.",
+      "explanation": "Once retries run out, the data is given up on.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Circumstances of data loss",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#circumstances-of-data-loss",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Network Unavailability + Timeout: The downstream endpoint is unavailable for longer than the configured max_elapsed_time in the retry_on_failure settings.",
+      "uses": [],
+      "conceptIDs": [
+        "otel.data-loss-circumstances"
+      ]
+    },
+    {
+      "id": "otel.debugging.loss-crash",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6515,
+      "front": "Which data-loss case is a Collector crashing or being terminated while it uses only an in-memory sending queue?",
+      "back": "Collector crash with no persistence: the data in memory is lost.",
+      "explanation": "Persistent storage on disk is the protection against this case.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Circumstances of data loss",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#circumstances-of-data-loss",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Collector Crash (No Persistence): The Collector instance crashes or is terminated, and it was only using an in-memory sending queue. Data in memory is lost.",
+      "uses": [
+        "sending queue"
+      ],
+      "conceptIDs": [
+        "otel.data-loss-circumstances"
+      ]
+    },
+    {
+      "id": "otel.debugging.loss-storage",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6525,
+      "front": "Which data-loss case is the disk used by the file_storage extension failing or running out of space?",
+      "back": "Persistent storage failure.",
+      "explanation": "Even the write-ahead log depends on a healthy disk with free space.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Circumstances of data loss",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#circumstances-of-data-loss",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Persistent Storage Failure: The disk used by the file_storage extension fails or runs out of space.",
+      "uses": [
+        "extension"
+      ],
+      "conceptIDs": [
+        "otel.data-loss-circumstances"
+      ]
+    },
+    {
+      "id": "otel.debugging.loss-message-queue",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6535,
+      "front": "Which data-loss case is an outage of an external message queue such as Kafka, with too little local buffering in the producer?",
+      "back": "Message queue failure.",
+      "explanation": "The producing Collector needs adequate local buffering to ride out the queue’s outage.",
+      "source": "OpenTelemetry docs, Collector “Resiliency”, Circumstances of data loss",
+      "sourceURL": "https://opentelemetry.io/docs/collector/resiliency/#circumstances-of-data-loss",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Message Queue Failure: The external message queue (like Kafka) experiences an outage or data loss event, and the producing collector doesn’t have adequate local buffering",
+      "uses": [
+        "message queue between Collectors"
+      ],
+      "conceptIDs": [
+        "otel.data-loss-circumstances"
+      ]
+    },
+    {
+      "id": "otel.debugging.schemas-versioned",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6545,
+      "front": "Are telemetry schemas versioned?",
+      "back": "Yes. Over time a schema may evolve, and sources may emit data that conforms to newer versions.",
+      "explanation": "Versioning is what lets producers and consumers of telemetry evolve independently.",
+      "source": "OpenTelemetry specification, “Telemetry Schemas”, How Schemas Work",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/schemas/#how-schemas-work",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Telemetry schemas are versioned. Over time the schema may evolve and telemetry sources may emit data conforming to newer versions of the schema.",
+      "uses": [
+        "telemetry schema"
+      ],
+      "conceptIDs": [
+        "otel.telemetry-schema"
+      ]
+    },
+    {
+      "id": "otel.debugging.schema-transformations",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6555,
+      "front": "What do telemetry schemas define between versions, and what counts as a breaking change?",
+      "back": "The transformations to convert telemetry between versions; a change with no possible conversion is breaking.",
+      "explanation": "These defined transformations are what let a consumer convert data to the version it expects.",
+      "source": "OpenTelemetry specification, “Telemetry Schemas”, How Schemas Work",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/schemas/#how-schemas-work",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Telemetry schemas explicitly define transformations that are necessary to convert telemetry data between different versions of the schema, provided that such conversions are possible. When conversions are not possible it constitutes a breaking change between versions.",
+      "uses": [
+        "telemetry schema"
+      ],
+      "conceptIDs": [
+        "otel.telemetry-schema"
+      ]
+    },
+    {
+      "id": "otel.debugging.schema-url-roles",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6565,
+      "front": "Who puts a schema URL into telemetry, and what may consumers do with it?",
+      "back": "Sources such as instrumentation libraries include it; consumers may transform data to the schema version they expect.",
+      "explanation": "The point of use, such as a dashboard, may define which schema version it expects.",
+      "source": "OpenTelemetry specification, “Telemetry Schemas”, How Schemas Work",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/schemas/#how-schemas-work",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Telemetry sources (e.g. instrumentation libraries) will include a schema URL in the emitted telemetry. - Telemetry consumers will pay attention to the schema of the received telemetry. If necessary, telemetry consumers may transform the telemetry data from the received schema version to the target schema version as expected at the point of use",
+      "uses": [
+        "schema URL",
+        "instrumentation library"
+      ],
+      "conceptIDs": [
+        "otel.schema-url"
+      ]
+    },
+    {
+      "id": "otel.debugging.schema-rename-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 6575,
+      "front": "A new release of an instrumentation library renames an attribute, but your dashboard still expects the old name. What lets a consumer cope?",
+      "back": "A: the consumer reads the schema URL and transforms the data to the version the dashboard expects.",
+      "choices": "A) The schema URL on the telemetry, plus the schema’s transformations between versions\nB) The debug exporter\nC) Nothing: any rename is always a breaking change",
+      "choicesExplained": "B shows data but converts nothing. C: a change is breaking only when no conversion is possible.",
+      "explanation": "Consumers may transform telemetry from the received schema version to the one expected at the point of use.",
+      "source": "OpenTelemetry specification, “Telemetry Schemas”, How Schemas Work",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/schemas/#how-schemas-work",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If necessary, telemetry consumers may transform the telemetry data from the received schema version to the target schema version as expected at the point of use (e.g. a dashboard may define which schema version it expects).",
+      "uses": [
+        "schema URL",
+        "telemetry schema",
+        "instrumentation library",
+        "attribute",
+        "debug exporter"
+      ],
+      "conceptIDs": [
+        "otel.schema-url",
+        "otel.telemetry-schema"
+      ]
+    },
+    {
+      "id": "otel.debugging.schema-url-version",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 6585,
+      "front": "What is the last part of a schema URL’s path?",
+      "back": "The schema’s version number.",
+      "explanation": "The part before the version is the Schema Family identifier, shared by every schema in the family.",
+      "source": "OpenTelemetry specification, “Telemetry Schemas”, Schema URL",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/schemas/#schema-url",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The last part of the URL path is the version number of the schema. http[s]://server[:port]/path/<version> The part of the URL preceding the <version> is called Schema Family identifier.",
+      "uses": [
+        "schema URL"
+      ],
+      "conceptIDs": [
+        "otel.schema-url"
+      ]
+    },
+    {
+      "id": "otel.debugging.schema-version-format",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6595,
+      "front": "What format do schema version numbers follow, and which version numbers do they match?",
+      "back": "`MAJOR.MINOR.PATCH`, like SemVer 2.0; they match the semantic conventions’ version numbers.",
+      "explanation": "Beyond the ordering rules, the version numbers carry no other meaning.",
+      "source": "OpenTelemetry specification, “Telemetry Schemas”, Schema Version Number",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/schemas/#schema-version-number",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Version number follows the MAJOR.MINOR.PATCH format, similar to SemVer 2.0. Version numbers use the ordering rules defined by SemVer 2.0 specification. See how ordering is used in the Order of Transformations. Other than the ordering rules the schema version numbers do not carry any other semantic meaning. OpenTelemetry schema version numbers match OpenTelemetry Semantic Conventions",
+      "uses": [
+        "telemetry schema",
+        "semantic conventions"
+      ],
+      "conceptIDs": [
+        "otel.schema-version"
+      ]
+    },
+    {
+      "id": "otel.debugging.schema-translate",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6605,
+      "front": "If a backend is not aware of schemas, how can the Collector help?",
+      "back": "A schema translate processor, given a target schema_url, converts all telemetry passing through to that schema.",
+      "explanation": "The backend then receives telemetry in the one schema it expects.",
+      "source": "OpenTelemetry specification, “Telemetry Schemas”, Collector-Assisted Schema Transformation",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/schemas/#collector-assisted-schema-transformation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The “Schema Translate Processor” is configured, the target schema_url is specified and all telemetry data that passes through the Collector is converted to that target schema:",
+      "uses": [
+        "processor",
+        "OpenTelemetry Collector",
+        "schema URL"
+      ],
+      "conceptIDs": [
+        "otel.collector-schema-transform"
+      ]
+    },
+    {
+      "id": "otel.debugging.name-reuse",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 6615,
+      "front": "In semantic conventions, may two attributes share a name? May an attribute and a metric?",
+      "back": "Two attributes: no. An attribute and a metric: they may.",
+      "explanation": "A renamed or no-longer-recommended convention should be deprecated rather than removed.",
+      "source": "OpenTelemetry semantic conventions, “Naming”, Name reuse prohibition",
+      "sourceURL": "https://opentelemetry.io/docs/specs/semconv/general/attribute-naming/#name-reuse-prohibition",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Two attributes, two metrics, or two events MUST NOT share the same name. Different entities (attribute and metric, metric and event) MAY share the same name. Attributes, metrics, and events SHOULD NOT be removed from semantic conventions regardless of their maturity level. When the convention is renamed or no longer recommended, it SHOULD be deprecated.",
+      "uses": [
+        "semantic conventions",
+        "attribute",
+        "metric"
+      ],
+      "conceptIDs": [
+        "otel.name-reuse-prohibition"
+      ]
+    }
+  ]
+}

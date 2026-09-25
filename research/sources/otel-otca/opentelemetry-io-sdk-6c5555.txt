@@ -1,0 +1,1664 @@
+https://opentelemetry.io/docs/specs/otel/metrics/sdk/
+ Metrics SDK
+Status: Mixed
+Users of OpenTelemetry need a way for instrumentation interactions with the
+OpenTelemetry API to actually produce telemetry. The OpenTelemetry SDK
+(henceforth referred to as the SDK) is an implementation of the OpenTelemetry
+API that provides users with this functionally.
+All language implementations of OpenTelemetry MUST provide an SDK.
+
+## [#meterprovider] MeterProvider
+Status: Stable
+A MeterProvider MUST provide a way to allow a Resource to
+be specified. If a Resource is specified, it SHOULD be associated with all the
+metrics produced by any Meter from the MeterProvider. The tracing SDK
+specification has provided some
+suggestions regarding how to implement this efficiently.
+
+## [#meterprovider-creation] MeterProvider Creation
+The SDK SHOULD allow the creation of multiple independent MeterProviders.
+
+## [#meter-creation] Meter Creation
+It SHOULD only be possible to create Meter instances through a MeterProvider
+(see API).
+The MeterProvider MUST implement the Get a Meter API.
+The input provided by the user MUST be used to create
+an InstrumentationScope instance which
+is stored on the created Meter.
+In the case where an invalid name (null or empty string) is specified, a
+working Meter MUST be returned as a fallback rather than returning null or
+throwing an exception, its name SHOULD keep the original invalid value, and a
+message reporting that the specified value is invalid SHOULD be logged.
+Status: Development - The MeterProvider MUST
+compute the relevant MeterConfig using the
+configured MeterConfigurator, and create
+a Meter whose behavior conforms to that MeterConfig.
+
+## [#configuration] Configuration
+Configuration (
+i.e. MetricExporters, MetricReaders, Views,
+and (Development) MeterConfigurator and
+(Development) view_matching_mode) MUST be
+owned by the MeterProvider. The configuration MAY be applied at the time
+of MeterProvider creation if appropriate.
+The MeterProvider MAY provide methods to update the configuration. If
+configuration is updated (e.g., adding a MetricReader), the updated
+configuration MUST also apply to all already returned Meters (i.e. it MUST NOT
+matter whether a Meter was obtained from the MeterProvider before or after
+the configuration change). Note: Implementation-wise, this could mean that
+Meter instances have a reference to their MeterProvider and access
+configuration only via this reference.
+
+## [#view-matching-mode] View matching mode
+Status: Development
+A MeterProvider MAY accept a view_matching_mode parameter which controls
+how multiple matching Views are applied to an
+Instrument. A MeterProvider that accepts this parameter
+MUST support the following values:
+
+- independent: Each matching View creates a separate metric stream
+independently of any other Views registered for the same matching Instrument.
+
+- composable: Matching Views are combined (merged) to modify metric streams.
+See Measurement processing for details.
+If view_matching_mode is not specified, the SDK MUST use independent.
+Any other value MUST be treated as unsupported.
+If an unsupported value is provided, the SDK MUST either fail fast during
+initialization in accordance with the error handling
+principles, or emit a
+warning, ignore the value, and use independent.
+
+## [#meterconfigurator] MeterConfigurator
+Status: Development
+A MeterConfigurator is a function which computes
+the MeterConfig for a Meter.
+The function MUST accept the following parameter:
+
+- meter_scope:
+The InstrumentationScope of
+the Meter.
+The function MUST return the relevant MeterConfig, or some signal indicating
+that the default MeterConfig should be used. This signal MAY
+be nil, null, empty, or an instance of the default MeterConfig depending on
+what is idiomatic in the language.
+This function is called when a Meter is first created, and for each
+outstanding Meter when a MeterProvider’s MeterConfigurator is
+updated (if updating is supported). Therefore, it is important that it returns
+quickly.
+MeterConfigurator is modeled as a function to maximize flexibility.
+However, implementations MAY provide shorthand or helper functions to
+accommodate common use cases:
+
+- Select one or more Meters by name, with exact match or pattern matching.
+
+- Disable one or more specific Meters.
+
+- Disable all Meters, and selectively enable one or more specific Meters.
+
+## [#shutdown] Shutdown
+This method provides a way for provider to do any cleanup required.
+Shutdown MUST be called only once for each MeterProvider instance. After the
+call to Shutdown, subsequent attempts to get a Meter are not allowed. SDKs
+SHOULD return a valid no-op Meter for these calls, if possible.
+Shutdown SHOULD provide a way to let the caller know whether it succeeded,
+failed or timed out.
+Shutdown SHOULD complete or abort within some timeout. Shutdown MAY be
+implemented as a blocking API or an asynchronous API which notifies the caller
+via a callback or an event. OpenTelemetry SDK authors MAY
+decide if they want to make the shutdown timeout configurable.
+Shutdown MUST be implemented at least by invoking Shutdown on all registered
+MetricReader and MetricExporter instances.
+
+## [#forceflush] ForceFlush
+This method provides a way for provider to notify the registered
+MetricReader instances that have an associated
+Push Metric Exporter, so they can do as much
+as they could to collect and send the metrics.
+Note: Pull Metric Exporter can only send the
+data when it is being asked by the scraper, so ForceFlush would not make much
+sense.
+ForceFlush MUST invoke ForceFlush on all registered
+MetricReader instances that implement ForceFlush.
+ForceFlush SHOULD provide a way to let the caller know whether it succeeded,
+failed or timed out. ForceFlush SHOULD return some ERROR status if there
+is an error condition; and if there is no error condition, it should return some
+NO ERROR status, language implementations MAY decide how to model ERROR
+and NO ERROR.
+ForceFlush SHOULD complete or abort within some timeout. ForceFlush MAY be
+implemented as a blocking API or an asynchronous API which notifies the caller
+via a callback or an event. OpenTelemetry SDK authors MAY
+decide if they want to make the flush timeout configurable.
+
+## [#view] View
+A View provides SDK users with the flexibility to customize the metrics that
+are output by the SDK. Here are some examples when a View might be needed:
+
+- Customize which Instruments are to be
+processed/ignored. For example, an instrumented
+library can provide both temperature and
+humidity, but the application developer might only want temperature.
+
+- Customize the aggregation - if the default aggregation associated with the
+Instrument does not meet the needs of the user. For example, an HTTP client
+library might expose HTTP client request duration as
+Histogram by default, but the application developer
+might only want the total count of outgoing requests.
+
+- Customize which attribute(s) are to be reported on metrics. For
+example, an HTTP server library might expose HTTP verb (e.g. GET, POST) and
+HTTP status code (e.g. 200, 301, 404). The application developer might only
+care about HTTP status code (e.g. reporting the total count of HTTP requests
+for each HTTP status code). There could also be extreme scenarios in which the
+application developer does not need any attributes (e.g. just get the total
+count of all incoming requests).
+The SDK MUST provide functionality for a user to create Views for a
+MeterProvider. This functionality MUST accept as inputs the Instrument
+selection criteria and the resulting stream
+configuration.
+The SDK MUST provide the means to register Views with a MeterProvider.
+
+## [#instrument-selection-criteria] Instrument selection criteria
+Instrument selection criteria are the predicates that determine if a View will
+be applied to an Instrument or not.
+Criteria SHOULD be treated as additive. This means an Instrument has to match
+all the provided criteria for the View to be applied. For example, if the
+criteria are instrument name == “Foobar” and instrument type is Histogram,
+it will be treated as (instrument name == “Foobar”) AND (instrument type is
+Histogram).
+The SDK MUST accept the following criteria:
+
+- name: The name of the Instrument(s) to match. This name is evaluated to
+match an Instrument in the following manner.
+
+- If the value of name is *, the criterion matches all Instruments.
+
+- If the value of name is exactly the same as an Instrument, then the
+criterion matches that instrument.
+Additionally, the SDK MAY support wildcard pattern matching for the name
+criterion using the following characters.
+
+- A question mark (?): matches any single character
+
+- An asterisk (*): matches any number of any characters including none
+If wildcard pattern matching is supported, the name criterion will match if
+the wildcard pattern is evaluated to match the Instrument name.
+If the SDK does not support wildcards in general, it MUST still recognize the
+special single asterisk (*) character as matching all Instruments.
+Users can provide a name, but it is up to their discretion. Therefore, the
+instrument selection criteria parameter needs to be structured to accept a
+name, but MUST NOT obligate a user to provide one.
+
+- type: The type of Instruments to match. If the value of type is the same
+as an Instrument’s type, then the criterion matches that Instrument.
+Users can provide a type, but it is up to their discretion. Therefore, the
+instrument selection criteria parameter needs to be structured to accept a
+type, but MUST NOT obligate a user to provide one.
+
+- unit: If the value of unit is the same as an Instrument’s unit, then the
+criterion matches that Instrument.
+Users can provide a unit, but it is up to their discretion. Therefore, the
+instrument selection criteria parameter needs to be structured to accept a
+unit, but MUST NOT obligate a user to provide one.
+
+- meter_name: If the value of meter_name is the same as the Meter that
+created an Instrument, then the criterion matches that Instrument.
+Users can provide a meter_name, but it is up to their discretion.
+Therefore, the instrument selection criteria parameter needs to be structured
+to accept a meter_name, but MUST NOT obligate a user to provide one.
+
+- meter_version: If the value of meter_version is the same version as the
+Meter that created an Instrument, then the criterion matches that Instrument.
+Users can provide a meter_version, but it is up to their discretion.
+Therefore, the instrument selection criteria parameter needs to be structured
+to accept a meter_version, but MUST NOT obligate a user to provide one.
+
+- meter_schema_url: If the value of meter_schema_url is the same schema URL
+as the Meter that created an Instrument, then the criterion matches that
+Instrument.
+Users can provide a meter_schema_url, but it is up to their discretion.
+Therefore, the instrument selection criteria parameter needs to be structured
+to accept a meter_schema_url, but MUST NOT obligate a user to provide one.
+
+The SDK MAY accept additional criteria. For example, a strongly typed language
+may support point type criterion (e.g. allow the users to select Instruments
+based on whether the underlying number is integral or rational). Users can
+provide these additional criteria the SDK accepts, but it is up to their
+discretion. Therefore, the instrument selection criteria can be structured to
+accept the criteria, but MUST NOT obligate a user to provide them.
+
+## [#stream-configuration] Stream configuration
+Stream configuration are the parameters that define the metric
+stream a MeterProvider will
+use to define telemetry pipelines.
+The SDK MUST accept the following stream configuration parameters:
+
+- name: The metric stream name that SHOULD be used.
+In order to avoid conflicts, if a name is provided the View SHOULD have an
+instrument selector that selects at most one instrument. If the Instrument
+selection criteria for a View with a stream configuration name parameter
+can select more than one instrument (i.e. wildcards) the SDK MAY fail fast in
+accordance with initialization error handling
+principles.
+Users can provide a name, but it is up to their discretion. Therefore, the
+stream configuration parameter needs to be structured to accept a name, but
+MUST NOT obligate a user to provide one. If the user does not provide a
+name value, name from the Instrument the View matches MUST be used by
+default.
+The name provided via stream configuration is NOT REQUIRED to conform to
+the instrument name syntax, and the SDK
+MUST NOT validate it against that syntax.
+
+- description: The metric stream description that SHOULD be used.
+Users can provide a description, but it is up to their discretion.
+Therefore, the stream configuration parameter needs to be structured to
+accept a description, but MUST NOT obligate a user to provide one. If the
+user does not provide a description value, the description from the
+Instrument a View matches MUST be used by default.
+
+- attribute_keys: This is, at a minimum, an allow-list of attribute keys for
+measurements captured in the metric stream. The allow-list contains attribute
+keys that identify the attributes that MUST be kept, and all other attributes
+MUST be ignored.
+Implementations MAY accept additional attribute filtering functionality for
+this parameter.
+Users can provide attribute_keys, but it is up to their discretion.
+Therefore, the stream configuration parameter needs to be structured to
+accept attribute_keys, but MUST NOT obligate a user to provide them.
+If the user does not provide any value, the SDK SHOULD use
+the Attributes advisory
+parameter configured on the instrument instead. If the Attributes
+advisory parameter is absent, all attributes MUST be kept.
+Additionally, implementations SHOULD support configuring an exclude-list of
+attribute keys. The exclude-list contains attribute keys that identify the
+attributes that MUST be excluded, all other attributes MUST be kept. If an
+attribute key is both included and excluded, the SDK MAY fail fast in
+accordance with initialization error handling
+principles.
+Note
+An attribute key removed from the metric stream by View configuration
+(for example, to remove an attribute containing sensitive data) may
+still be exported on Exemplars as a filtered attribute. If this is
+not desired, Exemplars can be disabled by configuring the AlwaysOff
+ExemplarFilter, or a custom ExemplarFilter / ExemplarReservoir
+can be configured to control which measurements are sampled as
+Exemplars.
+
+SDK documentation SHOULD inform users that attributes excluded from a
+metric stream by View configuration may still be exported on Exemplars
+as filtered attributes, and describe how to disable or otherwise
+configure Exemplar sampling.
+
+- aggregation: The name of an aggregation function to use in
+aggregating the metric stream data.
+Users can provide an aggregation, but it is up to their discretion.
+Therefore, the stream configuration parameter needs to be structured to
+accept an aggregation, but MUST NOT obligate a user to provide one. If the
+user does not provide an aggregation value, the MeterProvider MUST apply
+a default aggregation configurable on the basis of
+instrument type according to the MetricReader instance.
+
+- exemplar_reservoir: A
+functional type that generates an exemplar reservoir a MeterProvider will
+use when storing exemplars. This functional type needs to be a factory or
+callback similar to aggregation selection functionality which allows
+different reservoirs to be chosen by the aggregation.
+Users can provide an exemplar_reservoir, but it is up to their discretion.
+Therefore, the stream configuration parameter needs to be structured to
+accept an exemplar_reservoir, but MUST NOT obligate a user to provide one.
+If the user does not provide an exemplar_reservoir value, the
+MeterProvider MUST apply a default exemplar
+reservoir.
+
+- aggregation_cardinality_limit: A positive integer value defining the
+maximum number of data points allowed to be emitted in a collection cycle by
+a single instrument. See cardinality limits, below.
+Users can provide an aggregation_cardinality_limit, but it is up to their
+discretion. Therefore, the stream configuration parameter needs to be
+structured to accept an aggregation_cardinality_limit, but MUST NOT
+obligate a user to provide one. If the user does not provide an
+aggregation_cardinality_limit value, the MeterProvider MUST apply the
+default aggregation cardinality limit the MetricReader is
+configured with.
+
+## [#measurement-processing] Measurement processing
+Status: Mixed
+The SDK SHOULD use the following logic to determine how to process Measurements
+made with an Instrument:
+
+- Determine the MeterProvider which “owns” the Instrument.
+
+- If the MeterProvider has no View registered, take the Instrument
+and apply the default Aggregation on the basis of instrument kind according
+to the MetricReader instance’s aggregation property.
+Instrument advisory parameters, if any,
+MUST be honored.
+
+- If the MeterProvider has one or more View(s) registered:
+- If view_matching_mode is independent (or unspecified), and the Instrument matches the instrument selection criteria of one or more Views, for each matching View:
+- Try to apply the View’s stream configuration independently of any other
+Views registered for the same matching Instrument (i.e. Views are not
+merged). This may result in conflicting metric identities
+even if stream configurations specify non-overlapping properties (e.g.
+one View setting aggregation and another View setting attribute_keys,
+both leaving the stream name as the default configured by the
+Instrument). If applying the View results in conflicting metric identities
+the implementation SHOULD apply the View and emit a warning.
+
+- If applying the View would produce semantic errors (for example,
+configuring an asynchronous instrument to use the Explicit bucket
+histogram aggregation), the
+implementation SHOULD emit a warning and proceed as if that View did not
+exist.
+
+- If both the View and Instrument advisory
+parameters specify the same aspect of
+the Stream configuration, the setting defined by
+the View MUST take precedence over the advisory parameters.
+
+- (Development) If view_matching_mode is composable, and the Instrument could match the instrument selection criteria of one or more Views:
+- Group the matching Views by their configured stream name.
+- A group contains Views that configure the same stream name and all
+matching Views that leave name null or unspecified.
+
+- Each distinct configured stream name creates a separate stream. If no
+matching View configures a stream name, create a single group and
+stream using the Instrument’s default name.
+
+- For each resulting stream, apply the Views in its group in registration order.
+For all aspects of the Stream configuration other
+than attribute_keys (name, description, aggregation,
+exemplar_reservoir, aggregation_cardinality_limit), the last matching
+View that specifies that aspect wins. Complex configurations like
+aggregation (including internal properties such as bucket boundaries or
+max buckets) are treated as a single atomic unit and are not merged across
+Views.
+
+- For attribute_keys, merge the Views in the group by combining their attribute filters using logical AND: an attribute key is preserved if it is included in all specified allow-lists (if any) and not excluded by any specified exclude-lists.
+
+- For each resulting stream:
+- If a setting selected for the stream would produce semantic errors, the
+implementation SHOULD emit a warning and use the next valid setting for
+that aspect from a preceding View in the same group, or the Instrument
+default if no preceding View specifies a valid setting.
+
+- If both the matching Views and Instrument advisory
+parameters specify the same aspect of
+the Stream configuration, the setting defined
+by the Views MUST take precedence over the advisory parameters.
+
+- If the Instrument could not match with any of the registered View(s), the
+SDK SHOULD enable the instrument using the default aggregation and temporality.
+Users can configure match-all Views using Drop aggregation
+to disable instruments by default.
+
+## [#view-examples] View examples
+The following are examples of an SDK’s functionality to create Views for a
+MeterProvider.
+# Python
+'''
++------------------+
+| MeterProvider    |
+|   Meter A        |
+|     Counter X    |
+|     Histogram Y  |
+|   Meter B        |
+|     Gauge Z      |
++------------------+
+'''
+
+# metrics from X and Y (reported as Foo and Bar) will be exported
+meter_provider
+    .add_view("X")
+    .add_view("Foo", instrument_name="Y")
+    .add_view(
+        "Bar",
+        instrument_name="Y",
+        aggregation=HistogramAggregation(buckets=[5.0, 10.0, 25.0, 50.0, 100.0]))
+    .add_metric_reader(PeriodicExportingMetricReader(ConsoleExporter()))
+
+# all the metrics will be exported using the default configuration
+meter_provider.add_metric_reader(PeriodicExportingMetricReader(ConsoleExporter()))
+
+# all the metrics will be exported using the default configuration
+meter_provider
+    .add_view("*") # a wildcard view that matches everything
+    .add_metric_reader(PeriodicExportingMetricReader(ConsoleExporter()))
+
+# Counter X will be exported as cumulative sum
+meter_provider
+    .add_view("X", aggregation=SumAggregation())
+    .add_metric_reader(PeriodicExportingMetricReader(ConsoleExporter()))
+
+# Counter X will be exported as a delta sum and the default attributes
+# Counter X, Histogram Y, and Gauge Z will be exported with 2 attributes (a and b)
+# A warning will be emitted for conflicting metric identities on Counter X (as two Views matching that Instrument
+# are configured with the same default name X) and streams from both views will be exported
+meter_provider
+    .add_view("X", aggregation=SumAggregation())
+    .add_view("*", attribute_keys=["a", "b"]) # wildcard view matches everything, including X
+    .add_metric_reader(PeriodicExportingMetricReader(ConsoleExporter()),
+              temporality=lambda kind: Delta if kind in [Counter, AsyncCounter, Histogram] else Cumulative)
+
+# Only Counter X will be exported, with the default configuration (match-all drop aggregation does not result in
+# conflicting metric identities)
+meter_provider
+    .add_view("X")
+    .add_view("*", aggregation=DropAggregation()) # a wildcard view to disable all instruments
+    .add_metric_reader(PeriodicExportingMetricReader(ConsoleExporter()))
+
+## [#aggregation] Aggregation
+An Aggregation, as configured via the View,
+informs the SDK on the ways and means to compute
+Aggregated Metrics
+from incoming Instrument Measurements.
+Note: the term aggregation is used instead of aggregator. It is RECOMMENDED
+that implementors reserve the “aggregator” term for the future when the SDK
+allows custom aggregation implementations.
+An Aggregation specifies an operation
+(i.e. decomposable aggregate function
+like Sum, Histogram, Min, Max, Count)
+and optional configuration parameter overrides.
+The operation’s default configuration parameter values will be used
+unless overridden by optional configuration parameter overrides.
+Note: Implementors MAY choose the best idiomatic practice for their language to
+represent the semantic of an Aggregation and optional configuration parameters.
+e.g. The View specifies an Aggregation by string name (i.e. “ExplicitBucketHistogram”).
+# Use Histogram with custom boundaries
+meter_provider
+  .add_view(
+    "X",
+    aggregation="ExplicitBucketHistogram",
+    aggregation_params={"Boundaries": [0, 10, 100]}
+    )
+
+e.g. The View specifies an Aggregation by class/type instance.
+// Use Histogram with custom boundaries
+meterProviderBuilder
+  .AddView(
+    instrumentName: "X",
+    aggregation: new ExplicitBucketHistogramAggregation(
+      boundaries: new double[] { 0.0, 10.0, 100.0 }
+    )
+  );
+
+The SDK MUST provide the following Aggregation to support the
+Metric Points in the
+Metrics Data Model.
+
+- Drop
+
+- Default
+
+- Sum
+
+- Last Value
+
+- Explicit Bucket Histogram
+The SDK SHOULD provide the following Aggregation:
+
+- Base2 Exponential Bucket Histogram
+
+## [#drop-aggregation] Drop Aggregation
+The Drop Aggregation informs the SDK to ignore/drop all Instrument Measurements
+for this Aggregation.
+This Aggregation does not have any configuration parameters.
+
+## [#default-aggregation] Default Aggregation
+The Default Aggregation informs the SDK to use the Instrument kind to select
+an aggregation and advisory parameters to influence aggregation configuration
+parameters (as noted in the “Selected Aggregation” column).
+Instrument KindSelected Aggregation
+CounterSum Aggregation
+Asynchronous CounterSum Aggregation
+UpDownCounterSum Aggregation
+Asynchronous UpDownCounterSum Aggregation
+GaugeLast Value Aggregation
+Asynchronous GaugeLast Value Aggregation
+HistogramExplicit Bucket Histogram Aggregation, with the ExplicitBucketBoundaries advisory parameter if provided
+This Aggregation does not have any configuration parameters.
+
+## [#sum-aggregation] Sum Aggregation
+The Sum Aggregation informs the SDK to collect data for the
+Sum Metric Point.
+The monotonicity of the aggregation is determined by the instrument type:
+Instrument KindSumType
+CounterMonotonic
+UpDownCounterNon-Monotonic
+HistogramMonotonic
+GaugeNon-Monotonic
+Asynchronous GaugeNon-Monotonic
+Asynchronous CounterMonotonic
+Asynchronous UpDownCounterNon-Monotonic
+This Aggregation does not have any configuration parameters.
+This Aggregation informs the SDK to collect:
+
+- The arithmetic sum of Measurement values.
+
+## [#last-value-aggregation] Last Value Aggregation
+The Last Value Aggregation informs the SDK to collect data for the
+Gauge Metric Point.
+This Aggregation does not have any configuration parameters.
+This Aggregation informs the SDK to collect:
+
+- The last Measurement.
+
+- The timestamp of the last Measurement.
+
+## [#histogram-aggregations] Histogram Aggregations
+All histogram Aggregations inform the SDK to collect:
+
+- Count of Measurement values in population.
+
+- Arithmetic sum of Measurement values in population. This SHOULD NOT be collected when used with
+instruments that record negative measurements (e.g. UpDownCounter or ObservableGauge).
+
+- Min (optional) Measurement value in population.
+
+- Max (optional) Measurement value in population.
+Explicit Bucket Histogram Aggregation
+The Explicit Bucket Histogram Aggregation informs the SDK to collect data for
+the Histogram Metric Point using a set of
+explicit boundary values for histogram bucketing.
+This Aggregation honors the following configuration parameters:
+KeyValueDefault ValueDescription
+Boundariesdouble[][ 0, 5, 10, 25, 50, 75, 100, 250, 500, 750, 1000, 2500, 5000, 7500, 10000 ]Array of increasing values representing explicit bucket boundary values.
+
+The Default Value represents the following buckets (heavily influenced by the default buckets of Prometheus clients, e.g. Java and Go):
+(-∞, 0], (0, 5.0], (5.0, 10.0], (10.0, 25.0], (25.0, 50.0], (50.0, 75.0], (75.0, 100.0], (100.0, 250.0], (250.0, 500.0], (500.0, 750.0], (750.0, 1000.0], (1000.0, 2500.0], (2500.0, 5000.0], (5000.0, 7500.0], (7500.0, 10000.0], (10000.0, +∞). SDKs SHOULD use the default value when boundaries are not explicitly provided, unless they have good reasons to use something different (e.g. for backward compatibility reasons in a stable SDK release).
+RecordMinMaxtrue, falsetrueWhether to record min and max.
+Explicit buckets are stated in terms of their upper boundary. Buckets
+are exclusive of their lower boundary and inclusive of their upper
+bound (except at positive infinity). A measurement is defined to fall
+into the greatest-numbered bucket with boundary that is greater than
+or equal to the measurement.
+Base2 Exponential Bucket Histogram Aggregation
+The Base2 Exponential Histogram Aggregation informs the SDK to collect data
+for the Exponential Histogram Metric
+Point, which uses a base-2 exponential
+formula to determine bucket boundaries and an integer scale
+parameter to control resolution. Implementations adjust scale as necessary given
+the data.
+This Aggregation honors the following configuration parameters:
+KeyValueDefault ValueDescription
+MaxSizeinteger160Maximum number of buckets in each of the positive and negative ranges, not counting the special zero bucket.
+MaxScaleinteger20Maximum scale factor.
+RecordMinMaxtrue, falsetrueWhether to record min and max.
+The default of 160 buckets is selected to establish default support
+for a high-resolution histogram able to cover a long-tail latency
+distribution from 1ms to 100s with less than 5% relative error.
+Because 160 can be factored into 10 * 2**K, maximum contrast is
+relatively simple to derive for scale K:
+ScaleMaximum data contrast at 10 * 2**K buckets
+K+25.657 (2**(10/4))
+K+132 (2**(10/2))
+K1024 (2**10)
+K-11048576 (2**20)
+The following table shows how the ideal scale for 160 buckets is
+calculated as a function of the input range:
+Input rangeContrastIdeal ScaleBaseRelative error
+1ms - 4ms461.0108890.542%
+1ms - 20ms2051.0218971.083%
+1ms - 1s10**341.0442742.166%
+1ms - 100s10**531.0905084.329%
+1μs - 10s10**721.1892078.643%
+Note that relative error is calculated as half of the bucket width
+divided by the bucket midpoint, which is the same in every bucket.
+Using the bucket from [1, base), we have (bucketWidth / 2) / bucketMidpoint = ((base - 1) / 2) / ((base + 1) / 2) = (base - 1) / (base + 1).
+This Aggregation uses the notion of “ideal” scale. The ideal scale is
+either:
+
+- The MaxScale (see configuration parameters), generally used for
+single-value histogram Aggregations where scale is not otherwise constrained.
+
+- The largest value of scale such that no more than the maximum number of
+buckets are needed to represent the full range of input data in either of the
+positive or negative ranges.
+Handle all normal values
+Implementations are REQUIRED to accept the entire normal range of IEEE
+floating point values (i.e., all values except for +Inf, -Inf and NaN
+values).
+Implementations SHOULD NOT incorporate non-normal values (i.e., +Inf,
+-Inf, and NaNs) into the sum, min, and max fields, because these
+values do not map into a valid bucket.
+Implementations MAY round subnormal values away from zero to the
+nearest normal value.
+Support a minimum and maximum scale
+The implementation MUST maintain reasonable minimum and maximum scale
+parameters that the automatic scale parameter will not exceed. The maximum scale
+is defined by the MaxScale configuration parameter.
+Use the maximum scale for single measurements
+When the histogram contains not more than one value in either of the
+positive or negative ranges, the implementation SHOULD use the maximum
+scale.
+Maintain the ideal scale
+Implementations SHOULD adjust the histogram scale as necessary to
+maintain the best resolution possible, within the constraint of
+maximum size (max number of buckets). Best resolution (highest scale)
+is achieved when the number of positive or negative range buckets
+exceeds half the maximum size, such that increasing scale by one would
+not be possible given the size constraint.
+
+## [#observations-inside-asynchronous-callbacks] Observations inside asynchronous callbacks
+Callback functions MUST be invoked for the specific MetricReader
+performing collection, such that observations made or produced by
+executing callbacks only apply to the intended MetricReader during
+collection.
+The implementation SHOULD disregard the use of asynchronous instrument
+APIs outside of registered callbacks.
+The implementation SHOULD use a timeout to prevent indefinite callback
+execution.
+The implementation MUST complete the execution of all callbacks for a
+given instrument before starting a subsequent round of collection.
+The implementation SHOULD NOT produce aggregated metric data for a
+previously-observed attribute set which is not observed during a successful
+callback. See MetricReader for more details on the persistence
+of metrics across successive collections.
+
+## [#start-timestamps] Start timestamps
+Status: Development
+The start timestamp for a timeseries is the timestamp which best represents
+the first possible moment a measurement for this timeseries could have been
+recorded.
+For delta aggregations, the start timestamp MUST equal the previous collection
+interval’s timestamp, or the creation time of the instrument if this is the
+first collection interval for the instrument. This implies that all data points
+with delta temporality aggregation for an instrument MUST share the same start
+timestamp.
+Cumulative timeseries MUST use a consistent start timestamp for all collection
+intervals.
+For synchronous instruments, the start timestamp SHOULD be the time of the
+first measurement for the series.
+For asynchronous instrument, the start timestamp SHOULD be:
+
+- The creation time of the instrument, if the first series measurement
+occurred in the first collection interval,
+
+- Otherwise, the timestamp of the collection interval prior to the first
+series measurement.
+
+## [#cardinality-limits] Cardinality limits
+Status: Stable
+SDKs SHOULD support being configured with a cardinality limit. The number of
+unique combinations of attributes is called cardinality. For a given metric, the
+cardinality limit is a hard limit on the number of Metric
+Points that can be collected during a collection
+cycle. Cardinality limit enforcement SHOULD occur after attribute filtering,
+if any. This ensures users can filter undesired attributes using views
+and prevent reaching the cardinality limit.
+
+## [#configuration-1] Configuration
+The cardinality limit for an aggregation is defined in one of three ways:
+
+- A view with criteria matching the instrument an aggregation is
+created for has an aggregation_cardinality_limit value defined for the
+stream, that value SHOULD be used.
+
+- If there is no matching view, but the MetricReader defines a default
+cardinality limit value based on the instrument an aggregation is created
+for, that value SHOULD be used.
+
+- If none of the previous values are defined, the default value of 2000 SHOULD
+be used.
+
+## [#overflow-attribute] Overflow attribute
+An overflow attribute set is defined, containing a single attribute
+otel.metric.overflow having (boolean) value true, which is used to report a
+synthetic aggregation of the Measurements that could not
+be independently aggregated because of the limit.
+The SDK MUST create an Aggregator with the overflow attribute set prior to
+reaching the cardinality limit and use it to aggregate
+Measurements for which the correct Aggregator could not
+be created. The SDK MUST provide the guarantee that overflow would not happen
+if the maximum number of distinct, non-overflow attribute sets is less than or
+equal to the limit.
+
+## [#synchronous-instrument-cardinality-limits] Synchronous instrument cardinality limits
+Aggregators for synchronous instruments with cumulative temporality MUST
+continue to export all attribute sets that were observed prior to the beginning
+of overflow. Measurements corresponding with attribute
+sets that were not observed prior to the overflow will be reflected in a single
+data point described by (only) the overflow attribute.
+Aggregators of synchronous instruments with delta aggregation temporality MAY
+choose an arbitrary subset of attribute sets to output to maintain the stated
+cardinality limit.
+Regardless of aggregation temporality, the SDK MUST ensure that every
+Measurement is reflected in exactly one Aggregator,
+which is either an Aggregator associated with the correct attribute set or an
+aggregator associated with the overflow attribute set.
+Measurements MUST NOT be double-counted or dropped
+during an overflow.
+
+## [#asynchronous-instrument-cardinality-limits] Asynchronous instrument cardinality limits
+Aggregators of asynchronous instruments SHOULD prefer the first-observed
+attributes in the callback when limiting cardinality, regardless of
+temporality.
+
+## [#meter] Meter
+Distinct meters MUST be treated as separate namespaces for the purposes of detecting
+duplicate instrument registrations.
+Status: Development - Meter MUST behave
+according to the MeterConfig computed
+during Meter creation. If the MeterProvider supports
+updating the MeterConfigurator, then upon update
+the Meter MUST be updated to behave according to the new MeterConfig.
+
+## [#meterconfig] MeterConfig
+Status: Development
+A MeterConfig defines various configurable aspects of a Meter’s behavior.
+It consists of the following parameters:
+
+- enabled: A boolean indication of whether the Meter is enabled.
+If not explicitly set, the enabled parameter SHOULD default to true (
+i.e. Meters are enabled by default).
+If a Meter is disabled, it MUST behave equivalently
+to No-op Meter.
+The value of enabled MUST be used to resolve whether an instrument
+is Enabled. See Instrument Enabled
+for details.
+
+It is not necessary for implementations to ensure that changes to any of these
+parameters are immediately visible to callers of Enabled.
+However, the changes MUST be eventually visible.
+
+## [#duplicate-instrument-registration] Duplicate instrument registration
+A duplicate instrument registration occurs when more than one Instrument of
+the same name is created for identical
+Meters from the same MeterProvider but they have different identifying
+fields.
+Whenever this occurs, users still need to be able to make measurements with the
+duplicate instrument. This means that the Meter MUST return a functional
+instrument that can be expected to export data even if this will cause
+semantic error in the data
+model.
+Additionally, users need to be informed about this error. Therefore, when a
+duplicate instrument registration occurs, and it is not corrected with a View,
+a warning SHOULD be emitted. The emitted warning SHOULD include information for
+the user on how to resolve the conflict, if possible.
+
+- If the potential conflict involves multiple description
+properties, setting the description through a configured View
+SHOULD avoid the warning.
+
+- If the potential conflict involves instruments that can be distinguished by
+a supported View selector (e.g. name, instrument kind) a renaming View
+recipe SHOULD be included in the warning.
+
+- Otherwise (e.g., use of multiple units), the SDK SHOULD pass through the
+data by reporting both Metric objects and emit a generic warning
+describing the duplicate instrument registration.
+It is unspecified whether or under which conditions the same or
+different Instrument instance will be returned as a result of
+duplicate instrument registration. The term identical applied to
+Instruments describes instances where all identifying
+fields are equal. The term distinct applied
+to Instruments describes instances where at least one field value is
+different.
+To accommodate the recommendations from the data
+model,
+the SDK MUST aggregate data from identical Instruments
+together in its export pipeline.
+
+## [#name-conflict] Name conflict
+The name of an Instrument is defined to be
+case-insensitive. If an SDK uses a case-sensitive encoding to represent this
+name, a duplicate instrument registration will occur when a user passes
+multiple casings of the same name. When this happens, the Meter MUST return
+an instrument using the first-seen instrument name and log an appropriate error
+as described above.
+For example, if a user creates an instrument with the name requestCount and
+then makes another request to the same Meter to create an instrument with the
+name RequestCount, in both cases an instrument with the name requestCount
+needs to be returned to the user and a log message needs to be emitted for the
+second request.
+
+## [#instrument-name] Instrument name
+When a Meter creates an instrument, it SHOULD validate the instrument name
+conforms to the instrument name syntax
+If the instrument name does not conform to this syntax, the Meter SHOULD emit
+an error notifying the user about the invalid name. It is left unspecified if a
+valid instrument is also returned.
+
+## [#instrument-unit] Instrument unit
+When a Meter creates an instrument, it SHOULD NOT validate the instrument unit.
+If a unit is not provided or the unit is null, the Meter MUST treat it the same
+as an empty unit string.
+
+## [#instrument-description] Instrument description
+When a Meter creates an instrument, it SHOULD NOT validate the instrument
+description. If a description is not provided or the description is null, the
+Meter MUST treat it the same as an empty description string.
+
+## [#instrument-advisory-parameters] Instrument advisory parameters
+Status: Stable, except where otherwise specified
+When a Meter creates an instrument, it SHOULD validate the instrument advisory
+parameters. If an advisory parameter is not valid, the Meter SHOULD emit an error
+notifying the user and proceed as if the parameter was not provided.
+If multiple identical Instruments are created with
+different advisory parameters, the Meter MUST return an instrument using the
+first-seen advisory parameters and log an appropriate error as described in
+duplicate instrument registrations.
+If both a View and advisory parameters specify the same aspect of the
+Stream configuration, the setting defined by the View
+MUST take precedence over the advisory parameters.
+
+## [#instrument-advisory-parameter-explicitbucketboundaries] Instrument advisory parameter: ExplicitBucketBoundaries
+This advisory parameter applies when the Explicit Bucket
+Histogram aggregation is used.
+If a matching View specifies Explicit Bucket Histogram aggregation (with or
+without bucket boundaries), the ExplicitBucketBoundaries advisory parameter is
+ignored.
+If no View matches, or if a matching View selects the default
+aggregation, the ExplicitBucketBoundaries advisory
+parameter MUST be used. If neither is provided, the default bucket boundaries
+apply.
+
+## [#instrument-advisory-parameter-attributes] Instrument advisory parameter: Attributes
+Status: Development
+This advisory parameter applies to all aggregations.
+Attributes (a list of attribute keys)
+specifies the recommended set of attribute keys for measurements aggregated to
+produce a metric stream.
+If the user has provided attribute keys via View(s), those keys take precedence.
+If no View is configured, or if a matching view does not specify attribute keys,
+the advisory parameter should be used. If neither is provided, all attributes
+must be retained.
+
+## [#instrument-enabled] Instrument enabled
+The synchronous instrument Enabled MUST return false
+when either:
+
+- Status: Development - The MeterConfig
+of the Meter used to create the instrument has parameter enabled=false.
+
+- All resolved views for the instrument are
+configured with the Drop Aggregation.
+Otherwise, it SHOULD return true.
+It MAY return false to support additional optimizations and features.
+Note: If a user makes no configuration changes, Enabled returns true since by
+default MeterConfig.enabled=true and instruments use the default
+aggregation when no matching views match the instrument.
+
+## [#instrument-bind] Instrument bind
+Status: Development
+A bound instrument MUST behave identically to calling the equivalent unbound recording
+operation with the pre-bound Attributes on each
+measurement.
+Attribute processing and cardinality limit
+evaluation MUST be performed at bind time. Each call to Bind MUST be independently
+evaluated against the cardinality state at that moment. As a consequence, separate calls
+to Bind with identical attributes may resolve to different aggregators (e.g. one to a
+concrete series, another to the overflow series) based on the
+cardinality state at the time of each call. The resolved aggregator MUST be fixed and
+not change across collection cycles.
+Measurements recorded on a bound instrument MUST be candidates for Exemplar
+sampling. The Context associated with each recording, whether
+implicit or explicit, MUST be used for exemplar TraceBased filtering and
+passed to the ExemplarReservoir offer method.
+The SDK MUST ensure attribute-free recordings on a bound instrument bypass per-recording
+map lookup.
+
+## [#attribute-limits] Attribute limits
+Status: Stable
+Attributes which belong to Metrics are exempt from the
+common rules of attribute limits at this
+time. Attribute truncation or deletion could affect identity of metric time
+series and the topic requires further analysis.
+
+## [#exemplar] Exemplar
+Status: Stable
+Exemplars are example data points for aggregated data. They provide specific
+context to otherwise general aggregations. Exemplars allow correlation between
+aggregated metric data and the original API calls where measurements are
+recorded. Exemplars work for trace-metric correlation across any metric, not
+just those that can also be derived from Spans. Exemplars also preserve
+attributes that are dropped during aggregation (e.g. by View configuration),
+regardless of instrument type (including asynchronous instruments).
+An Exemplar is a recorded
+Measurement that exposes the following pieces of
+information:
+
+- The value of the Measurement that was recorded by the API call.
+
+- The time the API call was made to record a Measurement.
+
+- The set of Attributes associated with the
+Measurement not already included in a metric data point.
+
+- For synchronous instruments, the associated trace ID and span
+ID of the active Span
+within Context of
+the Measurement at API call time.
+For example, if a user has configured a View to preserve the attributes: X
+and Y, but the user records a measurement as follows:
+const span = tracer.startSpan('makeRequest');
+api.context.with(api.trace.setSpan(api.context.active(), span), () => {
+  // Record a measurement.
+  cache_miss_counter.add(1, {"X": "x-value", "Y": "y-value", "Z": "z-value"});
+  ...
+  span.end();
+})
+
+Then an exemplar output in OTLP would consist of:
+
+- The value of 1.
+
+- The time when the add method was called.
+
+- The Attributes of {"Z": "z-value"}, as these are not preserved in the
+resulting metric point.
+
+- The trace/span ID for the makeRequest span.
+While the metric data point for the counter would carry the attributes X and
+Y.
+A Metric SDK MUST provide a mechanism to sample Exemplars from measurements
+via the ExemplarFilter and ExemplarReservoir hooks.
+Exemplar sampling SHOULD be turned on by default. If Exemplar sampling is
+off, the SDK MUST NOT have overhead related to exemplar sampling.
+A Metric SDK MUST allow exemplar sampling to leverage the configuration of
+metric aggregation. For example, Exemplar sampling of histograms should be able
+to leverage bucket boundaries.
+A Metric SDK SHOULD provide configuration for Exemplar sampling, specifically:
+
+- ExemplarFilter: filter which measurements can become exemplars.
+
+- ExemplarReservoir: storage and sampling of exemplars.
+
+## [#exemplarfilter] ExemplarFilter
+The ExemplarFilter configuration MUST allow users to select between one of the
+built-in ExemplarFilters. While ExemplarFilter determines which measurements
+are eligible for becoming an Exemplar, the ExemplarReservoir makes the
+final decision if a measurement becomes an exemplar and is stored.
+The ExemplarFilter SHOULD be a configuration parameter of a MeterProvider for
+an SDK. The default value SHOULD be TraceBased. The filter configuration
+SHOULD follow the environment variable specification.
+An OpenTelemetry SDK MUST support the following filters:
+
+- AlwaysOn
+
+- AlwaysOff
+
+- TraceBased
+
+## [#alwayson] AlwaysOn
+An ExemplarFilter which makes all measurements eligible for being an Exemplar.
+
+## [#alwaysoff] AlwaysOff
+An ExemplarFilter which makes no measurements eligible for being an Exemplar.
+Using this ExemplarFilter is as good as disabling the Exemplar feature.
+
+## [#tracebased] TraceBased
+An ExemplarFilter which makes those measurements eligible for being an
+Exemplar, which are recorded in the context of a sampled parent span.
+
+## [#exemplarreservoir] ExemplarReservoir
+The ExemplarReservoir interface MUST provide a method to offer measurements
+to the reservoir and another to collect accumulated Exemplars.
+A new ExemplarReservoir MUST be created for every known timeseries data point,
+as determined by aggregation and view configuration. This data point, and its
+set of defining attributes, are referred to as the associated timeseries point.
+The “offer” method SHOULD accept measurements, including:
+
+- The value of the measurement.
+
+- The complete set of Attributes of the measurement.
+
+- The Context of the measurement, which covers the
+Baggage and the current active
+Span.
+
+- A timestamp that best represents when the measurement was taken.
+The “offer” method SHOULD have the ability to pull associated trace and span
+information without needing to record full context. In other words, current
+span context and baggage can be inspected at this point.
+The “offer” method does not need to store all measurements it is given and
+MAY further sample beyond the ExemplarFilter.
+The “offer” method MAY accept a filtered subset of Attributes which diverge
+from the timeseries the reservoir is associated with. This MUST be clearly
+documented in the API and the reservoir MUST be given the Attributes
+associated with its timeseries point either at construction so that additional
+sampling performed by the reservoir has access to all attributes from a
+measurement in the “offer” method. SDK authors are encouraged to benchmark
+whether this option works best for their implementation.
+The “collect” method MUST return accumulated Exemplars. Exemplars are expected
+to abide by the AggregationTemporality of any metric point they are recorded
+with. In other words, Exemplars reported against a metric data point SHOULD have
+occurred within the start/stop timestamps of that point. SDKs are free to
+decide whether “collect” should also reset internal storage for delta temporal
+aggregation collection, or use a more optimal implementation.
+Exemplars MUST retain any attributes available in the measurement that
+are not preserved by aggregation or view configuration for the associated
+timeseries. Joining together attributes on an Exemplar with
+those available on its associated metric data point should result in the
+full set of attributes from the original sample measurement.
+The ExemplarReservoir SHOULD avoid allocations when sampling exemplars.
+
+## [#exemplar-defaults] Exemplar defaults
+The SDK MUST include two types of built-in exemplar reservoirs:
+
+- SimpleFixedSizeExemplarReservoir
+
+- AlignedHistogramBucketExemplarReservoir
+By default:
+
+- Explicit bucket histogram aggregation with more than 1 bucket SHOULD
+use AlignedHistogramBucketExemplarReservoir.
+
+- Base2 Exponential Histogram Aggregation SHOULD use a
+SimpleFixedSizeExemplarReservoir with a reservoir equal to the
+smaller of the maximum number of buckets configured on the aggregation or
+twenty (e.g. min(20, max_buckets)).
+
+- All other aggregations SHOULD use SimpleFixedSizeExemplarReservoir.
+Exemplar default reservoirs MAY change in
+a minor version bump. No
+guarantees are made on the shape or statistical properties of returned
+exemplars.
+
+## [#simplefixedsizeexemplarreservoir] SimpleFixedSizeExemplarReservoir
+This reservoir MUST use a uniformly-weighted sampling algorithm based on the
+number of samples the reservoir has seen so far to determine if the offered
+measurements should be sampled. For example, the simple reservoir sampling
+algorithm can be used:
+if num_measurements_seen < num_buckets then
+  bucket = num_measurements_seen
+else
+  bucket = random_integer(0, num_measurements_seen)
+end
+if bucket < num_buckets then
+  reservoir[bucket] = measurement
+end
+num_measurements_seen += 1
+
+Any stateful portion of sampling computation SHOULD be reset every collection
+cycle. For the above example, that would mean that the num_measurements_seen
+count is reset every time the reservoir is collected.
+This Exemplar reservoir MAY take a configuration parameter for the size of the
+reservoir. If no size configuration is provided, the default size MAY be
+the number of possible concurrent threads (e.g., number of CPUs) to help reduce
+contention. Otherwise, a default size of 1 SHOULD be used.
+
+## [#alignedhistogrambucketexemplarreservoir] AlignedHistogramBucketExemplarReservoir
+This Exemplar reservoir MUST take a configuration parameter that is the
+configuration of a Histogram. This implementation MUST store at most one
+measurement that falls within a histogram bucket, and SHOULD use a
+uniformly-weighted sampling algorithm based on the number of measurements the
+bucket has seen so far to determine if the offered measurements should be
+sampled. Alternatively, the implementation MAY instead keep the last seen
+measurement that falls within a histogram bucket.
+The reservoir will accept measurements using the equivalent of the following
+naive algorithm:
+bucket = find_histogram_bucket(measurement)
+num_measurements_seen_bucket = num_measurements_seen[bucket]
+if random_integer(0, num_measurements_seen_bucket) == 0 then
+  reservoir[bucket] = measurement
+end
+num_measurements_seen[bucket] += 1
+
+def find_histogram_bucket(measurement):
+  for boundary, idx in bucket_boundaries do
+    if value <= boundary then
+      return idx
+    end
+  end
+  return boundaries.length
+
+This Exemplar reservoir MAY take a configuration parameter for the bucket
+boundaries used by the reservoir. The size of the reservoir is always the
+number of bucket boundaries plus one. This configuration parameter SHOULD have
+the same format as specifying bucket boundaries to
+Explicit Bucket Histogram Aggregation.
+
+## [#custom-exemplarreservoir] Custom ExemplarReservoir
+The SDK MUST provide a mechanism for SDK users to provide their own
+ExemplarReservoir implementation. This extension MUST be configurable on
+a metric View, although individual reservoirs MUST still be
+instantiated per metric-timeseries (see
+Exemplar Reservoir - Paragraph 2).
+
+## [#metricreader] MetricReader
+Status: Stable
+MetricReader is an SDK implementation object that provides the
+common configurable aspects of the OpenTelemetry Metrics SDK and
+determines the following capabilities:
+
+- Collecting metrics from the SDK and any registered
+MetricProducers on demand.
+
+- Handling the ForceFlush and Shutdown signals from
+the SDK.
+To construct a MetricReader when setting up an SDK, at least the following
+SHOULD be provided:
+
+- The exporter to use, which is a MetricExporter instance.
+
+- The default output aggregation (optional), a function of instrument kind. This function SHOULD be obtained from the exporter. If not configured, the default aggregation SHOULD be used.
+
+- The output temporality (optional), a function of instrument kind. This function SHOULD be obtained from the exporter. If not configured, the Cumulative temporality SHOULD be used.
+
+- The default aggregation cardinality limit (optional) to use, a function of instrument kind. If not configured, a default value of 2000 SHOULD be used.
+
+- Status: Development - The MetricFilter to apply to metrics and attributes during MetricReader#Collect.
+
+- Zero of more MetricProducers (optional) to collect metrics from in addition to metrics from the SDK.
+Status: Development - A MetricReader SHOULD provide the MetricFilter to the SDK or registered MetricProducer(s)
+when calling the Produce operation.
+The MetricReader.Collect method allows general-purpose
+MetricExporter instances to explicitly initiate collection, commonly
+used with pull-based metrics collection. A common implementation of
+MetricReader, the periodic exporting
+MetricReader SHOULD be provided to be used
+typically with push-based metrics collection.
+The MetricReader MUST ensure that data points from OpenTelemetry
+instruments are output in the configured aggregation
+temporality for each instrument kind. For synchronous instruments with
+Cumulative aggregation temporality, this means
+converting Delta to Cumulative
+aggregation temporality. For asynchronous instruments with Delta temporality,
+this means
+converting Cumulative to Delta
+aggregation temporality.
+The MetricReader is not required to ensure data points from a non-SDK
+MetricProducer are output in the configured aggregation
+temporality, as these data points are not collected using OpenTelemetry
+instruments.
+The MetricReader selection of temporality as a function of instrument kind
+influences the persistence of metric data points across collections. For
+synchronous instruments with Cumulative aggregation
+temporality, MetricReader.Collect MUST receive data points exposed
+in previous collections regardless of whether new measurements have been
+recorded. For synchronous instruments with Delta aggregation
+temporality, MetricReader.Collect MUST only receive data points with
+measurements recorded since the previous collection. For asynchronous
+instruments with Delta or Cumulative aggregation
+temporality, MetricReader.Collect MUST only receive data points with
+measurements recorded since the previous collection. These rules apply to all
+metrics, not just those whose point kinds
+includes an aggregation temporality field.
+The MetricReader selection of temporality as a function of instrument kind
+influences the starting timestamp (i.e. StartTimeUnixNano) of metrics data
+points received by MetricReader.Collect. For instruments with
+Cumulative aggregation temporality, successive data points received by
+successive calls to MetricReader.Collect MUST repeat the same
+starting timestamps (e.g. (T0, T1], (T0, T2], (T0, T3]). For instruments with
+Delta aggregation temporality, successive data points received by successive
+calls to MetricReader.Collect MUST advance the starting timestamp (
+e.g. (T0, T1], (T1, T2], (T2, T3]). The ending timestamp (i.e. TimeUnixNano)
+MUST always be equal to time the metric data point took effect, which is equal
+to when MetricReader.Collect was invoked. These rules apply to all
+metrics, not just those whose point kinds includes
+an aggregation temporality field.
+See data model temporality for more details.
+The SDK MUST support multiple MetricReader instances to be registered on the
+same MeterProvider, and the MetricReader.Collect invocation on one
+MetricReader instance SHOULD NOT introduce side-effects to other MetricReader
+instances. For example, if a MetricReader instance is receiving metric data
+points that have delta temporality, it is expected
+that SDK will update the time range - e.g. from (Tn, Tn+1]
+to (Tn+1, Tn+2] - ONLY for this particular
+MetricReader instance.
+The SDK MUST NOT allow a MetricReader instance to be registered on more than
+one MeterProvider instance.
++-----------------+            +--------------+
+|                 | Metrics... |              |
+| In-memory state +------------> MetricReader |
+|                 |            |              |
++-----------------+            +--------------+
+
++-----------------+            +--------------+
+|                 | Metrics... |              |
+| In-memory state +------------> MetricReader |
+|                 |            |              |
++-----------------+            +--------------+
+
+The SDK SHOULD provide a way to allow MetricReader to respond to
+MeterProvider.ForceFlush and MeterProvider.Shutdown.
+OpenTelemetry SDK authors MAY decide the language
+idiomatic approach, for example, as OnForceFlush and OnShutdown callback
+functions.
+
+## [#metricreader-operations] MetricReader operations
+
+## [#collect] Collect
+Collects the metrics from the SDK and any registered
+MetricProducers. If there are
+asynchronous SDK Instruments involved,
+their callback functions will be triggered.
+Collect SHOULD provide a way to let the caller know whether it succeeded,
+failed or timed out. When the Collect operation fails or times out on
+some of the instruments, the SDK MAY return successfully collected results
+and a failed reasons list to the caller.
+Collect does not have any required parameters, however, OpenTelemetry
+SDK authors MAY choose to add parameters (e.g. callback,
+filter, timeout). OpenTelemetry SDK authors MAY choose the
+return value type, or do not return anything.
+Collect SHOULD invoke Produce on registered
+MetricProducers. If the batch of metric points from
+Produce includes Resource information, Collect MAY
+replace the Resource from the MetricProducer with the Resource provided
+when constructing the MeterProvider instead.
+Note: it is expected that the MetricReader.Collect implementations will be
+provided by the SDK, so it is RECOMMENDED to prevent the user from accidentally
+overriding it, if possible (e.g. final in C++ and Java, sealed in C#).
+
+## [#shutdown-1] Shutdown
+This method provides a way for the MetricReader to do any cleanup required.
+Shutdown MUST be called only once for each MetricReader instance. After the
+call to Shutdown, subsequent invocations to Collect are not allowed. SDKs
+SHOULD return some failure for these calls, if possible.
+Shutdown SHOULD provide a way to let the caller know whether it succeeded,
+failed or timed out.
+Shutdown SHOULD complete or abort within some timeout. Shutdown MAY be
+implemented as a blocking API or an asynchronous API which notifies the caller
+via a callback or an event. OpenTelemetry SDK authors MAY
+decide if they want to make the shutdown timeout configurable.
+
+## [#periodic-exporting-metricreader] Periodic exporting MetricReader
+This is an implementation of the MetricReader which collects metrics based on
+a user-configurable time interval, and passes the metrics to the configured
+Push Metric Exporter.
+Configurable parameters:
+
+- exportIntervalMillis - the time interval in milliseconds between two
+consecutive collections. The default value is 60000 (milliseconds).
+
+- exportTimeoutMillis - how long the export can run before it is cancelled.
+The default value is 30000 (milliseconds). When maxExportBatchSize is
+configured and results in splitting the collected metric data into multiple
+batches, exportTimeoutMillis applies to each individual Export(batch)
+invocation.
+
+- maxExportBatchSize - the maximum number of metric data points in a batch
+that are provided to a single export. The default is that the batch size is not
+limited.
+When maxExportBatchSize is configured, the reader MUST ensure no batch
+provided to Export exceeds the maxExportBatchSize by splitting the batch of
+metric data points into smaller batches. The initial batch of metric data MUST
+be split into as many “full” batches of size maxExportBatchSize as possible –
+even if this splits up data points that belong to the same metric into different
+batches. The reader MUST ensure all batches produced from a single Collect()
+are provided to Export serially and in-order before metric data points from a
+subsequent Collect() are provided. The reader MUST NOT combine metrics from
+different Collect() calls into the same batch provided to Export.
+The reader MUST synchronize calls to MetricExporter’s Export
+to make sure that they are not invoked concurrently. If an export is still in
+progress when the next scheduled interval occurs, the reader MUST either delay
+the subsequent collection and export until the in-progress export finishes, or
+skip the scheduled collection for that interval.
+One possible implementation of periodic exporting MetricReader is to inherit
+from MetricReader and start a background task which calls the inherited
+Collect() method at the requested exportIntervalMillis. The reader’s
+Collect() method may still be invoked by other callers. For example,
+
+- A user configures periodic exporting MetricReader with a push exporter and a
+30 second interval.
+
+- At the first 30 second interval, the background task calls Collect() which
+passes metrics to the push exporter.
+
+- After 15 seconds, the user decides to flush metrics for just this reader. They
+call Collect() which passes metrics to the push exporter.
+
+- After another 15 seconds (at the end of the second 30 second interval),
+the background task calls Collect() which passes metrics to the push
+exporter.
+
+## [#forceflush-1] ForceFlush
+This method provides a way for the periodic exporting MetricReader
+so it can do as much as it could to collect and send the metrics.
+ForceFlush SHOULD collect metrics, split into batches if necessary, call
+Export(batch) on each batch serially, and call
+ForceFlush() on the configured
+Push Metric Exporter. ForceFlush MAY skip
+Export(batch) calls if the timeout is already expired, but
+SHOULD still call ForceFlush() on the configured
+Push Metric Exporter even if the timeout has passed.
+ForceFlush SHOULD provide a way to let the caller know whether it succeeded,
+failed or timed out. If any Export(batch) call fails or times
+out, or if the configured exporter’s ForceFlush() fails or
+times out, ForceFlush SHOULD return some ERROR status. If all calls
+succeed, ForceFlush SHOULD return some NO ERROR status. Language
+implementations MAY decide how to model ERROR and NO ERROR.
+ForceFlush SHOULD complete or abort within some timeout. ForceFlush MAY be
+implemented as a blocking API or an asynchronous API which notifies the caller
+via a callback or an event.
+
+## [#metricexporter] MetricExporter
+Status: Stable
+MetricExporter defines the interface that protocol-specific exporters MUST
+implement so that they can be plugged into OpenTelemetry SDK and support sending
+of telemetry data.
+Metric Exporters always have an associated MetricReader. The
+aggregation and temporality properties used by the
+OpenTelemetry Metric SDK are determined when registering Metric
+Exporters through their associated MetricReader. OpenTelemetry
+language implementations MAY support automatically configuring the
+MetricReader to use for an Exporter.
+The goal of the interface is to minimize the burden of implementation for
+protocol-dependent telemetry exporters. The protocol exporter is expected to be
+primarily a simple telemetry data encoder and transmitter.
+Metric Exporter has access to the aggregated metrics
+data. Metric Exporters SHOULD
+report an error condition for data output by the MetricReader with
+unsupported Aggregation or Aggregation Temporality, as this condition
+can be corrected by a change of MetricReader configuration.
+There could be multiple Push Metric Exporters or Pull
+Metric Exporters or even a mixture of both configured at
+the same time on a given MeterProvider using one MetricReader for each exporter. Different exporters
+can run at different schedule, for example:
+
+- Exporter A is a push exporter which sends data every 1 minute.
+
+- Exporter B is a push exporter which sends data every 5 seconds.
+
+- Exporter C is a pull exporter which reacts to a scraper over HTTP.
+
+- Exporter D is a pull exporter which reacts to another scraper over a named
+pipe.
+
+## [#push-metric-exporter] Push Metric Exporter
+Push Metric Exporter sends metric data it receives from a paired
+MetricReader. Here are some examples:
+
+- Sends the data based on a user configured schedule, e.g. every 1 minute.
+This MAY be accomplished by pairing the exporter with a
+periodic exporting MetricReader.
+
+- Sends the data when there is a severe error.
+The following diagram shows Push Metric Exporter’s relationship to other
+components in the SDK:
++-----------------+            +---------------------------------+
+|                 | Metrics... |                                 |
+| In-memory state +------------> Periodic exporting MetricReader |
+|                 |            |                                 |
++-----------------+            |    +-----------------------+    |
+                               |    |                       |    |
+                               |    | MetricExporter (push) +-------> Another process
+                               |    |                       |    |
+                               |    +-----------------------+    |
+                               |                                 |
+                               +---------------------------------+
+
+## [#interface-definition] Interface Definition
+A Push Metric Exporter MUST support the following functions:
+Export(batch)
+Exports a batch of Metric Points. Protocol
+exporters that will implement this function are typically expected to serialize
+and transmit the data to the destination.
+The SDK MUST provide a way for the exporter to get the Meter
+information (e.g. name, version, etc.) associated with each Metric Point.
+Export should never be called concurrently with other Export calls for the
+same exporter instance.
+Export MUST NOT block indefinitely, there MUST be a reasonable upper limit
+after which the call must time out with an error result (Failure).
+Any retry logic that is required by the exporter is the responsibility of the
+exporter. The default SDK SHOULD NOT implement retry logic, as the required
+logic is likely to depend heavily on the specific protocol and backend the metrics
+are being sent to.
+Parameters:
+batch - a batch of Metric Points. The exact
+data type of the batch is language specific, typically it is some kind of list.
+The exact type of Metric Point is language specific, and is typically
+optimized for high performance. Here are some examples:
+       +--------+ +--------+     +--------+
+Batch: | Metric | | Metric | ... | Metric |
+       +---+----+ +--------+     +--------+
+           |
+           +--> name, unit, description, meter information, ...
+           |
+           |                  +-------------+ +-------------+     +-------------+
+           +--> MetricPoints: | MetricPoint | | MetricPoint | ... | MetricPoint |
+                              +-----+-------+ +-------------+     +-------------+
+                                    |
+                                    +--> timestamps, attributes, value (or buckets), exemplars, ...
+
+Refer to the Metric Points section from the
+Metrics Data Model specification for more details.
+Note: it is highly recommended that implementors design the Metric data type
+based on the Data Model, rather than directly use the data
+types generated from the proto
+files
+(because the types generated from proto files are not guaranteed to be backward
+compatible).
+Returns: ExportResult
+ExportResult is one of:
+
+- Success - The batch has been successfully exported. For protocol exporters
+this typically means that the data is sent over the wire and delivered to the
+destination server.
+
+- Failure - exporting failed. The batch must be dropped. For example, this can
+happen when the batch contains bad data and cannot be serialized.
+Note: this result may be returned via an async mechanism or a callback, if that
+is idiomatic for the language implementation.
+ForceFlush
+This is a hint to ensure that the export of any Metrics the exporter has
+received prior to the call to ForceFlush SHOULD be completed as soon as
+possible, preferably before returning from this method.
+ForceFlush SHOULD provide a way to let the caller know whether it succeeded,
+failed or timed out.
+ForceFlush SHOULD only be called in cases where it is absolutely necessary,
+such as when using some FaaS providers that may suspend the process after an
+invocation, but before the exporter exports the completed metrics.
+ForceFlush SHOULD complete or abort within some timeout. ForceFlush can be
+implemented as a blocking API or an asynchronous API which notifies the caller
+via a callback or an event. OpenTelemetry SDK authors MAY
+decide if they want to make the flush timeout configurable.
+Shutdown
+Shuts down the exporter. Called when SDK is shut down. This is an opportunity
+for exporter to do any cleanup required.
+Shutdown SHOULD be called only once for each MetricExporter instance. After
+the call to Shutdown subsequent calls to Export are not allowed and should
+return a Failure result.
+Shutdown SHOULD NOT block indefinitely (e.g. if it attempts to flush the data
+and the destination is unavailable). OpenTelemetry SDK
+authors MAY decide if they want to make the shutdown timeout configurable.
+
+## [#pull-metric-exporter] Pull Metric Exporter
+Pull Metric Exporter reacts to the metrics scrapers and reports the data
+passively. This pattern has been widely adopted by
+Prometheus.
+Unlike Push Metric Exporter which can send data on its
+own schedule, pull exporter can only send the data when it is being asked by the
+scraper, and ForceFlush would not make sense.
+Implementors MAY choose the best idiomatic design for their language. For
+example, they could generalize the Push Metric Exporter
+interface design and use that for consistency, they
+could model the pull exporter as MetricReader, or they could
+design a completely different pull exporter interface. If the pull exporter is
+modeled as MetricReader, implementors MAY name the MetricExporter interface as
+PushMetricExporter to prevent naming confusion.
+The following diagram gives some examples on how Pull Metric Exporter can be
+modeled to interact with other components in the SDK:
+
+- Model the pull exporter as MetricReader
++-----------------+            +-----------------------------+
+|                 | Metrics... |                             |
+| In-memory state +------------> PrometheusExporter (pull)   +---> Another process (scraper)
+|                 |            | (modeled as a MetricReader) |
++-----------------+            |                             |
+                               +-----------------------------+
+
+- Use the same MetricExporter design for both push and pull exporters
++-----------------+            +-----------------------------+
+|                 | Metrics... |                             |
+| In-memory state +------------> Exporting MetricReader      |
+|                 |            |                             |
++-----------------+            |  +-----------------------+  |
+                               |  |                       |  |
+                               |  | MetricExporter (pull) +------> Another process (scraper)
+                               |  |                       |  |
+                               |  +-----------------------+  |
+                               |                             |
+                               +-----------------------------+
+
+## [#metricproducer] MetricProducer
+Status: Stable except where otherwise specified
+MetricProducer defines the interface which bridges to third-party metric
+sources MUST implement, so they can be plugged into an OpenTelemetry
+MetricReader as a source of aggregated metric data. The SDK’s
+in-memory state MAY implement the MetricProducer interface for convenience.
+MetricProducer implementations SHOULD accept configuration for the
+AggregationTemporality of produced metrics. SDK authors MAY provide utility
+libraries to facilitate conversion between delta and cumulative temporalities.
++-----------------+            +--------------+
+|                 | Metrics... |              |
+| In-memory state +------------> MetricReader |
+|                 |            |              |
++-----------------+            |              |
+                               |              |
++-----------------+            |              |
+|                 | Metrics... |              |
+| MetricProducer  +------------>              |
+|                 |            |              |
++-----------------+            +--------------+
+
+When new OpenTelemetry integrations are added, the API is the preferred
+integration point. The MetricProducer is only meant for integrations that
+bridge pre-processed data.
+
+## [#interface-definition-1] Interface Definition
+A MetricProducer MUST support the following functions:
+
+## [#produce-batch] Produce batch
+Produce provides metrics from the MetricProducer to the caller. Produce
+MUST return a batch of Metric Points, filtered by the optional
+metricFilter parameter. Implementation SHOULD use the filter as early as
+possible to gain as much performance gain possible (memory allocation,
+internal metric fetching, etc).
+If the batch of Metric Points includes
+resource information, Produce SHOULD require a resource as a parameter.
+Produce does not have any other required parameters, however, OpenTelemetry
+SDK authors MAY choose to add required or optional
+parameters (e.g. timeout).
+Produce SHOULD provide a way to let the caller know whether it succeeded,
+failed or timed out. When the Produce operation fails, the MetricProducer
+MAY return successfully collected results and a failed reasons list to the
+caller.
+If a batch of Metric Points can include
+InstrumentationScope information,
+Produce SHOULD include a single InstrumentationScope which identifies the
+MetricProducer.
+Parameters:
+Status: Development metricFilter: An optional MetricFilter.
+
+## [#metricfilter] MetricFilter
+Status: Development
+MetricFilter defines the interface which enables the MetricReader’s
+registered MetricProducers or the SDK’s MetricProducer to filter aggregated data points
+(Metric Points) inside its Produce operation.
+The filtering is done at the MetricProducer for performance reasons.
+The MetricFilter allows filtering an entire metric stream - dropping or allowing all its attribute sets -
+by its TestMetric operation, which accepts the metric stream information
+(scope, name, kind and unit) and returns an enumeration: Accept, Drop
+or Accept_Partial. If the latter returned, the TestAttributes operation
+is to be called per attribute set of that metric stream, returning an enumeration
+determining if the data point for that (metric stream, attributes) pair is to be
+allowed in the result of the MetricProducer Produce operation.
+
+## [#interface-definition-2] Interface Definition
+A MetricFilter MUST support the following functions:
+
+## [#testmetric] TestMetric
+This operation is called once for every metric stream, in each MetricProducer Produce
+operation.
+Parameters:
+
+- instrumentationScope: the metric stream instrumentation scope
+
+- name: the name of the metric stream
+
+- kind: the metric stream kind
+
+- unit: the metric stream unit
+Returns: MetricFilterResult
+MetricFilterResult is one of:
+
+- Accept - All attributes of the given metric stream are allowed (not to be filtered).
+This provides a “short-circuit” as there is no need to call TestAttributes operation
+for each attribute set.
+
+- Drop - All attributes of the given metric stream are NOT allowed (filtered out - dropped).
+This provides a “short-circuit” as there is no need to call TestAttributes operation
+for each attribute set, and no need to collect those data points be it synchronous or asynchronous:
+e.g. the callback for this given instrument does not need to be invoked.
+
+- Accept_Partial - Some attributes are allowed and some aren’t, hence TestAttributes
+operation must be called for each attribute set of that instrument.
+
+## [#testattributes] TestAttributes
+An operation which determines for a given metric stream and attribute set if it should be allowed
+or filtered out.
+This operation should only be called if TestMetric operation returned Accept_Partial for
+the given metric stream arguments (instrumentationScope, name, kind, unit).
+Parameters:
+
+- instrumentationScope: the metric stream instrumentation scope
+
+- name: the name of the metric stream
+
+- kind: the metric stream kind
+
+- unit: the metric stream unit
+
+- attributes: the attributes
+Returns: AttributesFilterResult
+AttributesFilterResult is one of:
+
+- Accept - This given attributes are allowed (not to be filtered).
+
+- Drop - This given attributes are NOT allowed (filtered out - dropped).
+
+## [#defaults-and-configuration] Defaults and configuration
+The SDK MUST provide configuration according to the SDK environment
+variables specification.
+
+## [#numerical-limits-handling] Numerical limits handling
+The SDK MUST handle numerical limits in a graceful way according to Error
+handling in OpenTelemetry.
+If the SDK receives float/double values from Instruments,
+it MUST handle all the possible values. For example, if the language runtime
+supports IEEE 754, the SDK needs to
+handle NaNs and Infinites.
+It is unspecified how the SDK should handle the input limits. The SDK authors
+MAY leverage/follow the language runtime behavior for better performance, rather
+than perform a check on each value coming from the API.
+It is unspecified how the SDK should handle the output limits (e.g. integer
+overflow). The SDK authors MAY rely on the language runtime behavior as long as
+errors/exceptions are taken care of.
+
+## [#compatibility-requirements] Compatibility requirements
+Status: Stable
+All the metrics components SHOULD allow new methods to be added to existing
+components without introducing breaking changes.
+All the metrics SDK methods SHOULD allow optional parameter(s) to be added to
+existing methods without introducing breaking changes, if possible.
+
+## [#concurrency-requirements] Concurrency requirements
+Status: Stable
+For languages which support concurrent execution the Metrics SDKs provide
+specific guarantees and safeties.
+MeterProvider - Meter creation, ForceFlush and Shutdown MUST be safe
+to be called concurrently.
+ExemplarReservoir - all methods MUST be safe to be called concurrently.
+MetricReader - Collect, ForceFlush (for periodic exporting MetricReader)
+and Shutdown MUST be safe to be called concurrently.
+MetricExporter - ForceFlush and Shutdown MUST be safe to be called
+concurrently.
+
+## [#self-observability] Self-observability
+Status: Development
+The Metrics SDK SHOULD support SDK self-observability.
+
+## [#references] References
+
+- OTEP0113 Integrate Exemplars with Metrics
+
+- OTEP0126 A Proposal For SDK Support for Configurable Batching and Aggregations (Basic Views)
+
+- OTEP0146 Scenarios for Metrics API/SDK Prototyping
+ Feedback
+Was this page helpful?
+Yes
+NoThank you. Your feedback is appreciated!
+Please let us know how we can improve this page. Your feedback is appreciated!
+

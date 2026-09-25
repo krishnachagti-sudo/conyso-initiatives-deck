@@ -1,0 +1,1797 @@
+{
+  "topic": "SDK pipelines, sampling, propagation and agents",
+  "notes": [
+    {
+      "id": "otel.sdk-pipelines.span-processor",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4015,
+      "front": "In the OpenTelemetry SDK, what is a span processor?",
+      "back": "An interface with hooks for span start and end; built-in ones batch spans and pass them to exporters.",
+      "explanation": "Each processor registered on the TracerProvider starts its own pipeline: the processor plus an optional exporter at the end.",
+      "example": "Like a checkpoint on a conveyor belt that sees each parcel as it goes on and comes off, and passes finished ones onward.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Span processor",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#span-processor",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each processor registered on TracerProvider is a start of pipeline that consist of span processor and optional exporter.",
+      "introduces": [
+        "span processor"
+      ],
+      "uses": [
+        "span processor",
+        "span",
+        "TracerProvider",
+        "exporter",
+        "OpenTelemetry SDK"
+      ],
+      "conceptIDs": [
+        "otel.span-processor"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.span-exporter",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4025,
+      "front": "What is the span exporter interface in the OpenTelemetry SDK?",
+      "back": "The interface that protocol-specific exporters implement so they can plug into the SDK and send telemetry.",
+      "explanation": "The interface aims to keep protocol exporters light: mainly something that encodes telemetry and transmits it.",
+      "example": "Like a standard plug shape: an OTLP exporter or a console exporter fits the same socket in the SDK.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Span Exporter",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#span-exporter",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The goal of the interface is to minimize the burden of implementation for protocol-dependent telemetry exporters. The protocol exporter is expected to be primarily a simple telemetry data encoder and transmitter.",
+      "introduces": [
+        "span exporter interface"
+      ],
+      "uses": [
+        "span exporter interface",
+        "exporter",
+        "OTLP",
+        "OpenTelemetry SDK"
+      ],
+      "conceptIDs": [
+        "otel.span-exporter"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.sampling",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4035,
+      "front": "In OpenTelemetry, what is sampling of traces?",
+      "back": "Keeping only a share of traces instead of all of them, chosen so the share still represents the whole.",
+      "explanation": "When most requests succeed quickly and without errors, the docs say you do not need every trace to observe the system meaningfully.",
+      "example": "Like a food inspector who tastes a few jars from each batch instead of opening every jar.",
+      "source": "OpenTelemetry docs, “Sampling”, introduction",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "if the large majority of your requests are successful and finish with acceptable latency and no errors, you do not need 100% of your traces to meaningfully observe your applications and systems. You just need the right sampling.",
+      "introduces": [
+        "sampling"
+      ],
+      "uses": [
+        "sampling",
+        "distributed trace"
+      ],
+      "conceptIDs": [
+        "otel.sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.head-sampling",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4045,
+      "front": "What is head sampling?",
+      "back": "Sampling that decides as early as possible whether to keep a span or trace, without looking at the whole trace.",
+      "explanation": "Because the decision comes first, it cannot use anything that happens later in the trace.",
+      "example": "Like handing survey forms to every tenth visitor at the door, before you know how their visit will go.",
+      "source": "OpenTelemetry docs, “Sampling”, Head Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#head-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Head sampling is a sampling technique used to make a sampling decision as early as possible. A decision to sample or drop a span or trace is not made by inspecting the trace as a whole.",
+      "introduces": [
+        "head sampling"
+      ],
+      "uses": [
+        "head sampling",
+        "sampling",
+        "span",
+        "distributed trace"
+      ],
+      "conceptIDs": [
+        "otel.head-sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.tail-sampling",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4055,
+      "front": "What is tail sampling?",
+      "back": "Deciding whether to keep a trace by considering all or most of the spans in it.",
+      "explanation": "Criteria can come from different parts of the trace, which the docs say is not an option with head sampling.",
+      "example": "Like choosing which match highlights to keep after the final whistle, once you know how the game went.",
+      "source": "OpenTelemetry docs, “Sampling”, Tail Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#tail-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Tail sampling is where the decision to sample a trace takes place by considering all or most of the spans within the trace. Tail Sampling gives you the option to sample your traces based on specific criteria derived from different parts of a trace, which isn’t an option with Head Sampling.",
+      "introduces": [
+        "tail sampling"
+      ],
+      "uses": [
+        "tail sampling",
+        "head sampling",
+        "sampling",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.tail-sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.parentbased",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4065,
+      "front": "What is the ParentBased sampler?",
+      "back": "A sampler decorator that chooses which sampler to call from the span’s parent: none (root), remote or local, sampled or not.",
+      "explanation": "As a decorator it wraps other samplers and picks which one to call from what it knows about the span’s parent.",
+      "example": "Like a new starter who follows their manager’s lead, but makes their own call when there is no manager.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, ParentBased",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#parentbased",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This is a sampler decorator. ParentBased helps distinguish between the following cases: - No parent (root span). - Remote parent (SpanContext.IsRemote() == true) with SampledFlag set",
+      "introduces": [
+        "ParentBased sampler"
+      ],
+      "uses": [
+        "ParentBased sampler",
+        "sampling",
+        "span",
+        "span context"
+      ],
+      "conceptIDs": [
+        "otel.parentbased-sampler"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.context",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4075,
+      "front": "In context propagation, what is context?",
+      "back": "An object holding the information that sending and receiving services need to correlate one signal with another.",
+      "explanation": "Service A puts its trace and span identifiers in the context, and Service B uses them to create a child span in the same trace.",
+      "example": "Like a parcel’s tracking number, scanned at every depot so the whole journey links up.",
+      "source": "OpenTelemetry docs, “Context propagation”, Context",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/context-propagation/#context",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When Service A calls Service B, Service A includes a trace ID and a span ID as part of the context. Service B uses these values to create a new span that belongs to the same trace, setting the span from Service A as its parent.",
+      "introduces": [
+        "context"
+      ],
+      "uses": [
+        "context",
+        "context propagation",
+        "signal",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.context"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.propagator",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4085,
+      "front": "What is a propagator in OpenTelemetry?",
+      "back": "An object that reads context data from, and writes it to, the messages that applications exchange.",
+      "explanation": "Cross-cutting concerns such as traces and baggage use propagators to send their state on to the next process.",
+      "example": "Like a courier who slips a note into each outgoing parcel and reads the note in each incoming one.",
+      "source": "OpenTelemetry specification, “Propagators API”, Overview",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Cross-cutting concerns send their state to the next process using Propagators, which are defined as objects used to read and write context data to and from messages exchanged by the applications.",
+      "introduces": [
+        "propagator"
+      ],
+      "uses": [
+        "propagator",
+        "context",
+        "baggage"
+      ],
+      "conceptIDs": [
+        "otel.propagator"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.carrier",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4095,
+      "front": "In the Propagators API, what is a carrier?",
+      "back": "The medium a propagator reads values from and writes values to, such as a string map or a byte array.",
+      "explanation": "Each propagator type defines the carrier it expects, and a carrier used for injecting is expected to be mutable.",
+      "example": "Like the envelope of a letter: the sender writes the tracking details on it and the receiver reads them off.",
+      "source": "OpenTelemetry specification, “Propagators API”, Carrier",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#carrier",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A carrier is the medium used by Propagators to read values from and write values to. Each specific Propagator type defines its expected carrier type, such as a string map or a byte array. Carriers used at Inject are expected to be mutable.",
+      "introduces": [
+        "carrier"
+      ],
+      "uses": [
+        "carrier",
+        "propagator"
+      ],
+      "conceptIDs": [
+        "otel.carrier"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.textmap-propagator",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4105,
+      "front": "What is a TextMapPropagator?",
+      "back": "The one propagator type the API currently defines: it injects and extracts values as string key-value pairs.",
+      "explanation": "A propagator type is bound to a data type and reflects the restrictions of a particular transport.",
+      "example": "Like writing “trace: 42” on a luggage tag: a plain name and a plain value, both text.",
+      "source": "OpenTelemetry specification, “Propagators API”, Propagator Types",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#propagator-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A Propagator type defines the restrictions imposed by a specific transport and is bound to a data type, in order to propagate in-band context data across process boundaries. The Propagators API currently defines one Propagator type: - TextMapPropagator is a type that injects values into and extracts values from carriers as string key-value pairs.",
+      "introduces": [
+        "TextMapPropagator"
+      ],
+      "uses": [
+        "TextMapPropagator",
+        "propagator",
+        "carrier"
+      ],
+      "conceptIDs": [
+        "otel.textmap-propagator"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · OpenTelemetry docs as of that date"
+    },
+    {
+      "id": "otel.sdk-pipelines.composite-propagator",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4115,
+      "front": "What is a composite propagator?",
+      "back": "Several propagators grouped to act as one, which calls them in the order they were specified.",
+      "explanation": "Each composite still implements one specific propagator type, such as TextMapPropagator.",
+      "example": "Like a set of rubber stamps pressed on each letter in turn: one for tracing, one for baggage.",
+      "source": "OpenTelemetry specification, “Propagators API”, Composite Propagator",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#composite-propagator",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The resulting composite Propagator will invoke the Propagators, Injectors, or Extractors, in the order they were specified. Each composite Propagator will implement a specific Propagator type, such as TextMapPropagator",
+      "introduces": [
+        "composite propagator"
+      ],
+      "uses": [
+        "composite propagator",
+        "propagator",
+        "TextMapPropagator",
+        "baggage"
+      ],
+      "conceptIDs": [
+        "otel.composite-propagator"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.w3c-trace-context",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4125,
+      "front": "What are W3C Trace Context and its traceparent header?",
+      "back": "A standard for passing trace context over http; its traceparent header carries the trace identifier and the parent span identifier.",
+      "explanation": "In the docs’ example, a downstream service learns which trace and which parent span its work belongs to from this header.",
+      "example": "Like a boarding-pass barcode scanned at every gate: the same flight reference travels with the passenger.",
+      "source": "OpenTelemetry docs, “Context propagation”, Example",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/context-propagation/#example",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "the context (here: Trace ID and Span ID as “Parent ID”) is propagated using the traceparent header as it is defined in the W3C TraceContext specification.",
+      "introduces": [
+        "W3C Trace Context and traceparent"
+      ],
+      "uses": [
+        "W3C Trace Context and traceparent",
+        "context",
+        "http",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.w3c-trace-context"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.java-agent",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4135,
+      "front": "What is the OpenTelemetry Java agent?",
+      "back": "A file attached to any Java 8+ application that injects bytecode to capture telemetry from popular libraries and frameworks.",
+      "explanation": "It captures telemetry at an app’s edges, such as inbound requests, outbound http calls and database calls.",
+      "example": "Like a clip-on dashcam: it records the journey without rewiring the car.",
+      "source": "OpenTelemetry docs, “Java Agent”, introduction",
+      "sourceURL": "https://opentelemetry.io/docs/zero-code/java/agent/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Zero-code instrumentation with Java uses a Java agent JAR attached to any Java 8+ application. It dynamically injects bytecode to capture telemetry from many popular libraries and frameworks. It can be used to capture telemetry data at the “edges” of an app or service, such as inbound requests, outbound HTTP calls, database calls, and so on.",
+      "introduces": [
+        "Java agent"
+      ],
+      "uses": [
+        "Java agent",
+        "zero-code instrumentation",
+        "http"
+      ],
+      "conceptIDs": [
+        "otel.java-agent"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.k8s-operator",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4145,
+      "front": "What is the OpenTelemetry Operator for Kubernetes?",
+      "back": "A Kubernetes Operator that manages OpenTelemetry Collectors and auto-instrumentation of workloads.",
+      "explanation": "It covers both halves of a setup on Kubernetes: running Collectors, and instrumenting the apps with instrumentation libraries.",
+      "example": "Like a building manager who runs the post room and also fits every flat with a letterbox.",
+      "source": "OpenTelemetry docs, “OpenTelemetry Operator for Kubernetes”, Introduction",
+      "sourceURL": "https://opentelemetry.io/docs/platforms/kubernetes/operator/#introduction",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The OpenTelemetry Operator is an implementation of a Kubernetes Operator. The operator manages: - OpenTelemetry Collector - auto-instrumentation of the workloads using OpenTelemetry instrumentation libraries",
+      "introduces": [
+        "OpenTelemetry Operator for Kubernetes"
+      ],
+      "uses": [
+        "OpenTelemetry Operator for Kubernetes",
+        "kubernetes",
+        "instrumentation library"
+      ],
+      "conceptIDs": [
+        "otel.k8s-operator"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.ebpf-instrumentation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4155,
+      "front": "What is OpenTelemetry eBPF Instrumentation?",
+      "back": "An OpenTelemetry option for automatic instrumentation using eBPF, listed in the zero-code instrumentation docs.",
+      "explanation": "The docs file it beside the per-language zero-code options, such as the Java agent.",
+      "example": "Like the Java agent, it sits under zero-code instrumentation, but it is named after eBPF rather than after a language.",
+      "source": "OpenTelemetry docs, “Zero-code Instrumentation”, section index",
+      "sourceURL": "https://opentelemetry.io/docs/zero-code/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "OpenTelemetry eBPF Instrumentation Learn how to use OpenTelemetry eBPF Instrumentation for automatic instrumentation.",
+      "introduces": [
+        "OpenTelemetry eBPF Instrumentation",
+        "OBI"
+      ],
+      "uses": [
+        "OpenTelemetry eBPF Instrumentation",
+        "zero-code instrumentation",
+        "Java agent"
+      ],
+      "conceptIDs": [
+        "otel.ebpf-instrumentation"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.faas-assets",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4165,
+      "front": "What are OpenTelemetry’s Function as a Service assets?",
+      "back": "Pre-built Lambda layers that auto-instrument an application, and a standalone Collector Lambda layer.",
+      "explanation": "The Collector layer can be used whether the application is instrumented manually or automatically.",
+      "example": "Like a clip-on kit for a hire car: you fit it to a function the cloud vendor runs for you.",
+      "source": "OpenTelemetry docs, “Components”, Function as a Service assets",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/components/#function-as-a-service-assets",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The OpenTelemetry community currently provides pre-built Lambda layers able to auto-instrument your application as well as the option of a standalone Collector Lambda layer that can be used when instrumenting applications manually or automatically.",
+      "introduces": [
+        "Function as a Service assets"
+      ],
+      "uses": [
+        "Function as a Service assets"
+      ],
+      "conceptIDs": [
+        "otel.faas-assets"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · OpenTelemetry docs as of that date"
+    },
+    {
+      "id": "otel.sdk-pipelines.library-vs-service-deps",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4175,
+      "front": "In code-based instrumentation, what does a library depend on, and what does a standalone service depend on?",
+      "back": "A library: only the API. A standalone process or service: the API and the SDK.",
+      "explanation": "A library is meant to be consumed by a runnable binary, and that binary is the artifact that takes the SDK.",
+      "source": "OpenTelemetry docs, “Code-based”, Import the OpenTelemetry API and SDK",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/instrumentation/code-based/#import-the-opentelemetry-api-and-sdk",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you’re developing a library or some other component that is intended to be consumed by a runnable binary, then you would only take a dependency on the API. If your artifact is a standalone process or service, then you would take a dependency on the API and the SDK.",
+      "uses": [
+        "code-based instrumentation",
+        "OpenTelemetry API",
+        "OpenTelemetry SDK"
+      ],
+      "conceptIDs": [
+        "otel.code-based-steps"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.processors-only-recording",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4205,
+      "front": "When are span processors invoked?",
+      "back": "Only for spans whose IsRecording flag is true.",
+      "explanation": "Span processors are the hooks on span start and end, and they are skipped for spans that are not recording.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Span processor",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#span-processor",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Span processor is an interface which allows hooks for span start and end method invocations. The span processors are invoked only when IsRecording is true.",
+      "uses": [
+        "span processor",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.span-processor"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.processor-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4215,
+      "front": "In what order are several span processors on one TracerProvider invoked?",
+      "back": "In the same order as they were registered.",
+      "explanation": "So the processor you register first is the first to see each span.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Span processor",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#span-processor",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Span processors can be registered directly on SDK TracerProvider and they are invoked in the same order as they were registered.",
+      "uses": [
+        "span processor",
+        "TracerProvider"
+      ],
+      "conceptIDs": [
+        "otel.span-processor"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.recording-not-sampled",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4225,
+      "front": "A span is recording but its sampled flag is not set. Does the span processor receive it? Does the span exporter?",
+      "back": "The processor does; the exporter should not.",
+      "explanation": "Exporters are meant to get only spans that were sampled, while processors see every recording span.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Span Processor MUST receive only those spans which have this field set to true. However, Span Exporter SHOULD NOT receive them unless the Sampled flag was also set.",
+      "uses": [
+        "span processor",
+        "span exporter interface",
+        "sampling"
+      ],
+      "conceptIDs": [
+        "otel.span-processor",
+        "otel.sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.processor-order-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4235,
+      "front": "A service registers two span processors: first one that adds a tenant attribute, then a batching one that exports. A span ends. Which processor sees it first?",
+      "back": "A: the attribute-adding processor, registered first.",
+      "choices": "A) The attribute-adding processor\nB) The batching processor\nC) Whichever finishes its work sooner",
+      "choicesExplained": "B was registered second, so it runs second. C: the order is fixed by registration, not by speed.",
+      "explanation": "Processors run in the order they were registered on the TracerProvider.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Span processor",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#span-processor",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "they are invoked in the same order as they were registered.",
+      "uses": [
+        "span processor",
+        "attribute",
+        "TracerProvider"
+      ],
+      "conceptIDs": [
+        "otel.span-processor"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.simple-processor",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4245,
+      "front": "What does the simple span processor do with finished spans?",
+      "back": "Passes each one to the configured exporter as soon as it finishes.",
+      "explanation": "It still makes sure that two Export calls never run at the same time.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Simple processor",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#simple-processor",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "passes the export-friendly span data representation to the configured SpanExporter, as soon as they are finished. The processor MUST synchronize calls to Span Exporter’s Export to make sure that they are not invoked concurrently.",
+      "uses": [
+        "span processor",
+        "exporter"
+      ],
+      "conceptIDs": [
+        "otel.simple-vs-batch-processor"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.batching-processor",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4255,
+      "front": "What does the batching span processor do with finished spans?",
+      "back": "Groups them into batches and passes each batch to the configured exporter.",
+      "explanation": "Like the simple processor, it never lets two Export calls run at once.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Batching processor",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "create batches of finished spans and passes the export-friendly span data representations to the configured SpanExporter. The processor MUST synchronize calls to Span Exporter’s Export to make sure that they are not invoked concurrently.",
+      "uses": [
+        "span processor",
+        "exporter"
+      ],
+      "conceptIDs": [
+        "otel.simple-vs-batch-processor"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.simple-vs-batch-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4265,
+      "front": "A developer wants each span handed to the exporter the moment it finishes, with no grouping. Which built-in span processor behaves that way?",
+      "back": "A: the simple span processor.",
+      "choices": "A) The simple span processor\nB) The batching span processor\nC) Neither: processors never call exporters",
+      "choicesExplained": "B groups finished spans into batches first. C: both built-in processors pass spans to the configured exporter.",
+      "explanation": "The simple processor passes each finished span on as soon as it is finished.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Simple processor",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#simple-processor",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "passes the export-friendly span data representation to the configured SpanExporter, as soon as they are finished.",
+      "uses": [
+        "span processor",
+        "exporter"
+      ],
+      "conceptIDs": [
+        "otel.simple-vs-batch-processor"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.simple-vs-batch-contrast",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4275,
+      "front": "Simple versus batching span processor: when does each hand spans to the exporter?",
+      "back": "Simple: each span as soon as it finishes. Batching: in batches, for example when the queue holds a full batch.",
+      "explanation": "A full batch is exported even before the scheduled delay has passed.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Batching processor",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If the queue reaches maxExportBatchSize a batch will be exported even if scheduledDelayMillis milliseconds have not elapsed.",
+      "uses": [
+        "span processor",
+        "exporter"
+      ],
+      "conceptIDs": [
+        "otel.simple-vs-batch-processor"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.batch-queue-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4285,
+      "front": "The batching span processor’s default maxQueueSize is {{c1::2048}} spans; once it is reached, further spans are dropped.",
+      "explanation": "A full queue loses spans rather than delaying them.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Batching processor",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "maxQueueSize - the maximum queue size. After the size is reached, spans are dropped. The default value is 2048.",
+      "uses": [
+        "span processor",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.batch-processor-defaults"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.batch-delay-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4295,
+      "front": "The batching span processor’s default scheduledDelayMillis, the longest gap between two exports, is {{c1::5000}} milliseconds.",
+      "explanation": "This is the timer that sends a batch even when the queue has not filled.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Batching processor",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "scheduledDelayMillis - the maximum delay interval in milliseconds between two consecutive exports. The default value is 5000.",
+      "uses": [
+        "span processor"
+      ],
+      "conceptIDs": [
+        "otel.batch-processor-defaults"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.batch-timeout-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4305,
+      "front": "In the batching span processor, an export can run for {{c1::30000}} milliseconds by default before it is cancelled (exportTimeoutMillis).",
+      "explanation": "The limit stops one slow export from running on indefinitely.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Batching processor",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "exportTimeoutMillis - how long the export can run before it is cancelled. The default value is 30000.",
+      "uses": [
+        "span processor"
+      ],
+      "conceptIDs": [
+        "otel.batch-processor-defaults"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.batch-size-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4315,
+      "front": "The batching span processor’s default maxExportBatchSize is {{c1::512}} spans, and it must not exceed maxQueueSize.",
+      "explanation": "When the queue reaches this size, a batch goes out without waiting for the scheduled delay.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Batching processor",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "maxExportBatchSize - the maximum batch size of every export. It must be smaller or equal to maxQueueSize. If the queue reaches maxExportBatchSize a batch will be exported even if scheduledDelayMillis milliseconds have not elapsed. The default value is 512.",
+      "uses": [
+        "span processor",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.batch-processor-defaults"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.exporter-functions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4325,
+      "front": "Which three functions must a span exporter support?",
+      "back": "Export, Shutdown and ForceFlush.",
+      "explanation": "In strongly typed languages there is typically a separate exporter interface for each signal.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Span Exporter: Interface Definition",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#interface-definition-1",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The exporter MUST support three functions: Export, Shutdown, and ForceFlush. In strongly typed languages typically there will be one separate Exporter interface per signal (SpanExporter, …).",
+      "uses": [
+        "span exporter interface",
+        "signal"
+      ],
+      "conceptIDs": [
+        "otel.span-exporter"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.exporter-retry",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4335,
+      "front": "Whose job is retry logic: the span exporter’s, or the SDK’s default span processors’?",
+      "back": "The exporter’s. The default span processors should not implement retries.",
+      "explanation": "The right retry logic is likely to depend heavily on the protocol and the backend the spans go to.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Export(batch)",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#exportbatch",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Concurrent requests and retry logic is the responsibility of the exporter. The default SDK’s Span Processors SHOULD NOT implement retry logic, as the required logic is likely to depend heavily on the specific protocol and backend the spans are being sent to.",
+      "uses": [
+        "span exporter interface",
+        "span processor",
+        "OpenTelemetry SDK"
+      ],
+      "conceptIDs": [
+        "otel.span-exporter"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.exporter-retry-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4345,
+      "front": "You are writing a span exporter for a backend that briefly rejects requests during deploys. Where should the retry logic go?",
+      "back": "A: in the exporter.",
+      "choices": "A) In your exporter\nB) In the SDK’s batching span processor\nC) Nowhere: the SDK retries every export for you",
+      "choicesExplained": "B: the default span processors should not implement retry logic. C: the spec gives retries to the exporter, not to the SDK’s processors.",
+      "explanation": "Retry and concurrent requests are the exporter’s responsibility under the spec.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Export(batch)",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#exportbatch",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Concurrent requests and retry logic is the responsibility of the exporter.",
+      "uses": [
+        "span exporter interface",
+        "span processor",
+        "OpenTelemetry SDK"
+      ],
+      "conceptIDs": [
+        "otel.span-exporter"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.forceflush-when",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4355,
+      "front": "When does the spec say an exporter’s ForceFlush should be called?",
+      "back": "Only when absolutely necessary, for example with some FaaS providers that may suspend the process after an invocation.",
+      "explanation": "Such a suspension can come before the exporter has exported the completed spans.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Span Exporter: ForceFlush()",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#forceflush-2",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "ForceFlush SHOULD only be called in cases where it is absolutely necessary, such as when using some FaaS providers that may suspend the process after an invocation, but before the exporter exports the completed spans.",
+      "uses": [
+        "span exporter interface",
+        "Function as a Service assets"
+      ],
+      "conceptIDs": [
+        "otel.shutdown-forceflush"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.sampled-meaning",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4365,
+      "front": "In OpenTelemetry’s terms, what does it mean for a trace or span to be “sampled”?",
+      "back": "It is processed and exported, having been chosen by the sampler as representative of the population.",
+      "explanation": "The opposite, “not sampled”, means the sampler did not choose it, so it is neither processed nor exported.",
+      "source": "OpenTelemetry docs, “Sampling”, Terminology",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#terminology",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Sampled: A trace or span is processed and exported. Because it is chosen by the sampler as a representative of the population, it is considered “sampled”. - Not sampled: A trace or span is not processed or exported.",
+      "uses": [
+        "sampling",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.sampled-out-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4375,
+      "front": "A colleague says the traces your pipeline dropped were “sampled”. Is that correct usage?",
+      "back": "A: data that is not processed or exported is “not sampled”.",
+      "choices": "A) No: dropped data is “not sampled”\nB) Yes: “sampled” means removed by the sampler\nC) Yes, if they were dropped by head sampling",
+      "choicesExplained": "B reverses the terms, which the docs call an incorrect statement. C: the terms do not change with the kind of sampling.",
+      "explanation": "The docs note these terms get mixed up, and call that use incorrect.",
+      "source": "OpenTelemetry docs, “Sampling”, Terminology",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#terminology",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You might find someone states that they are “sampling out data” or that data not processed or exported is considered “sampled”. These are incorrect statements.",
+      "uses": [
+        "sampling",
+        "head sampling"
+      ],
+      "conceptIDs": [
+        "otel.sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.representativeness",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4385,
+      "front": "What does sampling keep that other cost cutters, such as filtering or aggregating data, do not?",
+      "back": "Representativeness: a smaller group that accurately represents the larger one.",
+      "explanation": "The docs call representativeness crucial for in-depth analysis of application or system behaviour.",
+      "source": "OpenTelemetry docs, “Sampling”, Why sampling?",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#why-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Although there are other ways to lower costs, such as filtering or aggregating data, these other methods do not adhere to the concept of representativeness, which is crucial when performing in-depth analysis of application or system behavior.",
+      "uses": [
+        "sampling"
+      ],
+      "conceptIDs": [
+        "otel.sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.when-not-to-sample",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4395,
+      "front": "What are two situations in which the docs say you might avoid sampling?",
+      "back": "You generate very little data; regulation prohibits dropping data.",
+      "explanation": "A third is using observability data only in aggregate, since that data can be pre-aggregated instead.",
+      "source": "OpenTelemetry docs, “Sampling”, When not to sample",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#when-not-to-sample",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You generate very little data (tens of small traces per second or lower). - You only use observability data in aggregate, and can thus pre-aggregate data. - You are bound by circumstances such as regulation that prohibit dropping data",
+      "uses": [
+        "sampling",
+        "observability"
+      ],
+      "conceptIDs": [
+        "otel.sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.regulated-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 4405,
+      "front": "A payments service must, by law, keep every trace, and it has no low-cost storage to send unsampled data to. What do the docs suggest about sampling it?",
+      "back": "A: avoid sampling.",
+      "choices": "A) Avoid sampling\nB) Head sampling at 1%\nC) Tail sampling that keeps only errors",
+      "choicesExplained": "B and C both drop data, which the regulation prohibits.",
+      "explanation": "The docs list regulation that prohibits dropping data as a reason to avoid sampling.",
+      "source": "OpenTelemetry docs, “Sampling”, When not to sample",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#when-not-to-sample",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You are bound by circumstances such as regulation that prohibit dropping data (and cannot route unsampled data to low-cost storage).",
+      "uses": [
+        "sampling",
+        "head sampling",
+        "tail sampling"
+      ],
+      "conceptIDs": [
+        "otel.sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.consistent-probability",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4415,
+      "front": "What is the most common form of head sampling, and what does it base its decision on?",
+      "back": "Consistent probability (deterministic) sampling, deciding from the trace identifier and the desired percentage.",
+      "explanation": "Deciding from the trace identifier keeps whole traces together, with no missing spans.",
+      "source": "OpenTelemetry docs, “Sampling”, Head Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#head-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "the most common form of head sampling is Consistent Probability Sampling. This is also referred to as Deterministic Sampling. In this case, a sampling decision is made based on the trace ID and the desired percentage of traces to sample.",
+      "uses": [
+        "head sampling",
+        "sampling"
+      ],
+      "conceptIDs": [
+        "otel.head-sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.head-classify",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4425,
+      "front": "Classify: a service keeps 5% of traces, decided from each trace identifier when the trace starts. Head or tail sampling?",
+      "back": "Head sampling (consistent probability sampling).",
+      "explanation": "The decision is made early, from the trace identifier and a percentage, not from the finished trace.",
+      "source": "OpenTelemetry docs, “Sampling”, Head Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#head-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This ensures that whole traces are sampled - no missing spans - at a consistent rate, such as 5% of all traces.",
+      "uses": [
+        "head sampling",
+        "tail sampling"
+      ],
+      "conceptIDs": [
+        "otel.head-sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.tail-almost-always",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4435,
+      "front": "For which systems do the docs say tail sampling is almost always necessary?",
+      "back": "Larger systems that must sample telemetry.",
+      "explanation": "It is how such systems balance data volume against the usefulness of that data.",
+      "source": "OpenTelemetry docs, “Sampling”, Tail Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#tail-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For larger systems that must sample telemetry, it is almost always necessary to use Tail Sampling to balance data volume with the usefulness of that data.",
+      "uses": [
+        "tail sampling"
+      ],
+      "conceptIDs": [
+        "otel.tail-sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.tail-classify",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4445,
+      "front": "Classify: a policy keeps more traces from a newly deployed service, judged from attributes on the trace’s spans. Head or tail sampling?",
+      "back": "Tail sampling.",
+      "explanation": "The docs give sampling on attributes of spans in a trace, such as a new service, as a tail sampling example.",
+      "source": "OpenTelemetry docs, “Sampling”, Tail Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#tail-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Sampling traces based on the presence or value of specific attributes on one or more spans in a trace; for example, sampling more traces originating from a newly deployed service",
+      "uses": [
+        "tail sampling",
+        "head sampling",
+        "span attributes"
+      ],
+      "conceptIDs": [
+        "otel.tail-sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.tail-downsides",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4455,
+      "front": "What are the three primary downsides of tail sampling today?",
+      "back": "Hard to implement; hard to operate; often vendor-specific.",
+      "explanation": "Its components must be stateful and store a lot of data, which can take dozens or hundreds of compute nodes.",
+      "source": "OpenTelemetry docs, “Sampling”, Tail Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#tail-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Tail sampling can be difficult to operate. The component(s) that implement tail sampling must be stateful systems that can accept and store a large amount of data. Depending on traffic patterns, this can require dozens or even hundreds of compute nodes",
+      "uses": [
+        "tail sampling"
+      ],
+      "conceptIDs": [
+        "otel.tail-sampling-downsides"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.tail-vendor",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4465,
+      "front": "If you use a paid observability vendor, what may limit your tail sampling options?",
+      "back": "What the vendor offers: tail samplers often end up as vendor-specific technology.",
+      "explanation": "The most effective options may be limited to the vendor’s own.",
+      "source": "OpenTelemetry docs, “Sampling”, Tail Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#tail-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Tail samplers often end up as vendor-specific technology today. If you’re using a paid vendor for Observability, the most effective tail sampling options available to you might be limited to what the vendor offers.",
+      "uses": [
+        "tail sampling",
+        "observability"
+      ],
+      "conceptIDs": [
+        "otel.tail-sampling-downsides"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.head-then-tail",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4475,
+      "front": "Can head sampling and tail sampling be used together?",
+      "back": "Yes: very high-volume services may head-sample a small share, then tail-sample later in the pipeline.",
+      "explanation": "The docs say this is often done to protect the telemetry pipeline from being overloaded.",
+      "source": "OpenTelemetry docs, “Sampling”, Tail Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#tail-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "might first use head sampling to sample only a small percentage of traces, and then later in the telemetry pipeline use tail sampling to make more sophisticated sampling decisions before exporting to a backend. This is often done in the interest of protecting the telemetry pipeline from being overloaded.",
+      "uses": [
+        "head sampling",
+        "tail sampling"
+      ],
+      "conceptIDs": [
+        "otel.tail-sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.head-downside",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4485,
+      "front": "What is the primary downside of head sampling?",
+      "back": "It cannot decide using data in the entire trace, so it cannot ensure every trace with an error is kept.",
+      "explanation": "For that case, and many others, the docs say you need tail sampling.",
+      "source": "OpenTelemetry docs, “Sampling”, Head Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#head-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The primary downside to head sampling is that it is not possible to make a sampling decision based on data in the entire trace. For example, you cannot ensure that all traces with an error within them are sampled with head sampling alone. For this situation and many others, you need tail sampling.",
+      "uses": [
+        "head sampling",
+        "tail sampling"
+      ],
+      "conceptIDs": [
+        "otel.head-vs-tail"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.errors-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4495,
+      "front": "Your team must keep every trace that contains an error while dropping most healthy traffic. Which approach can do that?",
+      "back": "A: tail sampling.",
+      "choices": "A) Tail sampling\nB) Head sampling alone\nC) Consistent probability sampling at 5%",
+      "choicesExplained": "B and C decide before the trace is complete, so they cannot see whether an error occurs later in it.",
+      "explanation": "Head sampling alone cannot ensure all traces with an error are sampled.",
+      "source": "OpenTelemetry docs, “Sampling”, Head Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#head-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "you cannot ensure that all traces with an error within them are sampled with head sampling alone. For this situation and many others, you need tail sampling.",
+      "uses": [
+        "head sampling",
+        "tail sampling"
+      ],
+      "conceptIDs": [
+        "otel.head-vs-tail",
+        "otel.tail-sampling"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.head-vs-tail-contrast",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4505,
+      "front": "Head sampling versus tail sampling: when is the decision made, and on what?",
+      "back": "Head: as early as possible, without the whole trace. Tail: after considering all or most of the trace’s spans.",
+      "explanation": "Head sampling is easy to understand, configure and run; tail sampling trades that simplicity for richer criteria.",
+      "source": "OpenTelemetry docs, “Sampling”, Head Sampling",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/sampling/#head-sampling",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The upsides to head sampling are: - Easy to understand - Easy to configure - Efficient - Can be done at any point in the trace collection pipeline",
+      "uses": [
+        "head sampling",
+        "tail sampling",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.head-vs-tail"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.default-sampler",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4515,
+      "front": "What is the default sampler in the OpenTelemetry SDK?",
+      "back": "ParentBased with AlwaysOn as its root sampler: ParentBased(root=AlwaysOn).",
+      "explanation": "The notation names the decorator first and its root delegate in brackets.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, Built-in samplers",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#built-in-samplers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "OpenTelemetry supports a number of built-in samplers to choose from. The default sampler is ParentBased(root=AlwaysOn).",
+      "uses": [
+        "ParentBased sampler",
+        "OpenTelemetry SDK"
+      ],
+      "conceptIDs": [
+        "otel.built-in-samplers"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.alwayson",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4525,
+      "front": "What decision does the AlwaysOn sampler return?",
+      "back": "`RECORD_AND_SAMPLE`, every time.",
+      "explanation": "Its description string must be AlwaysOnSampler.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, AlwaysOn",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#alwayson",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Returns RECORD_AND_SAMPLE always. - Description MUST be AlwaysOnSampler.",
+      "uses": [
+        "sampling"
+      ],
+      "conceptIDs": [
+        "otel.built-in-samplers"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.alwaysoff",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4535,
+      "front": "What decision does the AlwaysOff sampler return?",
+      "back": "`DROP`, every time.",
+      "explanation": "Its description string must be AlwaysOffSampler.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, AlwaysOff",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#alwaysoff",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Returns DROP always. - Description MUST be AlwaysOffSampler.",
+      "uses": [
+        "sampling"
+      ],
+      "conceptIDs": [
+        "otel.built-in-samplers"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.sampler-choice-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4545,
+      "front": "For a load test you want the SDK to drop every span, whatever its parent says. Which built-in sampler returns that decision every time?",
+      "back": "A: AlwaysOff.",
+      "choices": "A) AlwaysOff\nB) AlwaysOn\nC) The default ParentBased(root=AlwaysOn)",
+      "choicesExplained": "B always records and samples. C samples root spans and follows sampled parents.",
+      "explanation": "AlwaysOff returns the drop decision on every call.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, AlwaysOff",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#alwaysoff",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Returns DROP always. - Description MUST be AlwaysOffSampler.",
+      "uses": [
+        "sampling",
+        "ParentBased sampler",
+        "OpenTelemetry SDK"
+      ],
+      "conceptIDs": [
+        "otel.built-in-samplers"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.parentbased-defaults",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4555,
+      "front": "In a ParentBased sampler, what are the default delegates for a sampled parent and for an unsampled parent?",
+      "back": "Sampled parent: AlwaysOn. Unsampled parent: AlwaysOff. The same for remote and local parents.",
+      "explanation": "By default, then, a child simply follows its parent’s decision.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, ParentBased",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#parentbased",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "remoteParentSampled(Sampler) (default: AlwaysOn) - remoteParentNotSampled(Sampler) (default: AlwaysOff) - localParentSampled(Sampler) (default: AlwaysOn) - localParentNotSampled(Sampler) (default: AlwaysOff)",
+      "uses": [
+        "ParentBased sampler"
+      ],
+      "conceptIDs": [
+        "otel.parentbased-sampler"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.ratio-ignores-parent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4565,
+      "front": "Does the TraceIdRatioBased sampler respect the parent’s sampled flag?",
+      "back": "No, it ignores it. To respect the parent, use it as a delegate of the ParentBased sampler.",
+      "explanation": "Wrapping it in ParentBased applies the ratio to root spans while children follow their parents.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, TraceIdRatioBased",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#traceidratiobased",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The TraceIdRatioBased MUST ignore the parent SampledFlag. To respect the parent SampledFlag, the TraceIdRatioBased should be used as a delegate of the ParentBased sampler specified below.",
+      "uses": [
+        "ParentBased sampler"
+      ],
+      "conceptIDs": [
+        "otel.parentbased-sampler",
+        "otel.traceidratio-deprecated"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.parentbased-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4575,
+      "front": "A service uses the default sampler. A request arrives whose traceparent says the caller’s span was not sampled. What happens to the service’s new span?",
+      "back": "A: not sampled. An unsampled remote parent goes to AlwaysOff by default.",
+      "choices": "A) It is not sampled\nB) It is sampled, because the root sampler is AlwaysOn\nC) It is sampled at a random 50%",
+      "choicesExplained": "B: the root sampler is only for spans with no parent. C: no default delegate samples at random.",
+      "explanation": "The default is ParentBased, whose remoteParentNotSampled delegate defaults to AlwaysOff.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, ParentBased",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#parentbased",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Optional parameters: - remoteParentSampled(Sampler) (default: AlwaysOn) - remoteParentNotSampled(Sampler) (default: AlwaysOff)",
+      "uses": [
+        "ParentBased sampler",
+        "W3C Trace Context and traceparent",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.parentbased-sampler"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.traceidratio-deprecated",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4585,
+      "front": "Which sampler replaces the deprecated TraceIdRatioBased sampler?",
+      "back": "The composable ProbabilitySampler.",
+      "explanation": "SDKs must not remove or change the old sampler’s behaviour until at least 1 January 2027.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, TraceIdRatioBased",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#traceidratiobased",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The TraceIdRatioBased sampler is deprecated in favor of the composable ProbabilitySampler. This component is being phased out to address a “TODO” in the 1.0 trace specification. OpenTelemetry SDK implementors SHALL NOT remove or modify the behavior of the original TraceIdRatioBased sampler until at least January 1, 2027.",
+      "uses": [
+        "sampling",
+        "OpenTelemetry SDK"
+      ],
+      "conceptIDs": [
+        "otel.traceidratio-deprecated"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · OpenTelemetry docs as of that date"
+    },
+    {
+      "id": "otel.sdk-pipelines.traceidratio-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4595,
+      "front": "A new service copies its sampler setup from an old blog post that uses TraceIdRatioBased. What does the current spec say about that sampler?",
+      "back": "A: deprecated in favour of the composable ProbabilitySampler.",
+      "choices": "A) It is deprecated in favour of the composable ProbabilitySampler\nB) It has been removed from every SDK\nC) It is the default sampler",
+      "choicesExplained": "B: SDKs must keep it working until at least 1 January 2027. C: the default is ParentBased(root=AlwaysOn).",
+      "explanation": "The old sampler is being phased out, but SDKs keep its behaviour for now.",
+      "source": "OpenTelemetry specification, “Tracing SDK”, TraceIdRatioBased",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/trace/sdk/#traceidratiobased",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The TraceIdRatioBased sampler is deprecated in favor of the composable ProbabilitySampler.",
+      "uses": [
+        "sampling",
+        "ParentBased sampler",
+        "OpenTelemetry SDK"
+      ],
+      "conceptIDs": [
+        "otel.traceidratio-deprecated"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · OpenTelemetry docs as of that date"
+    },
+    {
+      "id": "otel.sdk-pipelines.traces-sampler-arg",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4605,
+      "front": "What does `OTEL_TRACES_SAMPLER_ARG` do, and when is it used?",
+      "back": "It passes an argument, such as a ratio, to the chosen sampler; it is only used if `OTEL_TRACES_SAMPLER` is set.",
+      "explanation": "Each sampler type defines its own expected input, and invalid input is logged as an error.",
+      "source": "OpenTelemetry docs, “General SDK Configuration”, OTEL_TRACES_SAMPLER_ARG",
+      "sourceURL": "https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_traces_sampler_arg",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Specifies arguments, if applicable, to the sampler defined by OTEL_TRACES_SAMPLER. The specified value will only be used if OTEL_TRACES_SAMPLER is set. Each Sampler type defines its own expected input, if any. Invalid or unrecognized input is logged as an error.",
+      "uses": [
+        "SDK environment variables",
+        "sampling"
+      ],
+      "conceptIDs": [
+        "otel.sampler-env-values"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.propagation-mechanism",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4615,
+      "front": "What is propagation, in OpenTelemetry’s context propagation?",
+      "back": "The mechanism that moves context between services and processes, by serialising and deserialising it.",
+      "explanation": "Instrumentation libraries usually handle it, so it is transparent to the user.",
+      "source": "OpenTelemetry docs, “Context propagation”, Propagation",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/context-propagation/#propagation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Propagation is the mechanism that moves context between services and processes. It serializes or deserializes the context object and provides the relevant information to be propagated from one service to another. Propagation is usually handled by instrumentation libraries and is transparent to the user.",
+      "uses": [
+        "context",
+        "context propagation",
+        "instrumentation library"
+      ],
+      "conceptIDs": [
+        "otel.context"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.broken-trace-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4625,
+      "front": "Service A calls Service B over http, but B’s spans show up as a separate trace instead of as children of A’s span. What is most likely missing?",
+      "back": "A: A’s trace and span identifiers are not reaching B as context.",
+      "choices": "A) Context propagation from A to B\nB) A span processor in B\nC) A higher sampling ratio in A",
+      "choicesExplained": "B: a processor handles spans B already made; it does not link them to A. C: sampling decides what is kept, not how spans link.",
+      "explanation": "B can only create a span in the same trace, with A’s span as parent, when it receives A’s identifiers.",
+      "source": "OpenTelemetry docs, “Context propagation”, Context",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/context-propagation/#context",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Service B uses these values to create a new span that belongs to the same trace, setting the span from Service A as its parent.",
+      "uses": [
+        "context",
+        "context propagation",
+        "http",
+        "span processor",
+        "sampling"
+      ],
+      "conceptIDs": [
+        "otel.context"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.inject",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4635,
+      "front": "What does a propagator’s Inject operation do?",
+      "back": "Takes the right value from the context and writes it into a carrier, such as the headers of an outgoing http request.",
+      "explanation": "The value may be a span context, baggage or another cross-cutting concern’s context.",
+      "source": "OpenTelemetry specification, “Propagators API”, Inject",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#inject",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Injects the value into a carrier. For example, into the headers of an HTTP request. Required arguments: - A Context. The Propagator MUST retrieve the appropriate value from the Context first, such as SpanContext, Baggage or another cross-cutting concern context.",
+      "uses": [
+        "propagator",
+        "context",
+        "carrier",
+        "http",
+        "span context",
+        "baggage"
+      ],
+      "conceptIDs": [
+        "otel.inject-extract"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.extract-failure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4645,
+      "front": "What must a propagator’s Extract do when it cannot parse a value from the carrier?",
+      "back": "Not throw an exception, and not store a new value in the context.",
+      "explanation": "This preserves any valid value the context already held.",
+      "source": "OpenTelemetry specification, “Propagators API”, Extract",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#extract",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If a value can not be parsed from the carrier, for a cross-cutting concern, the implementation MUST NOT throw an exception and MUST NOT store a new value in the Context, in order to preserve any previously existing valid value.",
+      "uses": [
+        "propagator",
+        "carrier",
+        "context"
+      ],
+      "conceptIDs": [
+        "otel.inject-extract"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.extract-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4655,
+      "front": "Your consumer reads a message from a queue and must continue the producer’s trace. Which propagator operation do you call on the message’s metadata?",
+      "back": "A: Extract, which reads values from the carrier.",
+      "choices": "A) Extract\nB) Inject\nC) Fields",
+      "choicesExplained": "B writes values into a carrier, which is the producer’s job. C only lists the propagation fields a propagator uses.",
+      "explanation": "Inject writes to carriers and Extract reads from them.",
+      "source": "OpenTelemetry specification, “Propagators API”, Operations",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#operations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Propagators MUST define Inject and Extract operations, in order to write values to and read values from carriers respectively.",
+      "uses": [
+        "propagator",
+        "carrier",
+        "context"
+      ],
+      "conceptIDs": [
+        "otel.inject-extract"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.noop-propagators",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4665,
+      "front": "Which propagators does the OpenTelemetry API use unless it is explicitly configured otherwise?",
+      "back": "No-op propagators.",
+      "explanation": "Propagation has to be configured before the API sends or reads any context.",
+      "source": "OpenTelemetry specification, “Propagators API”, Global Propagators",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#global-propagators",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The OpenTelemetry API MUST use no-op propagators unless explicitly configured otherwise.",
+      "uses": [
+        "propagator",
+        "OpenTelemetry API"
+      ],
+      "conceptIDs": [
+        "otel.propagator"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.noop-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4675,
+      "front": "A developer’s app calls only the OpenTelemetry API: no SDK is installed and no propagator is configured anywhere. Will trace context be written into outgoing request headers?",
+      "back": "A: no, because the API’s propagators are no-op until configured.",
+      "choices": "A) No: the API uses no-op propagators\nB) Yes: the API always uses W3C Trace Context\nC) Yes, but only baggage is sent",
+      "choicesExplained": "B and C assume a default the API does not have without configuration.",
+      "explanation": "The API must use no-op propagators unless explicitly configured otherwise.",
+      "source": "OpenTelemetry specification, “Propagators API”, Global Propagators",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#global-propagators",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The OpenTelemetry API MUST use no-op propagators unless explicitly configured otherwise.",
+      "uses": [
+        "propagator",
+        "OpenTelemetry API",
+        "W3C Trace Context and traceparent",
+        "baggage"
+      ],
+      "conceptIDs": [
+        "otel.propagator"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.reused-carrier",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4685,
+      "front": "What should you do before calling Inject on a carrier that is reused?",
+      "back": "Delete the propagator’s predefined fields from it first.",
+      "explanation": "A single-use or immutable request object needs no clearing, since the fields cannot have been set before.",
+      "source": "OpenTelemetry specification, “Propagators API”, Fields",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#fields",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If your carrier is reused, you should delete the fields here before calling Inject. Fields are defined as string keys identifying format-specific components in a carrier. For example, if the carrier is a single-use or immutable request object, you don’t need to clear fields as they couldn’t have been set before.",
+      "uses": [
+        "carrier",
+        "propagator"
+      ],
+      "conceptIDs": [
+        "otel.carrier"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.getter-get",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4695,
+      "front": "In a TextMapPropagator’s Getter, what does Get return?",
+      "back": "The first value of the given key, or null if the key does not exist.",
+      "explanation": "The Getter is how a TextMapPropagator reads propagated fields from a carrier during Extract.",
+      "source": "OpenTelemetry specification, “Propagators API”, Getter argument",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#getter-argument",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Getter allows a TextMapPropagator to read propagated fields from a carrier. One of the ways to implement it is Getter class with methods Get, Keys, and GetAll as described below.",
+      "uses": [
+        "TextMapPropagator",
+        "carrier"
+      ],
+      "conceptIDs": [
+        "otel.textmap-propagator"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.textmap-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4705,
+      "front": "You need to put trace context into http headers, which are text names and text values. Which propagator type fits?",
+      "back": "A: TextMapPropagator, which works with string key-value pairs.",
+      "choices": "A) TextMapPropagator\nB) A binary propagator type from the API\nC) A span exporter",
+      "choicesExplained": "B: the API currently defines only the TextMapPropagator type. C: exporters send finished spans; they do not propagate context.",
+      "explanation": "TextMapPropagator injects and extracts string key-value pairs, which is what text headers hold.",
+      "source": "OpenTelemetry specification, “Propagators API”, Propagator Types",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#propagator-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "TextMapPropagator is a type that injects values into and extracts values from carriers as string key-value pairs.",
+      "uses": [
+        "TextMapPropagator",
+        "propagator",
+        "http",
+        "span exporter interface"
+      ],
+      "conceptIDs": [
+        "otel.textmap-propagator"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.global-is-composite",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4715,
+      "front": "What kind of propagator does the “get global propagator” method usually return?",
+      "back": "A composite instance.",
+      "explanation": "One global propagator can then carry several concerns at once, such as trace context and baggage.",
+      "source": "OpenTelemetry specification, “Propagators API”, Get Global Propagator",
+      "sourceURL": "https://opentelemetry.io/docs/specs/otel/context/api-propagators/#get-global-propagator",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This method SHOULD exist for each supported Propagator type. Returns a global Propagator. This usually will be composite instance.",
+      "uses": [
+        "composite propagator",
+        "propagator",
+        "baggage"
+      ],
+      "conceptIDs": [
+        "otel.composite-propagator"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.traceparent-format",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4725,
+      "front": "In what order are the fields of a traceparent header value?",
+      "back": "version-trace-id-parent-id-trace-flags.",
+      "explanation": "The identifiers are embedded in the header’s fields, separated by hyphens.",
+      "source": "OpenTelemetry docs, “Context propagation”, Example",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/context-propagation/#example",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This means the IDs are embedded in the fields of the header: <version>-<trace-id>-<parent-id>-<trace-flags>",
+      "uses": [
+        "W3C Trace Context and traceparent"
+      ],
+      "conceptIDs": [
+        "otel.w3c-trace-context"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.traceparent-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4735,
+      "front": "A request carries `traceparent: 00-<32 hex digits>-<16 hex digits>-01`. What does the 16-digit field identify?",
+      "back": "A: the parent span, which becomes the parent of the receiving service’s span.",
+      "choices": "A) The parent span\nB) The whole trace\nC) The version of the format",
+      "choicesExplained": "B: the trace is the 32-digit field before it. C: the version is the first field, 00.",
+      "explanation": "The fields run version, trace identifier, parent identifier, trace flags.",
+      "source": "OpenTelemetry docs, “Context propagation”, Example",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/context-propagation/#example",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This means the IDs are embedded in the fields of the header: <version>-<trace-id>-<parent-id>-<trace-flags>",
+      "uses": [
+        "W3C Trace Context and traceparent",
+        "span"
+      ],
+      "conceptIDs": [
+        "otel.w3c-trace-context"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.default-propagator",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4745,
+      "front": "Which headers does OpenTelemetry’s default propagator use?",
+      "back": "Those of the W3C TraceContext specification.",
+      "explanation": "OpenTelemetry maintains several official propagators; this is the one used by default.",
+      "source": "OpenTelemetry docs, “Context propagation”, Propagation",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/context-propagation/#propagation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "OpenTelemetry maintains several official propagators. The default propagator uses the headers specified by the W3C TraceContext specification.",
+      "uses": [
+        "W3C Trace Context and traceparent",
+        "propagator"
+      ],
+      "conceptIDs": [
+        "otel.w3c-trace-context"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.java-agent-api",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4765,
+      "front": "Can you add your own spans to an app that already runs the Java agent?",
+      "back": "Yes: use the OpenTelemetry API alongside the agent to add custom spans and metrics.",
+      "explanation": "The API extends the telemetry the agent generates automatically; the two work together.",
+      "source": "OpenTelemetry docs, “Java Agent”, Extending instrumentations with the API",
+      "sourceURL": "https://opentelemetry.io/docs/zero-code/java/agent/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use the OpenTelemetry API in combination with the Java agent to extend the automatically generated telemetry with custom spans and metrics",
+      "uses": [
+        "Java agent",
+        "OpenTelemetry API",
+        "span",
+        "metric"
+      ],
+      "conceptIDs": [
+        "otel.java-agent"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.java-agent-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4775,
+      "front": "A team runs a Java 17 service whose source they cannot change, and wants traces of inbound requests and database calls. What fits?",
+      "back": "A: the Java agent.",
+      "choices": "A) The OpenTelemetry Java agent\nB) Adding the SDK to the source code\nC) A composite propagator",
+      "choicesExplained": "B needs source changes, which the team cannot make. C moves context between services; it creates no telemetry.",
+      "explanation": "The agent attaches to any Java 8+ application and captures telemetry at edges such as inbound requests and database calls.",
+      "source": "OpenTelemetry docs, “Java Agent”, introduction",
+      "sourceURL": "https://opentelemetry.io/docs/zero-code/java/agent/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "It can be used to capture telemetry data at the “edges” of an app or service, such as inbound requests, outbound HTTP calls, database calls, and so on.",
+      "uses": [
+        "Java agent",
+        "composite propagator",
+        "OpenTelemetry SDK"
+      ],
+      "conceptIDs": [
+        "otel.java-agent"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.operator-cert-manager",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4785,
+      "front": "What must be installed in a cluster before you install the OpenTelemetry Operator?",
+      "back": "cert-manager.",
+      "explanation": "The getting-started steps check for it before applying the Operator’s manifest with kubectl.",
+      "source": "OpenTelemetry docs, “OpenTelemetry Operator for Kubernetes”, Getting started",
+      "sourceURL": "https://opentelemetry.io/docs/platforms/kubernetes/operator/#getting-started",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To install the operator in an existing cluster, make sure you have cert-manager installed and run:",
+      "uses": [
+        "OpenTelemetry Operator for Kubernetes"
+      ],
+      "conceptIDs": [
+        "otel.k8s-operator"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.operator-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4795,
+      "front": "A platform team wants zero-code instrumentation injected into Python workloads on Kubernetes without changing each image by hand. What does the zero-code page point them to?",
+      "back": "A: the Operator, which can inject zero-code instrumentation.",
+      "choices": "A) The OpenTelemetry Operator for Kubernetes\nB) The Java agent\nC) A composite propagator",
+      "choicesExplained": "B is for Java applications only. C carries context; it does not instrument anything.",
+      "explanation": "On Kubernetes the Operator can inject zero-code instrumentation for several languages, Python among them.",
+      "source": "OpenTelemetry docs, “Zero-code Instrumentation”, section index",
+      "sourceURL": "https://opentelemetry.io/docs/zero-code/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you are using Kubernetes, you can use the OpenTelemetry Operator for Kubernetes to inject zero-code instrumentation for .NET, Java, Node.js, Python, or Go into your application.",
+      "uses": [
+        "OpenTelemetry Operator for Kubernetes",
+        "zero-code instrumentation",
+        "kubernetes",
+        "Java agent",
+        "composite propagator"
+      ],
+      "conceptIDs": [
+        "otel.k8s-operator",
+        "otel.operator-languages"
+      ]
+    },
+    {
+      "id": "otel.sdk-pipelines.operator-languages",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 4805,
+      "front": "Which of these languages is NOT on the list the Operator can inject zero-code instrumentation for: Go, Python, `PHP` or Node.js?",
+      "back": "`PHP`. The list is `.NET`, Java, Node.js, Python and Go.",
+      "explanation": "`PHP` has its own zero-code page, but the Operator’s injection list does not include it.",
+      "source": "OpenTelemetry docs, “Zero-code Instrumentation”, section index",
+      "sourceURL": "https://opentelemetry.io/docs/zero-code/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "you can use the OpenTelemetry Operator for Kubernetes to inject zero-code instrumentation for .NET, Java, Node.js, Python, or Go into your application.",
+      "uses": [
+        "OpenTelemetry Operator for Kubernetes",
+        "zero-code instrumentation"
+      ],
+      "conceptIDs": [
+        "otel.operator-languages"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · OpenTelemetry docs as of that date"
+    },
+    {
+      "id": "otel.sdk-pipelines.faas-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 4815,
+      "front": "A team runs its functions on Lambda and wants them auto-instrumented without writing setup code. Which OpenTelemetry assets fit?",
+      "back": "A: the community’s pre-built Lambda layers.",
+      "choices": "A) The pre-built Lambda layers\nB) The Java agent attached by hand to each host\nC) The OpenTelemetry Operator for Kubernetes",
+      "choicesExplained": "B and C instrument processes on hosts or in a cluster the team runs, not functions on a vendor’s service.",
+      "explanation": "The layers can auto-instrument the application inside the function.",
+      "source": "OpenTelemetry docs, “Components”, Function as a Service assets",
+      "sourceURL": "https://opentelemetry.io/docs/concepts/components/#function-as-a-service-assets",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The OpenTelemetry community currently provides pre-built Lambda layers able to auto-instrument your application",
+      "uses": [
+        "Function as a Service assets",
+        "Java agent",
+        "OpenTelemetry Operator for Kubernetes"
+      ],
+      "conceptIDs": [
+        "otel.faas-assets"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-25 · OpenTelemetry docs as of that date"
+    }
+  ]
+}
