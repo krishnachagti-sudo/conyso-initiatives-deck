@@ -17,6 +17,9 @@ shape and tone of cards, see decks/kanban-guide/notes/*.json.
   decks are comprehensive. Stay within 15% of each topic's budget. If you
   cannot, say so in your report; never trim to save effort.
 - Never run git. Never edit another writer's topics.
+- The scratchpad is shared with other writers: name any helper file
+  `<slug>-t<your topics>-…` (e.g. `cka-t56-build.mjs`), and never run a
+  script you did not write.
 
 ## Files
 - One file per topic: `decks/<slug>/notes/<NN>-<topic-slug>.json`, shaped
