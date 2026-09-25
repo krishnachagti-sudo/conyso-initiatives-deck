@@ -38,7 +38,7 @@ test('deck page: the answer box first, then question sections in order, every ca
   for (const id of order.filter((x) => x !== 'about')) assert.match(html, new RegExp(`<h2 id="${id}-h">[^<]*\\?</h2>`), `${id} heading is a question`);
   for (const n of deck().notes) assert.match(html, new RegExp(`id="${n.id.replace(/\./g, '\\.')}"`));
   assert.match(html, /<details class="topic" id="t-widgets"/);
-  assert.match(html, /<a href="example-0\.1\.0\.csv" download>/);
+  assert.match(html, /<a class="dl-tile" href="example-0\.1\.0\.csv" download/);
   assert.match(html, /<link rel="canonical" href="https:\/\/conyso\.com\/decks\/example\/">/);
   assert.match(html, /noindex/, 'unreleased decks are never indexed');
 });
@@ -46,8 +46,8 @@ test('deck page: the answer box first, then question sections in order, every ca
 test('deck page: the answer box states counts the deck proves', () => {
   const html = deckPage(cfg, deck(), manifest);
   const primers = deck().notes.filter((n) => n.kind === 'primer').length;
-  assert.match(html, new RegExp(`${primers} primer cards explain every one of the ${primers} terms`));
-  assert.match(html, /you will have seen all 7 in 1 day\./);
+  assert.match(html, new RegExp(`${primers} primer cards explain all ${primers} of its terms, each before any card tests it`));
+  assert.match(html, /1 day to see every card/);
 });
 
 test('deck page: study data parses and cannot close its script tag', () => {

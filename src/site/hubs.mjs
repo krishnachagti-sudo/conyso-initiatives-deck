@@ -6,7 +6,7 @@
 // checked against its paper in learning-science/. Nothing is added here that
 // is not there.
 
-import { esc, page, crumbs, otherWays } from './layout.mjs';
+import { esc, page, crumbs, otherWays, icon } from './layout.mjs';
 import { FORMATS } from '../exporters/index.mjs';
 import { deckStats } from './deck-data.mjs';
 
@@ -49,32 +49,29 @@ export function methodPage(cfg, decks) {
     lead: `Every deck explains each idea with a primer card before any card tests it, explains the answer on the back of every card, and cites where each card came from. Of the ${n0(cards)} cards published so far, ${n0(primers)} are primers and ${n0(applied)} ask you to apply an idea to a situation.`,
     sections: [
       `<section><h2>Why teach before testing?</h2>
-<p>Because a card you cannot understand teaches nothing. Many shared decks treat every idea as already known: they jump straight to the test, and a newcomer ends up memorising words without meaning. This project began with exactly that failure.</p>
-<p>Research on learning points the same way. Teaching the parts before the whole helps newcomers (a median effect of d = 0.46 in Mayer’s pre-training studies), and too many new, interacting terms at once overload them. Difficulty only helps when it comes from effort: when learners lack the background, Bjork and Bjork call it an “undesirable difficulty”.</p>
-<p>So each deck opens every topic with primer cards, one new term each, with a plain answer, a reason it matters and a concrete example. The build refuses a deck in which any card uses a term that no earlier card has introduced. Experienced learners can suspend the primers in one step: they carry the tag <code>kind::primer</code>.</p></section>`,
+<p>Because a card you cannot understand teaches nothing. Many shared decks jump straight to the test and assume you know the subject already.</p>
+<p>Teaching the parts before the whole helps newcomers (median d = 0.46 in Mayer’s pre-training studies). So every topic opens with primer cards, one new term each, and the build refuses a deck where any card uses a term no earlier card taught.</p></section>`,
       `<section><h2>What makes a card work?</h2>
-<p>A card works when it makes you pull one precise answer out of memory, then tells you why it is right.</p>
-<ul>
-<li><strong>Recall, not rereading.</strong> Retrieval practice beats restudying in real classrooms (g = 0.33, Yang and colleagues, 2021), and spacing it out over days beats cramming.</li>
-<li><strong>An explanation on every back.</strong> Feedback roughly doubles the benefit of testing (Rowland, 2014), and on a card you cannot yet answer, the explanation is almost the whole of it.</li>
-<li><strong>One answer per card.</strong> No lists of more than three: a set is split into one card per member, so no member is left behind.</li>
-<li><strong>Facts and application.</strong> Practising facts alone did not raise scores on higher-order questions, while mixed practice did (Agarwal, 2019; McDaniel, 2013). So every core idea gets a fact card and a card that asks you to use it.</li>
-<li><strong>Explained wrong options.</strong> Where a card offers choices, every wrong option is explained, because unexplained lures can turn into false knowledge (Roediger and Marsh, 2005).</li>
-</ul></section>`,
+<div class="tips">
+<div class="tip">${icon('refresh')}<b>Recall, spaced out</b><span>Beats rereading in classrooms (g = 0.33, Yang 2021).</span></div>
+<div class="tip">${icon('bulb')}<b>A reason on every back</b><span>Feedback roughly doubles the benefit (Rowland 2014).</span></div>
+<div class="tip">${icon('cards')}<b>One answer per card</b><span>No lists over three; sets split card by card.</span></div>
+<div class="tip">${icon('steps')}<b>Facts, then use</b><span>Mixed practice beat facts alone (Agarwal 2019).</span></div>
+<div class="tip">${icon('check')}<b>Wrong options explained</b><span>Unexplained lures can stick (Roediger &amp; Marsh 2005).</span></div>
+<div class="tip">${icon('source')}<b>Every card sourced</b><span>Each links the exact section it came from.</span></div>
+</div></section>`,
       `<section><h2>What does the research not show?</h2>
-<p>It does not show that premade decks match the ones you make yourself. In six experiments, students who made their own cards after reading remembered definitions better than students given premade cards (d = 0.45), and applied them somewhat better (d = 0.29); paraphrasing was what helped (Pan and colleagues, 2022). Teaching before testing and inviting you to paraphrase on primer cards answer this, but no study has tested whether they close the gap, and we do not claim they do.</p>
-<p>Nor has any study tested flashcards for a particular certification exam. For adults in continuing education, the evidence for retrieval practice is thin. Flashcards are the knowledge layer of exam preparation: pair them with practice questions.</p></section>`,
+<div class="callout">${icon('alert')}<div><p>That premade decks match cards you make yourself: self-made cards did better (d = 0.45 on definitions, Pan 2022). Teaching first may narrow that gap; nobody has tested it, and we do not claim it.</p><p>No study has tested flashcards for a particular certification. Pair them with practice questions.</p></div></div></section>`,
       `<section id="checks"><h2>How is every card checked?</h2>
-<p>Four times before release: by the build, by an independent check against the source, by a newcomer, and by an expert.</p>
-<ol>
-<li><strong>The build’s card checker.</strong> A deck is not exported if any card breaks a rule: a primer must come before anything that uses its term; every card needs a question, a short answer, an explanation, a source link and that source’s licence; a scenario’s wrong options must be explained; and every core fact needs a matching application card.</li>
-<li><strong>An independent source audit.</strong> A second pass reads every card against its source and flags anything the source does not support. Flagged cards are fixed or removed.</li>
-<li><strong>A newcomer’s read-through.</strong> Someone who does not know the subject studies the first cards in order and flags anything they could not follow.</li>
-<li><strong>An expert review.</strong> Someone qualified in the subject reviews the deck before it is released.</li>
+<ol class="steps4">
+<li><b>The build</b><span>Refuses any card that breaks a rule: order, source, explanation.</span></li>
+<li><b>A source audit</b><span>A second pass reads every card against its source.</span></li>
+<li><b>A newcomer</b><span>Someone new to the subject studies the cards in order.</span></li>
+<li><b>An expert</b><span>Someone qualified reviews the deck before release.</span></li>
 </ol>
-<p>A deck marked “draft” has passed the first two and not yet the last two. Draft decks are published so they can be tried and corrected, and are kept out of search results until release.</p></section>`,
+<p class="hint">${icon('alert')} “Draft” means the first two are done, not the last two. Drafts stay out of search results.</p></section>`,
       `<section id="ai"><h2>What part does AI play?</h2>
-<p>AI drafts the cards, and people decide what is published. Drafting uses only the source each card cites, never exam questions or paid course material. The independent audit reads every draft against that source, and a person reviews every card before a deck is released. Every deck page says so.</p></section>`,
+<p>AI drafts cards from the cited source only; the audit and people decide what ships.</p></section>`,
     ],
     faq: [
       ['Are the decks official?', 'No. They are independent, written from openly licensed sources, and not affiliated with or approved by any exam body.'],
