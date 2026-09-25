@@ -46,7 +46,12 @@ export function prerequisiteTerms(root, meta) {
     const dir = join(root, slug);
     if (!existsSync(join(dir, 'deck.json'))) throw new Error(`prerequisite deck "${slug}" not found under ${root}`);
     const d = loadDeck(dir);
-    out.push(...d.notes.flatMap((n) => n.introduces || []), ...(d.meta.assumedTerms || []));
+    // "Term (ABBR)" counts as both the term and its abbreviation.
+    // Only a bracket that looks like an abbreviation (one short token with a
+    // capital: "PV", "SoD") is one; "(optional)" or "(a, b, c)" is a gloss.
+    const abbr = (x) => /^[A-Za-z0-9./&-]{1,12}$/.test(x) && /[A-Z]/.test(x);
+    const split = (t) => { const m = String(t).match(/^(.*\S) \(([^)]+)\)$/); return m ? [t, m[1], ...(abbr(m[2]) ? [m[2]] : [])] : [t]; };
+    out.push(...d.notes.flatMap((n) => n.introduces || []).flatMap(split), ...(d.meta.assumedTerms || []));
   }
   return out;
 }
@@ -66,6 +71,36 @@ export function loadConcepts(conceptsDir, family) {
 export function deckConcepts(conceptsDir, root, meta) {
   const families = [meta.family, ...(meta.prerequisiteDecks || []).map((slug) => readJSON(join(root, slug, 'deck.json')).family)];
   return new Map([...new Set(families)].flatMap((f) => [...loadConcepts(conceptsDir, f)]));
+}
+
+/** The licence each source host must carry (src/licences.json). */
+export function licenceRules() {
+  return readJSON(new URL('./licences.json', import.meta.url)).rules.map((r) => ({ url: new RegExp(r.url), licence: new RegExp(r.licence) }));
+}
+
+/**
+ * The official question pool a deck quotes verbatim, if its deck.json has a
+ * "pool" block naming a skeleton folder (one topic-NN.json per topic, as
+ * build/pool-skeleton.py writes). Paths are relative to the repository root.
+ * @returns {{poolId: string, question: string, choices: Record<string,string>, correct: string, answer: string}[] | undefined}
+ */
+export function loadPool(meta, base = '.') {
+  if (!meta.pool?.skeleton) return undefined;
+  const dir = join(base, meta.pool.skeleton);
+  return readdirSync(dir).filter((f) => /^topic-\d+\.json$/.test(f)).sort().flatMap((f) => {
+    const topic = Number(f.match(/\d+/)[0]);
+    return readJSON(join(dir, f)).questions.map((q) => ({ ...q, topic }));
+  });
+}
+
+/** Everything checkDeck needs to know about a deck beyond its own files. */
+export function checkContext(meta, { decks = 'decks', concepts = 'concepts', base = '.' } = {}) {
+  return {
+    concepts: deckConcepts(concepts, decks, meta),
+    prerequisiteTerms: prerequisiteTerms(decks, meta),
+    licences: licenceRules(),
+    pool: loadPool(meta, base),
+  };
 }
 
 /** Every deck directory under a root. */

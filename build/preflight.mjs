@@ -71,6 +71,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const cfg = loadConfig();
   const problems = preflight(dist, cfg);
   for (const p of problems) console.error(`✗ ${p.file}: ${p.message}`);
-  if (problems.length) process.exit(1);
+  if (problems.length) process.exitCode = 1; // not exit(): it can drop piped output
   console.log(`✓ preflight: ${dist} is clean`);
 }

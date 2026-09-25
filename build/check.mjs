@@ -37,6 +37,8 @@ export function checkDeck(deck, ctx = {}) {
     if (!nonEmpty(meta[k])) add(null, 'deck-meta', `deck.json is missing "${k}"`);
   }
   if (meta.id !== undefined && !Number.isInteger(meta.id)) add(null, 'deck-meta', 'deck.json "id" must be an integer and never change');
+  // A deck cannot be released while anything is still listed as blocking it.
+  if (meta.status === 'released' && nonEmpty(meta.releaseBlockers)) add(null, 'deck-meta', `status is "released" but releaseBlockers still lists ${meta.releaseBlockers.length} item(s)`);
 
   // ── Per-card rules ───────────────────────────────────────────────────────
   const seenIds = new Set();
@@ -100,6 +102,21 @@ export function checkDeck(deck, ctx = {}) {
       add(id, 'source', `sourceLicence must start with a tier letter (${Object.keys(LICENCE_TIERS).join(', ')}); tier D is never allowed`);
     }
 
+    // The licence label must match what the source host publishes under
+    // (src/licences.json); a "#page=" anchor must be a page number.
+    const rule = (ctx.licences || []).find((r) => r.url.test(n.sourceURL || ''));
+    if (rule && nonEmpty(n.sourceLicence) && !rule.licence.test(n.sourceLicence)) add(id, 'licence', `sourceLicence "${n.sourceLicence}" does not match this source (expected ${rule.licence.source})`);
+    const page = String(n.sourceURL || '').match(/#page=([^&]*)/);
+    if (page && !/^[1-9]\d*$/.test(page[1])) add(id, 'source', `"#page=${page[1]}" is not a page number`);
+
+    // "Name two …" must be answered with two.
+    const nameN = String(n.front || '').match(/\b(?:name|list|give|what are|which are)\s+(two|three|four|five|six)\b/i);
+    if (nameN && n.type !== 'cloze' && !nonEmpty(n.choices)) {
+      const want = { two: 2, three: 3, four: 4, five: 5, six: 6 }[nameN[1].toLowerCase()];
+      const got = String(n.back || '').split(/;|,|\band\b|\bor\b/).filter((x) => x.trim()).length;
+      if (got < want) add(id, 'back', `the front asks for ${want} but the back gives ${got}`);
+    }
+
     // Volatile facts carry a date.
     if (n.volatile && !/^\d{4}-\d{2}-\d{2}/.test(String(n.validAsOf || ''))) add(id, 'valid-as-of', 'a volatile card needs validAsOf (YYYY-MM-DD, plus version)');
 
@@ -120,7 +137,9 @@ export function checkDeck(deck, ctx = {}) {
       if (intro.length === 0) add(id, 'primer', 'a primer must introduce a term');
       // A term taught with its own abbreviation ("Incident Command System" and
       // "ICS") is one idea: the abbreviation does not count against the limit.
-      const isAbbr = (t) => /^[A-Z][A-Z0-9/&-]*[A-Z0-9](?: \S+)?$/.test(t) && intro.some((o) => o !== t && o.length > t.length);
+      // An abbreviation here is any short form (up to 12 characters, two words)
+      // taught beside a longer term: "ICS", "X", "mH", "op-amp", "Planning P".
+      const isAbbr = (t) => t.length <= 12 && t.split(/\s+/).length <= 2 && intro.some((o) => o !== t && o.length > t.length);
       const terms = intro.filter((t) => !isAbbr(t));
       if (terms.length > LIMITS.primerNewTerms || intro.length > LIMITS.primerNewTerms + 1) add(id, 'primer', `a primer introduces at most ${LIMITS.primerNewTerms} new term`);
     } else if (nonEmpty(n.introduces)) add(id, 'primer', 'only primers introduce terms');
@@ -208,6 +227,32 @@ export function checkDeck(deck, ctx = {}) {
     for (const n of group) add(n.id, 'front', `${group.length} cards share this front but accept different answers; give each its own question`);
   }
 
+  // ── Deck-level: official pool questions verbatim ────────────────────────
+  // A deck that quotes a question pool names its skeleton (deck.json "pool");
+  // every live question needs a card whose id ends in the pool ID, with the
+  // question, the four choices and the key word for word, and the pool's
+  // source line and date where the deck sets them.
+  if (ctx.pool) {
+    const tail = (n) => n.id.split('.').pop();
+    const byTail = new Map(notes.map((n) => [tail(n), n]));
+    const live = new Set(ctx.pool.map((q) => q.poolId.toLowerCase()));
+    const flat = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
+    for (const q of ctx.pool) {
+      const n = byTail.get(q.poolId.toLowerCase());
+      if (!n) { add(null, 'pool', `pool question ${q.poolId} has no card`); continue; }
+      const choices = Object.entries(q.choices).map(([k, v]) => `${k}) ${v}`).join('\n');
+      if (flat(n.front) !== flat(q.question)) add(n.id, 'pool', `the front is not ${q.poolId}'s question word for word`);
+      if (flat(n.choices) !== flat(choices)) add(n.id, 'pool', `the choices are not ${q.poolId}'s four options word for word, in order`);
+      const ans = flat(q.answer);
+      // A key over the back-length limit is shortened on the back; the choices keep it whole.
+      if (flat(n.back) !== ans && words(ans) <= LIMITS.backWords) add(n.id, 'pool', `the back is not the keyed option (${q.correct}) of ${q.poolId}`);
+      const p = meta.pool || {};
+      if (p.source && n.source !== p.source.replace('{id}', q.poolId)) add(n.id, 'pool', `source must be "${p.source.replace('{id}', q.poolId)}"`);
+      if (p.validAsOf && n.validAsOf !== p.validAsOf) add(n.id, 'pool', `validAsOf must be "${p.validAsOf}"`);
+    }
+    for (const n of notes) if (/^[a-z]\d[a-z]\d{2}$/.test(tail(n)) && !live.has(tail(n))) add(n.id, 'pool', 'the id names a pool question that is not in the live pool (withdrawn?)');
+  }
+
   // ── Released IDs must never disappear ───────────────────────────────────
   for (const rid of deck.releasedIds || []) {
     if (!seenIds.has(rid)) add(rid, 'released-id', 'a released card is missing; retire it with the "retired" tag instead of deleting it');
@@ -217,23 +262,38 @@ export function checkDeck(deck, ctx = {}) {
 }
 
 // ── CLI ────────────────────────────────────────────────────────────────────
+//   node build/check.mjs [--only=slug,slug] [--summary] [--json]
+//     [--registry=<terms.json>] [--concepts-extra=<file>,<file>]
+// --summary prints counts by rule (and by abbreviation) instead of every line,
+// so nobody has to count problems with grep. --concepts-extra adds a writer's
+// own concept files before they are merged, so a writer's check can be clean.
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const { deckDirs, loadDeck, deckConcepts, prerequisiteTerms } = await import('../src/decks.mjs');
-  const flag = (n, d) => process.argv.find((a) => a.startsWith(`--${n}=`))?.split('=')[1] || d;
-  const root = flag('decks', 'decks');
-  const conceptsDir = flag('concepts', 'concepts');
-  const { readFileSync: rf } = await import('node:fs');
-  const registry = flag('registry', '') ? JSON.parse(rf(flag('registry', ''), 'utf8')) : undefined;
   const { readFileSync } = await import('node:fs');
-  const cfg = JSON.parse(readFileSync('site.config.json', 'utf8'));
-  let total = 0;
+  const { deckDirs, loadDeck, checkContext } = await import('../src/decks.mjs');
+  const flag = (n, d) => process.argv.find((a) => a.startsWith(`--${n}=`))?.slice(n.length + 3) || d;
+  const has = (n) => process.argv.includes(`--${n}`);
+  const root = flag('decks', 'decks');
+  const readJSON = (f) => JSON.parse(readFileSync(f, 'utf8'));
+  const registry = flag('registry', '') ? readJSON(flag('registry', '')) : undefined;
+  const extra = (flag('concepts-extra', '') || '').split(',').filter(Boolean).flatMap(readJSON);
+  const only = flag('only', '')?.split(',').filter(Boolean);
+  const cfg = readJSON('site.config.json');
+  const all = [];
   for (const dir of deckDirs(root)) {
     const deck = loadDeck(dir);
+    if (only?.length && !only.includes(deck.meta.slug)) continue;
     deck.meta.pageBase ||= `${cfg.origin}${cfg.base}${deck.meta.slug}/`; // as build.mjs does
-    const problems = checkDeck(deck, { concepts: deckConcepts(conceptsDir, root, deck.meta), registry, prerequisiteTerms: prerequisiteTerms(root, deck.meta) });
-    total += problems.length;
-    for (const p of problems) console.log(`${deck.meta.slug}  ${p.id}  [${p.rule}]  ${p.message}`);
+    const ctx = checkContext(deck.meta, { decks: root, concepts: flag('concepts', 'concepts') });
+    for (const c of extra) if (!ctx.concepts.has(c.id)) ctx.concepts.set(c.id, c);
+    for (const p of checkDeck(deck, { ...ctx, registry })) all.push({ deck: deck.meta.slug, ...p });
   }
-  if (total) { console.error(`\n${total} problem(s). Release blocked.`); process.exit(1); }
-  console.log('card checker passed');
+  if (has('json')) console.log(JSON.stringify(all, null, 1));
+  else if (has('summary')) {
+    const count = (key) => Object.entries(all.reduce((m, p) => ({ ...m, [key(p)]: (m[key(p)] || 0) + 1 }), {})).sort((a, b) => b[1] - a[1]);
+    for (const [k, v] of count((p) => `${p.deck}  [${p.rule}]`)) console.log(`${String(v).padStart(5)}  ${k}`);
+    const abbr = count((p) => (p.rule === 'abbreviation' ? p.message.match(/"([^"]+)"/)?.[1] : '')).filter(([k]) => k);
+    if (abbr.length) console.log(`abbreviations: ${abbr.map(([k, v]) => `${k} ${v}`).join(', ')}`);
+  } else for (const p of all) console.log(`${p.deck}  ${p.id}  [${p.rule}]  ${p.message}`);
+  if (all.length) { console.error(`\n${all.length} problem(s). Release blocked.`); process.exitCode = 1; } // not exit(): it can drop piped output
+  else console.log('card checker passed');
 }

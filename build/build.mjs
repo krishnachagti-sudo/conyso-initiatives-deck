@@ -20,7 +20,7 @@ import { mkdirSync, writeFileSync, readFileSync, statSync, cpSync, rmSync } from
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 
-import { deckDirs, loadDeck, deckConcepts, prerequisiteTerms } from '../src/decks.mjs';
+import { deckDirs, loadDeck, checkContext } from '../src/decks.mjs';
 import { checkDeck } from './check.mjs';
 import { FORMATS } from '../src/exporters/index.mjs';
 import { mediaName } from '../src/exporters/common.mjs';
@@ -48,7 +48,7 @@ for (const src of sources) {
     // Real decks take their page address from the site config; a deck.json
     // value (the fixtures have one) is kept so tests stay independent of it.
     deck.meta.pageBase ||= `${cfg.origin}${cfg.base}${slug}/`;
-    const problems = checkDeck(deck, { concepts: deckConcepts(src.concepts, src.decks, deck.meta), prerequisiteTerms: prerequisiteTerms(src.decks, deck.meta) });
+    const problems = checkDeck(deck, checkContext(deck.meta, { decks: src.decks, concepts: src.concepts }));
     if (problems.length) {
       failed += 1;
       console.error(`✗ ${slug}: ${problems.length} checker problem(s); not exported. Run npm run check.`);
@@ -114,4 +114,4 @@ if (cfg.indexNowKey) writeFileSync(join(out, `${cfg.indexNowKey}.txt`), cfg.inde
 writeFileSync(join(out, '.nojekyll'), ''); // GitHub Pages: serve files as they are
 
 console.log(`✓ site${cfg.preview ? ` (noindex preview for ${cfg.origin}${cfg.base})` : ''}: ${built.length} deck page(s), home, sitemap (${urls.length} URLs), llms.txt → ${out}`);
-if (failed) process.exit(1);
+if (failed) process.exitCode = 1; // not exit(): it can drop piped output

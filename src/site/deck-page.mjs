@@ -81,7 +81,7 @@ ${crumbs(cfg, [[m.familyTitle || m.family, ''], [short, `${m.slug}/`]])}
     <div class="v">${esc(answerV)}</div>
     <p>${answerP}</p>
     ${kindBar(s.kinds, s.cards)}
-    ${released ? '' : `<p class="draft-note"><span class="badge b-draft">Draft</span> Checked against its source; newcomer and expert review still to come.</p>`}
+    ${released ? '' : `<p class="draft-note"><span class="badge b-draft">Draft</span> Checked against its source; newcomer and expert review still to come.${(m.releaseBlockers || []).length ? ` Before release: ${(m.releaseBlockers).map(esc).join('; ')}.` : ''}</p>`}
     <div class="dl">${apkg ? `<a class="btn btn-primary" href="${esc(apkg.file)}" download>${icon('download')} Download for Anki <small>${kb(apkg.bytes)}</small></a>` : ''}<a class="btn" href="#download">All ${n0(files.size)} formats</a><a class="btn" href="#try">${icon('browser')} Try it here</a></div>
   </div>
   <dl class="facts">${facts.map(([k, v]) => `<div class="fact"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
