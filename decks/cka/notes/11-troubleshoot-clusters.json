@@ -1,0 +1,1044 @@
+{
+  "topic": "Troubleshooting clusters and nodes",
+  "notes": [
+    {
+      "id": "cka.troubleshoot-clusters.static-pod-path-primer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 11000,
+      "front": "What is the kubelet staticPodPath?",
+      "back": "The field in the kubelet configuration file naming the directory the kubelet scans for static Pod manifests.",
+      "explanation": "The kubelet periodically scans that directory and creates or deletes static Pods as YAML or JSON files appear in it or disappear from it.",
+      "example": "Like a watched drop folder for print jobs, but each file dropped in becomes a Pod the kubelet runs on that node.",
+      "evidence": "Use the staticPodPath: <the directory> field in the kubelet configuration file , which periodically scans the directory and creates/deletes static Pods as YAML/JSON files appear/disappear there.",
+      "source": "Kubernetes documentation, Create static Pods, “Filesystem-hosted static Pod manifest”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/#configuration-files",
+      "sourceLicence": "B · CC BY 4.0",
+      "introduces": [
+        "kubelet staticPodPath"
+      ],
+      "uses": [
+        "kubelet staticPodPath",
+        "kubelet configuration file",
+        "static Pod / mirror Pod",
+        "kubelet",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cka.static-pod-path"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.first-check-nodes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11010,
+      "front": "According to the cluster troubleshooting guide, what is the first thing to check in a cluster, and with which command?",
+      "back": "That all nodes are registered correctly: run kubectl get nodes and confirm every expected node is present and Ready.",
+      "explanation": "The guide starts cluster debugging with the node list, checking both that no expected node is missing and that each is in the Ready state.",
+      "evidence": "The first thing to debug in your cluster is if your nodes are all registered correctly. Run the following command: kubectl get nodes And verify that all of the nodes you expect to see are present and that they are all in the Ready state.",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Listing your cluster”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#listing-your-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node",
+        "kubectl",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.get-nodes"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.node-detail-commands",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11020,
+      "front": "Which two kubectl commands give detailed information about a single node?",
+      "back": "kubectl describe node <name> and kubectl get node <name> -o yaml.",
+      "explanation": "The guide says these work for nodes just as they do for Pods.",
+      "evidence": "As with Pods, you can use kubectl describe node and kubectl get node -o yaml to retrieve detailed information about nodes.",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Example: debugging a down/unreachable node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#example-debugging-a-down-unreachable-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl describe",
+        "node",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "cka.get-nodes"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.cluster-info-dump",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 11030,
+      "front": "For detailed information about the overall health of the cluster, run {{c1::kubectl cluster-info dump}}.",
+      "back": "kubectl cluster-info dump",
+      "explanation": "The guide offers it right after the node check, as the command for the whole cluster rather than one node.",
+      "evidence": "To get detailed information about the overall health of your cluster, you can run: kubectl cluster-info dump",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Listing your cluster”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#listing-your-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.cluster-info-dump"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.node-down-causes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11040,
+      "front": "The guide's down-node example names causes for a node going down. What are two of them?",
+      "back": "The node is disconnected from the network; the kubelet dies and won't restart.",
+      "explanation": "The guide's list ends with “etc.”, so these are examples, not the only causes.",
+      "evidence": "here's what you'll see if a node is down (disconnected from the network, or kubelet dies and won't restart, etc.)",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Example: debugging a down/unreachable node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#example-debugging-a-down-unreachable-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node",
+        "kubelet"
+      ],
+      "conceptIDs": [
+        "cka.node-notready"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.unreachable-taints",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11050,
+      "front": "In the guide's example of a down node, which taints does kubectl describe node show?",
+      "back": "node.kubernetes.io/unreachable with effect NoExecute, and node.kubernetes.io/unreachable with effect NoSchedule.",
+      "explanation": "They appear in the example alongside the NotReady events and the Unknown node conditions.",
+      "evidence": "CreationTimestamp: Thu, 17 Feb 2022 16:46:30 -0500 Taints: node.kubernetes.io/unreachable:NoExecute node.kubernetes.io/unreachable:NoSchedule Unschedulable: false",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Example: debugging a down/unreachable node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#example-debugging-a-down-unreachable-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "taint",
+        "taint effects",
+        "kubectl describe",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.node-notready"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.ready-unknown",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11060,
+      "front": "When the kubelet on a node stops reporting, what status, reason and message does the Ready condition show?",
+      "back": "Status Unknown, reason NodeStatusUnknown, message “Kubelet stopped posting node status.”",
+      "explanation": "In the guide's example the node shows as NotReady in kubectl get nodes, and describe node gives this condition as the detail.",
+      "evidence": "Ready Unknown Thu, 17 Feb 2022 17:12:40 -0500 Thu, 17 Feb 2022 17:13:52 -0500 NodeStatusUnknown Kubelet stopped posting node status.",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Example: debugging a down/unreachable node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#example-debugging-a-down-unreachable-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "node",
+        "status"
+      ],
+      "conceptIDs": [
+        "cka.node-conditions",
+        "cka.node-notready"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.condition-network-unavailable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11070,
+      "front": "In the guide's down-node example, which node condition stayed False, set by the network plugin's Pod, while the others went Unknown?",
+      "back": "NetworkUnavailable.",
+      "explanation": "Its reason in the example is WeaveIsUp, with the message “Weave pod has set this”.",
+      "evidence": "NetworkUnavailable False Thu, 17 Feb 2022 17:09:13 -0500 Thu, 17 Feb 2022 17:09:13 -0500 WeaveIsUp Weave pod has set this",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Example: debugging a down/unreachable node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#example-debugging-a-down-unreachable-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node",
+        "CNI"
+      ],
+      "conceptIDs": [
+        "cka.node-conditions"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.condition-memory-pressure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11080,
+      "front": "Which node condition in kubectl describe node reports pressure on the node's memory?",
+      "back": "MemoryPressure.",
+      "explanation": "In the guide's down-node example it went Unknown with reason NodeStatusUnknown, because the kubelet had stopped posting node status.",
+      "evidence": "MemoryPressure Unknown Thu, 17 Feb 2022 17:12:40 -0500 Thu, 17 Feb 2022 17:13:52 -0500 NodeStatusUnknown Kubelet stopped posting node status.",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Example: debugging a down/unreachable node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#example-debugging-a-down-unreachable-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl describe",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.node-conditions"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.condition-disk-pressure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11090,
+      "front": "Which node condition in kubectl describe node reports pressure on the node's disk?",
+      "back": "DiskPressure.",
+      "explanation": "In the guide's down-node example it too went Unknown with reason NodeStatusUnknown when the kubelet stopped posting node status.",
+      "evidence": "DiskPressure Unknown Thu, 17 Feb 2022 17:12:40 -0500 Thu, 17 Feb 2022 17:13:52 -0500 NodeStatusUnknown Kubelet stopped posting node status.",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Example: debugging a down/unreachable node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#example-debugging-a-down-unreachable-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl describe",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.node-conditions"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.condition-pid-pressure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11100,
+      "front": "Which node condition in kubectl describe node reports pressure on process IDs?",
+      "back": "PIDPressure.",
+      "explanation": "In the guide's down-node example it went Unknown along with the memory and disk conditions, all with the message “Kubelet stopped posting node status.”",
+      "evidence": "PIDPressure Unknown Thu, 17 Feb 2022 17:12:40 -0500 Thu, 17 Feb 2022 17:13:52 -0500 NodeStatusUnknown Kubelet stopped posting node status.",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Example: debugging a down/unreachable node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#example-debugging-a-down-unreachable-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl describe",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.node-conditions"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.notready-eviction-time",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 11110,
+      "front": "In the guide's down-node example, the node's Pods are evicted after {{c1::five minutes}} of NotReady status.",
+      "back": "five minutes",
+      "explanation": "That is why, in the example, the Pods on the NotReady node are no longer running.",
+      "evidence": "Notice the events that show the node is NotReady, and also notice that the pods are no longer running (they are evicted after five minutes of NotReady status).",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Example: debugging a down/unreachable node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#example-debugging-a-down-unreachable-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "eviction / node-pressure eviction",
+        "node",
+        "Pod",
+        "event"
+      ],
+      "conceptIDs": [
+        "cka.notready-eviction-5m"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.log-apiserver",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11120,
+      "front": "On a control plane node that writes log files, which file holds the API server's logs?",
+      "back": "/var/log/kube-apiserver.log",
+      "explanation": "The guide lists it as the log of the component responsible for serving the API.",
+      "evidence": "/var/log/kube-apiserver.log - API Server, responsible for serving the API",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Control Plane nodes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#control-plane-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.control-plane-logs"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.log-scheduler",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11130,
+      "front": "On a control plane node that writes log files, which file would you read to learn why the scheduler made a scheduling decision?",
+      "back": "/var/log/kube-scheduler.log",
+      "explanation": "The guide describes the scheduler as the component responsible for making scheduling decisions.",
+      "evidence": "/var/log/kube-scheduler.log - Scheduler, responsible for making scheduling decisions",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Control Plane nodes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#control-plane-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-scheduler",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.control-plane-logs"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.log-controller-manager",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11140,
+      "front": "On a control plane node that writes log files, which file holds the logs of the component that runs most built-in controllers?",
+      "back": "/var/log/kube-controller-manager.log",
+      "explanation": "The guide notes one exception: scheduling is not in this component, because the kube-scheduler handles it.",
+      "evidence": "/var/log/kube-controller-manager.log - a component that runs most Kubernetes built-in controllers , with the notable exception of scheduling (the kube-scheduler handles scheduling).",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Control Plane nodes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#control-plane-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-controller-manager",
+        "controller / control loop",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.control-plane-logs"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.log-kubelet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11150,
+      "front": "On a worker node that writes log files, which file holds the logs of the component that runs containers on the node?",
+      "back": "/var/log/kubelet.log",
+      "explanation": "The guide lists the kubelet as responsible for running containers on the node.",
+      "evidence": "/var/log/kubelet.log - logs from the kubelet, responsible for running containers on the node",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Worker Nodes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#worker-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.worker-logs"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.log-kube-proxy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11160,
+      "front": "On a worker node that writes log files, which file holds the logs of the component that directs traffic to Service endpoints?",
+      "back": "/var/log/kube-proxy.log",
+      "explanation": "The guide lists kube-proxy as responsible for directing traffic to Service endpoints.",
+      "evidence": "/var/log/kube-proxy.log - logs from kube-proxy , which is responsible for directing traffic to Service endpoints",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Worker Nodes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#worker-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-proxy",
+        "Service",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.worker-logs"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.journalctl-instead",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11170,
+      "front": "To dig deeper into a cluster problem you log in to the machines. On systemd-based systems, what may you need to use instead of the log files?",
+      "back": "journalctl.",
+      "explanation": "The guide's /var/log file list comes with this note, because on such systems the logs may not be in those files.",
+      "evidence": "For now, digging deeper into the cluster requires logging into the relevant machines. Here are the locations of the relevant log files. On systemd-based systems, you may need to use journalctl instead of examining log files.",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Looking at logs”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#looking-at-logs",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.journalctl"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.journalctl-u-kubelet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11180,
+      "front": "On a Linux node that uses systemd, where do the kubelet and container runtime write their logs by default, and what command reads the kubelet's?",
+      "back": "To journald; read them with journalctl -u kubelet.",
+      "explanation": "Only if systemd is not present do they write .log files in the /var/log directory instead.",
+      "evidence": "On Linux nodes that use systemd, the kubelet and container runtime write to journald by default. You use journalctl to read the systemd journal; for example: journalctl -u kubelet . If systemd is not present, the kubelet and container runtime write to .log files in the /var/log directory.",
+      "source": "Kubernetes documentation, Logging Architecture, “System component logs: Log locations”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/cluster-administration/logging/#system-component-logs",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "container runtime",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.journalctl"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.enable-kubelet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11190,
+      "front": "What command enables the kubelet service and starts it at once, as the kubeadm install guide does before running kubeadm?",
+      "back": "sudo systemctl enable --now kubelet",
+      "explanation": "The install guide lists it as an optional step after installing the packages, so the kubelet service is already enabled and running when kubeadm is run.",
+      "evidence": "kubelet service before running kubeadm: sudo systemctl enable --now kubelet",
+      "source": "Kubernetes documentation, Installing kubeadm, “Installing kubeadm, kubelet and kubectl”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.systemctl-kubelet"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.kubelet-crashloop-before-init",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "order": 11200,
+      "front": "On a new node where you have not yet run kubeadm, systemctl shows the kubelet service disabled and inactive. Which one command enables it and starts it at once?",
+      "back": "sudo systemctl enable --now kubelet",
+      "explanation": "The install guide gives this command to enable the kubelet service before kubeadm runs; until then the kubelet waits in a crashloop, which is expected.",
+      "evidence": "(Optional) Enable the kubelet service before running kubeadm: sudo systemctl enable --now kubelet",
+      "source": "Kubernetes documentation, Installing kubeadm, “Installing kubeadm, kubelet and kubectl”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.systemctl-kubelet"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.dotfiles-ignored",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11220,
+      "front": "Which files in the static Pod directory does the kubelet ignore when it scans?",
+      "back": "Files whose names start with a dot.",
+      "explanation": "That is the only filter the page names; it states there is no filtering by file extension.",
+      "evidence": "Note that the kubelet will ignore files starting with dots when scanning the specified directory.",
+      "source": "Kubernetes documentation, Create static Pods, “Filesystem-hosted static Pod manifest”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/#configuration-files",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "static Pod / mirror Pod"
+      ],
+      "conceptIDs": [
+        "cka.static-pod-path"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.backup-manifest-trap",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 11230,
+      "front": "Before editing the API server manifest, an admin runs cp kube-apiserver.yaml kube-apiserver.yaml.orig inside /etc/kubernetes/manifests. What will the kubelet do?",
+      "choices": [
+        "Read both files and try to create a static Pod from each",
+        "Ignore the .orig file, because only .yaml files are read",
+        "Ignore both until the kubelet is restarted",
+        "Merge the two files into one Pod"
+      ],
+      "key": 0,
+      "back": "Read both files and try to create a static Pod from each.",
+      "explanation": "The kubelet processes every file not starting with a dot and does not filter by extension, so a backup belongs outside the directory.",
+      "choicesExplained": [
+        "",
+        "Wrong: there is no filtering by file extension.",
+        "Wrong: the kubelet periodically scans the directory while running.",
+        "Wrong: each file is treated as its own static Pod definition."
+      ],
+      "evidence": "The kubelet processes all files not starting with a dot in the static Pod directory — there is no filtering by file extension. For example, if you create a backup of a manifest by running cp kube-apiserver.yaml kube-apiserver.yaml.backup , the kubelet will read both files and attempt to create a static Pod from each.",
+      "source": "Kubernetes documentation, Create static Pods, “Filesystem-hosted static Pod manifest”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/#configuration-files",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "static Pod / mirror Pod",
+        "manifest",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cka.static-pod-path",
+        "cka.edit-static-pod"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.move-manifest-out",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11240,
+      "front": "What happens when you move a static Pod's manifest out of the watched directory, and later move it back?",
+      "back": "The kubelet removes the Pod, then adds it again when the file reappears.",
+      "explanation": "The running kubelet periodically scans the directory and adds or removes Pods as files appear or disappear.",
+      "evidence": "The running kubelet periodically scans the configured directory ( /etc/kubernetes/manifests in our example) for changes and adds/removes Pods as files appear/disappear in this directory.",
+      "source": "Kubernetes documentation, Create static Pods, “Dynamic addition and removal of static pods”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/#dynamic-addition-and-removal-of-static-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "static Pod / mirror Pod",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cka.edit-static-pod"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.delete-mirror-pod",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11250,
+      "front": "If you delete a static Pod's mirror Pod with kubectl delete pod, does the static Pod stop?",
+      "back": "No. The kubelet does not remove the static Pod, and the Pod is still running.",
+      "explanation": "The page shows the Pod still Running after the delete; the kubelet adds and removes static Pods as their files appear and disappear.",
+      "evidence": "mirror Pod from the API server, the kubelet doesn't remove the static Pod",
+      "source": "Kubernetes documentation, Create static Pods, “Observe static pod behavior”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/#behavior-of-static-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "static Pod / mirror Pod",
+        "kubelet",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "cka.edit-static-pod"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.configz",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 11260,
+      "front": "How can you view a node's final, running kubelet configuration through the API?",
+      "back": "Run kubectl proxy, then fetch /api/v1/nodes/<node-name>/proxy/configz (for example with curl).",
+      "explanation": "The page gives this for inspecting the actuated configuration when it may be spread over several files.",
+      "evidence": "Start a proxy server using kubectl proxy in your terminal. kubectl proxy Which gives output like: Starting to serve on 127.0.0.1:8001 Open another terminal window and use curl to fetch the kubelet configuration.",
+      "source": "Kubernetes documentation, Set Kubelet Parameters Via A Configuration File, “Viewing the kubelet configuration”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/#viewing-the-kubelet-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet configuration file",
+        "kubectl",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubelet-config-view"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.find-static-dir",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 11270,
+      "front": "A node's static Pods are not in /etc/kubernetes/manifests. Using the kubelet's configz output, which field tells you where they are?",
+      "choices": [
+        "staticPodPath",
+        "fileCheckFrequency",
+        "tlsCertFile",
+        "syncFrequency"
+      ],
+      "key": 0,
+      "back": "staticPodPath.",
+      "explanation": "The page's sample configz output includes staticPodPath with a different directory, /var/run/kubernetes/static-pods.",
+      "choicesExplained": [
+        "",
+        "Wrong: that is a check interval, not a directory.",
+        "Wrong: that is the kubelet's serving certificate.",
+        "Wrong: that is a sync interval, not a directory."
+      ],
+      "evidence": "curl -X GET http://127.0.0.1:8001/api/v1/nodes/<node-name>/proxy/configz | jq . { \"kubeletconfig\" : { \"enableServer\" : true , \"staticPodPath\" : \"/var/run/kubernetes/static-pods\"",
+      "source": "Kubernetes documentation, Set Kubelet Parameters Via A Configuration File, “Viewing the kubelet configuration”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/#viewing-the-kubelet-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet staticPodPath",
+        "kubelet configuration file",
+        "static Pod / mirror Pod"
+      ],
+      "conceptIDs": [
+        "cka.kubelet-config-view",
+        "cka.static-pod-path"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.crictl-ps-a",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11280,
+      "front": "Which crictl command lists all containers on a node, including exited ones?",
+      "back": "crictl ps -a",
+      "explanation": "The page's sample output shows both Running and Exited containers, with their state and attempt count.",
+      "evidence": "List all containers: crictl ps -a The output is similar to this: CONTAINER ID IMAGE CREATED STATE NAME ATTEMPT",
+      "source": "Kubernetes documentation, Debugging Kubernetes nodes with crictl, “List containers”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/#list-containers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "crictl",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.crictl-ps"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.crictl-logs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11290,
+      "front": "With crictl, how do you get a container's logs, and only its latest line?",
+      "back": "crictl logs <container-id>; add --tail=1 for only the latest line.",
+      "explanation": "It takes a container identifier, as listed by crictl ps -a, not a Pod name.",
+      "evidence": "Get only the latest N lines of logs: crictl logs --tail = 1 87d3992f84f74",
+      "source": "Kubernetes documentation, Debugging Kubernetes nodes with crictl, “Get a container's logs”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/#get-a-container-s-logs",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "crictl"
+      ],
+      "conceptIDs": [
+        "cka.crictl-logs"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.crictl-pods",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 11300,
+      "front": "Which crictl command lists the Pods on a node, and how do you narrow it to one Pod by name?",
+      "back": "crictl pods; add --name <pod-name> for one Pod.",
+      "explanation": "The page's output shows each Pod's identifier, state, name and namespace, including kube-system Pods.",
+      "evidence": "List all pods: crictl pods The output is similar to this: POD ID CREATED STATE NAME NAMESPACE ATTEMPT",
+      "source": "Kubernetes documentation, Debugging Kubernetes nodes with crictl, “List pods”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/#list-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "crictl",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.crictl-pods"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.apiserver-down-crictl",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 11310,
+      "front": "After an edit to the kube-apiserver manifest, every kubectl command fails to connect. How do you read the API server container's logs?",
+      "choices": [
+        "On the control plane node, find it with crictl ps -a, then run crictl logs <id>",
+        "kubectl logs -n kube-system kube-apiserver-<node>",
+        "kubectl describe node <control-plane-node>",
+        "kubectl cluster-info dump"
+      ],
+      "key": 0,
+      "back": "On the node, find the container with crictl ps -a, then read it with crictl logs <id>.",
+      "explanation": "The static Pod page says that once you identify the right container, you can get its logs with crictl, which runs on the node.",
+      "choicesExplained": [
+        "",
+        "Wrong: kubectl needs the API server, which is down.",
+        "Wrong: kubectl needs the API server, and describe does not show container logs.",
+        "Wrong: kubectl needs the API server, which is down."
+      ],
+      "evidence": "Once you identify the right container, you can get the logs for that container with crictl :",
+      "source": "Kubernetes documentation, Create static Pods, “Observe static pod behavior”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/#behavior-of-static-pods",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "crictl",
+        "kube-apiserver",
+        "static Pod / mirror Pod",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "cka.crictl-logs",
+        "cka.crictl-ps",
+        "cka.edit-static-pod"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.debug-node-command",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11330,
+      "front": "What kubectl command opens an interactive shell session on a node named worker-2, using an ubuntu image?",
+      "back": "kubectl debug node/worker-2 -it --image=ubuntu",
+      "explanation": "kubectl debug creates a debugging Pod on that node and names it after the node.",
+      "evidence": "kubectl debug node/mynode -it --image = ubuntu Creating debugging pod node-debugger-mynode-pdx84 with container debugger on node mynode.",
+      "source": "Kubernetes documentation, Debug Running Pods, “Debugging via a shell on the node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#node-shell-session",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl debug",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-debug-node"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.debug-node-host-mount",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 11340,
+      "front": "In a kubectl debug node session, where is the node's root filesystem, and is the debugging Pod privileged?",
+      "back": "The root filesystem is at /host; the Pod is not privileged, although it runs in host namespaces.",
+      "explanation": "So reading some process information and chroot /host may fail; for a privileged Pod, create one manually or use --profile=sysadmin.",
+      "evidence": "The root filesystem of the Node will be mounted at /host . The container runs in the host IPC, Network, and PID namespaces, although the pod isn't privileged, so reading some process information may fail, and chroot /host may fail. If you need a privileged pod, create it manually or use the --profile=sysadmin flag.",
+      "source": "Kubernetes documentation, Debug Running Pods, “Debugging via a shell on the node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#node-shell-session",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl debug",
+        "node",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-debug-node"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.failure-causes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 11350,
+      "front": "The guide lists contributing causes of cluster failure. What are two of them?",
+      "back": "Any two of: VM shutdown; network partition; crashes in Kubernetes software; storage data loss; operator error.",
+      "explanation": "The guide calls its failure list incomplete, so these are the causes it names, not all possible ones.",
+      "evidence": "Contributing causes VM(s) shutdown Network partition within cluster, or between cluster and users Crashes in Kubernetes software Data loss or unavailability of persistent storage (e.g. GCE PD or AWS EBS volume) Operator error, for example, misconfigured Kubernetes software or application software",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Contributing causes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#contributing-causes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.failure-modes"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.apiserver-down-effect",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 11360,
+      "front": "The API server has crashed. What happens to Pods and Services that were already running?",
+      "choices": [
+        "They should keep working, unless they depend on the Kubernetes API",
+        "They all stop at once",
+        "They are evicted after five minutes",
+        "They are rescheduled onto other nodes"
+      ],
+      "key": 0,
+      "back": "They should keep working normally, unless they depend on the Kubernetes API.",
+      "explanation": "What fails is changing things: you cannot stop, update or start new Pods and Services.",
+      "choicesExplained": [
+        "",
+        "Wrong: the guide says existing Pods and Services should continue to work.",
+        "Wrong: that describes Pods on a NotReady node, not an API server outage.",
+        "Wrong: with the API server down, new Pods cannot be started."
+      ],
+      "evidence": "API server VM shutdown or apiserver crashing Results unable to stop, update, or start new pods, services, replication controller existing pods and services should continue to work normally unless they depend on the Kubernetes API",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Specific scenarios”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#specific-scenarios",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver",
+        "Pod",
+        "Service",
+        "kubernetes api"
+      ],
+      "conceptIDs": [
+        "cka.failure-modes"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.kubelet-fault-effect",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 11370,
+      "front": "What does the guide say results from a kubelet software fault on a node?",
+      "back": "The crashing kubelet cannot start new Pods there; the node is marked unhealthy and new Pods start elsewhere.",
+      "explanation": "The guide also says the kubelet might delete the existing Pods or might not, so their fate is not certain.",
+      "evidence": "Kubelet software fault Results crashing kubelet cannot start new pods on the node kubelet might delete the pods or not node marked unhealthy replication controllers start new pods elsewhere",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Specific scenarios”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#specific-scenarios",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "node",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.failure-modes"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.notready-first-steps",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 11380,
+      "front": "kubectl get nodes shows worker-3 as NotReady, and describe node says “Kubelet stopped posting node status.” What is a sensible next step?",
+      "choices": [
+        "Log in to worker-3 and read the kubelet's logs, for example with journalctl -u kubelet",
+        "Run kubectl logs on the node object",
+        "Edit /etc/kubernetes/manifests on the control plane node",
+        "Delete the node's mirror Pods"
+      ],
+      "key": 0,
+      "back": "Log in to the node and read the kubelet's logs (journalctl -u kubelet on systemd).",
+      "explanation": "The guide says digging deeper requires logging into the machine, and on systemd nodes the kubelet logs to journald.",
+      "choicesExplained": [
+        "",
+        "Wrong: kubectl logs reads container logs, not a node's kubelet.",
+        "Wrong: the kubelet on worker-3 is the component that stopped reporting.",
+        "Wrong: deleting mirror Pods does not affect the kubelet."
+      ],
+      "evidence": "For now, digging deeper into the cluster requires logging into the relevant machines. Here are the locations of the relevant log files. On systemd-based systems, you may need to use journalctl instead of examining log files.",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Looking at logs”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#looking-at-logs",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "node",
+        "kubectl describe"
+      ],
+      "conceptIDs": [
+        "cka.node-notready",
+        "cka.journalctl"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.classify-log-home",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 11390,
+      "front": "The cluster troubleshooting guide lists log files on nodes. Which one holds the logs of the component that directs traffic to Service endpoints?",
+      "choices": [
+        "/var/log/kube-proxy.log",
+        "/var/log/kubelet.log",
+        "/var/log/kube-apiserver.log",
+        "/var/log/kube-controller-manager.log"
+      ],
+      "key": 0,
+      "back": "/var/log/kube-proxy.log",
+      "explanation": "In the guide's worker-node list, /var/log/kube-proxy.log belongs to kube-proxy, the component that directs traffic to Service endpoints.",
+      "choicesExplained": [
+        "",
+        "Wrong: the kubelet runs containers on the node.",
+        "Wrong: the API server serves the API.",
+        "Wrong: the controller manager runs most built-in controllers."
+      ],
+      "evidence": "/var/log/kube-proxy.log - logs from kube-proxy , which is responsible for directing traffic to Service endpoints",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Worker Nodes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#worker-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-proxy",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.worker-logs",
+        "cka.control-plane-logs"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.new-worker-check",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 11400,
+      "front": "You have just joined a new worker, worker-4. How do you confirm the cluster has it and it is usable?",
+      "choices": [
+        "Run kubectl get nodes and check worker-4 is listed and Ready",
+        "Run kubectl get pods -A and look for worker-4",
+        "Run crictl ps on the control plane node",
+        "Run kubectl top node worker-4"
+      ],
+      "key": 0,
+      "back": "kubectl get nodes: worker-4 must be present and in the Ready state.",
+      "explanation": "The guide checks both that every expected node is present and that each is Ready.",
+      "choicesExplained": [
+        "",
+        "Wrong: Pods are listed, not nodes, and a node can be registered with no Pods.",
+        "Wrong: that lists containers on the control plane node only.",
+        "Wrong: that shows metrics, not whether the node is registered and Ready."
+      ],
+      "evidence": "The first thing to debug in your cluster is if your nodes are all registered correctly. Run the following command: kubectl get nodes And verify that all of the nodes you expect to see are present and that they are all in the Ready state.",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Listing your cluster”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#listing-your-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "cka.get-nodes"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.all-conditions-unknown",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 11410,
+      "front": "kubectl describe node shows MemoryPressure, DiskPressure, PIDPressure and Ready all Unknown, reason NodeStatusUnknown. What does this point to?",
+      "choices": [
+        "The kubelet has stopped posting node status",
+        "The node is short of memory, disk and process IDs at once",
+        "The network plugin has failed",
+        "The scheduler is down"
+      ],
+      "key": 0,
+      "back": "The kubelet has stopped posting node status.",
+      "explanation": "Each Unknown condition carries the message “Kubelet stopped posting node status.”",
+      "choicesExplained": [
+        "",
+        "Wrong: Unknown means no status is being reported, not that pressure was measured.",
+        "Wrong: in the guide's example NetworkUnavailable is set by the network plugin's Pod, and it stayed False.",
+        "Wrong: the conditions are posted by the kubelet, not the scheduler."
+      ],
+      "evidence": "Ready Unknown Thu, 17 Feb 2022 17:12:40 -0500 Thu, 17 Feb 2022 17:13:52 -0500 NodeStatusUnknown Kubelet stopped posting node status.",
+      "source": "Kubernetes documentation, Troubleshooting Clusters, “Example: debugging a down/unreachable node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/#example-debugging-a-down-unreachable-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet",
+        "node",
+        "kubectl describe"
+      ],
+      "conceptIDs": [
+        "cka.node-conditions"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.debug-node-no-ssh",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 11420,
+      "front": "You must read a file under /etc on worker-2, but you cannot log in to that machine. What can you do?",
+      "choices": [
+        "Run kubectl debug node/worker-2 -it --image=ubuntu and look under /host/etc",
+        "Run kubectl exec into any Pod on worker-2 and read /etc",
+        "Run crictl logs from your workstation",
+        "Run kubectl describe node worker-2"
+      ],
+      "key": 0,
+      "back": "kubectl debug node/worker-2 -it --image=ubuntu, then read the file under /host.",
+      "explanation": "The debugging Pod mounts the node's root filesystem at /host.",
+      "choicesExplained": [
+        "",
+        "Wrong: a normal container sees its own filesystem, not the node's.",
+        "Wrong: crictl runs on the node itself, which you cannot log in to.",
+        "Wrong: describe shows status and events, not the node's files."
+      ],
+      "evidence": "When creating a debugging session on a node, keep in mind that: kubectl debug automatically generates the name of the new Pod based on the name of the Node. The root filesystem of the Node will be mounted at /host .",
+      "source": "Kubernetes documentation, Debug Running Pods, “Debugging via a shell on the node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#node-shell-session",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl debug",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-debug-node"
+      ]
+    },
+    {
+      "id": "cka.troubleshoot-clusters.contrast-kubectl-crictl",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 11430,
+      "front": "kubectl describe node versus crictl ps: where does each run, and what does each show?",
+      "back": "kubectl describe node goes through the API server and shows node conditions and events; crictl runs on the node and lists its runtime's containers.",
+      "explanation": "crictl is a command-line interface for CRI-compatible runtimes, for inspecting and debugging on a Kubernetes node.",
+      "evidence": "crictl is a command-line interface for CRI-compatible container runtimes. You can use it to inspect and debug container runtimes and applications on a Kubernetes node.",
+      "source": "Kubernetes documentation, Debugging Kubernetes nodes with crictl",
+      "sourceURL": "https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl describe",
+        "crictl",
+        "node",
+        "event"
+      ],
+      "conceptIDs": [
+        "cka.crictl-ps",
+        "cka.get-nodes"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1790 @@
+{
+  "topic": "Installing a cluster with kubeadm",
+  "notes": [
+    {
+      "id": "cka.kubeadm-install.what-is-cgroup-driver",
+      "type": "basic",
+      "priority": "core",
+      "order": 2005,
+      "kind": "primer",
+      "front": "What is a cgroup driver?",
+      "back": "The interface through which the kubelet and the container runtime work with Linux control groups to manage Pod resources.",
+      "explanation": "Control groups are how Linux constrains the resources given to processes, and both components must use them to enforce requests and limits.",
+      "example": "Like a shared filing convention: two clerks must file resource limits the same way, or each sees a different ledger.",
+      "introduces": [
+        "cgroup driver"
+      ],
+      "evidence": "Both the kubelet and the underlying container runtime need to interface with control groups to enforce resource management for pods and containers and set resources such as cpu/memory requests and limits. To interface with control groups, the kubelet and the container runtime need to use a cgroup driver .",
+      "source": "Kubernetes documentation, “Container Runtimes”, “cgroup drivers”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/#cgroup-drivers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cgroup driver",
+        "requests and limits",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.cgroup-driver"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.what-is-pkgs-k8s-io",
+      "type": "basic",
+      "priority": "core",
+      "order": 2010,
+      "kind": "primer",
+      "front": "What are the pkgs.k8s.io package repositories?",
+      "back": "The community-owned repositories for Kubernetes packages; you enable the one for the minor release you want.",
+      "explanation": "The packages are split by minor release, so choosing a version starts with choosing its repository.",
+      "example": "Like one shelf per edition of a book: packages for v1.35 come only from the v1.35 repository.",
+      "introduces": [
+        "pkgs.k8s.io package repositories"
+      ],
+      "evidence": "If you're using the community-owned package repositories ( pkgs.k8s.io ), you need to enable the package repository for the desired Kubernetes minor release.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Changing the package repository”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#changing-the-package-repository",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "pkgs.k8s.io package repositories"
+      ],
+      "conceptIDs": [
+        "cka.pkgs-k8s-io"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.what-is-pod-network-cidr",
+      "type": "basic",
+      "priority": "core",
+      "order": 2015,
+      "kind": "primer",
+      "front": "What does the kubeadm init flag --pod-network-cidr set?",
+      "back": "The range of IP addresses for the Pod network; the control plane then allocates a range to every node.",
+      "explanation": "Each node gets its own part of the range for the Pods it runs.",
+      "example": "Like a city giving each district its own block of house numbers out of one citywide range.",
+      "introduces": [
+        "--pod-network-cidr"
+      ],
+      "evidence": "--pod-network-cidr string Specify range of IP addresses for the pod network. If set, the control plane will automatically allocate CIDRs for every node.",
+      "source": "Kubernetes documentation, “kubeadm init”, “Options”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#options",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--pod-network-cidr",
+        "kubeadm",
+        "control plane",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.pod-network-cidr"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.what-is-control-plane-endpoint",
+      "type": "basic",
+      "priority": "core",
+      "order": 2020,
+      "kind": "primer",
+      "front": "What does the kubeadm init flag --control-plane-endpoint set?",
+      "back": "The shared endpoint for all control-plane nodes: a DNS name or a load-balancer IP address.",
+      "explanation": "Because it is shared, every control-plane node can sit behind the one address the cluster uses.",
+      "example": "Like a switchboard number that stays the same however many staff answer calls behind it.",
+      "introduces": [
+        "--control-plane-endpoint"
+      ],
+      "evidence": "you should specify the --control-plane-endpoint to set the shared endpoint for all control-plane nodes. Such an endpoint can be either a DNS name or an IP address of a load-balancer.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Initializing your control-plane node”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#initializing-your-control-plane-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--control-plane-endpoint",
+        "kubeadm",
+        "control plane",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.control-plane-endpoint"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.what-is-apiserver-advertise-address",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2025,
+      "kind": "primer",
+      "front": "What does the kubeadm flag --apiserver-advertise-address set?",
+      "back": "The address that this particular control-plane node’s API server advertises.",
+      "explanation": "It belongs to one node, unlike the endpoint shared by all control-plane nodes.",
+      "example": "Like the direct line of one office, as opposed to the company’s main switchboard number.",
+      "introduces": [
+        "--apiserver-advertise-address"
+      ],
+      "evidence": "While --apiserver-advertise-address can be used to set the advertised address for this particular control-plane node's API server",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Considerations about apiserver-advertise-address and ControlPlaneEndpoint”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#considerations-about-apiserver-advertise-address-and-controlplaneendpoint",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--apiserver-advertise-address",
+        "kubeadm",
+        "kube-apiserver",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.apiserver-advertise-address"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.what-is-bootstrap-token",
+      "type": "basic",
+      "priority": "core",
+      "order": 2030,
+      "kind": "primer",
+      "front": "What is a bootstrap token, in kubeadm?",
+      "back": "A secret token used for mutual authentication between the control-plane node and nodes joining the cluster.",
+      "explanation": "Anyone holding it can add authenticated nodes, which is why it must be kept safe.",
+      "example": "Like a one-day visitor pass: it lets a newcomer in and proves both sides are who they claim.",
+      "introduces": [
+        "bootstrap token"
+      ],
+      "evidence": "The token is used for mutual authentication between the control-plane node and the joining nodes. The token included here is secret. Keep it safe, because anyone with this token can add authenticated nodes to your cluster.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “More information”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#more-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "bootstrap token",
+        "kubeadm",
+        "control plane",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.bootstrap-token"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.what-is-discovery-hash",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2035,
+      "kind": "primer",
+      "front": "What is kubeadm join’s --discovery-token-ca-cert-hash for?",
+      "back": "It validates the public key of the root certificate authority that the control plane presents.",
+      "explanation": "With token discovery, the hash lets the joining node check it is talking to the right cluster.",
+      "example": "Like checking a letter’s seal against a photo of the real seal before trusting what the letter says.",
+      "introduces": [
+        "--discovery-token-ca-cert-hash"
+      ],
+      "evidence": "If you use a shared token for discovery, you should also pass the --discovery-token-ca-cert-hash flag to validate the public key of the root certificate authority (CA) presented by the Kubernetes Control Plane.",
+      "source": "Kubernetes documentation, “kubeadm join”, “Synopsis”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-join/#synopsis",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--discovery-token-ca-cert-hash",
+        "kubeadm",
+        "control plane",
+        "bootstrap token"
+      ],
+      "conceptIDs": [
+        "cka.discovery-token-ca-cert-hash"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.what-are-init-phases",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2040,
+      "kind": "primer",
+      "front": "What are kubeadm init phases?",
+      "back": "The ordered steps of kubeadm init, which you can run one at a time with kubeadm init phase.",
+      "explanation": "Phases let you run kubeadm init’s work step by step instead of all at once.",
+      "example": "Like cooking a recipe step by step, rather than pressing one button that runs them all.",
+      "introduces": [
+        "kubeadm init phases"
+      ],
+      "evidence": "kubeadm allows you to create a control plane node in phases using the kubeadm init phase command.",
+      "source": "Kubernetes documentation, “kubeadm init”, “Using init phases with kubeadm”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#init-phases",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm init phases",
+        "kubeadm",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-init-phases"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.what-is-kubeadm-config-file",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2045,
+      "kind": "primer",
+      "front": "What is a kubeadm configuration file?",
+      "back": "A file, passed with --config, that configures kubeadm init instead of command-line flags.",
+      "explanation": "Some more advanced features may only be available as configuration file options.",
+      "example": "Like handing over a filled-in form instead of answering each question aloud.",
+      "introduces": [
+        "kubeadm configuration file"
+      ],
+      "evidence": "It's possible to configure kubeadm init with a configuration file instead of command line flags, and some more advanced features may only be available as configuration file options. This file is passed using the --config flag",
+      "source": "Kubernetes documentation, “kubeadm init”, “Using kubeadm init with a configuration file”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#config-file",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm configuration file",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-config-file"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.what-is-kubelet-config-file",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2050,
+      "kind": "primer",
+      "front": "What is a kubelet configuration file?",
+      "back": "A JSON or YAML file holding the kubelet settings defined by the KubeletConfiguration struct.",
+      "explanation": "Only a subset of the kubelet’s settings can be set this way: those in the KubeletConfiguration struct.",
+      "example": "Like a settings file for an app, in place of a long list of start-up switches.",
+      "introduces": [
+        "kubelet configuration file"
+      ],
+      "evidence": "The subset of the kubelet's configuration that can be configured via a file is defined by the KubeletConfiguration struct. The configuration file must be a JSON or YAML representation of the parameters in this struct.",
+      "source": "Kubernetes documentation, “Set Kubelet Parameters Via A Configuration File”, “Create the config file”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/#create-the-config-file",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet configuration file",
+        "json",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "cka.kubelet-config-file"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.host-ram",
+      "type": "basic",
+      "priority": "core",
+      "order": 2055,
+      "kind": "fact",
+      "front": "How much memory does kubeadm ask for on each machine?",
+      "back": "2 gigabytes or more per machine.",
+      "explanation": "The docs say any less will leave little room for your apps.",
+      "evidence": "2 GB or more of RAM per machine (any less will leave little room for your apps).",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Before you begin”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#before-you-begin",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-host-requirements"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.host-cpu",
+      "type": "basic",
+      "priority": "core",
+      "order": 2060,
+      "kind": "fact",
+      "front": "How many CPUs does kubeadm ask for on control-plane machines?",
+      "back": "2 CPUs or more.",
+      "explanation": "The CPU minimum is stated for control-plane machines, while the memory minimum applies to every machine.",
+      "evidence": "2 GB or more of RAM per machine (any less will leave little room for your apps). 2 CPUs or more for control plane machines.",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Before you begin”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#before-you-begin",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-host-requirements"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.host-unique-ids",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2065,
+      "kind": "fact",
+      "front": "Why must every node have a unique network hardware address and product_uuid?",
+      "back": "Kubernetes uses them to identify nodes uniquely; if they repeat, installation may fail.",
+      "explanation": "Hardware very likely has unique values, but some virtual machines may share them.",
+      "evidence": "It is very likely that hardware devices will have unique addresses, although some virtual machines may have identical values. Kubernetes uses these values to uniquely identify the nodes in the cluster. If these values are not unique to each node, the installation process may fail .",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Verify the MAC address and product_uuid are unique for every node”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#verify-mac-address",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.unique-mac-product-uuid"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-host",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2070,
+      "kind": "application",
+      "front": "You are given three virtual machines for a kubeadm cluster: each has 4 gigabytes of memory, and the one chosen as control plane has 1 CPU. What falls short?",
+      "back": "The control-plane machine: kubeadm asks for 2 CPUs or more there.",
+      "choices": "A) The control-plane machine’s CPU count\nB) The memory on every machine\nC) Nothing; the workers are what need 2 CPUs",
+      "choicesExplained": "B: 4 gigabytes is above the 2-gigabyte minimum. C: the 2-CPU minimum is for control-plane machines.",
+      "explanation": "The CPU minimum is set for control-plane machines, and 1 is below it.",
+      "evidence": "2 GB or more of RAM per machine (any less will leave little room for your apps). 2 CPUs or more for control plane machines.",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Before you begin”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#before-you-begin",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-host-requirements"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.port-6443",
+      "type": "basic",
+      "priority": "core",
+      "order": 2075,
+      "kind": "fact",
+      "front": "On which port does the Kubernetes API server listen by default?",
+      "back": "6443.",
+      "explanation": "The ports table lists its users simply as “All”.",
+      "evidence": "TCP Inbound 6443 Kubernetes API server All",
+      "source": "Kubernetes documentation, “Ports and Protocols”, “Control plane”",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/#control-plane",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cka.port-6443",
+        "cka.control-plane-ports"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.port-etcd",
+      "type": "basic",
+      "priority": "core",
+      "order": 2080,
+      "kind": "fact",
+      "front": "Which ports does the etcd server client API use on a control-plane node, and who uses them?",
+      "back": "Ports 2379–2380, used by kube-apiserver and etcd.",
+      "explanation": "The docs note you can also host etcd externally or on custom ports.",
+      "evidence": "TCP Inbound 2379-2380 etcd server client API kube-apiserver, etcd TCP Inbound 10250 Kubelet API Self, Control plane TCP Inbound 10259 kube-scheduler Self TCP Inbound 10257 kube-controller-manager Self Although etcd ports are included in control plane section, you can also host your own etcd cluster externally or on custom ports.",
+      "source": "Kubernetes documentation, “Ports and Protocols”, “Control plane”",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/#control-plane",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "etcd",
+        "kube-apiserver",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.port-etcd",
+        "cka.control-plane-ports"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.port-10250",
+      "type": "basic",
+      "priority": "core",
+      "order": 2085,
+      "kind": "fact",
+      "front": "Which port does the kubelet API use, and on which nodes must it be open?",
+      "back": "Port 10250, on control-plane and worker nodes alike.",
+      "explanation": "Its users are listed as the node itself and the control plane.",
+      "evidence": "Worker node(s) Protocol Direction Port Range Purpose Used By TCP Inbound 10250 Kubelet API Self, Control plane",
+      "source": "Kubernetes documentation, “Ports and Protocols”, “Worker node(s)”",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/#node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.port-10250",
+        "cka.control-plane-ports"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.port-scheduler-controller-manager",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2090,
+      "kind": "fact",
+      "front": "Which control-plane components use ports 10259 and 10257?",
+      "back": "10259: kube-scheduler. 10257: kube-controller-manager.",
+      "explanation": "Both are listed as used only by the component itself (“Self”).",
+      "evidence": "TCP Inbound 10259 kube-scheduler Self TCP Inbound 10257 kube-controller-manager Self",
+      "source": "Kubernetes documentation, “Ports and Protocols”, “Control plane”",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/#control-plane",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-scheduler",
+        "kube-controller-manager",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.port-scheduler-controller-manager"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-ports",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2100,
+      "kind": "application",
+      "front": "A new worker cannot join: a firewall between it and the control plane blocks one inbound port on the control-plane node. Which port matters most for the join?",
+      "back": "Port 6443, the API server.",
+      "choices": "A) 6443\nB) 2379\nC) 10257",
+      "choicesExplained": "B: the etcd client port is used by kube-apiserver and etcd, not by other nodes. C: kube-controller-manager’s port is used only by itself.",
+      "explanation": "The API server port is the one listed as used by all, and kubeadm join talks to the API server.",
+      "evidence": "TCP Inbound 6443 Kubernetes API server All TCP Inbound 2379-2380 etcd server client API kube-apiserver, etcd",
+      "source": "Kubernetes documentation, “Ports and Protocols”, “Control plane”",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/#control-plane",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-apiserver",
+        "etcd",
+        "kube-controller-manager",
+        "control plane",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.port-6443",
+        "cka.port-etcd",
+        "cka.control-plane-ports"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.classify-port-10250",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2105,
+      "kind": "classification",
+      "front": "An audit finds inbound traffic on port 10250 at a worker node, coming from the control plane. What is being reached?",
+      "back": "The kubelet API.",
+      "choices": "A) The kubelet API\nB) kube-proxy\nC) A NodePort Service",
+      "choicesExplained": "B: kube-proxy uses 10256. C: NodePort Services use 30000–32767 by default.",
+      "explanation": "The worker table lists 10250 as the kubelet API, used by the node itself and the control plane.",
+      "evidence": "TCP Inbound 10250 Kubelet API Self, Control plane TCP Inbound 10256 kube-proxy Self, Load balancers TCP Inbound 30000-32767 NodePort Services† All",
+      "source": "Kubernetes documentation, “Ports and Protocols”, “Worker node(s)”",
+      "sourceURL": "https://kubernetes.io/docs/reference/networking/ports-and-protocols/#node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-proxy",
+        "NodePort",
+        "node",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.port-10250"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.swap-default",
+      "type": "basic",
+      "priority": "core",
+      "order": 2110,
+      "kind": "fact",
+      "front": "By default, what does the kubelet do if it detects swap memory on a node?",
+      "back": "It fails to start.",
+      "explanation": "So swap must be either disabled or tolerated by the kubelet.",
+      "evidence": "The default behavior of a kubelet is to fail to start if swap memory is detected on a node. This means that swap should either be disabled or tolerated by kubelet.",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Swap configuration”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#swap-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.swap-default"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.swap-tolerate",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2115,
+      "kind": "fact",
+      "front": "Which kubelet setting lets it start with swap on, and do workloads then use swap?",
+      "back": "failSwapOn: false. Workloads still get no swap by default (swapBehavior NoSwap).",
+      "explanation": "Giving workloads swap takes a second setting, a swapBehavior other than the default NoSwap.",
+      "evidence": "To tolerate swap, add failSwapOn: false to kubelet configuration or as a command line argument. Note: even if failSwapOn: false is provided, workloads wouldn't have swap access by default. This can be changed by setting a swapBehavior , again in the kubelet configuration file. To use swap, set a swapBehavior other than the default NoSwap setting.",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Swap configuration”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#swap-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet configuration file"
+      ],
+      "conceptIDs": [
+        "cka.swap-default"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.swap-disable",
+      "type": "basic",
+      "priority": "core",
+      "order": 2120,
+      "kind": "fact",
+      "front": "sudo swapoff -a disables swap. What else is needed to keep it off after a reboot?",
+      "back": "Disable swap in its config, such as /etc/fstab or systemd.swap.",
+      "explanation": "swapoff -a only disables swapping temporarily.",
+      "evidence": "To disable swap, sudo swapoff -a can be used to disable swapping temporarily. To make this change persistent across reboots, make sure swap is disabled in config files like /etc/fstab , systemd.swap , depending how it was configured on your system.",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Swap configuration”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#swap-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [],
+      "conceptIDs": [
+        "cka.swap-default"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-swap",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2125,
+      "kind": "application",
+      "front": "A node worked yesterday. After a reboot the kubelet will not start, and free shows swap in use. Someone had only run swapoff -a. What fixes it for good?",
+      "back": "Remove or disable the swap entry in /etc/fstab (or systemd.swap), then turn swap off.",
+      "choices": "A) Disable swap in /etc/fstab or systemd.swap as well\nB) Run swapoff -a again after each reboot\nC) Reinstall the kubelet package",
+      "choicesExplained": "B: works only until the next reboot. C: the package is fine; the kubelet refuses to start because swap is on.",
+      "explanation": "swapoff -a is temporary, and a kubelet at default settings fails to start when swap is present.",
+      "evidence": "To disable swap, sudo swapoff -a can be used to disable swapping temporarily. To make this change persistent across reboots, make sure swap is disabled in config files like /etc/fstab , systemd.swap",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Swap configuration”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#swap-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.swap-default"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.ipv4-default",
+      "type": "basic",
+      "priority": "core",
+      "order": 2130,
+      "kind": "fact",
+      "front": "By default, does the Linux kernel route IPv4 packets between interfaces?",
+      "back": "No.",
+      "explanation": "Most cluster networking implementations change this if needed, but some expect the administrator to do it.",
+      "evidence": "By default, the Linux kernel does not allow IPv4 packets to be routed between interfaces. Most Kubernetes cluster networking implementations will change this setting (if needed), but some might expect the administrator to do it for them.",
+      "source": "Kubernetes documentation, “Container Runtimes”, “Network configuration”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/#prerequisite-ipv4-forwarding-optional",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.ipv4-forwarding"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.ipv4-enable",
+      "type": "basic",
+      "priority": "core",
+      "order": 2135,
+      "kind": "fact",
+      "front": "Which sysctl setting enables IPv4 packet forwarding for Kubernetes, and how is it applied without a reboot?",
+      "back": "net.ipv4.ip_forward = 1 in /etc/sysctl.d/k8s.conf, applied with sudo sysctl --system.",
+      "explanation": "A file in /etc/sysctl.d keeps the setting across reboots, while sysctl --system applies it now.",
+      "evidence": "sysctl params required by setup, params persist across reboots cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf net.ipv4.ip_forward = 1 EOF # Apply sysctl params without reboot sudo sysctl --system",
+      "source": "Kubernetes documentation, “Container Runtimes”, “Enable IPv4 packet forwarding”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/#prerequisite-ipv4-forwarding-optional",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [],
+      "conceptIDs": [
+        "cka.ipv4-forwarding"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-ipv4",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2140,
+      "kind": "application",
+      "front": "Your network plugin’s docs say it will not change kernel settings for you. Which check belongs in node preparation?",
+      "back": "Confirm sysctl net.ipv4.ip_forward returns 1, and set it if not.",
+      "choices": "A) sysctl net.ipv4.ip_forward should show 1\nB) swapon should list an active swap device\nC) Port 2379 should be open on every worker",
+      "choicesExplained": "B: swap should be off (or tolerated), not on. C: the etcd port matters on control-plane nodes, not every worker.",
+      "explanation": "The kernel does not forward IPv4 by default, and some implementations leave enabling it to the administrator.",
+      "evidence": "Verify that net.ipv4.ip_forward is set to 1 with: sysctl net.ipv4.ip_forward",
+      "source": "Kubernetes documentation, “Container Runtimes”, “Enable IPv4 packet forwarding”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/#prerequisite-ipv4-forwarding-optional",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CNI",
+        "etcd",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.ipv4-forwarding"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.runtime-detect",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2145,
+      "kind": "fact",
+      "front": "A node has two container runtimes installed. How do you tell kubeadm which one to use?",
+      "back": "Pass the --cri-socket argument to kubeadm.",
+      "explanation": "Otherwise kubeadm picks a runtime by checking a list of well-known endpoints.",
+      "evidence": "(Optional) kubeadm tries to detect the container runtime by using a list of well known endpoints. To use different container runtime or if there are more than one installed on the provisioned node, specify the --cri-socket argument to kubeadm .",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Initializing your control-plane node”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#initializing-your-control-plane-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-init"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.two-cgroup-drivers",
+      "type": "basic",
+      "priority": "core",
+      "order": 2150,
+      "kind": "fact",
+      "front": "Which two cgroup drivers are available, and which is the kubelet’s default?",
+      "back": "cgroupfs and systemd; cgroupfs is the kubelet’s default.",
+      "explanation": "With cgroupfs, the kubelet and runtime work with the cgroup filesystem directly.",
+      "evidence": "There are two cgroup drivers available: cgroupfs systemd cgroupfs driver The cgroupfs driver is the default cgroup driver in the kubelet . When the cgroupfs driver is used, the kubelet and the container runtime directly interface with the cgroup filesystem to configure cgroups.",
+      "source": "Kubernetes documentation, “Container Runtimes”, “cgroupfs driver”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/#cgroupfs-cgroup-driver",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cgroup driver"
+      ],
+      "conceptIDs": [
+        "cka.cgroup-driver"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.cgroup-driver-match",
+      "type": "basic",
+      "priority": "core",
+      "order": 2155,
+      "kind": "fact",
+      "front": "What must be true of the kubelet’s and the container runtime’s cgroup drivers?",
+      "back": "They must be the same driver, configured the same way.",
+      "explanation": "The docs call this critical, and ask for the same configuration on both sides as well.",
+      "evidence": "It's critical that the kubelet and the container runtime use the same cgroup driver and are configured the same.",
+      "source": "Kubernetes documentation, “Container Runtimes”, “cgroup drivers”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/#cgroup-drivers",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cgroup driver"
+      ],
+      "conceptIDs": [
+        "cka.cgroup-driver-match"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.cgroup-v2-systemd",
+      "type": "basic",
+      "priority": "core",
+      "order": 2160,
+      "kind": "fact",
+      "front": "Which cgroup driver should you use with cgroup v2?",
+      "back": "systemd, not cgroupfs.",
+      "explanation": "cgroupfs is also not recommended when systemd is the init system.",
+      "evidence": "The cgroupfs driver is not recommended when systemd is the init system because systemd expects a single cgroup manager on the system. Additionally, if you use cgroup v2 , use the systemd cgroup driver instead of cgroupfs .",
+      "source": "Kubernetes documentation, “Container Runtimes”, “cgroupfs driver”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/#cgroupfs-cgroup-driver",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cgroup driver"
+      ],
+      "conceptIDs": [
+        "cka.systemd-cgroup-driver"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.cgroupfs-vs-systemd",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2165,
+      "kind": "contrast",
+      "front": "On a systemd host, why can cgroupfs for the kubelet and runtime cause trouble?",
+      "back": "The system gets two cgroup managers, and so two views of the available and in-use resources.",
+      "explanation": "systemd allocates a cgroup per systemd unit, so it already acts as a cgroup manager.",
+      "evidence": "systemd has a tight integration with cgroups and allocates a cgroup per systemd unit. As a result, if you use systemd as the init system with the cgroupfs driver, the system gets two different cgroup managers. Two cgroup managers result in two views of the available and in-use resources in the system.",
+      "source": "Kubernetes documentation, “Container Runtimes”, “systemd cgroup driver”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/#systemd-cgroup-driver",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cgroup driver"
+      ],
+      "conceptIDs": [
+        "cka.cgroupfs-vs-systemd"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.kubelet-cgroupdriver-field",
+      "type": "basic",
+      "priority": "core",
+      "order": 2170,
+      "kind": "fact",
+      "front": "Which KubeletConfiguration field sets the kubelet’s cgroup driver to systemd?",
+      "back": "cgroupDriver: systemd",
+      "explanation": "The setting lives in the kubelet’s own configuration, the KubeletConfiguration.",
+      "evidence": "To set systemd as the cgroup driver, edit the KubeletConfiguration option of cgroupDriver and set it to systemd .",
+      "source": "Kubernetes documentation, “Container Runtimes”, “systemd cgroup driver”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/#systemd-cgroup-driver",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cgroup driver",
+        "kubelet configuration file"
+      ],
+      "conceptIDs": [
+        "cka.cgroup-driver",
+        "cka.kubelet-config-file"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.containerd-systemdcgroup",
+      "type": "basic",
+      "priority": "core",
+      "order": 2175,
+      "kind": "fact",
+      "front": "In /etc/containerd/config.toml, which runc option turns on the systemd cgroup driver?",
+      "back": "SystemdCgroup = true",
+      "explanation": "The option sits under the runc runtime options; its section name differs between containerd 1.x and 2.x.",
+      "evidence": "To use the systemd cgroup driver in /etc/containerd/config.toml with runc , set the following config based on your Containerd version Containerd versions 1.x: [plugins.\"io.containerd.grpc.v1.cri\".containerd.runtimes.runc] ... [plugins.\"io.containerd.grpc.v1.cri\".containerd.runtimes.runc.options] SystemdCgroup = true",
+      "source": "Kubernetes documentation, “Container Runtimes”, “Configuring the systemd cgroup driver”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/#containerd-systemd",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cgroup driver"
+      ],
+      "conceptIDs": [
+        "cka.cgroup-driver-match"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-cgroup",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2180,
+      "kind": "application",
+      "front": "A node uses cgroup v2. The kubelet is set to cgroupDriver: systemd, but containerd’s config has SystemdCgroup = false. What should you change?",
+      "back": "Set SystemdCgroup = true in containerd’s config and restart containerd.",
+      "choices": "A) Set SystemdCgroup = true for containerd\nB) Set the kubelet to cgroupfs\nC) Nothing; the two drivers work independently",
+      "choicesExplained": "B: this would match, but cgroupfs is the wrong choice with cgroup v2. C: the kubelet and runtime must use the same driver.",
+      "explanation": "Setting systemd for the kubelet means setting it for the runtime too.",
+      "evidence": "If you configure systemd as the cgroup driver for the kubelet, you must also configure systemd as the cgroup driver for the container runtime.",
+      "source": "Kubernetes documentation, “Container Runtimes”, “systemd cgroup driver”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/container-runtimes/#systemd-cgroup-driver",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cgroup driver",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.cgroup-driver-match",
+        "cka.cgroup-driver",
+        "cka.systemd-cgroup-driver"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.packages-three",
+      "type": "basic",
+      "priority": "core",
+      "order": 2185,
+      "kind": "fact",
+      "front": "kubeadm, kubelet and kubectl are installed on every machine. Which of them runs on all machines and starts Pods and containers?",
+      "back": "kubelet.",
+      "explanation": "kubeadm is the command that bootstraps the cluster, and kubectl the command-line tool for talking to it.",
+      "evidence": "kubeadm : the command to bootstrap the cluster. kubelet : the component that runs on all of the machines in your cluster and does things like starting pods and containers. kubectl : the command line util to talk to your cluster.",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Installing kubeadm, kubelet and kubectl”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "kubectl",
+        "Pod",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.install-kubeadm-packages"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.kubeadm-no-manage",
+      "type": "basic",
+      "priority": "core",
+      "order": 2190,
+      "kind": "fact",
+      "front": "Does kubeadm install or manage the kubelet and kubectl for you?",
+      "back": "No: you must make sure they match the control-plane version kubeadm installs.",
+      "explanation": "Otherwise there is a risk of version skew, which can lead to unexpected, buggy behaviour.",
+      "evidence": "kubeadm will not install or manage kubelet or kubectl for you, so you will need to ensure they match the version of the Kubernetes control plane you want kubeadm to install for you. If you do not, there is a risk of a version skew occurring that can lead to unexpected, buggy behaviour.",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Installing kubeadm, kubelet and kubectl”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "kubectl",
+        "version skew",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.install-kubeadm-packages"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.kubelet-not-newer",
+      "type": "basic",
+      "priority": "core",
+      "order": 2195,
+      "kind": "fact",
+      "front": "Can the kubelet be newer than the API server?",
+      "back": "No. The kubelet may be older than the API server, but never newer.",
+      "explanation": "The install page’s example: a 1.7.0 kubelet should be fully compatible with a 1.8.0 API server, but a newer kubelet with an older API server is not.",
+      "evidence": "However, one minor version skew between the kubelet and the control plane is supported, but the kubelet version may never exceed the API server version. For example, the kubelet running 1.7.0 should be fully compatible with a 1.8.0 API server, but not vice versa.",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Installing kubeadm, kubelet and kubectl”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "version skew",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cka.install-kubeadm-packages"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.apt-mark-hold",
+      "type": "basic",
+      "priority": "core",
+      "order": 2200,
+      "kind": "fact",
+      "front": "After installing kubelet, kubeadm and kubectl with apt, which command pins their versions?",
+      "back": "sudo apt-mark hold kubelet kubeadm kubectl",
+      "explanation": "The instructions keep Kubernetes packages out of normal system upgrades, because kubeadm and Kubernetes need special attention to upgrade.",
+      "evidence": "Warning: These instructions exclude all Kubernetes packages from any system upgrades. This is because kubeadm and Kubernetes require special attention to upgrade .",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Installing kubeadm, kubelet and kubectl”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "cka.apt-mark-hold"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-apt-mark-hold",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2205,
+      "kind": "application",
+      "front": "A colleague runs apt-get upgrade on all nodes each week. What stops it from upgrading the Kubernetes packages behind kubeadm’s back?",
+      "back": "`apt-mark hold kubelet kubeadm kubectl`, which pins the three packages at their installed versions.",
+      "choices": "A) apt-mark hold kubelet kubeadm kubectl\nB) systemctl enable --now kubelet\nC) Nothing; kubeadm blocks package upgrades itself",
+      "choicesExplained": "B: this starts the kubelet at boot; it does not pin versions. C: kubeadm does not install or manage these packages.",
+      "explanation": "The install steps pin the three packages so that they are upgraded only through the Kubernetes upgrade procedure.",
+      "evidence": "Update the apt package index, install kubelet, kubeadm and kubectl, and pin their version: sudo apt-get update sudo apt-get install -y kubelet kubeadm kubectl sudo apt-mark hold kubelet kubeadm kubectl",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Installing kubeadm, kubelet and kubectl”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "kubectl",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.apt-mark-hold"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.kubelet-crashloop",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2210,
+      "kind": "fact",
+      "front": "After installing the packages but before kubeadm init, the kubelet restarts every few seconds. Is this a fault?",
+      "back": "No. It is waiting in a crashloop for kubeadm to tell it what to do.",
+      "explanation": "The kubelet runs normally once the control plane has been initialised.",
+      "evidence": "the kubelet restarts every few seconds as it waits in a crashloop for kubeadm to tell it what to do. This crashloop is expected and normal. After you initialize your control-plane, the kubelet runs normally.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Component installation”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#component-installation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.kubelet-crashloop-before-init"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.repo-per-minor",
+      "type": "basic",
+      "priority": "core",
+      "order": 2215,
+      "kind": "fact",
+      "front": "To install a different Kubernetes minor version from pkgs.k8s.io, what must you change?",
+      "back": "The minor version in the repository address, since each minor version has its own repository.",
+      "explanation": "Each repository therefore carries packages for one minor version only.",
+      "evidence": "Note: There's a dedicated package repository for each Kubernetes minor version.",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Installing kubeadm, kubelet and kubectl”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "pkgs.k8s.io package repositories"
+      ],
+      "conceptIDs": [
+        "cka.pkgs-k8s-io"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.legacy-repos",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2220,
+      "kind": "fact",
+      "front": "What happened to the legacy apt.kubernetes.io and yum.kubernetes.io repositories?",
+      "back": "They were deprecated and frozen from 13 September 2023, and might be removed without further notice.",
+      "explanation": "Versions released after that date can only be installed from pkgs.k8s.io.",
+      "evidence": "The legacy package repositories ( apt.kubernetes.io and yum.kubernetes.io ) have been deprecated and frozen starting from September 13, 2023 . Using the new package repositories hosted at pkgs.k8s.io is strongly recommended and required in order to install Kubernetes versions released after September 13, 2023.",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Installing kubeadm, kubelet and kubectl”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "pkgs.k8s.io package repositories"
+      ],
+      "conceptIDs": [
+        "cka.legacy-repos-frozen"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-repo",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2225,
+      "kind": "application",
+      "front": "You must install kubeadm 1.35, but apt only offers 1.34 packages. /etc/apt/sources.list.d/kubernetes.list points at …/core:/stable:/v1.34/deb/. What is the fix?",
+      "back": "Point the repository line at the v1.35 repository, then apt-get update and install.",
+      "choices": "A) Point the repository line at v1.35 and update\nB) Add apt.kubernetes.io as a second source\nC) Run apt-get upgrade until 1.35 appears",
+      "choicesExplained": "B: the legacy repositories are frozen and lack newer releases. C: the v1.34 repository never holds 1.35 packages.",
+      "explanation": "Each minor version has its own repository, so another minor version means pointing at another repository.",
+      "evidence": "Note: There's a dedicated package repository for each Kubernetes minor version.",
+      "source": "Kubernetes documentation, “Installing kubeadm”, “Installing kubeadm, kubelet and kubectl”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "pkgs.k8s.io package repositories",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.pkgs-k8s-io",
+        "cka.install-kubeadm-packages"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.init-preflight",
+      "type": "basic",
+      "priority": "core",
+      "order": 2230,
+      "kind": "fact",
+      "front": "What does kubeadm init do first, and how can you downgrade its errors to warnings?",
+      "back": "Runs pre-flight checks; --ignore-preflight-errors=<list> turns the listed errors into warnings.",
+      "explanation": "Some checks only warn, while others stop kubeadm until the problem is fixed or ignored.",
+      "evidence": "Runs a series of pre-flight checks to validate the system state before making changes. Some checks only trigger warnings, others are considered errors and will exit kubeadm until the problem is corrected or the user specifies --ignore-preflight-errors=<list-of-errors> .",
+      "source": "Kubernetes documentation, “kubeadm init”, “Init workflow”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#init-workflow",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-init"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.init-static-pods",
+      "type": "basic",
+      "priority": "core",
+      "order": 2235,
+      "kind": "fact",
+      "front": "Where does kubeadm init write the control plane’s static Pod manifests?",
+      "back": "/etc/kubernetes/manifests, which the kubelet watches.",
+      "explanation": "It writes manifests for the API server, controller manager and scheduler, plus etcd when no external etcd is given.",
+      "evidence": "Generates static Pod manifests for the API server, controller-manager and scheduler. In case an external etcd is not provided, an additional static Pod manifest is generated for etcd. Static Pod manifests are written to /etc/kubernetes/manifests ; the kubelet watches this directory for Pods to create on startup.",
+      "source": "Kubernetes documentation, “kubeadm init”, “Init workflow”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#init-workflow",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "static Pod / mirror Pod",
+        "kube-apiserver",
+        "kube-controller-manager",
+        "kube-scheduler",
+        "etcd",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cka.static-pod-manifests"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-static-pods",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2240,
+      "kind": "application",
+      "front": "On a kubeadm control-plane node you must add a flag to the API server. Where do you make the change?",
+      "back": "In its static Pod manifest under /etc/kubernetes/manifests.",
+      "choices": "A) /etc/kubernetes/manifests/kube-apiserver.yaml\nB) kubectl edit deployment kube-apiserver -n kube-system\nC) The kubelet configuration file",
+      "choicesExplained": "B: kubeadm runs the API server as a static Pod, not a Deployment. C: that file configures the kubelet, not the API server.",
+      "explanation": "kubeadm writes the API server as a static Pod manifest, and the kubelet creates Pods from that directory.",
+      "evidence": "Static Pod manifests are written to /etc/kubernetes/manifests ; the kubelet watches this directory for Pods to create on startup.",
+      "source": "Kubernetes documentation, “kubeadm init”, “Init workflow”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#init-workflow",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "static Pod / mirror Pod",
+        "kube-apiserver",
+        "kubelet configuration file",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "cka.static-pod-manifests"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.init-addons",
+      "type": "basic",
+      "priority": "core",
+      "order": 2245,
+      "kind": "fact",
+      "front": "Which two add-on components does kubeadm init install through the API server?",
+      "back": "The CoreDNS DNS server and kube-proxy.",
+      "explanation": "The DNS server is deployed but will not be scheduled until a network plugin is installed.",
+      "evidence": "Installs a DNS server (CoreDNS) and the kube-proxy addon components via the API server. Please note that although the DNS server is deployed, it will not be scheduled until CNI is installed.",
+      "source": "Kubernetes documentation, “kubeadm init”, “Init workflow”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#init-workflow",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kube-proxy",
+        "addons",
+        "CNI"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-init"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-init",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2255,
+      "kind": "application",
+      "front": "kubeadm init stops at pre-flight with an error about swap on a lab machine where you have deliberately allowed swap. What lets it continue?",
+      "back": "kubeadm init --ignore-preflight-errors=Swap",
+      "choices": "A) --ignore-preflight-errors=Swap\nB) --skip-phases=preflight\nC) --dry-run",
+      "choicesExplained": "B: skipping the whole phase drops every check, not just the swap one. C: dry run only prints what would be done.",
+      "explanation": "The flag takes a list of checks whose errors are shown as warnings; Swap is the reference’s own example.",
+      "evidence": "--ignore-preflight-errors strings A list of checks whose errors will be shown as warnings. Example: 'IsPrivilegedUser,Swap'.",
+      "source": "Kubernetes documentation, “kubeadm init”, “Options”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#options",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-init"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.pod-cidr-overlap",
+      "type": "basic",
+      "priority": "core",
+      "order": 2260,
+      "kind": "fact",
+      "front": "What must the Pod network range given to --pod-network-cidr not do?",
+      "back": "Overlap any of the host networks.",
+      "explanation": "The docs warn that problems are likely if there is any overlap.",
+      "evidence": "Take care that your Pod network must not overlap with any of the host networks: you are likely to see problems if there is any overlap.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Installing a Pod network add-on”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#pod-network",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--pod-network-cidr",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.pod-network-cidr"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-pod-cidr",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2265,
+      "kind": "application",
+      "front": "Your hosts sit on 10.244.0.0/24, and your network plugin prefers 10.244.0.0/16 for Pods. What do you do?",
+      "back": "Choose a non-overlapping block, pass it to kubeadm init --pod-network-cidr and set the same in the plugin’s YAML.",
+      "choices": "A) Pick another block for --pod-network-cidr and the plugin’s YAML\nB) Keep 10.244.0.0/16; overlap is harmless\nC) Change only the plugin’s YAML",
+      "choicesExplained": "B: overlap with host networks is likely to cause problems. C: kubeadm init must be given the same range with --pod-network-cidr.",
+      "explanation": "The docs ask for a replacement block used in both places when the plugin’s range collides with a host network.",
+      "evidence": "you should think of a suitable CIDR block to use instead, then use that during kubeadm init with --pod-network-cidr and as a replacement in your network plugin's YAML",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Installing a Pod network add-on”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#pod-network",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--pod-network-cidr",
+        "kubeadm",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "cka.pod-network-cidr"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.cpe-no-ha-later",
+      "type": "basic",
+      "priority": "core",
+      "order": 2270,
+      "kind": "fact",
+      "front": "Can kubeadm turn a single control-plane cluster created without --control-plane-endpoint into a highly available one?",
+      "back": "No, kubeadm does not support that.",
+      "explanation": "Adding the shared endpoint afterwards is not a path kubeadm offers.",
+      "evidence": "Turning a single control plane cluster created without --control-plane-endpoint into a highly available cluster is not supported by kubeadm.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Considerations about apiserver-advertise-address and ControlPlaneEndpoint”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#considerations-about-apiserver-advertise-address-and-controlplaneendpoint",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--control-plane-endpoint",
+        "kubeadm",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.control-plane-endpoint"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-cpe",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2275,
+      "kind": "application",
+      "front": "You are building a one-node control plane today, but the team plans to add two more control-plane nodes next quarter. What should kubeadm init include?",
+      "back": "--control-plane-endpoint set to a DNS name (or load-balancer address) that can later point at a load balancer.",
+      "choices": "A) --control-plane-endpoint=cluster-endpoint (a DNS name)\nB) --apiserver-advertise-address=<this node’s IP>\nC) Nothing now; add the endpoint when the new nodes arrive",
+      "choicesExplained": "B: this sets only this node’s own advertised address. C: kubeadm cannot convert a cluster made without the endpoint into a highly available one.",
+      "explanation": "A DNS name can be moved to the load balancer’s address later, so the same endpoint serves every control-plane node.",
+      "evidence": "This will allow you to pass --control-plane-endpoint=cluster-endpoint to kubeadm init and pass the same DNS name to kubeadm join . Later you can modify cluster-endpoint to point to the address of your load-balancer in a high availability scenario.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Considerations about apiserver-advertise-address and ControlPlaneEndpoint”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#considerations-about-apiserver-advertise-address-and-controlplaneendpoint",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--control-plane-endpoint",
+        "--apiserver-advertise-address",
+        "kubeadm",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.control-plane-endpoint"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.advertise-vs-endpoint",
+      "type": "basic",
+      "priority": "core",
+      "order": 2280,
+      "kind": "contrast",
+      "front": "--apiserver-advertise-address against --control-plane-endpoint: what does each set?",
+      "back": "The first: this one node’s advertised API server address. The second: the shared endpoint for all control-plane nodes.",
+      "explanation": "The endpoint accepts IP addresses and DNS names that map to IP addresses.",
+      "evidence": "While --apiserver-advertise-address can be used to set the advertised address for this particular control-plane node's API server, --control-plane-endpoint can be used to set the shared endpoint for all control-plane nodes. --control-plane-endpoint allows both IP addresses and DNS names that can map to IP addresses.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Considerations about apiserver-advertise-address and ControlPlaneEndpoint”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#considerations-about-apiserver-advertise-address-and-controlplaneendpoint",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "--apiserver-advertise-address",
+        "--control-plane-endpoint",
+        "kube-apiserver",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.apiserver-advertise-address",
+        "cka.control-plane-endpoint"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.advertise-address-certs",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2285,
+      "kind": "fact",
+      "front": "Why is it costly to change a control-plane component’s IP address after kubeadm init?",
+      "back": "The addresses are written into the components’ certificates, so new certificates must be signed and components restarted.",
+      "explanation": "The IPs become part of the certificates’ subject alternative name fields.",
+      "evidence": "The IP addresses that you assign to control plane components become part of their X.509 certificates' subject alternative name fields. Changing these IP addresses would require signing new certificates and restarting the affected components",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Network setup”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#network-setup",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "control plane",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.apiserver-advertise-address"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.admin-conf-copy",
+      "type": "basic",
+      "priority": "core",
+      "order": 2290,
+      "kind": "fact",
+      "front": "After kubeadm init, which commands let a regular user run kubectl against the new cluster?",
+      "back": "Copy /etc/kubernetes/admin.conf to .kube/config in their home directory (mkdir, sudo cp, then chown it to the user).",
+      "explanation": "The chown gives the regular user ownership of the copied file.",
+      "evidence": "To start using your cluster, you need to run the following as a regular user: mkdir -p $HOME/.kube sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config sudo chown $(id -u):$(id -g) $HOME/.kube/config",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “More information”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#more-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "kubectl",
+        "kubeconfig"
+      ],
+      "conceptIDs": [
+        "cka.admin-conf"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.admin-conf-root",
+      "type": "basic",
+      "priority": "core",
+      "order": 2295,
+      "kind": "fact",
+      "front": "As root, what is the quick way to point kubectl at a new kubeadm cluster?",
+      "back": "export KUBECONFIG=/etc/kubernetes/admin.conf",
+      "explanation": "It uses the administrator kubeconfig in place, instead of copying it.",
+      "evidence": "Alternatively, if you are the root user, you can run: export KUBECONFIG = /etc/kubernetes/admin.conf",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “More information”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#more-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "kubeconfig",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.admin-conf"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.admin-conf-privilege",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2300,
+      "kind": "fact",
+      "front": "What access does admin.conf give, and how should it be treated?",
+      "back": "Cluster-admin rights, through the kubeadm:cluster-admins group; do not share it.",
+      "explanation": "That group is bound to the built-in cluster-admin ClusterRole.",
+      "evidence": "The group kubeadm:cluster-admins is bound to the built-in cluster-admin ClusterRole. Do not share the admin.conf file with anyone.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “More information”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#more-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "ClusterRole",
+        "kubeconfig"
+      ],
+      "conceptIDs": [
+        "cka.admin-conf"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-admin-conf",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2305,
+      "kind": "application",
+      "front": "Right after kubeadm init, user ops runs kubectl get nodes and it cannot reach any cluster. What did ops skip?",
+      "back": "Copying /etc/kubernetes/admin.conf to .kube/config in the home directory and taking ownership of it.",
+      "choices": "A) Copy admin.conf to ~/.kube/config and chown it\nB) Install a Pod network add-on\nC) Run kubeadm join on the control-plane node",
+      "choicesExplained": "B: the add-on is needed for Pod traffic, not for kubectl to find the cluster. C: kubeadm join is for other nodes; this one is already initialised.",
+      "explanation": "kubeadm init’s output tells a regular user to run these commands before using the cluster.",
+      "evidence": "To make kubectl work for your non-root user, run these commands, which are also part of the kubeadm init output:",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “More information”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#more-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "kubeconfig",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.admin-conf"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.pod-network-required",
+      "type": "basic",
+      "priority": "core",
+      "order": 2310,
+      "kind": "fact",
+      "front": "What must you deploy after kubeadm init so that Pods can talk to each other?",
+      "back": "A Pod network add-on based on CNI, e.g. with kubectl apply -f <add-on.yaml>.",
+      "explanation": "Without it, Pods have no network over which to communicate with each other.",
+      "evidence": "You must deploy a Container Network Interface (CNI) based Pod network add-on so that your Pods can communicate with each other.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Installing a Pod network add-on”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#pod-network",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CNI",
+        "addons",
+        "kubectl apply",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.install-pod-network"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.one-pod-network",
+      "type": "basic",
+      "priority": "core",
+      "order": 2315,
+      "kind": "fact",
+      "front": "How many Pod networks can a kubeadm cluster have?",
+      "back": "Only one.",
+      "explanation": "The limit is per cluster, so the add-on you choose is the one the cluster keeps.",
+      "evidence": "You can install only one Pod network per cluster.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Installing a Pod network add-on”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#pod-network",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "cluster",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.install-pod-network"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.network-working-check",
+      "type": "basic",
+      "priority": "core",
+      "order": 2320,
+      "kind": "fact",
+      "front": "How do you confirm that a newly installed Pod network works, before joining nodes?",
+      "back": "Check that the CoreDNS Pod is Running in kubectl get pods --all-namespaces.",
+      "explanation": "The docs say to continue with joining nodes once the CoreDNS Pod is up and running.",
+      "evidence": "Once a Pod network has been installed, you can confirm that it is working by checking that the CoreDNS Pod is Running in the output of kubectl get pods --all-namespaces . And once the CoreDNS Pod is up and running, you can continue by joining your nodes.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Installing a Pod network add-on”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#pod-network",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubectl",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.install-pod-network",
+        "cka.coredns-needs-cni"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.coredns-needs-cni",
+      "type": "basic",
+      "priority": "core",
+      "order": 2325,
+      "kind": "fact",
+      "front": "Will cluster DNS (CoreDNS) start on a kubeadm cluster with no Pod network installed?",
+      "back": "No. It will not start up before a network is installed.",
+      "explanation": "It is a matter of order: the network add-on has to come first.",
+      "evidence": "Cluster DNS (CoreDNS) will not start up before a network is installed.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Installing a Pod network add-on”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#pod-network",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CNI",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.coredns-needs-cni"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-coredns-pending",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2330,
+      "kind": "application",
+      "front": "After kubeadm init, the CoreDNS Pods stay Pending and nothing else looks wrong. What is the most likely cause?",
+      "back": "No Pod network add-on has been installed yet.",
+      "choices": "A) No Pod network add-on yet\nB) CoreDNS is misconfigured and must be reinstalled\nC) The control-plane node is out of memory",
+      "choicesExplained": "B: CoreDNS is expected to wait for a network; nothing is wrong with it. C: possible in general, but nothing points to it, while a missing network always blocks CoreDNS.",
+      "explanation": "kubeadm deploys the DNS server, but it is not scheduled until CNI is installed.",
+      "evidence": "Please note that although the DNS server is deployed, it will not be scheduled until CNI is installed.",
+      "source": "Kubernetes documentation, “kubeadm init”, “Init workflow”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#init-workflow",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "CNI",
+        "addons",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.coredns-needs-cni",
+        "cka.install-pod-network"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.cp-isolation",
+      "type": "basic",
+      "priority": "core",
+      "order": 2335,
+      "kind": "fact",
+      "front": "By default, does a kubeadm cluster schedule ordinary Pods on control-plane nodes?",
+      "back": "No, for security reasons.",
+      "explanation": "The default can be changed, for example for a single-machine cluster.",
+      "evidence": "By default, your cluster will not schedule Pods on the control plane nodes for security reasons. If you want to be able to schedule Pods on the control plane nodes, for example for a single machine Kubernetes cluster, run:",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Control plane node isolation”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#control-plane-node-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "scheduling",
+        "control plane",
+        "taint"
+      ],
+      "conceptIDs": [
+        "cka.control-plane-isolation"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.cp-taint-remove",
+      "type": "basic",
+      "priority": "core",
+      "order": 2340,
+      "kind": "fact",
+      "front": "Which command lets Pods be scheduled on kubeadm control-plane nodes?",
+      "back": "kubectl taint nodes --all node-role.kubernetes.io/control-plane-",
+      "explanation": "It removes the node-role.kubernetes.io/control-plane:NoSchedule taint, so the scheduler can then place Pods everywhere.",
+      "evidence": "This will remove the node-role.kubernetes.io/control-plane:NoSchedule taint from any nodes that have it, including the control plane nodes, meaning that the scheduler will then be able to schedule Pods everywhere.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Control plane node isolation”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#control-plane-node-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "taint",
+        "taint effects",
+        "kube-scheduler",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.control-plane-isolation"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-single-node",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2345,
+      "kind": "application",
+      "front": "You built a one-machine kubeadm lab cluster. Your test Deployment’s Pods stay Pending with no other node available. What is the usual fix?",
+      "back": "Remove the control-plane taint: kubectl taint nodes --all node-role.kubernetes.io/control-plane-",
+      "choices": "A) Remove the node-role.kubernetes.io/control-plane taint\nB) Add more replicas to the Deployment\nC) Reinstall the Pod network add-on",
+      "choicesExplained": "B: more replicas still cannot be placed on the tainted node. C: the network is not what blocks scheduling here.",
+      "explanation": "The docs give this very step for a single-machine cluster.",
+      "evidence": "If you want to be able to schedule Pods on the control plane nodes, for example for a single machine Kubernetes cluster, run: kubectl taint nodes --all node-role.kubernetes.io/control-plane",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Control plane node isolation”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#control-plane-node-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "taint",
+        "Deployment",
+        "control plane",
+        "replica"
+      ],
+      "conceptIDs": [
+        "cka.control-plane-isolation"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.node-role-labels",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2350,
+      "kind": "fact",
+      "front": "How do you give a node a node-role.kubernetes.io/* label in a kubeadm cluster?",
+      "back": "With kubectl label after the node has joined; the kubelet’s --node-labels cannot set it.",
+      "explanation": "A node that tries to set them with that flag fails to register with the API server.",
+      "evidence": "you cannot use the kubelet --node-labels flag to apply restricted labels (such as node-role.kubernetes.io/* ) during initialization. If you attempt to add restricted labels by using this kubelet flag, the node will fail to register with the API server. To apply these labels manually, you must use kubectl label after the node has joined the cluster.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Managed node labels”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#managed-node-labels",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "label",
+        "node",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cka.managed-node-labels"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.join-command",
+      "type": "cloze",
+      "priority": "core",
+      "order": 2355,
+      "kind": "fact",
+      "front": "Complete the join command that kubeadm init prints: kubeadm join <control-plane-host>:<control-plane-port> {{c1::--token <token> --discovery-token-ca-cert-hash sha256:<hash>}}",
+      "explanation": "Run it as root on each node; keep a record of it, as you need it to join nodes.",
+      "evidence": "You can now join any number of machines by running the following on each node as root: kubeadm join <control-plane-host>:<control-plane-port> --token <token> --discovery-token-ca-cert-hash sha256:<hash>",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “More information”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#more-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "bootstrap token",
+        "--discovery-token-ca-cert-hash",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-join"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.token-ttl",
+      "type": "basic",
+      "priority": "core",
+      "order": 2365,
+      "kind": "fact",
+      "front": "How long does the default bootstrap token from kubeadm init last?",
+      "back": "24 hours (--token-ttl default 24h0m0s); a value of 0 means it never expires.",
+      "explanation": "After that the token is deleted automatically, so a join a day later needs a new one.",
+      "evidence": "--token-ttl duration Default: 24h0m0s The duration before the token is automatically deleted (e.g. 1s, 2m, 3h). If set to '0', the token will never expire",
+      "source": "Kubernetes documentation, “kubeadm init”, “Options”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#options",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "bootstrap token",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.token-ttl"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.print-join-command",
+      "type": "basic",
+      "priority": "core",
+      "order": 2370,
+      "kind": "fact",
+      "front": "Which command creates a new bootstrap token and prints the full kubeadm join command to use with it?",
+      "back": "kubeadm token create --print-join-command",
+      "explanation": "A joining node needs a live token and the CA key hash; by default kubeadm prints that hash at the end of `kubeadm init` or through this command.",
+      "evidence": "By default, the hash value is printed at the end of the kubeadm init command or in the output from the kubeadm token create --print-join-command command.",
+      "source": "Kubernetes documentation, “kubeadm join”, “Token-based discovery with CA pinning”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-join/#token-based-discovery-with-ca-pinning",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "bootstrap token",
+        "kubeadm",
+        "--discovery-token-ca-cert-hash"
+      ],
+      "conceptIDs": [
+        "cka.print-join-command"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-token-expired",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2375,
+      "kind": "application",
+      "front": "Two days after kubeadm init, a new worker’s join fails: the token from init’s output is no longer valid. What do you run on the control plane?",
+      "back": "kubeadm token create --print-join-command, then run the printed command on the worker.",
+      "choices": "A) kubeadm token create --print-join-command\nB) kubeadm init again\nC) kubeadm reset on the control plane",
+      "choicesExplained": "B: kubeadm init cannot be re-run without first tearing down the cluster. C: reset tears down the control plane’s own state.",
+      "explanation": "The default token is deleted after 24 hours, and this command issues a new one with the join command around it.",
+      "evidence": "--token-ttl duration Default: 24h0m0s The duration before the token is automatically deleted (e.g. 1s, 2m, 3h). If set to '0', the token will never expire",
+      "source": "Kubernetes documentation, “kubeadm init”, “Options”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#options",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "bootstrap token",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.token-ttl",
+        "cka.print-join-command",
+        "cka.kubeadm-join"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.token-secret",
+      "type": "basic",
+      "priority": "core",
+      "order": 2380,
+      "kind": "fact",
+      "front": "Which command lists, creates and deletes kubeadm’s bootstrap tokens?",
+      "back": "kubeadm token (list, create, delete).",
+      "explanation": "Tokens are secret, since anyone holding one can add authenticated nodes, so it helps to see and delete them.",
+      "evidence": "Keep it safe, because anyone with this token can add authenticated nodes to your cluster. These tokens can be listed, created, and deleted with the kubeadm token command.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “More information”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#more-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "bootstrap token",
+        "kubeadm",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.bootstrap-token"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.scenario-bootstrap-token",
+      "type": "scenario",
+      "priority": "core",
+      "order": 2385,
+      "kind": "application",
+      "front": "A join command with a live token was pasted into a public chat by mistake. What is the risk, and the fix?",
+      "back": "Anyone with it can add authenticated nodes; delete the token with kubeadm token delete.",
+      "choices": "A) Delete the token with kubeadm token delete\nB) Nothing; the CA hash alone protects the cluster\nC) Restart the kubelet on the control plane",
+      "choicesExplained": "B: the token itself is what lets its holder add authenticated nodes. C: restarting the kubelet does not delete a token.",
+      "explanation": "The token is what authenticates joining nodes, so removing it removes the access.",
+      "evidence": "Keep it safe, because anyone with this token can add authenticated nodes to your cluster. These tokens can be listed, created, and deleted with the kubeadm token command.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “More information”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#more-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "bootstrap token",
+        "kubeadm",
+        "--discovery-token-ca-cert-hash",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.bootstrap-token"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.join-skew",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2390,
+      "kind": "fact",
+      "front": "Which kubeadm version must you use for kubeadm join on a new node?",
+      "back": "The same version last used to create the cluster with kubeadm init or to upgrade it.",
+      "explanation": "kubeadm limits how its commands operate on existing nodes and clusters it manages.",
+      "evidence": "If new nodes are joined to the cluster, the kubeadm binary used for kubeadm join must match the last version of kubeadm used to either create the cluster with kubeadm init or to upgrade the same node with kubeadm upgrade .",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “kubeadm’s skew against kubeadm”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#kubeadm-s-skew-against-kubeadm",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "version skew",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-skew"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.kubeadm-kubelet-skew",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2395,
+      "kind": "fact",
+      "front": "Which Kubernetes versions can kubeadm deploy for the control-plane components, relative to its own version?",
+      "back": "The same version as kubeadm, or one version older.",
+      "explanation": "You choose the version with --kubernetes-version or the ClusterConfiguration.kubernetesVersion field.",
+      "evidence": "kubeadm can be used with Kubernetes components that are the same version as kubeadm or one version older. The Kubernetes version can be specified to kubeadm by using the --kubernetes-version flag of kubeadm init or the ClusterConfiguration.kubernetesVersion field when using --config .",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Version skew policy”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#version-skew-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm",
+        "version skew",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-skew"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.init-phases-help",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2400,
+      "kind": "fact",
+      "front": "How do you see kubeadm init’s phases in order?",
+      "back": "Run kubeadm init --help; the ordered list is at the top of the help screen.",
+      "explanation": "Each phase and sub-phase appears with a description next to it.",
+      "evidence": "To view the ordered list of phases and sub-phases you can call kubeadm init --help . The list will be located at the top of the help screen and each phase will have a description next to it.",
+      "source": "Kubernetes documentation, “kubeadm init”, “Using init phases with kubeadm”",
+      "sourceURL": "https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#init-phases",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubeadm init phases",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-init-phases"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.kubelet-config-flag",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2410,
+      "kind": "fact",
+      "front": "How is the kubelet told to use a configuration file, and which wins if a flag sets the same value?",
+      "back": "Start it with --config <path>; a command-line flag overrides the file’s value.",
+      "explanation": "The docs say the override helps keep backwards compatibility with the command-line API.",
+      "evidence": "Start the kubelet with the --config flag set to the path of the kubelet's config file. The kubelet will then load its config from this file. Note that command line flags which target the same value as a config file will override that value. This helps ensure backwards compatibility with the command-line API.",
+      "source": "Kubernetes documentation, “Set Kubelet Parameters Via A Configuration File”, “Start a kubelet process configured via the config file”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/#start-a-kubelet-process-configured-via-the-config-file",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "kubelet configuration file"
+      ],
+      "conceptIDs": [
+        "cka.kubelet-config-file"
+      ]
+    },
+    {
+      "id": "cka.kubeadm-install.remove-node",
+      "type": "basic",
+      "priority": "extra",
+      "order": 2415,
+      "kind": "fact",
+      "front": "Before deleting a worker from a kubeadm cluster, which two steps come first?",
+      "back": "kubectl drain the node, then kubeadm reset on it.",
+      "explanation": "kubeadm reset does not clean up iptables rules, among others; those need manual commands.",
+      "evidence": "kubectl drain <node name> --delete-emptydir-data --force --ignore-daemonsets Before removing the node, reset the state installed by kubeadm : kubeadm reset The reset process does not reset or clean up iptables rules or IPVS tables.",
+      "source": "Kubernetes documentation, “Creating a cluster with kubeadm”, “Remove the node”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#remove-the-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "drain",
+        "kubeadm",
+        "kubectl",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-reset"
+      ]
+    }
+  ]
+}

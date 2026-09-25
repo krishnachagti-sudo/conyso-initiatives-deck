@@ -1,0 +1,2161 @@
+{
+  "topic": "Network policies, Ingress and Gateway API",
+  "notes": [
+    {
+      "id": "cka.network-policies-ingress-gateway.what-is-endport",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9005,
+      "front": "What does the endPort field let a NetworkPolicy port entry do?",
+      "back": "Target a range of ports, from port up to endPort, instead of a single port.",
+      "explanation": "The rule then covers every port from port up to endPort.",
+      "introduces": [
+        "port ranges with endPort"
+      ],
+      "example": "Like allowing egress to ports 30000 to 30100 with one entry, rather than writing 101 entries.",
+      "source": "Kubernetes documentation, “Network Policies”, “Targeting a range of ports”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#targeting-a-range-of-ports",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When writing a NetworkPolicy, you can target a range of ports instead of a single port. This is achievable with the usage of the endPort field",
+      "uses": [
+        "NetworkPolicy",
+        "port ranges with endPort"
+      ],
+      "conceptIDs": [
+        "cka.netpol-endport"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-are-ingress-rules",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9010,
+      "front": "In an Ingress, what does each HTTP rule contain?",
+      "back": "An optional host, and a list of paths, each with a backend: a Service name and port.",
+      "explanation": "The rules are what the Ingress controller matches every incoming request against.",
+      "introduces": [
+        "Ingress rules"
+      ],
+      "example": "Like a post-room sheet: letters for this building and this floor go to this desk.",
+      "source": "Kubernetes documentation, “Ingress”, “Ingress rules”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each HTTP rule contains the following information: An optional host. In this example, no host is specified, so the rule applies to all inbound HTTP traffic through the IP address specified.",
+      "uses": [
+        "Ingress",
+        "Ingress rules",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.ingress-rules"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-is-ingressclass",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9015,
+      "front": "What is an IngressClass?",
+      "back": "A resource an Ingress names as its class, holding extra configuration, including which controller should implement it.",
+      "explanation": "Different controllers can implement Ingresses, often with different configuration, so each Ingress says which class it belongs to.",
+      "introduces": [
+        "IngressClass"
+      ],
+      "example": "Like choosing a courier company on a parcel label: the label names the company that will carry it.",
+      "source": "Kubernetes documentation, “Ingress”, “Ingress class”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each Ingress should specify a class, a reference to an IngressClass resource that contains additional configuration including the name of the controller that should implement the class.",
+      "uses": [
+        "Ingress",
+        "ingress controller",
+        "IngressClass"
+      ],
+      "conceptIDs": [
+        "cka.ingressclass"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-is-default-backend",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9020,
+      "front": "What is .spec.defaultBackend on an Ingress?",
+      "back": "The backend that handles requests when the Ingress has no rules.",
+      "explanation": "An Ingress with no rules sends all of its traffic to that single backend.",
+      "introduces": [
+        "Ingress defaultBackend"
+      ],
+      "example": "Like a switchboard that puts every caller through to reception when no extension is dialled.",
+      "source": "Kubernetes documentation, “Ingress”, “DefaultBackend”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#default-backend",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "An Ingress with no rules sends all traffic to a single default backend and .spec.defaultBackend is the backend that should handle requests in that case.",
+      "uses": [
+        "Ingress",
+        "Ingress defaultBackend"
+      ],
+      "conceptIDs": [
+        "cka.default-backend"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-is-simple-fanout",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9025,
+      "front": "What is a simple fanout Ingress?",
+      "back": "One that routes traffic from a single IP address to more than one Service, based on the path requested.",
+      "explanation": "The documentation adds that an Ingress lets you keep the number of load balancers down to a minimum.",
+      "introduces": [
+        "simple fanout"
+      ],
+      "example": "Like one shop entrance with signs sending shoppers left for groceries and right for clothing.",
+      "source": "Kubernetes documentation, “Ingress”, “Simple fanout”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#simple-fanout",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A fanout configuration routes traffic from a single IP address to more than one Service, based on the HTTP URI being requested. An Ingress allows you to keep the number of load balancers down to a minimum.",
+      "uses": [
+        "Ingress",
+        "Service",
+        "simple fanout"
+      ],
+      "conceptIDs": [
+        "cka.simple-fanout"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-is-name-based-virtual-hosting",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9030,
+      "front": "What does name-based virtual hosting do in an Ingress?",
+      "back": "Routes HTTP traffic for several host names arriving at the same IP address, using the Host header.",
+      "explanation": "The backing load balancer reads the Host header of each request to pick the rule.",
+      "introduces": [
+        "name-based virtual hosting"
+      ],
+      "example": "Like one office building whose receptionist sends visitors to different companies by the name they ask for.",
+      "source": "Kubernetes documentation, “Ingress”, “Name based virtual hosting”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#name-based-virtual-hosting",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Name-based virtual hosts support routing HTTP traffic to multiple host names at the same IP address.",
+      "uses": [
+        "Ingress",
+        "name-based virtual hosting"
+      ],
+      "conceptIDs": [
+        "cka.name-based-vhosts"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-is-gatewayclass",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9035,
+      "front": "In Gateway API, what does a GatewayClass define?",
+      "back": "A set of Gateways with common configuration, managed by a controller that implements the class.",
+      "explanation": "It is one of the four stable Gateway API kinds, alongside Gateway, HTTPRoute and GRPCRoute.",
+      "introduces": [
+        "GatewayClass"
+      ],
+      "example": "Like a car-hire category such as “compact”: you pick the category, and the hire company decides which fleet serves it.",
+      "source": "Kubernetes documentation, “Gateway API”, “Resource model”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#resource-model",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "GatewayClass: Defines a set of gateways with common configuration and managed by a controller that implements the class.",
+      "uses": [
+        "Gateway API",
+        "GatewayClass",
+        "controller / control loop"
+      ],
+      "conceptIDs": [
+        "cka.gatewayclass"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-is-controllername",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9040,
+      "front": "What does the controllerName field of a GatewayClass hold?",
+      "back": "The name of the controller that implements the class, such as example.com/gateway-controller.",
+      "explanation": "A controller that implements Gateway API manages the GatewayClasses carrying its controller name.",
+      "introduces": [
+        "controllerName"
+      ],
+      "example": "Like the maker’s name stamped on a machine: it says who services it.",
+      "source": "Kubernetes documentation, “Gateway API”, “GatewayClass”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#api-kind-gateway-class",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In this example, a controller that has implemented Gateway API is configured to manage GatewayClasses with the controller name example.com/gateway-controller .",
+      "uses": [
+        "Gateway API",
+        "GatewayClass",
+        "controllerName"
+      ],
+      "conceptIDs": [
+        "cka.gatewayclass-controller"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-is-a-gateway",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9045,
+      "front": "What does a Gateway describe in Gateway API?",
+      "back": "An instance of traffic handling infrastructure, such as a cloud load balancer or an in-cluster proxy server.",
+      "explanation": "It defines a network endpoint that can process traffic for backends such as a Service.",
+      "introduces": [
+        "Gateway"
+      ],
+      "example": "Like a particular front door of a building, with its own address, through which visitors arrive.",
+      "source": "Kubernetes documentation, “Gateway API”, “Gateway”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#api-kind-gateway",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A Gateway describes an instance of traffic handling infrastructure. It defines a network endpoint that can be used for processing traffic, i.e. filtering, balancing, splitting, etc. for backends such as a Service.",
+      "uses": [
+        "Gateway API",
+        "Gateway",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.gateway"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-are-listeners",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9050,
+      "front": "What do a Gateway’s listeners define?",
+      "back": "Hostnames, ports, protocol, termination and TLS settings, and which routes can attach to each listener.",
+      "explanation": "The Gateway spec pairs listeners with a GatewayClass name and requested addresses.",
+      "introduces": [
+        "Gateway listeners"
+      ],
+      "example": "Like the numbered doors of a warehouse: each door takes one kind of delivery.",
+      "source": "Gateway API documentation, “Gateway”, “Gateway”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/gateway/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Listeners - Define the hostnames, ports, protocol, termination, TLS settings and which routes can be attached to a listener.",
+      "uses": [
+        "Gateway",
+        "Gateway listeners"
+      ],
+      "conceptIDs": [
+        "cka.gateway-listeners"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-is-httproute",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9055,
+      "front": "What does an HTTPRoute define?",
+      "back": "Rules mapping HTTP traffic from a Gateway listener to backend network endpoints, often a Service.",
+      "explanation": "Defining an HTTPRoute can add traffic routes to the cloud load balancer or proxy behind the Gateway.",
+      "introduces": [
+        "HTTPRoute"
+      ],
+      "example": "Like the sorting rules posted inside one warehouse door.",
+      "source": "Kubernetes documentation, “Gateway API”, “Resource model”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#resource-model",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "HTTPRoute: Defines HTTP-specific rules for mapping traffic from a Gateway listener to a representation of backend network endpoints. These endpoints are often represented as a Service .",
+      "uses": [
+        "Gateway",
+        "Gateway listeners",
+        "HTTPRoute",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.httproute"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-is-grpcroute",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9060,
+      "front": "What does a GRPCRoute define?",
+      "back": "Rules mapping gRPC traffic from a Gateway listener to backend network endpoints, often a Service.",
+      "explanation": "It is the gRPC counterpart of HTTPRoute among the stable Gateway API kinds.",
+      "introduces": [
+        "GRPCRoute"
+      ],
+      "example": "Like HTTPRoute, but for remote procedure calls made with gRPC.",
+      "source": "Kubernetes documentation, “Gateway API”, “Resource model”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#resource-model",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "GRPCRoute: Defines gRPC-specific rules for mapping traffic from a Gateway listener to a representation of backend network endpoints.",
+      "uses": [
+        "Gateway listeners",
+        "GRPCRoute",
+        "HTTPRoute",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.grpcroute"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-are-httproute-hostnames",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 9065,
+      "front": "What are an HTTPRoute’s hostnames matched against?",
+      "back": "The Host header of the HTTP request.",
+      "explanation": "When one matches, the HTTPRoute is selected to route the request by its rules and filters.",
+      "introduces": [
+        "HTTPRoute hostnames"
+      ],
+      "example": "Like the addressee line on a letter, read before anything else on the envelope.",
+      "source": "Gateway API documentation, “HTTPRoute”, “Hostnames”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#hostnames",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Hostnames define a list of hostnames to match against the Host header of the HTTP request. When a match occurs, the HTTPRoute is selected to perform request routing based on rules and filters (optional).",
+      "uses": [
+        "HTTPRoute",
+        "HTTPRoute hostnames"
+      ],
+      "conceptIDs": [
+        "cka.httproute-hostnames"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-are-httproute-filters",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 9070,
+      "front": "What are HTTPRoute filters?",
+      "back": "Processing steps completed during the request or response lifecycle, such as modifying requests or responses.",
+      "explanation": "They are an extension point for extra processing that Gateway implementations may perform.",
+      "introduces": [
+        "HTTPRoute filters"
+      ],
+      "example": "Like a mailroom stamping each letter with a received date before it reaches the desk.",
+      "source": "Gateway API documentation, “HTTPRoute”, “Filters (optional)”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#filters-optional",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Filters define processing steps that must be completed during the request or response lifecycle. Filters act as an extension point to express additional processing that may be performed in Gateway implementations. Some examples include request or response modification, implementing authentication strategies, rate-limiting, and traffic shaping.",
+      "uses": [
+        "HTTPRoute",
+        "HTTPRoute filters",
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "cka.httproute-filters"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.needs-plugin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9075,
+      "front": "What happens if you create a NetworkPolicy in a cluster whose network plugin does not implement NetworkPolicy?",
+      "back": "Nothing: the policy has no effect.",
+      "explanation": "Network policies are implemented by the network plugin, so the networking solution must support NetworkPolicy.",
+      "source": "Kubernetes documentation, “Network Policies”, “Prerequisites”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#prerequisites",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Network policies are implemented by the network plugin . To use network policies, you must be using a networking solution which supports NetworkPolicy. Creating a NetworkPolicy resource without a controller that implements it will have no effect.",
+      "uses": [
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cka.netpol-needs-plugin"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.layer4-guarantee",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9080,
+      "front": "Which protocols is a deny-all NetworkPolicy guaranteed to deny?",
+      "back": "TCP, UDP and SCTP connections. For other protocols the behaviour is undefined.",
+      "explanation": "NetworkPolicy is defined for layer 4 connections, and other protocols vary across network plugins.",
+      "source": "Kubernetes documentation, “Network Policies”, “Network traffic filtering”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#network-traffic-filtering",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When a deny all network policy is defined, it is only guaranteed to deny TCP, UDP and SCTP connections. For other protocols, such as ARP or ICMP, the behaviour is undefined.",
+      "uses": [
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cka.netpol-layer4"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.default-non-isolated-ingress",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9085,
+      "front": "By default, with no NetworkPolicy selecting it, is a Pod isolated for ingress?",
+      "back": "No. It is non-isolated for ingress: all inbound connections are allowed.",
+      "explanation": "Isolation only begins when a policy selects the Pod for that direction.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, a pod is non-isolated for ingress; all inbound connections are allowed.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.pod-isolation"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.what-isolates-for-ingress",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9090,
+      "front": "What makes a Pod isolated for ingress?",
+      "back": "Any NetworkPolicy that selects the Pod and has Ingress in its policyTypes.",
+      "explanation": "Such a policy is said to apply to the Pod for ingress.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A pod is isolated for ingress if there is any NetworkPolicy that both selects the pod and has \"Ingress\" in its policyTypes ; we say that such a policy applies to the pod for ingress.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.pod-isolation"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.allowed-into-isolated-pod",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9095,
+      "front": "Once a Pod is isolated for ingress, which inbound connections are still allowed?",
+      "back": "Connections from the Pod’s own node, and those allowed by the ingress list of some policy that applies to it.",
+      "explanation": "Traffic from the node where a Pod runs is always allowed, whatever the policies say.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When a pod is isolated for ingress, the only allowed connections into the pod are those from the pod's node and those allowed by the ingress list of some NetworkPolicy that applies to the pod for ingress.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.pod-isolation"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.additive",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9100,
+      "front": "Network policies do not conflict; they are {{c1::additive}}.",
+      "back": "Additive.",
+      "explanation": "Where several policies apply to a Pod in one direction, what is allowed is the union of what they allow.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Network policies do not conflict; they are additive. If any policy or policies apply to a given pod for a given direction, the connections allowed in that direction from that pod is the union of what the applicable policies allow.",
+      "uses": [
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cka.netpol-additive"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.both-ends-must-allow",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9105,
+      "front": "For a connection from Pod A to Pod B to be allowed, which policies must allow it?",
+      "back": "Both the egress policy on A, the source, and the ingress policy on B, the destination.",
+      "explanation": "If either side does not allow the connection, it will not happen.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For a connection from a source pod to a destination pod to be allowed, both the egress policy on the source pod and the ingress policy on the destination pod need to allow the connection. If either side does not allow the connection, it will not happen.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.netpol-additive"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.policytypes-values",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9110,
+      "front": "Which values can a NetworkPolicy’s policyTypes list hold?",
+      "back": "Ingress, Egress, or both.",
+      "explanation": "The list says whether the policy applies to traffic into the selected Pods, out of them, or both.",
+      "source": "Kubernetes documentation, “Network Policies”, “The NetworkPolicy resource”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#networkpolicy-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each NetworkPolicy includes a policyTypes list which may include either Ingress , Egress , or both. The policyTypes field indicates whether or not the given policy applies to ingress traffic to selected pod, egress traffic from selected pods, or both.",
+      "uses": [
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cka.netpol-policytypes"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.peer-podselector",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9115,
+      "front": "Which from/to selector in a NetworkPolicy allows particular Pods in the policy’s own namespace?",
+      "back": "podSelector.",
+      "explanation": "Used alone as a peer, it looks only in the same namespace as the NetworkPolicy.",
+      "source": "Kubernetes documentation, “Network Policies”, “Behavior of to and from selectors”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "podSelector : This selects particular Pods in the same namespace as the NetworkPolicy which should be allowed as ingress sources or egress destinations.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "namespace",
+        "selector"
+      ],
+      "conceptIDs": [
+        "cka.netpol-peer-selectors"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.peer-namespaceselector",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9120,
+      "front": "Which from/to selector in a NetworkPolicy allows every Pod in particular namespaces?",
+      "back": "namespaceSelector.",
+      "explanation": "It picks namespaces by label, and all their Pods become allowed peers.",
+      "source": "Kubernetes documentation, “Network Policies”, “Behavior of to and from selectors”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "namespaceSelector : This selects particular namespaces for which all Pods should be allowed as ingress sources or egress destinations.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "namespace",
+        "selector"
+      ],
+      "conceptIDs": [
+        "cka.netpol-peer-selectors"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.peer-ipblock",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9125,
+      "front": "Which from/to selector in a NetworkPolicy allows particular IP address ranges?",
+      "back": "ipBlock, which takes CIDR ranges.",
+      "explanation": "It is the only peer that is not chosen by labels.",
+      "source": "Kubernetes documentation, “Network Policies”, “Behavior of to and from selectors”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "ipBlock : This selects particular IP CIDR ranges to allow as ingress sources or egress destinations.",
+      "uses": [
+        "NetworkPolicy",
+        "selector"
+      ],
+      "conceptIDs": [
+        "cka.netpol-peer-selectors"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.default-deny-ingress-how",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9130,
+      "front": "How do you make a default deny-all-ingress NetworkPolicy for a namespace?",
+      "back": "Select all Pods (podSelector: {}), set policyTypes to Ingress, and give no ingress rules.",
+      "explanation": "It selects every Pod but allows no ingress, so even Pods no other policy selects become isolated for ingress.",
+      "source": "Kubernetes documentation, “Network Policies”, “Default deny all ingress traffic”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#default-deny-all-ingress-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "name : default-deny-ingress spec : podSelector : {} policyTypes : - Ingress This ensures that even pods that aren't selected by any other NetworkPolicy will still be isolated for ingress.",
+      "uses": [
+        "NetworkPolicy",
+        "namespace",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.default-deny-ingress"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.default-deny-egress-how",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9135,
+      "front": "How do you make a default deny-all-egress NetworkPolicy for a namespace?",
+      "back": "Select all Pods (podSelector: {}), set policyTypes to Egress, and give no egress rules.",
+      "explanation": "Pods that no other policy selects are then not allowed egress traffic either.",
+      "source": "Kubernetes documentation, “Network Policies”, “Default deny all egress traffic”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#default-deny-all-egress-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "name : default-deny-egress spec : podSelector : {} policyTypes : - Egress This ensures that even pods that aren't selected by any other NetworkPolicy will not be allowed egress traffic.",
+      "uses": [
+        "NetworkPolicy",
+        "namespace",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.default-deny-egress"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.no-namespace-names",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9140,
+      "front": "Can a NetworkPolicy name a namespace directly, by its name?",
+      "back": "No. You must select namespaces by their labels, with a namespaceSelector.",
+      "explanation": "There is no field for a namespace name in the NetworkPolicy API.",
+      "source": "Kubernetes documentation, “Network Policies”, “Targeting multiple namespaces by label”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#targeting-multiple-namespaces-by-label",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Note: It is not possible to directly specify the name of the namespaces in a NetworkPolicy. You must use a namespaceSelector with matchLabels or matchExpressions to select the namespaces based on their labels.",
+      "uses": [
+        "NetworkPolicy",
+        "namespace",
+        "label"
+      ],
+      "conceptIDs": [
+        "cka.namespace-name-label"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.endport-restrictions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9145,
+      "front": "What restrictions apply to a NetworkPolicy port range written with endPort?",
+      "back": "endPort must be at least port; port must also be defined; both must be numeric.",
+      "explanation": "A range needs a numeric start and an end not below it.",
+      "source": "Kubernetes documentation, “Network Policies”, “Targeting a range of ports”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#targeting-a-range-of-ports",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The endPort field must be equal to or greater than the port field. endPort can only be defined if port is also defined. Both ports must be numeric.",
+      "uses": [
+        "NetworkPolicy",
+        "port ranges with endPort"
+      ],
+      "conceptIDs": [
+        "cka.netpol-endport"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.limit-tls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9150,
+      "front": "Can the NetworkPolicy API handle anything TLS related?",
+      "back": "No. The documentation suggests a service mesh or an ingress controller for that.",
+      "explanation": "The documentation lists it among the things the NetworkPolicy API cannot do yet.",
+      "source": "Kubernetes documentation, “Network Policies”, “What you can’t do with network policies (at least, not yet)”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#what-you-can-t-do-with-network-policies-at-least-not-yet",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Anything TLS related (use a service mesh or ingress controller for this).",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (the exam version)",
+      "uses": [
+        "NetworkPolicy",
+        "ingress controller"
+      ],
+      "conceptIDs": [
+        "cka.netpol-limits"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.limit-explicit-deny",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9155,
+      "front": "Can a NetworkPolicy contain an explicit deny rule?",
+      "back": "No. The model is deny by default, with only allow rules.",
+      "explanation": "You deny traffic by isolating Pods and not allowing it.",
+      "source": "Kubernetes documentation, “Network Policies”, “What you can’t do with network policies (at least, not yet)”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#what-you-can-t-do-with-network-policies-at-least-not-yet",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The ability to explicitly deny policies (currently the model for NetworkPolicies are deny by default, with only the ability to add allow rules).",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (the exam version)",
+      "uses": [
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cka.netpol-limits"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.test-pod-with-label",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9160,
+      "front": "How do you start a throwaway shell Pod carrying a label, to test a NetworkPolicy?",
+      "back": "kubectl run with --labels, for example: kubectl run test --rm -ti --labels=\"access=true\" --image=busybox -- /bin/sh",
+      "explanation": "The label on the test Pod decides whether the policy lets its request in.",
+      "source": "Kubernetes documentation, “Declare Network Policy”, “Define access label and test again”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/#define-access-label-and-test-again",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl run busybox --rm -ti --labels=\"access=true\" --image=busybox -- /bin/sh",
+      "uses": [
+        "kubectl",
+        "label",
+        "Pod",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cka.netpol-test"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.ingress-frozen",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9165,
+      "front": "What is the status of the Ingress API?",
+      "back": "Frozen: generally available and staying, but no longer developed, with no further changes planned.",
+      "explanation": "It keeps the stability guarantees of a generally available API, and there are no plans to remove it.",
+      "source": "Kubernetes documentation, “Ingress”, “Ingress”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The Ingress API has been frozen. This means that: The Ingress API is generally available, and is subject to the stability guarantees for generally available APIs. The Kubernetes project has no plans to remove Ingress from Kubernetes. The Ingress API is no longer being developed, and will have no further changes or updates made to it.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (the exam version)",
+      "uses": [
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cka.ingress-frozen"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.gateway-recommended",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9170,
+      "front": "What does the Kubernetes project recommend using instead of Ingress?",
+      "back": "Gateway (Gateway API).",
+      "explanation": "The Ingress API is frozen, while Gateway API is its successor.",
+      "source": "Kubernetes documentation, “Ingress Controllers”, “Ingress Controllers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/#ingress-controllers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Note: The Kubernetes project recommends using Gateway instead of Ingress . The Ingress API has been frozen.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (the exam version)",
+      "uses": [
+        "Ingress",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "cka.ingress-frozen"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.host-and-path-must-match",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9175,
+      "front": "In an Ingress rule, both the {{c1::host and path}} must match an incoming request before traffic goes to the referenced Service.",
+      "back": "Host and path.",
+      "explanation": "A rule is one combined condition on the request.",
+      "source": "Kubernetes documentation, “Ingress”, “Ingress rules”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Both the host and path must match the content of an incoming request before the load balancer directs traffic to the referenced Service.",
+      "uses": [
+        "Ingress rules",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.ingress-rules"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.pathtype-exact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9180,
+      "front": "Which Ingress pathType matches the request path exactly, and case-sensitively?",
+      "back": "Exact.",
+      "explanation": "It is one of the three supported path types.",
+      "source": "Kubernetes documentation, “Ingress”, “Path types”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Exact : Matches the URL path exactly and with case sensitivity.",
+      "uses": [
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cka.path-types"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.pathtype-prefix",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9185,
+      "front": "Which Ingress pathType matches on a path prefix split by /, element by element?",
+      "back": "Prefix.",
+      "explanation": "Matching is case-sensitive and done on whole path elements, not characters.",
+      "source": "Kubernetes documentation, “Ingress”, “Path types”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Prefix : Matches based on a URL path prefix split by / . Matching is case sensitive and done on a path element by element basis.",
+      "uses": [
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cka.path-types"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.pathtype-implementation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9190,
+      "front": "Which Ingress pathType leaves matching up to the IngressClass?",
+      "back": "ImplementationSpecific.",
+      "explanation": "Implementations may treat it as its own type, or like Prefix or Exact.",
+      "source": "Kubernetes documentation, “Ingress”, “Path types”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "ImplementationSpecific : With this path type, matching is up to the IngressClass. Implementations can treat this as a separate pathType or treat it identically to Prefix or Exact path types.",
+      "uses": [
+        "Ingress",
+        "IngressClass"
+      ],
+      "conceptIDs": [
+        "cka.path-types"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.multiple-matches",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9195,
+      "front": "When several paths in an Ingress match a request, which one wins?",
+      "back": "The longest matching path; if still tied, an Exact path beats a Prefix path.",
+      "explanation": "This is the precedence order the documentation sets.",
+      "source": "Kubernetes documentation, “Ingress”, “Multiple matches”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#multiple-matches",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In those cases precedence will be given first to the longest matching path. If two paths are still equally matched, precedence will be given to paths with an exact path type over prefix path type.",
+      "uses": [
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cka.path-types"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.ingressclass-controller-field",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9200,
+      "front": "Which IngressClass field names the ingress controller that implements the class?",
+      "back": ".spec.controller, for example example.com/ingress-controller.",
+      "explanation": "The optional .spec.parameters then point at controller-specific configuration.",
+      "source": "Kubernetes documentation, “Ingress”, “Ingress class”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The specific type of parameters to use depends on the ingress controller that you specify in the .spec.controller field of the IngressClass.",
+      "uses": [
+        "IngressClass",
+        "ingress controller"
+      ],
+      "conceptIDs": [
+        "cka.ingressclass"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.default-ingressclass-annotation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9205,
+      "front": "How do you mark an IngressClass as the cluster default?",
+      "back": "Set the annotation ingressclass.kubernetes.io/is-default-class to \"true\" on it.",
+      "explanation": "New Ingresses without an ingressClassName are then assigned that class.",
+      "source": "Kubernetes documentation, “Ingress”, “Default IngressClass”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#default-ingress-class",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Setting the ingressclass.kubernetes.io/is-default-class annotation to true on an IngressClass resource will ensure that new Ingresses without an ingressClassName field specified will be assigned this default IngressClass.",
+      "uses": [
+        "IngressClass",
+        "annotation",
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cka.default-ingressclass"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.no-rules-needs-default-backend",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9210,
+      "front": "If an Ingress has no .spec.rules, what must it specify?",
+      "back": ".spec.defaultBackend.",
+      "explanation": "Without rules, the default backend is the only place traffic can go.",
+      "source": "Kubernetes documentation, “Ingress”, “DefaultBackend”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#default-backend",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If no .spec.rules are specified, .spec.defaultBackend must be specified.",
+      "uses": [
+        "Ingress",
+        "Ingress defaultBackend"
+      ],
+      "conceptIDs": [
+        "cka.default-backend"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.tls-secret-keys",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9215,
+      "front": "Which keys must the TLS Secret for an Ingress contain?",
+      "back": "tls.crt and tls.key.",
+      "explanation": "They hold the certificate and the private key used for TLS.",
+      "source": "Kubernetes documentation, “Ingress”, “TLS”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#tls",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The TLS secret must contain keys named tls.crt and tls.key that contain the certificate and private key to use for TLS.",
+      "uses": [
+        "Secret",
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cka.ingress-tls"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.tls-port-termination",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9220,
+      "front": "Where does an Ingress end TLS, and on which port?",
+      "back": "At the ingress point, on port 443 only; traffic onward to the Service and Pods is plaintext.",
+      "explanation": "The Ingress resource supports a single TLS port.",
+      "source": "Kubernetes documentation, “Ingress”, “TLS”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#tls",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The Ingress resource only supports a single TLS port, 443, and assumes TLS termination at the ingress point (traffic to the Service and its Pods is in plaintext).",
+      "uses": [
+        "Ingress",
+        "Service",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.ingress-tls"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.kubectl-create-ingress",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9225,
+      "front": "Which kubectl subcommand creates an Ingress imperatively?",
+      "back": "kubectl create ingress <name>.",
+      "explanation": "It is one of the kubectl create subcommands for common kinds.",
+      "source": "Kubernetes documentation, “kubectl create”, “See Also”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_create/#see-also",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl create ingress - Create an ingress with the specified name",
+      "uses": [
+        "kubectl",
+        "Ingress",
+        "imperative commands"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-ingress"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.gateway-api-addon",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9230,
+      "front": "Is Gateway API built into Kubernetes?",
+      "back": "No. It is an add-on: custom resources, served by one of many implementations, whose CRDs you install.",
+      "explanation": "Kubernetes does not implement the Gateway API resources natively.",
+      "source": "Kubernetes documentation, “Gateway API”, “What’s next”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#what-s-next",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Instead of Gateway API resources being natively implemented by Kubernetes, the specifications are defined as Custom Resources supported by a wide range of implementations . Install the Gateway API CRDs or follow the installation instructions of your selected implementation.",
+      "uses": [
+        "Gateway API",
+        "custom resource",
+        "CustomResourceDefinition"
+      ],
+      "conceptIDs": [
+        "cka.gateway-api-addon"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.role-infra-provider",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9235,
+      "front": "Which Gateway API role manages infrastructure that lets multiple isolated clusters serve multiple tenants?",
+      "back": "The Infrastructure Provider, for example a cloud provider.",
+      "explanation": "Gateway API kinds are modelled on these organisational roles.",
+      "source": "Kubernetes documentation, “Gateway API”, “Design principles”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#design-principles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Infrastructure Provider: Manages infrastructure that allows multiple isolated clusters to serve multiple tenants, e.g. a cloud provider.",
+      "uses": [
+        "Gateway API",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.gateway-roles"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.role-cluster-operator",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9240,
+      "front": "Which Gateway API role manages clusters and is typically concerned with policies, network access and application permissions?",
+      "back": "The Cluster Operator.",
+      "explanation": "It is one of the three roles that Gateway API kinds are modelled on.",
+      "source": "Kubernetes documentation, “Gateway API”, “Design principles”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#design-principles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Cluster Operator: Manages clusters and is typically concerned with policies, network access, application permissions, etc.",
+      "uses": [
+        "Gateway API",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.gateway-roles"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.role-app-developer",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9245,
+      "front": "Which Gateway API role manages an application and is typically concerned with application-level configuration and Service composition?",
+      "back": "The Application Developer.",
+      "explanation": "Gateway API kinds are modelled on this and two other organisational roles.",
+      "source": "Kubernetes documentation, “Gateway API”, “Design principles”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#design-principles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Application Developer: Manages an application running in a cluster and is typically concerned with application-level configuration and Service composition.",
+      "uses": [
+        "Gateway API",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.gateway-roles"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.gatewayclass-cluster-scoped",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9250,
+      "front": "What is the scope of a GatewayClass, and who defines it?",
+      "back": "Cluster-scoped, defined by the infrastructure provider.",
+      "explanation": "It represents a class of Gateways that can be instantiated.",
+      "source": "Gateway API documentation, “GatewayClass”, “GatewayClass”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/gatewayclass/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "GatewayClass is a cluster-scoped resource defined by the infrastructure provider. This resource represents a class of Gateways that can be instantiated.",
+      "uses": [
+        "GatewayClass",
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "cka.gatewayclass"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.gatewayclass-like-ingressclass",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9255,
+      "front": "Which Ingress-side resource does GatewayClass play the same part as?",
+      "back": "IngressClass.",
+      "explanation": "Both name the controller that implements the objects of that class.",
+      "source": "Gateway API documentation, “GatewayClass”, “GatewayClass”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/gatewayclass/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note: GatewayClass serves the same function as the networking.IngressClass resource .",
+      "uses": [
+        "GatewayClass",
+        "IngressClass"
+      ],
+      "conceptIDs": [
+        "cka.gatewayclass"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.gatewayclassname",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9260,
+      "front": "Which Gateway spec field names the GatewayClass it uses?",
+      "back": "gatewayClassName.",
+      "explanation": "The spec also defines listeners and requested addresses.",
+      "source": "Gateway API documentation, “Gateway”, “Gateway”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/gateway/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "GatewayClassName - Defines the name of a GatewayClass object used by this Gateway.",
+      "uses": [
+        "Gateway",
+        "GatewayClass"
+      ],
+      "conceptIDs": [
+        "cka.gateway"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.parentrefs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9265,
+      "front": "Which HTTPRoute field attaches it to a Gateway?",
+      "back": "parentRefs.",
+      "explanation": "An HTTPRoute must reference its parent Gateway there to receive traffic from it.",
+      "source": "Gateway API documentation, “HTTP routing” guide, “HTTP routing”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/guides/http-routing/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In order to receive traffic from a Gateway an HTTPRoute resource must be configured with ParentRefs which reference the parent gateway(s) that it should be attached to.",
+      "uses": [
+        "HTTPRoute",
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "cka.parentrefs"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.matches-independent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9270,
+      "front": "In an HTTPRoute rule with several matches, when does the rule match a request?",
+      "back": "When any single match is satisfied: each match is independent.",
+      "explanation": "Conditions inside one match must all hold; separate matches are alternatives.",
+      "source": "Gateway API documentation, “HTTPRoute”, “Matches”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#matches",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Matches define conditions used for matching an HTTP request. Each match is independent, i.e. this rule will be matched if any single match is satisfied.",
+      "uses": [
+        "HTTPRoute"
+      ],
+      "conceptIDs": [
+        "cka.httproute-matches"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.no-matches-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9275,
+      "front": "If an HTTPRoute rule specifies no matches, which requests does it match?",
+      "back": "Every request: the default is a prefix path match on /.",
+      "explanation": "A prefix of / is shared by every path.",
+      "source": "Gateway API documentation, “HTTPRoute”, “Matches”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#matches",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If no matches are specified, the default is a prefix path match on “/”, which has the effect of matching every HTTP request.",
+      "uses": [
+        "HTTPRoute"
+      ],
+      "conceptIDs": [
+        "cka.httproute-matches"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.match-headers",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9280,
+      "front": "Which HTTPRoute match field tests a request header’s value?",
+      "back": "headers.",
+      "explanation": "One match can combine it with other conditions, all of which must hold.",
+      "source": "Gateway API documentation, “HTTPRoute”, “BackendRefs (optional)”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#backendrefs-optional",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "HTTP requests fulfilling all four of the following criteria header magic: foo query param great: example path prefix /some/thing method GET",
+      "uses": [
+        "HTTPRoute"
+      ],
+      "conceptIDs": [
+        "cka.httproute-matches"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.match-queryparams",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9285,
+      "front": "Which HTTPRoute match field tests a query string parameter?",
+      "back": "queryParams.",
+      "explanation": "One match can combine it with header, path and method conditions.",
+      "source": "Gateway API documentation, “HTTPRoute”, “BackendRefs (optional)”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#backendrefs-optional",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "HTTP requests fulfilling all four of the following criteria header magic: foo query param great: example path prefix /some/thing method GET",
+      "uses": [
+        "HTTPRoute"
+      ],
+      "conceptIDs": [
+        "cka.httproute-matches"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.match-method",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9290,
+      "front": "Which HTTPRoute match field tests the request’s HTTP method?",
+      "back": "method.",
+      "explanation": "One match can combine it with header, query and path conditions.",
+      "source": "Gateway API documentation, “HTTPRoute”, “BackendRefs (optional)”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#backendrefs-optional",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "HTTP requests fulfilling all four of the following criteria header magic: foo query param great: example path prefix /some/thing method GET",
+      "uses": [
+        "HTTPRoute"
+      ],
+      "conceptIDs": [
+        "cka.httproute-matches"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.match-path",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9295,
+      "front": "Which HTTPRoute match field tests the request path, for example with type PathPrefix?",
+      "back": "path.",
+      "explanation": "It is also what the default match uses: a prefix match on /.",
+      "source": "Gateway API documentation, “HTTPRoute”, “BackendRefs (optional)”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#backendrefs-optional",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "HTTP requests fulfilling all four of the following criteria header magic: foo query param great: example path prefix /some/thing method GET",
+      "uses": [
+        "HTTPRoute"
+      ],
+      "conceptIDs": [
+        "cka.httproute-matches"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.backendrefs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9300,
+      "front": "In an HTTPRoute rule, what does backendRefs define, and what if it is left out?",
+      "back": "Where matching requests are sent. Without it, the rule forwards nothing.",
+      "explanation": "With no backendRefs and no filter that sends a response, the client gets a 500 error.",
+      "source": "Gateway API documentation, “HTTPRoute”, “BackendRefs (optional)”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#backendrefs-optional",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "BackendRefs defines API objects where matching requests should be sent. If unspecified, the rule performs no forwarding. If unspecified and no filters are specified that would result in a response being sent, a 500 error code is returned.",
+      "uses": [
+        "HTTPRoute"
+      ],
+      "conceptIDs": [
+        "cka.httproute"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.filter-add-header",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 9305,
+      "front": "Which HTTPRoute filter type adds a header to requests?",
+      "back": "RequestHeaderModifier, with an add list of header names and values.",
+      "explanation": "It modifies the request on its way to the backend.",
+      "source": "Gateway API documentation, “HTTPRoute”, “Filters (optional)”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#filters-optional",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "rules : - filters : - type : RequestHeaderModifier requestHeaderModifier : add : - name : my-header value : foo",
+      "uses": [
+        "HTTPRoute filters"
+      ],
+      "conceptIDs": [
+        "cka.httproute-filters"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.request-flow-host",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9310,
+      "front": "In the Gateway request flow, what does the reverse proxy use to find the configuration from the Gateway and its HTTPRoute?",
+      "back": "The request’s Host header.",
+      "explanation": "Header and path matching and filters may then follow, before forwarding to backends.",
+      "source": "Kubernetes documentation, “Gateway API”, “Request flow”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#request-flow",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "the reverse proxy receives the HTTP request and uses the Host: header to match a configuration that was derived from the Gateway and attached HTTPRoute.",
+      "uses": [
+        "Gateway",
+        "HTTPRoute"
+      ],
+      "conceptIDs": [
+        "cka.gateway-request-flow"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.migrating",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 9315,
+      "front": "Does Gateway API include the Ingress kind, so existing Ingresses keep working?",
+      "back": "No. Moving from Ingress needs a one-time conversion to Gateway API resources.",
+      "explanation": "Gateway API is the successor to Ingress but does not contain it.",
+      "source": "Kubernetes documentation, “Gateway API”, “Migrating from Ingress”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#migrating-from-ingress",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Gateway API is the successor to the Ingress API. However, it does not include the Ingress kind. As a result, a one-time conversion from your existing Ingress resources to Gateway API resources is necessary.",
+      "uses": [
+        "Gateway API",
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cka.migrating-from-ingress"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-no-plugin",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9320,
+      "front": "You apply a deny-all-ingress NetworkPolicy. kubectl shows it exists, yet every Pod in the namespace still accepts connections from anywhere. What is the likeliest cause?",
+      "back": "B) The network plugin does not enforce NetworkPolicy.",
+      "choices": "A) The policy also needs Egress in policyTypes\nB) The cluster’s network plugin does not enforce NetworkPolicy\nC) Another, older policy allows all ingress and wins",
+      "choicesExplained": "A: Ingress isolation needs only Ingress in policyTypes. C: policies are additive, and order does not affect the result.",
+      "explanation": "A NetworkPolicy without a controller that implements it has no effect, even though the API accepted it.",
+      "source": "Kubernetes documentation, “Network Policies”, “Prerequisites”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#prerequisites",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Creating a NetworkPolicy resource without a controller that implements it will have no effect.",
+      "uses": [
+        "NetworkPolicy",
+        "CNI"
+      ],
+      "conceptIDs": [
+        "cka.netpol-needs-plugin"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-independent-isolation",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9325,
+      "front": "Only one NetworkPolicy selects Pod web: policyTypes [Ingress], allowing traffic from app=api. Can web still open connections to any other Pod?",
+      "back": "A) Yes: web is not isolated for egress.",
+      "choices": "A) Yes: nothing isolates web for egress\nB) No: any policy isolates a Pod in both directions\nC) Only to Pods labelled app=api",
+      "choicesExplained": "B: the two sorts of isolation are declared independently. C: the from list controls who may connect in, not where web may connect out.",
+      "explanation": "Egress isolation needs a policy with Egress in its policyTypes; this one has only Ingress.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The two sorts of isolation (or not) are declared independently, and are both relevant for a connection from one pod to another.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.pod-isolation"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-union",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9330,
+      "front": "Two NetworkPolicies select Pod db for ingress. One allows port 5432 from app=orders; the other allows port 5432 from app=reports. Which Pods can reach db on 5432?",
+      "back": "C) Both: the allowed set is the union of the policies.",
+      "choices": "A) Only app=orders, from the first policy created\nB) Neither, since the policies conflict\nC) Both app=orders and app=reports",
+      "choicesExplained": "A: order of evaluation does not affect the result. B: network policies do not conflict; they are additive.",
+      "explanation": "Several policies applying in one direction allow the union of what each allows.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If any policy or policies apply to a given pod for a given direction, the connections allowed in that direction from that pod is the union of what the applicable policies allow.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.netpol-additive"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-empty-selector",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9335,
+      "front": "You want one NetworkPolicy to cover every Pod in namespace shop, including Pods created later. What do you put in spec.podSelector?",
+      "back": "A) An empty selector, {}.",
+      "choices": "A) An empty selector: {}\nB) matchLabels with kubernetes.io/metadata.name: shop\nC) matchExpressions with key app and operator Exists",
+      "choicesExplained": "B: that label is on namespaces, not Pods, so it belongs in a namespaceSelector. C: it selects only Pods that carry an app label, so unlabelled Pods are left out.",
+      "explanation": "An empty podSelector selects all Pods in the policy’s namespace.",
+      "source": "Kubernetes documentation, “Network Policies”, “The NetworkPolicy resource”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#networkpolicy-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "An empty podSelector selects all pods in the namespace.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "namespace",
+        "selector"
+      ],
+      "conceptIDs": [
+        "cka.netpol-empty-podselector"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-policytypes-trap",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9340,
+      "front": "A NetworkPolicy selects app=batch, has egress rules allowing only the database, and no policyTypes field. What happens to inbound connections to batch Pods?",
+      "back": "A) All inbound connections are denied.",
+      "choices": "A) They are all denied: Ingress is set by default, and there are no ingress rules\nB) Nothing changes: the policy only has egress rules\nC) Only the database may connect in",
+      "choicesExplained": "B: with no policyTypes, Ingress is always set. C: the egress rules say where batch may connect to, not who may connect in.",
+      "explanation": "Omitting policyTypes sets Ingress always, and Egress because egress rules exist, so the Pods are isolated both ways.",
+      "source": "Kubernetes documentation, “Network Policies”, “The NetworkPolicy resource”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#networkpolicy-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If no policyTypes are specified on a NetworkPolicy then by default Ingress will always be set and Egress will be set if the NetworkPolicy has any egress rules.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.netpol-policytypes"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-ipblock",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9345,
+      "front": "Pods labelled app=api must accept connections from a partner’s servers outside the cluster, all in 198.51.100.0/24. Which peer do you use in the ingress rule?",
+      "back": "C) ipBlock with that address range.",
+      "choices": "A) namespaceSelector\nB) podSelector\nC) ipBlock with cidr 198.51.100.0/24",
+      "choicesExplained": "A and B pick Pods by label, and the partner’s servers are not Pods in the cluster.",
+      "explanation": "ipBlock allows address ranges, and is meant for addresses outside the cluster.",
+      "source": "Kubernetes documentation, “Network Policies”, “Behavior of to and from selectors”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "ipBlock : This selects particular IP CIDR ranges to allow as ingress sources or egress destinations. These should be cluster-external IPs",
+      "uses": [
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cka.netpol-peer-selectors"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-and-or",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9350,
+      "front": "A policy’s ingress has: from: [ {namespaceSelector: team=pay}, {podSelector: app=billing} ] — two list items. Which sources does it allow?",
+      "back": "B) Either peer: two list items mean either one.",
+      "choices": "A) Only app=billing Pods inside team=pay namespaces\nB) app=billing Pods in the policy’s own namespace, or any Pod in team=pay namespaces\nC) Nothing, because the selectors contradict",
+      "choicesExplained": "A: that would need both selectors in one list item. C: selectors in separate items are alternatives, not contradictions.",
+      "explanation": "Two elements in the from array are separate peers; a podSelector alone looks in the policy’s own namespace.",
+      "source": "Kubernetes documentation, “Network Policies”, “Behavior of to and from selectors”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "It contains two elements in the from array, and allows connections from Pods in the local Namespace with the label role=client , or from any Pod in any namespace with the label user=alice .",
+      "uses": [
+        "NetworkPolicy",
+        "namespace",
+        "selector",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "cka.netpol-and-vs-or"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-default-deny-new-pods",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9355,
+      "front": "You want every Pod in namespace prod, including ones no other policy mentions, to refuse inbound traffic unless a policy allows it. What do you create?",
+      "back": "A) A default deny-all-ingress policy.",
+      "choices": "A) A default deny-all-ingress policy: podSelector {}, policyTypes Ingress, no rules\nB) An allow-all-ingress policy with ingress: - {}\nC) A policy with policyTypes Egress",
+      "choicesExplained": "B: that allows every incoming connection. C: Egress isolation concerns outbound connections.",
+      "explanation": "Selecting all Pods and allowing no ingress isolates even Pods no other policy selects.",
+      "source": "Kubernetes documentation, “Network Policies”, “Default deny all ingress traffic”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#default-deny-all-ingress-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This ensures that even pods that aren't selected by any other NetworkPolicy will still be isolated for ingress.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.default-deny-ingress"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-dns-broken",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9360,
+      "front": "After adding a default deny-all-egress policy to namespace jobs, its Pods cannot resolve any Service names. What is the fix the documentation gives?",
+      "back": "B) Allow egress to the cluster’s DNS service.",
+      "choices": "A) Delete the policy and use ingress rules instead\nB) Add a separate policy allowing egress to the cluster’s DNS service\nC) Restart CoreDNS",
+      "choicesExplained": "A: the goal is to keep egress denied, not drop it. C: CoreDNS is not at fault; the Pods’ outbound queries are blocked.",
+      "explanation": "A deny-all egress policy also blocks DNS traffic, so DNS must be allowed separately.",
+      "source": "Kubernetes documentation, “Network Policies”, “Default deny all egress traffic”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#default-deny-all-egress-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If your workloads need DNS resolution, you must add a separate NetworkPolicy that allows egress to your cluster's DNS service.",
+      "uses": [
+        "NetworkPolicy",
+        "CoreDNS",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.default-deny-egress"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-namespace-by-name",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9365,
+      "front": "Pods in namespace db must accept connections only from Pods in namespace monitoring, which has no labels you added. How do you select it?",
+      "back": "A) Match the kubernetes.io/metadata.name label.",
+      "choices": "A) namespaceSelector matching kubernetes.io/metadata.name: monitoring\nB) A namespace: monitoring field in the from entry\nC) podSelector matching namespace=monitoring",
+      "choicesExplained": "B: a NetworkPolicy cannot name a namespace directly. C: podSelector matches Pod labels in the policy’s own namespace.",
+      "explanation": "The control plane labels every namespace with its own name, so a namespaceSelector can use that.",
+      "source": "Kubernetes documentation, “Network Policies”, “Targeting a Namespace by its name”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#targeting-a-namespace-by-its-name",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "While NetworkPolicy cannot target a namespace by its name with some object field, you can use the standardized label to target a specific namespace.",
+      "uses": [
+        "NetworkPolicy",
+        "namespace",
+        "label"
+      ],
+      "conceptIDs": [
+        "cka.namespace-name-label"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-test-policy",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9370,
+      "front": "A policy lets only Pods labelled role=client reach Service cache. You test from an unlabelled busybox Pod and wget times out. What next confirms the policy works?",
+      "back": "A) Retest from a Pod carrying role=client.",
+      "choices": "A) Repeat the test from a Pod started with --labels=\"role=client\"\nB) Delete the policy and retry\nC) Nothing: a timeout means the policy is broken",
+      "choicesExplained": "B: deleting the policy tests nothing about it. C: a timeout is the expected result for a Pod the policy does not allow.",
+      "explanation": "The walkthrough tests from an unlabelled Pod, then from one with the allowed label, which should succeed.",
+      "source": "Kubernetes documentation, “Declare Network Policy”, “Define access label and test again”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/#define-access-label-and-test-again",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can create a Pod with the correct labels to see that the request is allowed",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "label",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.netpol-test"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-no-controller",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9375,
+      "front": "You create an Ingress, but kubectl get ingress never shows an address, and no ingress controller Pods exist in the cluster. What do you do?",
+      "back": "A) Install an ingress controller.",
+      "choices": "A) Install and set up an ingress controller\nB) Recreate the Ingress with kubectl replace\nC) Add a NodePort to the Ingress spec",
+      "choicesExplained": "B: recreating it changes nothing; creating an Ingress alone has no effect. C: an Ingress does not expose arbitrary ports.",
+      "explanation": "An Ingress needs a running ingress controller to fulfil it.",
+      "source": "Kubernetes documentation, “Ingress Controllers”, “Ingress Controllers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/#ingress-controllers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In order for an Ingress to work in your cluster, there must be an ingress controller running.",
+      "uses": [
+        "Ingress",
+        "ingress controller"
+      ],
+      "conceptIDs": [
+        "cka.ingress-needs-controller"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-non-http",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9380,
+      "front": "A team wants to expose a database protocol on port 5432 to clients outside the cluster. Which option fits?",
+      "back": "B) A LoadBalancer or NodePort Service.",
+      "choices": "A) An Ingress rule for port 5432\nB) A Service of type LoadBalancer or NodePort\nC) An Ingress with pathType Exact",
+      "choicesExplained": "A and C: Ingress only directs HTTP and HTTPS and does not expose arbitrary ports or protocols.",
+      "explanation": "Exposing services other than HTTP and HTTPS usually uses a NodePort or LoadBalancer Service.",
+      "source": "Kubernetes documentation, “Ingress”, “What is Ingress?”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#what-is-ingress",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Exposing services other than HTTP and HTTPS to the internet typically uses a service of type Service.Type=NodePort or Service.Type=LoadBalancer .",
+      "uses": [
+        "Ingress",
+        "NodePort",
+        "LoadBalancer",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.ingress-rules"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.cls-prefix-element",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9385,
+      "front": "An Ingress path is /app with pathType Prefix. Which request path does it match?",
+      "back": "B) /app/login.",
+      "choices": "A) /application\nB) /app/login\nC) /App",
+      "choicesExplained": "A: Prefix matches whole path elements, and “application” is not the element “app”. C: matching is case-sensitive.",
+      "explanation": "Prefix matching splits the path by / and compares element by element, with case sensitivity.",
+      "source": "Kubernetes documentation, “Ingress”, “Path types”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Prefix : Matches based on a URL path prefix split by / . Matching is case sensitive and done on a path element by element basis.",
+      "uses": [
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cka.path-types"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.cls-exact-trailing",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9390,
+      "front": "An Ingress path is /status with pathType Exact. Does a request for /status/ match it?",
+      "back": "B) No.",
+      "choices": "A) Yes, trailing slashes are ignored\nB) No\nC) Only if a Prefix path also exists",
+      "choicesExplained": "A: Exact matches the path exactly, so the extra slash matters. C: another path does not change what an Exact path matches.",
+      "explanation": "The documentation’s table shows Exact /foo does not match a request for /foo/.",
+      "source": "Kubernetes documentation, “Ingress”, “Path types”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Exact /foo /foo Yes Exact /foo /bar No Exact /foo /foo/ No",
+      "uses": [
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cka.path-types"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-two-controllers",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9395,
+      "front": "A cluster runs two ingress controllers, with IngressClasses public and internal. How does a new Ingress pick the internal one?",
+      "back": "A) Set spec.ingressClassName to internal.",
+      "choices": "A) Set spec.ingressClassName: internal\nB) Create the Ingress in a namespace called internal\nC) Add a host rule named internal",
+      "choicesExplained": "B: the namespace does not choose a class. C: hosts are matched against requests; they do not choose a controller.",
+      "explanation": "The ingressClassName field references the IngressClass, which names the controller.",
+      "source": "Kubernetes documentation, “Ingress Controllers”, “Using multiple Ingress controllers”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/#using-multiple-ingress-controllers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you create an ingress you would need that name to specify the ingressClassName field on your Ingress object",
+      "uses": [
+        "Ingress",
+        "IngressClass",
+        "ingress controller"
+      ],
+      "conceptIDs": [
+        "cka.ingressclass",
+        "cka.multiple-ingress-controllers"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.cls-fanout",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9400,
+      "front": "One Ingress sends shop.example.com/cart to Service cart and shop.example.com/search to Service search. Which type of Ingress is this?",
+      "back": "A) Simple fanout.",
+      "choices": "A) Simple fanout\nB) Name-based virtual hosting\nC) Ingress backed by a single Service",
+      "choicesExplained": "B: the host name is the same; the path chooses the Service. C: two Services are involved.",
+      "explanation": "A fanout sends traffic from one address to more than one Service by the path requested.",
+      "source": "Kubernetes documentation, “Ingress”, “Simple fanout”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#simple-fanout",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A fanout configuration routes traffic from a single IP address to more than one Service, based on the HTTP URI being requested.",
+      "uses": [
+        "Ingress",
+        "simple fanout",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.simple-fanout"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.cls-vhosts",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9405,
+      "front": "One Ingress sends every request for blog.example.com to Service blog, and every request for shop.example.com to Service shop, both at one address. Which type is this?",
+      "back": "B) Name-based virtual hosting.",
+      "choices": "A) Simple fanout\nB) Name-based virtual hosting\nC) A default backend",
+      "choicesExplained": "A: fanout chooses by the request path, not the host. C: a default backend takes requests that match no rule.",
+      "explanation": "Name-based virtual hosts route traffic for several host names at the same address, by the Host header.",
+      "source": "Kubernetes documentation, “Ingress”, “Name based virtual hosting”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#name-based-virtual-hosting",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Name-based virtual hosts support routing HTTP traffic to multiple host names at the same IP address.",
+      "uses": [
+        "Ingress",
+        "name-based virtual hosting"
+      ],
+      "conceptIDs": [
+        "cka.name-based-vhosts"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-tls-ingress",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9410,
+      "front": "You must serve https://pay.example.com through an Ingress with an existing certificate and key. What do you create first?",
+      "back": "A) A TLS Secret, referenced in the Ingress’s tls section.",
+      "choices": "A) A Secret with keys tls.crt and tls.key, referenced from the Ingress’s tls section for host pay.example.com\nB) A ConfigMap holding the certificate\nC) A second Ingress on port 8443",
+      "choicesExplained": "B: the Ingress takes its certificate from a Secret. C: the Ingress resource supports a single TLS port, 443.",
+      "explanation": "The Ingress is secured by a Secret with tls.crt and tls.key, whose host must match the rules.",
+      "source": "Kubernetes documentation, “Ingress”, “TLS”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#tls",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The TLS secret must contain keys named tls.crt and tls.key that contain the certificate and private key to use for TLS.",
+      "uses": [
+        "Ingress",
+        "Secret",
+        "ConfigMap"
+      ],
+      "conceptIDs": [
+        "cka.ingress-tls"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-no-crds",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9415,
+      "front": "On a fresh kubeadm cluster, kubectl get gatewayclasses reports that the resource type does not exist. What is missing?",
+      "back": "A) The Gateway API CRDs, and an implementation.",
+      "choices": "A) The Gateway API CRDs and an implementation\nB) A feature gate in kube-apiserver\nC) An IngressClass marked as default",
+      "choicesExplained": "B: Gateway API is not a built-in API behind a feature gate but an add-on. C: IngressClass belongs to the Ingress API.",
+      "explanation": "Gateway API kinds are custom resources, so their CRDs must be installed, along with an implementation.",
+      "source": "Kubernetes documentation, “Gateway API”, “What’s next”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#what-s-next",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Install the Gateway API CRDs or follow the installation instructions of your selected implementation.",
+      "uses": [
+        "Gateway API",
+        "CustomResourceDefinition",
+        "kubeadm",
+        "feature gate",
+        "IngressClass",
+        "GatewayClass"
+      ],
+      "conceptIDs": [
+        "cka.gateway-api-addon"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-choose-gateway",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9420,
+      "front": "A team starting a new service needs routing by request header and a weighted canary. They ask whether to use Ingress or Gateway API. What do the Kubernetes docs point to?",
+      "back": "B) Gateway API.",
+      "choices": "A) Ingress, because it is generally available\nB) Gateway API\nC) Ingress with a new header field, added in a recent release",
+      "choicesExplained": "A: Ingress stays available, but the project recommends Gateway. C: the Ingress API is frozen and gets no new fields.",
+      "explanation": "Gateway API supports header-based matching and weighting natively, and the project recommends Gateway instead of Ingress.",
+      "source": "Kubernetes documentation, “Gateway API”, “Design principles”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#design-principles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Expressive: Gateway API kinds support functionality for common traffic routing use cases such as header-based matching, traffic weighting, and others that were only possible in Ingress by using custom annotations.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (the exam version)",
+      "uses": [
+        "Ingress",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "cka.ingress-frozen",
+        "cka.gateway-api-addon"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.cls-role-gatewayclass",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 9425,
+      "front": "Which Gateway API role normally creates the GatewayClasses in a cluster?",
+      "back": "C) The Infrastructure Provider.",
+      "choices": "A) Application Developer\nB) Cluster Operator\nC) Infrastructure Provider",
+      "choicesExplained": "A: application developers usually write routes for their Services. B: the GatewayClass reference says the infrastructure provider defines it.",
+      "explanation": "GatewayClass is a cluster-scoped resource defined by the infrastructure provider.",
+      "source": "Gateway API documentation, “GatewayClass”, “GatewayClass”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/gatewayclass/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "We expect that one or more GatewayClasses will be created by the infrastructure provider for the user.",
+      "uses": [
+        "GatewayClass",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "cka.gateway-roles",
+        "cka.gatewayclass"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-cross-namespace-route",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9430,
+      "front": "Gateway web-gw in namespace infra has a listener with no allowedRoutes set. An HTTPRoute in namespace shop names web-gw in parentRefs, but never attaches. Why?",
+      "back": "B) The Gateway accepts Routes only from its own namespace by default.",
+      "choices": "A) HTTPRoutes cannot use parentRefs across namespaces at all\nB) By default a Gateway only accepts Routes from its own namespace\nC) The HTTPRoute needs a hostnames list",
+      "choicesExplained": "A: cross-namespace routes work once allowedRoutes permits them. C: hostnames are optional; with none, rules alone route traffic.",
+      "explanation": "Cross-namespace Routes require configuring allowedRoutes on the Gateway listener.",
+      "source": "Kubernetes documentation, “Gateway API”, “Gateway”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/gateway/#api-kind-gateway",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Note: By default, a Gateway only accepts Routes from the same namespace. Cross-namespace Routes require configuring allowedRoutes .",
+      "uses": [
+        "Gateway",
+        "HTTPRoute",
+        "namespace",
+        "Gateway listeners"
+      ],
+      "conceptIDs": [
+        "cka.parentrefs",
+        "cka.gateway-listeners",
+        "cka.gateway"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-match-or",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9435,
+      "front": "An HTTPRoute rule has two matches: (1) path /beta with header x-tester: yes; (2) path /preview. Does a request for /preview with no headers match the rule?",
+      "back": "A) Yes: any single match is enough.",
+      "choices": "A) Yes, match (2) alone is enough\nB) No, it lacks the header\nC) Only if hostnames is empty",
+      "choicesExplained": "B: the header belongs to match (1) only; conditions do not carry across matches. C: hostnames do not change how matches combine.",
+      "explanation": "Each match in a rule is independent, and the rule matches when any single match is satisfied.",
+      "source": "Gateway API documentation, “HTTPRoute”, “Matches”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#matches",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Each match is independent, i.e. this rule will be matched if any single match is satisfied.",
+      "uses": [
+        "HTTPRoute",
+        "HTTPRoute hostnames"
+      ],
+      "conceptIDs": [
+        "cka.httproute-matches"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-canary-weights",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9440,
+      "front": "You want 5% of requests on an HTTPRoute to reach Service api-v2 and the rest api-v1. How?",
+      "back": "A) Two backendRefs weighted 95 and 5.",
+      "choices": "A) Two backendRefs: api-v1 with weight 95, api-v2 with weight 5\nB) Two HTTPRoutes with the same hostname\nC) A RequestHeaderModifier filter",
+      "choicesExplained": "B: two routes do not split traffic by percentage. C: that filter changes headers; it does not split traffic.",
+      "explanation": "The weight field on backendRefs splits a rule’s traffic between backends in proportion.",
+      "source": "Gateway API documentation, “HTTPRoute”, “BackendRefs (optional)”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#backendrefs-optional",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The following example uses the weight field to forward 90% of HTTP requests to foo.example.com to the “foo-v1” Service and the other 10% to the “foo-v2” Service",
+      "uses": [
+        "HTTPRoute",
+        "Service",
+        "HTTPRoute filters"
+      ],
+      "conceptIDs": [
+        "cka.httproute-weights"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-filter-combo",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9445,
+      "front": "An HTTPRoute rule has both a URLRewrite filter and a RequestRedirect filter, and the route is not accepted. Why?",
+      "back": "A) URLRewrite and RequestRedirect may not be combined.",
+      "choices": "A) Those two filters may not be combined\nB) A rule may have only one filter of any kind\nC) Filters need a backendRefs weight",
+      "choicesExplained": "B: other filters are expected to be compatible and can be combined. C: weights are for splitting traffic, unrelated to filters.",
+      "explanation": "Implementations may set the Accepted condition to False with reason IncompatibleFilters for this.",
+      "source": "Gateway API documentation, “HTTPRoute”, “Filters (optional)”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#filters-optional",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In cases where incompatible or unsupported filters are specified and cause the Accepted condition to be set to status False , implementations may use the IncompatibleFilters reason to specify this configuration error.",
+      "uses": [
+        "HTTPRoute filters",
+        "HTTPRoute"
+      ],
+      "conceptIDs": [
+        "cka.httproute-filters"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-one-listener",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9450,
+      "front": "Gateway edge has listeners public (port 80) and admin (port 8081). An HTTPRoute should attach to admin only. What do you add to its parentRefs entry?",
+      "back": "A) sectionName: admin.",
+      "choices": "A) sectionName: admin\nB) hostnames: [admin]\nC) namespace: admin",
+      "choicesExplained": "B: hostnames are matched against the Host header, not listener names. C: namespace names where the Gateway lives, not which listener.",
+      "explanation": "sectionName in parentRefs binds a route to one named listener of the parent.",
+      "source": "Gateway API documentation, “HTTPRoute”, “Attaching to Gateways”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#attaching-to-gateways",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You can bind a route to listener foo only, using the sectionName field in parentRefs",
+      "uses": [
+        "HTTPRoute",
+        "Gateway listeners",
+        "HTTPRoute hostnames",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.parentrefs"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.app-no-backendrefs",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 9455,
+      "front": "An HTTPRoute rule matches path /old and has no backendRefs and no filters. What does a client requesting /old get?",
+      "back": "A) A 500 error.",
+      "choices": "A) A 500 error\nB) The Gateway’s default Service\nC) A redirect to /",
+      "choicesExplained": "B: nothing in the rule forwards the request anywhere. C: only a redirect filter would send a redirect, and there are no filters.",
+      "explanation": "Without backendRefs the rule forwards nothing, and with no filter sending a response, a 500 code is returned.",
+      "source": "Gateway API documentation, “HTTPRoute”, “BackendRefs (optional)”",
+      "sourceURL": "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/#backendrefs-optional",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If unspecified and no filters are specified that would result in a response being sent, a 500 error code is returned.",
+      "uses": [
+        "HTTPRoute",
+        "HTTPRoute filters",
+        "Gateway",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.httproute"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.contrast-isolation",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 9460,
+      "front": "How does a Pod that is non-isolated for egress differ from one that is isolated for egress?",
+      "back": "Non-isolated: all outbound connections allowed. Isolated: only connections allowed by the egress list of a policy applying to it.",
+      "explanation": "A Pod becomes isolated for egress when a policy selecting it has Egress in its policyTypes.",
+      "source": "Kubernetes documentation, “Network Policies”, “The two sorts of pod isolation”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#the-two-sorts-of-pod-isolation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, a pod is non-isolated for egress; all outbound connections are allowed.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.pod-isolation"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.contrast-and-or",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 9465,
+      "front": "How does one from entry holding both namespaceSelector and podSelector differ from the same two selectors as separate entries?",
+      "back": "One entry: only matching Pods inside matching namespaces. Separate entries: matching Pods locally, or any Pod in matching namespaces.",
+      "explanation": "In the YAML, a dash before podSelector starts a second list item, which turns one combined peer into two alternative peers.",
+      "source": "Kubernetes documentation, “Network Policies”, “Behavior of to and from selectors”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#behavior-of-to-and-from-selectors",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A single to / from entry that specifies both namespaceSelector and podSelector selects particular Pods within particular namespaces.",
+      "uses": [
+        "NetworkPolicy",
+        "selector",
+        "yaml"
+      ],
+      "conceptIDs": [
+        "cka.netpol-and-vs-or"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.contrast-deny-allow",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 9470,
+      "front": "How does a default deny-all-ingress policy differ from an allow-all-ingress policy?",
+      "back": "Both select all Pods with policyTypes Ingress. Deny has no ingress rules; allow has one empty rule, - {}, matching everything.",
+      "explanation": "An empty rule matches all traffic, while no rules match none.",
+      "source": "Kubernetes documentation, “Network Policies”, “Allow all ingress traffic”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/network-policies/#allow-all-ingress-traffic",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you want to allow all incoming connections to all pods in a namespace, you can create a policy that explicitly allows that.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.allow-all-ingress",
+        "cka.default-deny-ingress"
+      ]
+    },
+    {
+      "id": "cka.network-policies-ingress-gateway.contrast-fanout-vhosts",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 9475,
+      "front": "How does simple fanout differ from name-based virtual hosting in an Ingress?",
+      "back": "Fanout chooses the Service by request path. Virtual hosting chooses it by host name, at the same address.",
+      "explanation": "Both let one Ingress address serve several Services.",
+      "source": "Kubernetes documentation, “Ingress”, “Name based virtual hosting”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/services-networking/ingress/#name-based-virtual-hosting",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The following Ingress tells the backing load balancer to route requests based on the Host header .",
+      "uses": [
+        "simple fanout",
+        "name-based virtual hosting",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cka.simple-fanout",
+        "cka.name-based-vhosts"
+      ]
+    }
+  ]
+}

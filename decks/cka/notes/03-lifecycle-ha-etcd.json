@@ -1,0 +1,1699 @@
+{
+  "topic": "Cluster lifecycle, HA and etcd",
+  "notes": [
+    {
+      "id": "cka.lifecycle-ha-etcd.what-is-pki-directory",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3000,
+      "front": "What is /etc/kubernetes/pki on a kubeadm cluster?",
+      "back": "The default directory where kubeadm keeps the cluster’s certificates and keys; it can be changed with --cert-dir or certificatesDir.",
+      "explanation": "kubeadm generates every certificate a cluster needs, and custom certificates must go in this same directory for kubeadm to use them.",
+      "introduces": [
+        "/etc/kubernetes/pki"
+      ],
+      "example": "Like a building’s key cabinet: every lock’s key is kept in one known cupboard, and the cluster’s certificate authority is the master key inside it.",
+      "source": "Kubernetes documentation, “Certificate Management with kubeadm”, “Using custom certificates”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#custom-certificates",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "you must place them in whatever directory is specified by the --cert-dir flag or the certificatesDir field of kubeadm's ClusterConfiguration . By default this is /etc/kubernetes/pki",
+      "uses": [
+        "kubeadm",
+        "/etc/kubernetes/pki"
+      ],
+      "conceptIDs": [
+        "cka.pki-directory"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.what-is-stacked-etcd",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3005,
+      "front": "What is the stacked etcd topology for a highly available cluster?",
+      "back": "etcd runs on the control plane nodes themselves: each control plane node has a local etcd member that talks only to that node’s kube-apiserver.",
+      "explanation": "The etcd cluster is stacked on top of the nodes kubeadm manages that run the control plane components, so the two are coupled on the same machines.",
+      "introduces": [
+        "stacked etcd topology"
+      ],
+      "example": "Like three shops that each keep their own copy of the ledger in the back room: lose one shop and you lose that ledger copy too.",
+      "source": "Kubernetes documentation, “Options for Highly Available Topology”, “Stacked etcd topology”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each control plane node creates a local etcd member and this etcd member communicates only with the kube-apiserver of this node.",
+      "uses": [
+        "etcd",
+        "control plane",
+        "node",
+        "kube-apiserver",
+        "stacked etcd topology"
+      ],
+      "conceptIDs": [
+        "cka.stacked-etcd"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.what-is-external-etcd",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3010,
+      "front": "What is the external etcd topology for a highly available cluster?",
+      "back": "etcd members run on separate hosts from the control plane nodes, and each etcd host talks to the kube-apiserver of every control plane node.",
+      "explanation": "The etcd cluster sits outside the cluster formed by the control plane nodes, which still each run kube-apiserver, kube-scheduler and kube-controller-manager.",
+      "introduces": [
+        "external etcd topology"
+      ],
+      "example": "Like shops that all use one separate bank vault for the ledger: a shop can close without touching the ledger copies.",
+      "source": "Kubernetes documentation, “Options for Highly Available Topology”, “External etcd topology”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#external-etcd-topology",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "However, etcd members run on separate hosts, and each etcd host communicates with the kube-apiserver of each control plane node.",
+      "uses": [
+        "etcd",
+        "control plane",
+        "node",
+        "kube-apiserver",
+        "external etcd topology"
+      ],
+      "conceptIDs": [
+        "cka.external-etcd"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.upgrade-high-level-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3020,
+      "front": "In what order does the kubeadm upgrade workflow upgrade the parts of a cluster?",
+      "back": "The primary control plane node, then the additional control plane nodes, then the worker nodes.",
+      "explanation": "This is the high-level workflow on the kubeadm upgrade page; the control plane goes before any worker node.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Upgrading kubeadm clusters”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The upgrade workflow at high level is the following: Upgrade a primary control plane node. Upgrade additional control plane nodes. Upgrade worker nodes.",
+      "uses": [
+        "kubeadm",
+        "control plane",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.upgrade-order"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.upgrade-order-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3022,
+      "front": "You must upgrade a kubeadm cluster with three control plane nodes and five workers. Where do you start?",
+      "back": "On one control plane node that has /etc/kubernetes/admin.conf; the workers come after all the control plane nodes.",
+      "choices": "A) On one control plane node\nB) On a worker node, to test the new version\nC) On all eight nodes at the same time",
+      "choicesExplained": "B: workers are upgraded after the control plane, not before. C: control plane nodes go one at a time, and workers one or a few at a time.",
+      "explanation": "The workflow upgrades a primary control plane node first, then the other control plane nodes, then the workers.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Upgrading control plane nodes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#upgrading-control-plane-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Pick a control plane node that you wish to upgrade first. It must have the /etc/kubernetes/admin.conf file.",
+      "uses": [
+        "kubeadm",
+        "control plane",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.upgrade-order"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.control-plane-one-at-a-time",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3025,
+      "front": "The kubeadm upgrade procedure on control plane nodes should be executed {{c1::one node at a time}}.",
+      "back": "One node at a time.",
+      "explanation": "You pick one control plane node to upgrade first; it must have the /etc/kubernetes/admin.conf file.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Upgrading control plane nodes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#upgrading-control-plane-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The upgrade procedure on control plane nodes should be executed one node at a time. Pick a control plane node that you wish to upgrade first. It must have the /etc/kubernetes/admin.conf file.",
+      "uses": [
+        "kubeadm",
+        "control plane",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.upgrade-order"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.no-skipping-minor",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3030,
+      "front": "Skipping {{c1::minor}} versions when upgrading a kubeadm cluster is unsupported.",
+      "back": "Minor versions.",
+      "explanation": "The page points to the version skew policy for the details; patch upgrades within one minor release are covered by the same procedure.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Upgrading kubeadm clusters”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Skipping MINOR versions when upgrading is unsupported. For more details, please visit Version Skew Policy.",
+      "uses": [
+        "kubeadm",
+        "version skew"
+      ],
+      "conceptIDs": [
+        "cka.no-skipping-minor"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.skip-minor-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3035,
+      "front": "A kubeadm cluster runs v1.33 and must end up on v1.35. What is the supported path?",
+      "back": "Upgrade v1.33 to v1.34 first, then v1.34 to v1.35.",
+      "choices": "A) Run kubeadm upgrade apply v1.35.x directly\nB) Upgrade to v1.34, then to v1.35\nC) Upgrade the worker nodes to v1.35 first, then the control plane",
+      "choicesExplained": "A: jumping from v1.33 to v1.35 skips a minor version, which is unsupported. C: the workflow upgrades the control plane before the worker nodes.",
+      "explanation": "Skipping a minor version is unsupported, so each minor release is a separate upgrade.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Upgrading kubeadm clusters”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Skipping MINOR versions when upgrading is unsupported.",
+      "uses": [
+        "kubeadm",
+        "version skew"
+      ],
+      "conceptIDs": [
+        "cka.no-skipping-minor"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.package-repo-per-minor",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3040,
+      "front": "With the pkgs.k8s.io repositories, what must you do before upgrading kubeadm to a new minor release?",
+      "back": "Enable the package repository for the desired Kubernetes minor release.",
+      "explanation": "The steps are in the “Changing the Kubernetes package repository” document that the upgrade page links to.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Changing the package repository”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#changing-the-package-repository",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you're using the community-owned package repositories ( pkgs.k8s.io ), you need to enable the package repository for the desired Kubernetes minor release.",
+      "uses": [
+        "pkgs.k8s.io package repositories",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.change-package-repo"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.package-repo-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3045,
+      "front": "On a node using pkgs.k8s.io, apt-cache madison kubeadm lists only patch releases of the current minor version, not the minor you want. What do you check first?",
+      "back": "That the package repository for the target minor release is enabled.",
+      "choices": "A) The Kubernetes package repository configuration\nB) The kubelet logs\nC) The etcd snapshot",
+      "choicesExplained": "B: the kubelet has nothing to do with which package versions the package manager can see. C: an etcd backup is good practice but does not change the packages on offer.",
+      "explanation": "The upgrade page says to enable the repository for the desired minor release, and to check the repositories if the expected version does not appear.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Determine which version to upgrade to”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#determine-which-version-to-upgrade-to",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you don't see the version you expect to upgrade to, verify if the Kubernetes package repositories are used.",
+      "uses": [
+        "pkgs.k8s.io package repositories",
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.change-package-repo"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.upgrade-plan-does",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3055,
+      "front": "What does kubeadm upgrade plan do?",
+      "back": "Checks that the cluster can be upgraded, fetches the versions you can upgrade to, and shows the component config version states.",
+      "explanation": "You run it before choosing the version to pass to kubeadm upgrade apply.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Call “kubeadm upgrade””",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#call-kubeadm-upgrade",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This command checks that your cluster can be upgraded, and fetches the versions you can upgrade to. It also shows a table with the component config version states.",
+      "uses": [
+        "kubeadm",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-upgrade-plan"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.upgrade-plan-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3057,
+      "front": "You have upgraded the kubeadm package on the first control plane node and want to see which versions the cluster can move to. What do you run?",
+      "back": "sudo kubeadm upgrade plan",
+      "choices": "A) sudo kubeadm upgrade plan\nB) sudo kubeadm upgrade node\nC) kubeadm certs check-expiration",
+      "choicesExplained": "B: upgrade node performs an upgrade on an additional node; it does not list versions. C: that reports certificate expiry, not available versions.",
+      "explanation": "It checks that the cluster can be upgraded and fetches the versions available, before you choose one for kubeadm upgrade apply.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Call “kubeadm upgrade””",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#call-kubeadm-upgrade",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This command checks that your cluster can be upgraded, and fetches the versions you can upgrade to.",
+      "uses": [
+        "kubeadm",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-upgrade-plan"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.upgrade-apply-first-cp",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3060,
+      "front": "Which command upgrades the control plane on the first control plane node, for example to v1.35.x?",
+      "back": "sudo kubeadm upgrade apply v1.35.x",
+      "explanation": "You choose a version from the upgrade plan and pass it to kubeadm upgrade apply on the first control plane node.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Call “kubeadm upgrade””",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#call-kubeadm-upgrade",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Choose a version to upgrade to, and run the appropriate command. For example: # replace x with the patch version you picked for this upgrade sudo kubeadm upgrade apply",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (the exam version)",
+      "uses": [
+        "kubeadm",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-upgrade-apply"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.upgrade-apply-checks",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3065,
+      "front": "Before upgrading, kubeadm upgrade apply checks the cluster is upgradeable. What three conditions does it check?",
+      "back": "The API server is reachable, all nodes are Ready, and the control plane is healthy.",
+      "explanation": "These three checks are the first thing listed under what kubeadm upgrade apply does.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “How it works”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#how-it-works",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Checks that your cluster is in an upgradeable state: The API server is reachable All nodes are in the Ready state The control plane is healthy",
+      "uses": [
+        "kubeadm",
+        "kube-apiserver",
+        "node",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-upgrade-apply"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.upgrade-node-other-cp",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3075,
+      "front": "On the other control plane nodes, which kubeadm command replaces kubeadm upgrade apply?",
+      "back": "sudo kubeadm upgrade node",
+      "explanation": "The other control plane nodes follow the same steps as the first, but use kubeadm upgrade node instead of kubeadm upgrade apply.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Call “kubeadm upgrade””",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#call-kubeadm-upgrade",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Same as the first control plane node but use: sudo kubeadm upgrade node instead of: sudo kubeadm upgrade apply",
+      "uses": [
+        "kubeadm",
+        "control plane",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-upgrade-node"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.upgrade-node-on-workers",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3085,
+      "front": "What does kubeadm upgrade node do on a worker node?",
+      "back": "Fetches the kubeadm ClusterConfiguration from the cluster and upgrades the kubelet configuration for that node.",
+      "explanation": "On additional control plane nodes it also upgrades the static Pod manifests for the control plane components.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “How it works”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#how-it-works",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubeadm upgrade node does the following on worker nodes: Fetches the kubeadm ClusterConfiguration from the cluster. Upgrades the kubelet configuration for this node.",
+      "uses": [
+        "kubeadm",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-upgrade-node"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.which-upgrade-command",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3095,
+      "front": "You have finished kubeadm upgrade apply on cp1 and upgraded kubeadm on cp2, the second of three control plane nodes. Which command do you run on cp2?",
+      "back": "sudo kubeadm upgrade node",
+      "choices": "A) sudo kubeadm upgrade apply v1.35.x\nB) sudo kubeadm upgrade node\nC) sudo kubeadm upgrade plan",
+      "choicesExplained": "A: upgrade apply is for the first control plane node only. C: calling upgrade plan is no longer needed on the other control plane nodes, and it upgrades nothing.",
+      "explanation": "Only the first control plane node runs kubeadm upgrade apply; the others run kubeadm upgrade node.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Call “kubeadm upgrade””",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#call-kubeadm-upgrade",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Same as the first control plane node but use: sudo kubeadm upgrade node instead of: sudo kubeadm upgrade apply",
+      "uses": [
+        "kubeadm",
+        "control plane",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubeadm-upgrade-node",
+        "cka.kubeadm-upgrade-apply"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.drain-before-minor-kubelet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3110,
+      "front": "Before a minor version upgrade of a node’s kubelet, what must you do to the node first?",
+      "back": "Drain it.",
+      "explanation": "This applies to control plane nodes too, which could be running CoreDNS Pods or other critical workloads.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Additional information”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#additional-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you are performing a minor version upgrade for any kubelet, you must first drain the node (or nodes) that you are upgrading. In the case of control plane nodes, they could be running CoreDNS Pods or other critical workloads.",
+      "uses": [
+        "drain",
+        "node",
+        "control plane",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.upgrade-kubelet-kubectl",
+        "cka.kubectl-drain"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.restart-kubelet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3115,
+      "front": "After installing the new kubelet package on a node, which two commands restart the kubelet?",
+      "back": "sudo systemctl daemon-reload, then sudo systemctl restart kubelet.",
+      "explanation": "The page gives these two commands straight after installing the new kubelet and kubectl packages.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Upgrade kubelet and kubectl”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#upgrade-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Restart the kubelet: sudo systemctl daemon-reload sudo systemctl restart kubelet",
+      "uses": [
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.upgrade-kubelet-kubectl"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.uncordon-after-upgrade",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3135,
+      "front": "What is the last step on a node after its kubelet has been upgraded and restarted?",
+      "back": "Uncordon it with kubectl uncordon <node> to mark it schedulable again.",
+      "explanation": "The node was drained, so it stays unschedulable until you bring it back online.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Uncordon the node”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#uncordon-the-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Bring the node back online by marking it schedulable: # replace <node-to-uncordon> with the name of your node kubectl uncordon <node-to-uncordon>",
+      "uses": [
+        "kubectl",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-uncordon",
+        "cka.upgrade-kubelet-kubectl"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.control-plane-node-steps",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3140,
+      "front": "On cp2 you have run kubeadm upgrade node and drained the node. What comes next?",
+      "back": "Upgrade the kubelet and kubectl packages, run systemctl daemon-reload and restart kubelet, then uncordon cp2.",
+      "choices": "A) Uncordon cp2 straight away\nB) Upgrade kubelet and kubectl, restart the kubelet, then uncordon\nC) Run kubeadm upgrade apply on cp2",
+      "choicesExplained": "A: the kubelet still runs the old version, which is why the node was drained. C: upgrade apply belongs on the first control plane node only.",
+      "explanation": "The page’s order after kubeadm upgrade is drain, upgrade kubelet and kubectl, restart the kubelet, then uncordon.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Upgrade kubelet and kubectl”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#upgrade-kubelet-and-kubectl",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Restart the kubelet: sudo systemctl daemon-reload sudo systemctl restart kubelet Uncordon the node Bring the node back online by marking it schedulable",
+      "uses": [
+        "kubectl",
+        "drain",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.upgrade-kubelet-kubectl",
+        "cka.kubectl-uncordon"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.workers-few-at-a-time",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3145,
+      "front": "How many worker nodes should you upgrade at once?",
+      "back": "One or a few at a time, without compromising the minimum capacity your workloads need.",
+      "explanation": "Control plane nodes, by contrast, are upgraded strictly one at a time.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Upgrade worker nodes”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#upgrade-worker-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The upgrade procedure on worker nodes should be executed one node at a time or few nodes at a time, without compromising the minimum required capacity for running your workloads.",
+      "uses": [
+        "node",
+        "drain"
+      ],
+      "conceptIDs": [
+        "cka.upgrade-order"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.upgrade-renews-certs",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3160,
+      "front": "kubeadm upgrade also automatically {{c1::renews the certificates}} that it manages on this node.",
+      "back": "Renews the certificates.",
+      "explanation": "You can opt out of the renewal with the flag --certificate-renewal=false.",
+      "source": "Kubernetes documentation, “Upgrading kubeadm clusters”, “Call “kubeadm upgrade””",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/#call-kubeadm-upgrade",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubeadm upgrade also automatically renews the certificates that it manages on this node. To opt-out of certificate renewal the flag --certificate-renewal=false can be used.",
+      "uses": [
+        "kubeadm",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.upgrade-renews-certs"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.regular-upgrades-renew",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3170,
+      "front": "A team upgrades its kubeadm cluster every four months and has no special certificate needs. Must it schedule manual certificate renewals?",
+      "back": "No: kubeadm renews all the certificates during each control plane upgrade.",
+      "choices": "A) Yes, every month\nB) No, the upgrades renew the certificates\nC) Yes, because upgrades never touch certificates",
+      "choicesExplained": "A: nothing in the source calls for monthly renewal when upgrades are this frequent. C: kubeadm upgrade does renew the certificates it manages.",
+      "explanation": "The source says that with upgrades less than a year apart, kubeadm keeps the cluster up to date and reasonably secure.",
+      "source": "Kubernetes documentation, “Certificate Management with kubeadm”, “Automatic certificate renewal”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#automatic-certificate-renewal",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "perform Kubernetes version upgrades regularly (less than 1 year in between each upgrade), kubeadm will take care of keeping your cluster up to date and reasonably secure.",
+      "uses": [
+        "kubeadm",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.upgrade-renews-certs",
+        "cka.client-cert-1-year"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.kubectl-cordon",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3180,
+      "front": "What does kubectl cordon my-node do?",
+      "back": "Marks my-node as unschedulable.",
+      "explanation": "The quick reference lists it beside drain and uncordon as a node command.",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with Nodes and cluster”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-nodes-and-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl cordon my-node # Mark my-node as unschedulable",
+      "uses": [
+        "kubectl",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-cordon"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.kubectl-uncordon",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3185,
+      "front": "What does kubectl uncordon my-node do?",
+      "back": "Marks my-node as schedulable again.",
+      "explanation": "It reverses cordon, and drain, which also leaves the node unschedulable.",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with Nodes and cluster”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-nodes-and-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl uncordon my-node # Mark my-node as schedulable",
+      "uses": [
+        "kubectl",
+        "node",
+        "drain"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-uncordon"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.kubectl-drain",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3190,
+      "front": "What does kubectl drain do before node maintenance?",
+      "back": "Safely evicts all the Pods from the node, letting containers terminate gracefully and respecting PodDisruptionBudgets.",
+      "explanation": "After a successful drain it is safe to power the machine down or delete its virtual machine.",
+      "source": "Kubernetes documentation, “Safely Drain a Node”, “Use kubectl drain to remove a node from service”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/#use-kubectl-drain-to-remove-a-node-from-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Safe evictions allow the pod's containers to gracefully terminate and will respect the PodDisruptionBudgets you have specified.",
+      "uses": [
+        "kubectl",
+        "drain",
+        "Pod",
+        "disruptions / PodDisruptionBudget",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-drain"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.ignore-daemonsets",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3195,
+      "front": "If there are Pods managed by a DaemonSet on a node, kubectl drain needs the flag {{c1::--ignore-daemonsets}} to drain it successfully.",
+      "back": "--ignore-daemonsets",
+      "explanation": "The DaemonSet controller, part of the control plane, immediately replaces missing DaemonSet Pods with new ones.",
+      "source": "Kubernetes documentation, “Safely Drain a Node”, “Use kubectl drain to remove a node from service”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/#use-kubectl-drain-to-remove-a-node-from-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If there are pods managed by a DaemonSet, you will need to specify --ignore-daemonsets with kubectl to successfully drain the node. The kubectl drain subcommand on its own does not actually drain a node of its DaemonSet pods: the DaemonSet controller (part of the control plane) immediately replaces missing Pods with new equivalent Pods.",
+      "uses": [
+        "kubectl",
+        "drain",
+        "DaemonSet",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.ignore-daemonsets"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.daemonset-why",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3200,
+      "front": "Why does kubectl drain not remove a node’s DaemonSet Pods?",
+      "back": "The DaemonSet controller immediately replaces missing Pods, and its Pods ignore unschedulable taints, so they would land on the node again.",
+      "explanation": "The DaemonSet controller is part of the control plane.",
+      "source": "Kubernetes documentation, “Safely Drain a Node”, “Use kubectl drain to remove a node from service”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/#use-kubectl-drain-to-remove-a-node-from-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "the DaemonSet controller (part of the control plane) immediately replaces missing Pods with new equivalent Pods. The DaemonSet controller also creates Pods that ignore unschedulable taints",
+      "uses": [
+        "DaemonSet",
+        "drain",
+        "taint",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.ignore-daemonsets"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.drain-daemonset-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3205,
+      "front": "kubectl drain node3 stops with an error about Pods managed by a DaemonSet (a log agent). What do you run?",
+      "back": "kubectl drain node3 --ignore-daemonsets",
+      "choices": "A) Delete the DaemonSet, then drain\nB) kubectl drain node3 --ignore-daemonsets\nC) kubectl cordon node3 and stop there",
+      "choicesExplained": "A: deleting the DaemonSet removes the agent from every node, which is not needed. C: cordon stops new Pods but evicts nothing, so the node is not ready for maintenance.",
+      "explanation": "The DaemonSet controller immediately replaces missing DaemonSet Pods, so drain needs the flag to succeed.",
+      "source": "Kubernetes documentation, “Safely Drain a Node”, “Use kubectl drain to remove a node from service”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/#use-kubectl-drain-to-remove-a-node-from-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If there are pods managed by a DaemonSet, you will need to specify --ignore-daemonsets with kubectl to successfully drain the node. The kubectl drain subcommand on its own does not actually drain a node of its DaemonSet pods: the DaemonSet controller (part of the control plane) immediately replaces missing Pods with new equivalent Pods.",
+      "uses": [
+        "kubectl",
+        "drain",
+        "DaemonSet",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.ignore-daemonsets",
+        "cka.kubectl-drain"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.drain-pdb-rule",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3210,
+      "front": "If several kubectl drain commands run in parallel, do they still respect PodDisruptionBudgets?",
+      "back": "Yes. Any drain that would push healthy replicas below the budget is blocked.",
+      "explanation": "Concurrent drains are still limited by the PodDisruptionBudget, so a parallel drain cannot bypass it.",
+      "source": "Kubernetes documentation, “Safely Drain a Node”, “Draining multiple nodes in parallel”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/#draining-multiple-nodes-in-parallel",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Multiple drain commands running concurrently will still respect the PodDisruptionBudget you specify.",
+      "uses": [
+        "drain",
+        "disruptions / PodDisruptionBudget",
+        "PDB",
+        "replica"
+      ],
+      "conceptIDs": [
+        "cka.drain-respects-pdb"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.drain-pdb-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3215,
+      "front": "A StatefulSet has 5 healthy replicas and a PodDisruptionBudget of minAvailable: 3. You drain several nodes in parallel. At most how many of its Pods can be unavailable at once?",
+      "back": "2 (replicas − minAvailable).",
+      "choices": "A) 2\nB) 3\nC) 5, because drain ignores budgets",
+      "choicesExplained": "B: 3 is the number that must stay available, not the number that may go. C: drain respects PodDisruptionBudgets, even in parallel.",
+      "explanation": "Kubernetes respects the budget, calculated as replicas minus minAvailable, and blocks drains that would go below it.",
+      "source": "Kubernetes documentation, “Safely Drain a Node”, “Draining multiple nodes in parallel”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/#draining-multiple-nodes-in-parallel",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Kubernetes respects the PodDisruptionBudget and ensures that only 1 (calculated as replicas - minAvailable ) Pod is unavailable at any given time.",
+      "uses": [
+        "StatefulSet",
+        "replica",
+        "disruptions / PodDisruptionBudget",
+        "drain"
+      ],
+      "conceptIDs": [
+        "cka.drain-respects-pdb"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.nodename-bypass",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3225,
+      "front": "A Pod has spec.nodeName set directly to a node you drained and marked unschedulable. Will it run there?",
+      "back": "Yes: setting nodeName bypasses the scheduler, so the Pod is bound to that node anyway.",
+      "explanation": "The drain page lists this as an exception: the Pod is bound to the node you named.",
+      "source": "Kubernetes documentation, “Safely Drain a Node”, “Use kubectl drain to remove a node from service”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/#use-kubectl-drain-to-remove-a-node-from-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "directly set the nodeName field for a Pod (bypassing the scheduler), then the Pod is bound to the specified node and will run there, even though you have drained that node and marked it unschedulable.",
+      "uses": [
+        "Pod",
+        "kube-scheduler",
+        "drain",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.nodename-bypasses-drain"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.uncordon-after-maintenance",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3235,
+      "front": "You drained node4, patched its kernel and rebooted it, leaving it in the cluster. It is Ready but gets no new Pods. What do you run?",
+      "back": "kubectl uncordon node4",
+      "choices": "A) kubectl uncordon node4\nB) kubectl drain node4 again\nC) systemctl restart kubelet on node4",
+      "choicesExplained": "B: draining again keeps the node unschedulable. C: the kubelet is already running and the node is Ready; the problem is the unschedulable mark.",
+      "explanation": "A node left in the cluster after maintenance must be uncordoned before Kubernetes schedules new Pods onto it.",
+      "source": "Kubernetes documentation, “Safely Drain a Node”, “Use kubectl drain to remove a node from service”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/#use-kubectl-drain-to-remove-a-node-from-service",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you leave the node in the cluster during the maintenance operation, you need to run kubectl uncordon <node name> afterwards to tell Kubernetes that it can resume scheduling new pods onto the node.",
+      "uses": [
+        "kubectl",
+        "drain",
+        "node",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-uncordon"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.cordon-vs-drain",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 3240,
+      "front": "What does kubectl drain do that kubectl cordon does not?",
+      "back": "Drain also evicts the Pods already on the node; cordon only marks it unschedulable.",
+      "explanation": "The quick reference describes cordon as marking a node unschedulable and drain as preparing it for maintenance.",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with Nodes and cluster”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-nodes-and-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl cordon my-node # Mark my-node as unschedulable kubectl drain my-node # Drain my-node in preparation for maintenance",
+      "uses": [
+        "kubectl",
+        "drain",
+        "node",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-cordon",
+        "cka.kubectl-drain"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.cordon-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3245,
+      "front": "You want no new Pods to start on node2 while you investigate it, but its running Pods must stay put. Which command?",
+      "back": "kubectl cordon node2",
+      "choices": "A) kubectl drain node2\nB) kubectl cordon node2\nC) kubectl uncordon node2",
+      "choicesExplained": "A: drain evicts the running Pods, which you want to keep. C: uncordon makes the node schedulable, the opposite of what you want.",
+      "explanation": "Cordon only marks the node unschedulable; drain would evict the running Pods.",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Interacting with Nodes and cluster”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#interacting-with-nodes-and-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl cordon my-node # Mark my-node as unschedulable",
+      "uses": [
+        "kubectl",
+        "drain",
+        "node",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-cordon"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.client-cert-one-year",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3255,
+      "front": "Client certificates generated by kubeadm expire after {{c1::1 year}}.",
+      "back": "1 year.",
+      "explanation": "The same page explains how to renew them with kubeadm.",
+      "source": "Kubernetes documentation, “Certificate Management with kubeadm”, “Certificate Management with kubeadm”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Client certificates generated by kubeadm expire after 1 year.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (the exam version)",
+      "uses": [
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.client-cert-1-year"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.ca-ten-years",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3260,
+      "front": "By default, how long are the certificate authority certificates that kubeadm generates valid?",
+      "back": "10 years (87600h).",
+      "explanation": "The certificate authority default is ten times the one-year default for the other certificates.",
+      "source": "Kubernetes documentation, “Certificate Management with kubeadm”, “Choosing cert validity period”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#choosing-cert-validity-period",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "caCertificateValidityPeriod: 87600h # Default : 365 days × 24 hours * 10 = 10 years",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (the exam version)",
+      "uses": [
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.ca-10-years"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.check-expiration",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3265,
+      "front": "Which command shows when a kubeadm cluster’s certificates expire?",
+      "back": "kubeadm certs check-expiration",
+      "explanation": "It lists each certificate’s expiry date and residual time, and whether it is externally managed.",
+      "source": "Kubernetes documentation, “Certificate Management with kubeadm”, “Check certificate expiration”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#check-certificate-expiration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can use the check-expiration subcommand to check when certificates expire: kubeadm certs check-expiration The output is similar to this: CERTIFICATE EXPIRES RESIDUAL TIME CERTIFICATE AUTHORITY EXTERNALLY MANAGED",
+      "uses": [
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.certs-check-expiration"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.check-expiration-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3270,
+      "front": "Besides the certificates in /etc/kubernetes/pki, which certificates does kubeadm certs check-expiration report?",
+      "back": "The client certificates embedded in admin.conf, controller-manager.conf and scheduler.conf.",
+      "explanation": "These are the kubeconfig files kubeadm itself uses.",
+      "source": "Kubernetes documentation, “Certificate Management with kubeadm”, “Check certificate expiration”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#check-certificate-expiration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The command shows expiration/residual time for the client certificates in the /etc/kubernetes/pki folder and for the client certificate embedded in the kubeconfig files used by kubeadm ( admin.conf , controller-manager.conf and scheduler.conf ).",
+      "uses": [
+        "kubeadm",
+        "kubeconfig",
+        "/etc/kubernetes/pki"
+      ],
+      "conceptIDs": [
+        "cka.certs-check-expiration"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.certs-renew-all",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3280,
+      "front": "Which command renews all the certificates kubeadm manages?",
+      "back": "kubeadm certs renew all",
+      "explanation": "kubeadm certs renew can also renew one specific certificate instead of all of them.",
+      "source": "Kubernetes documentation, “Certificate Management with kubeadm”, “Manual certificate renewal”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#manual-certificate-renewal",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubeadm certs renew can renew any specific certificate or, with the subcommand all , it can renew all of them",
+      "uses": [
+        "kubeadm"
+      ],
+      "conceptIDs": [
+        "cka.certs-renew"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.certs-renew-every-cp",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3285,
+      "front": "With a replicated control plane, on which nodes must you run kubeadm certs renew?",
+      "back": "On all the control plane nodes.",
+      "explanation": "Running it on only one node of a replicated control plane is not enough.",
+      "source": "Kubernetes documentation, “Certificate Management with kubeadm”, “Manual certificate renewal”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#manual-certificate-renewal",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you are running cluster with a replicated control plane, this command needs to be executed on all the control-plane nodes.",
+      "uses": [
+        "kubeadm",
+        "control plane",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.certs-renew"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.restart-after-renew",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3295,
+      "front": "After kubeadm certs renew, what must you do so the control plane uses the new certificates?",
+      "back": "Restart the control plane Pods.",
+      "explanation": "Dynamic certificate reload is currently not supported for all components and certificates.",
+      "source": "Kubernetes documentation, “Certificate Management with kubeadm”, “Manual certificate renewal”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#manual-certificate-renewal",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "After running the command you should restart the control plane Pods. This is required since dynamic certificate reload is currently not supported for all components and certificates.",
+      "uses": [
+        "control plane",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.certs-renew"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.restart-static-pod",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3300,
+      "front": "kubectl cannot restart a control plane static Pod. How do you restart one?",
+      "back": "Move its manifest out of /etc/kubernetes/manifests, wait about 20 seconds, then move it back.",
+      "explanation": "Static Pods are managed by the local kubelet, not the API server, so kubectl cannot delete and restart them.",
+      "source": "Kubernetes documentation, “Certificate Management with kubeadm”, “Manual certificate renewal”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#manual-certificate-renewal",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Static Pods are managed by the local kubelet and not by the API Server, thus kubectl cannot be used to delete and restart them. To restart a static Pod you can temporarily remove its manifest file from /etc/kubernetes/manifests/ and wait for 20 seconds",
+      "uses": [
+        "static Pod / mirror Pod",
+        "kubectl",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cka.certs-renew"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.expiring-certs-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3310,
+      "front": "kubeadm certs check-expiration on a three-node control plane shows 10 days left on the apiserver certificate. What is the fix?",
+      "back": "Run kubeadm certs renew all on each control plane node, then restart the control plane Pods.",
+      "choices": "A) kubeadm certs renew all on one node only\nB) kubeadm certs renew all on each control plane node, then restart the control plane Pods\nC) Delete /etc/kubernetes/pki and rerun kubeadm init",
+      "choicesExplained": "A: in a replicated control plane the command must run on all control plane nodes. C: that throws away the cluster’s certificate authority, which renewal needs.",
+      "explanation": "In a replicated control plane the renewal has to run on every control plane node.",
+      "source": "Kubernetes documentation, “Certificate Management with kubeadm”, “Manual certificate renewal”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#manual-certificate-renewal",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you are running cluster with a replicated control plane, this command needs to be executed on all the control-plane nodes.",
+      "uses": [
+        "kubeadm",
+        "control plane",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.certs-renew",
+        "cka.certs-check-expiration"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.etcdctl-vs-etcdutl",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 3325,
+      "front": "What is the difference between etcdctl and etcdutl?",
+      "back": "etcdctl is the network client for day-to-day operations; etcdutl works directly on etcd data files, for example to restore snapshots.",
+      "explanation": "For network operations, the page says etcdctl should be used.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Understanding etcdctl and etcdutl”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#understanding-etcdctl-and-etcdutl",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "etcdutl : This is an administration utility designed to operate directly on etcd data files, including migrating data between etcd versions, defragmenting the database, restoring snapshots, and validating data consistency. For network operations, etcdctl should be used.",
+      "uses": [
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.etcdctl-vs-etcdutl"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.which-tool-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 3330,
+      "front": "Which tool do you use to take a snapshot from a live etcd member over the network?",
+      "back": "etcdctl",
+      "choices": "A) etcdctl\nB) etcdutl\nC) kubeadm certs",
+      "choicesExplained": "B: etcdutl works on data files directly, not over the network. C: kubeadm certs manages certificates, not etcd data.",
+      "explanation": "The page names etcdctl snapshot save as the way to take a snapshot from a live member.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Built-in snapshot”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#built-in-snapshot",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A snapshot may either be created from a live member with the etcdctl snapshot save command",
+      "uses": [
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.etcdctl-vs-etcdutl",
+        "cka.etcd-snapshot-save"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.snapshot-save",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3335,
+      "front": "Which command saves a snapshot of the etcd keyspace served by $ENDPOINT to snapshot.db?",
+      "back": "ETCDCTL_API=3 etcdctl --endpoints $ENDPOINT snapshot save snapshot.db",
+      "explanation": "The example writes a snapshot of the keyspace served by the given endpoint to the file snapshot.db.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Built-in snapshot”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#built-in-snapshot",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "ETCDCTL_API = 3 etcdctl --endpoints $ENDPOINT snapshot save snapshot.db",
+      "uses": [
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.etcd-snapshot-save"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.why-back-up-etcd",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3340,
+      "front": "Why back up etcd periodically?",
+      "back": "All Kubernetes objects are stored in etcd, so a backup lets you recover the cluster after a disaster such as losing all control plane nodes.",
+      "explanation": "The page also advises encrypting the snapshot files to keep the sensitive data safe.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Backing up an etcd cluster”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#backing-up-an-etcd-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "All Kubernetes objects are stored in etcd. Periodically backing up the etcd cluster data is important to recover Kubernetes clusters under disaster scenarios, such as losing all control plane nodes.",
+      "uses": [
+        "etcd",
+        "object",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.etcd-snapshot-save"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.flag-endpoints",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3350,
+      "front": "Which etcdctl flag gives the address of the etcd member to talk to, for example https://127.0.0.1:2379?",
+      "back": "--endpoints",
+      "explanation": "The page’s secure snapshot example passes the endpoint together with the certificates and key.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Snapshot using etcdctl options”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#snapshot-using-etcdctl-options",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "ETCDCTL_API = 3 etcdctl --endpoints = https://127.0.0.1:2379",
+      "uses": [
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.etcdctl-tls-flags"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.flag-cacert",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3355,
+      "front": "Which etcdctl flag names the trusted certificate authority file used to verify the etcd server?",
+      "back": "--cacert",
+      "explanation": "In the page’s example it takes the trusted certificate authority file, which can be read from the etcd Pod’s description.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Snapshot using etcdctl options”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#snapshot-using-etcdctl-options",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "--cacert = <trusted-ca-file> --cert = <cert-file> --key = <key-file> \\ snapshot save <backup-file-location> where trusted-ca-file , cert-file and key-file can be obtained from the description of the etcd Pod.",
+      "uses": [
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.etcdctl-tls-flags"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.flag-cert",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3360,
+      "front": "Which etcdctl flag names the client certificate file etcdctl presents to etcd?",
+      "back": "--cert",
+      "explanation": "It pairs with --key; both files can be found in the description of the etcd Pod.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Snapshot using etcdctl options”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#snapshot-using-etcdctl-options",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "--cacert = <trusted-ca-file> --cert = <cert-file> --key = <key-file> \\ snapshot save <backup-file-location> where trusted-ca-file , cert-file and key-file can be obtained from the description of the etcd Pod.",
+      "uses": [
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.etcdctl-tls-flags"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.flag-key",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3365,
+      "front": "Which etcdctl flag names the private key file that matches the client certificate?",
+      "back": "--key",
+      "explanation": "It pairs with --cert when talking to etcd over TLS.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Snapshot using etcdctl options”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#snapshot-using-etcdctl-options",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "--cacert = <trusted-ca-file> --cert = <cert-file> --key = <key-file> \\ snapshot save <backup-file-location> where trusted-ca-file , cert-file and key-file can be obtained from the description of the etcd Pod.",
+      "uses": [
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.etcdctl-tls-flags"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.where-tls-files",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3370,
+      "front": "On a kubeadm control plane node you must back up etcd but do not know which certificate files to pass to etcdctl. Where do you look?",
+      "back": "In the description of the etcd Pod, which shows the trusted certificate authority, certificate and key files.",
+      "choices": "A) In the etcd Pod’s description\nB) In the kubelet’s config file\nC) In the kubeconfig file `~/.kube/config`",
+      "choicesExplained": "B: the kubelet configuration does not list etcd’s client credentials. C: the kubeconfig holds credentials for the API server, not for etcd.",
+      "explanation": "The page says the files for --cacert, --cert and --key can be obtained from the etcd Pod’s description.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Snapshot using etcdctl options”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#snapshot-using-etcdctl-options",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "where trusted-ca-file , cert-file and key-file can be obtained from the description of the etcd Pod.",
+      "uses": [
+        "etcd",
+        "Pod",
+        "kubectl describe"
+      ],
+      "conceptIDs": [
+        "cka.etcdctl-tls-flags"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.snapshot-status",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3375,
+      "front": "Which tool does the documentation recommend for verifying a snapshot file, and with which subcommand?",
+      "back": "etcdutl snapshot status, for example etcdutl --write-out=table snapshot status snapshot.db",
+      "explanation": "etcdctl snapshot status has been deprecated since etcd v3.5.x.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Built-in snapshot”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#built-in-snapshot",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The usage of etcdctl snapshot status has been deprecated since etcd v3.5.x and is slated for removal from etcd v3.6. It is recommended to utilize etcdutl instead.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (the exam version)",
+      "uses": [
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.etcd-snapshot-status"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.snapshot-restore",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3380,
+      "front": "Which command restores snapshot.db into a new data directory with etcdutl?",
+      "back": "etcdutl --data-dir <data-dir-location> snapshot restore snapshot.db",
+      "explanation": "<data-dir-location> is a directory that the restore process creates.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Restoring an etcd cluster”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#restoring-an-etcd-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "etcdutl --data-dir <data-dir-location> snapshot restore snapshot.db where <data-dir-location> is a directory that will be created during the restore process.",
+      "uses": [
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.etcd-snapshot-restore"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.restore-etcdctl-deprecated",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3385,
+      "front": "Is etcdctl snapshot restore still the recommended way to restore etcd?",
+      "back": "No: using etcdctl for restoring has been deprecated since etcd v3.5.x; use etcdutl instead.",
+      "explanation": "The etcdctl restore command is slated for removal from etcd v3.6.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Restoring an etcd cluster”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#restoring-an-etcd-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The usage of etcdctl for restoring has been deprecated since etcd v3.5.x and is slated for removal from etcd v3.6. It is recommended to utilize etcdutl instead.",
+      "volatile": true,
+      "validAsOf": "2026-09-25 · Kubernetes v1.35 (the exam version)",
+      "uses": [
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.etcdctl-restore-deprecated"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.restore-same-dir",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3390,
+      "front": "You want to restore etcd into the same data directory as before. What must you do first?",
+      "back": "Stop the etcd process and delete that directory before restoring.",
+      "explanation": "Otherwise, restore to a new directory and point etcd’s configuration at it.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Restoring an etcd cluster”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#restoring-an-etcd-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If <data-dir-location> is the same folder as before, delete it and stop the etcd process before restoring the cluster.",
+      "uses": [
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.etcd-snapshot-restore"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.restore-point-manifest",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3395,
+      "front": "After restoring etcd to a new directory on a kubeadm node, which setting do you change so etcd uses it?",
+      "back": "In /etc/kubernetes/manifests/etcd.yaml, the volumes.hostPath.path of the volume named etcd-data.",
+      "explanation": "Then delete the etcd Pod or restart the kubelet (or both) so etcd starts on the new directory.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Restoring an etcd cluster”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#restoring-an-etcd-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "first change /etc/kubernetes/manifests/etcd.yaml 's volumes.hostPath.path for name: etcd-data to <data-dir-location> , then execute kubectl -n kube-system delete pod <name-of-etcd-pod> or systemctl restart kubelet.service (or both).",
+      "uses": [
+        "etcd",
+        "hostPath",
+        "static Pod / mirror Pod",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cka.etcd-restore-point-manifest"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.restore-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3400,
+      "front": "You ran etcdutl --data-dir /var/lib/etcd-restore snapshot restore backup.db on a kubeadm control plane node. The cluster still shows the old state. What is missing?",
+      "back": "Point the etcd-data hostPath in /etc/kubernetes/manifests/etcd.yaml at /var/lib/etcd-restore, then restart etcd.",
+      "choices": "A) Run etcdctl snapshot save again\nB) Point etcd.yaml’s etcd-data hostPath at the new directory and restart etcd\nC) Run kubeadm upgrade apply",
+      "choicesExplained": "A: saving takes a new backup; it does not load the restored data. C: an upgrade does not change which data directory etcd reads.",
+      "explanation": "A restore to a new directory takes effect only once etcd’s configuration uses that directory and etcd restarts.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Restoring an etcd cluster”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#restoring-an-etcd-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Otherwise, change etcd configuration and restart the etcd process after restoration to have it use the new data directory",
+      "uses": [
+        "etcd",
+        "hostPath",
+        "static Pod / mirror Pod"
+      ],
+      "conceptIDs": [
+        "cka.etcd-restore-point-manifest",
+        "cka.etcd-snapshot-restore"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.restore-stop-apiservers",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3405,
+      "front": "If API servers are running, what three steps does the documentation give for restoring etcd?",
+      "back": "Stop all API server instances, restore state in all etcd instances, then restart all API server instances.",
+      "explanation": "The page cautions against restoring etcd while any API servers are running.",
+      "source": "Kubernetes documentation, “Operating etcd clusters for Kubernetes”, “Restoring an etcd cluster”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#restoring-an-etcd-cluster",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If any API servers are running in your cluster, you should not attempt to restore instances of etcd. Instead, follow these steps to restore etcd: stop all API server instances restore state in all etcd instances restart all API server instances",
+      "uses": [
+        "etcd",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cka.etcd-snapshot-restore"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.stacked-risk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3430,
+      "front": "What risk does the stacked etcd topology carry?",
+      "back": "Failed coupling: if one node goes down, both an etcd member and a control plane instance are lost.",
+      "explanation": "Redundancy is compromised, and the source says you can mitigate this by adding more control plane nodes.",
+      "source": "Kubernetes documentation, “Options for Highly Available Topology”, “Stacked etcd topology”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "a stacked cluster runs the risk of failed coupling. If one node goes down, both an etcd member and a control plane instance are lost, and redundancy is compromised.",
+      "uses": [
+        "stacked etcd topology",
+        "etcd",
+        "control plane",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.stacked-etcd"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.stacked-minimum-three",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3435,
+      "front": "You should run a minimum of {{c1::three}} stacked control plane nodes for a highly available cluster.",
+      "back": "Three.",
+      "explanation": "Adding control plane nodes mitigates the risk of losing an etcd member and a control plane instance together.",
+      "source": "Kubernetes documentation, “Options for Highly Available Topology”, “Stacked etcd topology”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can mitigate this risk by adding more control plane nodes. You should therefore run a minimum of three stacked control plane nodes for an HA cluster.",
+      "uses": [
+        "stacked etcd topology",
+        "control plane",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.three-control-plane-nodes"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.stacked-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3440,
+      "front": "Which highly available topology is the default in kubeadm, and when is the local etcd member created?",
+      "back": "Stacked etcd; the local etcd member is created automatically by kubeadm init and kubeadm join --control-plane.",
+      "explanation": "Nothing extra is needed to get a local etcd member on each control plane node.",
+      "source": "Kubernetes documentation, “Options for Highly Available Topology”, “Stacked etcd topology”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This is the default topology in kubeadm. A local etcd member is created automatically on control plane nodes when using kubeadm init and kubeadm join --control-plane .",
+      "uses": [
+        "stacked etcd topology",
+        "kubeadm",
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.stacked-etcd"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.external-hosts",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3445,
+      "front": "How many hosts does a highly available cluster with external etcd need at minimum?",
+      "back": "Six: three for control plane nodes and three for etcd nodes.",
+      "explanation": "The topology needs twice the number of hosts of the stacked topology.",
+      "source": "Kubernetes documentation, “Options for Highly Available Topology”, “External etcd topology”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#external-etcd-topology",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "However, this topology requires twice the number of hosts as the stacked HA topology. A minimum of three hosts for control plane nodes and three hosts for etcd nodes are required for an HA cluster with this topology.",
+      "uses": [
+        "external etcd topology",
+        "control plane",
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.external-etcd",
+        "cka.three-control-plane-nodes"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.stacked-vs-external",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 3450,
+      "front": "Stacked versus external etcd: which is simpler to set up, and which is less affected by losing one member?",
+      "back": "Stacked is simpler to set up and manage; external etcd is less affected, because control plane and etcd are decoupled.",
+      "explanation": "Decoupled, losing a control plane instance or an etcd member affects redundancy less than in the stacked topology.",
+      "source": "Kubernetes documentation, “Options for Highly Available Topology”, “External etcd topology”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#external-etcd-topology",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This topology decouples the control plane and etcd member. It therefore provides an HA setup where losing a control plane instance or an etcd member has less impact",
+      "uses": [
+        "stacked etcd topology",
+        "external etcd topology",
+        "control plane",
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cka.stacked-vs-external"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.topology-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 3455,
+      "front": "A team has only three machines for its highly available control plane and wants the simplest setup. Which topology fits?",
+      "back": "Stacked etcd topology.",
+      "choices": "A) Stacked etcd topology\nB) External etcd topology\nC) A single control plane node with etcd",
+      "choicesExplained": "B: external etcd needs three extra etcd hosts, six in all. C: one control plane node is not highly available.",
+      "explanation": "The source calls stacked etcd simpler to set up, and to manage for replication, than external etcd.",
+      "source": "Kubernetes documentation, “Options for Highly Available Topology”, “Stacked etcd topology”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "It is simpler to set up than a cluster with external etcd nodes, and simpler to manage for replication.",
+      "uses": [
+        "stacked etcd topology",
+        "external etcd topology"
+      ],
+      "conceptIDs": [
+        "cka.stacked-vs-external",
+        "cka.stacked-etcd",
+        "cka.external-etcd",
+        "cka.three-control-plane-nodes"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.lose-node-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3460,
+      "front": "In a stacked highly available cluster, one control plane machine dies. What has the cluster lost?",
+      "back": "One etcd member and one control plane instance together.",
+      "choices": "A) Only a control plane instance\nB) An etcd member and a control plane instance\nC) Nothing, because etcd runs elsewhere",
+      "choicesExplained": "A: in stacked etcd the node also held an etcd member. C: that describes external etcd, not stacked.",
+      "explanation": "In the stacked topology the etcd member and control plane instance share the node, so they fail together.",
+      "source": "Kubernetes documentation, “Options for Highly Available Topology”, “Stacked etcd topology”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/#stacked-etcd-topology",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If one node goes down, both an etcd member and a control plane instance are lost, and redundancy is compromised.",
+      "uses": [
+        "stacked etcd topology",
+        "etcd",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.stacked-etcd",
+        "cka.stacked-vs-external"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.lb-health-check",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3470,
+      "front": "What health check does the load balancer use for a kube-apiserver?",
+      "back": "A connection check on the port the kube-apiserver listens on (default 6443).",
+      "explanation": "The load balancer distributes traffic to all healthy control plane nodes in its target list.",
+      "source": "Kubernetes documentation, “Creating Highly Available Clusters with kubeadm”, “Create load balancer for kube-apiserver”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/#create-load-balancer-for-kube-apiserver",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The health check for an apiserver is a TCP check on the port the kube-apiserver listens on (default value :6443 ).",
+      "uses": [
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cka.apiserver-load-balancer"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.lb-matches-endpoint",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3475,
+      "front": "The load balancer’s address must always match which kubeadm setting?",
+      "back": "kubeadm’s ControlPlaneEndpoint, set with --control-plane-endpoint.",
+      "explanation": "kubeadm init takes --control-plane-endpoint as the address or DNS name and port of the load balancer.",
+      "source": "Kubernetes documentation, “Creating Highly Available Clusters with kubeadm”, “Create load balancer for kube-apiserver”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/#create-load-balancer-for-kube-apiserver",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Make sure the address of the load balancer always matches the address of kubeadm's ControlPlaneEndpoint .",
+      "uses": [
+        "kubeadm",
+        "--control-plane-endpoint"
+      ],
+      "conceptIDs": [
+        "cka.apiserver-load-balancer"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.lb-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3480,
+      "front": "You are building a highly available control plane in a cloud. What should kubeadm init’s --control-plane-endpoint point to?",
+      "back": "The DNS name and port of a load balancer in front of the control plane nodes.",
+      "choices": "A) The first control plane node’s IP address\nB) The load balancer’s DNS name and port\nC) The etcd client address",
+      "choicesExplained": "A: tying the endpoint to one node defeats high availability, and a direct IP address is not recommended in a cloud. C: etcd is not the API endpoint clients use.",
+      "explanation": "The endpoint should be the load balancer’s address, and using an IP address directly is not recommended in a cloud environment.",
+      "source": "Kubernetes documentation, “Creating Highly Available Clusters with kubeadm”, “Steps for the first control plane node”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/#steps-for-the-first-control-plane-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The --control-plane-endpoint flag should be set to the address or DNS and port of the load balancer.",
+      "uses": [
+        "--control-plane-endpoint",
+        "kubeadm",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.apiserver-load-balancer"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.upload-certs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3485,
+      "front": "What does --upload-certs do in `kubeadm init --control-plane-endpoint \"LB:PORT\" --upload-certs`?",
+      "back": "Uploads the certificates that all control plane instances share to the cluster, encrypted, in the kubeadm-certs Secret.",
+      "explanation": "Joining control plane nodes can then download them instead of you copying them by hand.",
+      "source": "Kubernetes documentation, “Creating Highly Available Clusters with kubeadm”, “Steps for the first control plane node”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/#steps-for-the-first-control-plane-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The --upload-certs flag is used to upload the certificates that should be shared across all the control-plane instances to the cluster.",
+      "uses": [
+        "kubeadm",
+        "control plane",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cka.upload-certs"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.join-control-plane",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3495,
+      "front": "Which two flags turn a kubeadm join into a control plane join that fetches the uploaded certificates?",
+      "back": "--control-plane and --certificate-key <key>.",
+      "explanation": "--control-plane creates a new control plane; the key decrypts the certificates downloaded from the kubeadm-certs Secret.",
+      "source": "Kubernetes documentation, “Creating Highly Available Clusters with kubeadm”, “Steps for the rest of the control plane nodes”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/#steps-for-the-rest-of-the-control-plane-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The --control-plane flag tells kubeadm join to create a new control plane. The --certificate-key ... will cause the control plane certificates to be downloaded from the kubeadm-certs Secret in the cluster and be decrypted using the given key.",
+      "uses": [
+        "kubeadm",
+        "control plane",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cka.join-control-plane"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.certificate-key-2h",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3500,
+      "front": "By default, the decryption key from --certificate-key expires after {{c1::two hours}}.",
+      "back": "Two hours.",
+      "explanation": "The kubeadm-certs Secret is deleted at the same time as a safeguard.",
+      "source": "Kubernetes documentation, “Creating Highly Available Clusters with kubeadm”, “Steps for the rest of the control plane nodes”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/#steps-for-the-rest-of-the-control-plane-nodes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Don't forget that the decryption key from --certificate-key expires after two hours, by default.",
+      "uses": [
+        "kubeadm",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cka.certificate-key-2h"
+      ]
+    },
+    {
+      "id": "cka.lifecycle-ha-etcd.reupload-certs",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3505,
+      "front": "Three hours after kubeadm init --upload-certs, joining cp3 with --control-plane --certificate-key fails. What do you run on an existing control plane node?",
+      "back": "sudo kubeadm init phase upload-certs --upload-certs, which re-uploads the certificates and prints a new key.",
+      "choices": "A) kubeadm init phase upload-certs --upload-certs on an existing control plane node\nB) kubeadm reset on cp1\nC) kubeadm certs renew all on cp3",
+      "choicesExplained": "B: resetting cp1 tears down a working control plane node. C: renewal changes certificate expiry dates; it does not re-upload the shared certificates or make a new key.",
+      "explanation": "The uploaded certificates and key expire after two hours, so a fresh upload and key are needed.",
+      "source": "Kubernetes documentation, “Creating Highly Available Clusters with kubeadm”, “Steps for the first control plane node”",
+      "sourceURL": "https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/#steps-for-the-first-control-plane-node",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To re-upload the certificates and generate a new decryption key, use the following command on a control plane node that is already joined to the cluster: sudo kubeadm init phase upload-certs --upload-certs",
+      "uses": [
+        "kubeadm",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.join-control-plane",
+        "cka.upload-certs",
+        "cka.certificate-key-2h"
+      ]
+    }
+  ]
+}

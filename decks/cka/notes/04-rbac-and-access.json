@@ -1,0 +1,1750 @@
+{
+  "topic": "RBAC and cluster access",
+  "notes": [
+    {
+      "id": "cka.rbac-and-access.what-is-resourcenames",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4000,
+      "front": "In an RBAC rule, what is resourceNames?",
+      "back": "A list of object names that restricts the rule to those individual instances of a resource.",
+      "explanation": "The RBAC page’s example restricts a Role to getting or updating one ConfigMap, my-configmap.",
+      "introduces": [
+        "resourceNames"
+      ],
+      "example": "Like a key card that opens only room 214, not every room on the floor.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Referring to resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can also refer to resources by name for certain requests through the resourceNames list. When specified, requests can be restricted to individual instances of a resource.",
+      "uses": [
+        "RBAC",
+        "Role",
+        "resourceNames"
+      ],
+      "conceptIDs": [
+        "cka.resourcenames"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.what-is-subresource",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4005,
+      "front": "In RBAC, how do you name a subresource such as a Pod’s logs?",
+      "back": "Resource and subresource separated by a slash, for example pods/log.",
+      "explanation": "A request for a Pod’s logs goes to …/pods/{name}/log, where log is a subresource of pods.",
+      "introduces": [
+        "subresources such as pods/log"
+      ],
+      "example": "Like a building (pods) with a mailroom (log): access to the building is listed separately from access to its mailroom.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Referring to resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In this case, pods is the namespaced resource for Pod resources, and log is a subresource of pods . To represent this in an RBAC role, use a slash ( / ) to delimit the resource and subresource.",
+      "uses": [
+        "RBAC",
+        "Pod",
+        "subresources such as pods/log"
+      ],
+      "conceptIDs": [
+        "cka.subresources"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.what-is-aggregated-clusterrole",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4010,
+      "front": "What is an aggregated ClusterRole?",
+      "back": "A ClusterRole whose aggregationRule label selector makes a control plane controller combine the rules of matching ClusterRoles into it.",
+      "explanation": "You change its rules by changing the selected ClusterRoles, not the aggregate’s own rules field.",
+      "introduces": [
+        "aggregated ClusterRoles"
+      ],
+      "example": "Like a playlist built from every song tagged “chill”: tag a new song and it joins the playlist.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Aggregated ClusterRoles”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The aggregationRule defines a label selector that the controller uses to match other ClusterRole objects that should be combined into the rules field of this one.",
+      "uses": [
+        "ClusterRole",
+        "label",
+        "selector",
+        "controller / control loop",
+        "aggregated ClusterRoles"
+      ],
+      "conceptIDs": [
+        "cka.aggregated-clusterroles"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.what-is-csr",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4015,
+      "front": "What is a CertificateSigningRequest (CSR) in Kubernetes?",
+      "back": "An API resource used to ask a named signer to sign a certificate; the request may be approved or denied before it is signed.",
+      "explanation": "It lets clients of the Kubernetes API request and obtain X.509 certificates through the API.",
+      "introduces": [
+        "CertificateSigningRequest",
+        "CSR"
+      ],
+      "example": "Like a passport application: you fill it in, an official approves or rejects it, and only then is the passport printed.",
+      "source": "Kubernetes documentation, “Certificates and Certificate Signing Requests”, “Certificate signing requests”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#certificate-signing-requests",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A CertificateSigningRequest (CSR) resource is used to request that a certificate be signed by a denoted signer, after which the request may be approved or denied before finally being signed.",
+      "uses": [
+        "kubernetes api",
+        "CertificateSigningRequest",
+        "CSR"
+      ],
+      "conceptIDs": [
+        "cka.certificatesigningrequest"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.what-is-apiserver-client-signer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4020,
+      "front": "What does the kubernetes.io/kube-apiserver-client signer do?",
+      "back": "Signs certificates that the API server will honour as client certificates.",
+      "explanation": "It is one of the built-in signers, each with a well-known signerName that a CSR names in spec.signerName.",
+      "introduces": [
+        "kubernetes.io/kube-apiserver-client signer"
+      ],
+      "example": "Like a staff-badge office: its badges get you through the API server’s front door, and nothing else.",
+      "source": "Kubernetes documentation, “Certificates and Certificate Signing Requests”, “Kubernetes signers”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#kubernetes-signers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubernetes.io/kube-apiserver-client : signs certificates that will be honored as client certificates by the API server.",
+      "uses": [
+        "kube-apiserver",
+        "CSR",
+        "kubernetes.io/kube-apiserver-client signer"
+      ],
+      "conceptIDs": [
+        "cka.kube-apiserver-client-signer"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.what-is-expirationseconds",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4025,
+      "front": "What is spec.expirationSeconds on a CertificateSigningRequest?",
+      "back": "An optional field that requests a particular lifetime, in seconds, for the issued certificate.",
+      "explanation": "Clients may set it in Kubernetes v1.22 and later; the minimum valid value is 600.",
+      "introduces": [
+        "spec.expirationSeconds"
+      ],
+      "example": "Like asking for a visitor badge valid for one day (86400 seconds) instead of the default period.",
+      "source": "Kubernetes documentation, “Certificates and Certificate Signing Requests”, “Request signing process”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#request-signing-process",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In Kubernetes v1.22 and later, clients may optionally set the spec.expirationSeconds field to request a particular lifetime for the issued certificate. The minimum valid value for this field is 600 , i.e. ten minutes.",
+      "uses": [
+        "CertificateSigningRequest",
+        "CSR",
+        "spec.expirationSeconds"
+      ],
+      "conceptIDs": [
+        "cka.csr-expiration-seconds"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.what-is-context",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4030,
+      "front": "What is a kubeconfig context?",
+      "back": "A named group of access parameters in a kubeconfig file: a cluster, a namespace and a user.",
+      "explanation": "By default, kubectl uses the parameters from the current context to talk to the cluster.",
+      "introduces": [
+        "kubeconfig context"
+      ],
+      "example": "Like a saved profile in a remote-desktop app that stores which server, which login and which folder to open.",
+      "source": "Kubernetes documentation, “Organizing Cluster Access Using kubeconfig Files”, “Context”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#context",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A context element in a kubeconfig file is used to group access parameters under a convenient name. Each context has three parameters: cluster, namespace, and user.",
+      "uses": [
+        "kubeconfig",
+        "cluster",
+        "namespace",
+        "kubectl",
+        "kubeconfig context"
+      ],
+      "conceptIDs": [
+        "cka.kubeconfig-context"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.additive-no-deny",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4040,
+      "front": "Can an RBAC Role or ClusterRole contain a “deny” rule?",
+      "back": "No: permissions are purely additive; there are no deny rules.",
+      "explanation": "A Role or ClusterRole is a set of rules, and each rule can only grant permissions.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Role and ClusterRole”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "An RBAC Role or ClusterRole contains rules that represent a set of permissions. Permissions are purely additive (there are no \"deny\" rules).",
+      "uses": [
+        "RBAC",
+        "Role",
+        "ClusterRole"
+      ],
+      "conceptIDs": [
+        "cka.role-vs-clusterrole"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.role-vs-clusterrole",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4045,
+      "front": "How does the scope of a Role differ from that of a ClusterRole?",
+      "back": "A Role always sets permissions within one namespace; a ClusterRole is a non-namespaced resource.",
+      "explanation": "When you create a Role you must specify the namespace it belongs in.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Role and ClusterRole”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A Role always sets permissions within a particular namespace ; when you create a Role, you have to specify the namespace it belongs in. ClusterRole, by contrast, is a non-namespaced resource.",
+      "uses": [
+        "RBAC",
+        "Role",
+        "ClusterRole",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.role-vs-clusterrole"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.clusterrole-uses",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4050,
+      "front": "What three kinds of permission can a ClusterRole define?",
+      "back": "Namespaced resources granted in individual namespaces; namespaced resources granted across all namespaces; cluster-scoped resources.",
+      "explanation": "These are the three uses the RBAC page lists for ClusterRoles.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Role and ClusterRole”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "define permissions on namespaced resources and be granted access within individual namespace(s) define permissions on namespaced resources and be granted access across all namespaces define permissions on cluster-scoped resources",
+      "uses": [
+        "RBAC",
+        "ClusterRole",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.role-vs-clusterrole"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.role-or-clusterrole-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4055,
+      "front": "A monitoring tool must be allowed to list Nodes. Should its permissions be defined in a Role or a ClusterRole?",
+      "back": "A ClusterRole, because Nodes are cluster-scoped.",
+      "choices": "A) A Role in kube-system\nB) A ClusterRole\nC) Either; Roles can also grant cluster-scoped access",
+      "choicesExplained": "A: a Role sets permissions only within its namespace, and Nodes are not in any namespace. C: only a ClusterRole can define permissions on cluster-scoped resources.",
+      "explanation": "A ClusterRole can define permissions on cluster-scoped resources; a Role only sets permissions within a namespace.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Role and ClusterRole”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "define permissions on cluster-scoped resources If you want to define a role within a namespace, use a Role; if you want to define a role cluster-wide, use a ClusterRole.",
+      "uses": [
+        "RBAC",
+        "Role",
+        "ClusterRole",
+        "node",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.role-vs-clusterrole"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.rolebinding-vs-crb",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4065,
+      "front": "How does the scope of a RoleBinding differ from that of a ClusterRoleBinding?",
+      "back": "A RoleBinding grants permissions within a specific namespace; a ClusterRoleBinding grants that access cluster-wide.",
+      "explanation": "To bind a ClusterRole to all the namespaces in the cluster, you use a ClusterRoleBinding.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “RoleBinding and ClusterRoleBinding”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A RoleBinding grants permissions within a specific namespace whereas a ClusterRoleBinding grants that access cluster-wide.",
+      "uses": [
+        "RBAC",
+        "RoleBinding",
+        "ClusterRoleBinding",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.role-vs-clusterrole",
+        "cka.rolebinding-clusterrole"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.rolebinding-to-clusterrole",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4070,
+      "front": "A RoleBinding can reference a ClusterRole and bind that ClusterRole to {{c1::the namespace of the RoleBinding}}.",
+      "back": "The namespace of the RoleBinding.",
+      "explanation": "This lets you define a set of common roles once across the cluster and reuse them within several namespaces.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “RoleBinding example”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-example",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A RoleBinding can also reference a ClusterRole to grant the permissions defined in that ClusterRole to resources inside the RoleBinding's namespace. This kind of reference lets you define a set of common roles across your cluster, then reuse them within multiple namespaces.",
+      "uses": [
+        "RBAC",
+        "RoleBinding",
+        "ClusterRole",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.rolebinding-clusterrole"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.rolebinding-clusterrole-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4075,
+      "front": "ClusterRole “config-reader” allows reading ConfigMaps. A RoleBinding in namespace “billing” binds it to user priya. Where can priya read ConfigMaps?",
+      "back": "Only in the billing namespace.",
+      "choices": "A) In every namespace, because the role is a ClusterRole\nB) Only in billing\nC) Nowhere: a RoleBinding cannot reference a ClusterRole",
+      "choicesExplained": "A: cluster-wide access needs a ClusterRoleBinding; the RoleBinding limits it to its namespace. C: a RoleBinding may reference a ClusterRole.",
+      "explanation": "A RoleBinding that references a ClusterRole grants its permissions only inside the RoleBinding’s own namespace.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “RoleBinding and ClusterRoleBinding”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Alternatively, a RoleBinding can reference a ClusterRole and bind that ClusterRole to the namespace of the RoleBinding.",
+      "uses": [
+        "RBAC",
+        "RoleBinding",
+        "ClusterRole",
+        "ConfigMap",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.rolebinding-clusterrole"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.all-namespaces-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4080,
+      "front": "An auditor must read ConfigMaps in every namespace, including ones created later. Which binding do you create for the “config-reader” ClusterRole?",
+      "back": "A ClusterRoleBinding.",
+      "choices": "A) A ClusterRoleBinding\nB) One RoleBinding in the default namespace\nC) A Role in each namespace",
+      "choicesExplained": "B: a RoleBinding grants only within its own namespace. C: Roles would have to be recreated for each new namespace, and still need bindings.",
+      "explanation": "To bind a ClusterRole to all the namespaces in the cluster, the RBAC page says to use a ClusterRoleBinding.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “RoleBinding and ClusterRoleBinding”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you want to bind a ClusterRole to all the namespaces in your cluster, you use a ClusterRoleBinding.",
+      "uses": [
+        "RBAC",
+        "ClusterRoleBinding",
+        "ClusterRole",
+        "RoleBinding",
+        "namespace",
+        "ConfigMap"
+      ],
+      "conceptIDs": [
+        "cka.rolebinding-clusterrole"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.roleref-immutable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4085,
+      "front": "Can you change the Role or ClusterRole that an existing binding refers to?",
+      "back": "No. Changing roleRef gives a validation error; delete the binding and create a replacement.",
+      "explanation": "The roleRef of a binding is immutable once the binding exists.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “ClusterRoleBinding example”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#clusterrolebinding-example",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "After you create a binding, you cannot change the Role or ClusterRole that it refers to. If you try to change a binding's roleRef , you get a validation error. If you do want to change the roleRef for a binding, you need to remove the binding object and create a replacement.",
+      "uses": [
+        "RBAC",
+        "Role",
+        "ClusterRole",
+        "RoleBinding"
+      ],
+      "conceptIDs": [
+        "cka.roleref-immutable"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.roleref-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4095,
+      "front": "RoleBinding “dev-access” refers to Role “viewer”. You kubectl edit it to point at Role “editor” and get a validation error. What should you do?",
+      "back": "Delete dev-access and create a new binding that refers to editor.",
+      "choices": "A) Retry with kubectl edit --force\nB) Delete the binding and create a new one referring to editor\nC) Edit the Role “viewer” to rename it “editor”",
+      "choicesExplained": "A: roleRef is immutable, so no edit of it is accepted. C: Roles cannot be renamed either, and the binding would still name viewer.",
+      "explanation": "A binding’s roleRef cannot be changed after creation; the binding must be removed and replaced.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “ClusterRoleBinding example”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#clusterrolebinding-example",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you do want to change the roleRef for a binding, you need to remove the binding object and create a replacement.",
+      "uses": [
+        "RBAC",
+        "RoleBinding",
+        "Role",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "cka.roleref-immutable"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.subject-user",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4105,
+      "front": "Which RBAC subject kind is represented by a plain string such as \"alice\" or \"bob@example.com\"?",
+      "back": "User.",
+      "explanation": "Kubernetes represents usernames as strings; the format is up to how you configure authentication.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Referring to subjects”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Kubernetes represents usernames as strings. These can be: plain names, such as \"alice\"; email-style names, like \"bob@example.com\"; or numeric user IDs represented as a string.",
+      "uses": [
+        "RBAC",
+        "authentication"
+      ],
+      "conceptIDs": [
+        "cka.rbac-subjects"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.subject-group",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4110,
+      "front": "Which RBAC subject kind gets its membership from the Authenticator modules?",
+      "back": "Group.",
+      "explanation": "Groups, like users, are strings with no format requirement other than the reserved system: prefix.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Referring to subjects”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In Kubernetes, Authenticator modules provide group information. Groups, like users, are represented as strings",
+      "uses": [
+        "RBAC",
+        "authentication"
+      ],
+      "conceptIDs": [
+        "cka.rbac-subjects"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.subject-serviceaccount",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4115,
+      "front": "Which RBAC subject kind has usernames prefixed with system:serviceaccount:?",
+      "back": "ServiceAccount.",
+      "explanation": "ServiceAccounts also belong to groups whose names are prefixed with system:serviceaccounts: (plural).",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Referring to subjects”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "ServiceAccounts have names prefixed with system:serviceaccount: , and belong to groups that have names prefixed with system:serviceaccounts: .",
+      "uses": [
+        "RBAC",
+        "ServiceAccount"
+      ],
+      "conceptIDs": [
+        "cka.rbac-subjects",
+        "cka.serviceaccount-username"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.sa-username-format",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4125,
+      "front": "What is the full username of ServiceAccount “deployer” in namespace “ci”?",
+      "back": "system:serviceaccount:ci:deployer",
+      "explanation": "ServiceAccount usernames are the system:serviceaccount: prefix followed by the namespace and the name.",
+      "source": "Kubernetes documentation, “Authorization”, “Checking API access”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "to check whether a ServiceAccount named dev-sa in Namespace dev can list Pods in the Namespace target : kubectl auth can-i list pods \\ --namespace target \\ --as system:serviceaccount:dev:dev-sa",
+      "uses": [
+        "ServiceAccount",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.serviceaccount-username"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.verb-create",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4140,
+      "front": "Which RBAC request verb does an HTTP `POST` map to?",
+      "back": "create",
+      "explanation": "The authorization page maps each HTTP verb used on a resource to a request verb.",
+      "source": "Kubernetes documentation, “Authorization”, “Determine the request verb”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#request-verb-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "HTTP verb request verb POST create",
+      "uses": [
+        "authorization",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "cka.rbac-verbs"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.verb-list",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4145,
+      "front": "Which RBAC request verb covers an HTTP `GET` on a collection, including full object content?",
+      "back": "list",
+      "explanation": "On an individual resource the same HTTP method maps to get instead.",
+      "source": "Kubernetes documentation, “Authorization”, “Determine the request verb”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#request-verb-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "get (for individual resources), list (for collections, including full object content)",
+      "uses": [
+        "authorization",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "cka.rbac-verbs"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.verb-watch",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4150,
+      "front": "Which RBAC request verb covers watching an individual resource or a collection for changes?",
+      "back": "watch",
+      "explanation": "It is one of the verbs that can come from an HTTP `GET` or `HEAD` request.",
+      "source": "Kubernetes documentation, “Authorization”, “Determine the request verb”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#request-verb-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "watch (for watching an individual resource or collection of resources)",
+      "uses": [
+        "authorization",
+        "RBAC",
+        "watch"
+      ],
+      "conceptIDs": [
+        "cka.rbac-verbs"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.verb-patch-update",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4155,
+      "front": "Which RBAC request verbs do HTTP `PUT` and `PATCH` map to?",
+      "back": "`PUT` maps to update; `PATCH` maps to patch.",
+      "explanation": "They are separate request verbs, each listed on its own in a rule’s verbs.",
+      "source": "Kubernetes documentation, “Authorization”, “Determine the request verb”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#request-verb-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "PUT update PATCH patch",
+      "uses": [
+        "authorization",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "cka.rbac-verbs"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.verb-deletecollection",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4160,
+      "front": "Which RBAC request verb covers an HTTP `DELETE` on a whole collection?",
+      "back": "deletecollection",
+      "explanation": "An HTTP `DELETE` on an individual resource maps to delete instead.",
+      "source": "Kubernetes documentation, “Authorization”, “Determine the request verb”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#request-verb-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "delete (for individual resources), deletecollection (for collections)",
+      "uses": [
+        "authorization",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "cka.rbac-verbs"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.get-list-watch-equal",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4165,
+      "front": "Is granting only list on Secrets safer than granting get?",
+      "back": "No: get, list and watch can all return full resource details; list on secrets reveals their data.",
+      "explanation": "In terms of access to the returned data the three verbs are equivalent.",
+      "source": "Kubernetes documentation, “Authorization”, “Determine the request verb”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#request-verb-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The get , list and watch verbs can all return the full details of a resource. In terms of access to the returned data they are equivalent. For example, list on secrets will reveal the data attributes of any returned resources.",
+      "uses": [
+        "authorization",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cka.rbac-verbs"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.verbs-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4170,
+      "front": "A CI job must create Pods and follow them with kubectl get pods -w. Which verbs does its Role need on pods?",
+      "back": "create, list and watch (get too if it reads single Pods by name).",
+      "choices": "A) create, list and watch\nB) create only\nC) update and patch",
+      "choicesExplained": "B: listing and watching Pods are separate verbs that create does not include. C: update and patch change existing objects; they neither create nor list.",
+      "explanation": "Creating maps to create, listing a collection to list, and following changes to watch.",
+      "source": "Kubernetes documentation, “Authorization”, “Determine the request verb”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#request-verb-resource",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "POST create GET , HEAD get (for individual resources), list (for collections, including full object content), watch (for watching an individual resource or collection of resources)",
+      "uses": [
+        "Role",
+        "Pod",
+        "kubectl",
+        "watch"
+      ],
+      "conceptIDs": [
+        "cka.rbac-verbs"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.resourcenames-limits",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4180,
+      "front": "Which two kinds of request cannot be restricted by resourceNames?",
+      "back": "deletecollection and top-level create requests.",
+      "explanation": "For create, the name of the new object may not be known at authorization time.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Referring to resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You cannot restrict deletecollection or top-level create requests by resource name. For create , this limitation is because the name of the new object may not be known at authorization time.",
+      "uses": [
+        "RBAC",
+        "resourceNames"
+      ],
+      "conceptIDs": [
+        "cka.resourcenames"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.pods-log-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 4195,
+      "front": "A support engineer can get pods in namespace shop but kubectl logs fails with “forbidden”. What should the Role’s resources include?",
+      "back": "pods/log as well as pods.",
+      "choices": "A) pods/log as well as pods\nB) logs, as a resource of its own\nC) Nothing: get on pods already includes logs",
+      "choicesExplained": "B: logs are a subresource of pods, written pods/log, not a separate resource. C: the subresource must be named in the rule.",
+      "explanation": "Logs are the log subresource of pods, which a rule must name separately with a slash.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Referring to resources”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To allow a subject to read pods and also access the log subresource for each of those Pods, you write:",
+      "uses": [
+        "RBAC",
+        "subresources such as pods/log",
+        "Role",
+        "kubectl logs",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.subresources"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.aggregated-rules-overwritten",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4205,
+      "front": "You hand-edit the rules field of an aggregated ClusterRole. What happens?",
+      "back": "The control plane overwrites it; change the ClusterRoles selected by the aggregationRule instead.",
+      "explanation": "The page also says to omit the rules field from manifests for aggregated ClusterRoles.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Aggregated ClusterRoles”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The control plane overwrites any values that you manually specify in the rules field of an aggregate ClusterRole. If you want to change or add rules, do so in the ClusterRole objects that are selected by the aggregationRule .",
+      "uses": [
+        "aggregated ClusterRoles",
+        "ClusterRole",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cka.aggregated-clusterroles"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.role-cluster-admin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4215,
+      "front": "Which default user-facing ClusterRole allows super-user access to perform any action on any resource?",
+      "back": "cluster-admin",
+      "explanation": "Bound with a ClusterRoleBinding it controls every resource in all namespaces; with a RoleBinding, everything in that namespace.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “User-facing roles”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "cluster-admin system:masters group Allows super-user access to perform any action on any resource.",
+      "uses": [
+        "RBAC",
+        "ClusterRole",
+        "ClusterRoleBinding",
+        "RoleBinding"
+      ],
+      "conceptIDs": [
+        "cka.user-facing-roles"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.role-admin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4220,
+      "front": "Which default ClusterRole, used in a RoleBinding, can also create roles and role bindings within the namespace?",
+      "back": "admin",
+      "explanation": "It still cannot write to the resource quota or to the namespace itself.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “User-facing roles”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If used in a RoleBinding , allows read/write access to most resources in a namespace, including the ability to create roles and role bindings within the namespace. This role does not allow write access to resource quota or to the namespace itself.",
+      "uses": [
+        "RBAC",
+        "ClusterRole",
+        "RoleBinding",
+        "namespace",
+        "ResourceQuota"
+      ],
+      "conceptIDs": [
+        "cka.user-facing-roles"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.role-edit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4225,
+      "front": "Which default ClusterRole allows read/write access to most objects in a namespace but not viewing or modifying roles or role bindings?",
+      "back": "edit",
+      "explanation": "It does allow accessing Secrets and running Pods as any ServiceAccount in the namespace.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “User-facing roles”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "edit None Allows read/write access to most objects in a namespace. This role does not allow viewing or modifying roles or role bindings. However, this role allows accessing Secrets and running Pods as any ServiceAccount in the namespace",
+      "uses": [
+        "RBAC",
+        "ClusterRole",
+        "namespace",
+        "Secret",
+        "ServiceAccount"
+      ],
+      "conceptIDs": [
+        "cka.user-facing-roles"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.role-view",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4230,
+      "front": "Which default ClusterRole gives read-only access to most objects in a namespace, but not Secrets?",
+      "back": "view",
+      "explanation": "Reading Secrets would expose ServiceAccount credentials and allow API access as any ServiceAccount, a form of privilege escalation.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “User-facing roles”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This role does not allow viewing Secrets, since reading the contents of Secrets enables access to ServiceAccount credentials in the namespace, which would allow API access as any ServiceAccount in the namespace (a form of privilege escalation).",
+      "uses": [
+        "RBAC",
+        "ClusterRole",
+        "namespace",
+        "Secret",
+        "ServiceAccount",
+        "kubernetes api"
+      ],
+      "conceptIDs": [
+        "cka.user-facing-roles"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.default-role-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4235,
+      "front": "A team lead must manage everything in namespace team-a, including giving teammates access, but must not change its ResourceQuota. Which default ClusterRole, in a RoleBinding?",
+      "back": "admin",
+      "choices": "A) view\nB) edit\nC) admin\nD) cluster-admin",
+      "choicesExplained": "A: view is read-only. B: edit cannot view or modify roles or role bindings, so the lead could not grant access. D: cluster-admin in a RoleBinding gives full control of the namespace, including the namespace itself.",
+      "explanation": "admin allows creating roles and role bindings in the namespace but no write access to its resource quota.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “User-facing roles”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "including the ability to create roles and role bindings within the namespace. This role does not allow write access to resource quota or to the namespace itself.",
+      "uses": [
+        "RBAC",
+        "ClusterRole",
+        "RoleBinding",
+        "namespace",
+        "ResourceQuota"
+      ],
+      "conceptIDs": [
+        "cka.user-facing-roles"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.system-masters",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4240,
+      "front": "Why should you avoid adding users to the system:masters group?",
+      "back": "Its members get unrestricted access, bypassing any RBAC or Webhook authorization restrictions.",
+      "explanation": "To give someone cluster-admin rights, bind them to the built-in cluster-admin ClusterRole with a ClusterRoleBinding instead.",
+      "source": "Kubernetes documentation, “Authorization”, “The system:masters group”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#the-system-masters-group",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Any user assigned to this group has full cluster administrator privileges, bypassing any authorization restrictions imposed by the RBAC or Webhook mechanisms. Avoid adding users to this group.",
+      "uses": [
+        "RBAC",
+        "authorization"
+      ],
+      "conceptIDs": [
+        "cka.system-masters"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.mode-node",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4245,
+      "front": "What does the Node authorization mode do?",
+      "back": "Grants kubelets permissions based on the Pods they are scheduled to run.",
+      "explanation": "It is a special-purpose mode, alongside modes such as RBAC and Webhook.",
+      "source": "Kubernetes documentation, “Authorization”, “Authorization modes”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Node A special-purpose authorization mode that grants permissions to kubelets based on the pods they are scheduled to run.",
+      "uses": [
+        "authorization",
+        "Pod",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "cka.authorization-modes"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.create-role-cmd",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4260,
+      "front": "Which command creates a Role “pod-reader” allowing get, list and watch on pods?",
+      "back": "kubectl create role pod-reader --verb=get --verb=list --verb=watch --resource=pods",
+      "explanation": "kubectl create role creates a Role object defining permissions within a single namespace.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “kubectl create role”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#kubectl-create-role",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl create role pod-reader --verb = get --verb = list --verb = watch --resource = pods",
+      "uses": [
+        "kubectl",
+        "Role",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-role"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.create-role-resource-name",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4265,
+      "front": "Which kubectl create role flag adds resourceNames to the rule?",
+      "back": "--resource-name, for example --resource-name=readablepod",
+      "explanation": "It can be repeated to allow several named objects.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “kubectl create role”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#kubectl-create-role",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl create role pod-reader --verb = get --resource = pods --resource-name = readablepod --resource-name = anotherpod",
+      "uses": [
+        "kubectl",
+        "Role",
+        "resourceNames"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-role",
+        "cka.resourcenames"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.create-clusterrole-cmd",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4270,
+      "front": "Which command creates a ClusterRole “node-reader” allowing get, list and watch on nodes?",
+      "back": "kubectl create clusterrole node-reader --verb=get,list,watch --resource=nodes",
+      "explanation": "The verbs can be given as one comma-separated list instead of repeated --verb flags.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “kubectl create clusterrole”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#kubectl-create-clusterrole",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl create clusterrole pod-reader --verb = get,list,watch --resource = pods",
+      "uses": [
+        "kubectl",
+        "ClusterRole",
+        "node"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-clusterrole"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.create-rolebinding-cmd",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4275,
+      "front": "Which command grants the admin ClusterRole to user bob within namespace acme?",
+      "back": "kubectl create rolebinding bob-admin-binding --clusterrole=admin --user=bob --namespace=acme",
+      "explanation": "kubectl create rolebinding grants a Role or ClusterRole within a specific namespace.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “kubectl create rolebinding”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#kubectl-create-rolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl create rolebinding bob-admin-binding --clusterrole = admin --user = bob --namespace = acme",
+      "uses": [
+        "kubectl",
+        "RoleBinding",
+        "ClusterRole",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-rolebinding"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.serviceaccount-flag",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4280,
+      "front": "To bind a ServiceAccount with kubectl create rolebinding, pass --serviceaccount={{c1::<namespace>:<name>}}, for example acme:myapp.",
+      "back": "<namespace>:<name>",
+      "explanation": "The ServiceAccount’s namespace is written before the colon, and can differ from the binding’s namespace.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “kubectl create rolebinding”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#kubectl-create-rolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl create rolebinding myapp-view-binding --clusterrole = view --serviceaccount = acme:myapp --namespace = acme",
+      "uses": [
+        "kubectl",
+        "RoleBinding",
+        "ServiceAccount",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-rolebinding"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.create-crb-cmd",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4285,
+      "front": "Which command grants the cluster-admin ClusterRole to user root across the entire cluster?",
+      "back": "kubectl create clusterrolebinding root-cluster-admin-binding --clusterrole=cluster-admin --user=root",
+      "explanation": "The page’s other examples bind a ServiceAccount the same way, with --serviceaccount=<namespace>:<name>.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “kubectl create clusterrolebinding”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#kubectl-create-clusterrolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl create clusterrolebinding root-cluster-admin-binding --clusterrole = cluster-admin --user = root",
+      "uses": [
+        "kubectl",
+        "ClusterRoleBinding",
+        "ClusterRole"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-clusterrolebinding"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.rbac-cmd-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4290,
+      "front": "ServiceAccount “reporter” in namespace “ops” must read Pods in namespace “shop” only. Which pair of commands does it?",
+      "back": "kubectl create role pod-reader --verb=get,list,watch --resource=pods -n shop, then kubectl create rolebinding … --role=pod-reader --serviceaccount=ops:reporter -n shop.",
+      "choices": "A) Role and RoleBinding in shop, --serviceaccount=ops:reporter\nB) Role and RoleBinding in ops, --serviceaccount=reporter\nC) ClusterRole and ClusterRoleBinding, --serviceaccount=ops:reporter",
+      "choicesExplained": "B: a binding in ops grants access in ops, not shop, and the flag needs namespace:name. C: a ClusterRoleBinding grants access in every namespace, more than asked.",
+      "explanation": "A Role and RoleBinding in shop limit access to shop, and the --serviceaccount value names the account’s own namespace.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “kubectl create rolebinding”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#kubectl-create-rolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl create rolebinding myappnamespace-myapp-view-binding --clusterrole = view --serviceaccount = myappnamespace:myapp --namespace = acme",
+      "uses": [
+        "kubectl",
+        "Role",
+        "RoleBinding",
+        "ServiceAccount",
+        "namespace",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-role",
+        "cka.kubectl-create-rolebinding"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.crb-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4295,
+      "front": "A logging agent’s ServiceAccount “collector” in namespace “logging” needs the existing ClusterRole “log-reader” in every namespace. Which command?",
+      "back": "kubectl create clusterrolebinding collector-binding --clusterrole=log-reader --serviceaccount=logging:collector",
+      "choices": "A) kubectl create clusterrolebinding … --clusterrole=log-reader --serviceaccount=logging:collector\nB) kubectl create rolebinding … --clusterrole=log-reader --serviceaccount=logging:collector -n logging\nC) kubectl create clusterrole log-reader --serviceaccount=logging:collector",
+      "choicesExplained": "B: a RoleBinding grants only within logging. C: creating a ClusterRole defines permissions but binds them to no one.",
+      "explanation": "kubectl create clusterrolebinding grants a ClusterRole across the entire cluster, in all namespaces.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “kubectl create clusterrolebinding”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#kubectl-create-clusterrolebinding",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl create clusterrolebinding Grants a ClusterRole across the entire cluster (all namespaces).",
+      "uses": [
+        "kubectl",
+        "ClusterRoleBinding",
+        "ClusterRole",
+        "ServiceAccount",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-clusterrolebinding",
+        "cka.kubectl-create-clusterrole"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.auth-can-i",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4305,
+      "front": "Which command asks whether you can create Deployments in namespace dev?",
+      "back": "kubectl auth can-i create deployments --namespace dev",
+      "explanation": "It answers yes or no by querying the API authorization layer, whatever authorization mode is used.",
+      "source": "Kubernetes documentation, “Authorization”, “Checking API access”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl provides the auth can-i subcommand for quickly querying the API authorization layer. The command uses the SelfSubjectAccessReview API to determine if the current user can perform a given action, and works regardless of the authorization mode used.",
+      "uses": [
+        "kubectl",
+        "Deployment",
+        "namespace",
+        "authorization"
+      ],
+      "conceptIDs": [
+        "cka.auth-can-i"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.auth-can-i-as",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4310,
+      "front": "How does an administrator check whether user dave can list Secrets in namespace dev?",
+      "back": "kubectl auth can-i list secrets --namespace dev --as dave",
+      "explanation": "Administrators combine can-i with user impersonation to see what other users can do.",
+      "source": "Kubernetes documentation, “Authorization”, “Checking API access”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Administrators can combine this with user impersonation to determine what action other users can perform. kubectl auth can-i list secrets --namespace dev --as dave",
+      "uses": [
+        "kubectl",
+        "Secret",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.auth-can-i-as"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.can-i-sa-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4315,
+      "front": "You bound a Role to ServiceAccount “builder” in namespace “ci”. Which command checks that it can create Jobs in ci?",
+      "back": "kubectl auth can-i create jobs -n ci --as system:serviceaccount:ci:builder",
+      "choices": "A) kubectl auth can-i create jobs -n ci --as builder\nB) kubectl auth can-i create jobs -n ci --as system:serviceaccount:ci:builder\nC) kubectl auth can-i create jobs -n ci",
+      "choicesExplained": "A: --as builder impersonates a user named builder, not the ServiceAccount. C: without --as it checks your own permissions.",
+      "explanation": "A ServiceAccount is impersonated by its full username, system:serviceaccount:<namespace>:<name>, not by its bare name.",
+      "source": "Kubernetes documentation, “Authorization”, “Checking API access”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl auth can-i list pods \\ --namespace target \\ --as system:serviceaccount:dev:dev-sa",
+      "uses": [
+        "kubectl",
+        "ServiceAccount",
+        "Job",
+        "namespace",
+        "Role"
+      ],
+      "conceptIDs": [
+        "cka.auth-can-i-as",
+        "cka.serviceaccount-username",
+        "cka.auth-can-i"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.rbac-subjects-scenario",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4320,
+      "front": "A binding must grant access to everyone in the “frontend-admins” group from your identity provider. Which subject kind?",
+      "back": "Group",
+      "choices": "A) User\nB) Group\nC) ServiceAccount",
+      "choicesExplained": "A: a User subject names one user, not everyone in a group. C: ServiceAccounts are identities for workloads, not for people from an identity provider.",
+      "explanation": "Group membership comes from the Authenticator modules, and a binding’s subjects can be groups, users or ServiceAccounts.",
+      "source": "Kubernetes documentation, “Using RBAC Authorization”, “Referring to subjects”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A RoleBinding or ClusterRoleBinding binds a role to subjects. Subjects can be groups, users or ServiceAccounts .",
+      "uses": [
+        "RBAC",
+        "RoleBinding",
+        "ServiceAccount",
+        "authentication"
+      ],
+      "conceptIDs": [
+        "cka.rbac-subjects"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.create-serviceaccount",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4330,
+      "front": "Which kubectl create subcommand creates a service account with a given name?",
+      "back": "kubectl create serviceaccount <name>",
+      "explanation": "It is one of the kubectl create subcommands, alongside role, rolebinding and token.",
+      "source": "Kubernetes documentation, “kubectl create”, “kubectl create”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_create/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl create serviceaccount - Create a service account with the specified name",
+      "uses": [
+        "kubectl",
+        "ServiceAccount"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-sa"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.default-sa",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4335,
+      "front": "A Pod is created without naming a ServiceAccount. Which one does it get?",
+      "back": "The ServiceAccount named default in the Pod’s namespace.",
+      "explanation": "Every namespace has at least one ServiceAccount, the default one.",
+      "source": "Kubernetes documentation, “Configure Service Accounts for Pods”, “Use the default service account to access the API server”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-the-default-service-account-to-access-the-api-server",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you do not specify a ServiceAccount when you create a Pod, Kubernetes automatically assigns the ServiceAccount named default in that namespace.",
+      "uses": [
+        "Pod",
+        "ServiceAccount",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-sa"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.serviceaccountname-immutable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4340,
+      "front": "Can you change spec.serviceAccountName on a Pod that already exists?",
+      "back": "No: it can only be set when creating a Pod or in a template for new Pods.",
+      "explanation": "To use a non-default ServiceAccount you set spec.serviceAccountName to its name at creation.",
+      "source": "Kubernetes documentation, “Configure Service Accounts for Pods”, “Use multiple service accounts”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-multiple-service-accounts",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can only set the serviceAccountName field when creating a Pod, or in a template for a new Pod. You cannot update the .spec.serviceAccountName field of a Pod that already exists.",
+      "uses": [
+        "Pod",
+        "ServiceAccount",
+        "PodTemplate"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-sa"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.sa-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4345,
+      "front": "Deployment “api” must run its Pods as the new ServiceAccount “api-sa”. What do you change?",
+      "back": "Set spec.serviceAccountName: api-sa in the Deployment’s Pod template.",
+      "choices": "A) kubectl edit each running Pod’s spec.serviceAccountName\nB) Set spec.serviceAccountName in the Pod template\nC) Rename api-sa to default",
+      "choicesExplained": "A: the field cannot be updated on an existing Pod. C: a ServiceAccount cannot be renamed, and default is already in use.",
+      "explanation": "The field can be set only when a Pod is created or in a template for new Pods.",
+      "source": "Kubernetes documentation, “Configure Service Accounts for Pods”, “Use multiple service accounts”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-multiple-service-accounts",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To use a non-default service account, set the spec.serviceAccountName field of a Pod to the name of the ServiceAccount you wish to use.",
+      "uses": [
+        "Deployment",
+        "Pod",
+        "ServiceAccount",
+        "PodTemplate"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-sa"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.create-token",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4350,
+      "front": "Which command gets a time-limited API token for ServiceAccount build-robot?",
+      "back": "kubectl create token build-robot",
+      "explanation": "The token it prints can be used to authenticate as that ServiceAccount.",
+      "source": "Kubernetes documentation, “Configure Service Accounts for Pods”, “Manually create an API token for a ServiceAccount”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#manually-create-an-api-token-for-a-serviceaccount",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can get a time-limited API token for that ServiceAccount using kubectl : kubectl create token build-robot The output from that command is a token that you can use to authenticate as that ServiceAccount.",
+      "uses": [
+        "kubectl",
+        "ServiceAccount",
+        "authentication"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-token"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.create-token-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4352,
+      "front": "A script run from your laptop must call the API for the next hour as ServiceAccount “reporter”. How do you get it a credential?",
+      "back": "kubectl create token reporter (optionally with --duration=1h).",
+      "choices": "A) kubectl create token reporter\nB) kubectl create serviceaccount reporter\nC) kubectl auth can-i --as reporter",
+      "choicesExplained": "B: that creates the ServiceAccount; it does not issue a token. C: can-i checks permissions and returns yes or no, not a credential.",
+      "explanation": "The command prints a time-limited token that authenticates as that ServiceAccount.",
+      "source": "Kubernetes documentation, “Configure Service Accounts for Pods”, “Manually create an API token for a ServiceAccount”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#manually-create-an-api-token-for-a-serviceaccount",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The output from that command is a token that you can use to authenticate as that ServiceAccount.",
+      "uses": [
+        "kubectl",
+        "ServiceAccount",
+        "authentication"
+      ],
+      "conceptIDs": [
+        "cka.kubectl-create-token"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.automount-false",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4360,
+      "front": "The ServiceAccount sets automountServiceAccountToken: false but the Pod spec sets it to true. Is the token mounted?",
+      "back": "Yes: when both set a value, the Pod spec takes precedence.",
+      "explanation": "You can opt out on the ServiceAccount or on an individual Pod.",
+      "source": "Kubernetes documentation, “Configure Service Accounts for Pods”, “Opt out of API credential automounting”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#opt-out-of-api-credential-automounting",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If both the ServiceAccount and the Pod's .spec specify a value for automountServiceAccountToken , the Pod spec takes precedence.",
+      "uses": [
+        "ServiceAccount",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cka.automount-opt-out"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.csr-must-be-approved",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4370,
+      "front": "What must happen to a CertificateSigningRequest before it can be signed?",
+      "back": "It must be approved, automatically by a controller for some signers, or manually with kubectl certificate approve.",
+      "explanation": "A CSR may instead be denied, which tells the signer it must not sign the request.",
+      "source": "Kubernetes documentation, “Certificates and Certificate Signing Requests”, “Request signing process”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#request-signing-process",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Once created, a CertificateSigningRequest must be approved before it can be signed. Depending on the signer selected, a CertificateSigningRequest may be automatically approved by a controller .",
+      "uses": [
+        "CertificateSigningRequest",
+        "CSR",
+        "controller / control loop",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "cka.csr-approve"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.client-signer-never-auto",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4375,
+      "front": "Will kube-controller-manager auto-approve a CSR for the kubernetes.io/kube-apiserver-client signer?",
+      "back": "No, never.",
+      "explanation": "Such requests need approval by some other means, such as kubectl certificate approve.",
+      "source": "Kubernetes documentation, “Certificates and Certificate Signing Requests”, “Kubernetes signers”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#kubernetes-signers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "signs certificates that will be honored as client certificates by the API server. Never auto-approved by kube-controller-manager .",
+      "uses": [
+        "kubernetes.io/kube-apiserver-client signer",
+        "kube-controller-manager",
+        "CSR"
+      ],
+      "conceptIDs": [
+        "cka.kube-apiserver-client-signer"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.expirationseconds-minimum",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4380,
+      "front": "The minimum valid value for spec.expirationSeconds is {{c1::600}} seconds, that is ten minutes.",
+      "back": "600",
+      "explanation": "The client-certificate task says the same: you cannot request a duration shorter than 10 minutes.",
+      "source": "Kubernetes documentation, “Certificates and Certificate Signing Requests”, “Request signing process”",
+      "sourceURL": "https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#request-signing-process",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The minimum valid value for this field is 600 , i.e. ten minutes.",
+      "uses": [
+        "spec.expirationSeconds",
+        "CSR"
+      ],
+      "conceptIDs": [
+        "cka.csr-expiration-seconds"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.csr-private-key",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4385,
+      "front": "Issuing a user a client certificate starts with a private key. Why must it stay secret?",
+      "back": "Anyone who has the private key can impersonate the user.",
+      "explanation": "The task creates it with `openssl genrsa -out myuser.key 3072`.",
+      "source": "Kubernetes documentation, “Issue a Certificate for a Kubernetes API Client Using a CertificateSigningRequest”, “Create private key”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tls/certificate-issue-client-csr/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You need to keep this private key secret; anyone who has it can impersonate the user.",
+      "uses": [
+        "CSR"
+      ],
+      "conceptIDs": [
+        "cka.csr-user-workflow"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.csr-cn-o",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4390,
+      "front": "In the X.509 signing request for a user certificate, what do the common name and organisation attributes set?",
+      "back": "The common name is the username; the organisation is the group the user will belong to.",
+      "explanation": "The task calls setting both important, and points to the RBAC page for the standard groups.",
+      "source": "Kubernetes documentation, “Issue a Certificate for a Kubernetes API Client Using a CertificateSigningRequest”, “Create an X.509 certificate signing request”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tls/certificate-issue-client-csr/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "It is important to set the CN and O attributes of the CSR. CN is the name of the user, and O is the group that this user will belong to.",
+      "uses": [
+        "CSR",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "cka.csr-user-workflow"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.csr-spec-fields",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4395,
+      "front": "In a CertificateSigningRequest for a user’s client certificate, what goes in spec.request, and what must usages be?",
+      "back": "The base64-encoded CSR file; usages has to be client auth.",
+      "explanation": "The task also sets signerName to kubernetes.io/kube-apiserver-client.",
+      "source": "Kubernetes documentation, “Issue a Certificate for a Kubernetes API Client Using a CertificateSigningRequest”, “Create a Kubernetes CertificateSigningRequest”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tls/certificate-issue-client-csr/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "usages has to be client auth expirationSeconds could be made longer (i.e. 864000 for ten days) or shorter (i.e. 3600 for one hour). You cannot request a duration shorter than 10 minutes. request is the base64 encoded value of the CSR file content.",
+      "uses": [
+        "CertificateSigningRequest",
+        "CSR",
+        "kubernetes.io/kube-apiserver-client signer"
+      ],
+      "conceptIDs": [
+        "cka.csr-user-workflow"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.csr-approve-cmd",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4400,
+      "front": "Which commands list CSRs and approve the one named myuser?",
+      "back": "kubectl get csr, then kubectl certificate approve myuser.",
+      "explanation": "To refuse it instead, use kubectl certificate deny.",
+      "source": "Kubernetes documentation, “Issue a Certificate for a Kubernetes API Client Using a CertificateSigningRequest”, “Approve the CertificateSigningRequest”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tls/certificate-issue-client-csr/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Get the list of CSRs: kubectl get csr Approve the CSR: kubectl certificate approve myuser",
+      "uses": [
+        "kubectl",
+        "CSR"
+      ],
+      "conceptIDs": [
+        "cka.csr-approve"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.csr-get-cert",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4410,
+      "front": "After approval, where in the CSR object is the issued certificate, and in what encoding?",
+      "back": "Under .status.certificate, Base64-encoded.",
+      "explanation": "The task exports it with `kubectl get csr myuser -o jsonpath='{.status.certificate}' | base64 -d > myuser.crt`.",
+      "source": "Kubernetes documentation, “Issue a Certificate for a Kubernetes API Client Using a CertificateSigningRequest”, “Get the certificate”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tls/certificate-issue-client-csr/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The certificate value is in Base64-encoded format under .status.certificate .",
+      "uses": [
+        "CSR",
+        "kubectl",
+        "status"
+      ],
+      "conceptIDs": [
+        "cka.csr-user-workflow"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.csr-order-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4415,
+      "front": "You have applied a CSR for user maria with the kube-apiserver-client signer. kubectl get csr shows it Pending. What next?",
+      "back": "kubectl certificate approve maria, then read .status.certificate, decode it, and add it to a kubeconfig.",
+      "choices": "A) Wait: kube-controller-manager will approve it\nB) kubectl certificate approve maria\nC) Delete it and set spec.expirationSeconds to 60",
+      "choicesExplained": "A: kube-apiserver-client requests are never auto-approved by kube-controller-manager. C: 60 is below the 600-second minimum, and expiry is not why it is pending.",
+      "explanation": "A CSR must be approved before it can be signed, and this signer is never auto-approved.",
+      "source": "Kubernetes documentation, “Issue a Certificate for a Kubernetes API Client Using a CertificateSigningRequest”, “Approve the CertificateSigningRequest”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tls/certificate-issue-client-csr/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use kubectl to find the CSR you made, and manually approve it.",
+      "uses": [
+        "CSR",
+        "kubectl",
+        "kubeconfig",
+        "kubernetes.io/kube-apiserver-client signer"
+      ],
+      "conceptIDs": [
+        "cka.csr-user-workflow",
+        "cka.csr-approve"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.csr-rbac-last",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4420,
+      "front": "maria now has a signed certificate in her kubeconfig, but every request is forbidden. What step is missing?",
+      "back": "RBAC: create a Role (or ClusterRole) and a binding that grant maria access.",
+      "explanation": "Issuing the certificate is not the last step: the task then defines a Role and RoleBinding for the new user.",
+      "source": "Kubernetes documentation, “Issue a Certificate for a Kubernetes API Client Using a CertificateSigningRequest”, “Create Role and RoleBinding”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tls/certificate-issue-client-csr/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "With the certificate created, it is time to define the Role and RoleBinding for this user to access Kubernetes cluster resources.",
+      "uses": [
+        "RBAC",
+        "Role",
+        "RoleBinding",
+        "kubeconfig",
+        "authentication",
+        "authorization"
+      ],
+      "conceptIDs": [
+        "cka.csr-user-workflow"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.set-credentials",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4430,
+      "front": "Which command adds user myuser to your kubeconfig with its key and certificate embedded?",
+      "back": "kubectl config set-credentials myuser --client-key=myuser.key --client-certificate=myuser.crt --embed-certs=true",
+      "explanation": "This is the first kubeconfig step after the certificate is issued; a context for the user comes next.",
+      "source": "Kubernetes documentation, “Issue a Certificate for a Kubernetes API Client Using a CertificateSigningRequest”, “Configure the certificate into kubeconfig”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tls/certificate-issue-client-csr/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl config set-credentials myuser --client-key = myuser.key --client-certificate = myuser.crt --embed-certs = true",
+      "uses": [
+        "kubectl",
+        "kubeconfig"
+      ],
+      "conceptIDs": [
+        "cka.config-set-credentials"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.set-credentials-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4432,
+      "front": "You hold alex.key and alex.crt and want them stored inside the kubeconfig, not as file paths. Which command?",
+      "back": "kubectl config set-credentials alex --client-key=alex.key --client-certificate=alex.crt --embed-certs=true",
+      "choices": "A) kubectl config set-credentials alex … --embed-certs=true\nB) kubectl config use-context alex\nC) kubectl certificate approve alex",
+      "choicesExplained": "B: use-context switches to an existing context; it stores no credentials. C: approval is a step on the CSR, before you have the certificate.",
+      "explanation": "The task adds a user’s credentials with set-credentials and --embed-certs=true, then adds a context for that user.",
+      "source": "Kubernetes documentation, “Issue a Certificate for a Kubernetes API Client Using a CertificateSigningRequest”, “Configure the certificate into kubeconfig”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tls/certificate-issue-client-csr/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The next step is to add this user to the kubeconfig file. First, you need to add new credentials:",
+      "uses": [
+        "kubectl",
+        "kubeconfig"
+      ],
+      "conceptIDs": [
+        "cka.config-set-credentials"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.set-context",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4435,
+      "front": "After set-credentials, which command adds a context “myuser” pairing that user with cluster “kubernetes”?",
+      "back": "kubectl config set-context myuser --cluster=kubernetes --user=myuser",
+      "explanation": "A context groups a cluster, a user and a namespace under one name.",
+      "source": "Kubernetes documentation, “Issue a Certificate for a Kubernetes API Client Using a CertificateSigningRequest”, “Configure the certificate into kubeconfig”",
+      "sourceURL": "https://kubernetes.io/docs/tasks/tls/certificate-issue-client-csr/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Then, you need to add the context: kubectl config set-context myuser --cluster = kubernetes --user = myuser",
+      "uses": [
+        "kubectl",
+        "kubeconfig context",
+        "kubeconfig"
+      ],
+      "conceptIDs": [
+        "cka.config-set-credentials",
+        "cka.kubeconfig-context"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.use-context",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4440,
+      "front": "Which command makes my-cluster-name the default context?",
+      "back": "kubectl config use-context my-cluster-name",
+      "explanation": "kubectl uses the current context’s parameters by default.",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Kubectl context and configuration”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#kubectl-context-and-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl config use-context my-cluster-name # set the default context to my-cluster-name",
+      "uses": [
+        "kubectl",
+        "kubeconfig context"
+      ],
+      "conceptIDs": [
+        "cka.config-use-context"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.set-context-namespace",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4450,
+      "front": "Which command makes namespace ggckad-s2 the default for all later kubectl commands in the current context?",
+      "back": "kubectl config set-context --current --namespace=ggckad-s2",
+      "explanation": "The quick reference says this permanently saves the namespace for all later kubectl commands in that context.",
+      "source": "Kubernetes documentation, “kubectl Quick Reference”, “Kubectl context and configuration”",
+      "sourceURL": "https://kubernetes.io/docs/reference/kubectl/quick-reference/#kubectl-context-and-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "kubectl config set-context --current --namespace = ggckad-s2",
+      "uses": [
+        "kubectl",
+        "kubeconfig context",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cka.kubeconfig-context"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.context-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4455,
+      "front": "An exam task says “work on cluster k8s-b”. Your kubeconfig has contexts k8s-a and k8s-b. What do you run first?",
+      "back": "kubectl config use-context k8s-b",
+      "choices": "A) kubectl config use-context k8s-b\nB) kubectl config set-cluster k8s-b\nC) kubectl get nodes --namespace k8s-b",
+      "choicesExplained": "B: set-cluster writes a cluster entry; it does not change which context is current. C: a namespace is not a cluster, so this still talks to k8s-a.",
+      "explanation": "kubectl talks to the cluster of the current context, so switching context switches cluster.",
+      "source": "Kubernetes documentation, “Organizing Cluster Access Using kubeconfig Files”, “Context”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#context",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, the kubectl command-line tool uses parameters from the current context to communicate with the cluster. To choose the current context: kubectl config use-context",
+      "uses": [
+        "kubectl",
+        "kubeconfig context",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cka.config-use-context",
+        "cka.kubeconfig-context"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.kubeconfig-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4460,
+      "front": "If the KUBECONFIG environment variable is not set, which kubeconfig file does kubectl use?",
+      "back": "`$HOME/.kube/config`",
+      "explanation": "If KUBECONFIG is set, kubectl merges the files it lists instead.",
+      "source": "Kubernetes documentation, “Organizing Cluster Access Using kubeconfig Files”, “The KUBECONFIG environment variable”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If the KUBECONFIG environment variable doesn't exist, kubectl uses the default kubeconfig file, $HOME/.kube/config .",
+      "uses": [
+        "kubectl",
+        "kubeconfig"
+      ],
+      "conceptIDs": [
+        "cka.kubeconfig-merge"
+      ]
+    },
+    {
+      "id": "cka.rbac-and-access.kubeconfig-first-wins",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4470,
+      "front": "Two files listed in `KUBECONFIG` both set current-context. Which value does kubectl use?",
+      "back": "The one from the first file: the first file to set a value or map key wins.",
+      "explanation": "Later files never change a value or map key an earlier file has set.",
+      "source": "Kubernetes documentation, “Organizing Cluster Access Using kubeconfig Files”, “Merging kubeconfig files”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#merging-kubeconfig-files",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The first file to set a particular value or map key wins. Never change the value or map key. Example: Preserve the context of the first file to set current-context .",
+      "uses": [
+        "kubectl",
+        "kubeconfig",
+        "kubeconfig context"
+      ],
+      "conceptIDs": [
+        "cka.kubeconfig-merge"
+      ]
+    }
+  ]
+}
