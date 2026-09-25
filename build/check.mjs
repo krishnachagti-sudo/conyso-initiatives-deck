@@ -132,12 +132,25 @@ export function checkDeck(deck, ctx = {}) {
   // ── Teaching order: no undefined terms, primers first ───────────────────
   const byOrder = notes.filter((n) => Number.isInteger(n.order)).slice().sort((a, b) => a.order - b.order);
   const known = new Set([...(meta.assumedTerms || []), ...(ctx.prerequisiteTerms || [])].map(norm));
+  const glossary = new Set(Object.keys(meta.glossary || {}).map(norm));
   for (const n of byOrder) {
     for (const t of n.uses || []) {
       const introducedHere = n.kind === 'primer' && (n.introduces || []).map(norm).includes(norm(t));
       if (!known.has(norm(t)) && !introducedHere) add(n.id, 'undefined-term', `uses "${t}" before any primer introduces it`);
     }
     for (const t of n.introduces || []) known.add(norm(t));
+
+    // Abbreviations: an all-capitals token in the card's text must be taught by
+    // an earlier primer (or this card's own), listed in its uses, assumed, or
+    // expanded in the deck's glossary. This catches jargon a writer never listed
+    // in `uses`, which the term check cannot see.
+    const text = ['front', 'back', 'explanation', 'example', 'contrast', 'choices', 'choicesExplained'].map((f) => n[f] || '').join(' ').replace(/\{\{c\d+::|\}\}/g, ' ');
+    const has = (list, a) => [...list].some((k) => new RegExp(`(^|[^a-z0-9])${a}([^a-z0-9]|$)`).test(norm(k)));
+    for (const tok of new Set(text.match(/\b[A-Z][A-Z0-9]{1,5}\b/g) || [])) {
+      const a = tok.toLowerCase();
+      if (glossary.has(a) || has(known, a) || has(n.uses || [], a)) continue;
+      add(n.id, 'abbreviation', `"${tok}" is not taught, used, assumed or in the deck glossary`);
+    }
   }
   for (const t of deck.topics) {
     const primers = t.notes.filter((n) => n.kind === 'primer' && Number.isInteger(n.order));

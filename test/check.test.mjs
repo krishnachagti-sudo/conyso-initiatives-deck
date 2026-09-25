@@ -123,3 +123,13 @@ test('images: the file must exist, with alt text, a credit and a licence tier', 
   assert.ok(rules.some((m) => /credit is missing/.test(m)));
   assert.ok(rules.some((m) => /tier letter/.test(m)));
 });
+
+test('abbreviations: an untaught all-capitals token is flagged unless glossed', () => {
+  const d = loadDeck('test/fixtures/decks/example');
+  const n = d.notes.find((x) => x.id === 'example.widgets.which-part');
+  n.explanation += ' See the WSX for details.';
+  const flagged = () => checkDeck(d, { concepts: loadConcepts('test/fixtures/concepts', 'example') }).filter((p) => p.rule === 'abbreviation');
+  assert.equal(flagged().length, 1);
+  d.meta.glossary = { WSX: 'Widget Standards Exchange' };
+  assert.equal(flagged().length, 0);
+});

@@ -206,7 +206,7 @@ ${check ? `<div class="checked"><h3>${icon('check')} What we checked</h3><p><str
   const about = `
 <section class="sec faq" id="about" aria-labelledby="about-h"><span class="label">10 · About</span>
 <h2 id="about-h">About this deck</h2>
-<div class="qa">${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}<details><summary>Licence and notices</summary><p>${esc(attribution(deck))}</p></details></div>
+<div class="qa">${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}${Object.keys(m.glossary || {}).length ? `<details><summary>Abbreviations used</summary><dl class="gloss">${Object.entries(m.glossary).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl></details>` : ''}<details><summary>Licence and notices</summary><p>${esc(attribution(deck))}</p></details></div>
 </section>`;
 
   // ── Aside ───────────────────────────────────────────────────────────────
