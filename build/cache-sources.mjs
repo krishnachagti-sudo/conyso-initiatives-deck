@@ -114,7 +114,7 @@ function cacheDocs(slug, docs, { saved, out = 'research/sources' } = {}) {
     const file = join(tmp, 'doc');
     const row = { url, tier, licence, cards, fetched: new Date().toISOString().slice(0, 10) };
     // The copy research saved comes first: no second download.
-    const usable = local && existsSync(local) && statSync(local).size > 0;
+    const usable = local && existsSync(local) && statSync(local).isFile() && statSync(local).size > 0; // a folder (a cloned repo) is not a copy
     const code = usable ? 200 : fetchTo(rawGitHub(url), file);
     let src = usable ? local : code >= 200 && code < 300 ? file : null;
     if (usable) row.via = 'research copy';

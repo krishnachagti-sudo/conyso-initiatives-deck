@@ -18,6 +18,10 @@ source. The Markdown brief stays under 5,000 words.
 - **Privacy.** Never put any email address, name or other personal detail in a
   request (User-Agent, header, query, body). Use a generic User-Agent such as
   "Mozilla/5.0 (compatible; research)".
+- **Respect a site's terms.** If a site blocks automated fetching or its
+  terms forbid scraping, do not get round it: no proxy readers (such as
+  r.jina.ai), no mirrors or caches of its pages. Use the owner's openly
+  licensed documents instead, or record the gap under "Not verified".
 - **Fetch pages, not sites.** Download only the pages and documents the outline
   needs; never mirror a website or clone a repository. Save each one once to the
   scratch folder, extract its text (pdftotext for PDFs) and grep it.
@@ -28,7 +32,7 @@ source. The Markdown brief stays under 5,000 words.
   (prerequisiteDecks), read that deck's `research/sources/<slug>/manifest.json`
   and `<slug>-terms.json` first. Re-use its sources and its terms; research only
   what is new.
-- Never run git. Write only your outputs and the scratch folder.
+- Never run git, not even read-only in a scratch clone. Write only your outputs and the scratch folder.
 
 ## Outputs (in research/deck-briefs/)
 1. **`<slug>.md`**, under 5,000 words:
