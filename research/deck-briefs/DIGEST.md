@@ -69,6 +69,8 @@ sourceLicence; uses; conceptIDs.
   `example` (concrete: "like X, but…").
 - **Volatile facts:** `volatile: true` and `validAsOf: "YYYY-MM-DD · <version>"`.
 - **Scenario cards:** `choicesExplained` says why each wrong option is wrong.
+  Spread the right answer across A, B, C and D; the checker rejects a deck
+  where more than half the scenario answers share one letter.
 
 ## Teaching
 - Each topic opens with primers for its registry terms, then facts, then

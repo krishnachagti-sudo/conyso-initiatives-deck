@@ -255,6 +255,16 @@ export function checkDeck(deck, ctx = {}) {
     for (const n of group) add(n.id, 'front', `${group.length} cards share this front but accept different answers; give each its own question`);
   }
 
+  // ── Deck-level: where the right answer sits ─────────────────────────────
+  // A learner who notices the answer is usually A stops reading the options.
+  // Our own scenarios (not pool questions, whose order is fixed) must spread it.
+  {
+    const letters = notes.filter((n) => n.choices && !/[a-z]\d[a-z]\d{2}$/.test(n.id))
+      .map((n) => String(n.back || '').match(/^\s*([A-E])[):]/)?.[1]).filter(Boolean);
+    const top = Object.entries(letters.reduce((m, l) => ({ ...m, [l]: (m[l] || 0) + 1 }), {})).sort((a, b) => b[1] - a[1])[0];
+    if (letters.length >= 20 && top && top[1] / letters.length > 0.5) add(null, 'answer-position', `${top[1]} of ${letters.length} scenario cards have the answer at ${top[0]}: spread the right answer across the options`);
+  }
+
   // ── Deck-level: official pool questions verbatim ────────────────────────
   // A deck that quotes a question pool names its skeleton (deck.json "pool");
   // every live question needs a card whose id ends in the pool ID, with the
