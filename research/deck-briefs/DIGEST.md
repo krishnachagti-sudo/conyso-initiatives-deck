@@ -55,6 +55,13 @@ priority (core | extra); order; front (a question, or a cloze sentence); back
 (≤ 25 words, lists ≤ 3 items); explanation (1–2 sentences saying WHY, never
 restating the answer); source (title, section, page); sourceURL;
 sourceLicence; uses; conceptIDs.
+- **evidence** (decks whose deck.json has `"evidence": true`): for a tier A
+  or B source, 4 to 60 words copied **exactly** from the cited source, and
+  from the cited PDF page. These words must support the back and the
+  explanation. The checker finds them in the cached text
+  (`research/sources/<slug>/`). If a reason in your explanation is not in the
+  evidence, the reason is yours: cut it. Tier C cards have no evidence (we do
+  not quote tier C).
 - **Primers** also have `introduces` (one term, plus its abbreviation) and an
   `example` (concrete: "like X, but…").
 - **Volatile facts:** `volatile: true` and `validAsOf: "YYYY-MM-DD · <version>"`.
@@ -113,9 +120,10 @@ budget, not an extra.
   fix everything they list in one pass, and run them once more.
 
 ## Last pass, before the checks
-Reread every explanation beside its cited passage, and ask of each: is
-every reason in it stated in that passage? Delete the ones that are not.
-This is the single most common audit finding.
+Reread every explanation beside its evidence (or its cited passage), and ask
+of each: is every reason in it stated there? Delete the ones that are not.
+This is the single most common audit finding. If your source is missing from
+`research/sources/<slug>/`, run `node build/cache-sources.mjs --only=<slug>`.
 
 ## Before you reply
 From /home/user/conyso-initiatives-deck, all three must be clean for your

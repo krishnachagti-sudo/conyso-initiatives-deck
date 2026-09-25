@@ -52,6 +52,7 @@ export function poolCards(deckDir, { topics, base = '.' } = {}) {
         sourceURL: p.sourceURL || '',
         sourceLicence: p.sourceLicence || '',
         ...(p.validAsOf ? { volatile: true, validAsOf: p.validAsOf } : {}),
+        ...(meta.evidence ? { evidence: q.question } : {}), // the question is in the pool text word for word
         uses: [],
         conceptIDs: [],
         ...(q.figure && p.figures?.[q.figure] ? { image: p.figures[q.figure] } : {}),

@@ -105,8 +105,8 @@ flow, with its evidence, the fix and the order of work. The target is about
 | Step | Who | What |
 |---|---|---|
 | 1. Research | one agent, strong model | Follows research/deck-briefs/BRIEF.md. Writes `<slug>.md`, `-sources.json`, `-terms.json`, `-concepts.json` and `-budget.json`. |
-| 2. Set up | main session | Writes deck.json (with `pool` if the exam has one) and `<slug>-writers.md` from WRITERS-TEMPLATE.md. Runs `node build/pool-cards.mjs <slug>` if there is a pool. |
-| 3. Pilot | one writer, smaller model | Writes one topic, following DIGEST.md. The main session runs `node build/status.mjs <slug> --registry` and reads 15 cards. Then one auditor audits that topic, and its patches are applied. The findings correct `<slug>-writers.md`. |
+| 2. Set up | main session | Writes deck.json with `"evidence": true` (plus `pool` if the exam has one) and `<slug>-writers.md` from WRITERS-TEMPLATE.md. Runs `node build/cache-sources.mjs --research=<slug>`, so writers are checked against the text, and `node build/pool-cards.mjs <slug>` if there is a pool. |
+| 3. Pilot | one writer, smaller model | Writes one topic, following DIGEST.md. The main session runs `node build/status.mjs <slug> --registry` and reads 15 cards; what it finds corrects `<slug>-writers.md`. A separate pilot audit runs only for decks budgeted over 800 cards; on a smaller deck it cost 250 tokens a card, so the pilot waits for the main audit. |
 | 4. Fan out | writers, smaller model | The remaining topics, in groups of 4 to 6. |
 | 5. Merge | main session | `node build/merge.mjs <slug>`. Topics more than 15% off budget go back to the same writer. Then `node build/check.mjs --only=<slug> --summary` must be clean. |
 | 6. Audit | auditors, strong model | Follow AUDIT.md: one per 400 to 600 cards, each writing a report and a patch file. |

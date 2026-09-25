@@ -7,6 +7,7 @@
 
 import { existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { locate } from '../src/evidence.mjs';
 import { NOTE_TYPES, KINDS, AFTER_PRIMERS, PRIORITIES, LICENCE_TIERS, LIMITS } from '../src/schema.mjs';
 
 const ID_RE = /^[a-z0-9]+(?:[.-][a-z0-9]+)*(?:\.[a-z0-9-]+)+$/;
@@ -115,6 +116,26 @@ export function checkDeck(deck, ctx = {}) {
       const want = { two: 2, three: 3, four: 4, five: 5, six: 6 }[nameN[1].toLowerCase()];
       const got = String(n.back || '').split(/;|,|\band\b|\bor\b/).filter((x) => x.trim()).length;
       if (got < want) add(id, 'back', `the front asks for ${want} but the back gives ${got}`);
+    }
+
+    // Evidence (decks with "evidence": true): a card resting on an openly
+    // licensed source (tier A or B) quotes the words that support it, and those
+    // words must be in the cached source text, on the cited PDF page if any.
+    if (ctx.sourceText && /^[AB]/.test(String(n.sourceLicence || '').trim())) {
+      const ev = String(n.evidence || '').trim();
+      const w = words(ev);
+      if (!ev) add(id, 'evidence', 'quote the source words that support this card in "evidence"');
+      else if (w < 4 || w > 60) add(id, 'evidence', `evidence has ${w} words; quote 4 to 60 words of the source`);
+      else {
+        const text = ctx.sourceText(n.sourceURL);
+        if (text === null) add(id, 'evidence', 'the source is not cached: run node build/cache-sources.mjs --only=<slug>');
+        else {
+          const at = locate(text, ev);
+          const page = Number(String(n.sourceURL || '').match(/#page=(\d+)/)?.[1]);
+          if (!at.found) add(id, 'evidence', 'the evidence is not in the source text word for word');
+          else if (page && at.pages.length && !at.pages.includes(page)) add(id, 'evidence', `the evidence is on page ${at.pages.join(', ')}, not #page=${page}`);
+        }
+      }
     }
 
     // Volatile facts carry a date.

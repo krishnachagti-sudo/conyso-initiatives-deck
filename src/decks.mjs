@@ -11,6 +11,7 @@
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { sourceReader } from './evidence.mjs';
 
 const readJSON = (p) => JSON.parse(readFileSync(p, 'utf8'));
 
@@ -96,6 +97,7 @@ export function loadPool(meta, base = '.') {
 /** Everything checkDeck needs to know about a deck beyond its own files. */
 export function checkContext(meta, { decks = 'decks', concepts = 'concepts', base = '.' } = {}) {
   return {
+    sourceText: meta.evidence ? sourceReader(meta.slug, join(base, 'research/sources')) : undefined,
     concepts: deckConcepts(concepts, decks, meta),
     prerequisiteTerms: prerequisiteTerms(decks, meta),
     licences: licenceRules(),

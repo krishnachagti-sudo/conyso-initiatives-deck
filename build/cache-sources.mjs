@@ -3,6 +3,7 @@
 // it again (docs/PIPELINE-V3.md, B4; decision D2).
 //
 //   node build/cache-sources.mjs [--only=slug,slug] [--saved=<folder of earlier downloads>]
+//   node build/cache-sources.mjs --research=<slug>   (at set-up: what research found)
 //
 // For each document a deck's cards cite (sourceURL without its #anchor):
 //   tier A or B → research/sources/<slug>/<name>.txt, plus a manifest row;
@@ -73,28 +74,50 @@ function toText(file, url) {
   return /<html|<body|<div|<p[ >]/i.test(raw) && !/\.md$/i.test(url) ? htmlText(raw) : raw;
 }
 
-export function cacheDeck(deckDir, { saved, out = 'research/sources' } = {}) {
+export function cacheDeck(deckDir, opts = {}) {
   const deck = loadDeck(deckDir);
-  const dir = join(out, deck.meta.slug);
-  mkdirSync(dir, { recursive: true });
-  const manifestPath = join(dir, 'manifest.json');
-  const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : [];
-  const have = new Map(manifest.map((m) => [m.url, m]));
   const docs = new Map();
   for (const n of deck.notes) if (n.sourceURL) {
     const url = n.sourceURL.split('#')[0];
     if (!docs.has(url)) docs.set(url, { licence: n.sourceLicence || '', cards: 0 });
     docs.get(url).cards++;
   }
+  return cacheDocs(deck.meta.slug, docs, opts);
+}
+
+/**
+ * Cache what research found, before any card is written, so writers can be
+ * checked against the text as they go. Reads research/deck-briefs/<slug>-sources.json
+ * ({url, tier, path}) and prefers the copy research already saved.
+ */
+export function cacheResearch(slug, opts = {}) {
+  const list = JSON.parse(readFileSync(join('research/deck-briefs', `${slug}-sources.json`), 'utf8'));
+  const docs = new Map();
+  for (const s of list) {
+    const url = s.url.split('#')[0];
+    if (!docs.has(url)) docs.set(url, { licence: `${s.tier} · ${s.licence}`, cards: 0, local: s.path });
+  }
+  return cacheDocs(slug, docs, opts);
+}
+
+function cacheDocs(slug, docs, { saved, out = 'research/sources' } = {}) {
+  const dir = join(out, slug);
+  mkdirSync(dir, { recursive: true });
+  const manifestPath = join(dir, 'manifest.json');
+  const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : [];
+  const have = new Map(manifest.map((m) => [m.url, m]));
   const tmp = mkdtempSync(join(tmpdir(), 'src-'));
   const tally = { cached: 0, reused: 0, tierC: 0, failed: [] };
-  for (const [url, { licence, cards }] of docs) {
+  for (const [url, { licence, cards, local }] of docs) {
     if (have.has(url) && (have.get(url).path === null || existsSync(join(dir, have.get(url).path)))) { tally.reused++; continue; }
     const tier = licence.trim().charAt(0);
     const file = join(tmp, 'doc');
     const row = { url, tier, licence, cards, fetched: new Date().toISOString().slice(0, 10) };
-    const code = fetchTo(rawGitHub(url), file);
-    let src = code >= 200 && code < 300 ? file : null;
+    // The copy research saved comes first: no second download.
+    const usable = local && existsSync(local) && statSync(local).size > 0;
+    const code = usable ? 200 : fetchTo(rawGitHub(url), file);
+    let src = usable ? local : code >= 200 && code < 300 ? file : null;
+    if (usable) row.via = 'research copy';
     // aliases.json maps a URL to a file under --saved, for copies saved under another name.
     const alias = existsSync(join(dir, 'aliases.json')) ? JSON.parse(readFileSync(join(dir, 'aliases.json'), 'utf8'))[url] : null;
     if (!src && saved && alias && existsSync(join(saved, alias))) { src = join(saved, alias); row.via = 'saved copy'; }
@@ -117,7 +140,11 @@ export function cacheDeck(deckDir, { saved, out = 'research/sources' } = {}) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const only = arg('only')?.split(',');
-  for (const d of deckDirs('decks')) {
+  if (arg('research')) {
+    const t = cacheResearch(arg('research'), { saved: arg('saved') });
+    console.log(`${arg('research')} (from research): ${t.cached} cached, ${t.reused} already cached, ${t.tierC} tier C (manifest only), ${t.failed.length} not saved`);
+    for (const u of t.failed.slice(0, 5)) console.log(`   not saved: ${u}`);
+  } else for (const d of deckDirs('decks')) {
     const slug = basename(d);
     if (only && !only.includes(slug)) continue;
     const t = cacheDeck(d, { saved: arg('saved') });

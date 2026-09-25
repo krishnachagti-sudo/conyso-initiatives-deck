@@ -28,6 +28,11 @@ Do not report:
 For pool cards, check only the explanation and choicesExplained.
 
 ## Pass 1: true and sourced
+Where a card has `evidence`, the checker has already confirmed those words
+are in the source, on the cited page. Your job is to check that the evidence
+actually supports the back and the explanation. Anything the card claims
+beyond the evidence needs another passage from the source, or it is a
+finding.
 - Every claim is supported by the cited page or section. Paraphrase is fine.
   These are not: changed meaning; overstatement ("only", "always", "must" not
   in the source); wrong numbers or units; inference presented as the
