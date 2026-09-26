@@ -1,0 +1,24 @@
+# CIPP/US: notes for every writer (read after DIGEST.md)
+
+- **Slug:** `iapp-cippus`. **Family prefix:** `cippus` (card ids `cippus.<topic-slug>.<card-slug>`, concept ids `cippus.<concept-slug>`). Use the concept ids in `iapp-cippus-concepts.json`; add new ones only when a card needs them.
+- **Builds on:** nothing. Every term gets its primer.
+- **Sources, their tiers and licence labels.** The label must match src/licences.json for the host. Tier A or B: "B · <licence>", with evidence. Tier C: "C · facts only, in our own words", with no evidence.
+  - iapp.org → tier C ("The contents of the Site are intended for your personal (professional), noncomm)
+  - assets.contentstack.io → tier C (No licence statement in the PDF; IAPP site terms apply: "The contents of the Sit)
+  - uscode.house.gov → tier B ("Copyright protection under this title is not available for any work of the Unit)
+  - www.govinfo.gov → tier B ("Copyright protection under this title is not available for any work of the Unit)
+  - nvlpubs.nist.gov → tier B ("Copyright protection under this title is not available for any work of the Unit)
+  - cppa.ca.gov → tier B ("In general, information presented on this website, unless otherwise indicated, )
+  - www.ca.gov → tier B ("In general, information presented on this website, unless otherwise indicated, )
+  - oag.ca.gov → tier C (No page-specific licence read; state site, terms not checked)
+  - law.lis.virginia.gov → tier C (No licence or copyright statement found on the page fetched; state legislative t)
+  - leg.colorado.gov → tier C (No licence or copyright statement found on the page fetched; state legislative t)
+  - app.leg.wa.gov → tier C (No licence or copyright statement found on the page fetched; state legislative t)
+  - www.leg.state.nv.us → tier C (No licence or copyright statement found on the page fetched; state legislative t)
+  - le.utah.gov → tier C (No licence or copyright statement found on the page fetched; state legislative t)
+  - www.nyc.gov → tier C (No licence statement read; terms not checked)
+  - publications.europa.eu → tier B (Official Journal / CJEU text from the Publications Office Cellar; reuse terms as)
+- **Evidence is required.** The texts are in `research/sources/iapp-cippus/`; the slice prints a passage under each concept.
+- **Volatile facts:** `volatile: true`, `validAsOf: "2026-09-26 · law in force"`.
+- **Scenarios:** your own. Never reuse a source's worked examples or exercises.
+- **Deck notice:** already in deck.json.
