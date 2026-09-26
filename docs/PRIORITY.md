@@ -17,7 +17,7 @@ GitHub Foundations, SIE, ISTQB CTFL, CCSP, CIPP/E.
 2. Azure: AZ-900, AZ-104, AZ-305, AI-900, SC-900, DP-900, AZ-400 (MicrosoftDocs repositories under CC BY 4.0).
 3. Aviation: FAA Instrument, Commercial, Flight Instructor (+FOI, CFII), Aviation Mechanic (General, Airframe, Powerplant).
 4. FCC Amateur Extra (public-domain pool).
-5. Privacy: CIPP/US, AIGP.
+5. Privacy: CIPP/US (on hold: see Parked).
 6. GitHub: Actions, Copilot, Advanced Security, Administration (GitHub Docs, CC BY 4.0).
 7. Google Cloud: Cloud Digital Leader, Professional Cloud Architect, Generative AI Leader (check licence).
 8. OSHA 10/30 and DOT hazmat (29 and 49 CFR).
@@ -29,3 +29,6 @@ GitHub Foundations, SIE, ISTQB CTFL, CCSP, CIPP/E.
 ## Parked
 Series 7, 24, 9/10, 6, 63, 65, 66 and the other FINRA and NASAA exams, until
 their rules can be sourced from SEC and Federal Register text alone; KCS v6.
+The IAPP exams (CIPP/E, AIGP, CIPT, CIPM): the IAPP's Conditions of Use bar
+using its site with any AI system. CIPP/US is written from US law alone and
+waits for a decision on publishing it without the IAPP's names.

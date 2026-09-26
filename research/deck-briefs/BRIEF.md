@@ -22,6 +22,10 @@ source. The Markdown brief stays under 5,000 words.
   terms forbid scraping, do not get round it: no proxy readers (such as
   r.jina.ai), no mirrors or caches of its pages. Use the owner's openly
   licensed documents instead, or record the gap under "Not verified".
+- **Read the exam owner's terms first.** Before any other fetch, read the
+  terms of use of the exam owner's site and of every site the outline rests
+  on. If they forbid using the content with AI (as FINRA's and the IAPP's do),
+  stop and report it: that site is tier D, and the deck may not be possible.
 - **Fetch pages, not sites.** Download only the pages and documents the outline
   needs; never mirror a website or clone a repository. Save each one once to the
   scratch folder, extract its text (pdftotext for PDFs) and grep it.

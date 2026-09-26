@@ -28,8 +28,12 @@ forbid using its content with AI tools. The SIE writers were redirected,
 saved copies of FINRA pages were deleted, and finra.org, msrb.org and
 nasaa.org are now tier D in `src/licences.json` and on the no-fetch list
 (`src/no-fetch.json`), which `sources.mjs` and `cache-sources.mjs` obey.
-The Series 7, 63, 65 and 66 decks are parked. The lesson: read a site's terms
-before research starts, not when its pages are already cached.
+The Series 7, 63, 65 and 66 decks are parked. The IAPP's Conditions of Use
+(§4.2) say the same; the AIGP researcher read them first and stopped. iapp.org
+is tier D too, and CIPP/US, whose topic plan came from the IAPP body of
+knowledge, is held for a decision. The lesson: read a site's terms
+before research starts, not when its pages are already cached. BRIEF.md now
+says so.
 
 **Two usage-limit stops killed every agent at once.** Topic files saved as
 each topic was finished survived both. A file half-written when the limit
