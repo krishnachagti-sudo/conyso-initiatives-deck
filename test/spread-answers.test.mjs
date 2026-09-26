@@ -11,6 +11,7 @@ test('option labels swap, the article "A" does not', () => {
 test('labels used as the subject of a sentence swap too', () => {
   assert.equal(swapLabels('B is wrong: it only logs. D and C match by pattern. A would work too.', 'A', 'B'), 'A is wrong: it only logs. D and C match by pattern. B would work too.');
   assert.equal(swapLabels('C confuses the two. A policy applies here.', 'A', 'C'), 'A confuses the two. A policy applies here.');
+  assert.equal(swapLabels('A covers only her account. A process restarts.', 'A', 'C'), 'C covers only her account. A process restarts.');
 });
 
 test('letters that name things are left alone', () => {

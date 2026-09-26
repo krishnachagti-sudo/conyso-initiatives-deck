@@ -26,7 +26,7 @@ export function parseChoices(choices) {
 const NOT_A_LABEL_AFTER = new Set(('class classes type types part parts schedule schedules tier tiers section sections plan plans form forms vitamin '
   + 'appendix category categories level levels grade grades zone zones item line box column row group groups division subpart chapter unit '
   + 'figure table annex article title runway taxiway phase model series rule step stage exhibit attachment block range size area sector '
-  + 'scale rating network address note hepatitis list amendment app channel band mode test drive paragraph question').split(' '));
+  + 'scale rating network address note chart hepatitis list amendment app channel band mode test drive paragraph question').split(' '));
 // Words that can follow the option "A" but never the article "a".
 const VERB_AFTER_A = /^(is|are|was|were|would|will|does|do|doesn't|did|can|cannot|can't|could|might|may|must|should|only|also|just|still|alone|too|either|neither|has|have|isn't|aren't|wouldn't|won't|instead|here)\b/;
 
@@ -48,7 +48,11 @@ export function isLabel(text, i) {
   if (l !== 'A') return true;
   // "A" is also the article: a label only before a verb or "and/or <label>".
   const next = after.trimStart();
-  return /^(and|or|nor)\s+[A-E]\b/.test(next) || VERB_AFTER_A.test(next);
+  // "A covers…", "A removes…": a verb in -s, where the article would need a
+  // noun (nouns in -ss, -us, -is and "series" are the article's).
+  const word = next.match(/^([a-z]+)\b/)?.[1] || '';
+  const verbS = /s$/.test(word) && !/(ss|us|is|ics|series|news|lens|gas|yes|this|thus|always|perhaps)$/.test(word);
+  return /^(and|or|nor)\s+[A-E]\b/.test(next) || VERB_AFTER_A.test(next) || verbS;
 }
 
 /** Swap the letters a and b wherever they are used as option labels. */
@@ -58,10 +62,24 @@ export function swapLabels(text, a, b) {
   return text.replace(new RegExp(`[${a}${b}]`, 'g'), (l, i) => (isLabel(text, i) ? flip(l) : l));
 }
 
+/**
+ * Does the card use a lone A–E as a name in its options or front ("issue A",
+ * "Test C", "A || B")? The article "A" before a word does not count.
+ */
+export function hasLetterNames(card) {
+  const text = `${String(card.choices || '').replace(/^\s*[A-E]\)/gm, '')}\n${card.front || ''}`
+    .replace(/\b(?:Class|Schedule|Part|Form|Type|Tier|Plan|Section)\s+[A-E]\b/g, '')
+    .replace(/(^|[\s("“])A\s+(?=[a-z0-9“"(])/g, '$1');
+  return /(^|[^A-Za-z0-9'’\-.])[A-E]($|[^A-Za-z0-9'’\-+#])/.test(text);
+}
+
 export function spread(card) {
   const opts = parseChoices(card.choices);
   const right = String(card.back || '').match(/^\s*([A-E])[):]/)?.[1];
   if (!opts || !right) return false;
+  // Options that use letters as names ("issue A", "Test C", "A || B") would be
+  // swapped with the labels: leave those cards where the writer put them.
+  if (hasLetterNames(card)) return false;
   const n = opts.length;
   const target = LETTERS[parseInt(createHash('sha256').update(card.id).digest('hex').slice(0, 8), 16) % n];
   if (target === right) return false;
