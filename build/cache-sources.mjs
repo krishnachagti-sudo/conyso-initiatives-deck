@@ -64,7 +64,7 @@ function findSaved(dir, url) {
 
 function toText(file, url) {
   const head = readFileSync(file).subarray(0, 5).toString();
-  if (head === '%PDF-') return execFileSync('pdftotext', [file, '-']).toString();
+  if (head === '%PDF-') return execFileSync('pdftotext', [file, '-'], { maxBuffer: 1 << 28 }).toString();
   if (head.startsWith('PK')) {
     // A course ZIP: keep the student manual (what cards cite), else every PDF.
     const pdfs = execFileSync('unzip', ['-Z1', file]).toString().split('\n').filter((f) => /\.pdf$/i.test(f));
