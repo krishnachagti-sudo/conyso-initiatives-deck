@@ -1,0 +1,34 @@
+# faa-cfi audit A: topics 01–04
+
+Scope: decks/faa-cfi/notes/01-risk-management.json to 04-teaching-process.json, 444 cards (96 + 86 + 149 + 113; 110 scenario cards, no pool cards). I checked every card against its `evidence` first. For claims beyond the evidence, I searched the cached Aviation Instructor's Handbook (FAA-H-8083-9B) and FAA-S-ACS-25 in research/sources/faa-cfi/, page by page. I compared the faa-private-pilot, faa-commercial and faa-part-107 decks and their terms files to find re-taught material. I fetched nothing.
+
+- **choicesExplained letters.** All 110 scenario cards explain every wrong letter and only those. Each key matches its choice.
+- **Figures.** The risk matrix PNG matches Figure 1-4 as the alt text describes it: occasional × catastrophic is High, as p1-9 says. The Maslow PNG shows the five levels of Figure 2-3, with physiological needs listed as air, water, food, shelter, sleep and sex. The domains SVG matches p3-13; the Bloom SVG matches p3-5 and 3-6 (the top three levels are HOTS); the levels SVG matches p3-14 and 3-15. The demonstration-performance SVG matches both chapters: ch. 5 lists five phases (p5-21), ch. 9 lists four (p9-5).
+- **Checked beyond the evidence, all supported.** Freud 1894 (p2-9); Maslow 1954 (p2-5); minimisation (p2-9); the Knowles traits (p2-17); overpractice bringing on plateaus (p3-26); three or four repetitions and five per cent lecture retention (p3-39); the hypnosis note on fading (p3-38); holistic top-down and serialistic bottom-up (p3-21); HOTS as ADM and as Bloom's top three levels (p3-6); ground school and briefings building the first three levels (p3-16); ch. 9 having four demonstration-performance phases (p9-5); the glossary question types (G-2 to G-6); the curriculum definition (G-2); ACS-25 Area IV allowing prepared lesson plans (PDF p33).
+
+id | severity | problem | evidence (source words, with page)
+---|---|---|---
+cfi.learning-process.class-negative-transfer | wrong | Explanation says "When learning skill D hinders learning skill B". The handbook's rule is about skill A and skill B; "D" is a typo. Patched. | "If learning skill A hinders the learning of skill B, negative transfer occurs." (p3-40)
+cfi.risk-management.imsafe-s | ambiguous | Front "Which IMSAFE item is not among the medical conditions the regulations list as requiring grounding?" has more than one defensible answer, since fatigue and emotion are not listed either. Front, back and explanation rewritten to ask about stress only. | "While the regulations list medical conditions that require grounding, stress is not among them." (p1-8)
+cfi.human-behaviour.dc-listening | unclear | "Most instructors know listening as what?" is hard to read on first sight. Patched. | "Most instructors are familiar with the concept that listening is 'hearing with comprehension.'" (p4-8)
+cfi.risk-management.what-is-frat | minor | Explanation says Chapter 1 calls it a Flight Risk Analysis Tool. Chapter 1 uses both names: its heading says assessment, its text says analysis. Patched. | heading "Flight Risk Assessment Tools"; text "A Flight Risk Analysis Tool (FRAT) enables proactive hazard identification" (p1-10)
+cfi.risk-management.app-dm-verify | minor | choicesExplained calls the learner "he" although the front never sets that up. The reason for A does not name the real error. Patched. | "once an initial assumption is made regarding the problem, other sources should be used to verify" (p1-20)
+cfi.learning-process.class-interference | minor | The reason for A ("she has used the speeds recently") rests on a fact the front does not state. Patched. | "a person forgets information that is not used for an extended period of time" (p3-38)
+cfi.learning-process.class-level-understanding | minor | Scenario rewords the handbook's own example: the learner explains the turn procedure but has not yet practised it. Front replaced with an engine run-up case. | "Bill may explain the procedure for entering a level, left turn to Beverly … she has developed an understanding of the procedure for turning" (p3-15)
+cfi.risk-management.imsafe-m | minor | American spelling "judgment" in the front and explanation, outside a quotation. Patched. | —
+cfi.risk-management.ha-spot-why | minor | "judgment" in the explanation, outside a quotation. Patched. | —
+cfi.risk-management.app-imsafe-m | minor | "judgment" in the explanation, outside a quotation. Patched. | —
+cfi.human-behaviour.app-ce-feedback | minor | "nonjudgmental" in choicesExplained, outside a quotation. Patched to "non-judgemental". | —
+cfi.risk-management.workload-definition | minor | "prioritizing" in the cloze front, which is not set as a quotation. Patched. | —
+cfi.risk-management.imsafe-a | minor | Re-taught: the same fact as ppl.human-factors.imsafe-alcohol-question and uas.adm-crm-and-risk.imsafe-alcohol-hours. Marked for deletion; concept cfi.imsafe-checklist stays on seven other cards. | "Have I been drinking within 8 hours? Within 24 hours?" (p1-8)
+cfi.risk-management.adm-definition | minor | Re-taught: the same definition as uas.adm-crm-and-risk.what-is-adm. Marked for deletion; concept cfi.adm stays on app-adm-deviate. | "ADM is a systematic approach to the mental process used by aircraft pilots" (p1-19)
+cfi.risk-management.sa-fixation | minor | Re-taught: the same fact as uas.adm-crm-and-risk.sa-obstacles (fatigue, stress and work overload cause fixation). Marked for deletion; concept cfi.situational-awareness stays on three other cards. | "fatigue, stress, or work overload can cause the pilot to fixate on a single perceived important item" (p1-13)
+cfi.risk-management.what-is-risk | minor | Re-taught primer: "risk" is a prerequisite term (uas.adm-crm-and-risk.what-is-risk). No patch: deciding whether to keep the handbook's definition is an editorial choice. | —
+cfi.risk-management.what-is-pave | minor | Re-taught primer (uas.adm-crm-and-risk.what-is-pave; PAVE is a prerequisite term). No patch. | —
+cfi.risk-management.what-is-imsafe | minor | Re-taught primer (uas.adm-crm-and-risk.what-is-imsafe). No patch. | —
+cfi.risk-management.what-is-3p | minor | Re-taught primer (uas.adm-crm-and-risk.what-is-the-3p-model). No patch. | —
+cfi.risk-management.what-is-situational-awareness | minor | Re-taught primer (uas.adm-crm-and-risk.what-is-situational-awareness). No patch. | —
+cfi.risk-management.what-is-srm | minor | Re-taught primer (uas.adm-crm-and-risk.what-is-srm). No patch. | —
+cfi.risk-management.what-is-5p | minor | Re-taught primer (uas.adm-crm-and-risk.what-is-5p and ppl.human-factors.five-ps). No patch. | —
+
+Topics 2 to 4 re-teach nothing from the prerequisite decks: human behaviour, communication, the learning process and the teaching process are new material. The IMSAFE and PAVE item cards (imsafe-i/m/e/f, pave-p/a/v/e) ask for the handbook's question or remedy, not just the letter, so they go beyond the part-107 letter cards and I kept them.
