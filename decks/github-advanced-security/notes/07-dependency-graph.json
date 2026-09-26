@@ -1,0 +1,1349 @@
+{
+  "topic": "Dependency graph, submission and SBOMs",
+  "notes": [
+    {
+      "id": "ghas.dependency-graph.what-is-a-manifest-file",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7000,
+      "front": "In supply chain terms, what is a manifest file?",
+      "back": "A file in which you specify your project’s dependencies, which adds them directly to your supply chain.",
+      "explanation": "The dependency graph reads a repository’s explicit dependencies from the manifest and lock files it finds.",
+      "example": "Like a shopping list: an npm project’s `package.json` names the packages the project needs.",
+      "introduces": [
+        "manifest file"
+      ],
+      "source": "GitHub Docs, “Supply chain security”, “About supply chain security at GitHub”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/supply-chain-security#about-supply-chain-security-at-github",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You add dependencies directly to your supply chain when you specify them in a manifest file or a lockfile.",
+      "uses": [
+        "manifest file",
+        "dependency graph"
+      ],
+      "conceptIDs": [
+        "ghas.manifest-file"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.what-is-a-lock-file",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7010,
+      "front": "What is a lock file?",
+      "back": "A file that defines exactly which versions of your direct and indirect dependencies you currently use.",
+      "explanation": "Because it pins versions, it also makes every contributor use the same versions.",
+      "example": "Like the till receipt after the shopping trip: where the manifest said “bread”, the lock file records the exact loaf bought.",
+      "introduces": [
+        "lock file"
+      ],
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Static analysis”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#static-analysis",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "you should use lock files (or their equivalent), because they define exactly which versions of the direct and indirect dependencies you currently use. Lock files also ensure that all contributors to the repository are using the same versions",
+      "uses": [
+        "lock file",
+        "manifest file"
+      ],
+      "conceptIDs": [
+        "ghas.lock-file"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.what-is-a-direct-dependency",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7020,
+      "front": "What is a direct dependency?",
+      "back": "A dependency explicitly defined in a manifest or lock file.",
+      "explanation": "Static analysis of the dependency graph identifies these from the files in your repository.",
+      "example": "Your web app’s manifest names a web framework: that framework is a direct dependency.",
+      "introduces": [
+        "direct dependency"
+      ],
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Static analysis”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#static-analysis",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Static analysis can identify: * **Direct dependencies** explicitly defined in a manifest or lock file",
+      "uses": [
+        "direct dependency",
+        "manifest file",
+        "lock file"
+      ],
+      "conceptIDs": [
+        "ghas.direct-vs-transitive"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.what-is-a-transitive-dependency",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7030,
+      "front": "What is a transitive dependency?",
+      "back": "A dependency of one of your direct dependencies; GitHub Docs also call it an indirect dependency.",
+      "explanation": "Static analysis finds one only when a manifest or lock file defines it, not when it is resolved at build time.",
+      "example": "The web framework you list itself needs a logging library; you never named the logger, but you depend on it.",
+      "introduces": [
+        "transitive dependency"
+      ],
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Static analysis”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#static-analysis",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Indirect dependencies**—dependencies of these direct dependencies, also called \"transitive dependencies\"—but only if they are defined in a manifest or lock file, not if they are resolved at build time",
+      "uses": [
+        "transitive dependency",
+        "direct dependency"
+      ],
+      "conceptIDs": [
+        "ghas.direct-vs-transitive"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.what-is-the-dependency-submission-api",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7040,
+      "front": "What is the dependency submission API?",
+      "back": "A way to submit dependency data to the dependency graph yourself, for example the dependencies resolved when a project is built.",
+      "explanation": "It covers dependencies that static analysis does not capture.",
+      "example": "Like handing the librarian your own typed list of books when the scanner cannot read their spines: your build sends the graph the dependencies it resolved.",
+      "introduces": [
+        "dependency submission API"
+      ],
+      "source": "GitHub Docs, “Using the dependency submission API”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/use-dependency-submission-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The dependency submission API is a method of submitting data to the dependency graph. It allows you to submit dependencies that are not captured by static analysis.",
+      "uses": [
+        "dependency submission API",
+        "dependency graph",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "ghas.dependency-submission-api"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.what-is-automatic-dependency-submission",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7050,
+      "front": "What is automatic dependency submission?",
+      "back": "A feature that runs a GitHub Actions workflow to generate the complete dependency tree, including build-time dependencies, and uploads it through the dependency submission API.",
+      "explanation": "It uploads through the same API that you could otherwise call yourself.",
+      "example": "Like a stock-taker who watches the kitchen during service rather than reading the menu: the workflow records what the build actually pulls in.",
+      "introduces": [
+        "automatic dependency submission"
+      ],
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Automatic dependency submission”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#automatic-dependency-submission",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In the background, automatic dependency submission runs a GitHub Actions workflow that generates the complete tree and uploads it using the dependency submission API.",
+      "uses": [
+        "automatic dependency submission",
+        "dependency submission API",
+        "GitHub Actions",
+        "workflow",
+        "transitive dependency"
+      ],
+      "conceptIDs": [
+        "ghas.automatic-dependency-submission"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.what-is-a-dependabot-graph-job",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7060,
+      "front": "What is a Dependabot graph job?",
+      "back": "A special type of Dependabot job that builds a dependency snapshot and uploads it to the dependency submission API.",
+      "explanation": "The snapshot goes through the same API that automatic submission and your own scripts use.",
+      "example": "Like automatic dependency submission for a Python repository, but run by Dependabot rather than by a workflow you pay minutes for.",
+      "introduces": [
+        "Dependabot graph job"
+      ],
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Dependabot graph jobs”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#dependabot-graph-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Dependabot graph jobs use a special type of Dependabot job to build a dependency snapshot and upload it to the dependency submission API.",
+      "uses": [
+        "Dependabot graph job",
+        "dependency submission API"
+      ],
+      "conceptIDs": [
+        "ghas.dependabot-graph-jobs"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.what-is-spdx",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 7070,
+      "front": "What is SPDX, in the dependency graph?",
+      "back": "The industry-standard format in which GitHub exports a repository’s dependency graph as a software bill of materials (SBOM).",
+      "explanation": "The export captures the current state of the dependency graph.",
+      "example": "Like saving an inventory in a standard spreadsheet format rather than a private one: “Export SBOM” gives you an SPDX file.",
+      "introduces": [
+        "SPDX"
+      ],
+      "source": "GitHub Docs, “Exporting a software bill of materials for your repository”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/export-dependencies-as-sbom",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can export the current state of the dependency graph for your repository as a software bill of materials (SBOM) using the industry standard [SPDX](https://spdx.github.io/spdx-spec/v2.3/) format.",
+      "uses": [
+        "SPDX",
+        "software bill of materials",
+        "dependency graph"
+      ],
+      "conceptIDs": [
+        "ghas.spdx",
+        "ghas.sbom-spdx"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.what-is-cyclonedx",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 7080,
+      "front": "What is CycloneDX, as GitHub Docs mention it?",
+      "back": "A standard SBOM format, alongside SPDX; the dependency submission API’s snapshot format is very similar to both.",
+      "explanation": "Several tools can generate or translate these formats for use as snapshots.",
+      "example": "Like a second standard spreadsheet format for the same inventory: a team whose tools write CycloneDX can still feed the dependency graph.",
+      "introduces": [
+        "CycloneDX"
+      ],
+      "source": "GitHub Docs, “Using the dependency submission API”, “Submitting SBOMs as snapshots”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/use-dependency-submission-api#submitting-sboms-as-snapshots",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The snapshot data format is very similar to the standard SPDX and CycloneDX SBOM formats, and there are several tools which can generate or translate formats for use as snapshots.",
+      "uses": [
+        "CycloneDX",
+        "SPDX",
+        "software bill of materials",
+        "dependency submission API"
+      ],
+      "conceptIDs": [
+        "ghas.cyclonedx"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.method-parses-manifests",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7100,
+      "front": "Which dependency graph method parses the manifest and lock files in your repository?",
+      "back": "Static analysis.",
+      "explanation": "It scans for supported manifest files and parses each package’s name and version.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Static analysis** | Parses manifest and lock files in your repository",
+      "uses": [
+        "dependency graph",
+        "manifest file",
+        "lock file"
+      ],
+      "conceptIDs": [
+        "ghas.graph-detection-methods"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.method-dependabot-workflow-snapshots",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7105,
+      "front": "Which dependency graph method uses a Dependabot GitHub Actions workflow to generate dependency snapshots?",
+      "back": "Dependabot graph jobs.",
+      "explanation": "The snapshots go to the dependency submission API, like the other build-time methods.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Dependabot graph jobs** | Uses a Dependabot GitHub Actions workflow to generate dependency snapshots",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published",
+      "uses": [
+        "Dependabot graph job",
+        "dependency graph",
+        "GitHub Actions"
+      ],
+      "conceptIDs": [
+        "ghas.graph-detection-methods",
+        "ghas.dependabot-graph-jobs"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.method-built-in-workflow",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7110,
+      "front": "Which dependency graph method runs a built-in GitHub Actions workflow to resolve build-time dependencies?",
+      "back": "Automatic dependency submission.",
+      "explanation": "It exists for ecosystems whose indirect dependencies are only resolved when the project is built.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Automatic submission** | Runs a built-in GitHub Actions workflow to resolve build-time dependencies",
+      "uses": [
+        "automatic dependency submission",
+        "dependency graph",
+        "GitHub Actions"
+      ],
+      "conceptIDs": [
+        "ghas.graph-detection-methods",
+        "ghas.automatic-dependency-submission"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.method-programmatic-data",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7115,
+      "front": "Which dependency graph method accepts dependency data you submit programmatically?",
+      "back": "The dependency submission API.",
+      "explanation": "You call it from your own script or workflow, or through a pre-made action.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Dependency submission API** | Accepts dependency data you submit programmatically",
+      "uses": [
+        "dependency submission API",
+        "dependency graph"
+      ],
+      "conceptIDs": [
+        "ghas.graph-detection-methods",
+        "ghas.dependency-submission-api"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.graph-feeds-alerts",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7120,
+      "front": "Once dependencies are in the dependency graph, you can receive {{c1::Dependabot alerts and Dependabot security updates}} for any known vulnerabilities.",
+      "explanation": "However the dependencies arrive, the graph is what later vulnerability features read.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Once dependencies are in the graph, you can receive Dependabot alerts and Dependabot security updates for any known vulnerabilities.",
+      "uses": [
+        "dependency graph"
+      ],
+      "conceptIDs": [
+        "ghas.graph-detection-methods"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.static-misses-build-time",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7130,
+      "front": "Does static analysis find transitive dependencies that are resolved at build time?",
+      "back": "No. It finds them only if they are defined in a manifest or lock file.",
+      "explanation": "That gap is what automatic dependency submission, Dependabot graph jobs and the submission API fill.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Static analysis”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#static-analysis",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "but only if they are defined in a manifest or lock file, not if they are resolved at build time",
+      "uses": [
+        "transitive dependency",
+        "manifest file",
+        "lock file"
+      ],
+      "conceptIDs": [
+        "ghas.static-analysis-graph"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.most-reliable-graph",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7140,
+      "front": "For the most reliable dependency graph, which kind of file should a repository contain?",
+      "back": "Lock files (or their equivalent).",
+      "explanation": "They define exactly which versions of the direct and indirect dependencies you currently use.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Static analysis”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#static-analysis",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For the most reliable graph, you should use lock files (or their equivalent), because they define exactly which versions of the direct and indirect dependencies you currently use.",
+      "uses": [
+        "lock file",
+        "dependency graph"
+      ],
+      "conceptIDs": [
+        "ghas.use-lock-files"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.manifest-inferred-excluded",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7145,
+      "front": "Indirect dependencies inferred from manifest files, rather than lock files, are {{c1::excluded from vulnerability checks}}.",
+      "explanation": "A manifest alone does not pin what the indirect dependencies really are, which is one more reason to commit lock files.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Static analysis”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#static-analysis",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In addition, indirect dependencies inferred from manifest files (rather than lock files) are excluded from vulnerability checks.",
+      "uses": [
+        "manifest file",
+        "lock file"
+      ],
+      "conceptIDs": [
+        "ghas.use-lock-files",
+        "ghas.static-analysis-graph"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.enable-graph-where",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7150,
+      "front": "Where in a repository’s settings do you enable the dependency graph?",
+      "back": "Settings, then “Advanced Security” in the “Security and quality” section, then **Enable** next to “Dependency Graph”.",
+      "explanation": "The same page has a **Disable** button, so you can turn it off at any time.",
+      "source": "GitHub Docs, “Enabling the dependency graph”, “Enabling the dependency graph for a repository”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/enable-dependency-graph#enabling-the-dependency-graph-for-a-repository",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In the \"Security and quality\" section of the sidebar, click **codescan Advanced Security**. 4. Read the message about granting GitHub read-only access to the repository data to enable the dependency graph, then next to \"Dependency Graph\", click **Enable**.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published",
+      "uses": [
+        "dependency graph",
+        "repository"
+      ],
+      "conceptIDs": [
+        "ghas.enable-dependency-graph"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.enable-graph-read-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7155,
+      "front": "What access does enabling the dependency graph give GitHub?",
+      "back": "Read-only access to the repository’s dependency manifest and lock files.",
+      "explanation": "You are shown a message about this read-only access before you click **Enable**.",
+      "source": "GitHub Docs, “Enabling the dependency graph”, “Enabling the dependency graph for a repository”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/enable-dependency-graph#enabling-the-dependency-graph-for-a-repository",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Enabling the dependency graph gives GitHub read-only access to the dependency manifest and lock files for a repository.",
+      "uses": [
+        "dependency graph",
+        "manifest file",
+        "lock file"
+      ],
+      "conceptIDs": [
+        "ghas.enable-dependency-graph"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.graph-populated-when",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7160,
+      "front": "After you first enable the dependency graph, how soon is it usually populated, and what keeps it current?",
+      "back": "Usually within minutes; then every push to the repository, and every push to other repositories in the graph, updates it.",
+      "explanation": "Manifest and lock files are parsed immediately, though repositories with many dependencies may take longer.",
+      "source": "GitHub Docs, “Enabling the dependency graph”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/enable-dependency-graph",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The graph is usually populated within minutes but this may take longer for repositories with many dependencies. Once enabled, the graph is automatically updated with every push to the repository and every push to other repositories in the graph.",
+      "uses": [
+        "dependency graph",
+        "push",
+        "repository"
+      ],
+      "conceptIDs": [
+        "ghas.enable-dependency-graph"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.auto-uses-actions-minutes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7200,
+      "front": "By default, where does automatic dependency submission run, and what does it cost?",
+      "back": "On GitHub-hosted runners, and it counts toward your GitHub Actions minutes.",
+      "explanation": "You can optionally run it on self-hosted runners or larger runners instead.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Automatic dependency submission”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#automatic-dependency-submission",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Automatic dependency submission runs on GitHub-hosted runners by default and counts toward your GitHub Actions minutes. Optionally, you can choose to run it on self-hosted runners or larger runners.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published",
+      "uses": [
+        "automatic dependency submission",
+        "GitHub-hosted runner",
+        "self-hosted runner",
+        "larger runner"
+      ],
+      "conceptIDs": [
+        "ghas.auto-submission-actions-minutes"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.auto-prerequisites",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7205,
+      "front": "Which two features must be enabled on a repository before you can use automatic dependency submission?",
+      "back": "The dependency graph and GitHub Actions.",
+      "explanation": "GitHub Docs list both as prerequisites: the graph for the repository, and Actions for the repository.",
+      "source": "GitHub Docs, “Configuring automatic dependency submission for your repository”, “Prerequisites”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/submit-dependencies-automatically#prerequisites",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Dependency graph must be enabled for the repository for you to enable automatic dependency submission. You must also enable GitHub Actions for the repository in order to use automatic dependency submission.",
+      "uses": [
+        "automatic dependency submission",
+        "dependency graph",
+        "GitHub Actions"
+      ],
+      "conceptIDs": [
+        "ghas.enable-auto-submission",
+        "ghas.automatic-dependency-submission"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.auto-enable-where",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7210,
+      "front": "In the repository’s Advanced Security settings, how do you turn on automatic dependency submission?",
+      "back": "Under “Dependency graph”, open the dropdown next to “Automatic dependency submission” and select **Enabled**.",
+      "explanation": "It is a single dropdown under the “Dependency graph” heading of the Advanced Security settings.",
+      "source": "GitHub Docs, “Configuring automatic dependency submission for your repository”, “Enabling automatic dependency submission”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/submit-dependencies-automatically#enabling-automatic-dependency-submission",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Under \"Dependency graph\", click the dropdown menu next to “Automatic dependency submission”, then select **Enabled**.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published",
+      "uses": [
+        "automatic dependency submission",
+        "dependency graph"
+      ],
+      "conceptIDs": [
+        "ghas.enable-auto-submission"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.auto-runs-when",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7215,
+      "front": "Once automatic dependency submission is enabled, {{c1::it runs each time a commit to the default branch updates a manifest}}.",
+      "explanation": "GitHub also triggers one run straight after you enable it, and you can see the runs on the **Actions** tab.",
+      "source": "GitHub Docs, “Configuring automatic dependency submission for your repository”, “Enabling automatic dependency submission”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/submit-dependencies-automatically#enabling-automatic-dependency-submission",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "After you enable automatic dependency submission, we'll automatically trigger a run of the action. Once enabled, it'll run each time a commit to the default branch updates a manifest.",
+      "uses": [
+        "automatic dependency submission",
+        "commit",
+        "manifest file"
+      ],
+      "conceptIDs": [
+        "ghas.automatic-dependency-submission"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.auto-self-hosted-label",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7220,
+      "front": "To run automatic dependency submission on your self-hosted runners, which label do you give them, and which setting do you pick?",
+      "back": "The `dependency-submission` label, then **Enabled for labeled runners**.",
+      "explanation": "The jobs then run on those runners, apart from the exceptions GitHub Docs list, such as the runners being unavailable.",
+      "source": "GitHub Docs, “Configuring automatic dependency submission for your repository”, “Using self-hosted runners”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/submit-dependencies-automatically#using-self-hosted-runners",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Assign a `dependency-submission` label to each runner you want automatic dependency submission to use.",
+      "uses": [
+        "automatic dependency submission",
+        "self-hosted runner",
+        "runner label"
+      ],
+      "conceptIDs": [
+        "ghas.enable-auto-submission"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.graph-jobs-ecosystems",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7300,
+      "front": "For which two ecosystems are Dependabot graph jobs currently supported?",
+      "back": "Go and Python.",
+      "explanation": "For these, Dependabot graph jobs give full transitive dependency coverage that static analysis may miss.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Dependabot graph jobs”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#dependabot-graph-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Dependabot graph jobs are currently supported for **Go** and **Python** dependencies. For supported ecosystems, Dependabot graph jobs provide: * Full transitive dependency coverage, which means Dependabot can alert you to vulnerabilities in indirect dependencies that static analysis may miss.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published",
+      "uses": [
+        "Dependabot graph job"
+      ],
+      "conceptIDs": [
+        "ghas.dependabot-graph-jobs"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.graph-jobs-no-minutes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7305,
+      "front": "How do Dependabot graph jobs differ from automatic dependency submission in cost?",
+      "back": "They do not incur charges for GitHub Actions minutes.",
+      "explanation": "Otherwise the approach is similar, and graph jobs can also use organisation-wide private registry settings set up for Dependabot.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Dependabot graph jobs”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#dependabot-graph-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This approach is similar to automatic dependency submission, but does not incur charges for GitHub Actions minutes. It can also access organization-wide configurations for private registries you've set up for Dependabot.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published",
+      "uses": [
+        "Dependabot graph job",
+        "automatic dependency submission",
+        "GitHub Actions"
+      ],
+      "conceptIDs": [
+        "ghas.dependabot-graph-jobs",
+        "ghas.auto-submission-actions-minutes"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.graph-jobs-take-precedence",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7310,
+      "front": "Dependabot graph jobs {{c1::take precedence over automatic dependency submission}}; the only requirement is that the dependency graph is enabled.",
+      "explanation": "A Python repository that used automatic submission stops running those jobs once graph jobs are active.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Dependabot graph jobs”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#dependabot-graph-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Dependabot graph jobs take precedence over automatic dependency submission. For example, if your Python repository previously used automatic dependency submission, those jobs will no longer run once Dependabot graph jobs are active. The only requirement is that the dependency graph is enabled for your repository.",
+      "uses": [
+        "Dependabot graph job",
+        "automatic dependency submission",
+        "dependency graph"
+      ],
+      "conceptIDs": [
+        "ghas.graph-jobs-precedence"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.graph-jobs-private-omitted",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7315,
+      "front": "What happens when a Dependabot graph job meets a private package it cannot reach through the configured Dependabot secrets?",
+      "back": "The package is gracefully omitted from the dependency graph, and the job does not fail.",
+      "explanation": "A missing private package is left out of the graph quietly instead of breaking the job.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Dependabot graph jobs”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#dependabot-graph-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Private packages that are not accessible through configured Dependabot secrets are gracefully omitted from the dependency graph without causing a failure.",
+      "uses": [
+        "Dependabot graph job",
+        "dependency graph",
+        "secret"
+      ],
+      "conceptIDs": [
+        "ghas.dependabot-graph-jobs"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.api-two-uses",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7400,
+      "front": "GitHub Docs name two situations where calling the dependency submission API yourself is useful. What are they?",
+      "back": "You must submit transitive dependencies that lock files cannot reveal; or you need custom logic or use an external continuous integration system.",
+      "explanation": "GitHub Docs give these as the cases for calling the API from your own script or workflow.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “The dependency submission API”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#the-dependency-submission-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You need to submit transitive dependencies that cannot be detected from lock files. * You need to create custom logic or are using an external CI/CD system.",
+      "uses": [
+        "dependency submission API",
+        "transitive dependency",
+        "lock file"
+      ],
+      "conceptIDs": [
+        "ghas.dependency-submission-api"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.api-snapshot",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7405,
+      "front": "Dependencies are sent to the dependency submission API as a snapshot: {{c1::a list of dependencies associated with a commit SHA and other metadata}}.",
+      "explanation": "The snapshot reflects the current state of your repository.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “The dependency submission API”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#the-dependency-submission-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Dependencies are submitted to the dependency submission API in the form of a snapshot. This is a list of dependencies associated with a commit SHA and other metadata, reflecting the current state of your repository.",
+      "uses": [
+        "dependency submission API",
+        "commit SHA"
+      ],
+      "conceptIDs": [
+        "ghas.dependency-submission-api"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.api-not-in-insights",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7410,
+      "front": "Do dependencies submitted through the dependency submission API appear in your organisation’s dependency insights?",
+      "back": "No. They are shown in dependency review, but not in dependency insights.",
+      "explanation": "So an organisation-wide dependency insights view will not include what your builds submitted.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “The dependency submission API”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#the-dependency-submission-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Submitted dependencies will be shown in dependency review, but are *not* available in your organization's dependency insights.",
+      "uses": [
+        "dependency submission API",
+        "dependency insights",
+        "organization"
+      ],
+      "conceptIDs": [
+        "ghas.dependency-submission-api"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.api-write-permission",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7415,
+      "front": "In a workflow that submits dependencies to the dependency submission API, which `GITHUB_TOKEN` permission does the API need?",
+      "back": "`contents: write`: write permission on the repository.",
+      "explanation": "The GitHub Docs example workflow sets this permission, with a comment that the API requires write access to submit.",
+      "source": "GitHub Docs, “Using the dependency submission API”, “Using pre-made actions”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/use-dependency-submission-api#using-pre-made-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The API requires write permission on the repository to submit dependencies",
+      "uses": [
+        "dependency submission API",
+        "GITHUB_TOKEN",
+        "permissions",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "ghas.dependency-submission-api"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.api-premade-actions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7420,
+      "front": "What is the simplest way to use the dependency submission API from GitHub Actions?",
+      "back": "Add a pre-made action for your ecosystem, which gathers the dependencies, converts them to the snapshot format and submits them.",
+      "explanation": "The action does the conversion into the snapshot format for you.",
+      "source": "GitHub Docs, “Using the dependency submission API”, “Using pre-made actions”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/use-dependency-submission-api#using-pre-made-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The simplest way to use the dependency submission API is by adding a pre-made action to your repository that will gather and convert the list of dependencies to the required snapshot format and submit the list to the API.",
+      "uses": [
+        "dependency submission API",
+        "action",
+        "GitHub Actions"
+      ],
+      "conceptIDs": [
+        "ghas.dependency-submission-api"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.precedence-user-first",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7450,
+      "front": "When several methods report the same manifest file, which source does the dependency graph rank highest?",
+      "back": "User submissions (made through the dependency submission API).",
+      "explanation": "They are usually created during artifact builds, so they carry the most complete information.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Prioritization”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#prioritization",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**User submissions** take the highest priority, because they are usually created during artifact builds they have the most complete information.",
+      "uses": [
+        "dependency graph",
+        "dependency submission API",
+        "artifact"
+      ],
+      "conceptIDs": [
+        "ghas.graph-source-precedence"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.precedence-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7455,
+      "front": "After user submissions, in what order does the dependency graph rank the other three sources for one manifest?",
+      "back": "Dependabot graph jobs, then automatic submissions, then static analysis (used only when no other data exists).",
+      "explanation": "Automatic submissions come from builds too, but rank below graph jobs because they are not submitted by users.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Prioritization”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#prioritization",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Dependabot graph jobs** have the second-highest priority. For ecosystems where Dependabot graph jobs are available (currently Go and Python), they take precedence over automatic dependency submission. 3. **Automatic submissions** have the next priority since they are also created during artifact builds, but are not submitted by users. 4. **Static analysis results** are used when no other data is available.",
+      "uses": [
+        "dependency graph",
+        "Dependabot graph job",
+        "automatic dependency submission"
+      ],
+      "conceptIDs": [
+        "ghas.graph-source-precedence"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.sbom-who-and-how",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7500,
+      "front": "Who can export a repository’s dependency graph as an SBOM, and by which two routes?",
+      "back": "Anyone with at least read access, in the browser on GitHub or through the GitHub API.",
+      "explanation": "The export is SPDX-compatible, whichever route you use.",
+      "source": "GitHub Docs, “Supply chain security”, “What is the dependency graph?”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/supply-chain-security#what-is-the-dependency-graph",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you have at least read access to the repository, you can export the dependency graph for the repository as an SPDX-compatible, Software Bill of Materials (SBOM), via the GitHub UI or GitHub REST API.",
+      "uses": [
+        "dependency graph",
+        "software bill of materials",
+        "SPDX"
+      ],
+      "conceptIDs": [
+        "ghas.export-sbom-rest",
+        "ghas.export-sbom-ui"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.sbom-contents",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7505,
+      "front": "Besides the list of dependencies, what are two kinds of information an exported SBOM includes?",
+      "back": "Any two of: versions, package identifiers, licences, transitive paths, copyright information.",
+      "explanation": "GitHub Docs give these as examples of the associated information in the inventory, among others.",
+      "source": "GitHub Docs, “Exporting a software bill of materials for your repository”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/export-dependencies-as-sbom",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "SBOMs include an inventory of a project's dependencies and associated information such as versions, package identifiers, licenses, transitive paths, and copyright information.",
+      "uses": [
+        "software bill of materials"
+      ],
+      "conceptIDs": [
+        "ghas.sbom-contents"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.sbom-no-dependents",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7510,
+      "front": "What does an SBOM exported from the dependency graph not include?",
+      "back": "Dependents: other projects that rely on your project.",
+      "explanation": "The SBOM inventories what your project depends on, not who depends on it.",
+      "source": "GitHub Docs, “Exporting a software bill of materials for your repository”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/export-dependencies-as-sbom",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "SBOMs do not include dependents (other projects that rely on your project).",
+      "uses": [
+        "software bill of materials",
+        "dependents"
+      ],
+      "conceptIDs": [
+        "ghas.sbom-contents"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.sbom-export-ui",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 7515,
+      "front": "On GitHub in the browser, where is the **Export SBOM** button?",
+      "back": "Insights, then **Dependency graph**, at the top right of the **Dependencies** tab.",
+      "explanation": "Clicking it generates an SBOM file that downloads through your browser.",
+      "source": "GitHub Docs, “Exporting a software bill of materials for your repository”, “Exporting a software bill of materials for your repository from the UI”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/export-dependencies-as-sbom#exporting-a-software-bill-of-materials-for-your-repository-from-the-ui",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "On the top right side of the **Dependencies** tab, click **Export SBOM** to generate an SBOM file for download from your browser.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published",
+      "uses": [
+        "software bill of materials",
+        "dependency graph"
+      ],
+      "conceptIDs": [
+        "ghas.export-sbom-ui"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.sbom-actions-artifact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7520,
+      "front": "Where do the SBOM-generating actions listed in GitHub Docs, such as the Anchore SBOM Action, put the SBOM?",
+      "back": "They attach it to the run as a workflow artifact, which you can download and use in other applications.",
+      "explanation": "So the SBOM comes out of your workflow run rather than from the Export SBOM button.",
+      "source": "GitHub Docs, “Exporting a software bill of materials for your repository”, “Generating a software bill of materials from GitHub Actions”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/export-dependencies-as-sbom#generating-a-software-bill-of-materials-from-github-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The following actions will generate an SBOM for your repository and attach it as a workflow artifact which you can download and use in other applications.",
+      "uses": [
+        "software bill of materials",
+        "artifact",
+        "action"
+      ],
+      "conceptIDs": [
+        "ghas.sbom-actions"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.cyclonedx-upload-action",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7525,
+      "front": "What does the SBOM Dependency Submission Action do?",
+      "back": "It uploads a CycloneDX SBOM to the dependency submission API.",
+      "explanation": "So an SBOM in CycloneDX, not only SPDX, can feed the dependency graph.",
+      "source": "GitHub Docs, “Exporting a software bill of materials for your repository”, “Generating a software bill of materials from GitHub Actions”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/export-dependencies-as-sbom#generating-a-software-bill-of-materials-from-github-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "[SBOM Dependency Submission Action](https://github.com/marketplace/actions/sbom-submission-action) | Uploads a CycloneDX SBOM to the dependency submission API",
+      "uses": [
+        "CycloneDX",
+        "software bill of materials",
+        "dependency submission API"
+      ],
+      "conceptIDs": [
+        "ghas.cyclonedx",
+        "ghas.sbom-actions"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.sbom-generate-and-submit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 7530,
+      "front": "Which two actions can both generate an SBOM and submit it to the dependency submission API?",
+      "back": "The SPDX Dependency Submission Action and the Anchore SBOM Action.",
+      "explanation": "One action covers both producing the SBOM and sending it to the graph.",
+      "source": "GitHub Docs, “Using the dependency submission API”, “Submitting SBOMs as snapshots”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/use-dependency-submission-api#submitting-sboms-as-snapshots",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The [SPDX Dependency Submission Action](https://github.com/marketplace/actions/spdx-dependency-submission-action) and the [Anchore SBOM Action](https://github.com/marketplace/actions/anchore-sbom-action) can be used to both generate a SBOM and submit it to the dependency submission API.",
+      "uses": [
+        "software bill of materials",
+        "dependency submission API",
+        "action"
+      ],
+      "conceptIDs": [
+        "ghas.submit-sbom-snapshot"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.classify-method",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 7600,
+      "front": "A repository’s graph was built by GitHub reading the committed `package-lock.json`, with no workflow or API call involved. Which method produced it?",
+      "choices": "A) Automatic dependency submission\nB) The dependency submission API\nC) Static analysis\nD) A Dependabot graph job",
+      "back": "C) Static analysis",
+      "choicesExplained": "A and D both run a job that builds a snapshot. B needs someone to call the API from a script or workflow.",
+      "explanation": "Static analysis is the method that parses manifest and lock files already in the repository.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Static analysis** | Parses manifest and lock files in your repository",
+      "uses": [
+        "lock file",
+        "dependency graph",
+        "automatic dependency submission",
+        "dependency submission API",
+        "Dependabot graph job"
+      ],
+      "conceptIDs": [
+        "ghas.graph-detection-methods"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.scenario-build-time-gap",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7610,
+      "front": "A Java team’s Gradle build resolves most indirect dependencies only at build time, so the dependency graph shows just the direct ones. The team wants GitHub to capture the full tree with no scripting of its own. What should an administrator enable?",
+      "choices": "A) Dependabot graph jobs for Java\nB) Automatic dependency submission\nC) SBOM export from the Dependencies tab\nD) Nothing: static analysis already sees build-time dependencies",
+      "back": "B) Automatic dependency submission",
+      "choicesExplained": "A: graph jobs currently support only Go and Python. C exports what the graph already holds; it adds nothing. D is false: static analysis misses dependencies resolved at build time.",
+      "explanation": "Automatic submission runs a built-in Actions workflow that resolves build-time dependencies and uploads the whole tree.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Automatic dependency submission”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#automatic-dependency-submission",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Some ecosystems resolve indirect dependencies at build time, so static analysis can't see the full dependency tree. When you enable automatic dependency submission for a repository, GitHub automatically identifies the transitive dependencies in the repository for supported ecosystems.",
+      "uses": [
+        "automatic dependency submission",
+        "transitive dependency",
+        "dependency graph",
+        "Dependabot graph job",
+        "software bill of materials"
+      ],
+      "conceptIDs": [
+        "ghas.automatic-dependency-submission",
+        "ghas.static-analysis-graph"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.scenario-python-no-minutes",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7620,
+      "front": "A Python project wants full transitive coverage in its dependency graph, but its Actions minutes are nearly used up. What is the cheapest route?",
+      "choices": "A) Automatic dependency submission on GitHub-hosted runners\nB) A larger runner running automatic dependency submission\nC) Dependabot graph jobs, which only need the dependency graph enabled\nD) Deleting the lock file so static analysis reads the manifest",
+      "back": "C) Dependabot graph jobs, which only need the dependency graph enabled",
+      "choicesExplained": "A and B both count toward Actions minutes. D makes things worse: indirect dependencies inferred from manifests are excluded from vulnerability checks.",
+      "explanation": "Graph jobs support Python, give full transitive coverage and do not incur charges for Actions minutes.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Dependabot graph jobs”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#dependabot-graph-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This approach is similar to automatic dependency submission, but does not incur charges for GitHub Actions minutes.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published",
+      "uses": [
+        "Dependabot graph job",
+        "dependency graph",
+        "automatic dependency submission",
+        "GitHub-hosted runner",
+        "larger runner",
+        "lock file",
+        "manifest file"
+      ],
+      "conceptIDs": [
+        "ghas.dependabot-graph-jobs",
+        "ghas.auto-submission-actions-minutes",
+        "ghas.enable-dependency-graph"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.scenario-external-ci",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7630,
+      "front": "A company builds its product on its own build server outside GitHub, where the full dependency list is known only after compilation. How can it get that list into the repository’s dependency graph?",
+      "choices": "A) Enable Dependabot graph jobs for the language\nB) Call the dependency submission API from the build server with a snapshot\nC) Commit the compiled binaries so static analysis can read them\nD) Export an SBOM from the Dependencies tab",
+      "back": "B) Call the dependency submission API from the build server with a snapshot",
+      "choicesExplained": "A covers only Go and Python and is not something you call from an outside build. C: static analysis parses manifest and lock files, not binaries. D exports the graph; it does not add to it.",
+      "explanation": "Using an external build system is one of the two cases GitHub Docs give for calling the API yourself.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “The dependency submission API”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#the-dependency-submission-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You need to create custom logic or are using an external CI/CD system.",
+      "uses": [
+        "dependency submission API",
+        "dependency graph",
+        "Dependabot graph job",
+        "software bill of materials"
+      ],
+      "conceptIDs": [
+        "ghas.dependency-submission-api"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.scenario-auditor-sbom",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7640,
+      "front": "An auditor asks a developer with read access for a list of the repository’s dependencies with their versions and licences, in an industry-standard format, today. What should the developer do?",
+      "choices": "A) Ask an administrator, because only admins can export SBOMs\nB) Write a custom action with the Dependency Submission Toolkit\nC) Click **Export SBOM** on the Dependencies tab, which downloads an SPDX file\nD) Enable automatic dependency submission and send the Actions log",
+      "back": "C) Click **Export SBOM** on the Dependencies tab, which downloads an SPDX file",
+      "choicesExplained": "A: read access is enough to export. B builds a way to submit dependencies, not to report them. D adds data to the graph but produces no SBOM.",
+      "explanation": "The browser export produces an SBOM of the current graph in SPDX, including versions and licences.",
+      "source": "GitHub Docs, “Exporting a software bill of materials for your repository”, “Exporting a software bill of materials for your repository from the UI”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/export-dependencies-as-sbom#exporting-a-software-bill-of-materials-for-your-repository-from-the-ui",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "On the top right side of the **Dependencies** tab, click **Export SBOM** to generate an SBOM file for download from your browser.",
+      "uses": [
+        "software bill of materials",
+        "SPDX",
+        "automatic dependency submission"
+      ],
+      "conceptIDs": [
+        "ghas.export-sbom-ui",
+        "ghas.spdx",
+        "ghas.sbom-spdx"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.scenario-sbom-dependents",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7650,
+      "front": "A library’s maintainer exports an SBOM, hoping to see which downstream projects use the library. What will she find?",
+      "choices": "A) A list of every public repository that depends on it\nB) No dependents: SBOMs list the project’s own dependencies, not who relies on it\nC) Dependents, but only those in her organisation\nD) Dependents, but only when automatic dependency submission is on",
+      "back": "B) No dependents: SBOMs list the project’s own dependencies, not who relies on it",
+      "choicesExplained": "A, C and D all assume the SBOM holds dependents under some condition; GitHub Docs say SBOMs do not include dependents at all.",
+      "explanation": "The SBOM is an inventory of the project’s dependencies and their details.",
+      "source": "GitHub Docs, “Exporting a software bill of materials for your repository”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/export-dependencies-as-sbom",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "SBOMs do not include dependents (other projects that rely on your project).",
+      "uses": [
+        "software bill of materials",
+        "dependents",
+        "automatic dependency submission"
+      ],
+      "conceptIDs": [
+        "ghas.sbom-contents"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.scenario-no-lock-file",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7660,
+      "front": "A repository commits only its manifest, never a lock file. A vulnerable indirect dependency is known to be in use, yet no vulnerability shows for it. What best explains this and fixes it?",
+      "choices": "A) The graph updates only weekly; wait for the next update\nB) The dependency graph ignores all indirect dependencies; nothing can be done\nC) Indirect dependencies inferred from manifests are excluded from vulnerability checks; commit the lock file\nD) SBOM export is off; export an SBOM first",
+      "back": "C) Indirect dependencies inferred from manifests are excluded from vulnerability checks; commit the lock file",
+      "choicesExplained": "B: indirect dependencies are found when a lock file defines them. A: the graph updates on pushes, not weekly. D: exporting an SBOM does not change what is checked.",
+      "explanation": "Lock files define the exact direct and indirect versions, which makes them the basis for the most reliable graph.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Static analysis”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#static-analysis",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In addition, indirect dependencies inferred from manifest files (rather than lock files) are excluded from vulnerability checks.",
+      "uses": [
+        "manifest file",
+        "lock file",
+        "transitive dependency",
+        "dependency graph",
+        "software bill of materials"
+      ],
+      "conceptIDs": [
+        "ghas.use-lock-files",
+        "ghas.static-analysis-graph"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.scenario-internal-registry",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 7670,
+      "front": "A Maven repository uses automatic dependency submission, but its private registry can be reached only from inside the company network, so the jobs cannot resolve dependencies. What should the team do?",
+      "choices": "A) Switch to Dependabot graph jobs for Maven\nB) Rename the manifest so static analysis skips it\nC) Disable the dependency graph and rely on static analysis\nD) Label self-hosted runners `dependency-submission` and choose **Enabled for labeled runners**",
+      "back": "D) Label self-hosted runners `dependency-submission` and choose **Enabled for labeled runners**",
+      "choicesExplained": "A: graph jobs cover only Go and Python. B hides the dependencies rather than resolving them. C: without the graph, nothing is submitted at all.",
+      "explanation": "Self-hosted runners are needed when registries are only reachable from within your network, for ecosystems without graph jobs.",
+      "source": "GitHub Docs, “Configuring automatic dependency submission for your repository”, “Using self-hosted runners”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/submit-dependencies-automatically#using-self-hosted-runners",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This is necessary to access private registries for ecosystems that do not support Dependabot graph jobs, or when your registries are only reachable from within your network.",
+      "uses": [
+        "automatic dependency submission",
+        "self-hosted runner",
+        "runner label",
+        "Dependabot graph job",
+        "dependency graph"
+      ],
+      "conceptIDs": [
+        "ghas.enable-auto-submission"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.scenario-python-precedence",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7680,
+      "front": "A Python repository has used automatic dependency submission for a year. Dependabot graph jobs then become active for it. What happens to the automatic submission jobs?",
+      "choices": "A) Both run, and the graph merges their output\nB) Automatic submission keeps priority because it was enabled first\nC) They stop running, because graph jobs take precedence\nD) The dependency graph is disabled until one is chosen",
+      "back": "C) They stop running, because graph jobs take precedence",
+      "choicesExplained": "A: GitHub Docs say the automatic jobs no longer run. B: precedence goes to graph jobs, not to the older setting. D: the graph stays enabled; it is the only requirement for graph jobs.",
+      "explanation": "Graph jobs outrank automatic submission for the ecosystems they support.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Dependabot graph jobs”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#dependabot-graph-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "if your Python repository previously used automatic dependency submission, those jobs will no longer run once Dependabot graph jobs are active.",
+      "uses": [
+        "automatic dependency submission",
+        "Dependabot graph job",
+        "dependency graph"
+      ],
+      "conceptIDs": [
+        "ghas.graph-jobs-precedence"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.scenario-two-sources",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7690,
+      "front": "A repository’s build workflow submits a snapshot through the dependency submission API, and static analysis also parses the same lock file. Which result does the dependency graph display for that manifest?",
+      "choices": "A) The static analysis result, because it reads the committed file\nB) The user submission from the API\nC) Both, side by side\nD) Whichever arrived most recently",
+      "back": "B) The user submission from the API",
+      "choicesExplained": "A: static analysis results are used only when no other data is available. C: the graph displays one instance of each manifest. D: precedence follows the source, not the time.",
+      "explanation": "User submissions rank highest because, made during builds, they usually carry the most complete information.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Prioritization”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#prioritization",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Static analysis results** are used when no other data is available.",
+      "uses": [
+        "dependency submission API",
+        "lock file",
+        "dependency graph",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "ghas.graph-source-precedence"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.scenario-nightly-sbom",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 7695,
+      "front": "A compliance team wants a script to fetch every repository’s SBOM each night without anyone clicking in the browser. Which route fits?",
+      "choices": "A) The Export SBOM button\nB) The API endpoint for exporting an SBOM\nC) Dependabot graph jobs\nD) The dependency submission API",
+      "back": "B) The API endpoint for exporting an SBOM",
+      "choicesExplained": "A needs a person in the browser. C builds the graph; it does not export it. D sends dependencies in; it does not export an SBOM.",
+      "explanation": "GitHub offers an API endpoint to export a repository’s SBOM as well as the browser button.",
+      "source": "GitHub Docs, “Exporting a software bill of materials for your repository”, “Exporting a software bill of materials for your repository using the REST API”",
+      "sourceURL": "https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/export-dependencies-as-sbom#exporting-a-software-bill-of-materials-for-your-repository-using-the-rest-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you want to use the REST API to export an SBOM for your repository",
+      "uses": [
+        "software bill of materials",
+        "Dependabot graph job",
+        "dependency submission API"
+      ],
+      "conceptIDs": [
+        "ghas.export-sbom-rest"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.contrast-direct-transitive",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7800,
+      "front": "Direct versus transitive dependency: how does each enter your supply chain?",
+      "back": "Direct: you specify it in a manifest or lock file. Transitive: a dependency of yours uses it, though you never specified it.",
+      "explanation": "You never name a transitive dependency, yet you are still dependent on it.",
+      "source": "GitHub Docs, “Supply chain security”, “About supply chain security at GitHub”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/supply-chain-security#about-supply-chain-security-at-github",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Dependencies can also be included transitively, that is, even if you don’t specify a particular dependency, but a dependency of yours uses it, then you’re also dependent on that dependency.",
+      "uses": [
+        "direct dependency",
+        "transitive dependency",
+        "manifest file",
+        "lock file"
+      ],
+      "conceptIDs": [
+        "ghas.direct-vs-transitive"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.contrast-auto-vs-graph-jobs",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7810,
+      "front": "Automatic dependency submission versus Dependabot graph jobs: which takes precedence, and where?",
+      "back": "Graph jobs, in the ecosystems where they are available (currently Go and Python).",
+      "explanation": "So automatic submission still does the work in the other ecosystems it supports.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Prioritization”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#prioritization",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For ecosystems where Dependabot graph jobs are available (currently Go and Python), they take precedence over automatic dependency submission.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published",
+      "uses": [
+        "automatic dependency submission",
+        "Dependabot graph job"
+      ],
+      "conceptIDs": [
+        "ghas.dependabot-graph-jobs",
+        "ghas.automatic-dependency-submission"
+      ]
+    },
+    {
+      "id": "ghas.dependency-graph.contrast-manifest-lock",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 7820,
+      "front": "Manifest file versus lock file: which gives the dependency graph exact indirect versions?",
+      "back": "The lock file. Indirect dependencies inferred only from a manifest are excluded from vulnerability checks.",
+      "explanation": "So only a lock file lets the graph check those indirect dependencies for vulnerabilities.",
+      "source": "GitHub Docs, “How the dependency graph recognizes dependencies”, “Static analysis”",
+      "sourceURL": "https://docs.github.com/en/code-security/concepts/supply-chain-security/dependency-graph-data#static-analysis",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "indirect dependencies inferred from manifest files (rather than lock files) are excluded from vulnerability checks.",
+      "uses": [
+        "manifest file",
+        "lock file",
+        "dependency graph"
+      ],
+      "conceptIDs": [
+        "ghas.use-lock-files",
+        "ghas.manifest-file",
+        "ghas.lock-file"
+      ]
+    }
+  ]
+}
