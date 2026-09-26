@@ -1,0 +1,21 @@
+# ISC2 SSCP: notes for every writer (read after DIGEST.md)
+
+- **Slug:** `isc2-sscp`. **Family prefix:** `sscp` (card ids `sscp.<topic-slug>.<card-slug>`, concept ids `sscp.<concept-slug>`). Use the concept ids in `isc2-sscp-concepts.json`; add new ones only when a card needs them.
+- **Builds on:** `isc2-cc`. Their registry terms (topic 0) count as taught: never re-introduce them.
+- **Sources, their tiers and licence labels.** The label must match src/licences.json for the host. Tier A or B: "B · <licence>", with evidence. Tier C: "C · facts only, in our own words", with no evidence.
+  - edge.sitecorecloud.io → tier C ("All contents of this site constitute the property of ISC2, Inc. and may not be )
+  - www.isc2.org → tier C ("All contents of this site constitute the property of ISC2, Inc. and may not be )
+  - www.nist.gov → tier B ("Works authored by NIST employees are not subject to Copyright protection within)
+  - nvlpubs.nist.gov → tier B ("Works authored by NIST employees are not subject to Copyright protection within)
+  - www.itu.int → tier C (ITU publication; no open licence read (re-used isc2-cissp copy); facts only)
+  - www.rfc-editor.org → tier C ("Copyright (c) 2012 IETF Trust and the persons identified as the document author)
+  - www.iana.org → tier B ("both IANA and IETF affirm that any applicable rights that they may have in the )
+  - www.first.org → tier C ("While FIRST owns all rights and interest in CVSS, it licenses it to the public )
+  - learn.microsoft.com → tier C ("© Microsoft 2026" (page footer); no open licence on the page (CONTENT-POLICY §3)
+  - attack.mitre.org → tier B ("The MITRE Corporation (MITRE) hereby grants you a non-exclusive, royalty-free l)
+  - owasp.org → tier B ("© Copyright 2021-2025 - OWASP Top 10 Team - This work is licensed under a Creat)
+  - csrc.nist.gov → tier C (NIST CSRC glossary page; each definition is quoted from its cited source (e.g. C)
+- **Evidence is required.** The texts are in `research/sources/isc2-sscp/`; the slice prints a passage under each concept.
+- **Volatile facts:** `volatile: true`, `validAsOf: "2026-09-26 · SSCP outline as published"`.
+- **Scenarios:** your own. Never reuse a source's worked examples or exercises.
+- **Deck notice:** already in deck.json.
