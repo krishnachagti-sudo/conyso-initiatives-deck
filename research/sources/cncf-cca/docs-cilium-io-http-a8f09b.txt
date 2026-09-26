@@ -1,0 +1,145 @@
+https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/http/
+
+## {#http-example}
+{#gs-gateway-http}
+HTTP Example
+
+In this example, we will deploy a simple HTTP service and expose it to the
+Cilium Gateway API.
+
+The demo application is from the bookinfo demo microservices app from
+the Istio project.
+
+## {#deploy-the-demo-app}
+
+Deploy the Demo App
+
+$ kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.11/samples/bookinfo/platform/kube/bookinfo.yaml
+
+This is just deploying the demo app, it’s not adding any Istio components. You
+can confirm that with Cilium Service Mesh there is no Envoy sidecar created
+alongside each of the demo app microservices.
+
+$ kubectl get pods
+NAME READY STATUS RESTARTS AGE
+details-v1-5498c86cf5-kjzkj 1/1 Running 0 2m39s
+productpage-v1-65b75f6885-ff59g 1/1 Running 0 2m39s
+ratings-v1-b477cf6cf-kv7bh 1/1 Running 0 2m39s
+reviews-v1-79d546878f-r5bjz 1/1 Running 0 2m39s
+reviews-v2-548c57f459-pld2f 1/1 Running 0 2m39s
+reviews-v3-6dd79655b9-nhrnh 1/1 Running 0 2m39s
+
+Note
+
+With the sidecar implementation the output would show 2/2 READY. One for
+the microservice and one for the Envoy sidecar.
+
+## {#deploy-the-cilium-gateway}
+
+Deploy the Cilium Gateway
+
+You’ll find the example Gateway and HTTPRoute definition in basic-http.yaml.
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+name: my-gateway
+spec:
+gatewayClassName: cilium
+listeners:
+- protocol: HTTP
+port: 80
+name: web-gw
+allowedRoutes:
+namespaces:
+from: Same
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+name: http-app-1
+spec:
+parentRefs:
+- name: my-gateway
+namespace: default
+rules:
+- matches:
+- path:
+type: PathPrefix
+value: /details
+backendRefs:
+- name: details
+port: 9080
+- matches:
+- headers:
+- type: Exact
+name: magic
+value: foo
+queryParams:
+- type: Exact
+name: great
+value: example
+path:
+type: PathPrefix
+value: /
+method: GET
+backendRefs:
+- name: productpage
+port: 9080
+
+$ kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.20.2/examples/kubernetes/gateway/basic-http.yaml
+
+The above example creates a Gateway named my-gateway that listens on port 80.
+Two routes are defined, one for /details to the details service, and
+one for / to the productpage service.
+
+Your cloud provider will automatically provision an external IP address for the
+gateway, but it may take up to 20 minutes.
+
+$ kubectl get gateway my-gateway
+NAME CLASS ADDRESS PROGRAMMED AGE
+my-gateway cilium 10.100.26.37 True 2d7h
+
+Note
+
+Some providers e.g. EKS use a fully-qualified domain name rather than an IP address.
+
+## {#make-http-requests}
+
+Make HTTP Requests
+
+Now that the Gateway is ready, you can make HTTP requests to the services.
+
+$ GATEWAY=$(kubectl get gateway my-gateway -o jsonpath='{.status.addresses[0].value}')
+$ curl --fail -s http://"$GATEWAY"/details/1 | jq
+{
+"id": 1,
+"author": "William Shakespeare",
+"year": 1595,
+"type": "paperback",
+"pages": 200,
+"publisher": "PublisherA",
+"language": "English",
+"ISBN-10": "1234567890",
+"ISBN-13": "123-1234567890"
+}
+$ curl -v -H 'magic: foo' http://"$GATEWAY"\?great\=example
+...
+
+Hello! This is a simple bookstore application consisting of three services as shown below
+
+name http://details:9080
+endpoint details
+children name endpoint children
+http://details:9080 details
+http://reviews:9080 reviews name endpoint children
+http://ratings:9080 ratings
+
+Click on one of the links below to auto generate a request to the backend as a real user or a tester
+
+Normal user
+
+Test user
+
+<footer

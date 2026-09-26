@@ -1,0 +1,268 @@
+https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gamma/
+
+
+
+## {#gamma-support} 
+ {#gs-gamma} 
+GAMMA Support
+
+## {#what-is-gamma} 
+
+What is GAMMA?
+
+(From the GAMMA page
+on the Gateway API site):
+
+The GAMMA initiative is a dedicated workstream within the Gateway API
+subproject, shepherded by the GAMMA leads, rather than being a separate
+subproject. GAMMA’s goal is to define how Gateway API can be used to configure
+a service mesh, with the intention of making minimal changes to Gateway API and
+always preserving the role-oriented nature of Gateway API. Additionally, GAMMA
+strives to advocate for consistency between implementations of Gateway API by
+service mesh projects, regardless of their technology stack or proxy.
+
+In Gateway API, GAMMA supports adding extra routing to Services by
+binding a Route (HTTPRoute or GRPCRoute) to a Service as a parent (as opposed
+to the north/south Gateway API usage of binding a Route to a Gateway as a parent).
+
+This allows Cilium to intercept layer 7 traffic flowing to a parent Service and
+route the traffic through the per-node Envoy proxy. Because of this, GAMMA
+performs the same function as Cilium’s
+Layer 7 traffic management, without the user
+needing to know anything about configuring Envoy directly.
+
+## {#types-of-gamma-configuration} 
+
+Types of GAMMA configuration
+
+In GAMMA, there are two types of Routes: “producer” and “consumer” Routes.
+
+“Producer” routes are Routes (HTTPRoute or GRPCRoute) that bind to a Service that lives in the same
+namespace and have the same owner as the owner of the Service whose traffic is
+being managed. So, for an application foo, in the namespace foo, with a
+Service called foo-svc, the owner of foo would create a HTTPRoute in the foo
+namespace that lists foo-svc as its parent. The routing then affects all traffic
+coming to the foo service from the whole cluster, and is controlled by the
+“producer” of the foo service - its owner.
+
+“Consumer” routes are Routes that bind to a Service that lives in a different
+namespace than that Service. These Routes are called “consumer” Routes because
+they are owned by the consumer of the Service they bind to. For the foo Service
+above, a Route in the bar namespace, to be used by the app in that namespace,
+that binds to the foo-svc Service in the foo namespace is a consumer Service
+because it changes the routing for the bar service, which consumes the foo
+Service.
+
+Cilium currently supports only “Producer” Routes, and so HTTPRoutes and
+GRPCRoutes must be in the same namespace as the Service that they are binding to.
+
+## {#cilium-gamma-support} 
+
+Cilium GAMMA Support
+
+Cilium supports GAMMA for the following resources (see
+Gateway API Support for supported Gateway API version details):
+
+HTTPRoute
+
+GRPCRoute
+
+ReferenceGrant
+
+Cilium currently does not support “consumer” Routes (HTTPRoute or GRPCRoute), and
+so does not support the MeshConsumerRoute feature of the Mesh conformance profile.
+
+Note
+
+During workload termination or rolling updates, Hubble may report
+DROP_EP_NOT_READY events for GAMMA traffic. An Envoy upstream TCP
+connection can outlive the source endpoint whose traffic created it. After
+Cilium removes that endpoint’s policy program, packets that close the
+remaining connection can be dropped.
+
+These events are generally harmless when they are limited to closing TCP
+connections and application requests continue to succeed. Drops that affect
+new connections or coincide with request failures should be separately
+investigated.
+
+## {#prerequisites} 
+
+Prerequisites
+
+Cilium must be configured with the kube-proxy replacement, using
+kubeProxyReplacement=true. For more information, see kube-proxy
+replacement.
+
+Cilium must be configured with the L7 proxy enabled using l7Proxy=true
+(enabled by default).
+
+Traffic arriving at the Gateway’s Service is transparently forwarded to Envoy
+using the TPROXY kernel facility. With the default bpf.tproxy=false,
+TPROXY is implemented with iptables, so nodes must provide iptables along
+with the netfilter modules listed in the L7 proxy system requirements. Some distributions do not ship these by default, in
+which case connections to the Gateway time out without ever reaching Envoy.
+The eBPF-based bpf.tproxy=true (beta) removes this iptables dependency.
+
+By default, the Cilium Gateway API controller creates a service of LoadBalancer type,
+so your environment will need to support this. Alternatively, since Cilium 1.16,
+you can directly expose the Cilium L7 proxy on the host network.
+
+## {#installation} 
+
+Installation
+
+The below CRDs from Gateway API v1.6.1 must be installed.
+
+GatewayClass
+
+Gateway
+
+HTTPRoute
+
+GRPCRoute
+
+BackendTLSPolicy
+
+ReferenceGrant
+
+TLSRoute
+
+Please refer to these docs
+for installation steps. Alternatively, the below snippet could be used.
+
+Note that the experimental release channel includes everything in the standard
+release channel plus some experimental resources and fields. If you need
+a feature that is currently marked as experimental (for example, HTTPRoute Retry in the HTTPRoute resource),
+you must install the corresponding CRDs. Please refer to the experimental GEP list
+for a full list of experimental features.
+
+If you are updating your current installation, make sure to always check the Upgrade Guide
+first to review any breaking changes, deprecated features, or important configuration updates needed for the new version.
+For Cilium 1.20 upgrades, review the Gateway API v1.6.1 and TLSRoute notes in the upgrade guide before updating Gateway API CRDs.
+
+You can install the set of required CRDs like this:
+
+StandardExperimental
+
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/standard/gateway.networking.k8s.io_gatewayclasses.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/standard/gateway.networking.k8s.io_gateways.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/standard/gateway.networking.k8s.io_httproutes.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/standard/gateway.networking.k8s.io_referencegrants.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/standard/gateway.networking.k8s.io_grpcroutes.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/standard/gateway.networking.k8s.io_backendtlspolicies.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/standard/gateway.networking.k8s.io_tlsroutes.yaml
+
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/experimental/gateway.networking.k8s.io_gatewayclasses.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/experimental/gateway.networking.k8s.io_gateways.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/experimental/gateway.networking.k8s.io_httproutes.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/experimental/gateway.networking.k8s.io_referencegrants.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/experimental/gateway.networking.k8s.io_grpcroutes.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/experimental/gateway.networking.k8s.io_backendtlspolicies.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml
+
+The TCPRoute,
+UDPRoute,
+or ListenerSet
+CRDs are optional and to use this functionality, you must install the corresponding CRD resources.
+If they are not installed, Cilium will disable support for these features.
+
+You can install the set of optional CRDs like this:
+
+StandardExperimental
+
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/standard/gateway.networking.k8s.io_listenersets.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/standard/gateway.networking.k8s.io_tcproutes.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/standard/gateway.networking.k8s.io_udproutes.yaml
+
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/experimental/gateway.networking.k8s.io_listenersets.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/experimental/gateway.networking.k8s.io_tcproutes.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.6.1/config/crd/experimental/gateway.networking.k8s.io_udproutes.yaml
+
+Once CRDs are installed, use Helm or Cilium CLI to enable Cilium Gateway API controller.
+
+HelmCilium CLI
+
+Install the latest version of the Cilium CLI. The Cilium CLI can be used to
+install Cilium, inspect the state of a Cilium installation, and enable/disable
+various features (e.g. clustermesh, Hubble).
+
+LinuxmacOSOther
+
+CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+CLI_ARCH=amd64
+if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
+sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
+rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+
+CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+CLI_ARCH=amd64
+if [ "$(uname -m)" = "arm64" ]; then CLI_ARCH=arm64; fi
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-darwin-${CLI_ARCH}.tar.gz{,.sha256sum}
+shasum -a 256 -c cilium-darwin-${CLI_ARCH}.tar.gz.sha256sum
+sudo tar xzvfC cilium-darwin-${CLI_ARCH}.tar.gz /usr/local/bin
+rm cilium-darwin-${CLI_ARCH}.tar.gz{,.sha256sum}
+
+See the full page of releases.
+
+Cilium Gateway API Controller can be enabled with helm flag gatewayAPI.enabled
+set as true. Please refer to Installation using Helm for a fresh installation.
+
+Helm RepositoryOCI Registry
+
+helm upgrade cilium cilium/cilium --version 1.20.2 \
+   --namespace kube-system \
+   --reuse-values \
+   --set kubeProxyReplacement=true \
+   --set gatewayAPI.enabled=true
+kubectl -n kube-system rollout restart deployment/cilium-operator
+kubectl -n kube-system rollout restart ds/cilium
+
+helm upgrade cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace kube-system \
+   --reuse-values \
+   --set kubeProxyReplacement=true \
+   --set gatewayAPI.enabled=true
+kubectl -n kube-system rollout restart deployment/cilium-operator
+kubectl -n kube-system rollout restart ds/cilium
+
+Next you can check the status of the Cilium agent and operator:
+
+$ cilium status
+
+Install the latest version of the Cilium CLI. The Cilium CLI can be used to
+install Cilium, inspect the state of a Cilium installation, and enable/disable
+various features (e.g. clustermesh, Hubble).
+
+LinuxmacOSOther
+
+CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+CLI_ARCH=amd64
+if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
+sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
+rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+
+CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+CLI_ARCH=amd64
+if [ "$(uname -m)" = "arm64" ]; then CLI_ARCH=arm64; fi
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-darwin-${CLI_ARCH}.tar.gz{,.sha256sum}
+shasum -a 256 -c cilium-darwin-${CLI_ARCH}.tar.gz.sha256sum
+sudo tar xzvfC cilium-darwin-${CLI_ARCH}.tar.gz /usr/local/bin
+rm cilium-darwin-${CLI_ARCH}.tar.gz{,.sha256sum}
+
+See the full page of releases.
+
+Cilium Gateway API Controller can be enabled with the below command.
+
+$ cilium upgrade 1.20.2 \
+    --set kubeProxyReplacement=true \
+    --set gatewayAPI.enabled=true
+
+Next you can check the status of the Cilium agent and operator:
+
+$ cilium status
+
+          <footer

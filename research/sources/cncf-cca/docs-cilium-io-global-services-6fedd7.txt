@@ -1,0 +1,230 @@
+https://docs.cilium.io/en/stable/network/clustermesh/global-services/
+
+
+
+## {#global-services} 
+ {#gs-clustermesh-global-services} 
+Global Services
+
+This tutorial will guide you to perform load-balancing and service discovery
+across multiple Kubernetes clusters using Cilium Global Services.
+
+## {#prerequisites} 
+
+Prerequisites
+
+You need to have a functioning Cluster Mesh setup, please follow the guide
+Setting up Cluster Mesh to set it up.
+
+## {#load-balancing-with-global-services} 
+
+Load-balancing with Global Services
+
+Establishing load-balancing between clusters is achieved by defining a
+Kubernetes service with identical name and namespace in each cluster and adding
+the annotation service.cilium.io/global: "true" to declare it global.
+Cilium will automatically perform load-balancing to pods in both clusters.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rebel-base
+  annotations:
+    service.cilium.io/global: "true"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+  selector:
+    name: rebel-base
+
+## {#disabling-global-service-sharing} 
+
+Disabling Global Service Sharing
+
+By default, a Global Service will load-balance across backends in multiple clusters.
+This implicitly configures service.cilium.io/shared: "true". To prevent service
+backends from being shared to other clusters, this option should be disabled.
+
+Below example will expose remote endpoint without sharing local endpoints.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rebel-base
+  annotations:
+    service.cilium.io/global: "true"
+    service.cilium.io/shared: "false"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+  selector:
+    name: rebel-base
+
+## {#synchronizing-kubernetes-endpointslice-beta} 
+ {#endpointslicesync} 
+Synchronizing Kubernetes EndpointSlice (Beta)
+
+Note
+
+This is a beta feature. Please provide feedback and file a GitHub issue if
+you experience any problems.
+
+By default Kubernetes EndpointSlice synchronization is disabled on non Headless Global services.
+To have Cilium discover remote clusters endpoints of a Global Service
+from DNS or any third party controllers, enable synchronization by adding
+the annotation service.cilium.io/global-sync-endpoint-slices: "true".
+This will allow Cilium to create Kubernetes EndpointSlices belonging to a
+remote cluster for services that have that annotation.
+Regarding Global Headless services this option is enabled by default unless
+explicitly opted-out by adding the annotation service.cilium.io/global-sync-endpoint-slices: "false".
+
+Note that this feature does not complement/is not required by any other Cilium features
+and is only required if you need to discover EndpointSlice from remote cluster on
+third party controllers. For instance, the Cilium ingress controller works in a Cluster Mesh
+without enabling this feature, although if you use any other ingress controller
+you may need to enable this.
+
+This feature is currently disabled by default via a feature flag.
+To install Cilium with EndpointSlice Cluster Mesh synchronization, run:
+
+Helm RepositoryOCI Registry
+
+helm install cilium cilium/cilium --version 1.20.2 \
+   --namespace kube-system \
+   --set clustermesh.enableEndpointSliceSynchronization=true
+
+helm install cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace kube-system \
+   --set clustermesh.enableEndpointSliceSynchronization=true
+
+To enable EndpointSlice Cluster Mesh synchronization on an existing Cilium installation, run:
+
+Helm RepositoryOCI Registry
+
+helm upgrade cilium cilium/cilium --version 1.20.2 \
+   --namespace kube-system \
+   --reuse-values \
+   --set clustermesh.enableEndpointSliceSynchronization=true
+kubectl -n kube-system rollout restart deployment/cilium-operator
+
+helm upgrade cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace kube-system \
+   --reuse-values \
+   --set clustermesh.enableEndpointSliceSynchronization=true
+kubectl -n kube-system rollout restart deployment/cilium-operator
+
+## {#known-limitations} 
+
+Known Limitations
+
+This is a beta feature, you may experience bugs or shortcomings.
+
+Hostnames are synchronized as is without any form of conflict resolution
+mechanisms. This means that multiple StatefulSets with a single governing
+Service that synchronize EndpointSlices across multiple clusters should have
+different names. For instance, you can add the cluster name to the StatefulSet
+name (cluster1-my-statefulset instead of my-statefulset).
+
+## {#deploying-a-simple-example-service} 
+
+Deploying a Simple Example Service
+
+In cluster 1, deploy:
+
+kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.20.2/examples/kubernetes/clustermesh/cluster1.yaml
+kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.20.2/examples/kubernetes/clustermesh/global-service-example.yaml
+
+In cluster 2, deploy:
+
+kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.20.2/examples/kubernetes/clustermesh/cluster2.yaml
+kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.20.2/examples/kubernetes/clustermesh/global-service-example.yaml
+
+From either cluster, access the global service:
+
+kubectl exec -ti deployment/x-wing -- curl rebel-base
+
+You will see replies from pods in both clusters.
+
+In cluster 1, add service.cilium.io/shared="false" to existing global service
+
+kubectl annotate service rebel-base service.cilium.io/shared="false" --overwrite
+
+From cluster 1, access the global service one more time:
+
+kubectl exec -ti deployment/x-wing -- curl rebel-base
+
+You will still see replies from pods in both clusters.
+
+From cluster 2, access the global service again:
+
+kubectl exec -ti deployment/x-wing -- curl rebel-base
+
+You will see replies from pods only from cluster 2, as the global service in cluster 1 is no longer shared.
+
+In cluster 1, remove service.cilium.io/shared annotation of existing global service
+
+kubectl annotate service rebel-base service.cilium.io/shared-
+
+From either cluster, access the global service:
+
+kubectl exec -ti deployment/x-wing -- curl rebel-base
+
+You will see replies from pods in both clusters again.
+
+## {#global-and-shared-services-reference} 
+
+Global and Shared Services Reference
+
+The flow chart below summarizes the overall behavior considering a service present
+in two clusters (i.e., Cluster1 and Cluster2), and different combinations of the
+service.cilium.io/global and service.cilium.io/shared annotation values.
+The terminating nodes represent the endpoints used in each combination by the two
+clusters for the service under examination.
+
+## {#handling-unreachable-clusters} 
+
+Handling Unreachable Clusters
+
+By default, if a remote cluster becomes unreachable, Cilium will retain the last-known service
+information in its cache. This can lead to traffic being sent to “stale” or unreachable backends.
+
+To mitigate this, you can configure a cache time-to-live (TTL). If a remote cluster’s connection is
+lost and not re-established within this duration, Cilium will automatically revoke the cached data
+for that cluster. For global services, this means Cilium will stop load-balancing to the service
+backends in the unreachable cluster. When connectivity is re-established, the remote cluster’s
+services are repopulated, and load-balancing to its backends resumes.
+
+The default value is "0s", which disables this feature and means caches are never revoked. To
+enable it, set clustermesh.cacheTTL to a duration greater than zero (e.g., "15m").
+
+Helm RepositoryOCI Registry
+
+helm upgrade cilium cilium/cilium --version 1.20.2 \
+   --namespace kube-system \
+   --reuse-values \
+   --set clustermesh.cacheTTL="15m"
+
+helm upgrade cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace kube-system \
+   --reuse-values \
+   --set clustermesh.cacheTTL="15m"
+
+## {#limitations} 
+
+Limitations
+
+Global NodePort services load balance across both local and remote backends only
+if Cilium is configured to replace kube-proxy (kubeProxyReplacement=true).
+Otherwise, only local backends are eligible for
+load balancing when accessed through the NodePort.
+
+Global services accessed by a Node, or a Pod running in host network, load
+balance across both local and remote backends only if Cilium is configured
+to replace kube-proxy (kubeProxyReplacement=true). This limitation can be
+overcome enabling SocketLB in the host namespace: socketLB.enabled=true,
+socketLB.hostNamespaceOnly=true. Otherwise, only local backends are eligible
+for load balancing.
+
+          <footer

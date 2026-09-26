@@ -1,0 +1,1002 @@
+https://docs.cilium.io/en/stable/installation/k8s-install-helm/
+
+
+
+## {#installation-using-helm} 
+ {#k8s-install-helm} 
+Installation using Helm
+
+This guide will show you how to install Cilium using Helm. This involves a couple of additional steps compared to
+the Cilium Quick Installation and requires you to manually select the best
+datapath and IPAM mode for your particular environment.
+
+## {#helm-installation-methods} 
+
+Helm Installation Methods
+
+Cilium can be installed using Helm in two ways:
+
+OCI Registry (Recommended) — Install directly from OCI registries without adding a Helm repository
+
+Traditional Repository — Use the classic https://helm.cilium.io/ repository
+
+## {#using-oci-registries-recommended} 
+
+Using OCI Registries (Recommended)
+
+Cilium Helm charts are available directly from OCI container registries,
+eliminating the need for a separate Helm repository.
+
+Tip
+
+No helm repo add required! Just reference the chart directly with
+oci://quay.io/cilium/charts/cilium.
+
+Why OCI Registries?
+
+Storing Helm charts in OCI registries alongside container images offers
+several advantages:
+
+Signed charts — All charts are signed with cosign for verification
+
+Simpler setup — No repository configuration needed
+
+Digest pinning — Reference exact chart versions by SHA for reproducibility
+
+Unified tooling — Use the same registry infrastructure for images and charts
+
+Quick Start with OCI:
+
+helm install cilium oci://quay.io/cilium/charts/cilium \
+  1.20.2 \
+  --namespace kube-system
+
+Finding Available Versions:
+
+OCI registries don’t support helm search. Here’s how to find available
+versions:
+
+Important
+
+Version format matters: Helm chart versions follow SemVer 2.0 without
+the “v” prefix (e.g., 1.15.0). Container image tags include the “v”
+(e.g., v1.15.0). Use versions without the “v” for Helm commands.
+
+Browse the registry: Quay.io tags
+
+Query via CLI:
+
+# Using crane
+crane ls quay.io/cilium/charts/cilium
+
+Check releases: https://github.com/cilium/cilium/releases
+
+Verifying Chart Signatures:
+
+All charts are signed with cosign. Verify before installing:
+
+cosign verify \
+  --certificate-identity-regexp='https://github.com/cilium/cilium/.*' \
+  --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
+  quay.io/cilium/charts/cilium:<VERSION>
+
+See https://docs.sigstore.dev/cosign/installation/ for cosign installation.
+
+Pinning by Digest:
+
+For reproducible deployments, pin charts by digest instead of tag:
+
+# Get the digest
+helm pull oci://quay.io/cilium/charts/cilium --version <VERSION>
+
+# Install with digest
+helm install cilium oci://quay.io/cilium/charts/cilium@sha256:<DIGEST> \
+  --namespace kube-system
+
+This guarantees the exact same chart every time.
+
+## {#using-traditional-helm-repository} 
+
+Using Traditional Helm Repository
+
+You can also install Cilium using the traditional Helm repository method.
+Both installation methods are fully supported.
+
+## {#install-cilium} 
+
+Install Cilium
+
+Setup Helm repository:
+
+Helm RepositoryOCI Registry
+
+helm repo add cilium https://helm.cilium.io/
+
+Cilium charts are also available via OCI registries (Quay.io and Docker Hub).
+No setup required - you can install directly using oci:// URLs.
+
+See the OCI Registry section for more information,
+including chart signing verification and digest-based installations.
+
+GenericGKEAKSEKSOpenShiftRKEk3sRancher DesktopTalos LinuxAlibaba ACK
+
+These are the generic instructions on how to install Cilium into any
+Kubernetes cluster using the default configuration options below. Please
+see the other tabs for distribution/platform specific instructions which
+also list the ideal default configuration for particular platforms.
+
+Default Configuration:
+
+Datapath
+
+IPAM
+
+Datastore
+
+Encapsulation
+
+Cluster Pool
+
+Kubernetes CRD
+
+Requirements:
+
+Kubernetes must be configured to use CNI (see Network Plugin Requirements)
+
+Linux kernel >= 5.10
+
+Tip
+
+See System Requirements for more details on the system requirements.
+
+Install Cilium:
+
+Deploy Cilium release via Helm:
+
+Helm RepositoryOCI Registry
+
+helm install cilium cilium/cilium --version 1.20.2 \
+   --namespace kube-system
+
+helm install cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace kube-system
+
+To install Cilium on Google Kubernetes Engine (GKE),
+perform the following steps:
+
+Default Configuration:
+
+Datapath
+
+IPAM
+
+Datastore
+
+Direct Routing
+
+Kubernetes PodCIDR
+
+Kubernetes CRD
+
+Requirements:
+
+The cluster should be created with the taint node.cilium.io/agent-not-ready=true:NoExecute
+using --node-taints option. However, there are other options. Please make
+sure to read and understand the documentation page on taint effects and unmanaged pods.
+
+Install Cilium:
+
+Extract the Cluster CIDR to enable native-routing:
+
+NATIVE_CIDR="$(gcloud container clusters describe "${NAME}" --zone "${ZONE}" --format 'value(clusterIpv4Cidr)')"
+echo $NATIVE_CIDR
+
+Deploy Cilium release via Helm:
+
+Helm RepositoryOCI Registry
+
+helm install cilium cilium/cilium --version 1.20.2 \
+   --namespace kube-system \
+   --set nodeinit.enabled=true \
+   --set nodeinit.reconfigureKubelet=true \
+   --set nodeinit.removeCbrBridge=true \
+   --set cni.binPath=/home/kubernetes/bin \
+   --set gke.enabled=true \
+   --set ipam.mode=kubernetes \
+   --set ipv4NativeRoutingCIDR=$NATIVE_CIDR
+
+helm install cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace kube-system \
+   --set nodeinit.enabled=true \
+   --set nodeinit.reconfigureKubelet=true \
+   --set nodeinit.removeCbrBridge=true \
+   --set cni.binPath=/home/kubernetes/bin \
+   --set gke.enabled=true \
+   --set ipam.mode=kubernetes \
+   --set ipv4NativeRoutingCIDR=$NATIVE_CIDR
+
+The NodeInit DaemonSet is required to prepare the GKE nodes as nodes are added
+to the cluster. The NodeInit DaemonSet will perform the following actions:
+
+Reconfigure kubelet to run in CNI mode
+
+Mount the eBPF filesystem
+
+Configuration:
+
+Datapath
+
+IPAM
+
+Datastore
+
+Encapsulation
+
+Cluster Pool
+
+Kubernetes CRD
+
+Requirements:
+
+Note
+
+On AKS, Cilium can be installed either manually by administrators via Bring your own CNI or
+automatically by AKS via Azure CNI Powered by Cilium. Bring your own CNI offers more flexibility
+and customization as administrators have full control over the installation, but it does not
+integrate natively with the Azure network stack and administrators need to handle Cilium upgrades.
+Azure CNI Powered by Cilium integrates natively with the Azure network stack and upgrades are
+handled by AKS, but it does not offer as much flexibility and customization as it is controlled by AKS.
+The following instructions assume Bring your own CNI. For Azure CNI Powered by
+Cilium, see the external installer guide Installation using Azure CNI Powered by Cilium in AKS for dedicated instructions.
+
+The AKS cluster must be created with --network-plugin none. See the
+Bring your own CNI
+documentation for more details about BYOCNI prerequisites / implications.
+
+Make sure that you set a cluster pool IPAM pod CIDR that does not overlap with the default service
+CIDR of AKS. For example, you can use --helm-set ipam.operator.clusterPoolIPv4PodCIDRList=192.168.0.0/16.
+
+Install Cilium:
+
+Deploy Cilium release via Helm:
+
+Helm RepositoryOCI Registry
+
+helm install cilium cilium/cilium --version 1.20.2 \
+   --namespace kube-system \
+   --set aksbyocni.enabled=true
+
+helm install cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace kube-system \
+   --set aksbyocni.enabled=true
+
+Note
+
+Installing Cilium via helm is supported only for AKS BYOCNI cluster and
+not for Azure CNI Powered by Cilium clusters.
+
+To install Cilium on Amazon Elastic Kubernetes Service (EKS),
+perform the following steps:
+
+Default Configuration:
+
+Datapath
+
+IPAM
+
+Datastore
+
+Direct Routing (ENI)
+
+AWS ENI
+
+Kubernetes CRD
+
+For more information on AWS ENI mode, see AWS ENI.
+
+Tip
+
+To chain Cilium on top of the AWS CNI, see AWS VPC CNI plugin.
+
+You can also bring up Cilium in a Single-Region, Multi-Region, or Multi-AZ environment for EKS.
+
+Requirements:
+
+The EKS Managed Nodegroups must
+be properly tainted to ensure applications pods are properly managed by
+Cilium:
+
+managedNodeGroups should be tainted with
+node.cilium.io/agent-not-ready=true:NoExecute to ensure application
+pods will only be scheduled once Cilium is ready to manage them. However,
+there are other options. Please make sure to read and understand the
+documentation page on taint effects and unmanaged pods.
+
+Below is an example on how to use ClusterConfig
+file to create the cluster:
+
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+# ...
+managedNodeGroups:
+- name: ng-1
+  # ...
+  #
+  # taint nodes so that application pods are
+  # not scheduled/executed until Cilium is deployed.
+  # Alternatively, see the note above regarding taint effects.
+  taints:
+   - key: "node.cilium.io/agent-not-ready"
+     value: "true"
+     effect: "NoExecute"
+
+Limitations:
+
+The AWS ENI integration of Cilium is currently only enabled for IPv4. If you
+want to use IPv6, use a datapath/IPAM mode other than ENI.
+
+Patch VPC CNI (aws-node DaemonSet)
+
+Cilium will manage ENIs instead of VPC CNI, so the aws-node
+DaemonSet has to be patched to prevent conflict behavior.
+
+kubectl -n kube-system patch daemonset aws-node --type='strategic' -p='{"spec":{"template":{"spec":{"nodeSelector":{"io.cilium/aws-node-enabled":"true"}}}}}'
+
+Install Cilium:
+
+Deploy Cilium release via Helm:
+
+Helm RepositoryOCI Registry
+
+helm install cilium cilium/cilium --version 1.20.2 \
+   --namespace kube-system \
+   --set eni.enabled=true
+
+helm install cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace kube-system \
+   --set eni.enabled=true
+
+Note
+
+This helm command sets eni.enabled=true,
+meaning that Cilium will allocate a fully-routable AWS ENI IP address
+for each pod, similar to the behavior of the Amazon VPC CNI plugin.
+
+This mode depends on a set of Required Privileges from the EC2 API.
+
+Cilium can alternatively run in EKS using an overlay mode that gives
+pods non-VPC-routable IPs.  This allows running more pods per
+Kubernetes worker node than the ENI limit but includes the following caveats:
+
+Pod connectivity to resources outside the cluster (e.g., VMs in the VPC
+or AWS managed services) is masqueraded (i.e., SNAT) by Cilium to use the
+VPC IP address of the Kubernetes worker node.
+
+The EKS API Server is unable to route packets to the overlay network. This
+implies that any webhook
+which needs to be accessed must be host networked or exposed through a service
+or ingress.
+
+To set up Cilium overlay mode, follow the steps below:
+
+Excluding the line eni.enabled=true from the helm command will configure Cilium to use
+overlay routing mode (which is the helm default).
+
+Flush iptables rules added by VPC CNI
+
+iptables -t nat -F AWS-SNAT-CHAIN-0 \
+   && iptables -t nat -F AWS-SNAT-CHAIN-1 \
+   && iptables -t nat -F AWS-CONNMARK-CHAIN-0 \
+   && iptables -t nat -F AWS-CONNMARK-CHAIN-1
+
+To install Cilium on OpenShift,
+perform the following steps:
+
+Default Configuration:
+
+Datapath
+
+IPAM
+
+Datastore
+
+Encapsulation
+
+Cluster Pool
+
+Kubernetes CRD
+
+Requirements:
+
+OpenShift 4.x
+
+Install Cilium:
+
+Cilium is a Certified OpenShift CNI Plugin
+and is best installed when an OpenShift cluster is created using the OpenShift
+installer. Please refer to Installation on OpenShift OKD for more information.
+
+To install Cilium top of a standalone Rancher Kubernetes Engine 1 (RKE1)
+or Rancher Kubernetes Engine 2 (RKE2) cluster,
+follow the installation instructions provided in the dedicated
+Installation using Rancher Kubernetes Engine guide.
+
+If your RKE1/2 cluster is managed by Rancher (non-standalone), follow the
+Installation using Rancher guide instead.
+
+To install Cilium on k3s,
+perform the following steps:
+
+Default Configuration:
+
+Datapath
+
+IPAM
+
+Datastore
+
+Encapsulation
+
+Cluster Pool
+
+Kubernetes CRD
+
+Requirements:
+
+Install your k3s cluster as you normally would but making sure to disable
+support for the default CNI plugin and the built-in network policy enforcer so
+you can install Cilium on top:
+
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='--flannel-backend=none --disable-network-policy' sh -
+
+For the Cilium CLI to access the cluster in successive steps you will need to
+use the kubeconfig file stored at /etc/rancher/k3s/k3s.yaml by setting
+the KUBECONFIG environment variable:
+
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+
+Install Cilium:
+
+Helm RepositoryOCI Registry
+
+helm install cilium cilium/cilium --version 1.20.2 \
+   --namespace $CILIUM_NAMESPACE \
+   --set operator.replicas=1
+
+helm install cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace $CILIUM_NAMESPACE \
+   --set operator.replicas=1
+
+Configure Rancher Desktop:
+
+To install Cilium on Rancher Desktop,
+perform the following steps:
+
+Configuring Rancher Desktop is done using a YAML configuration file.
+This step is necessary in order to disable the default CNI and replace it with
+Cilium.
+
+Next you need to start Rancher Desktop with containerd and create a override.yaml:
+
+env:
+  # needed for cilium
+  INSTALL_K3S_EXEC: '--flannel-backend=none --disable-network-policy'
+provision:
+  # needs root to mount
+  - mode: system
+    script: |
+      #!/bin/sh
+      set -e
+
+      # needed for cilium
+      mount bpffs -t bpf /sys/fs/bpf
+      mount --make-shared /sys/fs/bpf
+
+      mkdir -p /run/cilium/cgroupv2
+      mount -t cgroup2 none /run/cilium/cgroupv2
+      mount --make-shared /run/cilium/cgroupv2/
+
+After the file is created move it into your Rancher Desktop’s lima/_config directory:
+
+LinuxmacOS
+
+cp override.yaml ~/.local/share/rancher-desktop/lima/_config/override.yaml
+
+cp override.yaml ~/Library/Application\ Support/rancher-desktop/lima/_config/override.yaml
+
+Finally, open the Rancher Desktop UI and go to the Troubleshooting panel and click “Reset Kubernetes”.
+
+After a few minutes Rancher Desktop will start back up prepared for installing Cilium.
+
+Install Cilium:
+
+Helm RepositoryOCI Registry
+
+helm install cilium cilium/cilium --version 1.20.2 \
+   --namespace $CILIUM_NAMESPACE \
+   --set operator.replicas=1 \
+   --set cni.binPath=/usr/libexec/cni
+
+helm install cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace $CILIUM_NAMESPACE \
+   --set operator.replicas=1 \
+   --set cni.binPath=/usr/libexec/cni
+
+To install Cilium on Talos Linux,
+perform the following steps.
+
+Prerequisites / Limitations
+
+Cilium’s Talos Linux support is only tested with Talos versions >=1.5.0.
+
+As Talos does not allow loading Kernel modules by Kubernetes workloads, SYS_MODULE needs to be dropped from the Cilium default capability list.
+
+Talos Linux’s Forwarding kube-dns to Host DNS (enabled by default since Talos 1.8+) doesn’t work together with Cilium’s eBPF Host-Routing. To make it work, you must set bpf.hostLegacyRouting to true as DNS won’t work otherwise.
+
+Note
+
+The official Talos Linux documentation already covers many different Cilium deployment
+options inside their Deploying Cilium CNI guide. Thus, this guide will only focus on
+the most recommended deployment option, from a Cilium perspective:
+
+Deployment via official Cilium Helm chart
+
+Cilium Kube-Proxy replacement enabled
+
+Reuse the cgroupv2 mount that Talos already provides
+
+Kubernetes Host Scope IPAM mode as Talos, by default, assigns PodCIDRs to v1.Node resources
+
+Configure Talos Linux
+
+Before installing Cilium, there are two Talos Linux Kubernetes configurations that
+need to be adjusted:
+
+Ensuring no other CNI is deployed via cluster.network.cni.name: none
+
+Disabling Kube-Proxy deployment via cluster.proxy.disabled: true
+
+Prepare a patch.yaml file:
+
+cluster:
+  network:
+    cni:
+      name: none
+  proxy:
+    disabled: true
+
+Next, generate the configuration files for the Talos cluster by using the
+talosctl gen config command:
+
+talosctl gen config \
+  my-cluster https://mycluster.local:6443 \
+  --config-patch @patch.yaml
+
+Install Cilium
+
+To run Cilium with Kube-Proxy replacement enabled, it’s required
+to configure k8sServiceHost and k8sServicePort, and point them to the
+Kubernetes API. Luckily, Talos Linux provides KubePrism which allows it to access
+the Kubernetes API in a convenient way, which solely relies on host networking without
+using an external loadbalancer. This KubePrism endpoint can be accessed from every
+Talos Linux node on localhost:7445.
+
+Helm RepositoryOCI Registry
+
+helm install cilium cilium/cilium --version 1.20.2 \
+   --namespace $CILIUM_NAMESPACE \
+   --set ipam.mode=kubernetes \
+   --set kubeProxyReplacement=true \
+   --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}" \
+   --set securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}" \
+   --set cgroup.autoMount.enabled=false \
+   --set cgroup.hostRoot=/sys/fs/cgroup \
+   --set k8sServiceHost=localhost \
+   --set k8sServicePort=7445
+
+helm install cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace $CILIUM_NAMESPACE \
+   --set ipam.mode=kubernetes \
+   --set kubeProxyReplacement=true \
+   --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}" \
+   --set securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}" \
+   --set cgroup.autoMount.enabled=false \
+   --set cgroup.hostRoot=/sys/fs/cgroup \
+   --set k8sServiceHost=localhost \
+   --set k8sServicePort=7445
+
+To install Cilium on ACK (Alibaba Cloud Container Service for Kubernetes), perform the following steps:
+
+Disable ACK CNI (ACK Only):
+
+If you are running an ACK cluster, you should delete the ACK CNI.
+
+Cilium will manage ENIs instead of the ACK CNI, so any running DaemonSet from
+the list below has to be deleted to prevent conflicts.
+
+kube-flannel-ds
+
+terway
+
+terway-eni
+
+terway-eniip
+
+Note
+
+If you are using ACK with Flannel (DaemonSet kube-flannel-ds),
+the Cloud Controller Manager (CCM) will create a route (Pod CIDR) in VPC.
+If your cluster is a Managed Kubernetes you cannot disable this behavior.
+Please consider creating a new cluster.
+
+kubectl -n kube-system delete daemonset <terway>
+
+The next step is to remove CRD below created by terway* CNI
+
+kubectl delete crd \
+    ciliumclusterwidenetworkpolicies.cilium.io \
+    ciliumendpoints.cilium.io \
+    ciliumidentities.cilium.io \
+    ciliumnetworkpolicies.cilium.io \
+    ciliumnodes.cilium.io \
+    bgpconfigurations.crd.projectcalico.org \
+    clusterinformations.crd.projectcalico.org \
+    felixconfigurations.crd.projectcalico.org \
+    globalnetworkpolicies.crd.projectcalico.org \
+    globalnetworksets.crd.projectcalico.org \
+    hostendpoints.crd.projectcalico.org \
+    ippools.crd.projectcalico.org \
+    networkpolicies.crd.projectcalico.org
+
+Create AlibabaCloud Secrets:
+
+Before installing Cilium, a new Kubernetes Secret with the AlibabaCloud Tokens needs to
+be added to your Kubernetes cluster. This Secret will allow Cilium to gather
+information from the AlibabaCloud API which is needed to implement ToGroups policies.
+
+AlibabaCloud Access Keys:
+
+To create a new access token the following guide can be used.
+These keys need to have certain RAM Permissions:
+
+{
+  "Version": "1",
+  "Statement": [{
+      "Action": [
+        "ecs:CreateNetworkInterface",
+        "ecs:DescribeNetworkInterfaces",
+        "ecs:AttachNetworkInterface",
+        "ecs:DetachNetworkInterface",
+        "ecs:DeleteNetworkInterface",
+        "ecs:DescribeInstanceAttribute",
+        "ecs:DescribeInstanceTypes",
+        "ecs:AssignPrivateIpAddresses",
+        "ecs:UnassignPrivateIpAddresses",
+        "ecs:DescribeInstances",
+        "ecs:DescribeSecurityGroups",
+        "ecs:ListTagResources"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Effect": "Allow"
+    },
+    {
+      "Action": [
+        "vpc:DescribeVSwitches",
+        "vpc:ListTagResources",
+        "vpc:DescribeVpcs"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Effect": "Allow"
+    }
+  ]
+}
+
+As soon as you have the access tokens, the following secret needs to be added,
+with each empty string replaced by the associated value as a base64-encoded string:
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cilium-alibabacloud
+  namespace: kube-system
+type: Opaque
+data:
+  ALIBABA_CLOUD_ACCESS_KEY_ID: ""
+  ALIBABA_CLOUD_ACCESS_KEY_SECRET: ""
+
+The base64 command line utility can be used to generate each value, for example:
+
+$ echo -n "access_key" | base64
+YWNjZXNzX2tleQ==
+
+This secret stores the AlibabaCloud credentials, which will be used to
+connect to the AlibabaCloud API.
+
+$ kubectl create -f cilium-secret.yaml
+
+Install Cilium:
+
+Install Cilium release via Helm:
+
+Helm RepositoryOCI Registry
+
+helm install cilium cilium/cilium --version 1.20.2 \
+   --namespace kube-system \
+   --set alibabacloud.enabled=true \
+   --set ipam.mode=alibabacloud \
+   --set enableIPv4Masquerade=false \
+   --set routingMode=native
+
+helm install cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace kube-system \
+   --set alibabacloud.enabled=true \
+   --set ipam.mode=alibabacloud \
+   --set enableIPv4Masquerade=false \
+   --set routingMode=native
+
+Note
+
+You must ensure that the security groups associated with the ENIs (eth1,
+eth2, …) allow for egress traffic to go outside of the VPC. By default,
+the security groups for pod ENIs are derived from the primary ENI
+(eth0).
+
+Video
+
+If you’d like to learn more about Cilium Helm values, check out eCHO episode 117: A Tour of the Cilium Helm Values.
+
+## {#upgrading} 
+
+Upgrading
+
+## {#using-oci-registry} 
+
+Using OCI Registry
+
+helm upgrade cilium oci://quay.io/cilium/charts/cilium \
+  1.20.2 \
+  --namespace kube-system
+
+## {#migrating-from-traditional-repository-to-oci} 
+
+Migrating from Traditional Repository to OCI
+
+If you’re using the traditional repository (https://helm.cilium.io/),
+switching to OCI is straightforward as the charts are identical:
+
+helm upgrade cilium oci://quay.io/cilium/charts/cilium \
+  1.20.2 \
+  --namespace kube-system \
+  --reuse-values
+
+The --reuse-values flag preserves your existing configuration.
+
+## {#oci-vs-traditional-repository} 
+
+OCI vs Traditional Repository
+
+Feature
+
+OCI Registry
+
+Traditional Repository
+
+Setup
+
+None
+
+helm repo add
+
+Chart signing
+
+Yes (cosign)
+
+No
+
+Digest pinning
+
+Yes
+
+Limited
+
+Air-gapped install
+
+Standard OCI mirror tools
+
+Separate chart mirror
+
+Both methods remain fully supported.
+
+## {#troubleshooting} 
+
+Troubleshooting
+
+## {#failed-to-authorize-failed-to-fetch-anonymous-token} 
+
+“failed to authorize: failed to fetch anonymous token”
+
+This usually means network or registry connectivity issues. Test access:
+
+curl https://quay.io/v2/
+
+## {#chart-not-found} 
+
+“chart not found”
+
+Double-check your version number. Remember: no “v” prefix for Helm versions.
+
+## {#restart-unmanaged-pods} 
+
+Restart unmanaged Pods
+
+If you did not create a cluster with the nodes tainted with the taint
+node.cilium.io/agent-not-ready, then unmanaged pods need to be restarted
+manually. Restart all already running pods which are not running in
+host-networking mode to ensure that Cilium starts managing them. This is
+required to ensure that all pods which have been running before Cilium was
+deployed have network connectivity provided by Cilium and NetworkPolicy applies
+to them:
+
+$ kubectl get pods --all-namespaces -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,HOSTNETWORK:.spec.hostNetwork --no-headers=true | grep '<none>' | awk '{print "-n "$1" "$2}' | xargs -L 1 -r kubectl delete pod
+pod "event-exporter-v0.2.3-f9c896d75-cbvcz" deleted
+pod "fluentd-gcp-scaler-69d79984cb-nfwwk" deleted
+pod "heapster-v1.6.0-beta.1-56d5d5d87f-qw8pv" deleted
+pod "kube-dns-5f8689dbc9-2nzft" deleted
+pod "kube-dns-5f8689dbc9-j7x5f" deleted
+pod "kube-dns-autoscaler-76fcd5f658-22r72" deleted
+pod "kube-state-metrics-7d9774bbd5-n6m5k" deleted
+pod "l7-default-backend-6f8697844f-d2rq2" deleted
+pod "metrics-server-v0.3.1-54699c9cc8-7l5w2" deleted
+
+Note
+
+This may error out on macOS due to -r being unsupported by
+xargs. In this case you can safely run this command without -r
+with the symptom that this will hang if there are no pods to
+restart. You can stop this with ctrl-c.
+
+## {#validate-the-installation} 
+
+Validate the Installation
+
+Cilium CLIManually
+
+Install the latest version of the Cilium CLI. The Cilium CLI can be used to
+install Cilium, inspect the state of a Cilium installation, and enable/disable
+various features (e.g. clustermesh, Hubble).
+
+LinuxmacOSOther
+
+CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+CLI_ARCH=amd64
+if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
+sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
+rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+
+CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+CLI_ARCH=amd64
+if [ "$(uname -m)" = "arm64" ]; then CLI_ARCH=arm64; fi
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-darwin-${CLI_ARCH}.tar.gz{,.sha256sum}
+shasum -a 256 -c cilium-darwin-${CLI_ARCH}.tar.gz.sha256sum
+sudo tar xzvfC cilium-darwin-${CLI_ARCH}.tar.gz /usr/local/bin
+rm cilium-darwin-${CLI_ARCH}.tar.gz{,.sha256sum}
+
+See the full page of releases.
+
+To validate that Cilium has been properly installed, you can run
+
+$ cilium status --wait
+   /¯¯\
+/¯¯\__/¯¯\    Cilium:         OK
+\__/¯¯\__/    Operator:       OK
+/¯¯\__/¯¯\    Hubble:         disabled
+\__/¯¯\__/    ClusterMesh:    disabled
+   \__/
+
+DaemonSet         cilium             Desired: 2, Ready: 2/2, Available: 2/2
+Deployment        cilium-operator    Desired: 2, Ready: 2/2, Available: 2/2
+Containers:       cilium-operator    Running: 2
+                  cilium             Running: 2
+Image versions    cilium             quay.io/cilium/cilium:v1.9.5: 2
+                  cilium-operator    quay.io/cilium/operator-generic:v1.9.5: 2
+
+Run the following command to validate that your cluster has proper network
+connectivity:
+
+$ cilium connectivity test
+ℹ️  Monitor aggregation detected, will skip some flow validation steps
+✨ [k8s-cluster] Creating namespace for connectivity check...
+(...)
+---------------------------------------------------------------------------------------------------------------------
+📋 Test Report
+---------------------------------------------------------------------------------------------------------------------
+✅ 69/69 tests successful (0 warnings)
+
+Note
+
+The connectivity test may fail to deploy due to too many open files in one
+or more of the pods. If you notice this error, you can increase the
+inotify resource limits on your host machine (see
+Pod errors due to “too many open files”).
+
+Congratulations! You have a fully functional Kubernetes cluster with Cilium. 🎉
+
+You can monitor as Cilium and all required components are being installed:
+
+$ kubectl -n kube-system get pods --watch
+NAME                                    READY   STATUS              RESTARTS   AGE
+cilium-operator-cb4578bc5-q52qk         0/1     Pending             0          8s
+cilium-s8w5m                            0/1     PodInitializing     0          7s
+coredns-86c58d9df4-4g7dd                0/1     ContainerCreating   0          8m57s
+coredns-86c58d9df4-4l6b2                0/1     ContainerCreating   0          8m57s
+
+It may take a couple of minutes for all components to come up:
+
+cilium-operator-cb4578bc5-q52qk         1/1     Running   0          4m13s
+cilium-s8w5m                            1/1     Running   0          4m12s
+coredns-86c58d9df4-4g7dd                1/1     Running   0          13m
+coredns-86c58d9df4-4l6b2                1/1     Running   0          13m
+
+You can deploy the “connectivity-check” to test connectivity between pods. It is
+recommended to create a separate namespace for this.
+
+kubectl create ns cilium-test
+
+Deploy the check with:
+
+kubectl apply -n cilium-test -f https://raw.githubusercontent.com/cilium/cilium/1.20.2/examples/kubernetes/connectivity-check/connectivity-check.yaml
+
+It will deploy a series of deployments which will use various connectivity
+paths to connect to each other. Connectivity paths include with and without
+service load-balancing and various network policy combinations. The pod name
+indicates the connectivity variant and the readiness and liveness gate
+indicates success or failure of the test:
+
+$ kubectl get pods -n cilium-test
+NAME                                                     READY   STATUS    RESTARTS   AGE
+echo-a-76c5d9bd76-q8d99                                  1/1     Running   0          66s
+echo-b-795c4b4f76-9wrrx                                  1/1     Running   0          66s
+echo-b-host-6b7fc94b7c-xtsff                             1/1     Running   0          66s
+host-to-b-multi-node-clusterip-85476cd779-bpg4b          1/1     Running   0          66s
+host-to-b-multi-node-headless-dc6c44cb5-8jdz8            1/1     Running   0          65s
+pod-to-a-79546bc469-rl2qq                                1/1     Running   0          66s
+pod-to-a-allowed-cnp-58b7f7fb8f-lkq7p                    1/1     Running   0          66s
+pod-to-a-denied-cnp-6967cb6f7f-7h9fn                     1/1     Running   0          66s
+pod-to-b-intra-node-nodeport-9b487cf89-6ptrt             1/1     Running   0          65s
+pod-to-b-multi-node-clusterip-7db5dfdcf7-jkjpw           1/1     Running   0          66s
+pod-to-b-multi-node-headless-7d44b85d69-mtscc            1/1     Running   0          66s
+pod-to-b-multi-node-nodeport-7ffc76db7c-rrw82            1/1     Running   0          65s
+pod-to-external-1111-d56f47579-d79dz                     1/1     Running   0          66s
+pod-to-external-fqdn-allow-google-cnp-78986f4bcf-btjn7   1/1     Running   0          66s
+
+Note
+
+If you deploy the connectivity check to a single node cluster, pods that check multi-node
+functionalities will remain in the Pending state. This is expected since these pods
+need at least 2 nodes to be scheduled successfully.
+
+Once done with the test, remove the cilium-test namespace:
+
+kubectl delete ns cilium-test
+
+## {#next-steps} 
+
+Next Steps
+
+Setting up Hubble Observability
+
+Inspecting Network Flows with the CLI
+
+Service Map & Hubble UI
+
+Identity-Aware and HTTP-Aware Policy Enforcement
+
+Setting up Cluster Mesh
+
+          <footer

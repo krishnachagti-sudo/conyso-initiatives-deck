@@ -1,0 +1,1823 @@
+{
+  "topic": "Ingress, Gateway API and service mesh",
+  "notes": [
+    {
+      "id": "cca.ingress-gateway-mesh.sidecar-model",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the sidecar model of a service mesh?",
+      "back": "A design that pairs each pod with its own proxy, which handles that pod’s traffic.",
+      "explanation": "It offers excellent control per service, but uses more computing resources and grows harder to manage as the system grows.",
+      "example": "Like giving every employee a personal assistant who screens all their calls.",
+      "source": "CNCF Cloud Native Glossary, “Service Mesh”",
+      "sourceURL": "https://glossary.cncf.io/service-mesh/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This per-pod proxy intercepts and manages network traffic, enforces security policies, balances workloads, and collects performance data for each service. While this approach offers excellent control and service-specific traffic management, it also uses more computing resources and becomes more complex to manage as your system grows.",
+      "introduces": [
+        "sidecar model"
+      ],
+      "uses": [
+        "sidecar model",
+        "service mesh",
+        "sidecar container",
+        "service proxy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.sidecar-model"
+      ],
+      "order": 6010
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.sidecarless-model",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the sidecarless model of a service mesh?",
+      "back": "A design that moves mesh functions to the operating-system level, using kernel features such as eBPF, with no per-pod proxies.",
+      "explanation": "Dropping per-pod proxies cuts resource use and removes network hops, which lowers latency.",
+      "example": "Like one switchboard for the whole office instead of a personal assistant for each person.",
+      "source": "CNCF Cloud Native Glossary, “Service Mesh”",
+      "sourceURL": "https://glossary.cncf.io/service-mesh/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A Sidecarless design, on the other hand, moves the aforementioned mesh functionality to the operating system level by using kernel features like eBPF . By doing away with per-pod proxies, this method drastically reduces resource usage and removes unnecessary network hops, which lowers latency and boosts performance.",
+      "introduces": [
+        "sidecarless model"
+      ],
+      "uses": [
+        "sidecarless model",
+        "service mesh",
+        "kernel",
+        "ebpf",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.sidecarless-model"
+      ],
+      "order": 6020
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.cilium-ingress-controller",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the Cilium Ingress controller?",
+      "back": "Cilium’s own handler for standard Kubernetes Ingress resources, chosen with `ingressClassName: cilium`.",
+      "explanation": "It serves path-based routing and TLS termination for those Ingresses.",
+      "example": "Like a building’s own front desk rather than a separate reception firm hired in.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Kubernetes Ingress Support”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#gs-ingress",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium uses the standard Kubernetes Ingress resource definition, with an ingressClassName of cilium. This can be used for path-based routing and for TLS termination.",
+      "introduces": [
+        "Cilium Ingress controller"
+      ],
+      "uses": [
+        "Cilium Ingress controller",
+        "Ingress",
+        "ingress controller",
+        "IngressClass",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "cca.cilium-ingress"
+      ],
+      "order": 6030
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.ingress-default",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does the Helm value `ingressController.default=true` do?",
+      "back": "It makes Cilium the default ingress controller, so it handles Ingresses even when no ingress class is set.",
+      "explanation": "Without it, only Ingresses that name the `cilium` class are served by Cilium.",
+      "example": "Like a post room that takes any parcel with no department written on it.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Installation”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#installation",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium can become the default ingress controller by setting the --set ingressController.default=true flag. This will create ingress entries even when the ingressClass is not set.",
+      "introduces": [
+        "ingressController.default"
+      ],
+      "uses": [
+        "ingressController.default",
+        "ingress controller",
+        "IngressClass",
+        "Ingress",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "cca.ingress-default-class"
+      ],
+      "order": 6040
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.ingress2gateway",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is `ingress2gateway`?",
+      "back": "A tool that reads a cluster’s Ingress resources and prints equivalent Gateway API resources as YAML.",
+      "explanation": "The documentation calls it experimental and does not recommend it for production.",
+      "example": "Like an automatic translator: it gives you a first draft, not a finished text.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Migration Methods”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#migration-methods",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The ingress2gateway project reads Ingress resources from a Kubernetes cluster based on your current Kube Config. It outputs YAML for equivalent Gateway API resources to stdout. Note The ingress2gateway tool remains experimental and is not recommended for production.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "introduces": [
+        "ingress2gateway"
+      ],
+      "uses": [
+        "ingress2gateway",
+        "Ingress",
+        "Gateway API",
+        "yaml",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.ingress2gateway"
+      ],
+      "order": 6050
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.gamma",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is GAMMA?",
+      "back": "A workstream within the Gateway API project that defines how Gateway API can configure a service mesh.",
+      "explanation": "It aims to change Gateway API as little as possible and to keep its role-oriented design.",
+      "example": "Like reusing a city’s road-sign rules for the corridors inside its buildings.",
+      "source": "Cilium docs (1.20): GAMMA Support, “What is GAMMA?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gamma/#what-is-gamma",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "GAMMA’s goal is to define how Gateway API can be used to configure a service mesh, with the intention of making minimal changes to Gateway API and always preserving the role-oriented nature of Gateway API.",
+      "introduces": [
+        "GAMMA"
+      ],
+      "uses": [
+        "GAMMA",
+        "Gateway API",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "cca.gamma"
+      ],
+      "order": 6060
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.cec",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a CiliumEnvoyConfig (CEC)?",
+      "back": "A Cilium CRD for controlling layer 7 traffic; its cluster-scoped counterpart is CiliumClusterwideEnvoyConfig.",
+      "explanation": "Being a custom resource, it lets layer 7 traffic handling be declared through the Kubernetes API.",
+      "example": "Like handing the switchboard operator a written rulebook for routing calls.",
+      "source": "Cilium docs (1.20): L7-Aware Traffic Management, “L7-Aware Traffic Management”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/l7-traffic-management/#gs-l7-traffic-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium provides a way to control L7 traffic via CRDs (e.g. CiliumEnvoyConfig and CiliumClusterwideEnvoyConfig).",
+      "introduces": [
+        "CiliumEnvoyConfig",
+        "CEC"
+      ],
+      "uses": [
+        "CiliumEnvoyConfig",
+        "CEC",
+        "CRD",
+        "api"
+      ],
+      "conceptIDs": [
+        "cca.ciliumenvoyconfig"
+      ],
+      "order": 6070
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.feature-resilient",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which service mesh feature requires service-to-service communication to work across clouds, clusters and premises?",
+      "back": "Resilient connectivity.",
+      "explanation": "It also asks that such communication be resilient and fault tolerant.",
+      "source": "Cilium docs (1.20): Service Mesh, “What is Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#what-is-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Resilient Connectivity: Service to service communication must be possible across boundaries such as clouds, clusters, and premises. Communication must be resilient and fault tolerant.",
+      "uses": [
+        "service mesh",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.service-mesh-features"
+      ],
+      "order": 6080
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.feature-l7",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which service mesh feature requires load balancing, rate limiting and resiliency to understand protocols such as HTTP and gRPC?",
+      "back": "L7 traffic management.",
+      "explanation": "Balancing by connection alone is not enough when decisions depend on individual requests.",
+      "source": "Cilium docs (1.20): Service Mesh, “What is Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#what-is-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "L7 Traffic Management: Load balancing, rate limiting, and resiliency must be L7-aware (HTTP, REST, gRPC, WebSocket, …).",
+      "uses": [
+        "service mesh",
+        "http",
+        "grpc",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "cca.service-mesh-features"
+      ],
+      "order": 6090
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.feature-identity",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which service mesh feature has sender and receiver authenticate each other by identity rather than network identifiers?",
+      "back": "Identity-based security.",
+      "explanation": "The documentation says relying on network identifiers is no longer sufficient.",
+      "source": "Cilium docs (1.20): Service Mesh, “What is Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#what-is-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Identity-based Security: Relying on network identifiers to achieve security is no longer sufficient, both the sending and receiving services must be able to authenticate each other based on identities instead of a network identifier.",
+      "uses": [
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "cca.service-mesh-features"
+      ],
+      "order": 6100
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.feature-observability",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which service mesh feature covers tracing and metrics for understanding and troubleshooting applications?",
+      "back": "Observability and tracing.",
+      "explanation": "The documentation calls it critical to understanding stability, performance and availability.",
+      "source": "Cilium docs (1.20): Service Mesh, “What is Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#what-is-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Observability & Tracing: Observability in the form of tracing and metrics is critical to understanding, monitoring, and troubleshooting application stability, performance, and availability.",
+      "uses": [
+        "service mesh",
+        "observability"
+      ],
+      "conceptIDs": [
+        "cca.service-mesh-features"
+      ],
+      "order": 6110
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.feature-transparency",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which service mesh feature requires the mesh to work without changes to application code?",
+      "back": "Transparency.",
+      "explanation": "The mesh’s functions must reach applications in a transparent manner.",
+      "source": "Cilium docs (1.20): Service Mesh, “What is Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#what-is-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Transparency: The functionality must be available to applications in a transparent manner, i.e. without requiring to change application code.",
+      "uses": [
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "cca.service-mesh-features"
+      ],
+      "order": 6120
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.mesh-extracts",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In the Cilium documentation’s account, what does a service mesh do with features that applications once embedded themselves?",
+      "back": "It takes them out of the application and offers them as infrastructure for all applications.",
+      "explanation": "Each application then no longer has to change to get them.",
+      "source": "Cilium docs (1.20): Service Mesh, “What is Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#what-is-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A service mesh extracts these features out of the application and offers them as part of the infrastructure for all applications to use and thus no longer requires to change each application.",
+      "uses": [
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "cca.service-mesh-features"
+      ],
+      "order": 6130
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.ebpf-network",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In Cilium’s service mesh, what handles network processing for protocols such as `IP`, `TCP` and `UDP`?",
+      "back": "eBPF, as the in-kernel datapath.",
+      "explanation": "Application-layer protocols go to a proxy instead.",
+      "source": "Cilium docs (1.20): Service Mesh, “Why Cilium Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#why-cilium-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For all network processing including protocols such as IP, TCP, and UDP, Cilium uses eBPF as the highly efficient in-kernel datapath.",
+      "uses": [
+        "ebpf",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cca.why-cilium-mesh"
+      ],
+      "order": 6140
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.envoy-app",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In Cilium’s service mesh, what parses application-layer protocols such as HTTP, gRPC and DNS?",
+      "back": "A proxy such as Envoy.",
+      "explanation": "So the mesh is sidecarless, but not proxy-free: layer 7 work still goes through a proxy.",
+      "source": "Cilium docs (1.20): Service Mesh, “Why Cilium Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#why-cilium-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Protocols at the application layer such as HTTP, gRPC, and DNS are parsed using a proxy such as Envoy.",
+      "uses": [
+        "Envoy",
+        "http",
+        "grpc",
+        "DNS",
+        "sidecarless model"
+      ],
+      "conceptIDs": [
+        "cca.why-cilium-mesh"
+      ],
+      "order": 6150
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.ready-1-1",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Under Cilium Service Mesh, an application pod has one container. What does `kubectl get pods` show under `READY`?",
+      "back": "`1/1`; a sidecar implementation would show `2/2`, the extra container being the Envoy sidecar.",
+      "explanation": "Cilium creates no Envoy sidecar next to each workload.",
+      "source": "Cilium docs (1.20): Ingress and Network Policy Example, “Deploy the Demo App”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-and-network-policy/#deploy-the-demo-app",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note With the sidecar implementation the output would show 2/2 READY. One for the microservice and one for the Envoy sidecar.",
+      "uses": [
+        "kubectl",
+        "Pod",
+        "Envoy",
+        "sidecar model"
+      ],
+      "conceptIDs": [
+        "cca.no-sidecar-in-cilium"
+      ],
+      "order": 6160
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.per-node-envoy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Through what does Ingress and Gateway API traffic pass on its way to backends in Cilium?",
+      "back": "A per-node Envoy proxy that can look up policy in the eBPF policy engine.",
+      "explanation": "That makes Envoy a network policy enforcement point for this traffic.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Cilium’s ingress config and CiliumNetworkPolicy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#cilium-s-ingress-config-and-ciliumnetworkpolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Ingress and Gateway API traffic bound to backend services via Cilium passes through a per-node Envoy proxy. The per-node Envoy proxy has special code that allows it to interact with the eBPF policy engine, and do policy lookups on traffic.",
+      "uses": [
+        "Envoy",
+        "Ingress",
+        "Gateway API",
+        "ebpf",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.why-cilium-mesh",
+        "cca.cilium-ingress"
+      ],
+      "order": 6170
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.tproxy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How does traffic arriving at the port of a Cilium Ingress Service reach Envoy?",
+      "back": "eBPF code intercepts it and forwards it transparently to Envoy, using the kernel’s `TPROXY` facility.",
+      "explanation": "This is why client address visibility works differently from other ingress controllers.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “How Cilium Ingress and Gateway API differ from other Ingress controllers”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#how-cilium-ingress-and-gateway-api-differ-from-other-ingress-controllers",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "when traffic arrives at the Service’s port, eBPF code intercepts the traffic and transparently forwards it to Envoy (using the TPROXY kernel facility). This affects things like client IP visibility, which works differently for Cilium’s Ingress and Gateway API support to other Ingress controllers.",
+      "uses": [
+        "Cilium Ingress controller",
+        "Service",
+        "port",
+        "ebpf",
+        "Envoy",
+        "kernel",
+        "ingress controller"
+      ],
+      "conceptIDs": [
+        "cca.cilium-ingress"
+      ],
+      "order": 6180
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.prereq",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which two Cilium settings must be enabled for its Ingress and Gateway API support?",
+      "back": "`kubeProxyReplacement=true` and the layer 7 proxy, `l7Proxy=true`, which is on by default.",
+      "explanation": "Both Ingress and Gateway API pages list the same two prerequisites.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Prerequisites”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#prerequisites",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium must be configured with the kube-proxy replacement, using kubeProxyReplacement=true. For more information, see kube-proxy replacement. Cilium must be configured with the L7 proxy enabled using l7Proxy=true (enabled by default).",
+      "uses": [
+        "kube-proxy replacement",
+        "Ingress",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "cca.ingress-prereqs"
+      ],
+      "order": 6190
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.lb-service",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What kind of Service does the Cilium Ingress controller create by default, and what are the alternatives?",
+      "back": "A `LoadBalancer` Service; alternatives are `NodePort` or, since Cilium 1.16, exposing the proxy on the host network.",
+      "explanation": "The environment must therefore support LoadBalancer Services unless one of the alternatives is chosen.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Prerequisites”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#prerequisites",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, the Ingress controller creates a Service of LoadBalancer type, so your environment will need to support this. Alternatively, you can change this to NodePort or, since Cilium 1.16+, directly expose the Cilium L7 proxy on the host network.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "uses": [
+        "Cilium Ingress controller",
+        "Service",
+        "LoadBalancer",
+        "NodePort",
+        "host"
+      ],
+      "conceptIDs": [
+        "cca.ingress-lb-service"
+      ],
+      "order": 6200
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.host-network-exclusive",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Can the Cilium Ingress controller’s host network mode be used together with its LoadBalancer Service?",
+      "back": "No: enabling host network mode turns off the LoadBalancer/NodePort Service mode; they are mutually exclusive.",
+      "explanation": "The listener is then exposed on all of the host’s interfaces instead.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Host network mode”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#host-network-mode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Enabling the Cilium ingress controller host network mode automatically disables the LoadBalancer/NodePort type Service mode. They are mutually exclusive.",
+      "uses": [
+        "Cilium Ingress controller",
+        "LoadBalancer",
+        "NodePort",
+        "Service",
+        "host"
+      ],
+      "conceptIDs": [
+        "cca.ingress-lb-service"
+      ],
+      "order": 6210
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.enable",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "The Cilium Ingress controller is enabled with the Helm value {{c1::`ingressController.enabled=true`}}.",
+      "explanation": "Like other Cilium features, it is switched on through the Helm chart’s values.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Installation”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#installation",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium Ingress Controller can be enabled with helm flag ingressController.enabled set as true.",
+      "uses": [
+        "Cilium Ingress controller",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "cca.ingress-enable"
+      ],
+      "order": 6220
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.mode-dedicated",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In `dedicated` load balancer mode, what does the Cilium Ingress controller create?",
+      "back": "A dedicated load balancer for each Ingress.",
+      "explanation": "Its counterpart, `shared`, uses one load balancer for all Ingresses.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Kubernetes Ingress Support”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#gs-ingress",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "dedicated: The Ingress controller will create a dedicated loadbalancer for the Ingress. shared: The Ingress controller will use a shared loadbalancer for all Ingress resources.",
+      "uses": [
+        "Cilium Ingress controller",
+        "load balancer",
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cca.ingress-lb-modes"
+      ],
+      "order": 6230
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.mode-shared",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In `shared` load balancer mode, how many load balancers serve the cluster’s Ingress resources?",
+      "back": "One, shared by all Ingress resources.",
+      "explanation": "Its counterpart, `dedicated`, creates one per Ingress.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Kubernetes Ingress Support”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#gs-ingress",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "dedicated: The Ingress controller will create a dedicated loadbalancer for the Ingress. shared: The Ingress controller will use a shared loadbalancer for all Ingress resources.",
+      "uses": [
+        "Cilium Ingress controller",
+        "load balancer",
+        "Ingress",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.ingress-lb-modes"
+      ],
+      "order": 6240
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.mode-change",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What can happen to active connections when an Ingress’s load balancer mode is changed?",
+      "back": "They may be cut, because a new load balancer IP address is assigned to the Ingress.",
+      "explanation": "The change is possible, but it is a reconfiguration, not a seamless switch.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Kubernetes Ingress Support”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#gs-ingress",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When the mode is changed, active connections to backends of the Ingress may be terminated during the reconfiguration due to a new load balancer IP address being assigned to the Ingress resource.",
+      "uses": [
+        "Ingress",
+        "load balancer",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.ingress-lb-modes"
+      ],
+      "order": 6250
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.ingress-identity",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What identity does Cilium’s policy engine give traffic that arrives at Envoy for Ingress or Gateway API?",
+      "back": "The special `ingress` identity; traffic from outside the cluster usually carries the world identity before that.",
+      "explanation": "So a request is judged twice: once reaching Envoy, and again leaving it for the backend.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Cilium’s ingress config and CiliumNetworkPolicy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#cilium-s-ingress-config-and-ciliumnetworkpolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Traffic that arrives at Envoy for Ingress or Gateway API is assigned the special ingress identity in Cilium’s Policy engine. Traffic coming from outside the cluster is usually assigned the world identity (unless there are IP CIDR policies in the cluster).",
+      "uses": [
+        "Envoy",
+        "Ingress",
+        "Gateway API",
+        "security identity",
+        "reserved:world",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.ingress-policy"
+      ],
+      "order": 6260
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.two-steps",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "When applying network policy to a cluster that uses Cilium Ingress, which two steps must both be allowed?",
+      "back": "Traffic from world to ingress, and from ingress to the backend identities in the cluster.",
+      "explanation": "There are two logical enforcement points: before the ingress identity and when leaving the per-node Envoy.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Cilium’s ingress config and CiliumNetworkPolicy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#cilium-s-ingress-config-and-ciliumnetworkpolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This means that, when applying Network Policy to a cluster, it’s important to ensure that both steps are allowed, and that traffic is allowed from world to ingress, and from ingress to identities in the cluster",
+      "uses": [
+        "Cilium Ingress controller",
+        "world entity",
+        "security identity",
+        "cluster",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "cca.ingress-policy"
+      ],
+      "order": 6270
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.xff",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "By default, how does a backend behind Cilium Ingress learn the client’s address?",
+      "back": "From the `X-Forwarded-For` header, to which Cilium’s Envoy appends the visible source address.",
+      "explanation": "Many HTTP libraries handle that header transparently.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Source IP Visibility”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#source-ip-visibility",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, Cilium’s Envoy instances are configured to append the visible source address of incoming HTTP connections to the X-Forwarded-For header, using the usual rules.",
+      "uses": [
+        "Cilium Ingress controller",
+        "Envoy",
+        "http"
+      ],
+      "conceptIDs": [
+        "cca.cilium-ingress"
+      ],
+      "order": 6280
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.gw-version",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Gateway API version does Cilium 1.20 support, and how well?",
+      "back": "v1.6.1, passing all the Core conformance tests.",
+      "explanation": "The supported version changes with Cilium releases, so check it for the version you run.",
+      "source": "Cilium docs (1.20): Gateway API Support, “Cilium Gateway API Support”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/#cilium-gateway-api-support",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium supports Gateway API v1.6.1 for below resources, all the Core conformance tests are passed. GatewayClass Gateway HTTPRoute GRPCRoute TLSRoute BackendTLSPolicy ReferenceGrant ListenerSet TCPRoute UDPRoute",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "uses": [
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "cca.gateway-api-resources"
+      ],
+      "order": 6290
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.gw-routes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two route resources, other than HTTPRoute, that Cilium’s Gateway API support covers?",
+      "back": "Any two of GRPCRoute, TLSRoute, TCPRoute and UDPRoute.",
+      "explanation": "Routes for protocols beyond HTTP are one thing Gateway API adds over Ingress.",
+      "source": "Cilium docs (1.20): Gateway API Support, “Cilium Gateway API Support”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/#cilium-gateway-api-support",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium supports Gateway API v1.6.1 for below resources, all the Core conformance tests are passed. GatewayClass Gateway HTTPRoute GRPCRoute TLSRoute BackendTLSPolicy ReferenceGrant ListenerSet TCPRoute UDPRoute",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "uses": [
+        "Gateway API",
+        "HTTPRoute",
+        "GRPCRoute",
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cca.gateway-api-resources"
+      ],
+      "order": 6300
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.gw-classconfig",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which Cilium CRD can a GatewayClass reference through `parametersRef`?",
+      "back": "CiliumGatewayClassConfig.",
+      "explanation": "It is Cilium’s own addition on top of the standard Gateway API resources.",
+      "source": "Cilium docs (1.20): Gateway API Support, “Cilium Gateway API Support”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/#cilium-gateway-api-support",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Additionally, Cilium provides CiliumGatewayClassConfig CRD, which can be referenced in GatewayClass.parametersRef.",
+      "uses": [
+        "GatewayClass",
+        "CRD",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "cca.gateway-api-resources"
+      ],
+      "order": 6310
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.gw-crds",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What must be installed in the cluster for Cilium’s Gateway API support to work?",
+      "back": "The Gateway API CRDs, such as GatewayClass, Gateway, HTTPRoute, GRPCRoute and ReferenceGrant, at the supported version.",
+      "explanation": "Cilium implements the resources but does not define them; the CRDs come from the Gateway API project.",
+      "source": "Cilium docs (1.20): Gateway API Support, “Installation”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/#installation",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The below CRDs from Gateway API v1.6.1 must be installed. GatewayClass Gateway HTTPRoute GRPCRoute BackendTLSPolicy ReferenceGrant TLSRoute",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "uses": [
+        "Gateway API",
+        "CRD",
+        "GatewayClass",
+        "Gateway",
+        "HTTPRoute",
+        "GRPCRoute",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.gateway-api-crds"
+      ],
+      "order": 6320
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.gw-tproxy-iptables",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "With the default `bpf.tproxy=false`, what must nodes provide for Gateway traffic to reach Envoy?",
+      "back": "`iptables` and the listed netfilter modules; without them, connections to the Gateway time out.",
+      "explanation": "The beta `bpf.tproxy=true` option removes this dependency.",
+      "source": "Cilium docs (1.20): Gateway API Support, “Prerequisites”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/#gs-gateway-api-prerequisites",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With the default bpf.tproxy=false, TPROXY is implemented with iptables, so nodes must provide iptables along with the netfilter modules listed in the L7 proxy system requirements. Some distributions do not ship these by default, in which case connections to the Gateway time out without ever reaching Envoy.",
+      "uses": [
+        "Gateway",
+        "Envoy",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.ingress-prereqs"
+      ],
+      "order": 6330
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.lim-routing",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which advanced routing features does the Kubernetes Ingress API lack natively?",
+      "back": "Among others: traffic splitting, header modification and `URL` rewriting.",
+      "explanation": "It supports only basic routing on path and host rules.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Ingress API Limitations”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#ingress-api-limitations",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Ingress API supports basic routing based on path and host rules, but it lacks native support for more advanced routing features such as traffic splitting, header modification, and URL rewriting.",
+      "uses": [
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cca.ingress-limitations"
+      ],
+      "order": 6340
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.lim-protocols",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which protocols does the Kubernetes Ingress API support?",
+      "back": "Only HTTP and `HTTPS`; it does not natively support others such as `TCP` or `UDP`.",
+      "explanation": "Gateway API was designed partly to cover the protocols Ingress leaves out.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Ingress API Limitations”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#ingress-api-limitations",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Ingress API only supports HTTP and HTTPS traffic, and does not natively support other protocols like TCP or UDP.",
+      "uses": [
+        "Ingress",
+        "http",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "cca.ingress-limitations"
+      ],
+      "order": 6350
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.lim-annotations",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What problem did vendor-specific annotations cause for Ingress users?",
+      "back": "Inconsistencies between ingress controllers, so switching controllers often caused issues.",
+      "explanation": "Vendors added annotations to work around the Ingress specification’s limits.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Ingress API Limitations”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#ingress-api-limitations",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "However, using annotations created inconsistencies from one Ingress Controller to another. For example, issues often arise when switching from one Ingress Controller to another because annotations are often vendor-specific.",
+      "uses": [
+        "Ingress",
+        "ingress controller"
+      ],
+      "conceptIDs": [
+        "cca.ingress-limitations"
+      ],
+      "order": 6360
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.lim-operations",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What operational constraint does the Kubernetes Ingress API have?",
+      "back": "It is not well suited to multi-team clusters with shared load-balancing infrastructure.",
+      "explanation": "Its single-persona model gives no clean split between teams sharing one entry point.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Ingress API Limitations”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#ingress-api-limitations",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Finally, the Ingress API suffers from operational constraints: it is not well suited for multi-team clusters with shared load-balancing infrastructure.",
+      "uses": [
+        "Ingress",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.ingress-limitations"
+      ],
+      "order": 6370
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.ben-native",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which external-traffic functions does Gateway API manage natively?",
+      "back": "HTTP routing, TLS termination, traffic splitting or weighting, and header modification.",
+      "explanation": "Having them native is what removes the need for annotations.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Benefits of the Gateway API”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#benefits-of-the-gateway-api",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Gateway API provides a centralized mechanism for managing and enforcing policies for external traffic, including HTTP routing, TLS termination, traffic splitting/weighting, and header modification.",
+      "uses": [
+        "Gateway API",
+        "http",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "cca.gateway-benefits"
+      ],
+      "order": 6380
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.ben-portable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why are Gateway API resources more portable between implementations than Ingress resources?",
+      "back": "Ingress traffic patterns are supported natively, so annotations are no longer required.",
+      "explanation": "Annotations were vendor-specific; native fields mean the same thing everywhere.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Benefits of the Gateway API”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#benefits-of-the-gateway-api",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Native support of policies for external traffic means that annotations are no longer required to support ingress traffic patterns. This means that Gateway API resources are more portable from one Gateway API implementation to another.",
+      "uses": [
+        "Gateway API",
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cca.gateway-benefits"
+      ],
+      "order": 6390
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.ben-beyond-http",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Besides being the long-term successor to Ingress, what does Gateway API support that Ingress does not?",
+      "back": "Use cases beyond HTTP and `HTTPS` applications.",
+      "explanation": "Route types for other protocols are part of that.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Migrating from Ingress to Gateway”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#gs-ingress-to-gateway",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Gateway API is not only the long-term successor to the Ingress API, it also supports use cases beyond HTTP/HTTPS-based applications.",
+      "uses": [
+        "Gateway API",
+        "Ingress",
+        "http"
+      ],
+      "conceptIDs": [
+        "cca.gateway-benefits"
+      ],
+      "order": 6400
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.ben-no-annotation-port",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Why is it rare to carry vendor Ingress annotations over into Gateway API resources?",
+      "back": "Gateway API avoids implementation-specific annotations, and supports some of those features natively instead.",
+      "explanation": "Examples it supports natively include traffic splitting and routing by header, query parameter or method.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Ingress Annotations Migration”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#ingress-annotations-migration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the Gateway API avoids implementation-specific annotations in order to provide a portable configuration. As a consequence, it’s rare to port implementation-specific Ingress annotations to a Gateway API resource.",
+      "uses": [
+        "Gateway API",
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cca.gateway-benefits"
+      ],
+      "order": 6410
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.persona-infra",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Gateway API persona administers a cloud provider’s managed services, or is the on-premises network team?",
+      "back": "Infrastructure providers.",
+      "explanation": "They run the infrastructure beneath the cluster, while cluster operators run the cluster itself.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Benefits of the Gateway API”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#benefits-of-the-gateway-api",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Infrastructure Providers administrate the managed services of a cloud provider, or the infrastructure/network team when running Kubernetes on-premises.",
+      "uses": [
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "cca.gateway-personas"
+      ],
+      "order": 6420
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.persona-operator",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Gateway API persona is responsible for administering a cluster?",
+      "back": "Cluster operators.",
+      "explanation": "Infrastructure providers run what lies beneath the cluster; application developers configure their own apps on it.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Benefits of the Gateway API”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#benefits-of-the-gateway-api",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cluster Operators are responsible for the administration of a cluster.",
+      "uses": [
+        "Gateway API",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.gateway-personas"
+      ],
+      "order": 6430
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.persona-dev",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Gateway API persona defines application configuration and service composition?",
+      "back": "Application developers.",
+      "explanation": "They can be given rights to create routes without being able to change the Gateway.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Benefits of the Gateway API”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#benefits-of-the-gateway-api",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Application Developers are responsible for defining application configuration and service composition.",
+      "uses": [
+        "Gateway API",
+        "Gateway"
+      ],
+      "conceptIDs": [
+        "cca.gateway-personas"
+      ],
+      "order": 6440
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.persona-ingress",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which persona model does the Ingress API assume?",
+      "back": "A single persona: developers who create and manage Ingress and Service resources themselves.",
+      "explanation": "Gateway API splits that one role into several, each with its own access.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Benefits of the Gateway API”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#benefits-of-the-gateway-api",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Ingress model is based on a persona where developers manage and create ingress and service resources themselves.",
+      "uses": [
+        "Ingress",
+        "Service",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "cca.gateway-personas"
+      ],
+      "order": 6450
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.migration-methods",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What are the two primary methods for migrating Ingress resources to Gateway API?",
+      "back": "Manual, creating Gateway API resources by hand; and automated, generating them with ingress2gateway.",
+      "explanation": "The automated route still needs checking, since the tool is experimental.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Migration Methods”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#migration-methods",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "There are two primary methods to migrate Ingress API resources to Gateway API: manual: manually creating Gateway API resources based on existing Ingress API resources. automated: creating rules using the ingress2gateway tool.",
+      "uses": [
+        "Ingress",
+        "Gateway API",
+        "ingress2gateway"
+      ],
+      "conceptIDs": [
+        "cca.ingress2gateway"
+      ],
+      "order": 6460
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.splitting",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What is HTTP traffic splitting in Cilium’s Gateway API, and what is it useful for?",
+      "back": "Sending incoming traffic to several backend services by weights or other criteria; useful for canary testing and A/B scenarios.",
+      "explanation": "Cilium’s Gateway API supports it natively, with no annotations.",
+      "source": "Cilium docs (1.20): Traffic Splitting Example, “Traffic Splitting Example”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/splitting/#gs-gateway-splitting",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "HTTP traffic splitting is the process of sending incoming traffic to multiple backend services, based on predefined weights or other criteria. The Cilium Gateway API includes built-in support for traffic splitting, allowing users to easily distribute incoming traffic across multiple backend services. This is very useful for canary testing or A/B scenarios.",
+      "uses": [
+        "Gateway API",
+        "http",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.traffic-splitting"
+      ],
+      "order": 6470
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.weight",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In an HTTPRoute, each entry under {{c1::`backendRefs`}} can carry a `weight` that sets its share of the traffic.",
+      "explanation": "Changing the weights, for example from 50/50 to 99/1, shifts traffic between backends.",
+      "source": "Cilium docs (1.20): Traffic Splitting Example, “Traffic Splitting Example”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/splitting/#gs-gateway-splitting",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "backendRefs: - kind: Service name: echo-1 port: 8080 weight: 99 - kind: Service name: echo-2 port: 8090 weight: 1",
+      "uses": [
+        "HTTPRoute",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.traffic-splitting"
+      ],
+      "order": 6480
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.tls-spec",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Where does an Ingress served by Cilium name the certificate used for TLS termination?",
+      "back": "In `spec.tls`: a list of `hosts` and a `secretName` pointing to a TLS Secret.",
+      "explanation": "The Secret holds the key and certificate for those host names.",
+      "source": "Cilium docs (1.20): Ingress Example with TLS Termination, “Ingress Example with TLS Termination”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/tls-termination/#gs-ingress-tls",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "tls: - hosts: - bookinfo.cilium.rocks - hipstershop.cilium.rocks secretName: demo-cert",
+      "uses": [
+        "Ingress",
+        "Secret",
+        "tls / mtls",
+        "digital certificate"
+      ],
+      "conceptIDs": [
+        "cca.tls-termination"
+      ],
+      "order": 6490
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.gamma-parent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "In GAMMA, what does a Route bind to as its parent?",
+      "back": "A Service, instead of a Gateway as in north-south use of Gateway API.",
+      "explanation": "Binding to a Service is what lets routing apply to traffic inside the mesh.",
+      "source": "Cilium docs (1.20): GAMMA Support, “What is GAMMA?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gamma/#what-is-gamma",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "GAMMA supports adding extra routing to Services by binding a Route (HTTPRoute or GRPCRoute) to a Service as a parent (as opposed to the north/south Gateway API usage of binding a Route to a Gateway as a parent).",
+      "uses": [
+        "GAMMA",
+        "Service",
+        "Gateway",
+        "HTTPRoute",
+        "GRPCRoute",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "cca.gamma"
+      ],
+      "order": 6500
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.gamma-envoy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What does GAMMA give Cilium users compared with configuring Envoy directly?",
+      "back": "The same function as Cilium’s layer 7 traffic management, without needing to know how to configure Envoy.",
+      "explanation": "Cilium intercepts layer 7 traffic to the parent Service and routes it through the per-node Envoy.",
+      "source": "Cilium docs (1.20): GAMMA Support, “What is GAMMA?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gamma/#what-is-gamma",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This allows Cilium to intercept layer 7 traffic flowing to a parent Service and route the traffic through the per-node Envoy proxy. Because of this, GAMMA performs the same function as Cilium’s Layer 7 traffic management, without the user needing to know anything about configuring Envoy directly.",
+      "uses": [
+        "GAMMA",
+        "Envoy",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.gamma"
+      ],
+      "order": 6510
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.gamma-producer",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which kind of GAMMA Route does Cilium support?",
+      "back": "Only producer Routes, in the same namespace as the Service they bind to; consumer Routes are not supported.",
+      "explanation": "The Service’s owner, not its consumers, therefore controls its mesh routing.",
+      "source": "Cilium docs (1.20): GAMMA Support, “Types of GAMMA configuration”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gamma/#types-of-gamma-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium currently supports only “Producer” Routes, and so HTTPRoutes and GRPCRoutes must be in the same namespace as the Service that they are binding to.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "uses": [
+        "GAMMA",
+        "namespace",
+        "Service",
+        "HTTPRoute",
+        "GRPCRoute"
+      ],
+      "conceptIDs": [
+        "cca.gamma"
+      ],
+      "order": 6520
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.cec-conflicts",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What happens if several CECs modify the same parts of Envoy’s configuration?",
+      "back": "The results may be unpredictable: CECs get minimal validation and have no defined conflict resolution.",
+      "explanation": "Nothing decides which CEC wins, so overlapping changes are unsafe.",
+      "source": "Cilium docs (1.20): L7-Aware Traffic Management, “Caveats”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/l7-traffic-management/#caveats",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "CiliumEnvoyConfig resources have only minimal validation performed, and do not have a defined conflict resolution behavior. This means that if you create multiple CECs that modify the same parts of Envoy’s config, the results may be unpredictable.",
+      "uses": [
+        "CEC",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "cca.ciliumenvoyconfig"
+      ],
+      "order": 6530
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.cec-admin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Who should be allowed to create or change CECs?",
+      "back": "Cluster administrators only; permissions for them should not be delegated to other users.",
+      "explanation": "The documentation calls these resources implementation details.",
+      "source": "Cilium docs (1.20): L7-Aware Traffic Management, “Caveats”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/l7-traffic-management/#caveats",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "CiliumEnvoyConfig and CiliumClusterwideEnvoyConfig resources are implementation details. Both should be treated as cluster admin resources and permissions for their configuration should not be delegated to other users.",
+      "uses": [
+        "CEC",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.ciliumenvoyconfig"
+      ],
+      "order": 6540
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.cec-generated",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Cilium features create CECs themselves?",
+      "back": "Its Ingress and Gateway API support, which use them to direct traffic through the per-node Envoy proxies.",
+      "explanation": "Hand-written CECs that touch this generated config can give unpredictable results.",
+      "source": "Cilium docs (1.20): L7-Aware Traffic Management, “Caveats”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/l7-traffic-management/#caveats",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "CiliumEnvoyConfig is used by Cilium’s Ingress and Gateway API support to direct traffic through the per-node Envoy proxies. If you create CECs that conflict with or modify the autogenerated config, results may be unpredictable.",
+      "uses": [
+        "CEC",
+        "Ingress",
+        "Gateway API",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "cca.ciliumenvoyconfig"
+      ],
+      "order": 6550
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.envoy-config-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "How do you enable Cilium’s Envoy traffic management without Ingress support?",
+      "back": "Enable only `--enable-envoy-config`, set in Helm as `envoyConfig.enabled=true`.",
+      "explanation": "This leaves the Ingress controller off while allowing CECs.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Installation”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#installation",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If you only want to use envoy traffic management feature without Ingress support, you should only enable --enable-envoy-config flag. Helm RepositoryOCI Registry helm upgrade cilium cilium/cilium --version 1.20.2 \\ --namespace kube-system \\ --reuse-values \\ --set envoyConfig.enabled=true",
+      "uses": [
+        "Envoy",
+        "Ingress",
+        "Helm chart",
+        "CEC"
+      ],
+      "conceptIDs": [
+        "cca.ciliumenvoyconfig"
+      ],
+      "order": 6560
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.istio-recommended",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What is the recommended way to run Istio on a Cilium cluster?",
+      "back": "With kube-proxy present: `kubeProxyReplacement: false`, the default.",
+      "explanation": "kube-proxy then keeps handling ClusterIP routing.",
+      "source": "Cilium docs (1.20): Integration with Istio, “Integration with Istio”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/istio/#gsg-istio",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With kube-proxy present (recommended): Set kubeProxyReplacement: false (the default). Cilium does not fully replace kube-proxy; kube-proxy continues to handle ClusterIP routing.",
+      "uses": [
+        "kube-proxy",
+        "kube-proxy replacement",
+        "ClusterIP"
+      ],
+      "conceptIDs": [
+        "cca.istio-integration"
+      ],
+      "order": 6570
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.istio-no-kube-proxy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which settings let Cilium run with Istio when kube-proxy is removed?",
+      "back": "`kubeProxyReplacement: true`, `socketLB.hostNamespaceOnly: true` and `cni.exclusive: false`.",
+      "explanation": "They stop Cilium’s socket-based load balancing from interfering with Istio’s proxying.",
+      "source": "Cilium docs (1.20): Integration with Istio, “Integration with Istio”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/istio/#gsg-istio",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With kube-proxy removed (full replacement): Set kubeProxyReplacement: true, socketLB.hostNamespaceOnly: true, and cni.exclusive: false. These settings prevent Cilium’s socket-based load balancing from interfering with Istio’s proxying.",
+      "uses": [
+        "kube-proxy",
+        "kube-proxy replacement",
+        "socket-LB"
+      ],
+      "conceptIDs": [
+        "cca.istio-integration"
+      ],
+      "order": 6580
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.istio-one-l7",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Should Cilium and Istio layer 7 HTTP policy controls be used at the same time?",
+      "back": "No: use one or the other, to avoid split-brain problems.",
+      "explanation": "Two engines deciding the same requests could disagree.",
+      "source": "Cilium docs (1.20): Integration with Istio, “Istio configuration”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/istio/#istio-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Either Cilium or Istio L7 HTTP policy controls can be used, but it is not recommended to use both Cilium and Istio L7 HTTP policy controls at the same time, to avoid split-brain problems.",
+      "uses": [
+        "http"
+      ],
+      "conceptIDs": [
+        "cca.istio-integration"
+      ],
+      "order": 6590
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.istio-mtls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Why must Istio mTLS be turned off for workloads that Cilium layer 7 policy is to manage?",
+      "back": "Istio’s mTLS encrypts their traffic, so Cilium cannot see it to enforce layer 7 policy.",
+      "explanation": "Cilium can only apply layer 7 rules to traffic it can read.",
+      "source": "Cilium docs (1.20): Integration with Istio, “Istio configuration”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/istio/#istio-configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "as otherwise the traffic between Istio-managed workloads will be encrypted by Istio with mTLS, and not accessible to Cilium for the purposes of L7 policy enforcement.",
+      "uses": [
+        "mtls",
+        "encryption"
+      ],
+      "conceptIDs": [
+        "cca.istio-integration"
+      ],
+      "order": 6600
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-feature",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A team wants retries and rate limits that understand individual gRPC calls, not just connections. Which service mesh feature is that?",
+      "back": "D: L7 traffic management",
+      "choices": "A) Resilient connectivity\nB) Identity-based security\nC) Observability and tracing\nD) L7 traffic management",
+      "choicesExplained": "A is about reaching services across clouds and clusters. B is about mutual authentication. C is about tracing and metrics.",
+      "explanation": "Load balancing, rate limiting and resiliency must be aware of protocols like gRPC.",
+      "source": "Cilium docs (1.20): Service Mesh, “What is Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#what-is-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "L7 Traffic Management: Load balancing, rate limiting, and resiliency must be L7-aware (HTTP, REST, gRPC, WebSocket, …).",
+      "uses": [
+        "service mesh",
+        "grpc"
+      ],
+      "conceptIDs": [
+        "cca.service-mesh-features"
+      ],
+      "order": 6610
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-split-work",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A Cilium mesh has a route based on an HTTP header and a rule allowing a plain `TCP` port. Which part of Cilium handles each?",
+      "back": "D: Envoy handles the header route; eBPF handles the port rule",
+      "choices": "A) Envoy handles both\nB) eBPF handles the header route; Envoy handles the port rule\nC) eBPF handles both\nD) Envoy handles the header route; eBPF handles the port rule",
+      "choicesExplained": "A and C ignore the split between the two layers. B reverses it.",
+      "explanation": "Network-level processing runs in eBPF; application-layer protocols are parsed by a proxy.",
+      "source": "Cilium docs (1.20): Service Mesh, “Why Cilium Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#why-cilium-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For all network processing including protocols such as IP, TCP, and UDP, Cilium uses eBPF as the highly efficient in-kernel datapath. Protocols at the application layer such as HTTP, gRPC, and DNS are parsed using a proxy such as Envoy.",
+      "uses": [
+        "ebpf",
+        "Envoy",
+        "http",
+        "port"
+      ],
+      "conceptIDs": [
+        "cca.why-cilium-mesh"
+      ],
+      "order": 6620
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-ready",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "An engineer used to a sidecar mesh enables Cilium Service Mesh and expects each single-container pod to show `2/2` ready. What will they see, and why?",
+      "back": "D: `1/1`, because Cilium adds no Envoy sidecar",
+      "choices": "A) `3/3`, because Hubble is injected too\nB) `2/2`, because Envoy is injected into each pod\nC) `0/1`, because pods wait for Envoy\nD) `1/1`, because Cilium adds no Envoy sidecar",
+      "choicesExplained": "B describes the sidecar model. C and A invent containers that Cilium does not add.",
+      "explanation": "Cilium runs Envoy per node, not per pod.",
+      "source": "Cilium docs (1.20): Ingress and Network Policy Example, “Deploy the Demo App”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-and-network-policy/#deploy-the-demo-app",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "can confirm that with Cilium Service Mesh there is no Envoy sidecar created alongside each of the demo app microservices.",
+      "uses": [
+        "sidecar model",
+        "Pod",
+        "Envoy",
+        "Hubble"
+      ],
+      "conceptIDs": [
+        "cca.no-sidecar-in-cilium",
+        "cca.sidecarless-model"
+      ],
+      "order": 6630
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-class",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A cluster has two ingress controllers. Which Ingress field makes the Cilium Ingress controller serve a given Ingress?",
+      "back": "B: `spec.ingressClassName: cilium`",
+      "choices": "A) `metadata.namespace: kube-system`\nB) `spec.ingressClassName: cilium`\nC) `spec.defaultBackend: cilium`\nD) `metadata.labels.app: cilium`",
+      "choicesExplained": "A only places the object in a namespace. C names a backend Service, not a controller. D is an ordinary label.",
+      "explanation": "Cilium serves Ingresses whose class is `cilium`.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Kubernetes Ingress Support”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#gs-ingress",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium uses the standard Kubernetes Ingress resource definition, with an ingressClassName of cilium.",
+      "uses": [
+        "Cilium Ingress controller",
+        "ingress controller",
+        "Ingress",
+        "IngressClass",
+        "namespace",
+        "label",
+        "Service",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.cilium-ingress"
+      ],
+      "order": 6640
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-prereq",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A cluster runs Cilium alongside kube-proxy with `kubeProxyReplacement=false`. The team wants Cilium’s Ingress controller. What must change first?",
+      "back": "C: Set `kubeProxyReplacement=true`",
+      "choices": "A) Install an Envoy sidecar in each pod\nB) Set `ingressController.default=true`\nC) Set `kubeProxyReplacement=true`\nD) Disable the layer 7 proxy",
+      "choicesExplained": "A is not how Cilium works. B only makes Cilium the default controller. D would remove another prerequisite.",
+      "explanation": "Ingress and Gateway API support need the kube-proxy replacement and the layer 7 proxy.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Prerequisites”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#prerequisites",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium must be configured with the kube-proxy replacement, using kubeProxyReplacement=true. For more information, see kube-proxy replacement. Cilium must be configured with the L7 proxy enabled using l7Proxy=true (enabled by default).",
+      "uses": [
+        "kube-proxy",
+        "kube-proxy replacement",
+        "Cilium Ingress controller",
+        "ingressController.default",
+        "Envoy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.ingress-prereqs"
+      ],
+      "order": 6650
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-no-lb",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "On a bare-metal lab cluster with no LoadBalancer support, the Cilium Ingress stays without an address. Which change is documented to fix this?",
+      "back": "A: Use a NodePort Service or host network mode instead",
+      "choices": "A) Use a NodePort Service or host network mode instead\nB) Add `ingressController.default=true`\nC) Change the Ingress load balancer mode to `shared`\nD) Switch to the sidecar model",
+      "choicesExplained": "D is unrelated. B changes which Ingresses Cilium serves, not how it is exposed. C still needs a LoadBalancer Service.",
+      "explanation": "By default the controller creates a LoadBalancer Service, which the environment must support.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Prerequisites”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#prerequisites",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, the Ingress controller creates a Service of LoadBalancer type, so your environment will need to support this. Alternatively, you can change this to NodePort or, since Cilium 1.16+, directly expose the Cilium L7 proxy on the host network.",
+      "uses": [
+        "LoadBalancer",
+        "NodePort",
+        "Service",
+        "host",
+        "Cilium Ingress controller",
+        "ingressController.default",
+        "sidecar model",
+        "Ingress",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.ingress-lb-service"
+      ],
+      "order": 6660
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-lb-mode",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Two teams’ Ingresses both route the path prefix `/api`, and they clash on a shared load balancer. Which Cilium mode avoids such conflicts?",
+      "back": "B: `dedicated`",
+      "choices": "A) `shared`\nB) `dedicated`\nC) `hostNetwork` with one shared listener\nD) `ingressController.default=true`",
+      "choicesExplained": "A is the mode that shares one configuration. C still shares one listener. D only chooses the default controller.",
+      "explanation": "Dedicated mode gives each Ingress its own load balancer.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Kubernetes Ingress Support”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#gs-ingress",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the dedicated mode can help to avoid potential conflicts (e.g. path prefix) between resources.",
+      "uses": [
+        "Ingress",
+        "load balancer",
+        "ingressController.default",
+        "host"
+      ],
+      "conceptIDs": [
+        "cca.ingress-lb-modes"
+      ],
+      "order": 6670
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-enable",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Which Helm change turns on Cilium’s Ingress controller in an existing installation?",
+      "back": "C: `--set ingressController.enabled=true`",
+      "choices": "A) `--set ingress.enabled=true`\nB) `--set envoyConfig.enabled=true`\nC) `--set ingressController.enabled=true`\nD) `--set gatewayAPI.default=true`",
+      "choicesExplained": "A is not the Cilium value name. B enables Envoy traffic management without Ingress support. D is not the value that enables the Ingress controller.",
+      "explanation": "The Ingress controller has its own Helm switch under `ingressController`.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Installation”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#installation",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium Ingress Controller can be enabled with helm flag ingressController.enabled set as true.",
+      "uses": [
+        "Helm chart",
+        "Cilium Ingress controller",
+        "Envoy",
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cca.ingress-enable"
+      ],
+      "order": 6680
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-crds",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Gateway API support is enabled in Cilium’s Helm values, but `kubectl get gatewayclass` says the resource type does not exist. What is the likely cause?",
+      "back": "C: The Gateway API CRDs were not installed",
+      "choices": "A) The kube-proxy replacement is on\nB) The Ingress controller is off\nC) The Gateway API CRDs were not installed\nD) No HTTPRoute exists yet",
+      "choicesExplained": "A is a prerequisite, not a problem. B is independent of Gateway API. D would not make the GatewayClass type unknown.",
+      "explanation": "The resource types come from the Gateway API CRDs, which must be installed.",
+      "source": "Cilium docs (1.20): Gateway API Support, “Installation”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/#installation",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The below CRDs from Gateway API v1.6.1 must be installed. GatewayClass Gateway HTTPRoute GRPCRoute BackendTLSPolicy ReferenceGrant TLSRoute",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "uses": [
+        "Gateway API",
+        "GatewayClass",
+        "CRD",
+        "HTTPRoute",
+        "kubectl",
+        "kube-proxy replacement",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "cca.gateway-api-crds",
+        "cca.gateway-api-resources"
+      ],
+      "order": 6690
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-gateway",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team must expose a `UDP` game server and send 10% of web traffic to a new version, with configuration that is portable between implementations. What should they use?",
+      "back": "C: Gateway API routes",
+      "choices": "A) Ingress with vendor annotations\nB) Ingress in `shared` mode\nC) Gateway API routes\nD) Ingress with `ingressController.default=true`",
+      "choicesExplained": "A relies on vendor annotations, which are not portable, and Ingress lacks `UDP`. B and D are still Ingress, which supports only HTTP and `HTTPS`.",
+      "explanation": "Gateway API supports protocols beyond HTTP and native traffic splitting.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Ingress API Limitations”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#ingress-api-limitations",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Ingress API only supports HTTP and HTTPS traffic, and does not natively support other protocols like TCP or UDP.",
+      "uses": [
+        "Ingress",
+        "Gateway API",
+        "ingressController.default",
+        "http"
+      ],
+      "conceptIDs": [
+        "cca.ingress-limitations",
+        "cca.gateway-benefits",
+        "cca.gateway-api-resources"
+      ],
+      "order": 6700
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-personas",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A platform team wants developers to manage routing for their own apps in their own namespaces, without being able to change the shared Gateway. Which fits?",
+      "back": "C: Gateway API: developers get rights to create Route objects in their namespace only",
+      "choices": "A) One CEC per team\nB) Ingress: developers edit the shared Ingress\nC) Gateway API: developers get rights to create Route objects in their namespace only\nD) Give developers cluster-admin",
+      "choicesExplained": "B mixes all teams into one object. A should stay with cluster admins. D grants far more than routing.",
+      "explanation": "Gateway API splits objects by persona so each gets only the access it needs.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Benefits of the Gateway API”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#benefits-of-the-gateway-api",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For example, application developers in a specific team could be assigned permissions to create Route objects in a specified namespace without also gaining permissions to modify the Gateway configuration",
+      "uses": [
+        "Gateway API",
+        "Gateway",
+        "Ingress",
+        "CEC",
+        "namespace",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.gateway-personas"
+      ],
+      "order": 6710
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-canary",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team wants to send 5% of requests to `shop-v2` and 95% to `shop-v1` through Cilium’s Gateway API. What do they configure?",
+      "back": "B: An HTTPRoute whose `backendRefs` carry weights 95 and 5",
+      "choices": "A) Two Gateways, one per version\nB) An HTTPRoute whose `backendRefs` carry weights 95 and 5\nC) An Ingress annotation for canary traffic\nD) A CNP with a 5% rule",
+      "choicesExplained": "A does not split traffic between backends. C depends on vendor annotations, which Gateway API avoids. D is a security policy, not routing.",
+      "explanation": "Weighted splitting is built into Cilium’s Gateway API, for canary tests like this.",
+      "source": "Cilium docs (1.20): Traffic Splitting Example, “Traffic Splitting Example”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/splitting/#gs-gateway-splitting",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Cilium Gateway API includes built-in support for traffic splitting, allowing users to easily distribute incoming traffic across multiple backend services. This is very useful for canary testing or A/B scenarios.",
+      "uses": [
+        "Gateway API",
+        "Gateway",
+        "HTTPRoute",
+        "Ingress",
+        "CNP"
+      ],
+      "conceptIDs": [
+        "cca.traffic-splitting"
+      ],
+      "order": 6720
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-tls",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "An Ingress served by Cilium must terminate TLS for `shop.example.com`. What must it include?",
+      "back": "C: A `tls` entry listing the host and a `secretName` for a TLS Secret",
+      "choices": "A) A `serverNames` list\nB) An Envoy sidecar in the backend pod\nC) A `tls` entry listing the host and a `secretName` for a TLS Secret\nD) The annotation `ingressController.default=true`",
+      "choicesExplained": "A belongs to network policy, not Ingress. B is not how Cilium works. D is a Helm value, not an Ingress field.",
+      "explanation": "The certificate and key come from the Secret named in the Ingress.",
+      "source": "Cilium docs (1.20): Ingress Example with TLS Termination, “Ingress Example with TLS Termination”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/tls-termination/#gs-ingress-tls",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "tls: - hosts: - bookinfo.cilium.rocks - hipstershop.cilium.rocks secretName: demo-cert",
+      "uses": [
+        "Ingress",
+        "Secret",
+        "tls / mtls",
+        "serverNames",
+        "Envoy",
+        "Pod",
+        "ingressController.default"
+      ],
+      "conceptIDs": [
+        "cca.tls-termination"
+      ],
+      "order": 6730
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.app-cec",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "An application developer asks for permission to create CECs so they can tune Envoy for their service. What does the documentation advise?",
+      "back": "A: Keep CECs to cluster admins; do not delegate them",
+      "choices": "A) Keep CECs to cluster admins; do not delegate them\nB) Grant it, since CECs are fully validated\nC) Grant it if they avoid Ingress-generated CECs\nD) Grant it in their namespace only",
+      "choicesExplained": "D and C still delegate a resource the docs say should stay with admins. B is wrong: CECs get only minimal validation.",
+      "explanation": "CECs are implementation details with minimal validation and no conflict resolution.",
+      "source": "Cilium docs (1.20): L7-Aware Traffic Management, “Caveats”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/l7-traffic-management/#caveats",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Both should be treated as cluster admin resources and permissions for their configuration should not be delegated to other users.",
+      "uses": [
+        "CEC",
+        "Envoy",
+        "namespace",
+        "Ingress",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.ciliumenvoyconfig"
+      ],
+      "order": 6740
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.contrast-sidecar",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does a sidecarless mesh differ from a sidecar mesh in cost?",
+      "back": "Sidecar: a proxy per pod, using more resources. Sidecarless: no per-pod proxies, so less resource use and fewer network hops.",
+      "explanation": "The glossary adds that sidecarless overhead stays constant however many pods there are.",
+      "source": "CNCF Cloud Native Glossary, “Service Mesh”",
+      "sourceURL": "https://glossary.cncf.io/service-mesh/",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By doing away with per-pod proxies, this method drastically reduces resource usage and removes unnecessary network hops, which lowers latency and boosts performance. Because overhead remains constant regardless of pod count and there are fewer agents to deploy",
+      "uses": [
+        "sidecar model",
+        "sidecarless model",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.sidecar-vs-sidecarless"
+      ],
+      "order": 6750
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.contrast-lb-modes",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "What does each Cilium Ingress load balancer mode trade off?",
+      "back": "`shared` saves resources with one load balancer; `dedicated` avoids conflicts, such as clashing path prefixes, between Ingresses.",
+      "explanation": "Neither mode is better in every case; the documentation says each has benefits and drawbacks.",
+      "source": "Cilium docs (1.20): Kubernetes Ingress Support, “Kubernetes Ingress Support”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#gs-ingress",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Each load balancer mode has its own benefits and drawbacks. The shared mode saves resources by sharing a single LoadBalancer config across all Ingress resources in the cluster, while the dedicated mode can help to avoid potential conflicts (e.g. path prefix) between resources.",
+      "uses": [
+        "Cilium Ingress controller",
+        "load balancer",
+        "Ingress"
+      ],
+      "conceptIDs": [
+        "cca.ingress-lb-modes"
+      ],
+      "order": 6760
+    },
+    {
+      "id": "cca.ingress-gateway-mesh.contrast-ingress-gateway",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does Gateway API differ from Ingress in the traffic it can handle?",
+      "back": "Ingress handles HTTP and `HTTPS` only; Gateway API also supports use cases beyond them.",
+      "explanation": "Gateway API is also the long-term successor to Ingress.",
+      "source": "Cilium docs (1.20): Migrating from Ingress to Gateway, “Migrating from Ingress to Gateway”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress-to-gateway/ingress-to-gateway/#gs-ingress-to-gateway",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Gateway API is not only the long-term successor to the Ingress API, it also supports use cases beyond HTTP/HTTPS-based applications.",
+      "uses": [
+        "Gateway API",
+        "Ingress",
+        "http"
+      ],
+      "conceptIDs": [
+        "cca.ingress-limitations",
+        "cca.gateway-benefits"
+      ],
+      "order": 6770
+    }
+  ]
+}

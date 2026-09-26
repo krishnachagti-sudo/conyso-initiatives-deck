@@ -1,0 +1,2262 @@
+{
+  "topic": "Policy rules and policy types",
+  "notes": [
+    {
+      "id": "cca.policy-rules.cnp",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a CiliumNetworkPolicy (CNP)?",
+      "back": "A namespaced Cilium policy resource, defined as a CRD, that supports layer 3 to layer 7 rules for ingress and egress.",
+      "explanation": "It goes beyond the standard NetworkPolicy, which supports only layers 3 and 4.",
+      "example": "Like building access rules that check not only which door you use but also what you ask for once inside.",
+      "source": "Cilium docs (1.20): Network Policy, “Network Policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#k8s-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The standard NetworkPolicy resource which supports L3 and L4 policies at ingress or egress of the Pod. The Kubernetes ClusterNetworkPolicy format (v1alpha2) which supports cluster-scoped policies. The extended CiliumNetworkPolicy format which is available as a CustomResourceDefinition which supports specification of policies at Layers 3-7 for both ingress and egress.",
+      "introduces": [
+        "CiliumNetworkPolicy",
+        "CNP"
+      ],
+      "uses": [
+        "CiliumNetworkPolicy",
+        "CNP",
+        "NetworkPolicy",
+        "CustomResourceDefinition",
+        "CRD",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cca.cnp",
+        "cca.policy-types"
+      ],
+      "order": 5010
+    },
+    {
+      "id": "cca.policy-rules.ccnp",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a CiliumClusterwideNetworkPolicy (CCNP)?",
+      "back": "A cluster-scoped Cilium policy resource: the same specification as a CNP, but with no namespace.",
+      "explanation": "One CCNP can therefore set policy for workloads in every namespace at once.",
+      "example": "Like a rule posted by head office for every department, instead of one posted by each department.",
+      "source": "Cilium docs (1.20): Network Policy, “Network Policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#k8s-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The CiliumClusterwideNetworkPolicy format which is a cluster-scoped CustomResourceDefinition for specifying cluster-wide policies to be enforced by Cilium. The specification is same as that of CiliumNetworkPolicy with no specified namespace.",
+      "introduces": [
+        "CiliumClusterwideNetworkPolicy",
+        "CCNP"
+      ],
+      "uses": [
+        "CiliumClusterwideNetworkPolicy",
+        "CCNP",
+        "CNP",
+        "namespace",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.ccnp"
+      ],
+      "order": 5020
+    },
+    {
+      "id": "cca.policy-rules.kcnp",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is the Kubernetes ClusterNetworkPolicy (KCNP)?",
+      "back": "The upstream Kubernetes format for cluster-scoped network policies; Cilium supports it from version 1.20.",
+      "explanation": "It is new in Cilium 1.20, so whether a cluster can use it depends on its Cilium version.",
+      "example": "Like an industry-standard form that a firm now accepts alongside its own in-house version.",
+      "source": "Cilium docs (1.20): Network Policy, “Kubernetes ClusterNetworkPolicy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#clusternetworkpolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Support for the Kubernetes ClusterNetworkPolicy (KCNP) is available starting with Cilium 1.20.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "introduces": [
+        "ClusterNetworkPolicy",
+        "KCNP"
+      ],
+      "uses": [
+        "ClusterNetworkPolicy",
+        "KCNP",
+        "cluster",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.kcnp"
+      ],
+      "order": 5030
+    },
+    {
+      "id": "cca.policy-rules.endpoint-selector",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the `endpointSelector` of a Cilium policy rule?",
+      "back": "The selector that picks, by label, the endpoints the rule applies to; it is based on the Kubernetes LabelSelector.",
+      "explanation": "Its name says what it matches: only labels associated with an endpoint.",
+      "example": "Like the “To:” line on a memo: it says who must follow it.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Endpoint Selector”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#endpointselector",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Endpoint Selector is based on the Kubernetes LabelSelector. It is called Endpoint Selector because it only applies to labels associated with an Endpoint.",
+      "introduces": [
+        "endpointSelector"
+      ],
+      "uses": [
+        "endpointSelector",
+        "selector",
+        "label",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.endpoint-selector"
+      ],
+      "order": 5040
+    },
+    {
+      "id": "cca.policy-rules.node-selector",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is the `nodeSelector` of a Cilium policy rule?",
+      "back": "A selector that matches node labels instead of endpoint labels; it can only be used in CCNPs.",
+      "explanation": "It turns a rule into a node-level policy rather than one for pods.",
+      "example": "Like a rule for a building’s plant rooms rather than for its tenants’ flats.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Node Selector”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#nodeselector",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Like the Endpoint Selector, the Node Selector is based on the Kubernetes LabelSelector, although rather than matching on labels associated with Endpoints, it applies to labels associated with Nodes in the cluster. Node Selectors can only be used in CiliumClusterwideNetworkPolicies.",
+      "introduces": [
+        "nodeSelector"
+      ],
+      "uses": [
+        "nodeSelector",
+        "endpointSelector",
+        "CCNP",
+        "selector",
+        "label",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.node-selector"
+      ],
+      "order": 5050
+    },
+    {
+      "id": "cca.policy-rules.from-endpoints",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the `fromEndpoints` field of an ingress rule do?",
+      "back": "It selects, by label, the source endpoints allowed to send traffic to the endpoints the rule selects.",
+      "explanation": "It uses the same selector form as endpointSelector, but for the peer rather than the protected endpoint.",
+      "example": "Like a guest list at a door: only the named guests may enter.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Ingress”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#ingress",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To restrict traffic upon ingress to the selected endpoint, the rule selects the source endpoint with the Endpoint Selector in the fromEndpoints field.",
+      "introduces": [
+        "fromEndpoints"
+      ],
+      "uses": [
+        "fromEndpoints",
+        "endpointSelector",
+        "endpoint",
+        "label"
+      ],
+      "conceptIDs": [
+        "cca.from-to-endpoints"
+      ],
+      "order": 5060
+    },
+    {
+      "id": "cca.policy-rules.world-entity",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the `world` entity select in a Cilium policy?",
+      "back": "All endpoints outside the cluster; allowing to world is the same as allowing to `0.0.0.0/0`.",
+      "explanation": "Finer-grained DNS or CIDR rules are the documented alternative to allowing all of world.",
+      "example": "Like “members of the public” in a shop’s opening policy.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Entities based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The world entity corresponds to all endpoints outside of the cluster. Allowing to world is identical to allowing to CIDR 0.0.0.0/0. An alternative to allowing from and to world is to define fine grained DNS or CIDR based policies.",
+      "introduces": [
+        "world entity"
+      ],
+      "uses": [
+        "world entity",
+        "endpoint",
+        "cluster",
+        "DNS",
+        "cidr"
+      ],
+      "conceptIDs": [
+        "cca.entity-world",
+        "cca.entities"
+      ],
+      "order": 5070
+    },
+    {
+      "id": "cca.policy-rules.cluster-entity",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the `cluster` entity select in a Cilium policy?",
+      "back": "Every endpoint in the local cluster: managed and unmanaged endpoints plus the host, remote-node, init, ingress, health and kube-apiserver entities.",
+      "explanation": "In a clustermesh it also takes in all remote nodes.",
+      "example": "Like “everyone on the company’s site”, contractors and building staff included.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Entities based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cluster is the logical group of all network endpoints inside of the local cluster. This includes all Cilium-managed endpoints of the local cluster, unmanaged endpoints in the local cluster, as well as the host, remote-node, init, ingress, health, and kube-apiserver entities. This also includes all remote nodes in a clustermesh scenario.",
+      "introduces": [
+        "cluster entity"
+      ],
+      "uses": [
+        "cluster entity",
+        "endpoint",
+        "cluster",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cca.entity-cluster",
+        "cca.entities"
+      ],
+      "order": 5080
+    },
+    {
+      "id": "cca.policy-rules.kube-apiserver-entity",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does the `kube-apiserver` entity select in a Cilium policy?",
+      "back": "The cluster’s kube-apiserver, whether it is deployed inside or outside the cluster.",
+      "explanation": "Policy can allow API access without knowing where or at which addresses the API server runs.",
+      "example": "Like addressing a letter to “the tax office” instead of to a street address.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Entities based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The kube-apiserver entity represents the kube-apiserver in a Kubernetes cluster. This entity represents both deployments of the kube-apiserver: within the cluster and outside of the cluster.",
+      "introduces": [
+        "kube-apiserver entity"
+      ],
+      "uses": [
+        "kube-apiserver entity",
+        "kube-apiserver",
+        "cluster",
+        "api"
+      ],
+      "conceptIDs": [
+        "cca.entity-kube-apiserver"
+      ],
+      "order": 5090
+    },
+    {
+      "id": "cca.policy-rules.to-services",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does the `toServices` field of an egress rule do?",
+      "back": "It allows traffic to Kubernetes Services, referenced by name or by label selector.",
+      "explanation": "It works by using the Service’s own label selector as an endpoint selector inside the policy.",
+      "example": "Like allowing calls to “the help desk” rather than to each person on shift.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Services based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#services-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Traffic from endpoints to services running in your cluster can be allowed via toServices statements in Egress rules. Policies can reference Kubernetes Services by name or label selector. This feature uses the discovered services’ label selector as an endpoint selector within the policy.",
+      "introduces": [
+        "toServices"
+      ],
+      "uses": [
+        "toServices",
+        "Service",
+        "selector",
+        "label",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.to-services"
+      ],
+      "order": 5100
+    },
+    {
+      "id": "cca.policy-rules.to-cidr",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the `toCIDR` field of an egress rule list?",
+      "back": "Destination prefixes that the endpoints selected by the rule are allowed to talk to.",
+      "explanation": "The prefixes are written into the policy itself, unlike label-based rules.",
+      "example": "Like a phone plan that allows calls only to numbers with one area code.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Egress”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#id6",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "toCIDR List of destination prefixes/CIDRs that endpoints selected by endpointSelector are allowed to talk to.",
+      "introduces": [
+        "toCIDR"
+      ],
+      "uses": [
+        "toCIDR",
+        "cidr",
+        "endpoint",
+        "endpointSelector"
+      ],
+      "conceptIDs": [
+        "cca.cidr-policy"
+      ],
+      "order": 5110
+    },
+    {
+      "id": "cca.policy-rules.from-nodes",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does the `fromNodes` field of an ingress rule do, and what must be enabled for it?",
+      "back": "It selects source nodes by their labels; it only takes effect with `enable-node-selector-labels` set to true.",
+      "explanation": "With that flag on, each agent allocates a separate identity for every other node, so single nodes can be told apart.",
+      "example": "Like accepting deliveries only from vans marked with one depot’s name.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Node based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#node-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Example below with fromNodes/toNodes fields will only take effect when enable-node-selector-labels flag is set to true (or equivalent Helm value nodeSelectorLabels: true). When --enable-node-selector-labels=true is specified, every cilium-agent allocates a different local security identity for all other nodes.",
+      "introduces": [
+        "fromNodes"
+      ],
+      "uses": [
+        "fromNodes",
+        "node",
+        "label",
+        "Cilium agent",
+        "security identity"
+      ],
+      "conceptIDs": [
+        "cca.node-policy"
+      ],
+      "order": 5120
+    },
+    {
+      "id": "cca.policy-rules.to-fqdns",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does a `toFQDNs` egress rule do?",
+      "back": "It allows traffic to domain names, using the IPs Cilium sees in DNS responses for names that match the rule.",
+      "explanation": "Each toFQDNs rule becomes an ordinary CIDR rule behind the scenes, filled with the looked-up addresses.",
+      "example": "Like a guest list by company name, checked against the company’s current staff list each morning.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “DNS based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#dns-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "An L3 CIDR based rule is generated for every toFQDNs rule and applies to the same endpoints. The IP information is selected for insertion by matchName or matchPattern rules, and is collected from all DNS responses seen by Cilium on the node.",
+      "introduces": [
+        "toFQDNs"
+      ],
+      "uses": [
+        "toFQDNs",
+        "DNS",
+        "ip address",
+        "cidr"
+      ],
+      "conceptIDs": [
+        "cca.tofqdns"
+      ],
+      "order": 5130
+    },
+    {
+      "id": "cca.policy-rules.dns-proxy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the DNS proxy in Cilium?",
+      "back": "A proxy in the Cilium agent that intercepts egress DNS traffic and records the IPs seen in the responses.",
+      "explanation": "The interception is itself a policy rule governing DNS requests, so it must be written separately.",
+      "example": "Like a switchboard operator who notes down every number callers are given.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “DNS Proxy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#dns-proxy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A DNS Proxy in the agent intercepts egress DNS traffic and records IPs seen in the responses. This interception is, itself, a separate policy rule governing DNS requests, and must be specified separately.",
+      "introduces": [
+        "DNS proxy"
+      ],
+      "uses": [
+        "DNS proxy",
+        "Cilium agent",
+        "DNS",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.dns-proxy"
+      ],
+      "order": 5140
+    },
+    {
+      "id": "cca.policy-rules.to-ports",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the `toPorts` field of a Cilium rule hold?",
+      "back": "Layer 4 rules: the ports and protocols allowed, at ingress or egress.",
+      "explanation": "Ports are matched after service port mapping, so the rule names the backend’s own port.",
+      "example": "Like a building that admits visitors only through the loading-bay door.",
+      "source": "Cilium docs (1.20): Layer 4 Policies, “Limit ingress/egress ports”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer4/#limit-ingress-egress-ports",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Layer 4 policies apply to ports after service port mapping has been applied. Layer 4 policy can be specified at both ingress and egress using the toPorts field.",
+      "introduces": [
+        "toPorts"
+      ],
+      "uses": [
+        "toPorts",
+        "port"
+      ],
+      "conceptIDs": [
+        "cca.to-ports"
+      ],
+      "order": 5150
+    },
+    {
+      "id": "cca.policy-rules.server-names",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does the `serverNames` field of a Cilium rule restrict?",
+      "back": "The server names an endpoint may ask for in a TLS handshake; it is always configured at egress.",
+      "explanation": "It is usually set up alongside a port rule, such as one for port 443.",
+      "example": "Like a receptionist who puts calls through only when the caller asks for one named person.",
+      "source": "Cilium docs (1.20): Layer 4 Policies, “Limit TLS Server Name Indication (SNI)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer4/#limit-tls-server-name-indication-sni",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium Network Policy can limit an endpoint’s ability to establish a TLS handshake to a specified list of SNIs. The SNI policy is always configured at the egress level and is usually set up alongside port policies.",
+      "introduces": [
+        "serverNames"
+      ],
+      "uses": [
+        "serverNames",
+        "tls / mtls",
+        "endpoint",
+        "port"
+      ],
+      "conceptIDs": [
+        "cca.sni-rule"
+      ],
+      "order": 5160
+    },
+    {
+      "id": "cca.policy-rules.l7-http-rule",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an L7 HTTP rule in a Cilium policy?",
+      "back": "A layer 7 rule, embedded in a layer 4 rule, that allows only matching HTTP requests.",
+      "explanation": "Sitting inside a port rule, it applies only to traffic on that port.",
+      "example": "Like a doorman who, once you are through the door, checks which room you ask for.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “Layer 7 Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#l7-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Layer 7 policy rules are embedded into Layer 4 rules and can be specified for ingress and egress.",
+      "introduces": [
+        "L7 HTTP rule"
+      ],
+      "uses": [
+        "L7 HTTP rule",
+        "http",
+        "toPorts"
+      ],
+      "conceptIDs": [
+        "cca.l7-http"
+      ],
+      "order": 5170
+    },
+    {
+      "id": "cca.policy-rules.deny-policy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a deny policy in Cilium?",
+      "back": "A policy that explicitly restricts certain traffic to or from a pod, taking precedence over allow policies.",
+      "explanation": "The precedence holds whichever format the allow comes from, a Kubernetes NetworkPolicy included.",
+      "example": "Like a club’s banned list, which beats any entry on the guest list.",
+      "source": "Cilium docs (1.20): Deny Policies, “Deny Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/deny/#deny-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "allows to explicitly restrict certain traffic to and from a Pod. Deny policies take precedence over allow policies, regardless of whether they are a Cilium Network Policy, a Clusterwide Cilium Network Policy or even a Kubernetes Network Policy.",
+      "introduces": [
+        "deny policy"
+      ],
+      "uses": [
+        "deny policy",
+        "Pod",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cca.deny-policies"
+      ],
+      "order": 5180
+    },
+    {
+      "id": "cca.policy-rules.host-policy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a host policy in Cilium?",
+      "back": "A CCNP that uses a nodeSelector instead of an endpointSelector, so it applies to nodes.",
+      "explanation": "It can hold layer 3 and 4 rules in both directions, and layer 7 DNS rules but no other layer 7 rules.",
+      "example": "Like the rules for a building’s own staff entrance, not for the tenants’ front doors.",
+      "source": "Cilium docs (1.20): Host Policies, “Host Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/host/#hostpolicies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Host policies take the form of a CiliumClusterwideNetworkPolicy with a Node Selector instead of an Endpoint Selector. Host policies can have layer 3 and layer 4 rules on both ingress and egress. They can also have layer 7 DNS rules, but no other kinds of layer 7 rules.",
+      "introduces": [
+        "host policy"
+      ],
+      "uses": [
+        "host policy",
+        "CCNP",
+        "nodeSelector",
+        "endpointSelector",
+        "node",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "cca.host-policies"
+      ],
+      "order": 5190
+    },
+    {
+      "id": "cca.policy-rules.host-firewall",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is Cilium’s host firewall?",
+      "back": "The Cilium feature that enforces security policies for Kubernetes nodes themselves.",
+      "explanation": "Enforcing policy on nodes rather than on pods is what sets it apart from ordinary Cilium policy.",
+      "example": "Like a lock on the landlord’s office, separate from the locks on the flats.",
+      "source": "Cilium docs (1.20): Host Firewall, “Host Firewall”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/host-firewall/#host-firewall",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This document serves as an introduction to Cilium’s host firewall, to enforce security policies for Kubernetes nodes.",
+      "introduces": [
+        "host firewall"
+      ],
+      "uses": [
+        "host firewall",
+        "node",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.host-firewall"
+      ],
+      "order": 5200
+    },
+    {
+      "id": "cca.policy-rules.knp-layers",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which policy format that Cilium enforces is limited to layer 3 and layer 4 rules?",
+      "back": "The standard Kubernetes NetworkPolicy.",
+      "explanation": "A CNP extends the same idea up to layer 7.",
+      "source": "Cilium docs (1.20): Network Policy, “Network Policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#k8s-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The standard NetworkPolicy resource which supports L3 and L4 policies at ingress or egress of the Pod. The Kubernetes ClusterNetworkPolicy format (v1alpha2) which supports cluster-scoped policies. The extended CiliumNetworkPolicy format which is available as a CustomResourceDefinition which supports specification of policies at Layers 3-7 for both ingress and egress.",
+      "uses": [
+        "NetworkPolicy",
+        "CNP"
+      ],
+      "conceptIDs": [
+        "cca.policy-types",
+        "cca.knp-vs-cnp"
+      ],
+      "order": 5210
+    },
+    {
+      "id": "cca.policy-rules.mixed-types",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Can Cilium enforce NetworkPolicy, CNP and CCNP resources at the same time?",
+      "back": "Yes, but mixing them makes the full set of allowed traffic hard to see and may allow traffic unintentionally.",
+      "explanation": "Each format adds its own allowed traffic, and the combination is what counts.",
+      "source": "Cilium docs (1.20): Network Policy, “Network Policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#k8s-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium supports running multiple of these policy types at the same time. However caution should be applied when using multiple policy types at the same time, as it can be confusing to understand the complete set of allowed traffic across multiple policy types. If close attention is not applied this may lead to unintended policy allow behavior.",
+      "uses": [
+        "NetworkPolicy",
+        "CNP",
+        "CCNP"
+      ],
+      "conceptIDs": [
+        "cca.mixed-policy-caution"
+      ],
+      "order": 5220
+    },
+    {
+      "id": "cca.policy-rules.cnp-purpose",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What is the stated purpose of the CNP resource relative to the standard NetworkPolicy?",
+      "back": "To provide functionality not yet supported in NetworkPolicy; ideally it would be merged into the standard later.",
+      "explanation": "The documentation hopes the CRD will one day no longer be required.",
+      "source": "Cilium docs (1.20): Network Policy, “CiliumNetworkPolicy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#ciliumnetworkpolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The CiliumNetworkPolicy is very similar to the standard NetworkPolicy. The purpose is to provide the functionality which is not yet supported in NetworkPolicy. Ideally all of the functionality will be merged into the standard resource format and this CRD will no longer be required.",
+      "uses": [
+        "CNP",
+        "NetworkPolicy",
+        "CRD"
+      ],
+      "conceptIDs": [
+        "cca.cnp"
+      ],
+      "order": 5230
+    },
+    {
+      "id": "cca.policy-rules.ccnp-differences",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In what two ways does a CCNP differ from a CNP?",
+      "back": "It is non-namespaced and cluster-scoped, and it allows the use of nodeSelector.",
+      "explanation": "Internally the two are identical, so a rule has the same effect in either.",
+      "source": "Cilium docs (1.20): Network Policy, “CiliumClusterwideNetworkPolicy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#ciliumclusterwidenetworkpolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "CiliumClusterwideNetworkPolicy is similar to CiliumNetworkPolicy, except (1) policies defined by CiliumClusterwideNetworkPolicy are non-namespaced and are cluster-scoped, and (2) it enables the use of Node Selector. Internally the policy is identical to CiliumNetworkPolicy and thus the effects of this policy specification are also same.",
+      "uses": [
+        "CCNP",
+        "CNP",
+        "nodeSelector",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cca.cnp-vs-ccnp"
+      ],
+      "order": 5240
+    },
+    {
+      "id": "cca.policy-rules.kcnp-enable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What two steps enable Kubernetes ClusterNetworkPolicy support in Cilium?",
+      "back": "Set `--enable-k8s-cluster-network-policy=true` (Helm `k8sClusterNetworkPolicy.enabled=true`), and install the KCNP CRD.",
+      "explanation": "Support is off by default, and the resource type itself comes from the Kubernetes network-policy-api project.",
+      "source": "Cilium docs (1.20): Network Policy, “Enabling KCNP”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#enabling-kcnp",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Support must be enabled by setting the --enable-k8s-cluster-network-policy flag to true (or equivalent Helm value k8sClusterNetworkPolicy.enabled=true). You also must install the Custom Resource Definition (CRD) from sigs.k8s.io/network-policy-api",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "uses": [
+        "KCNP",
+        "CRD",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "cca.kcnp"
+      ],
+      "order": 5250
+    },
+    {
+      "id": "cca.policy-rules.tier-admin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which KCNP tier is evaluated first, and can a CNP override its rules?",
+      "back": "The Admin tier; its rules take precedence over all NetworkPolicy-tier policies, CNPs and CCNPs included, and cannot be overridden by them.",
+      "explanation": "The documentation says to keep this in mind when migrating from CCNP to KCNP.",
+      "source": "Cilium docs (1.20): Network Policy, “Tiers”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#tiers",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Rules in the Admin tier take precedence over all policies at the NetworkPolicy tier level, including CiliumClusterwideNetworkPolicy, CiliumNetworkPolicy, and standard NetworkPolicy resources and cannot be overridden by them. Keep this in mind when migrating from CiliumClusterwideNetworkPolicy to Kubernetes ClusterNetworkPolicy.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "uses": [
+        "KCNP",
+        "CNP",
+        "CCNP",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cca.kcnp-tiers"
+      ],
+      "order": 5260
+    },
+    {
+      "id": "cca.policy-rules.tier-networkpolicy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "In which KCNP tier do NetworkPolicy, CNP and CCNP resources sit?",
+      "back": "The NetworkPolicy tier, evaluated after the Admin tier and before the Baseline tier.",
+      "explanation": "A KCNP itself can only be placed in the Admin or Baseline tier.",
+      "source": "Cilium docs (1.20): Network Policy, “Tiers”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#tiers",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "NetworkPolicy tier: Workload and cluster rules, including standard NetworkPolicy, CiliumNetworkPolicy, and CiliumClusterwideNetworkPolicy. Baseline tier: Default guardrails set by cluster administrators. A Kubernetes ClusterNetworkPolicy can be assigned to either the Admin or Baseline tier.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "uses": [
+        "KCNP",
+        "CNP",
+        "CCNP",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cca.kcnp-tiers"
+      ],
+      "order": 5270
+    },
+    {
+      "id": "cca.policy-rules.tier-baseline",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which KCNP tier holds the default guardrails set by cluster administrators?",
+      "back": "The Baseline tier, evaluated last.",
+      "explanation": "The evaluation order is Admin, then NetworkPolicy, then Baseline.",
+      "source": "Cilium docs (1.20): Network Policy, “Tiers”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#tiers",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Policy rules are evaluated in the following order: Admin tier: High-priority security rules set by cluster administrators. NetworkPolicy tier: Workload and cluster rules, including standard NetworkPolicy, CiliumNetworkPolicy, and CiliumClusterwideNetworkPolicy. Baseline tier: Default guardrails set by cluster administrators.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "uses": [
+        "KCNP",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cca.kcnp-tiers"
+      ],
+      "order": 5280
+    },
+    {
+      "id": "cca.policy-rules.ipblock-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "By default, can `ipBlock` rules in a Kubernetes NetworkPolicy match pod or node IPs?",
+      "back": "No; setting `policyCIDRMatchMode` to `pods` or `nodes` lets them match intra-cluster IPs.",
+      "explanation": "Without that setting, in-cluster peers must be allowed with other kinds of rules.",
+      "source": "Cilium docs (1.20): Network Policy, “NetworkPolicy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#networkpolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, ipBlock rules in NetworkPolicy do not match intra-cluster IPs (such as Pod or Node IPs). Setting the –policy-cidr-match-mode option (or equivalent Helm value policyCIDRMatchMode) to pods or nodes allows ipBlock rules to match intra-cluster IPs.",
+      "uses": [
+        "NetworkPolicy",
+        "Pod",
+        "node",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.ipblock-cluster-ips"
+      ],
+      "order": 5290
+    },
+    {
+      "id": "cca.policy-rules.union",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Two rules select the same endpoint, and one matches a broader set of traffic than the other. What is allowed?",
+      "back": "All traffic matching the broader rule; overlapping rules allow the union of what they match.",
+      "explanation": "Rules only ever add allowed traffic, so a narrower rule never trims a broader one.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Rule Basics”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#rule-basics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If two rules exist, and one would match a broader set of traffic, then all traffic matching the broader rule will be allowed. If there is an intersection between two or more rules, then traffic matching the union of those rules will be allowed.",
+      "uses": [
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.allow-list-model"
+      ],
+      "order": 5300
+    },
+    {
+      "id": "cca.policy-rules.unmatched",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Traffic that matches none of the rules is {{c1::dropped}}, according to the policy enforcement mode.",
+      "explanation": "In `never` mode, for example, the mode itself means nothing is dropped.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Rule Basics”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#rule-basics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Finally, if traffic does not match any of the rules, it will be dropped pursuant to the Policy Enforcement Modes.",
+      "uses": [
+        "policyEnforcementMode"
+      ],
+      "conceptIDs": [
+        "cca.allow-list-model"
+      ],
+      "order": 5310
+    },
+    {
+      "id": "cca.policy-rules.no-sections",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What happens if a rule omits both its `ingress` and its `egress` section?",
+      "back": "The rule has no effect.",
+      "explanation": "Each section carries the rules for one direction, so with neither there is nothing to apply.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Rule Basics”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#rule-basics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Either ingress, egress, or both can be provided. If both ingress and egress are omitted, the rule has no effect.",
+      "uses": [],
+      "conceptIDs": [
+        "cca.ingress-egress-sections"
+      ],
+      "order": 5320
+    },
+    {
+      "id": "cca.policy-rules.egress-section",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which packets do the rules in a policy’s `egress` section apply to?",
+      "back": "All packets leaving the selected endpoint.",
+      "explanation": "The `ingress` section is the mirror image: packets entering the endpoint.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Rule Basics”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#rule-basics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "ingress List of rules which must apply at ingress of the endpoint, i.e. to all network packets which are entering the endpoint. egress List of rules which must apply at egress of the endpoint, i.e. to all network packets which are leaving the endpoint.",
+      "uses": [
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.ingress-egress-sections"
+      ],
+      "order": 5330
+    },
+    {
+      "id": "cca.policy-rules.empty-selector",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does an empty selector, `- {}`, under `fromEndpoints` allow?",
+      "back": "Ingress from all endpoints.",
+      "explanation": "An empty selector selects every endpoint, so every endpoint becomes an allowed source.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Ingress Allow All Endpoints”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#ingress-allow-all-endpoints",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "An empty Endpoint Selector will select all endpoints, thus writing a rule that will allow all ingress traffic to an endpoint may be done as follows",
+      "uses": [
+        "fromEndpoints",
+        "selector",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.from-to-endpoints"
+      ],
+      "order": 5340
+    },
+    {
+      "id": "cca.policy-rules.both-sides",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A receiver’s policy allows all ingress. Does that guarantee every endpoint can reach it?",
+      "back": "No: the sender’s own policy must also allow the traffic; policy applies on both sides.",
+      "explanation": "The receiver’s rule opens its ingress only; the sender’s egress is judged separately.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Ingress Allow All Endpoints”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#ingress-allow-all-endpoints",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note that while the above examples allow all ingress traffic to an endpoint, this does not mean that all endpoints are allowed to send traffic to this endpoint per their policies. In other words, policy must be configured on both sides (sender and receiver).",
+      "uses": [
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.from-to-endpoints"
+      ],
+      "order": 5350
+    },
+    {
+      "id": "cca.policy-rules.to-endpoints",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "On egress, a rule selects the destination endpoints that may be reached with the {{c1::`toEndpoints`}} field.",
+      "explanation": "It is the egress twin of fromEndpoints and uses the same selector form.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Egress”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#egress",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To restrict traffic upon egress to the selected endpoint, the rule selects the destination endpoint with the Endpoint Selector in the toEndpoints field.",
+      "uses": [
+        "fromEndpoints",
+        "endpoint",
+        "selector"
+      ],
+      "conceptIDs": [
+        "cca.from-to-endpoints"
+      ],
+      "order": 5360
+    },
+    {
+      "id": "cca.policy-rules.egress-deny",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "An `egressDeny` rule matches traffic that an `egress` rule in the same policy would allow. What happens?",
+      "back": "The traffic is denied.",
+      "explanation": "A matching deny wins even inside the same policy.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Simple Egress Deny”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#simple-egress-deny",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If an egressDeny rule matches, egress traffic is denied even if the policy contains egress rules that would otherwise allow it.",
+      "uses": [
+        "deny policy"
+      ],
+      "conceptIDs": [
+        "cca.deny-precedence"
+      ],
+      "order": 5370
+    },
+    {
+      "id": "cca.policy-rules.from-entities",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In a Cilium policy, what do `fromEntities` and `toEntities` list?",
+      "back": "`fromEntities`: entities that may access the selected endpoints. `toEntities`: entities the selected endpoints may access.",
+      "explanation": "Entities let a rule name kinds of peers, such as world or cluster, without knowing their addresses.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Entities based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "fromEntities is used to describe the entities that can access the selected endpoints. toEntities is used to describe the entities that can be accessed by the selected endpoints.",
+      "uses": [
+        "world entity",
+        "cluster entity",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.entities"
+      ],
+      "order": 5380
+    },
+    {
+      "id": "cca.policy-rules.entity-host",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which entity covers the local host, including containers in host-networking mode on it?",
+      "back": "`host`.",
+      "explanation": "Its counterpart for every other node is `remote-node`.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Entities based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The host entity includes the local host. This also includes all containers running in host networking mode on the local host.",
+      "uses": [
+        "host"
+      ],
+      "conceptIDs": [
+        "cca.entities"
+      ],
+      "order": 5390
+    },
+    {
+      "id": "cca.policy-rules.entity-remote-node",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which entity covers any node in the connected clusters other than the local host?",
+      "back": "`remote-node`.",
+      "explanation": "It also takes in containers running in host-networking mode on those nodes.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Entities based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "remote-node Any node in any of the connected clusters other than the local host. This also includes all containers running in host-networking mode on remote nodes.",
+      "uses": [
+        "node",
+        "cluster",
+        "host"
+      ],
+      "conceptIDs": [
+        "cca.entities"
+      ],
+      "order": 5400
+    },
+    {
+      "id": "cca.policy-rules.entity-ingress",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which entity represents the Cilium Envoy instance that handles ingress layer 7 traffic?",
+      "back": "`ingress`.",
+      "explanation": "It also applies to pod-to-pod traffic in the same cluster that goes through ingress endpoints, known as hairpinning.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Entities based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The ingress entity represents the Cilium Envoy instance that handles ingress L7 traffic. Be aware that this also applies for pod-to-pod traffic within the same cluster when using ingress endpoints (also known as hairpinning).",
+      "uses": [
+        "Envoy",
+        "Pod",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.entities"
+      ],
+      "order": 5410
+    },
+    {
+      "id": "cca.policy-rules.entity-health",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which entity represents the endpoints Cilium uses to check cluster connectivity health?",
+      "back": "`health`.",
+      "explanation": "Each node managed by Cilium hosts one such endpoint.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Entities based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The health entity represents the health endpoints, used to check cluster connectivity health. Each node managed by Cilium hosts a health endpoint.",
+      "uses": [
+        "endpoint",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.entities"
+      ],
+      "order": 5420
+    },
+    {
+      "id": "cca.policy-rules.entity-unmanaged",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which entity represents endpoints that Cilium does not manage, and is it part of `cluster`?",
+      "back": "`unmanaged`; yes, it is included in the cluster entity.",
+      "explanation": "Unmanaged endpoints count as part of the cluster even without Cilium.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Entities based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The unmanaged entity represents endpoints not managed by Cilium. Unmanaged endpoints are considered part of the cluster and are included in the cluster entity.",
+      "uses": [
+        "cluster entity",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.entities"
+      ],
+      "order": 5430
+    },
+    {
+      "id": "cca.policy-rules.entity-all",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which entity combines all known clusters and world, allowing all communication?",
+      "back": "`all`.",
+      "explanation": "It is broader than `cluster`, which leaves out world.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Entities based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The all entity represents the combination of all known clusters as well world and whitelists all communication.",
+      "uses": [
+        "world entity",
+        "cluster entity",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.entities"
+      ],
+      "order": 5440
+    },
+    {
+      "id": "cca.policy-rules.to-services-apiserver",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Why should toServices not be used to grant access to the Kubernetes API server?",
+      "back": "The `default/kubernetes` Service has no label selector; the kube-apiserver entity is recommended instead.",
+      "explanation": "toServices relies on a Service’s label selector, which this special Service lacks.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Services based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#services-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The special Kubernetes Service default/kubernetes does not use a label selector. It is not recommended to grant access to the Kubernetes API server with a toServices-based policy. Use instead the kube-apiserver entity.",
+      "uses": [
+        "toServices",
+        "kube-apiserver entity",
+        "Service",
+        "selector",
+        "api"
+      ],
+      "conceptIDs": [
+        "cca.to-services",
+        "cca.entity-kube-apiserver"
+      ],
+      "order": 5450
+    },
+    {
+      "id": "cca.policy-rules.cidr-for-unmanaged",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What kind of peers are CIDR-based rules meant for?",
+      "back": "Endpoints that Cilium does not manage and that have no labels, such as external services, VMs or bare-metal machines.",
+      "explanation": "Without labels there is nothing for an endpoint selector to match, so addresses are used instead.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “IP/CIDR based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#ip-cidr-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "CIDR policies are used to define policies to and from endpoints which are not managed by Cilium and thus do not have labels associated with them. These are typically external services, VMs or metal machines running in particular subnets.",
+      "uses": [
+        "cidr",
+        "endpoint",
+        "label"
+      ],
+      "conceptIDs": [
+        "cca.cidr-policy"
+      ],
+      "order": 5460
+    },
+    {
+      "id": "cca.policy-rules.cidr-not-internal",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Do CIDR rules apply when both sides of a connection are Cilium-managed endpoints?",
+      "back": "No; that traffic is allowed with label, service or entity based rules instead.",
+      "explanation": "Such traffic is matched by identity, through labels, services or entities, so hard-coded addresses are not needed.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “IP/CIDR based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#ip-cidr-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Conversely, CIDR rules do not apply to traffic where both sides of the connection are either managed by Cilium or use an IP belonging to a node in the cluster (including host networking pods). This traffic may be allowed using labels, services or entities -based policies as described above.",
+      "uses": [
+        "cidr",
+        "endpoint",
+        "label",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.cidr-policy"
+      ],
+      "order": 5470
+    },
+    {
+      "id": "cca.policy-rules.cidr-last-resort",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "IP/CIDR-based rules should be used as a {{c1::last resort}}, because they require stable IP or subnet assignments.",
+      "explanation": "They hard-code addresses into policy, which breaks when those addresses change.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Layer 3 Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#l3-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This requires to hardcode either IP addresses or subnets into the policies. This construct should be used as a last resort as it requires stable IP or subnet assignments.",
+      "uses": [
+        "cidr",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.cidr-policy"
+      ],
+      "order": 5480
+    },
+    {
+      "id": "cca.policy-rules.fqdn-requirements",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What must be configured for toFQDNs to learn the IPs behind domain names?",
+      "back": "The layer 7 proxy (`--enable-l7-proxy=true`) and a layer 7 policy allowing DNS requests (a `rules.dns` block).",
+      "explanation": "Cilium learns names and addresses by intercepting DNS responses per endpoint through the DNS proxy.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “DNS based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#dns-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In order to associate domain names with IP addresses, Cilium intercepts DNS responses per-Endpoint using a DNS Proxy. This requires Cilium to be configured with --enable-l7-proxy=true and an L7 policy allowing DNS requests (rules.dns YAML block).",
+      "uses": [
+        "toFQDNs",
+        "DNS proxy",
+        "DNS",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.tofqdns-needs-dns-rule"
+      ],
+      "order": 5490
+    },
+    {
+      "id": "cca.policy-rules.fqdn-no-l3",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Can a toFQDNs egress rule also contain toEndpoints or toCIDR?",
+      "back": "No: it cannot contain other layer 3 rules, though it may contain toPorts and HTTP rules.",
+      "explanation": "The toFQDNs part is the rule’s only layer 3 selector; ports and HTTP details can still narrow it.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “DNS based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#dns-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "toFQDNs egress rules cannot contain any other L3 rules, such as toEndpoints (under Endpoints Based) and toCIDRs (under CIDR Based). They may contain L4/L7 rules, such as toPorts (see Layer 4 Policies) with, optionally, HTTP section (see Layer 7 Policies).",
+      "uses": [
+        "toFQDNs",
+        "toCIDR",
+        "toPorts",
+        "http"
+      ],
+      "conceptIDs": [
+        "cca.tofqdns"
+      ],
+      "order": 5500
+    },
+    {
+      "id": "cca.policy-rules.dns-proxy-agent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why do DNS requests targeted by DNS policies depend on the Cilium agent pod being available?",
+      "back": "The DNS proxy runs inside each Cilium agent.",
+      "explanation": "When the agent is unavailable, so is the proxy those requests go through.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “DNS based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#dns-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The DNS Proxy is provided in each Cilium agent. As a result, DNS requests targeted by policies depend on the availability of the Cilium agent pod.",
+      "uses": [
+        "DNS proxy",
+        "Cilium agent",
+        "Pod",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "cca.dns-proxy"
+      ],
+      "order": 5510
+    },
+    {
+      "id": "cca.policy-rules.match-pattern-star",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Does the toFQDNs pattern `*.example.org` match `example.org` or `a.b.example.org`?",
+      "back": "Neither: `*` matches characters within one name label only, so it matches `a.example.org` alone.",
+      "explanation": "Within a domain, `*` stands for zero or more characters but never the `.` separator.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “DNS based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#dns-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "* within a domain allows 0 or more valid DNS characters, except for the . separator. *.cilium.io will match sub.cilium.io but not cilium.io or sub.sub.cilium.io.",
+      "uses": [
+        "toFQDNs",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "cca.matchname-matchpattern"
+      ],
+      "order": 5520
+    },
+    {
+      "id": "cca.policy-rules.l4-icmp",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Once any layer 4 rule applies to an endpoint, what happens to `ICMP` traffic?",
+      "back": "It is blocked unless it relates to a connection that the policy otherwise allows.",
+      "explanation": "Without any layer 4 rule, all ports and protocols, `ICMP` included, are allowed.",
+      "source": "Cilium docs (1.20): Layer 4 Policies, “Limit ingress/egress ports”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer4/#limit-ingress-egress-ports",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If no layer 4 policy is specified for an endpoint, the endpoint is allowed to send and receive on all layer 4 ports and protocols including ICMP. If any layer 4 policy is specified, then ICMP will be blocked unless it’s related to a connection that is otherwise allowed by the policy.",
+      "uses": [
+        "endpoint",
+        "port"
+      ],
+      "conceptIDs": [
+        "cca.l4-blocks-icmp"
+      ],
+      "order": 5530
+    },
+    {
+      "id": "cca.policy-rules.port-range",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "How does a toPorts entry allow a range of ports rather than one port?",
+      "back": "By giving `endPort` beside `port`, e.g. `port: \"80\"` with `endPort: 444`.",
+      "explanation": "Layer 7 rules accept port ranges too, except DNS rules.",
+      "source": "Cilium docs (1.20): Layer 4 Policies, “Example Port Ranges”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer4/#example-port-ranges",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "port: \"80\" endPort: 444 protocol: TCP Note Layer 7 rules support port ranges, except for DNS rules.",
+      "uses": [
+        "toPorts",
+        "port",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "cca.to-ports"
+      ],
+      "order": 5540
+    },
+    {
+      "id": "cca.policy-rules.sni-proxy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What must be enabled for Cilium to enforce `serverNames` rules?",
+      "back": "The layer 7 proxy.",
+      "explanation": "Checking the name inside a TLS handshake needs the proxy, not just port matching.",
+      "source": "Cilium docs (1.20): Layer 4 Policies, “Example (TLS SNI)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer4/#example-tls-sni",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note TLS SNI policy enforcement requires L7 proxy enabled.",
+      "uses": [
+        "serverNames",
+        "tls / mtls"
+      ],
+      "conceptIDs": [
+        "cca.sni-rule"
+      ],
+      "order": 5550
+    },
+    {
+      "id": "cca.policy-rules.l7-shadowed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A policy has a plain layer 4 rule and a similar layer 4 rule that carries layer 7 rules. What do the layer 7 rules do?",
+      "back": "Nothing: the layer 7 portions of the second rule have no effect.",
+      "explanation": "The plain rule already allows the port, so there is nothing left for the layer 7 rules to restrict.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “Layer 7 Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#l7-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If a layer 4 rule is specified in the policy, and a similar layer 4 rule with layer 7 rules is also specified, then the layer 7 portions of the latter rule will have no effect.",
+      "uses": [
+        "toPorts",
+        "L7 HTTP rule"
+      ],
+      "conceptIDs": [
+        "cca.l7-in-l4"
+      ],
+      "order": 5560
+    },
+    {
+      "id": "cca.policy-rules.l7-403",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does a client get when its HTTP request violates an L7 HTTP rule?",
+      "back": "An HTTP 403 access denied response, not a dropped packet.",
+      "explanation": "Layer 7 violations are answered in the application’s own protocol where possible.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “Layer 7 Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#l7-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Unlike layer 3 and layer 4 policies, violation of layer 7 rules does not result in packet drops. Instead, if possible, an application protocol specific access denied message is crafted and returned, e.g. an HTTP 403 access denied is sent back for HTTP requests which violate the policy, or a DNS REFUSED response for DNS requests.",
+      "uses": [
+        "L7 HTTP rule",
+        "http"
+      ],
+      "conceptIDs": [
+        "cca.l7-violation-403"
+      ],
+      "order": 5570
+    },
+    {
+      "id": "cca.policy-rules.l7-dns-refused",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does a client get when its DNS query violates a layer 7 DNS rule?",
+      "back": "A DNS `REFUSED` response.",
+      "explanation": "As with HTTP, the proxy answers in the protocol rather than dropping packets.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “Layer 7 Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#l7-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Unlike layer 3 and layer 4 policies, violation of layer 7 rules does not result in packet drops. Instead, if possible, an application protocol specific access denied message is crafted and returned, e.g. an HTTP 403 access denied is sent back for HTTP requests which violate the policy, or a DNS REFUSED response for DNS requests.",
+      "uses": [
+        "DNS",
+        "DNS proxy"
+      ],
+      "conceptIDs": [
+        "cca.l7-violation-403"
+      ],
+      "order": 5580
+    },
+    {
+      "id": "cca.policy-rules.l7-union",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Can HTTP and DNS layer 7 rules be combined on the same port?",
+      "back": "No: only one layer 7 rule type can be used per port; overlapping rules of different types get the policy rejected.",
+      "explanation": "The layer 7 rules structure is a union, so each port can carry the rules of a single protocol.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “Layer 7 Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#l7-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The structure is implemented as a union, i.e. only one member field can be used per port. If multiple toPorts rules with identical PortProtocol select an overlapping list of endpoints, then the layer 7 rules are combined together if they are of the same type. If the type differs, the policy is rejected.",
+      "uses": [
+        "L7 HTTP rule",
+        "DNS",
+        "port",
+        "toPorts"
+      ],
+      "conceptIDs": [
+        "cca.l7-union"
+      ],
+      "order": 5590
+    },
+    {
+      "id": "cca.policy-rules.l7-envoy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Through what does Cilium proxy traffic that layer 7 policies target?",
+      "back": "A node-local Envoy instance, run either as a DaemonSet or embedded in the agent pod.",
+      "explanation": "When Envoy is embedded in the agent pod, layer 7 traffic depends on that pod being available.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “Layer 7 Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#l7-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Layer 7 policies will proxy traffic through a node-local Envoy instance, which will either be deployed as a DaemonSet or embedded in the agent pod. When Envoy is embedded in the agent pod, Layer 7 traffic targeted by policies will therefore depend on the availability of the Cilium agent pod.",
+      "uses": [
+        "Envoy",
+        "DaemonSet",
+        "Cilium agent",
+        "L7 HTTP rule"
+      ],
+      "conceptIDs": [
+        "cca.l7-http"
+      ],
+      "order": 5600
+    },
+    {
+      "id": "cca.policy-rules.http-any-match",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A port carries several L7 HTTP rules. When is a request permitted?",
+      "back": "When at least one of the rules matches it.",
+      "explanation": "The rules form a list of alternatives; with no rules at all, all traffic is permitted.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “Layer 7 Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#l7-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Each member consists of a list of application protocol rules. A layer 7 request is permitted if at least one of the rules matches. If no rules are specified, then all traffic is permitted.",
+      "uses": [
+        "L7 HTTP rule",
+        "port"
+      ],
+      "conceptIDs": [
+        "cca.l7-http"
+      ],
+      "order": 5610
+    },
+    {
+      "id": "cca.policy-rules.http-method",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In an L7 HTTP rule, what happens if `method` is left out?",
+      "back": "All methods are allowed; when given, `method` is an extended regular expression matched against the request’s method.",
+      "explanation": "Omitted fields in an HTTP rule do not restrict anything.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “HTTP”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#http",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Method Method is an extended POSIX regex matched against the method of a request, e.g. GET, POST, PUT, PATCH, DELETE, … If omitted or empty, all methods are allowed.",
+      "uses": [
+        "L7 HTTP rule",
+        "http"
+      ],
+      "conceptIDs": [
+        "cca.l7-http"
+      ],
+      "order": 5620
+    },
+    {
+      "id": "cca.policy-rules.http-headers",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What does the `headers` field of an L7 HTTP rule require?",
+      "back": "That each listed HTTP header is present in the request.",
+      "explanation": "Left empty, it lets requests through whatever headers they carry.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “HTTP”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#http",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Headers Headers is a list of HTTP headers which must be present in the request. If omitted or empty, requests are allowed regardless of headers present.",
+      "uses": [
+        "L7 HTTP rule",
+        "http"
+      ],
+      "conceptIDs": [
+        "cca.l7-http"
+      ],
+      "order": 5630
+    },
+    {
+      "id": "cca.policy-rules.deny-unsupported",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What two kinds of denial do deny policies not support?",
+      "back": "Layer 7 denial, such as denying one path, and toFQDNs denial of a specific domain name.",
+      "explanation": "Deny policies work on layer 3 and 4 peers and ports, not application requests or names.",
+      "source": "Cilium docs (1.20): Deny Policies, “Deny Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/deny/#deny-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Deny policies do not support: policy enforcement at L7, i.e., specifically denying an URL and toFQDNs, i.e., specifically denying traffic to a specific domain name.",
+      "uses": [
+        "deny policy",
+        "toFQDNs"
+      ],
+      "conceptIDs": [
+        "cca.deny-policies"
+      ],
+      "order": 5640
+    },
+    {
+      "id": "cca.policy-rules.deny-default-deny",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Does a deny policy that selects a pod put that pod into default deny?",
+      "back": "Yes: like allow policies, it does so as soon as a single policy selects the pod.",
+      "explanation": "A deny-only policy can therefore block more than its deny rules name.",
+      "source": "Cilium docs (1.20): Deny Policies, “Deny Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/deny/#deny-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Similarly to “allow” policies, Pods will enter default-deny mode as soon a single policy selects it.",
+      "uses": [
+        "deny policy",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.deny-policies"
+      ],
+      "order": 5650
+    },
+    {
+      "id": "cca.policy-rules.host-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Do host policies apply to traffic between ordinary pods and locations outside the cluster?",
+      "back": "No: on each selected node they apply only to the host namespace, including host-networking pods.",
+      "explanation": "Ordinary pods remain governed by endpoint policies, not host policies.",
+      "source": "Cilium docs (1.20): Host Policies, “Host Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/host/#hostpolicies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In each selected node, they apply only to the host namespace, including host-networking pods. They don’t apply to communications between non-host-networking pods and locations outside of the cluster.",
+      "uses": [
+        "host policy",
+        "node",
+        "namespace",
+        "Pod",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.host-policies"
+      ],
+      "order": 5660
+    },
+    {
+      "id": "cca.policy-rules.host-firewall-enable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which Helm values does installing host policies require?",
+      "back": "`hostFirewall.enabled=true`, and `devices` naming the interfaces; if `devices` is omitted, Cilium auto-detects them.",
+      "explanation": "The host firewall must be on for host policies to be enforced on the chosen interfaces.",
+      "source": "Cilium docs (1.20): Host Policies, “Host Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/host/#hostpolicies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Installation of Host Policies requires the addition of the following helm flags when installing Cilium: --set devices='{interface}' where interface refers to the network device Cilium is configured on, for example eth0. If you omit this option, Cilium auto-detects what interface the host firewall applies to. --set hostFirewall.enabled=true",
+      "uses": [
+        "host policy",
+        "host firewall",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "cca.host-firewall"
+      ],
+      "order": 5670
+    },
+    {
+      "id": "cca.policy-rules.ns-endpoint-selector",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which pods can the endpointSelector of a CNP select?",
+      "back": "Only pods in the CNP’s own namespace.",
+      "explanation": "Kubernetes prohibits naming a namespace there, as that would break namespace isolation.",
+      "source": "Cilium docs (1.20): Using Kubernetes Constructs In Policy, “Specifying Namespace In EndpointSelector, FromEndpoints, ToEndpoints”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/kubernetes/#specifying-namespace-in-endpointselector-fromendpoints-toendpoints",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "However, Kubernetes prohibits specifying the namespace in the endpointSelector, as it would violate the namespace isolation principle of Kubernetes. The endpointSelector always applies to pods in the namespace associated with the CiliumNetworkPolicy resource itself.",
+      "uses": [
+        "endpointSelector",
+        "CNP",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cca.namespace-boundary"
+      ],
+      "order": 5680
+    },
+    {
+      "id": "cca.policy-rules.ns-cross",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How can a CNP in one namespace allow traffic from pods in another namespace?",
+      "back": "Add the label `k8s:io.kubernetes.pod.namespace` for that namespace to the fromEndpoints selector.",
+      "explanation": "Namespaces may be named in fromEndpoints and toEndpoints, just not in endpointSelector.",
+      "source": "Cilium docs (1.20): Using Kubernetes Constructs In Policy, “Specifying Namespace In EndpointSelector, FromEndpoints, ToEndpoints”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/kubernetes/#specifying-namespace-in-endpointselector-fromendpoints-toendpoints",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Specifying the namespace by way of the label k8s:io.kubernetes.pod.namespace in the fromEndpoints and toEndpoints fields is supported",
+      "uses": [
+        "CNP",
+        "fromEndpoints",
+        "namespace",
+        "Pod",
+        "label"
+      ],
+      "conceptIDs": [
+        "cca.namespace-boundary"
+      ],
+      "order": 5690
+    },
+    {
+      "id": "cca.policy-rules.service-account",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which label lets a CNP select pods by their Kubernetes ServiceAccount?",
+      "back": "`io.cilium.k8s.policy.serviceaccount`.",
+      "explanation": "It can be used in endpointSelector for the protected pods and in fromEndpoints for the peers.",
+      "source": "Cilium docs (1.20): Using Kubernetes Constructs In Policy, “ServiceAccounts”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/kubernetes/#serviceaccounts",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "endpointSelector: matchLabels: io.cilium.k8s.policy.serviceaccount: leia ingress: - fromEndpoints: - matchLabels: io.cilium.k8s.policy.serviceaccount: luke",
+      "uses": [
+        "CNP",
+        "label",
+        "Pod",
+        "endpointSelector",
+        "fromEndpoints"
+      ],
+      "conceptIDs": [
+        "cca.serviceaccount-selector"
+      ],
+      "order": 5700
+    },
+    {
+      "id": "cca.policy-rules.app-format",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Two teams need a policy that lets `reports` call only `GET /status` on `billing`. Which format can express that?",
+      "back": "B: A CiliumNetworkPolicy",
+      "choices": "A) A Kubernetes NetworkPolicy\nB) A CiliumNetworkPolicy\nC) A NetworkPolicy with an `ipBlock` rule\nD) The Helm value `policyEnforcementMode`",
+      "choicesExplained": "A and C are limited to layer 3 and 4, so they cannot see the method or path. D chooses an enforcement mode; it is not a policy.",
+      "explanation": "Only the Cilium formats reach layer 7, where the method and path live.",
+      "source": "Cilium docs (1.20): Network Policy, “Network Policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#k8s-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The standard NetworkPolicy resource which supports L3 and L4 policies at ingress or egress of the Pod. The Kubernetes ClusterNetworkPolicy format (v1alpha2) which supports cluster-scoped policies. The extended CiliumNetworkPolicy format which is available as a CustomResourceDefinition which supports specification of policies at Layers 3-7 for both ingress and egress.",
+      "uses": [
+        "NetworkPolicy",
+        "CiliumNetworkPolicy",
+        "policyEnforcementMode",
+        "http"
+      ],
+      "conceptIDs": [
+        "cca.policy-types",
+        "cca.cnp",
+        "cca.knp-vs-cnp"
+      ],
+      "order": 5710
+    },
+    {
+      "id": "cca.policy-rules.app-ccnp",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A platform team wants one object that denies traffic from outside the cluster to pods in every namespace. What should they write?",
+      "back": "C: A CCNP",
+      "choices": "A) A CNP in the `default` namespace\nB) One CNP per namespace, kept in sync by hand\nC) A CCNP\nD) A NetworkPolicy with an empty selector",
+      "choicesExplained": "A applies only within `default`. B works but is many objects, not one. D is namespaced too and cannot deny.",
+      "explanation": "A CCNP has the same specification as a CNP but is cluster-scoped.",
+      "source": "Cilium docs (1.20): Network Policy, “CiliumClusterwideNetworkPolicy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#ciliumclusterwidenetworkpolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "policies defined by CiliumClusterwideNetworkPolicy are non-namespaced and are cluster-scoped",
+      "uses": [
+        "CNP",
+        "CCNP",
+        "NetworkPolicy",
+        "namespace",
+        "Pod",
+        "cluster",
+        "selector"
+      ],
+      "conceptIDs": [
+        "cca.cnp-vs-ccnp",
+        "cca.ccnp"
+      ],
+      "order": 5720
+    },
+    {
+      "id": "cca.policy-rules.app-mixed",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A cluster uses NetworkPolicies from one team and CNPs from another. An auditor finds a connection allowed that neither team meant to allow. What does the documentation warn about?",
+      "back": "D: Mixing policy types makes the full allowed set confusing and can allow traffic unintentionally",
+      "choices": "A) CNPs cannot be read by Kubernetes\nB) NetworkPolicies are ignored when CNPs exist\nC) Deny rules are applied last\nD) Mixing policy types makes the full allowed set confusing and can allow traffic unintentionally",
+      "choicesExplained": "A is false: CNPs are Kubernetes custom resources. B is false: Cilium enforces both at once. C is false: deny takes precedence over allow.",
+      "explanation": "Every format adds allowed traffic, so the combined allowed set is what counts.",
+      "source": "Cilium docs (1.20): Network Policy, “Network Policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#k8s-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "However caution should be applied when using multiple policy types at the same time, as it can be confusing to understand the complete set of allowed traffic across multiple policy types. If close attention is not applied this may lead to unintended policy allow behavior.",
+      "uses": [
+        "NetworkPolicy",
+        "CNP",
+        "deny policy"
+      ],
+      "conceptIDs": [
+        "cca.mixed-policy-caution"
+      ],
+      "order": 5730
+    },
+    {
+      "id": "cca.policy-rules.app-union",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "One rule lets `frontend` reach `api` on port 8080; another rule, selecting the same `api` pods, lets `frontend` reach them on any port. What can `frontend` reach?",
+      "back": "D: `api` on any port",
+      "choices": "A) Only whichever rule was applied last\nB) `api` on port 8080 only\nC) Nothing: the rules conflict\nD) `api` on any port",
+      "choicesExplained": "B would need rules to narrow each other, which they never do. C and A are wrong: overlapping rules are combined, not rejected or replaced.",
+      "explanation": "Rules are allow lists, so the broader rule decides.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Rule Basics”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#rule-basics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If two rules exist, and one would match a broader set of traffic, then all traffic matching the broader rule will be allowed.",
+      "uses": [
+        "port",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.allow-list-model"
+      ],
+      "order": 5740
+    },
+    {
+      "id": "cca.policy-rules.app-both-sides",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "`server` allows ingress from `client`. `client` is selected by a policy whose egress section allows only DNS. Can `client` connect to `server`?",
+      "back": "C: No: client’s own egress policy drops it",
+      "choices": "A) Yes, the server’s ingress rule is enough\nB) Yes, because replies are stateful\nC) No: client’s own egress policy drops it\nD) Only if `server` also has an egress rule",
+      "choicesExplained": "A ignores the sender side. B concerns replies, not new connections. D adds a rule on the wrong side.",
+      "explanation": "Policy must allow the traffic at both the sender and the receiver.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Egress Allow All Endpoints”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#egress-allow-all-endpoints",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note that while the above examples allow all egress traffic from an endpoint, the receivers of the egress traffic may have ingress rules that deny the traffic. In other words, policy must be configured on both sides (sender and receiver).",
+      "uses": [
+        "DNS",
+        "fromEndpoints"
+      ],
+      "conceptIDs": [
+        "cca.from-to-endpoints"
+      ],
+      "order": 5750
+    },
+    {
+      "id": "cca.policy-rules.app-deny-wins",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A CNP allows ingress from the `world` entity to `web` pods. A CCNP has an `ingressDeny` rule for `world` on all pods. What happens to traffic from outside the cluster to `web`?",
+      "back": "C: Denied, because deny takes precedence over allow",
+      "choices": "A) Allowed, because the CNP is more specific\nB) Allowed, because the CNP is namespaced\nC) Denied, because deny takes precedence over allow\nD) Whichever policy was created first wins",
+      "choicesExplained": "A and B invent precedence rules by specificity or scope. D invents a precedence by creation time.",
+      "explanation": "Deny precedence holds whatever format the allow comes from.",
+      "source": "Cilium docs (1.20): Deny Policies, “Deny Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/deny/#deny-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Deny policies take precedence over allow policies, regardless of whether they are a Cilium Network Policy, a Clusterwide Cilium Network Policy or even a Kubernetes Network Policy.",
+      "uses": [
+        "CNP",
+        "CCNP",
+        "world entity",
+        "deny policy",
+        "Pod",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.deny-precedence",
+        "cca.deny-policies"
+      ],
+      "order": 5760
+    },
+    {
+      "id": "cca.policy-rules.app-world",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A `public-web` pod must accept connections from the internet but not from pods inside the cluster. Which ingress rule fits?",
+      "back": "A: `fromEntities: [world]`",
+      "choices": "A) `fromEntities: [world]`\nB) `fromEntities: [cluster]`\nC) `fromEndpoints: [{}]`\nD) `fromEntities: [host]`",
+      "choicesExplained": "B selects the local cluster, not the internet. C selects endpoints in the cluster. D is only the local host.",
+      "explanation": "The world entity covers all endpoints outside the cluster.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Entities based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The world entity corresponds to all endpoints outside of the cluster.",
+      "uses": [
+        "world entity",
+        "cluster entity",
+        "fromEndpoints",
+        "Pod",
+        "host"
+      ],
+      "conceptIDs": [
+        "cca.entity-world",
+        "cca.entities"
+      ],
+      "order": 5770
+    },
+    {
+      "id": "cca.policy-rules.app-cluster",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A metrics pod must accept connections from anything inside the local cluster, nodes and unmanaged pods included, but nothing from outside. Which entity fits?",
+      "back": "C: `cluster`",
+      "choices": "A) `world`\nB) `all`\nC) `cluster`\nD) `remote-node`",
+      "choicesExplained": "A is only outside the cluster. B adds world, which must be excluded. D covers other nodes only.",
+      "explanation": "The cluster entity groups every endpoint in the local cluster, including host, remote nodes and unmanaged endpoints.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “Entities based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#entities-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This includes all Cilium-managed endpoints of the local cluster, unmanaged endpoints in the local cluster, as well as the host, remote-node, init, ingress, health, and kube-apiserver entities.",
+      "uses": [
+        "cluster entity",
+        "world entity",
+        "Pod",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.entity-cluster",
+        "cca.entities"
+      ],
+      "order": 5780
+    },
+    {
+      "id": "cca.policy-rules.app-cidr",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Pods must reach a legacy database on a virtual machine outside the cluster, at the fixed address `203.0.113.10`. Which rule fits?",
+      "back": "D: `toCIDR: [203.0.113.10/32]`",
+      "choices": "A) `toEndpoints` with the database’s labels\nB) `toServices` naming the database\nC) `toEntities: [cluster]`\nD) `toCIDR: [203.0.113.10/32]`",
+      "choicesExplained": "A needs a Cilium-managed endpoint with labels. B needs a Kubernetes Service. C is inside the cluster only.",
+      "explanation": "The machine is not managed by Cilium and has no labels, so a CIDR rule is the tool.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “IP/CIDR based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#ip-cidr-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "CIDR policies are used to define policies to and from endpoints which are not managed by Cilium and thus do not have labels associated with them.",
+      "uses": [
+        "toCIDR",
+        "toServices",
+        "cluster entity",
+        "Pod",
+        "Service",
+        "label"
+      ],
+      "conceptIDs": [
+        "cca.cidr-policy"
+      ],
+      "order": 5790
+    },
+    {
+      "id": "cca.policy-rules.app-fqdn-missing",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A policy has a toFQDNs rule for `api.example.net`, but the pods still cannot connect, and Cilium never sees their DNS answers. What is missing?",
+      "back": "A: An egress rule to the cluster DNS service with a `rules.dns` block",
+      "choices": "A) An egress rule to the cluster DNS service with a `rules.dns` block\nB) A `toCIDR` rule in the same toFQDNs entry\nC) `policyEnforcementMode: never`\nD) A deny policy for other names",
+      "choicesExplained": "B is not allowed: toFQDNs rules cannot contain other layer 3 rules. C turns enforcement off rather than fixing it. D blocks, it does not teach Cilium any addresses.",
+      "explanation": "toFQDNs needs a layer 7 DNS rule so the DNS proxy can see the answers.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “DNS based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#dns-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This requires Cilium to be configured with --enable-l7-proxy=true and an L7 policy allowing DNS requests (rules.dns YAML block).",
+      "uses": [
+        "toFQDNs",
+        "toCIDR",
+        "DNS proxy",
+        "DNS",
+        "policyEnforcementMode",
+        "deny policy"
+      ],
+      "conceptIDs": [
+        "cca.tofqdns-needs-dns-rule"
+      ],
+      "order": 5800
+    },
+    {
+      "id": "cca.policy-rules.app-fqdn",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Pods must reach a payments provider whose IP addresses change often and are not published in advance. Which rule type fits best?",
+      "back": "C: `toFQDNs` with `matchName`",
+      "choices": "A) `toCIDR` with today’s addresses\nB) `fromEntities: [world]`\nC) `toFQDNs` with `matchName`\nD) `toServices`",
+      "choicesExplained": "A breaks when the addresses change. B is an ingress rule, and would open everything outside. D is for Kubernetes Services.",
+      "explanation": "DNS rules suit remote peers whose addresses change or are not known beforehand.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “DNS based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#dns-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The IP addresses provided in DNS responses are allowed by Cilium in a similar manner to IPs in CIDR based policies. They are an alternative when the remote IPs may change or are not know prior, or when DNS is more convenient.",
+      "uses": [
+        "toFQDNs",
+        "toCIDR",
+        "world entity",
+        "toServices",
+        "ip address",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.tofqdns"
+      ],
+      "order": 5810
+    },
+    {
+      "id": "cca.policy-rules.app-pattern",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A rule must allow `eu.api.example.net` and `us.api.example.net`, but not `api.example.net` or `x.eu.api.example.net`. Which toFQDNs entry fits?",
+      "back": "C: `matchPattern: \"*.api.example.net\"`",
+      "choices": "A) `matchName: \"api.example.net\"`\nB) `matchPattern: \"**.api.example.net\"`\nC) `matchPattern: \"*.api.example.net\"`\nD) `matchPattern: \"*\"`",
+      "choicesExplained": "A matches only that exact name. B also matches deeper names such as `x.eu.api.example.net`. D matches every name.",
+      "explanation": "A single `*` matches within one label but not across the `.` separator.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “DNS based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#dns-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "**. is a special prefix supported in DNS match pattern to wildcard all cascaded subdomains in the prefix. For example: **.cilium.io pattern will match both app.cilium.io and test.app.cilium.io but not cilium.io.",
+      "uses": [
+        "toFQDNs",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "cca.matchname-matchpattern"
+      ],
+      "order": 5820
+    },
+    {
+      "id": "cca.policy-rules.app-agent-down",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Cilium uses its default in-agent DNS proxy, and the agent pod on one node is restarting. What can pods on that node expect for DNS requests that their DNS policies target?",
+      "back": "D: They depend on the agent, so they cannot be served until it is back",
+      "choices": "A) They go straight to the upstream server unfiltered\nB) They are answered from the kube-apiserver\nC) They are unaffected, because the proxy runs as a separate DaemonSet\nD) They depend on the agent, so they cannot be served until it is back",
+      "choicesExplained": "A would bypass the policy, which is not what the documentation describes. B is not a DNS path. C describes the optional Standalone DNS Proxy (alpha), not the default in-agent proxy.",
+      "explanation": "The DNS proxy lives inside each Cilium agent.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “DNS based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#dns-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "As a result, DNS requests targeted by policies depend on the availability of the Cilium agent pod.",
+      "uses": [
+        "DNS proxy",
+        "Cilium agent",
+        "Pod",
+        "DNS",
+        "kube-apiserver",
+        "DaemonSet",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "cca.dns-proxy"
+      ],
+      "order": 5830
+    },
+    {
+      "id": "cca.policy-rules.app-icmp",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team adds an ingress rule allowing `TCP` port 443 to a pod. Afterwards, `ping` to the pod stops working. Why?",
+      "back": "C: Any layer 4 rule blocks `ICMP` not related to an allowed connection",
+      "choices": "A) `ping` needs the world entity\nB) Port 443 rules always block `ICMP`\nC) Any layer 4 rule blocks `ICMP` not related to an allowed connection\nD) Layer 4 rules turn on audit mode",
+      "choicesExplained": "B is too narrow: any port rule has this effect. A is unrelated to the protocol. D is not what layer 4 rules do.",
+      "explanation": "Before the rule, all protocols were allowed; with a layer 4 rule, only what it allows passes.",
+      "source": "Cilium docs (1.20): Layer 4 Policies, “Limit ingress/egress ports”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer4/#limit-ingress-egress-ports",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If any layer 4 policy is specified, then ICMP will be blocked unless it’s related to a connection that is otherwise allowed by the policy.",
+      "uses": [
+        "port",
+        "Pod",
+        "world entity",
+        "policy audit mode"
+      ],
+      "conceptIDs": [
+        "cca.l4-blocks-icmp"
+      ],
+      "order": 5840
+    },
+    {
+      "id": "cca.policy-rules.app-403",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "After a new policy, a client calling `/admin` on a service gets an immediate HTTP 403 instead of a timeout. What is the most likely cause?",
+      "back": "D: An L7 HTTP rule rejected the request",
+      "choices": "A) A layer 3 rule dropped the packets\nB) The default deny response is set to `icmp`\nC) A layer 4 rule dropped the connection\nD) An L7 HTTP rule rejected the request",
+      "choicesExplained": "A and C produce silent drops, which look like timeouts. B sends an `ICMP` unreachable, not an HTTP response.",
+      "explanation": "Layer 7 violations are answered with an access-denied message in the protocol.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “Layer 7 Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#l7-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Unlike layer 3 and layer 4 policies, violation of layer 7 rules does not result in packet drops. Instead, if possible, an application protocol specific access denied message is crafted and returned, e.g. an HTTP 403 access denied is sent back for HTTP requests which violate the policy, or a DNS REFUSED response for DNS requests.",
+      "uses": [
+        "L7 HTTP rule",
+        "http",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.l7-violation-403",
+        "cca.l7-http"
+      ],
+      "order": 5850
+    },
+    {
+      "id": "cca.policy-rules.app-shadow",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "For the same pods, one policy allows port 8080 with no further rules, and another allows port 8080 with HTTP rules for `GET /api`. What reaches port 8080?",
+      "back": "C: All traffic on 8080: the HTTP rules have no effect",
+      "choices": "A) Only `GET /api`\nB) Nothing: the policies conflict\nC) All traffic on 8080: the HTTP rules have no effect\nD) Only traffic that is not HTTP",
+      "choicesExplained": "A would need the plain rule removed. B is wrong: this is not a rejected combination. D invents a split by protocol.",
+      "explanation": "A plain layer 4 rule beside a similar one with layer 7 rules cancels the layer 7 part.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “Layer 7 Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#l7-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If a layer 4 rule is specified in the policy, and a similar layer 4 rule with layer 7 rules is also specified, then the layer 7 portions of the latter rule will have no effect.",
+      "uses": [
+        "port",
+        "http",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.l7-in-l4"
+      ],
+      "order": 5860
+    },
+    {
+      "id": "cca.policy-rules.app-http-yaml",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A pod may receive only `GET` requests for paths under `/api/` on port 8080. Which fragment of an ingress rule expresses this?",
+      "back": "D: the `toPorts` entry with `rules.http` for `GET` and `/api/.*`",
+      "choices": "A) `toPorts: [{ports: [{port: \"8080\"}]}]`\nB) `fromEntities: [world]` with `path: \"/api/.*\"`\nC) `rules: {dns: [{matchPattern: \"/api/*\"}]}`\nD) `toPorts: [{ports: [{port: \"8080\", protocol: TCP}], rules: {http: [{method: \"GET\", path: \"/api/.*\"}]}}]`",
+      "choicesExplained": "A allows every request on the port. B puts an HTTP field outside a port rule. C is a DNS rule, not HTTP.",
+      "explanation": "HTTP rules live under `rules.http` inside a `toPorts` entry.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “Allow GET /public”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#allow-get-public",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "toPorts: - ports: - port: \"80\" protocol: TCP rules: http: - method: \"GET\" path: \"/public\"",
+      "uses": [
+        "toPorts",
+        "L7 HTTP rule",
+        "port",
+        "Pod",
+        "world entity",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "cca.l7-http",
+        "cca.l7-in-l4"
+      ],
+      "order": 5870
+    },
+    {
+      "id": "cca.policy-rules.app-host",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Nodes labelled `role=bastion` must accept inbound traffic only on port 22. Which policy shape fits?",
+      "back": "A: A CCNP with `nodeSelector` matching `role=bastion`",
+      "choices": "A) A CCNP with `nodeSelector` matching `role=bastion`\nB) A CNP with `endpointSelector` matching `role=bastion`\nC) A NetworkPolicy in `kube-system`\nD) A CCNP with `endpointSelector: {}`",
+      "choicesExplained": "B selects pods, not nodes, and CNPs cannot use nodeSelector. C also selects pods. D selects every endpoint, not the nodes.",
+      "explanation": "Host policies are CCNPs that use a nodeSelector.",
+      "source": "Cilium docs (1.20): Host Policies, “Host Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/host/#hostpolicies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Host policies take the form of a CiliumClusterwideNetworkPolicy with a Node Selector instead of an Endpoint Selector.",
+      "uses": [
+        "host policy",
+        "CCNP",
+        "CNP",
+        "nodeSelector",
+        "endpointSelector",
+        "NetworkPolicy",
+        "node",
+        "port"
+      ],
+      "conceptIDs": [
+        "cca.host-policies"
+      ],
+      "order": 5880
+    },
+    {
+      "id": "cca.policy-rules.app-namespace",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A CNP in namespace `shop` has `endpointSelector: {}` and an ingress rule `fromEndpoints: [{}]`. A pod in namespace `blog` connects to a `shop` pod. What happens?",
+      "back": "B: Dropped: the CNP’s selectors apply within `shop` only",
+      "choices": "A) Allowed: the empty selector matches every pod in the cluster\nB) Dropped: the CNP’s selectors apply within `shop` only\nC) Allowed, because `blog` has no policy\nD) Dropped only if `blog` also has a policy",
+      "choicesExplained": "A ignores that a CNP applies within its namespace. C looks at the wrong side: the `shop` pod is in ingress default deny. D is irrelevant to the `shop` side’s decision.",
+      "explanation": "Allowing other namespaces needs the namespace label in fromEndpoints.",
+      "source": "Cilium docs (1.20): Using Kubernetes Constructs In Policy, “Policies Only Apply Within The Namespace”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/kubernetes/#policies-only-apply-within-the-namespace",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Network policies created and imported as CiliumNetworkPolicy CRD and NetworkPolicy apply within the namespace. In other words, the policy only applies to pods within that namespace.",
+      "uses": [
+        "CNP",
+        "endpointSelector",
+        "fromEndpoints",
+        "namespace",
+        "Pod",
+        "cluster",
+        "selector"
+      ],
+      "conceptIDs": [
+        "cca.namespace-boundary"
+      ],
+      "order": 5890
+    },
+    {
+      "id": "cca.policy-rules.app-empty-rule",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A policy selects `app=batch` but has neither an `ingress` nor an `egress` section. What does it change for `batch` pods?",
+      "back": "C: Nothing: the rule has no effect",
+      "choices": "A) It puts both directions into default deny\nB) It puts ingress into default deny\nC) Nothing: the rule has no effect\nD) It blocks all `ICMP`",
+      "choicesExplained": "A and B would need the matching section to be present. D is the effect of a layer 4 rule, which this policy lacks.",
+      "explanation": "The sections carry the rules for each direction; without them there is nothing to apply.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Rule Basics”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#rule-basics",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If both ingress and egress are omitted, the rule has no effect.",
+      "uses": [
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.ingress-egress-sections"
+      ],
+      "order": 5900
+    },
+    {
+      "id": "cca.policy-rules.contrast-knp-cnp",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does a Kubernetes NetworkPolicy differ from a CNP in what it can match?",
+      "back": "NetworkPolicy: layer 3 and 4 only. CNP: layers 3 to 7, for ingress and egress.",
+      "explanation": "This is why path, method or DNS-name rules need a Cilium format.",
+      "source": "Cilium docs (1.20): Network Policy, “Network Policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#k8s-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The standard NetworkPolicy resource which supports L3 and L4 policies at ingress or egress of the Pod. The Kubernetes ClusterNetworkPolicy format (v1alpha2) which supports cluster-scoped policies. The extended CiliumNetworkPolicy format which is available as a CustomResourceDefinition which supports specification of policies at Layers 3-7 for both ingress and egress.",
+      "uses": [
+        "NetworkPolicy",
+        "CNP",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "cca.knp-vs-cnp"
+      ],
+      "order": 5910
+    },
+    {
+      "id": "cca.policy-rules.contrast-cnp-ccnp",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does a CNP differ from a CCNP in scope?",
+      "back": "A CNP is namespaced and applies within its namespace; a CCNP is cluster-scoped and can also select nodes.",
+      "explanation": "Their rule specification is otherwise the same.",
+      "source": "Cilium docs (1.20): Network Policy, “CiliumClusterwideNetworkPolicy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/policy/#ciliumclusterwidenetworkpolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "CiliumClusterwideNetworkPolicy is similar to CiliumNetworkPolicy, except (1) policies defined by CiliumClusterwideNetworkPolicy are non-namespaced and are cluster-scoped, and (2) it enables the use of Node Selector.",
+      "uses": [
+        "CNP",
+        "CCNP",
+        "namespace",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.cnp-vs-ccnp"
+      ],
+      "order": 5920
+    },
+    {
+      "id": "cca.policy-rules.contrast-match",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does `matchName` differ from `matchPattern` in a toFQDNs rule?",
+      "back": "`matchName` matches one domain exactly; `matchPattern` matches names against a pattern with `*` wildcards.",
+      "explanation": "Several exact names need several `matchName` entries; one pattern can cover many names.",
+      "source": "Cilium docs (1.20): Layer 3 Policies, “DNS based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer3/#dns-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "toFQDNs.matchName Inserts IPs of domains that match matchName exactly. Multiple distinct names may be included in separate matchName entries and IPs for domains that match any matchName will be inserted. toFQDNs.matchPattern Inserts IPs of domains that match the pattern in matchPattern, accounting for wildcards.",
+      "uses": [
+        "toFQDNs",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "cca.matchname-matchpattern"
+      ],
+      "order": 5930
+    },
+    {
+      "id": "cca.policy-rules.contrast-drop-refuse",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does a layer 3 or 4 policy violation differ from a layer 7 violation, as the client sees it?",
+      "back": "Layer 3 and 4: packets are dropped. Layer 7: an access-denied reply, such as HTTP 403 or DNS `REFUSED`, where possible.",
+      "explanation": "The first looks like a timeout to the client; the second gives an immediate answer.",
+      "source": "Cilium docs (1.20): Layer 7 Policies, “Layer 7 Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/layer7/#l7-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Unlike layer 3 and layer 4 policies, violation of layer 7 rules does not result in packet drops. Instead, if possible, an application protocol specific access denied message is crafted and returned, e.g. an HTTP 403 access denied is sent back for HTTP requests which violate the policy, or a DNS REFUSED response for DNS requests.",
+      "uses": [
+        "http",
+        "DNS",
+        "L7 HTTP rule"
+      ],
+      "conceptIDs": [
+        "cca.l7-violation-403"
+      ],
+      "order": 5940
+    }
+  ]
+}

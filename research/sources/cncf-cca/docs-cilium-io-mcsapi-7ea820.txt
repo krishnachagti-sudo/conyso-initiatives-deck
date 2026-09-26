@@ -1,0 +1,213 @@
+https://docs.cilium.io/en/stable/network/clustermesh/mcsapi/
+
+
+
+## {#multi-cluster-services-api} 
+ {#gs-clustermesh-mcsapi} 
+Multi-Cluster Services API
+
+This tutorial will guide you to through the support of Multi-Cluster Services API (MCS-API) in Cilium.
+
+## {#prerequisites} 
+ {#clustermesh-mcsapi-prereqs} 
+Prerequisites
+
+You need to have a functioning Cluster Mesh setup, please follow the
+Setting up Cluster Mesh guide to set it up.
+
+Make sure you are running CoreDNS 1.12.2 or later (installed by default from Kubernetes 1.35).
+
+To install Cilium with MCS-API support, run:
+
+Helm RepositoryOCI Registry
+
+helm install cilium cilium/cilium --version 1.20.2 \
+   --namespace kube-system \
+   --set clustermesh.mcsapi.enabled=true
+
+helm install cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace kube-system \
+   --set clustermesh.mcsapi.enabled=true
+
+To enable MCS-API support on an existing Cilium installation, run:
+
+Helm RepositoryOCI Registry
+
+helm upgrade cilium cilium/cilium --version 1.20.2 \
+   --namespace kube-system \
+   --reuse-values \
+   --set clustermesh.mcsapi.enabled=true
+
+helm upgrade cilium oci://quay.io/cilium/charts/cilium 1.20.2 \
+   --namespace kube-system \
+   --reuse-values \
+   --set clustermesh.mcsapi.enabled=true
+
+Also checkout the EndpointSlice synchronization feature
+if you need Headless Services support.
+
+If you set clustermesh.mcsapi.corednsAutoConfigure.enabled to true, Cilium
+will automatically configure and rollout CoreDNS for MCS-API support. Otherwise to
+configure CoreDNS manually, you need to execute the following steps:
+
+# (optional) Install MCS-API CRDs if Cilium has not yet started or automatic CRDs installation is disabled
+kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.20.2/vendor/sigs.k8s.io/mcs-api/config/crd/multicluster.x-k8s.io_serviceexports.yaml
+kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.20.2/vendor/sigs.k8s.io/mcs-api/config/crd/multicluster.x-k8s.io_serviceimports.yaml
+
+# Adding RBAC to read ServiceImports
+kubectl create clusterrole coredns-mcsapi \
+   --verb=list,watch --resource=serviceimports.multicluster.x-k8s.io
+kubectl create clusterrolebinding coredns-mcsapi \
+   --clusterrole=coredns-mcsapi --serviceaccount=kube-system:coredns
+
+# Configure CoreDNS to support MCS-API
+kubectl get configmap -n kube-system coredns -o yaml | \
+   sed -e 's/cluster.local/cluster.local clusterset.local/g' | \
+   sed -E 's/^(.*)kubernetes(.*){/1kubernetes2{n1   multicluster clusterset.local/' | \
+   kubectl replace -f-
+
+# Rollout CoreDNS to apply the change
+kubectl rollout deployment -n kube-system coredns
+
+## {#exporting-a-service} 
+
+Exporting a Service
+
+To export a service you should create a ServiceExport resource. As a result
+your Service will be exported to all clusters, provided that the Service
+Namespace is present on those clusters.
+
+apiVersion: multicluster.x-k8s.io/v1beta1
+kind: ServiceExport
+metadata:
+   name: rebel-base
+
+In all the clusters and for each set of exported Services that have the same name and namespace,
+a ServiceImport resource will be automatically created. All the Endpoints from those exported Services
+with the same name and namespace will be merged and made globally available.
+
+ServiceImports in Cilium are implemented by creating derived Services named
+derived-$hash. These derived Services use the same Global Services mechanism
+that powers Cilium Global Services.
+
+An exported Service through MCS-API is available by default on the <svc>.<ns>.svc.clusterset.local domain.
+If you have defined any hostname (via a Statefulset for instance) on your pods
+each pods would also be available available through the <hostname>.<clustername>.<svc>.<ns>.svc.clusterset.local domain.
+
+Note
+
+The <clustername>.<svc>.<ns>.svc.clusterset.local domain that would allow
+to get all the endpoints of a Service in a specific cluster is not allowed!
+
+We recommend creating one service per cluster and/or region and exporting it
+accordingly if you do want to have this kind of behavior, for instance
+creating and exporting services mysvc-eu and mysvc-us instead of only
+one service. For more information checkout the dedicated section in the MCS-API KEP
+explaining this behavior.
+
+For each set of exported Services with the same name and namespace, MCS-API
+provides one globally consistent multi-cluster Service definition. Cilium
+globally reconciles the following properties into the ServiceImport:
+
+SessionAffinity
+
+Ports (Union of the different ServiceExports)
+
+Type (ClusterSetIP/Headless)
+
+InternalTrafficPolicy
+
+TrafficDistribution
+
+Annotations & Labels (via the ServiceExport exportedLabels and exportedAnnotations fields)
+
+If any conflict arises on any of these properties, Cilium sets a conflict
+condition on the corresponding ServiceExport status and resolves the conflict
+based on ServiceExport creation time from oldest to newest. A conflict may
+resolve to properties that you did not intend to, so you should eventually
+resolve any conflicts between the exported Services.
+
+## {#exporting-labels-and-annotations} 
+
+Exporting labels and annotations
+
+To configure labels or annotations on the generated ServiceImport and derived
+Service, specify them with the ServiceExport exportedLabels and
+exportedAnnotations fields.
+
+For instance, this is useful for adding any of the supported Cilium service
+annotations, such as Service affinity
+or EndpointSlice synchronization.
+
+apiVersion: multicluster.x-k8s.io/v1beta1
+kind: ServiceExport
+metadata:
+   name: rebel-base
+spec:
+   exportedLabels:
+      app.kubernetes.io/name: rebel-base
+   exportedAnnotations:
+      service.cilium.io/affinity: local
+
+## {#deploying-a-simple-example-service-using-mcs-api} 
+
+Deploying a Simple Example Service using MCS-API
+
+In cluster 1, deploy:
+
+kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.20.2/examples/kubernetes/clustermesh/cluster1.yaml
+kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.20.2/examples/kubernetes/clustermesh/mcsapi-example.yaml
+
+In cluster 2, deploy:
+
+kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.20.2/examples/kubernetes/clustermesh/cluster2.yaml
+kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.20.2/examples/kubernetes/clustermesh/mcsapi-example.yaml
+
+From either cluster, access the exported service:
+
+kubectl exec -ti deployment/x-wing -- curl rebel-base-mcsapi.default.svc.clusterset.local
+
+You will see replies from pods in both clusters.
+
+## {#gateway-api} 
+
+Gateway-API
+
+Gateway-API has optional support for MCS-API via GEP1748 by specifying a
+ServiceImport backend, for example:
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+   name: rebel-base-mcsapi
+   namespace: default
+spec:
+   parentRefs:
+   - group: gateway.networking.k8s.io
+     kind: Gateway
+     name: my-gateway
+     namespace: default
+   rules:
+   - backendRefs:
+     - group: multicluster.x-k8s.io
+       kind: ServiceImport
+       name: rebel-base-mcsapi
+       port: 80
+     matches:
+     - method: GET
+       path:
+         type: PathPrefix
+         value: /
+
+The Gateway API implementation of Cilium fully support its own MCS-API implementation.
+
+If you want to use another Gateway API implementation with the Cilium MCS-API implementation,
+the Gateway API implementation you are using should officially support MCS-API / GEP1748.
+If the alternate Gateway-API implementation relies on EndpointSlice to operate,
+configure Cilium to enable EndpointSlice synchronization.
+
+On the other hands, the Cilium Gateway API implementation only supports MCS-API
+implementations using an underlying Service associated with a ServiceImport, and with
+the annotation multicluster.kubernetes.io/derived-service on ServiceImport resources.
+
+          <footer

@@ -1,0 +1,114 @@
+https://docs.cilium.io/en/stable/observability/hubble/hubble-cli/
+
+
+
+## {#inspecting-network-flows-with-the-cli} 
+ {#hubble-cli} 
+Inspecting Network Flows with the CLI
+
+This guide walks you through using the Hubble CLI to inspect network flows and
+gain visibility into what is happening on the network level.
+
+The best way to get help if you get stuck is to ask a question on Cilium
+Slack. With Cilium contributors across the globe, there is almost always
+someone available to help.
+
+Note
+
+This guide uses examples based on the Demo App. If you would like to run them,
+deploy the Demo App first. Please refer to Identity-Aware and HTTP-Aware Policy Enforcement for more details.
+
+## {#pre-requisites} 
+
+Pre-Requisites
+
+Cilium has been correctly installed in your Kubernetes cluster.
+
+Hubble is enabled.
+
+Hubble CLI is installed.
+
+The Hubble API is accessible.
+
+If unsure, run cilium status and validate that Cilium and Hubble are up and
+running then run hubble status to verify you can communicate with the
+Hubble API .
+
+## {#inspecting-the-cluster-s-network-traffic-with-hubble-relay} 
+
+Inspecting the cluster’s network traffic with Hubble Relay
+
+Let’s issue some requests to emulate some traffic again. This first request is
+allowed by the policy.
+
+kubectl exec tiefighter -- curl -s -XPOST deathstar.default.svc.cluster.local/v1/request-landing
+Ship landed
+
+This next request is accessing an HTTP endpoint which is denied by policy.
+
+kubectl exec tiefighter -- curl -s -XPUT deathstar.default.svc.cluster.local/v1/exhaust-port
+Access denied
+
+Finally, this last request will hang because the xwing pod does not have
+the org=empire label required by policy. Press Control-C to kill the curl
+request, or wait for it to time out.
+
+kubectl exec xwing -- curl -s -XPOST deathstar.default.svc.cluster.local/v1/request-landing
+command terminated with exit code 28
+
+Let’s now inspect this traffic using the CLI. The command below filters all
+traffic on the application layer (L7, HTTP) to the deathstar pod:
+
+hubble observe --pod deathstar --protocol http
+May  4 13:23:40.501: default/tiefighter:42690 -> default/deathstar-c74d84667-cx5kp:80 http-request FORWARDED (HTTP/1.1 POST http://deathstar.default.svc.cluster.local/v1/request-landing)
+May  4 13:23:40.502: default/tiefighter:42690 <- default/deathstar-c74d84667-cx5kp:80 http-response FORWARDED (HTTP/1.1 200 0ms (POST http://deathstar.default.svc.cluster.local/v1/request-landing))
+May  4 13:23:43.791: default/tiefighter:42742 -> default/deathstar-c74d84667-cx5kp:80 http-request DROPPED (HTTP/1.1 PUT http://deathstar.default.svc.cluster.local/v1/exhaust-port)
+
+The following command shows all traffic to the deathstar pod that has been
+dropped:
+
+hubble observe --pod deathstar --verdict DROPPED
+May  4 13:23:43.791: default/tiefighter:42742 -> default/deathstar-c74d84667-cx5kp:80 http-request DROPPED (HTTP/1.1 PUT http://deathstar.default.svc.cluster.local/v1/exhaust-port)
+May  4 13:23:47.852: default/xwing:42818 <> default/deathstar-c74d84667-cx5kp:80 Policy denied DROPPED (TCP Flags: SYN)
+May  4 13:23:47.852: default/xwing:42818 <> default/deathstar-c74d84667-cx5kp:80 Policy denied DROPPED (TCP Flags: SYN)
+May  4 13:23:48.854: default/xwing:42818 <> default/deathstar-c74d84667-cx5kp:80 Policy denied DROPPED (TCP Flags: SYN)
+
+Feel free to further inspect the traffic. To get help for the observe
+command, use hubble help observe.
+
+## {#filtering-encrypted-traffic} 
+
+Filtering Encrypted Traffic
+
+You can filter flows based on whether they are encrypted (via WireGuard or IPsec) or not.
+
+To see only encrypted flows:
+
+$ hubble observe --encrypted
+
+To see only unencrypted flows:
+
+$ hubble observe --unencrypted
+
+## {#filtering-reply-traffic} 
+
+Filtering Reply Traffic
+
+You can filter flows based on whether they are reply packets (server-to-client
+direction) or not.
+
+To see only reply flows:
+
+$ hubble observe --reply
+
+To see only non-reply flows:
+
+$ hubble observe --not-reply
+
+## {#next-steps} 
+
+Next Steps
+
+Access the Hubble API with TLS Enabled
+
+          <footer

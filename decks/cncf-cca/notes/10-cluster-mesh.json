@@ -1,0 +1,1179 @@
+{
+  "topic": "Cluster Mesh",
+  "notes": [
+    {
+      "id": "cca.cluster-mesh.cluster-mesh",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 10010,
+      "front": "What is Cluster Mesh?",
+      "back": "Cilium's multi-cluster feature: it extends Cilium networking across several Kubernetes clusters.",
+      "explanation": "Traditional networking models struggle with service discovery, segmentation, policy and load-balancing across clusters, which is what it addresses.",
+      "introduces": [
+        "Cluster Mesh"
+      ],
+      "example": "Like joining several office networks so staff can reach any printer, but for pods, Services and policies across clusters.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Multi-Cluster (Cluster Mesh)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#cluster-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cluster Mesh addresses these challenges by extending Cilium networking across multiple Kubernetes clusters",
+      "uses": [
+        "Cluster Mesh",
+        "Cilium",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.cluster-mesh"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.clustermesh-apiserver",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 10020,
+      "front": "What is the clustermesh-apiserver?",
+      "back": "The pods hosting each cluster's Cluster Mesh control plane, exposing local state to remote clusters and syncing theirs in.",
+      "explanation": "Every cluster runs its own, so each cluster both publishes and receives state.",
+      "introduces": [
+        "clustermesh-apiserver"
+      ],
+      "example": "Like each embassy's press office, which publishes its own country's news and collects news from the others.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cluster Mesh is built around a per-cluster control plane hosted by clustermesh-apiserver pods. These pods expose the local cluster state to remote clusters and synchronize remote cluster state into the local cluster.",
+      "uses": [
+        "clustermesh-apiserver",
+        "Cluster Mesh",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cca.clustermesh-apiserver"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.kvstoremesh",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 10030,
+      "front": "What does the kvstoremesh container do?",
+      "back": "It synchronises remote cluster state from other clusters into the local cluster.",
+      "explanation": "It runs in the clustermesh-apiserver pod beside the etcd and apiserver containers.",
+      "introduces": [
+        "kvstoremesh"
+      ],
+      "example": "Like a courier who fetches the other branches' ledgers and files copies in the local office.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "kvstoremesh: Synchronizes remote cluster state from other clusters into the local cluster.",
+      "uses": [
+        "kvstoremesh",
+        "clustermesh-apiserver"
+      ],
+      "conceptIDs": [
+        "cca.kvstoremesh"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.global-service",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 10040,
+      "front": "What is a global service in Cluster Mesh?",
+      "back": "A Service with the same name and namespace in each cluster, annotated `service.cilium.io/global: \"true\"`.",
+      "explanation": "Cilium then load-balances to the Service's pods in all the clusters.",
+      "introduces": [
+        "global service"
+      ],
+      "example": "Like a chain's single phone number that rings in whichever branch has a free assistant.",
+      "source": "Cilium documentation, “Global Services”, “Load-balancing with Global Services”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/global-services/#load-balancing-with-global-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Establishing load-balancing between clusters is achieved by defining a Kubernetes service with identical name and namespace in each cluster and adding the annotation service.cilium.io/global: \"true\" to declare it global.",
+      "uses": [
+        "global service",
+        "Service",
+        "namespace",
+        "Cluster Mesh"
+      ],
+      "conceptIDs": [
+        "cca.global-service"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.mcs-api",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 10050,
+      "front": "What is the Multi-Cluster Services API (MCS-API)?",
+      "back": "A Kubernetes SIG Multicluster standard, built on ServiceExport and ServiceImport resources, which Cilium supports with Cluster Mesh.",
+      "explanation": "It is one of Cilium's two options for cross-cluster service discovery and load-balancing, beside global services.",
+      "introduces": [
+        "Multi-Cluster Services API",
+        "MCS-API"
+      ],
+      "example": "Like an industry-standard shipping label that any carrier reads, rather than one company's own label.",
+      "source": "Cilium documentation, “Load-balancing & Service Discovery”, “Load-balancing & Service Discovery”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/load-balancing/#gs-clustermesh-load-balancing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "MCS-API is a Kubernetes SIG Multicluster standard based on the ServiceExport and ServiceImport resources.",
+      "uses": [
+        "Multi-Cluster Services API",
+        "MCS-API",
+        "SIG",
+        "Cluster Mesh"
+      ],
+      "conceptIDs": [
+        "cca.mcs-api"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.why-multicluster",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10060,
+      "front": "What are two reasons the docs give for adopting multi-cluster Kubernetes setups?",
+      "back": "Any two of: fault isolation, scalability, geographical distribution.",
+      "explanation": "Such setups bring networking complexity, which Cluster Mesh is meant to address.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Multi-Cluster (Cluster Mesh)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#cluster-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Multi-cluster Kubernetes setups are often adopted for reasons like fault isolation, scalability, and geographical distribution. This approach can lead to networking complexity.",
+      "uses": [
+        "cluster",
+        "Cluster Mesh"
+      ],
+      "conceptIDs": [
+        "cca.cm-benefits"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.benefit-flat",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10070,
+      "front": "Which Cluster Mesh capability lets a pod reach a pod in another cluster directly at its address?",
+      "back": "Pod-to-pod connectivity between clusters within a flat IP address space.",
+      "explanation": "It relies on PodCIDR ranges that are unique across all clusters, a setup requirement.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Multi-Cluster (Cluster Mesh)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#cluster-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Pod-to-pod connectivity between clusters within a flat IP address space",
+      "uses": [
+        "Cluster Mesh",
+        "Pod",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.cm-benefits"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.benefit-policy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10080,
+      "front": "Which Cluster Mesh capability lets a rule say which cluster a peer must belong to?",
+      "back": "Cluster-aware network policy enforcement.",
+      "explanation": "It is one of the four things Cluster Mesh provides, beside connectivity, service discovery and affinity.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Multi-Cluster (Cluster Mesh)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#cluster-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cluster-aware network policy enforcement",
+      "uses": [
+        "Cluster Mesh",
+        "CiliumNetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cca.cm-benefits"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.benefit-lb",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10090,
+      "front": "Which Cluster Mesh capability lets clients in one cluster use backends in another?",
+      "back": "Cross-cluster service discovery and load-balancing.",
+      "explanation": "It is delivered through global services or the MCS-API.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Multi-Cluster (Cluster Mesh)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#cluster-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cross-cluster service discovery and load-balancing",
+      "uses": [
+        "Cluster Mesh",
+        "service discovery",
+        "global service",
+        "MCS-API"
+      ],
+      "conceptIDs": [
+        "cca.cm-benefits"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.benefit-affinity",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10100,
+      "front": "Which Cluster Mesh capability lets a Service prefer its own cluster's backends?",
+      "back": "Service affinity controls, to prefer local or remote backends.",
+      "explanation": "It is set per Service with an annotation.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Multi-Cluster (Cluster Mesh)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#cluster-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Service affinity controls to prefer local or remote backends",
+      "uses": [
+        "Cluster Mesh",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.cm-benefits"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.figure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10110,
+      "front": "In the Cluster Mesh architecture, which container of the clustermesh-apiserver pod serves the local state to remote clusters, and how?",
+      "back": "The etcd container, over mTLS, typically through a LoadBalancer or NodePort Service.",
+      "explanation": "Remote clusters' kvstoremesh containers read from it, while the local apiserver container fills it.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "etcd: Stores the local cluster state that is exposed to remote clusters over mTLS, typically through a LoadBalancer or NodePort service.",
+      "uses": [
+        "clustermesh-apiserver",
+        "etcd",
+        "mtls",
+        "LoadBalancer",
+        "NodePort",
+        "kvstoremesh"
+      ],
+      "conceptIDs": [
+        "cca.clustermesh-apiserver",
+        "cca.cm-apiserver-containers"
+      ],
+      "image": {
+        "file": "media/cca-clustermesh-architecture.svg",
+        "alt": "Two clusters. In the local cluster, the kube-apiserver feeds the apiserver container of the clustermesh-apiserver pod, which writes local state into its etcd container. The kvstoremesh container syncs state from the remote cluster's clustermesh-apiserver, whose etcd is exposed through a LoadBalancer or NodePort over mTLS. Cilium agents take local state from the kube-apiserver and remote state from the clustermesh-apiserver. Pod-to-pod traffic runs directly between nodes with no proxy or gateway.",
+        "credit": "Drawn for this deck from the Cilium documentation, “Multi-Cluster (Cluster Mesh)”, Architecture",
+        "licence": "B · Apache 2.0",
+        "side": "back"
+      }
+    },
+    {
+      "id": "cca.cluster-mesh.etcd-no-storage",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 10120,
+      "front": "Why does the embedded etcd in the clustermesh-apiserver pod need no persistent storage?",
+      "back": "Its whole state is rebuilt from the kube-apiserver on startup.",
+      "explanation": "It is also a single instance, which the docs say keeps it simple to operate.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This embedded etcd is simple to operate because it is a single instance and does not require persistent storage as the entire state is rebuilt from kube-apiserver on startup.",
+      "uses": [
+        "etcd",
+        "clustermesh-apiserver",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cca.cm-apiserver-containers"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.kvstore-mode",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 10130,
+      "front": "What does Cluster Mesh do differently when Cilium already runs in kvstore mode?",
+      "back": "It extends the existing kvstore etcd instead of deploying an extra embedded etcd.",
+      "explanation": "Cluster Mesh reuses several kvstore-mode concepts to exchange state between clusters.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When Cilium is already running in kvstore mode, Cluster Mesh extends the existing kvstore etcd instance instead of deploying an additional embedded etcd instance.",
+      "uses": [
+        "Cluster Mesh",
+        "key-value store",
+        "kvstore",
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cca.kvstoremesh"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.direct-traffic",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10140,
+      "front": "In Cluster Mesh, pod-to-pod traffic is forwarded directly between nodes, across cluster boundaries, without any additional {{c1::proxy or gateway}}.",
+      "explanation": "The clustermesh-apiserver exchanges state only; the agents program the datapath from it.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Pod-to-pod traffic is forwarded directly between nodes, including across cluster boundaries, without requiring any additional proxy or gateway.",
+      "uses": [
+        "Cluster Mesh",
+        "Pod",
+        "node",
+        "clustermesh-apiserver"
+      ],
+      "conceptIDs": [
+        "cca.cm-direct-traffic"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.trust-domain",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10150,
+      "front": "What security relationship do clusters joined in a Cluster Mesh have?",
+      "back": "They form a single trust domain, so only mutually trusted clusters with equivalent security postures should be joined.",
+      "explanation": "Cilium's sanity checks cannot fully stop a compromised cluster's control plane spreading malicious information.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Security”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#security",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "All clusters connected in a Cluster Mesh form a single trust domain. While Cilium performs various sanity checks on information received from remote clusters, these checks cannot fully prevent a compromised cluster’s Cilium control plane from propagating malicious information to other clusters.",
+      "uses": [
+        "Cluster Mesh",
+        "cluster",
+        "zero trust"
+      ],
+      "conceptIDs": [
+        "cca.cm-trust-domain"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.req-datapath",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10160,
+      "front": "Which datapath setting must match across all clusters in a Cluster Mesh?",
+      "back": "The datapath mode: all clusters must use the same one.",
+      "explanation": "The installer may default to encapsulation or native routing depending on the cloud, so it can differ unless set.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Cluster Addressing Requirements”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#cluster-addressing-requirements",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "All clusters must be configured with the same datapath mode. Cilium install may default to Encapsulation or Native-Routing mode depending on the specific cloud environment.",
+      "uses": [
+        "Cluster Mesh",
+        "encapsulation mode",
+        "native routing mode"
+      ],
+      "conceptIDs": [
+        "cca.cm-requirements"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.req-version",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10170,
+      "front": "How far apart may the Cilium versions of meshed clusters be?",
+      "back": "No more than one minor release: 1.18.x can join 1.17.x or 1.19.x, but not 1.16.x.",
+      "explanation": "The limit is on the minor release; patch releases do not count.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Cluster Addressing Requirements”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#cluster-addressing-requirements",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Cilium versions of all clusters must differ by no more than one minor release. For example, Cilium 1.18.x can connect to clusters running Cilium 1.17.x or 1.19.x, but not 1.16.x.",
+      "uses": [
+        "Cluster Mesh",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.cm-version-skew"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation"
+    },
+    {
+      "id": "cca.cluster-mesh.req-podcidr",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10180,
+      "front": "What is required of the PodCIDR ranges of meshed clusters?",
+      "back": "They must be non-conflicting and unique across all clusters and nodes.",
+      "explanation": "It is one of the cluster addressing requirements, beside a matching datapath mode.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Cluster Addressing Requirements”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#cluster-addressing-requirements",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "PodCIDR ranges in all clusters and all nodes must be non-conflicting and unique IP addresses.",
+      "uses": [
+        "PodCIDR",
+        "Cluster Mesh",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.cm-requirements"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.req-node-ip",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10190,
+      "front": "What network reachability do nodes in a Cluster Mesh need?",
+      "back": "Connectivity between all nodes of all clusters, using each node's configured InternalIP.",
+      "explanation": "This is typically arranged with peering or tunnels between the clusters' node networks.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Cluster Addressing Requirements”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#cluster-addressing-requirements",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Nodes in all clusters must have IP connectivity between each other using the configured InternalIP for each node.",
+      "uses": [
+        "node",
+        "Cluster Mesh",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.cm-requirements"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.req-native-cidr",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 10200,
+      "front": "With native routing, what must each cluster's native routing CIDR cover?",
+      "back": "All the PodCIDR ranges of all connected clusters, for example `10.0.0.0/8`.",
+      "explanation": "Pods in all clusters must also reach each other directly on any ports they use.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Additional Requirements for Native-routed Datapath Modes”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#additional-requirements-for-native-routed-datapath-modes",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium in each cluster must be configured with a native routing CIDR that covers all the PodCIDR ranges across all connected clusters.",
+      "uses": [
+        "native routing mode",
+        "ipv4-native-routing-cidr",
+        "PodCIDR",
+        "cidr"
+      ],
+      "conceptIDs": [
+        "cca.cm-native-cidr"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.name-and-id",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10210,
+      "front": "Which two identifiers must every cluster in a mesh have, and what range may the number take?",
+      "back": "A unique human-readable name and a numeric cluster identifier (`cluster.id`) from 1 to 255.",
+      "explanation": "Both are best set at installation time, with different values in each cluster.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Specify the Cluster Name and ID”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#specify-the-cluster-name-and-id",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Each cluster must be assigned a unique human-readable name as well as a numeric cluster ID (1-255).",
+      "uses": [
+        "cluster",
+        "Cluster Mesh"
+      ],
+      "conceptIDs": [
+        "cca.cluster-name-id"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.change-id-restart",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10220,
+      "front": "What must you do after changing the cluster name or `cluster.id` of a cluster with running workloads?",
+      "back": "Restart all workloads.",
+      "explanation": "The cluster identifier is used to generate security identities, which must be re-created for cross-cluster access.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Specify the Cluster Name and ID”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#specify-the-cluster-name-and-id",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If you change the cluster ID and/or cluster name in a cluster with running workloads, you will need to restart all workloads. The cluster ID is used to generate the security identity and it will need to be re-created in order to establish access across clusters.",
+      "uses": [
+        "security identity",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.cluster-name-id"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.max-clusters",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 10230,
+      "front": "How many clusters can a Cluster Mesh connect by default, and what raises the limit?",
+      "back": "255 by default; `maxConnectedClusters` can raise it to 511, at the cost of fewer cluster-local identities.",
+      "explanation": "The option changes the bit allocation of numeric identities: 511 clusters leaves 32767 cluster-local identities instead of 65535.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Scaling Limitations”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#scaling-limitations",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, the maximum number of clusters that can be connected together using Cluster Mesh is 255. By using the option maxConnectedClusters this limit can be set to 511, at the expense of lowering the maximum number of cluster-local identities.",
+      "uses": [
+        "Cluster Mesh",
+        "security identity"
+      ],
+      "conceptIDs": [
+        "cca.max-connected-clusters"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.max-clusters-install",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 10240,
+      "front": "When can `maxConnectedClusters` be set?",
+      "back": "Only once, during Cilium installation, and with the same value in every cluster of the mesh.",
+      "explanation": "Changing it on a live cluster may disrupt connections and enforce network policies incorrectly.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Scaling Limitations”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#scaling-limitations",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "MaxConnectedClusters can only be set once during Cilium installation and should not be changed for existing clusters. Changing this option on a live cluster may result in connection disruption and possible incorrect enforcement of network policies",
+      "uses": [
+        "Cluster Mesh"
+      ],
+      "conceptIDs": [
+        "cca.max-connected-clusters"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.wireguard-all",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 10250,
+      "front": "If WireGuard-encrypted clusters are joined in a Cluster Mesh, what is required of the other clusters?",
+      "back": "All participating clusters must have WireGuard enabled; mixed mode is not supported.",
+      "explanation": "The clustermesh-apiserver forwards WireGuard public keys to remote clusters automatically.",
+      "source": "Cilium documentation, “WireGuard Transparent Encryption”, “Cluster Mesh”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/encryption-wireguard/#cluster-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In such a setup, it is important to note that all participating clusters must have WireGuard encryption enabled, i.e. mixed mode is currently not supported.",
+      "uses": [
+        "WireGuard",
+        "Cluster Mesh",
+        "clustermesh-apiserver"
+      ],
+      "conceptIDs": [
+        "cca.cm-requirements"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.cm-enable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10260,
+      "front": "What does `cilium clustermesh enable` do in a cluster?",
+      "back": "It deploys the clustermesh-apiserver, generates the certificates as Secrets, and exposes the control plane to other clusters.",
+      "explanation": "It tries to auto-detect the best Service type for the LoadBalancer that exposes the Cluster Mesh control plane.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Alternative: configure with the Cilium CLI”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#alternative-configure-with-the-cilium-cli",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Enable all required components by running cilium clustermesh enable in the context of both clusters. This will deploy the clustermesh-apiserver into the cluster and generate all required certificates and import them as Kubernetes secrets.",
+      "uses": [
+        "Cilium CLI",
+        "clustermesh-apiserver",
+        "Secret",
+        "LoadBalancer"
+      ],
+      "conceptIDs": [
+        "cca.cm-enable-connect"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.cm-connect",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10270,
+      "front": "In how many directions must you run `cilium clustermesh connect`?",
+      "back": "Only one; the connection is established in both directions automatically.",
+      "explanation": "The example runs it from the first cluster with the second as `--destination-context`.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Alternative: configure with the Cilium CLI”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#alternative-configure-with-the-cilium-cli",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Finally, connect the clusters. This step only needs to be done in one direction. The connection will automatically be established in both directions:",
+      "uses": [
+        "Cilium CLI",
+        "kubeconfig context"
+      ],
+      "conceptIDs": [
+        "cca.cm-enable-connect"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.cm-status",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10280,
+      "front": "Which command waits for the Cluster Mesh components to come up?",
+      "back": "`cilium clustermesh status --wait`.",
+      "explanation": "With a LoadBalancer Service it also waits for an IP to be assigned.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Validate Cluster Mesh”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#validate-cluster-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Wait for the Cluster Mesh components to come up by invoking cilium clustermesh status --wait. If you are using a service of type LoadBalancer then this will also wait for the LoadBalancer to be assigned an IP.",
+      "uses": [
+        "Cilium CLI",
+        "Cluster Mesh",
+        "LoadBalancer"
+      ],
+      "conceptIDs": [
+        "cca.cm-enable-connect"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.cm-tls",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 10290,
+      "front": "What must be true of the certificates of meshed clusters?",
+      "back": "Every cluster must trust the others' certificates: use a common root authority or list every trusted one in `tls.caBundle`.",
+      "explanation": "Cluster Mesh secures its control-plane connections with mTLS.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Configure TLS certificates”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#clustermesh-setup-tls",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cluster Mesh uses mTLS to secure control plane connections within and between clusters.",
+      "uses": [
+        "digital certificate",
+        "mtls",
+        "Cluster Mesh"
+      ],
+      "conceptIDs": [
+        "cca.cm-tls"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.shared-false",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10300,
+      "front": "What does `service.cilium.io/shared: \"false\"` do on a global service in one cluster?",
+      "back": "That cluster still uses remote backends but stops sharing its own backends with other clusters.",
+      "explanation": "By default a global service is implicitly shared, so it load-balances across backends in several clusters.",
+      "source": "Cilium documentation, “Global Services”, “Disabling Global Service Sharing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/global-services/#disabling-global-service-sharing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To prevent service backends from being shared to other clusters, this option should be disabled. Below example will expose remote endpoint without sharing local endpoints.",
+      "uses": [
+        "global service",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.service-shared"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.affinity-local",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10310,
+      "front": "With `service.cilium.io/affinity: \"local\"`, when does a global service use remote backends?",
+      "back": "Only when all local backends are unavailable or unhealthy.",
+      "explanation": "Otherwise it load-balances across healthy backends in its own cluster.",
+      "source": "Cilium documentation, “Service Affinity”, “Enabling Global Service Affinity”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/affinity/#enabling-global-service-affinity",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "if the value of annotation service.cilium.io/affinity is local, the Global Service will load-balance across healthy local backends, and only user remote endpoints if and only if all of local backends are not available or unhealthy.",
+      "uses": [
+        "global service"
+      ],
+      "conceptIDs": [
+        "cca.service-affinity"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.affinity-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10320,
+      "front": "If a global service has no `service.cilium.io/affinity` annotation, its affinity is {{c1::`none`}}: no preference.",
+      "explanation": "The other values, `local` and `remote`, prefer one cluster's endpoints when available.",
+      "source": "Cilium documentation, “Service Affinity”, “Enabling Global Service Affinity”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/affinity/#enabling-global-service-affinity",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "none (default) # no preference. Default behavior if this annotation does not exist",
+      "uses": [
+        "global service"
+      ],
+      "conceptIDs": [
+        "cca.service-affinity"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.affinity-remote",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10330,
+      "front": "Which affinity value makes a global service prefer endpoints from remote clusters?",
+      "back": "`remote`.",
+      "explanation": "It prefers remote endpoints when they are available.",
+      "source": "Cilium documentation, “Service Affinity”, “Enabling Global Service Affinity”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/affinity/#enabling-global-service-affinity",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "remote # preferred endpoints from remote cluster if available",
+      "uses": [
+        "global service"
+      ],
+      "conceptIDs": [
+        "cca.service-affinity"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.nodeport-kpr",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 10340,
+      "front": "When does a global NodePort Service load-balance to remote backends as well as local ones?",
+      "back": "Only when Cilium replaces kube-proxy (`kubeProxyReplacement=true`).",
+      "explanation": "Otherwise only local backends are eligible through the NodePort.",
+      "source": "Cilium documentation, “Global Services”, “Limitations”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/global-services/#limitations",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Global NodePort services load balance across both local and remote backends only if Cilium is configured to replace kube-proxy (kubeProxyReplacement=true).",
+      "uses": [
+        "global service",
+        "NodePort",
+        "kube-proxy replacement"
+      ],
+      "conceptIDs": [
+        "cca.global-service"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.mcs-dns",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10350,
+      "front": "Which DNS domain does the MCS-API provide for exported Services?",
+      "back": "`clusterset.local`, which needs CoreDNS configuration that Cilium can manage automatically.",
+      "explanation": "Services are then reachable as `<svc>.<ns>.svc.clusterset.local`.",
+      "source": "Cilium documentation, “Load-balancing & Service Discovery”, “Load-balancing & Service Discovery”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/load-balancing/#gs-clustermesh-load-balancing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It provides higher-level features such as consistent global service properties, status condition reporting, and a dedicated clusterset.local DNS domain, which requires CoreDNS configuration that Cilium can manage automatically when CoreDNS auto-configuration is enabled.",
+      "uses": [
+        "MCS-API",
+        "DNS",
+        "CoreDNS"
+      ],
+      "conceptIDs": [
+        "cca.mcs-api"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.mcs-export",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 10360,
+      "front": "How do you export a Service with the MCS-API, and what appears in the clusters?",
+      "back": "Create a ServiceExport; a ServiceImport is then created automatically in all clusters.",
+      "explanation": "Endpoints of exported Services with the same name and namespace are merged and made globally available.",
+      "source": "Cilium documentation, “Multi-Cluster Services API”, “Exporting a Service”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/mcsapi/#exporting-a-service",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In all the clusters and for each set of exported Services that have the same name and namespace, a ServiceImport resource will be automatically created.",
+      "uses": [
+        "MCS-API",
+        "Service",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cca.mcs-api"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.policy-not-distributed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10370,
+      "front": "Are network policies distributed automatically to every cluster in a Cluster Mesh?",
+      "back": "No. You must apply the CiliumNetworkPolicy or NetworkPolicy in every cluster yourself.",
+      "explanation": "Enforcement spans clusters, but the policy objects themselves are per cluster.",
+      "source": "Cilium documentation, “Network Policy”, “Security Policies”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/policy/#security-policies",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note that Kubernetes security policies are not automatically distributed across clusters, it is your responsibility to apply CiliumNetworkPolicy or NetworkPolicy in all clusters.",
+      "uses": [
+        "Cluster Mesh",
+        "CiliumNetworkPolicy",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cca.cm-policy"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.policy-cluster-label",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10380,
+      "front": "Which label lets a CiliumNetworkPolicy select endpoints in a particular cluster?",
+      "back": "`io.cilium.k8s.policy.cluster`, set to the cluster's name.",
+      "explanation": "The cluster name is the one given through the agent's `cluster-name` option.",
+      "source": "Cilium documentation, “Network Policy”, “Allowing Specific Communication Between Clusters”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/policy/#allowing-specific-communication-between-clusters",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "matchLabels: name: rebel-base io.cilium.k8s.policy.cluster: cluster2",
+      "uses": [
+        "CiliumNetworkPolicy",
+        "label",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.cm-policy"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.policy-local-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 10390,
+      "front": "By default, from which clusters do a policy's endpoint selectors pick endpoints?",
+      "back": "From the local cluster only, unless one or more clusters are targeted.",
+      "explanation": "In Cilium v1.18 or lower, policies selected endpoints from all clusters by default.",
+      "source": "Cilium documentation, “Network Policy”, “Allowing Specific Communication Between Clusters”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/policy/#allowing-specific-communication-between-clusters",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Policies automatically select endpoints from the local cluster only, unless one or multiple cluster are specifically targeted. Warning In Cilium v1.18 or lower, policies used to select endpoints from all clusters by default.",
+      "uses": [
+        "endpoint",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.cm-policy"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation"
+    },
+    {
+      "id": "cca.cluster-mesh.scn-overlap",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10400,
+      "front": "Two clusters were both built with the pod range `10.244.0.0/16` and now need to be meshed. What must happen first?",
+      "back": "C: give them non-conflicting, unique PodCIDR ranges.",
+      "choices": "A) Nothing; Cluster Mesh translates addresses between clusters\nB) Put a gateway between the clusters\nC) Give them non-conflicting, unique PodCIDR ranges\nD) Set `service.cilium.io/shared: \"false\"`",
+      "choicesExplained": "A: Cluster Mesh uses a flat address space with no translation. B: traffic goes directly between nodes, without a gateway. D: this annotation only controls sharing of Service backends.",
+      "explanation": "Unique, non-conflicting PodCIDRs are a stated requirement for meshing clusters.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Cluster Addressing Requirements”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#cluster-addressing-requirements",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "PodCIDR ranges in all clusters and all nodes must be non-conflicting and unique IP addresses.",
+      "uses": [
+        "PodCIDR",
+        "Cluster Mesh",
+        "cidr"
+      ],
+      "conceptIDs": [
+        "cca.cm-requirements",
+        "cca.cm-benefits"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.scn-version",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10410,
+      "front": "Cluster A runs Cilium 1.20 and cluster B runs Cilium 1.17. Can they be meshed as they are?",
+      "back": "A: no; versions may differ by at most one minor release, so B must be upgraded first.",
+      "choices": "A) No; versions may differ by at most one minor release, so B must be upgraded first\nB) Yes; any versions can be meshed\nC) Yes, if both use native routing\nD) Only if `maxConnectedClusters` is 511",
+      "choicesExplained": "B: the docs set a one-minor-release limit. C: the datapath mode must match, but that does not lift the version rule. D: that option is about the number of clusters.",
+      "explanation": "1.20 and 1.17 are three minor releases apart.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Cluster Addressing Requirements”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#cluster-addressing-requirements",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Cilium versions of all clusters must differ by no more than one minor release.",
+      "uses": [
+        "Cluster Mesh",
+        "native routing mode"
+      ],
+      "conceptIDs": [
+        "cca.cm-version-skew",
+        "cca.cm-requirements"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation"
+    },
+    {
+      "id": "cca.cluster-mesh.scn-global",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10420,
+      "front": "`checkout` runs in namespace `shop` in two meshed clusters. Clients should be served by pods in either cluster. What is needed?",
+      "back": "D: in both clusters, a Service `checkout` in `shop` annotated `service.cilium.io/global: \"true\"`.",
+      "choices": "A) One Service in the first cluster only, annotated global\nB) An Ingress in each cluster\nC) A CiliumNetworkPolicy with `io.cilium.k8s.policy.cluster`\nD) In both clusters, a Service `checkout` in `shop` annotated `service.cilium.io/global: \"true\"`",
+      "choicesExplained": "A: the Service must exist with the same name and namespace in each cluster. B: an Ingress handles traffic from outside, not cross-cluster load-balancing. C: a policy allows traffic but does not create load-balancing.",
+      "explanation": "A global service is defined by matching name and namespace in each cluster plus the annotation.",
+      "source": "Cilium documentation, “Global Services”, “Load-balancing with Global Services”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/global-services/#load-balancing-with-global-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Establishing load-balancing between clusters is achieved by defining a Kubernetes service with identical name and namespace in each cluster",
+      "uses": [
+        "global service",
+        "Service",
+        "namespace",
+        "Ingress",
+        "CiliumNetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cca.global-service",
+        "cca.cm-benefits"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.scn-shared",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10430,
+      "front": "A small edge cluster should use the core cluster's `search` backends but never receive the core cluster's traffic on its own few pods. Which annotation goes on the edge cluster's global service?",
+      "back": "D: `service.cilium.io/shared: \"false\"`.",
+      "choices": "A) `service.cilium.io/affinity: \"remote\"`\nB) `service.cilium.io/affinity: \"none\"`\nC) `service.cilium.io/global: \"false\"`\nD) `service.cilium.io/shared: \"false\"`",
+      "choicesExplained": "A: affinity changes the edge cluster's own preference, but its pods would still be shared. C: this would stop the Service being global at all. B: `none` is the default and changes nothing.",
+      "explanation": "Unsharing keeps the edge pods out of other clusters' backend lists while still using remote backends.",
+      "source": "Cilium documentation, “Global Services”, “Disabling Global Service Sharing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/global-services/#disabling-global-service-sharing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Below example will expose remote endpoint without sharing local endpoints.",
+      "uses": [
+        "global service"
+      ],
+      "conceptIDs": [
+        "cca.service-shared",
+        "cca.service-affinity"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.scn-affinity",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10440,
+      "front": "Cross-cluster calls add latency. A global service should use backends in its own cluster, falling back to others only when none there are healthy. Which setting fits?",
+      "back": "B: `service.cilium.io/affinity: \"local\"`.",
+      "choices": "A) `service.cilium.io/shared: \"false\"`\nB) `service.cilium.io/affinity: \"local\"`\nC) Remove the global annotation\nD) `service.cilium.io/affinity: \"remote\"`",
+      "choicesExplained": "A: this stops sharing local backends with others; it does not set a local preference. C: then it would never fall back to other clusters. D: `remote` prefers the other clusters.",
+      "explanation": "Local affinity prefers healthy local backends and uses remote ones only when all local ones fail.",
+      "source": "Cilium documentation, “Service Affinity”, “Enabling Global Service Affinity”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/affinity/#enabling-global-service-affinity",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the Global Service will load-balance across healthy local backends, and only user remote endpoints if and only if all of local backends are not available or unhealthy.",
+      "uses": [
+        "global service"
+      ],
+      "conceptIDs": [
+        "cca.service-affinity"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.scn-policy",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10450,
+      "front": "Pods labelled `app=report` in the local cluster may reach `app=db` pods only in the cluster named `data-eu`. How should the egress rule select them?",
+      "back": "A: match `app: db` plus `io.cilium.k8s.policy.cluster: data-eu`.",
+      "choices": "A) Match `app: db` plus `io.cilium.k8s.policy.cluster: data-eu`\nB) Match `app: db` only, applied in the `data-eu` cluster\nC) Use `toCIDR` with the other cluster's node range\nD) Annotate the database Service as global",
+      "choicesExplained": "B: without a cluster label the selector picks local endpoints only, and the rule belongs in the local cluster. C: pods are selected by identity, and a node range is not the pods' addresses. D: a global Service shares backends but grants no access.",
+      "explanation": "The cluster label restricts the selection to endpoints in the named cluster.",
+      "source": "Cilium documentation, “Network Policy”, “Allowing Specific Communication Between Clusters”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/policy/#allowing-specific-communication-between-clusters",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The following policy illustrates how to allow particular pods to communicate between two clusters. The cluster name refers to the name given via the --cluster-name agent option or cluster-name ConfigMap option.",
+      "uses": [
+        "label",
+        "CiliumNetworkPolicy",
+        "toCIDR",
+        "global service"
+      ],
+      "conceptIDs": [
+        "cca.cm-policy",
+        "cca.cm-benefits"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.scn-trust",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10460,
+      "front": "A partner company offers to mesh its cluster, run by its own team with weaker controls, with yours. What does the Cilium guidance say?",
+      "back": "C: avoid it; meshed clusters form one trust domain, so only join mutually trusted clusters with equivalent security.",
+      "choices": "A) Accept; Cilium's sanity checks block any bad data\nB) Accept, but set affinity to `local`\nC) Avoid it; meshed clusters form one trust domain, so only join mutually trusted clusters with equivalent security\nD) Accept, if `maxConnectedClusters` is 511",
+      "choicesExplained": "A: the docs say the checks cannot fully prevent a compromised control plane from spreading malicious information. B: affinity only steers load-balancing. D: that option only changes cluster limits.",
+      "explanation": "A compromised cluster's control plane could propagate malicious information to the rest of the mesh.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Security”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#security",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Only connect clusters that are mutually trusted and have equivalent security postures.",
+      "uses": [
+        "Cluster Mesh",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cca.cm-trust-domain"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.scn-gateway",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10470,
+      "front": "A network team plans extra bandwidth for a Cluster Mesh gateway, expecting all cross-cluster pod traffic to pass through it. What is the flaw?",
+      "back": "B: there is no such gateway; pod traffic goes directly between nodes.",
+      "choices": "A) The gateway runs in the kvstoremesh container\nB) There is no such gateway; pod traffic goes directly between nodes\nC) All traffic passes through the clustermesh-apiserver instead\nD) Traffic goes through Hubble Relay",
+      "choicesExplained": "A: kvstoremesh syncs state; it forwards no pod traffic. C: the clustermesh-apiserver exchanges state only. D: Relay gathers flow data.",
+      "explanation": "Cluster Mesh forwards pod traffic across cluster boundaries without any additional proxy or gateway.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Pod-to-pod traffic is forwarded directly between nodes, including across cluster boundaries, without requiring any additional proxy or gateway.",
+      "uses": [
+        "Cluster Mesh",
+        "kvstoremesh",
+        "clustermesh-apiserver",
+        "Hubble Relay"
+      ],
+      "conceptIDs": [
+        "cca.cm-direct-traffic",
+        "cca.clustermesh-apiserver"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.scn-mcs",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10480,
+      "front": "A platform team wants cross-cluster Services through a Kubernetes standard, with status conditions and a dedicated DNS domain. Which option fits?",
+      "back": "B: the MCS-API.",
+      "choices": "A) Global services with annotations\nB) The MCS-API\nC) Service affinity\nD) `cilium clustermesh connect` alone",
+      "choicesExplained": "A: global services are Cilium-specific annotations. C: affinity only sets backend preference. D: connecting clusters does not by itself share Services.",
+      "explanation": "The docs recommend the MCS-API for a Kubernetes SIG Multicluster standard with higher-level features.",
+      "source": "Cilium documentation, “Load-balancing & Service Discovery”, “Load-balancing & Service Discovery”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/load-balancing/#gs-clustermesh-load-balancing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Use MCS-API if you want to use a Kubernetes SIG Multicluster standard with higher-level features.",
+      "uses": [
+        "MCS-API",
+        "global service",
+        "Cilium CLI",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "cca.mcs-api",
+        "cca.mcs-vs-global"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.scn-setup-order",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 10490,
+      "front": "Two clusters run Cilium with unique names and identifiers. Using the Cilium CLI, what is the next step to mesh them?",
+      "back": "D: `cilium clustermesh enable` in both clusters, then `cilium clustermesh connect` once.",
+      "choices": "A) Reinstall both clusters with the same `cluster.id`\nB) `cilium clustermesh connect` in each direction, with no enable step\nC) Annotate every Service as global\nD) `cilium clustermesh enable` in both clusters, then `cilium clustermesh connect` once",
+      "choicesExplained": "B: enable deploys the clustermesh-apiserver first, and connect is needed in one direction only. C: annotations come after the mesh exists. A: the identifiers must differ.",
+      "explanation": "Enable deploys the control plane and certificates; connect then links the clusters both ways.",
+      "source": "Cilium documentation, “Setting up Cluster Mesh”, “Alternative: configure with the Cilium CLI”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/setup/#alternative-configure-with-the-cilium-cli",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Finally, connect the clusters. This step only needs to be done in one direction.",
+      "uses": [
+        "Cilium CLI",
+        "clustermesh-apiserver",
+        "global service"
+      ],
+      "conceptIDs": [
+        "cca.cm-enable-connect",
+        "cca.cluster-name-id"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.mcs-vs-global",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 10500,
+      "front": "When would you choose global services over the MCS-API?",
+      "back": "When you want Cilium's Service annotations directly, different Service properties per cluster, or finer control over sharing backends.",
+      "explanation": "The MCS-API instead offers a Kubernetes standard with consistent global properties; the two can also be used together.",
+      "source": "Cilium documentation, “Load-balancing & Service Discovery”, “Load-balancing & Service Discovery”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/load-balancing/#gs-clustermesh-load-balancing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Global Services can be simpler to set up in some environments and are useful when you want different Service properties in each cluster or more granular control over how backends are shared.",
+      "uses": [
+        "global service",
+        "MCS-API",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.mcs-vs-global"
+      ]
+    },
+    {
+      "id": "cca.cluster-mesh.apiserver-vs-kvstoremesh",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "order": 10510,
+      "front": "How do the apiserver and kvstoremesh containers of the clustermesh-apiserver pod differ?",
+      "back": "apiserver pushes local state into the local etcd; kvstoremesh pulls remote clusters' state into the local cluster.",
+      "explanation": "One publishes this cluster's state, the other brings in everyone else's.",
+      "source": "Cilium documentation, “Multi-Cluster (Cluster Mesh)”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/clustermesh/intro/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "apiserver: Synchronizes local Cilium and Kubernetes state into the local etcd instance. kvstoremesh: Synchronizes remote cluster state from other clusters into the local cluster.",
+      "uses": [
+        "clustermesh-apiserver",
+        "kvstoremesh",
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cca.cm-apiserver-containers",
+        "cca.kvstoremesh"
+      ]
+    }
+  ]
+}

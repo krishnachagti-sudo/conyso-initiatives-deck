@@ -1,0 +1,580 @@
+https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/
+
+
+
+## {#cilium-quick-installation} 
+ {#k8s-install-standard}  {#k8s-quick-install}  {#k8s-install-quick} 
+Cilium Quick Installation
+
+This guide will walk you through the quick default installation. It will
+automatically detect and use the best configuration possible for the Kubernetes
+distribution you are using. All state is stored using Kubernetes custom resource definitions (CRDs).
+
+This is the best installation method for most use cases.  For large
+environments (> 500 nodes) or if you want to run specific datapath modes, refer
+to the Getting Started guide.
+
+Should you encounter any issues during the installation, please refer to the
+Troubleshooting section and/or seek help on Cilium Slack.
+
+## {#create-the-cluster} 
+ {#create-cluster} 
+Create the Cluster
+
+If you don’t have a Kubernetes Cluster yet, you can use the instructions below
+to create a Kubernetes cluster locally or using a managed Kubernetes service:
+
+GKEAKSEKSkindminikubeKubesprayRancher DesktopAlibaba ACK
+
+The following commands create a Kubernetes cluster using Google
+Kubernetes Engine.  See
+Installing Google Cloud SDK
+for instructions on how to install gcloud and prepare your
+account.
+
+export NAME="$(whoami)-$RANDOM"
+# Create the node pool with the following taint to guarantee that
+# Pods are only scheduled/executed in the node when Cilium is ready.
+# Alternatively, see the note below.
+gcloud container clusters create "${NAME}" \
+ --node-taints node.cilium.io/agent-not-ready=true:NoExecute \
+ --zone us-west2-a
+gcloud container clusters get-credentials "${NAME}" --zone us-west2-a
+
+Note
+
+Please make sure to read and understand the documentation page on taint effects and unmanaged pods.
+
+The following commands create a Kubernetes cluster using Azure
+Kubernetes Service with
+no CNI plugin pre-installed (BYOCNI). See Azure Cloud CLI
+for instructions on how to install az and prepare your account, and
+the Bring your own CNI documentation
+for more details about BYOCNI prerequisites / implications.
+
+export NAME="$(whoami)-$RANDOM"
+export AZURE_RESOURCE_GROUP="${NAME}-group"
+az group create --name "${AZURE_RESOURCE_GROUP}" -l westus2
+
+# Create AKS cluster
+az aks create \
+  --resource-group "${AZURE_RESOURCE_GROUP}" \
+  --name "${NAME}" \
+  --network-plugin none \
+  --generate-ssh-keys
+
+# Get the credentials to access the cluster with kubectl
+az aks get-credentials --resource-group "${AZURE_RESOURCE_GROUP}" --name "${NAME}"
+
+The following commands create a Kubernetes cluster with eksctl
+using Amazon Elastic Kubernetes Service.  See eksctl Installation for instructions on how to
+install eksctl and prepare your account.
+
+export NAME="$(whoami)-$RANDOM"
+cat <<EOF >eks-config.yaml
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${NAME}
+  region: eu-west-1
+
+managedNodeGroups:
+- name: ng-1
+  desiredCapacity: 2
+  privateNetworking: true
+  # taint nodes so that application pods are
+  # not scheduled/executed until Cilium is deployed.
+  # Alternatively, see the note below.
+  taints:
+   - key: "node.cilium.io/agent-not-ready"
+     value: "true"
+     effect: "NoExecute"
+EOF
+eksctl create cluster -f ./eks-config.yaml
+
+Note
+
+Please make sure to read and understand the documentation page on taint effects and unmanaged pods.
+
+Install kind >= v0.7.0 per kind documentation:
+Installation and Usage
+
+curl -LO https://raw.githubusercontent.com/cilium/cilium/1.20.2/Documentation/installation/kind-config.yaml
+kind create cluster --config=kind-config.yaml
+
+Note
+
+Cilium may fail to deploy due to too many open files in one or more
+of the agent pods. If you notice this error, you can increase the
+inotify resource limits on your host machine (see
+Pod errors due to “too many open files”).
+
+Install minikube ≥ v1.28.0 as per minikube documentation:
+Install Minikube.
+The following command will bring up a single node minikube cluster prepared for installing cilium.
+
+minikube start --cni=cilium
+
+Note
+
+This may not install the latest version of cilium.
+
+It might be necessary to add --host-dns-resolver=false if using the Virtualbox provider,
+otherwise DNS resolution may not work after Cilium installation.
+
+Kubespray requires Python ≥ 3.10 for recent versions.
+For environment setup and dependencies installation, see the Kubespray Ansible documentation.
+
+Configure cluster:
+
+# Enter the already cloned kubespray directory
+cd kubespray/
+
+# Copy sample inventory
+cp -rfp inventory/sample inventory/mycluster
+
+# Configure your inventory
+vi inventory/mycluster/inventory.ini
+
+# Configure Kubernetes networking:
+# Use CNI without any network plugin
+sed -e 's/^kube_network_plugin:.*$/kube_network_plugin: cni/' \
+    -e 's/^kube_owner:.*$/kube_owner: root/' \
+    inventory/mycluster/group_vars/k8s_cluster/k8s-cluster.yml > k8s-cluster.tmp
+mv k8s-cluster.tmp inventory/mycluster/group_vars/k8s_cluster/k8s-cluster.yml
+
+Setting kube_network_plugin: cni ensures the cluster deploys without any network plugin, allowing Cilium to be installed separately afterward.
+
+Deploy cluster:
+
+ansible-playbook -i inventory/mycluster/inventory.ini cluster.yml -b -v \
+  --private-key=~/.ssh/private_key
+
+(Adjust the path to your private SSH key.)
+
+Note
+
+For more detailed configuration options, refer to the Kubespray documentation.
+
+Install Rancher Desktop >= v1.1.0 as per Rancher Desktop documentation:
+Install Rancher Desktop.
+
+Next you need to configure Rancher Desktop to disable the built-in CNI so you can install Cilium.
+
+Configuring Rancher Desktop is done using a YAML configuration file.
+This step is necessary in order to disable the default CNI and replace it with
+Cilium.
+
+Next you need to start Rancher Desktop with containerd and create a override.yaml:
+
+env:
+  # needed for cilium
+  INSTALL_K3S_EXEC: '--flannel-backend=none --disable-network-policy'
+provision:
+  # needs root to mount
+  - mode: system
+    script: |
+      #!/bin/sh
+      set -e
+
+      # needed for cilium
+      mount bpffs -t bpf /sys/fs/bpf
+      mount --make-shared /sys/fs/bpf
+
+      mkdir -p /run/cilium/cgroupv2
+      mount -t cgroup2 none /run/cilium/cgroupv2
+      mount --make-shared /run/cilium/cgroupv2/
+
+After the file is created move it into your Rancher Desktop’s lima/_config directory:
+
+LinuxmacOS
+
+cp override.yaml ~/.local/share/rancher-desktop/lima/_config/override.yaml
+
+cp override.yaml ~/Library/Application\ Support/rancher-desktop/lima/_config/override.yaml
+
+Finally, open the Rancher Desktop UI and go to the Troubleshooting panel and click “Reset Kubernetes”.
+
+After a few minutes Rancher Desktop will start back up prepared for installing Cilium.
+
+Note
+
+This is a beta feature. Please provide feedback and file a GitHub issue if
+you experience any problems.
+
+Note
+
+The AlibabaCloud ENI integration with Cilium is subject to the following limitations:
+
+It is currently only enabled for IPv4.
+
+It only works with instances supporting ENI. Refer to Instance families for details.
+
+Setup a Kubernetes on AlibabaCloud. You can use any method you prefer.
+The quickest way is to create an ACK (Alibaba Cloud Container Service for
+Kubernetes) cluster and to replace the CNI plugin with Cilium.
+For more details on how to set up an ACK cluster please follow
+the official documentation.
+
+## {#install-the-cilium-cli} 
+ {#install-cilium-cli} 
+Install the Cilium CLI
+
+Install the latest version of the Cilium CLI. The Cilium CLI can be used to
+install Cilium, inspect the state of a Cilium installation, and enable/disable
+various features (e.g. clustermesh, Hubble).
+
+LinuxmacOSOther
+
+CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+CLI_ARCH=amd64
+if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
+sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
+rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+
+CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+CLI_ARCH=amd64
+if [ "$(uname -m)" = "arm64" ]; then CLI_ARCH=arm64; fi
+curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-darwin-${CLI_ARCH}.tar.gz{,.sha256sum}
+shasum -a 256 -c cilium-darwin-${CLI_ARCH}.tar.gz.sha256sum
+sudo tar xzvfC cilium-darwin-${CLI_ARCH}.tar.gz /usr/local/bin
+rm cilium-darwin-${CLI_ARCH}.tar.gz{,.sha256sum}
+
+See the full page of releases.
+
+Video
+
+To learn more about the Cilium CLI, check out eCHO episode 8: Exploring the Cilium CLI.
+
+## {#install-cilium} 
+
+Install Cilium
+
+You can install Cilium on any Kubernetes cluster. Pick one of the options below:
+
+GenericGKEAKSEKSOpenShiftRKEk3sAlibaba ACK
+
+These are the generic instructions on how to install Cilium into any
+Kubernetes cluster. The installer will attempt to automatically pick the
+best configuration options for you. Please see the other tabs for
+distribution/platform specific instructions which also list the ideal
+default configuration for particular platforms.
+
+Requirements:
+
+Kubernetes must be configured to use CNI (see Network Plugin Requirements)
+
+Linux kernel >= 5.10
+
+Tip
+
+See System Requirements for more details on the system requirements.
+
+Install Cilium
+
+Install Cilium into the Kubernetes cluster pointed to by your current kubectl context:
+
+cilium install 1.20.2
+
+To install Cilium on Google Kubernetes Engine (GKE),
+perform the following steps:
+
+Default Configuration:
+
+Datapath
+
+IPAM
+
+Datastore
+
+Direct Routing
+
+Kubernetes PodCIDR
+
+Kubernetes CRD
+
+Requirements:
+
+The cluster should be created with the taint node.cilium.io/agent-not-ready=true:NoExecute
+using --node-taints option. However, there are other options. Please make
+sure to read and understand the documentation page on taint effects and unmanaged pods.
+
+Install Cilium:
+
+Install Cilium into the GKE cluster:
+
+cilium install 1.20.2
+
+Configuration:
+
+Datapath
+
+IPAM
+
+Datastore
+
+Encapsulation
+
+Cluster Pool
+
+Kubernetes CRD
+
+Requirements:
+
+Note
+
+On AKS, Cilium can be installed either manually by administrators via Bring your own CNI or
+automatically by AKS via Azure CNI Powered by Cilium. Bring your own CNI offers more flexibility
+and customization as administrators have full control over the installation, but it does not
+integrate natively with the Azure network stack and administrators need to handle Cilium upgrades.
+Azure CNI Powered by Cilium integrates natively with the Azure network stack and upgrades are
+handled by AKS, but it does not offer as much flexibility and customization as it is controlled by AKS.
+The following instructions assume Bring your own CNI. For Azure CNI Powered by
+Cilium, see the external installer guide Installation using Azure CNI Powered by Cilium in AKS for dedicated instructions.
+
+The AKS cluster must be created with --network-plugin none. See the
+Bring your own CNI
+documentation for more details about BYOCNI prerequisites / implications.
+
+Make sure that you set a cluster pool IPAM pod CIDR that does not overlap with the default service
+CIDR of AKS. For example, you can use --helm-set ipam.operator.clusterPoolIPv4PodCIDRList=192.168.0.0/16.
+
+Install Cilium:
+
+Install Cilium into the AKS cluster:
+
+cilium install 1.20.2 --set azure.resourceGroup="${AZURE_RESOURCE_GROUP}"
+
+To install Cilium on Amazon Elastic Kubernetes Service (EKS),
+perform the following steps:
+
+Default Configuration:
+
+Datapath
+
+IPAM
+
+Datastore
+
+Direct Routing (ENI)
+
+AWS ENI
+
+Kubernetes CRD
+
+For more information on AWS ENI mode, see AWS ENI.
+
+Tip
+
+To chain Cilium on top of the AWS CNI, see AWS VPC CNI plugin.
+
+You can also bring up Cilium in a Single-Region, Multi-Region, or Multi-AZ environment for EKS.
+
+Requirements:
+
+The EKS Managed Nodegroups must
+be properly tainted to ensure applications pods are properly managed by
+Cilium:
+
+managedNodeGroups should be tainted with
+node.cilium.io/agent-not-ready=true:NoExecute to ensure application
+pods will only be scheduled once Cilium is ready to manage them. However,
+there are other options. Please make sure to read and understand the
+documentation page on taint effects and unmanaged pods.
+
+Below is an example on how to use ClusterConfig
+file to create the cluster:
+
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+# ...
+managedNodeGroups:
+- name: ng-1
+  # ...
+  #
+  # taint nodes so that application pods are
+  # not scheduled/executed until Cilium is deployed.
+  # Alternatively, see the note above regarding taint effects.
+  taints:
+   - key: "node.cilium.io/agent-not-ready"
+     value: "true"
+     effect: "NoExecute"
+
+Limitations:
+
+The AWS ENI integration of Cilium is currently only enabled for IPv4. If you
+want to use IPv6, use a datapath/IPAM mode other than ENI.
+
+Install Cilium:
+
+Install Cilium into the EKS cluster.
+
+cilium install 1.20.2
+cilium status --wait
+
+Note
+
+If you have to uninstall Cilium and later install it again, that could cause
+connectivity issues due to aws-node DaemonSet flushing Linux routing tables.
+The issues can be fixed by restarting all pods, alternatively to avoid such issues
+you can delete aws-node DaemonSet prior to installing Cilium.
+
+To install Cilium on OpenShift,
+perform the following steps:
+
+Default Configuration:
+
+Datapath
+
+IPAM
+
+Datastore
+
+Encapsulation
+
+Cluster Pool
+
+Kubernetes CRD
+
+Requirements:
+
+OpenShift 4.x
+
+Install Cilium:
+
+Cilium is a Certified OpenShift CNI Plugin
+and is best installed when an OpenShift cluster is created using the OpenShift
+installer. Please refer to Installation on OpenShift OKD for more information.
+
+To install Cilium top of a standalone Rancher Kubernetes Engine 1 (RKE1)
+or Rancher Kubernetes Engine 2 (RKE2) cluster,
+follow the installation instructions provided in the dedicated
+Installation using Rancher Kubernetes Engine guide.
+
+If your RKE1/2 cluster is managed by Rancher (non-standalone), follow the
+Installation using Rancher guide instead.
+
+Install Cilium:
+
+Install Cilium into your newly created RKE cluster:
+
+cilium install 1.20.2
+
+To install Cilium on k3s,
+perform the following steps:
+
+Default Configuration:
+
+Datapath
+
+IPAM
+
+Datastore
+
+Encapsulation
+
+Cluster Pool
+
+Kubernetes CRD
+
+Requirements:
+
+Install your k3s cluster as you normally would but making sure to disable
+support for the default CNI plugin and the built-in network policy enforcer so
+you can install Cilium on top:
+
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='--flannel-backend=none --disable-network-policy' sh -
+
+For the Cilium CLI to access the cluster in successive steps you will need to
+use the kubeconfig file stored at /etc/rancher/k3s/k3s.yaml by setting
+the KUBECONFIG environment variable:
+
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+
+Install Cilium:
+
+Install Cilium into your newly created Kubernetes cluster:
+
+cilium install 1.20.2
+
+You can install Cilium using Helm on Alibaba ACK, refer to Installation using Helm for details.
+
+If the installation fails for some reason, run cilium status to retrieve
+the overall status of the Cilium deployment and inspect the logs of whatever
+pods are failing to be deployed.
+
+Tip
+
+You may be seeing cilium install print something like this:
+
+♻️  Restarted unmanaged pod kube-system/event-exporter-gke-564fb97f9-rv8hg
+♻️  Restarted unmanaged pod kube-system/kube-dns-6465f78586-hlcrz
+♻️  Restarted unmanaged pod kube-system/kube-dns-autoscaler-7f89fb6b79-fsmsg
+♻️  Restarted unmanaged pod kube-system/l7-default-backend-7fd66b8b88-qqhh5
+♻️  Restarted unmanaged pod kube-system/metrics-server-v0.3.6-7b5cdbcbb8-kjl65
+♻️  Restarted unmanaged pod kube-system/stackdriver-metadata-agent-cluster-level-6cc964cddf-8n2rt
+
+This indicates that your cluster was already running some pods before Cilium
+was deployed and the installer has automatically restarted them to ensure
+all pods get networking provided by Cilium.
+
+## {#validate-the-installation} 
+
+Validate the Installation
+
+To validate that Cilium has been properly installed, you can run
+
+$ cilium status --wait
+   /¯¯\
+/¯¯\__/¯¯\    Cilium:         OK
+\__/¯¯\__/    Operator:       OK
+/¯¯\__/¯¯\    Hubble:         disabled
+\__/¯¯\__/    ClusterMesh:    disabled
+   \__/
+
+DaemonSet         cilium             Desired: 2, Ready: 2/2, Available: 2/2
+Deployment        cilium-operator    Desired: 2, Ready: 2/2, Available: 2/2
+Containers:       cilium-operator    Running: 2
+                  cilium             Running: 2
+Image versions    cilium             quay.io/cilium/cilium:v1.9.5: 2
+                  cilium-operator    quay.io/cilium/operator-generic:v1.9.5: 2
+
+Run the following command to validate that your cluster has proper network
+connectivity:
+
+$ cilium connectivity test
+ℹ️  Monitor aggregation detected, will skip some flow validation steps
+✨ [k8s-cluster] Creating namespace for connectivity check...
+(...)
+---------------------------------------------------------------------------------------------------------------------
+📋 Test Report
+---------------------------------------------------------------------------------------------------------------------
+✅ 69/69 tests successful (0 warnings)
+
+Note
+
+The connectivity test may fail to deploy due to too many open files in one
+or more of the pods. If you notice this error, you can increase the
+inotify resource limits on your host machine (see
+Pod errors due to “too many open files”).
+
+Congratulations! You have a fully functional Kubernetes cluster with Cilium. 🎉
+
+## {#next-steps} 
+
+Next Steps
+
+Setting up Hubble Observability
+
+Inspecting Network Flows with the CLI
+
+Service Map & Hubble UI
+
+Identity-Aware and HTTP-Aware Policy Enforcement
+
+Setting up Cluster Mesh
+
+          <footer

@@ -1,0 +1,1391 @@
+{
+  "topic": "Identity and policy enforcement",
+  "notes": [
+    {
+      "id": "cca.identity-enforcement.security-identity",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "In Cilium, what is a security identity?",
+      "back": "A cluster-wide unique identifier, derived from labels, that Cilium uses to enforce connectivity between endpoints.",
+      "explanation": "Every endpoint whose security-relevant labels are the same gets the same identity, so one identity can stand for many endpoints.",
+      "example": "Like a badge colour that opens the same doors for everyone in one team, rather than a key cut for each person.",
+      "source": "Cilium docs (1.20): Terminology, “Identity”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#identity",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "An identity is identified by Labels and is given a cluster wide unique identifier. The endpoint is assigned the identity which matches the endpoint’s Security Relevant Labels, i.e. all endpoints which share the same set of Security Relevant Labels will share the same identity.",
+      "introduces": [
+        "security identity"
+      ],
+      "uses": [
+        "security identity",
+        "label",
+        "endpoint",
+        "cluster",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.identity"
+      ],
+      "order": 4010
+    },
+    {
+      "id": "cca.identity-enforcement.reserved-host",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the reserved identity `reserved:host` stand for?",
+      "back": "Identity 1: the local host, for any traffic from or to one of the local host’s IPs.",
+      "explanation": "Traffic between a pod and the node it runs on is therefore matched by this identity, not by the node’s addresses.",
+      "example": "Like the caretaker’s pass in a block of flats: it covers whoever acts from the building itself.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "reserved:host 1 The local host. Any traffic that originates from or is designated to one of the local host IPs.",
+      "introduces": [
+        "reserved:host"
+      ],
+      "uses": [
+        "reserved:host",
+        "security identity",
+        "host",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.reserved-host",
+        "cca.special-identities"
+      ],
+      "order": 4020
+    },
+    {
+      "id": "cca.identity-enforcement.reserved-world",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the reserved identity `reserved:world` stand for?",
+      "back": "Identity 2: any network endpoint outside the cluster.",
+      "explanation": "A request from a laptop on the internet to a pod, for example, falls under this identity.",
+      "example": "Like “visitor” printed on a building pass: anyone from outside, whoever they are.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "reserved:world 2 Any network endpoint outside of the cluster",
+      "introduces": [
+        "reserved:world"
+      ],
+      "uses": [
+        "reserved:world",
+        "security identity",
+        "cluster",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.reserved-world",
+        "cca.special-identities"
+      ],
+      "order": 4030
+    },
+    {
+      "id": "cca.identity-enforcement.reserved-remote-node",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the reserved identity `reserved:remote-node` stand for?",
+      "back": "Identity 6: every host in any connected cluster other than the local node.",
+      "explanation": "So traffic from the addresses of any other machine in the cluster falls under one identity, however many of them there are.",
+      "example": "Like “colleague from another branch” on a pass, as opposed to “this branch”.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "reserved:remote-node 6 The collection of all remote cluster hosts. Any traffic that originates from or is designated to one of the IPs of any host in any connected cluster other than the local node.",
+      "introduces": [
+        "reserved:remote-node"
+      ],
+      "uses": [
+        "reserved:remote-node",
+        "reserved:host",
+        "security identity",
+        "host",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.reserved-remote-node",
+        "cca.special-identities"
+      ],
+      "order": 4040
+    },
+    {
+      "id": "cca.identity-enforcement.well-known-identity",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a well-known identity in Cilium?",
+      "back": "A security identity Cilium hands out by itself, without contacting the key-value store or any other external dependency.",
+      "explanation": "The purpose is bootstrapping: essential services get policy-enforced connectivity before anything else is available.",
+      "example": "Like a pre-printed pass for the night guard, ready before the badge office opens.",
+      "source": "Cilium docs (1.20): Terminology, “Well-known Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#well-known-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "which Cilium is aware of automatically and will hand out a security identity without requiring to contact any external dependencies such as the kvstore. The purpose of this is to allow bootstrapping Cilium and enable network connectivity with policy enforcement in the cluster for essential services without depending on any dependencies.",
+      "introduces": [
+        "well-known identity"
+      ],
+      "uses": [
+        "well-known identity",
+        "security identity",
+        "key-value store",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.well-known-identities"
+      ],
+      "order": 4050
+    },
+    {
+      "id": "cca.identity-enforcement.policy-enforcement-mode",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is `policyEnforcementMode` in a Cilium installation?",
+      "back": "The Helm value that sets the agent’s policy enforcement mode; the matching agent flag is `enable-policy`.",
+      "explanation": "Helm users set `policyEnforcementMode`; the agent’s own configuration calls the same setting `enable-policy`.",
+      "example": "Like a building’s master setting for door locks: “normal”, “always locked” or “never locked”.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Policy Enforcement Modes”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#policy-enforcement-modes",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To configure the policy enforcement mode, adjust the Helm value policyEnforcementMode or the corresponding configuration flag enable-policy.",
+      "introduces": [
+        "policyEnforcementMode"
+      ],
+      "uses": [
+        "policyEnforcementMode",
+        "Cilium agent",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "cca.policy-enforcement-mode-setting"
+      ],
+      "order": 4060
+    },
+    {
+      "id": "cca.identity-enforcement.enable-default-deny",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What does the policy field `enableDefaultDeny` control?",
+      "back": "Whether the policy puts its selected endpoints into default deny; set to false, it does not.",
+      "explanation": "Cilium ignores rules with it disabled when it works out an endpoint’s default mode.",
+      "example": "Like a camera added to a corridor: it watches everyone who passes but locks no doors.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Endpoint default policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#endpoint-default-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It is possible to create policies that do not enable the default-deny mode for selected endpoints. The field EnableDefaultDeny configures this. Rules with EnableDefaultDeny disabled are ignored when determining the default mode.",
+      "introduces": [
+        "enableDefaultDeny"
+      ],
+      "uses": [
+        "enableDefaultDeny",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.enable-default-deny"
+      ],
+      "order": 4070
+    },
+    {
+      "id": "cca.identity-enforcement.cidr-identity",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a CIDR identity in Cilium?",
+      "back": "The security identity generated when a CIDR policy is applied; it is local to each node.",
+      "explanation": "The same CIDR rule can therefore map to different identity numbers on two nodes.",
+      "example": "Like a cloakroom ticket: each venue gives the same coat its own number.",
+      "source": "Cilium docs (1.20): Security Identities, “CIDR-based identity”",
+      "sourceURL": "https://docs.cilium.io/en/stable/internals/security-identities/#cidr-based-identity",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When CIDR policies are applied, the identity generated is local to each node. In other words, the identity may not be the same for the same CIDR policy across two nodes.",
+      "introduces": [
+        "CIDR identity"
+      ],
+      "uses": [
+        "CIDR identity",
+        "security identity",
+        "cidr",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.cidr-identity"
+      ],
+      "order": 4080
+    },
+    {
+      "id": "cca.identity-enforcement.policy-audit-mode",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is policy audit mode in Cilium?",
+      "back": "A mode in which no network policy is enforced, used to validate the impact of host policies before enforcing them.",
+      "explanation": "Because nothing is enforced while it is on, the documentation does not recommend it for production.",
+      "example": "Like a speed camera set to “warn only” during a trial month.",
+      "source": "Cilium docs (1.20): Host Firewall, “Enable Policy Audit Mode for the Host Endpoint”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/host-firewall/#enable-policy-audit-mode-for-the-host-endpoint",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "switch the host firewall in audit mode and validate the impact of host policies before enforcing them. Warning When Policy Audit Mode is enabled, no network policy is enforced so this setting is not recommended for production deployment.",
+      "introduces": [
+        "policy audit mode"
+      ],
+      "uses": [
+        "policy audit mode",
+        "host"
+      ],
+      "conceptIDs": [
+        "cca.policy-audit-mode"
+      ],
+      "order": 4090
+    },
+    {
+      "id": "cca.identity-enforcement.label-source-k8s",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Cilium prefixes imported label keys with their source, so a pod started with the label `foo: bar` becomes {{c1::`k8s:foo=bar`}} on its endpoint.",
+      "explanation": "Different sources can use overlapping label keys, and the source prefix resolves that conflict.",
+      "source": "Cilium docs (1.20): Terminology, “Label Source”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#label-source",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Different sources can use overlapping label keys. To resolve this potential conflict, Cilium prefixes all label keys with source: to indicate the source of the label when importing labels, e.g. k8s:role=frontend. A Kubernetes pod started with the label foo: bar will be represented with a Cilium endpoint associated with the label k8s:foo=bar.",
+      "uses": [
+        "label",
+        "Pod",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.label-source"
+      ],
+      "order": 4100
+    },
+    {
+      "id": "cca.identity-enforcement.label-source-reserved",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which label source prefix marks Cilium’s special reserved labels?",
+      "back": "`reserved:`",
+      "explanation": "The same prefix begins every special identity, such as `reserved:world`.",
+      "source": "Cilium docs (1.20): Terminology, “Label Source”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#label-source",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "k8s: for labels derived from Kubernetes reserved: for special reserved labels, see Special Identities. unspec: for labels with unspecified source",
+      "uses": [
+        "label",
+        "reserved:world"
+      ],
+      "conceptIDs": [
+        "cca.label-source"
+      ],
+      "order": 4110
+    },
+    {
+      "id": "cca.identity-enforcement.label-source-unspec",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which label source prefix means that a label’s source is unspecified?",
+      "back": "`unspec:`",
+      "explanation": "It is listed beside `k8s:` for Kubernetes labels and `reserved:` for special labels.",
+      "source": "Cilium docs (1.20): Terminology, “Label Source”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#label-source",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "k8s: for labels derived from Kubernetes reserved: for special reserved labels, see Special Identities. unspec: for labels with unspecified source",
+      "uses": [
+        "label"
+      ],
+      "conceptIDs": [
+        "cca.label-source"
+      ],
+      "order": 4120
+    },
+    {
+      "id": "cca.identity-enforcement.label-source-any",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "If a label selector gives no source prefix, which source does Cilium assume?",
+      "back": "`any:`, which matches labels regardless of their source.",
+      "explanation": "Giving a source narrows matching: the selecting and matched labels must then have the same source.",
+      "source": "Cilium docs (1.20): Terminology, “Label Source”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#label-source",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If no source is provided, the label source defaults to any: which will match all labels regardless of their source. If a source is provided, the source of the selecting and matching labels need to match.",
+      "uses": [
+        "label",
+        "selector"
+      ],
+      "conceptIDs": [
+        "cca.label-source"
+      ],
+      "order": 4130
+    },
+    {
+      "id": "cca.identity-enforcement.identity-relabel",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What happens to an endpoint’s identity when the labels of its pod change?",
+      "back": "Cilium reconfirms the identity and changes it automatically if required.",
+      "explanation": "So adding or removing a label on a running pod can move it to a different identity.",
+      "source": "Cilium docs (1.20): Terminology, “What is an Identity?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#what-is-an-identity",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Whenever the Labels of the pod or workload change, the identity is reconfirmed and automatically modified as required.",
+      "uses": [
+        "security identity",
+        "endpoint",
+        "label",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.identity"
+      ],
+      "order": 4140
+    },
+    {
+      "id": "cca.identity-enforcement.security-relevant-why",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why does Cilium not use every pod label when it derives an identity?",
+      "back": "Not all labels are meaningful; some only store metadata, such as when a workload was launched.",
+      "explanation": "Cilium needs to know which labels are meaningful, and only those are considered.",
+      "source": "Cilium docs (1.20): Terminology, “Security Relevant Labels”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#security-relevant-labels",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Not all Labels associated with a pod or workload are meaningful when deriving the Identity. Labels may be used to store metadata such as the timestamp when a workload was launched. Cilium requires to know which labels are meaningful and are subject to being considered when deriving the identity.",
+      "uses": [
+        "label",
+        "Pod",
+        "security identity"
+      ],
+      "conceptIDs": [
+        "cca.security-relevant-labels"
+      ],
+      "order": 4150
+    },
+    {
+      "id": "cca.identity-enforcement.security-relevant-prefix",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "By default, Cilium treats {{c1::all labels}} as identity-relevant, except a built-in list of exclusions such as `pod-template-hash`.",
+      "explanation": "Labels such as hashes would give each pod its own identity, so they are excluded; the `labels` option can narrow the set further.",
+      "source": "Cilium docs (1.20): Limiting Identity-Relevant Labels, “Limiting Identity-Relevant Labels”",
+      "sourceURL": "https://docs.cilium.io/en/stable/operations/performance/scalability/identity-relevant-labels/#limiting-identity-relevant-labels",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, Cilium considers all labels to be relevant for identities, with the following exceptions:",
+      "uses": [
+        "label",
+        "Cilium agent"
+      ],
+      "conceptIDs": [
+        "cca.security-relevant-labels"
+      ],
+      "order": 4160
+    },
+    {
+      "id": "cca.identity-enforcement.identity-shared-cluster",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Pods with the same identity-relevant labels start on several nodes. How many identities do they get?",
+      "back": "One: they all resolve to and share a single identity.",
+      "explanation": "Sharing one identity across nodes needs coordination between those nodes.",
+      "source": "Cilium docs (1.20): Terminology, “Identity Management in the Cluster”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#identity-management-in-the-cluster",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "if several pods or containers are started on several cluster nodes, all of them will resolve and share a single identity if they share the identity relevant labels. This requires coordination between cluster nodes.",
+      "uses": [
+        "security identity",
+        "label",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.identity-cluster-wide"
+      ],
+      "order": 4170
+    },
+    {
+      "id": "cca.identity-enforcement.identity-kvstore",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "By default, through what do Cilium nodes coordinate the allocation of security identities?",
+      "back": "Kubernetes CiliumIdentity custom resources; a distributed key-value store can be used instead, with `--identity-allocation-mode=kvstore`.",
+      "explanation": "CRD allocation works in any Kubernetes cluster without an external dependency, so it is the default; the key-value store is an optional alternative.",
+      "source": "Cilium docs (1.20): Cilium Operator, “CRD Identity garbage collection”",
+      "sourceURL": "https://docs.cilium.io/en/stable/internals/cilium_operator/#crd-identity-garbage-collection",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "CRD identity allocation uses Kubernetes custom resource CiliumIdentity to represent a security identity. This is the default behavior of Cilium and works out of the box in any K8s environment without any external dependency.",
+      "uses": [
+        "key-value store",
+        "security identity",
+        "node",
+        "label"
+      ],
+      "conceptIDs": [
+        "cca.identity-cluster-wide"
+      ],
+      "order": 4180
+    },
+    {
+      "id": "cca.identity-enforcement.ip-filter-churn",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "With IP-based filters, what must happen each time a pod covered by a rule starts or stops?",
+      "back": "The rules on every node running affected pods must be updated to add or remove that pod’s IP address.",
+      "explanation": "Addresses change with every pod start and stop, so the allowed-address lists must keep changing with them.",
+      "source": "Cilium docs (1.20): Identity-Based, “Identity-Based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/identity/#identity-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Every time a new pod with the label role=frontend or role=backend is either started or stopped, the rules on every cluster node which run any such pods must be updated by either adding or removing the corresponding IP address from the list of allowed IP addresses.",
+      "uses": [
+        "ip address",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.identity-vs-ip"
+      ],
+      "order": 4190
+    },
+    {
+      "id": "cca.identity-enforcement.separates-security",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Cilium entirely separates {{c1::security}} from network addressing: it is based on a pod’s identity, derived through labels.",
+      "explanation": "Because that identity can be shared between pods, many pods can be covered by one identity.",
+      "source": "Cilium docs (1.20): Identity-Based, “Identity-Based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/identity/#identity-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium entirely separates security from network addressing. Instead, security is based on the identity of a pod, which is derived through labels. This identity can be shared between pods.",
+      "uses": [
+        "security identity",
+        "Pod",
+        "label"
+      ],
+      "conceptIDs": [
+        "cca.identity-vs-ip"
+      ],
+      "order": 4200
+    },
+    {
+      "id": "cca.identity-enforcement.reserved-unknown",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which reserved identity has the number 0, and what does it mean?",
+      "back": "`reserved:unknown`: the identity could not be derived.",
+      "explanation": "It is the one entry in the reserved list that records a failure rather than a kind of peer.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "reserved:unknown 0 The identity could not be derived.",
+      "uses": [
+        "security identity"
+      ],
+      "conceptIDs": [
+        "cca.special-identities"
+      ],
+      "order": 4210
+    },
+    {
+      "id": "cca.identity-enforcement.reserved-unmanaged",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which reserved identity covers a Kubernetes pod that was launched before Cilium was installed?",
+      "back": "`reserved:unmanaged` (3): an endpoint that Cilium does not manage.",
+      "explanation": "Such a pod is one example the documentation gives of an endpoint outside Cilium’s management.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "reserved:unmanaged 3 An endpoint that is not managed by Cilium, e.g. a Kubernetes pod that was launched before Cilium was installed.",
+      "uses": [
+        "security identity",
+        "Pod",
+        "endpoint",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.special-identities"
+      ],
+      "order": 4220
+    },
+    {
+      "id": "cca.identity-enforcement.reserved-health",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which reserved identity marks the health-checking traffic that Cilium agents generate?",
+      "back": "`reserved:health`, number 4.",
+      "explanation": "Policy can therefore recognise the agents’ health checks by identity.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "reserved:health 4 This is health checking traffic generated by Cilium agents.",
+      "uses": [
+        "security identity",
+        "Cilium agent"
+      ],
+      "conceptIDs": [
+        "cca.special-identities"
+      ],
+      "order": 4230
+    },
+    {
+      "id": "cca.identity-enforcement.reserved-init",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which identity does an endpoint hold while its security identity has not yet been resolved?",
+      "back": "`reserved:init`, number 5.",
+      "explanation": "It is a placeholder: some metadata needed to derive the real identity is still missing.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "reserved:init 5 An endpoint for which the identity has not yet been resolved is assigned the init identity. This represents the phase of an endpoint in which some of the metadata required to derive the security identity is still missing.",
+      "uses": [
+        "security identity",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.special-identities"
+      ],
+      "order": 4240
+    },
+    {
+      "id": "cca.identity-enforcement.reserved-kube-apiserver",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which reserved identity is given to remote nodes that run kube-apiserver backends?",
+      "back": "`reserved:kube-apiserver`, number 7.",
+      "explanation": "It sets those nodes apart from the other remote nodes, which carry `reserved:remote-node`.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "reserved:kube-apiserver 7 Remote node(s) which have backend(s) serving the kube-apiserver running.",
+      "uses": [
+        "security identity",
+        "kube-apiserver",
+        "reserved:remote-node",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.special-identities"
+      ],
+      "order": 4250
+    },
+    {
+      "id": "cca.identity-enforcement.reserved-ingress",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which reserved identity is given to the source addresses of connections from Ingress proxies?",
+      "back": "`reserved:ingress`, number 8.",
+      "explanation": "A backend pod’s policy can therefore name traffic that arrives through an Ingress proxy by identity.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "reserved:ingress 8 Given to the IPs used as the source address for connections from Ingress proxies.",
+      "uses": [
+        "security identity",
+        "Ingress",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.special-identities"
+      ],
+      "order": 4260
+    },
+    {
+      "id": "cca.identity-enforcement.reserved-range",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Cluster-local identities run from 1 to 2^16 - 1, and the lowest values, {{c1::1 to 255}}, are the reserved identity range.",
+      "explanation": "That is why reserved identities such as host (1) and world (2) have such small numbers.",
+      "source": "Cilium docs (1.20): Security Identities, “Cluster-local”",
+      "sourceURL": "https://docs.cilium.io/en/stable/internals/security-identities/#cluster-local",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cluster-local identities (1) range from 1 to 2^16 - 1. The lowest values, from 1 to 255, correspond to the reserved identity range.",
+      "uses": [
+        "security identity",
+        "reserved:host",
+        "reserved:world"
+      ],
+      "conceptIDs": [
+        "cca.special-identities"
+      ],
+      "order": 4270
+    },
+    {
+      "id": "cca.identity-enforcement.cidr-identity-range",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Why can CIDR identities use values above 2^24, when other identities are limited to 24 bits?",
+      "back": "CIDR identities are never encoded in packets between nodes, so they need not fit the 24-bit on-the-wire field.",
+      "explanation": "Only identities that travel in VXLAN or Geneve packets between nodes have to fit that field.",
+      "source": "Cilium docs (1.20): Security Identities, “Node-local identity”",
+      "sourceURL": "https://docs.cilium.io/en/stable/internals/security-identities/#node-local-identity",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Node-local identities (CIDR or remote-node) are never used for traffic between Cilium-managed nodes, so they do not need to fit inside of a VXLAN or Geneve virtual network field. Non-CIDR identities are limited to 24 bits so that they will fit in these fields on the wire",
+      "uses": [
+        "CIDR identity",
+        "VXLAN",
+        "Geneve",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.cidr-identity"
+      ],
+      "order": 4280
+    },
+    {
+      "id": "cca.identity-enforcement.identity-in-packet",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In a multi-node cluster, how does the receiving node learn which identity sent a packet?",
+      "back": "The sending endpoint’s identity is embedded in every packet sent between cluster nodes.",
+      "explanation": "The receiving node extracts it and checks whether that identity may talk to its local endpoints.",
+      "source": "Cilium docs (1.20): Policy Enforcement, “Policy Enforcement”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/policyenforcement/#policy-enforcement",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the identity of the transmitting endpoint is embedded into every network packet that is transmitted in between cluster nodes. The receiving cluster node can then extract the identity and verify whether a particular identity is allowed to communicate with any of the local endpoints.",
+      "uses": [
+        "security identity",
+        "endpoint",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.identity-in-packet"
+      ],
+      "order": 4290
+    },
+    {
+      "id": "cca.identity-enforcement.stateful-replies",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A policy allows A to connect to B. Are B’s reply packets to A allowed?",
+      "back": "Yes: reply packets are allowed automatically.",
+      "explanation": "Policies describe the direction in which connections may be set up, not every packet.",
+      "source": "Cilium docs (1.20): Policy Enforcement, “Policy Enforcement”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/policyenforcement/#policy-enforcement",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This means that the intent of the policy is to describe allowed direction of connection establishment. If the policy allows A => B then reply packets from B to A are automatically allowed as well.",
+      "uses": [],
+      "conceptIDs": [
+        "cca.stateful-enforcement"
+      ],
+      "order": 4300
+    },
+    {
+      "id": "cca.identity-enforcement.stateful-reverse",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Under stateful enforcement, if A => B is allowed and B must also open connections to A, {{c1::both directions}} must be explicitly allowed.",
+      "explanation": "Replies to A’s connections are covered; new connections started by B are not.",
+      "source": "Cilium docs (1.20): Policy Enforcement, “Policy Enforcement”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/policyenforcement/#policy-enforcement",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "However, B is not automatically allowed to initiate connections to A. If that outcome is desired, then both directions must be explicitly allowed.",
+      "uses": [],
+      "conceptIDs": [
+        "cca.stateful-enforcement"
+      ],
+      "order": 4310
+    },
+    {
+      "id": "cca.identity-enforcement.mode-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In `default` enforcement mode, what network access does an endpoint have before any policy selects it?",
+      "back": "Unrestricted access; once selected by a policy, it permits only allowed traffic.",
+      "explanation": "It is Cilium’s default behaviour, and the switch happens separately for each direction.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Policy Enforcement Modes”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#policy-enforcement-modes",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "default This is the default behavior for policy enforcement. In this mode, endpoints have unrestricted network access until selected by policy. Upon being selected by a policy, the endpoint permits only allowed traffic. This state is per-direction and can be adjusted on a per-policy basis.",
+      "uses": [
+        "endpoint",
+        "policyEnforcementMode"
+      ],
+      "conceptIDs": [
+        "cca.mode-default",
+        "cca.enforcement-modes"
+      ],
+      "order": 4320
+    },
+    {
+      "id": "cca.identity-enforcement.mode-always",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In `always` enforcement mode, is policy enforced on an endpoint that no rule selects?",
+      "back": "Yes: enforcement is enabled on all endpoints, even if no rules select them.",
+      "explanation": "The documentation adds that you will likely want to allow traffic to and from the health endpoint in this mode.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Policy Enforcement Modes”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#policy-enforcement-modes",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With always mode, policy enforcement is enabled on all endpoints even if no rules select specific endpoints. If you want to configure health entity to check cluster-wide connectivity when you start cilium-agent with enable-policy: always, you will likely want to enable communications to and from the health endpoint.",
+      "uses": [
+        "endpoint",
+        "policyEnforcementMode"
+      ],
+      "conceptIDs": [
+        "cca.mode-always",
+        "cca.enforcement-modes"
+      ],
+      "order": 4330
+    },
+    {
+      "id": "cca.identity-enforcement.mode-never",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In `never` enforcement mode, what happens to traffic of an endpoint that a policy selects?",
+      "back": "It is all allowed: enforcement is disabled on all endpoints, even selected ones.",
+      "explanation": "Rules can exist in this mode, but no traffic is filtered by them in either direction.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Policy Enforcement Modes”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#policy-enforcement-modes",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With never mode, policy enforcement is disabled on all endpoints, even if rules do select specific endpoints. In other words, all traffic is allowed from any source (on ingress) or destination (on egress).",
+      "uses": [
+        "endpoint",
+        "policyEnforcementMode"
+      ],
+      "conceptIDs": [
+        "cca.mode-never",
+        "cca.enforcement-modes"
+      ],
+      "order": 4340
+    },
+    {
+      "id": "cca.identity-enforcement.default-deny-direction",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A policy selects an endpoint and has only an `ingress` section. Which direction goes into default deny?",
+      "back": "Ingress only; egress stays unrestricted until a rule with an `egress` section selects the endpoint.",
+      "explanation": "Default deny is switched on per direction, by the section a selecting rule contains.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Endpoint default policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#endpoint-default-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If any rule selects an Endpoint and the rule has an ingress section, the endpoint goes into default deny-mode for ingress. If any rule selects an Endpoint and the rule has an egress section, the endpoint goes into default-deny mode for egress.",
+      "uses": [
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.default-deny-per-direction"
+      ],
+      "order": 4350
+    },
+    {
+      "id": "cca.identity-enforcement.default-deny-l7",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Does `enableDefaultDeny: false` stop a layer 7 rule from causing drops?",
+      "back": "No: it does not apply to layer 7 policy; a layer 7 rule without a layer 7 allow-all still causes drops.",
+      "explanation": "Turning default deny off is therefore not enough on its own when a policy carries layer 7 rules.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Endpoint default policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#endpoint-default-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Warning EnableDefaultDeny does not apply to layer-7 policy. Adding a layer-7 rule that does not include a layer-7 allow-all will cause drops, even when default-deny is explicitly disabled.",
+      "uses": [
+        "enableDefaultDeny"
+      ],
+      "conceptIDs": [
+        "cca.enable-default-deny"
+      ],
+      "order": 4360
+    },
+    {
+      "id": "cca.identity-enforcement.deny-response-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "By default, what does an application see when network policy denies its egress traffic?",
+      "back": "A connection timeout: Cilium silently drops the packets.",
+      "explanation": "No rejection is sent back, so the application waits instead of failing at once.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Policy Deny Response Handling”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#policy-deny-response-handling",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, when network policy denies egress traffic from a pod, Cilium silently drops the packets. This means applications experience connection timeouts rather than immediate connection failures when attempting to reach forbidden destinations.",
+      "uses": [
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.deny-response"
+      ],
+      "order": 4370
+    },
+    {
+      "id": "cca.identity-enforcement.ns-tunnel",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "In tunnelling mode, what identity does a request from outside the cluster to a Kubernetes Service carry?",
+      "back": "`reserved:world`.",
+      "explanation": "In native routing the answer depends on which node the request reaches first.",
+      "source": "Cilium docs (1.20): Caveats, “Security Identity for N/S Service Traffic”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/caveats/#security-identity-for-n-s-service-traffic",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In the tunneling mode (i.e., --tunnel-protocol=vxlan or --tunnel-protocol=geneve), the request to the service will have the reserved:world security identity.",
+      "uses": [
+        "reserved:world",
+        "Service",
+        "encapsulation mode",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.ns-service-identity"
+      ],
+      "order": 4380
+    },
+    {
+      "id": "cca.identity-enforcement.ns-native",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "In native routing mode, an external request to a Service must be forwarded to another node after backend selection. What identity does it carry?",
+      "back": "`reserved:remote-node`; only a request sent to the node running the chosen backend keeps `reserved:world`.",
+      "explanation": "So a rule that allows only world traffic may not match forwarded external requests.",
+      "source": "Cilium docs (1.20): Caveats, “Security Identity for N/S Service Traffic”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/caveats/#security-identity-for-n-s-service-traffic",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the security identity will be set to the reserved:world if the request was sent to the node which runs the selected endpoint by the LB. If not, i.e., the request needs to be forwarded to another node after the service endpoint selection, then it will have the reserved:remote-node.",
+      "uses": [
+        "reserved:remote-node",
+        "reserved:world",
+        "native routing mode",
+        "Service",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.ns-service-identity"
+      ],
+      "order": 4390
+    },
+    {
+      "id": "cca.identity-enforcement.audit-restart",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Does policy audit mode survive a restart of the Cilium agent?",
+      "back": "No: once restarted, the agent immediately enforces any existing host policies.",
+      "explanation": "A restart during a trial therefore ends the trial and starts enforcement.",
+      "source": "Cilium docs (1.20): Host Firewall, “Enable Policy Audit Mode for the Host Endpoint”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/host-firewall/#enable-policy-audit-mode-for-the-host-endpoint",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Audit mode does not persist across cilium-agent restarts. Once the agent is restarted, it will immediately enforce any existing host policies.",
+      "uses": [
+        "policy audit mode",
+        "Cilium agent",
+        "host"
+      ],
+      "conceptIDs": [
+        "cca.policy-audit-mode"
+      ],
+      "order": 4400
+    },
+    {
+      "id": "cca.identity-enforcement.lockdown",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "With `enable-lockdown-endpoint-on-policy-overflow` set to true, what happens to an endpoint whose policy map overflows?",
+      "back": "It is locked down: all its ingress and egress traffic is dropped until the map stops overflowing.",
+      "explanation": "Cilium lifts the lockdown by itself once the policy map can hold every required entry again.",
+      "source": "Cilium docs (1.20): Endpoint Lifecycle, “Lockdown Mode”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/lifecycle/#lockdown-mode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "if the policy map cannot accommodate all of the required policy map entries required (that is, the policy map for the endpoint is overflowing). Cilium will put the endpoint out of “lockdown” when it detects that the policy map is no longer overflowing. When an endpoint is locked down all network traffic, both egress and ingress, will be dropped.",
+      "uses": [
+        "endpoint",
+        "eBPF map"
+      ],
+      "conceptIDs": [
+        "cca.lockdown-mode"
+      ],
+      "order": 4410
+    },
+    {
+      "id": "cca.identity-enforcement.app-label-source",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A policy must match the label `role=db` only when it came from Kubernetes, not from any other source. Which selector key does that?",
+      "back": "C: `k8s:role`",
+      "choices": "A) `any:role`\nB) `reserved:role`\nC) `k8s:role`\nD) `unspec:role`",
+      "choicesExplained": "A matches labels from every source, which is also what a key with no prefix does. B is the source for Cilium’s special reserved labels. D is for labels whose source is unspecified.",
+      "explanation": "Once a source is given, the selecting and matched labels must share it.",
+      "source": "Cilium docs (1.20): Terminology, “Label Source”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#label-source",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When using labels to identify other resources, the source can be included to limit matching of labels to a particular type.",
+      "uses": [
+        "label",
+        "selector"
+      ],
+      "conceptIDs": [
+        "cca.label-source"
+      ],
+      "order": 4420
+    },
+    {
+      "id": "cca.identity-enforcement.app-relevant-labels",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "Under Cilium’s default label settings, which of these pod labels is left out when deriving an identity?",
+      "back": "C: `pod-template-hash=7d9f8c`",
+      "choices": "A) `team=payments`\nB) `tier=web`\nC) `pod-template-hash=7d9f8c`\nD) `app=shop`",
+      "choicesExplained": "A, B and D are ordinary labels; by default Cilium counts every label except a built-in list of exclusions, so they are included.",
+      "explanation": "A hash label changes with each pod version and would split one app into many identities, so the default list ignores it.",
+      "source": "Cilium docs (1.20): Limiting Identity-Relevant Labels, “Limiting Identity-Relevant Labels”",
+      "sourceURL": "https://docs.cilium.io/en/stable/operations/performance/scalability/identity-relevant-labels/#limiting-identity-relevant-labels",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Many Kubernetes labels are not useful for policy enforcement or visibility. A few good examples of such labels include timestamps or hashes.",
+      "uses": [
+        "label",
+        "Pod",
+        "security identity"
+      ],
+      "conceptIDs": [
+        "cca.security-relevant-labels"
+      ],
+      "order": 4430
+    },
+    {
+      "id": "cca.identity-enforcement.app-scale-out",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A web Deployment whose pods share identical labels is scaled from 3 to 300 replicas across many nodes. How many security identities do the web pods use?",
+      "back": "B: One, shared by all the pods",
+      "choices": "A) One per pod\nB) One, shared by all the pods\nC) One per replica set\nD) One per node that runs a replica",
+      "choicesExplained": "A and D would be true of address-based filtering, not of label-derived identities. C is not how identities are allocated: they follow the label set.",
+      "explanation": "Endpoints sharing the same security-relevant labels share one identity, which is what lets enforcement scale.",
+      "source": "Cilium docs (1.20): Terminology, “Identity”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#identity",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This concept allows to scale policy enforcement to a massive number of endpoints as many individual endpoints will typically share the same set of security Labels as applications are scaled.",
+      "uses": [
+        "security identity",
+        "Deployment",
+        "Pod",
+        "label",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.identity",
+        "cca.identity-cluster-wide"
+      ],
+      "order": 4440
+    },
+    {
+      "id": "cca.identity-enforcement.app-churn",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team’s old firewall lagged behind fast pod churn and dropped the first connections of newly started pods. What in Cilium’s model avoids this?",
+      "back": "D: New pods only wait until their label-derived identity is resolved",
+      "choices": "A) Enforcement is paused during rollouts\nB) Every node’s address filters are updated before the pod starts\nC) Pods reuse the addresses of pods that stopped\nD) New pods only wait until their label-derived identity is resolved",
+      "choicesExplained": "B is the address-filter approach that caused the problem. C is not how Cilium bases security. A is not what Cilium does; enforcement stays on.",
+      "explanation": "Resolving an identity is much simpler than updating the rules on every other node.",
+      "source": "Cilium docs (1.20): Identity-Based, “Identity-Based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/identity/#identity-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The starting of a new pod must only be delayed until the identity of the pod has been resolved which is a much simpler operation than updating the security rules on all other cluster nodes.",
+      "uses": [
+        "security identity",
+        "Pod",
+        "label",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.identity-vs-ip"
+      ],
+      "order": 4450
+    },
+    {
+      "id": "cca.identity-enforcement.app-world",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A pod receives a request from a phone on a mobile network outside the cluster, sent straight to the pod’s node. Which identity does the source have?",
+      "back": "A: `reserved:world`",
+      "choices": "A) `reserved:world`\nB) `reserved:remote-node`\nC) `reserved:host`\nD) `reserved:unmanaged`",
+      "choicesExplained": "C is the local host. B is other hosts in connected clusters. D is an endpoint inside the cluster that Cilium does not manage.",
+      "explanation": "Anything outside the cluster falls under the world identity.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "reserved:world 2 Any network endpoint outside of the cluster",
+      "uses": [
+        "reserved:world",
+        "reserved:host",
+        "reserved:remote-node",
+        "Pod",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.reserved-world",
+        "cca.special-identities"
+      ],
+      "order": 4460
+    },
+    {
+      "id": "cca.identity-enforcement.app-host",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A pod’s ingress policy must allow connections that come from the node the pod runs on. Which identity describes that source?",
+      "back": "A: `reserved:host`",
+      "choices": "A) `reserved:host`\nB) `reserved:world`\nC) `reserved:remote-node`\nD) `reserved:health`",
+      "choicesExplained": "B covers endpoints outside the cluster. C covers every other node, not the local one. D is the agents’ health-checking traffic.",
+      "explanation": "Traffic from the local host’s addresses is matched by identity 1.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "reserved:host 1 The local host. Any traffic that originates from or is designated to one of the local host IPs.",
+      "uses": [
+        "reserved:host",
+        "reserved:world",
+        "reserved:remote-node",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.reserved-host",
+        "cca.special-identities"
+      ],
+      "order": 4470
+    },
+    {
+      "id": "cca.identity-enforcement.app-remote-node",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A pod receives traffic from the address of another node in its own cluster, not from a pod. Which identity does the source have?",
+      "back": "C: `reserved:remote-node`",
+      "choices": "A) `reserved:host`\nB) `reserved:world`\nC) `reserved:remote-node`\nD) `reserved:init`",
+      "choicesExplained": "A is only the node the pod runs on. B is outside the cluster. D is an endpoint whose identity is not resolved yet.",
+      "explanation": "Every host in a connected cluster other than the local node is a remote node.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "reserved:remote-node 6 The collection of all remote cluster hosts.",
+      "uses": [
+        "reserved:remote-node",
+        "reserved:host",
+        "reserved:world",
+        "Pod",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.reserved-remote-node",
+        "cca.special-identities"
+      ],
+      "order": 4480
+    },
+    {
+      "id": "cca.identity-enforcement.app-packet-identity",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A pod on node 1 sends a packet to a pod on node 2. Node 2 must apply ingress policy. How does it know who sent the packet?",
+      "back": "A: It reads the sender’s identity carried in the packet",
+      "choices": "A) It reads the sender’s identity carried in the packet\nB) It asks node 1 over the kube-apiserver\nC) It asks the Cilium Operator for the sender’s labels\nD) It trusts any packet that arrives from another node",
+      "choicesExplained": "B is not part of enforcement. C: the operator is not in the critical path for any policy decision. D would not enforce policy at all.",
+      "explanation": "The sender’s identity travels in every packet between nodes, so the receiver can check it locally.",
+      "source": "Cilium docs (1.20): Policy Enforcement, “Policy Enforcement”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/policyenforcement/#policy-enforcement",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The receiving cluster node can then extract the identity and verify whether a particular identity is allowed to communicate with any of the local endpoints.",
+      "uses": [
+        "security identity",
+        "Pod",
+        "node",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cca.identity-in-packet"
+      ],
+      "order": 4490
+    },
+    {
+      "id": "cca.identity-enforcement.app-stateful",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Both pods are in default deny in both directions. The only rules let `client` open connections to `server`. Which traffic is allowed?",
+      "back": "B: Connections from client to server, and the server’s replies",
+      "choices": "A) Only client-to-server packets; replies are dropped\nB) Connections from client to server, and the server’s replies\nC) Connections in either direction\nD) Connections from server to client only",
+      "choicesExplained": "A forgets that replies are allowed automatically. C and D would need the reverse direction explicitly allowed, which it is not.",
+      "explanation": "Enforcement is stateful: replies are allowed, reverse connections are not.",
+      "source": "Cilium docs (1.20): Policy Enforcement, “Policy Enforcement”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/policyenforcement/#policy-enforcement",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If the policy allows A => B then reply packets from B to A are automatically allowed as well. However, B is not automatically allowed to initiate connections to A.",
+      "uses": [
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.stateful-enforcement"
+      ],
+      "order": 4500
+    },
+    {
+      "id": "cca.identity-enforcement.app-mode-always",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A security team requires every pod to be under enforcement from the moment it starts, even before anyone writes a policy for it. Which enforcement mode fits?",
+      "back": "B: `always`",
+      "choices": "A) `default`\nB) `always`\nC) `never`\nD) `audit`",
+      "choicesExplained": "A leaves endpoints unrestricted until a policy selects them. C disables enforcement everywhere. D is not one of the three modes.",
+      "explanation": "Only `always` enforces on endpoints that no rule selects.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Policy Enforcement Modes”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#policy-enforcement-modes",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With always mode, policy enforcement is enabled on all endpoints even if no rules select specific endpoints.",
+      "uses": [
+        "policyEnforcementMode",
+        "Pod",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.mode-always",
+        "cca.enforcement-modes",
+        "cca.policy-enforcement-mode-setting"
+      ],
+      "order": 4510
+    },
+    {
+      "id": "cca.identity-enforcement.app-mode-never",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "During a migration, an administrator wants all existing policies left in place but not enforced on any endpoint. Which enforcement mode fits?",
+      "back": "B: `never`",
+      "choices": "A) `default`\nB) `never`\nC) `strict`\nD) `always`",
+      "choicesExplained": "A enforces on every endpoint a policy selects. D enforces on all endpoints. C is not an enforcement mode.",
+      "explanation": "In `never` mode, rules may select endpoints but nothing is enforced.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Policy Enforcement Modes”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#policy-enforcement-modes",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With never mode, policy enforcement is disabled on all endpoints, even if rules do select specific endpoints.",
+      "uses": [
+        "policyEnforcementMode",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.mode-never",
+        "cca.enforcement-modes",
+        "cca.policy-enforcement-mode-setting"
+      ],
+      "order": 4520
+    },
+    {
+      "id": "cca.identity-enforcement.app-mode-default",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A cluster runs Cilium in `default` mode. A new pod starts that no policy selects. What traffic may it send and receive?",
+      "back": "A: All traffic",
+      "choices": "A) All traffic\nB) None until a policy allows it\nC) Only traffic inside its namespace\nD) Only DNS",
+      "choicesExplained": "B describes `always` mode, or an endpoint already selected by a policy. C and D describe restrictions that only a policy would add.",
+      "explanation": "In `default` mode endpoints have unrestricted access until a policy selects them.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Endpoint default policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#endpoint-default-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, all egress and ingress traffic is allowed for all endpoints. When an endpoint is selected by a network policy, it transitions to a default-deny state, where only explicitly allowed traffic is permitted.",
+      "uses": [
+        "Pod",
+        "namespace",
+        "DNS",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.mode-default",
+        "cca.enforcement-modes"
+      ],
+      "order": 4530
+    },
+    {
+      "id": "cca.identity-enforcement.app-direction",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "The only policy selecting `app=pay` has an `egress` section that allows DNS. Nothing else selects it. What happens to connections coming into `app=pay`?",
+      "back": "B: They are all allowed",
+      "choices": "A) They are all dropped\nB) They are all allowed\nC) Only DNS is allowed in\nD) Only replies to DNS are allowed in",
+      "choicesExplained": "A would need a rule with an `ingress` section selecting the endpoint. C and D confuse the egress rule with ingress; replies to its DNS queries are allowed anyway, but so is everything else.",
+      "explanation": "An egress section puts only egress into default deny; ingress stays open.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Endpoint default policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#endpoint-default-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If any rule selects an Endpoint and the rule has an egress section, the endpoint goes into default-deny mode for egress.",
+      "uses": [
+        "DNS",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.default-deny-per-direction"
+      ],
+      "order": 4540
+    },
+    {
+      "id": "cca.identity-enforcement.app-default-deny-off",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A platform team wants a cluster-wide policy that intercepts DNS for every pod, and it must never put any endpoint into default deny. What should the policy set?",
+      "back": "A: `enableDefaultDeny` false for ingress and egress",
+      "choices": "A) `enableDefaultDeny` false for ingress and egress\nB) An empty `ingress` section\nC) Policy audit mode on every node\nD) `policyEnforcementMode: never`",
+      "choicesExplained": "D would switch off enforcement for every other policy too. B would itself put endpoints into default deny for ingress. C stops enforcement of all policy, not just this one.",
+      "explanation": "Rules with the field disabled are ignored when Cilium decides an endpoint’s default mode; the DNS rule must still allow all names (`matchPattern: \"*\"`), as the field does not cover layer 7.",
+      "source": "Cilium docs (1.20): Policy Enforcement Modes, “Endpoint default policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/policy/intro/#endpoint-default-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "An administrator can safely apply this policy cluster-wide, without the risk that it transitions an endpoint in to default-deny and causes legitimate traffic to be dropped.",
+      "uses": [
+        "enableDefaultDeny",
+        "policyEnforcementMode",
+        "policy audit mode",
+        "DNS",
+        "Pod",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.enable-default-deny"
+      ],
+      "order": 4550
+    },
+    {
+      "id": "cca.identity-enforcement.app-audit",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "Before enforcing new policies on the cluster’s nodes, an operator wants to see their effect without risking lost access to the kube-apiserver. What should they use?",
+      "back": "C: Policy audit mode on the host endpoint",
+      "choices": "A) `policyEnforcementMode: always`\nB) A policy with `enableDefaultDeny` false\nC) Policy audit mode on the host endpoint\nD) Deleting the policies after testing",
+      "choicesExplained": "A enforces more, not less. B only affects default deny, not the policy’s own rules. D gives no view of the impact before enforcement.",
+      "explanation": "The documentation recommends audit mode to validate host policies before enforcing them.",
+      "source": "Cilium docs (1.20): Host Firewall, “Enable Policy Audit Mode for the Host Endpoint”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/host-firewall/#enable-policy-audit-mode-for-the-host-endpoint",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Particular care must be taken to ensure that when host policies are imported, Cilium does not block access to the nodes or break the cluster’s normal behavior (for example by blocking communication with kube-apiserver).",
+      "uses": [
+        "policy audit mode",
+        "policyEnforcementMode",
+        "enableDefaultDeny",
+        "kube-apiserver",
+        "node",
+        "host"
+      ],
+      "conceptIDs": [
+        "cca.policy-audit-mode"
+      ],
+      "order": 4560
+    },
+    {
+      "id": "cca.identity-enforcement.contrast-identity-ip",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "What does traditional enforcement base security on, and what does Cilium base it on instead?",
+      "back": "Traditional: IP address filters. Cilium: a pod’s identity, derived from its labels.",
+      "explanation": "Moving from addresses to identities is what removes the constant rule updates as pods come and go.",
+      "source": "Cilium docs (1.20): Identity-Based, “Identity-Based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/security/network/identity/#identity-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Traditionally security enforcement architectures have been based on IP address filters.",
+      "uses": [
+        "ip address",
+        "security identity",
+        "Pod",
+        "label"
+      ],
+      "conceptIDs": [
+        "cca.identity-vs-ip"
+      ],
+      "order": 4570
+    },
+    {
+      "id": "cca.identity-enforcement.contrast-host-remote",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does `reserved:host` differ from `reserved:remote-node`?",
+      "back": "`reserved:host` is the local node’s IPs; `reserved:remote-node` is every other host in any connected cluster.",
+      "explanation": "The same machine is host to its own pods and remote-node to pods on every other node.",
+      "source": "Cilium docs (1.20): Terminology, “Special Identities”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#special-identities",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Any traffic that originates from or is designated to one of the IPs of any host in any connected cluster other than the local node.",
+      "uses": [
+        "reserved:host",
+        "reserved:remote-node",
+        "host",
+        "node",
+        "cluster",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.reserved-remote-node",
+        "cca.reserved-host"
+      ],
+      "order": 4580
+    },
+    {
+      "id": "cca.identity-enforcement.contrast-cidr-scope",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "extra",
+      "front": "How does the scope of a CIDR identity differ from that of a label-based identity?",
+      "back": "A CIDR identity is local to each node; a label-based identity is valid across the whole cluster.",
+      "explanation": "So a CIDR identity number seen on one node may mean something else on another.",
+      "source": "Cilium docs (1.20): Security Identities, “CIDR-based identity”",
+      "sourceURL": "https://docs.cilium.io/en/stable/internals/security-identities/#cidr-based-identity",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "CIDR identities (3) are local to each node.",
+      "uses": [
+        "CIDR identity",
+        "security identity",
+        "label",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.cidr-identity",
+        "cca.identity-cluster-wide"
+      ],
+      "order": 4590
+    }
+  ]
+}

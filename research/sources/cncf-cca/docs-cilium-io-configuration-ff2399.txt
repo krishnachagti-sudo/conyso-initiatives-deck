@@ -1,0 +1,91 @@
+https://docs.cilium.io/en/stable/configuration/
+
+
+
+## {#configuration} 
+ {#id1} 
+Configuration
+
+Your Cilium installation is configured by one or more Helm values -
+see Helm Reference. These helm values are converted to arguments
+for the individual components of a Cilium installation, such as
+cilium-agent and cilium-operator, and
+stored in a ConfigMap.
+
+## {#cilium-config-configmap} 
+ {#id2} 
+cilium-config ConfigMap
+
+These arguments are stored in a shared ConfigMap called cilium-config
+(albeit without the leading --). For example, a typical installation
+may look like
+
+$ kubectl -n kube-system get configmap cilium-config -o yaml
+data:
+  agent-not-ready-taint-key: node.cilium.io/agent-not-ready
+  auto-direct-node-routes: "false"
+  (output continues)
+
+## {#making-changes} 
+ {#making-config-changes} 
+Making Changes
+
+You may change the configuration of a running installation in three ways:
+
+Via helm upgrade
+
+Do so by providing new values to Helm and applying them to the existing
+installation. By setting the value rollOutCiliumPods=true, the agent
+pods will be gradually restarted.
+
+Via cilium config set
+
+The Cilium CLI has the ability
+to update individual values in the cilium-config ConfigMap. By default
+Cilium Agent pods are restarted when configuration is changed. To gradually
+restart do cilium config set --restart=false ... and manually delete
+agent pods to pick up the changes.
+
+Via CiliumNodeConfig objects
+
+Cilium also supports configuration on sets of nodes. See the
+Per-node configuration page for more details. This requires
+that pods be manually deleted for changes to take effect.
+
+## {#detecting-unapplied-configmap-changes} 
+ {#config-drift-detection} 
+Detecting unapplied ConfigMap changes
+
+Because many Cilium configuration changes require an agent restart to take
+effect, there is a window after updating the cilium-config ConfigMap where
+the running agent’s settings no longer match the desired state. Cilium exposes
+a Prometheus metric to make this drift visible. See
+ConfigMap drift detection for details.
+
+## {#core-agent} 
+
+Core Agent
+
+API Rate Limiting
+
+Administrative API Enablement
+
+ConfigMap drift detection
+
+Per-node configuration
+
+SCTP support (beta)
+
+VLAN 802.1q support
+
+Troubleshooting Cilium deployed with Argo CD
+
+## {#security} 
+
+Security
+
+Verifying Image Signatures
+
+Software Bill of Materials
+
+          <footer

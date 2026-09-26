@@ -1,0 +1,2046 @@
+{
+  "topic": "Cilium's role and components",
+  "notes": [
+    {
+      "id": "cca.components.cilium",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is Cilium?",
+      "back": "Open source software that transparently secures network connectivity between application services on container platforms such as Kubernetes.",
+      "explanation": "It is built on eBPF, a Linux kernel technology, so security and visibility logic can be inserted inside Linux itself.",
+      "example": "Like the networking a cluster already needs, but also enforcing which Pods may talk to which, without touching the applications.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “What is Cilium?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#what-is-cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium is open source software for transparently securing the network connectivity between application services deployed using Linux container management platforms like Docker and Kubernetes.",
+      "introduces": [
+        "Cilium"
+      ],
+      "uses": [
+        "Cilium",
+        "ebpf",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cca.cilium"
+      ],
+      "order": 1010
+    },
+    {
+      "id": "cca.components.hubble",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is Hubble?",
+      "back": "A fully distributed networking and security observability platform built on top of Cilium and eBPF.",
+      "explanation": "Because it builds on Cilium, it can use eBPF for visibility, which the docs say keeps overhead low while giving deep, detailed visibility.",
+      "example": "Like a flight recorder for cluster traffic: it records which services talked, and whether the connection worked.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “What is Hubble?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#what-is-hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Hubble is a fully distributed networking and security observability platform. It is built on top of Cilium and eBPF to enable deep visibility into the communication and behavior of services",
+      "introduces": [
+        "Hubble"
+      ],
+      "uses": [
+        "Hubble",
+        "Cilium",
+        "ebpf",
+        "observability"
+      ],
+      "conceptIDs": [
+        "cca.hubble"
+      ],
+      "order": 1020
+    },
+    {
+      "id": "cca.components.agent",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the Cilium agent (`cilium-agent`)?",
+      "back": "The Cilium component that runs on each node in the cluster.",
+      "explanation": "It takes networking, load-balancing, policy and visibility configuration from Kubernetes or APIs and turns it into eBPF programs on its node.",
+      "example": "Like kube-proxy in that one copy runs on every node, but it loads eBPF programs instead of writing kube-proxy's packet-forwarding rules.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Agent”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Cilium agent (cilium-agent) runs on each node in the cluster.",
+      "introduces": [
+        "Cilium agent"
+      ],
+      "uses": [
+        "Cilium agent",
+        "Cilium",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.cilium-agent"
+      ],
+      "order": 1030
+    },
+    {
+      "id": "cca.components.dbg",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the Cilium debug CLI (`cilium-dbg`)?",
+      "back": "A command-line tool installed along with the Cilium agent that inspects the state and status of the local agent.",
+      "explanation": "It talks to the REST API of the agent on the same node, so it sees only that node.",
+      "example": "Like running a diagnostic command inside one router: it tells you about that router, not the whole network.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Debug Client (CLI)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Cilium debug CLI client (cilium-dbg) is a command-line tool that is installed along with the Cilium agent.",
+      "introduces": [
+        "Cilium debug CLI",
+        "cilium-dbg"
+      ],
+      "uses": [
+        "Cilium debug CLI",
+        "cilium-dbg",
+        "Cilium agent"
+      ],
+      "conceptIDs": [
+        "cca.cilium-dbg"
+      ],
+      "order": 1040
+    },
+    {
+      "id": "cca.components.operator",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the Cilium Operator (`cilium-operator`)?",
+      "back": "The Cilium component that handles duties that should logically be done once for the entire cluster, rather than once per node.",
+      "explanation": "It complements the per-node agents: work that needs one cluster-wide owner goes to the operator.",
+      "example": "Like a building manager who handles the lifts for everyone, while each flat looks after its own lights.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Operator”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Cilium Operator is responsible for managing duties in the cluster which should logically be handled once for the entire cluster, rather than once for each node in the cluster.",
+      "introduces": [
+        "Cilium Operator"
+      ],
+      "uses": [
+        "Cilium Operator",
+        "Cilium",
+        "cluster",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.cilium-operator"
+      ],
+      "order": 1050
+    },
+    {
+      "id": "cca.components.cni-plugin",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the Cilium CNI plugin (`cilium-cni`)?",
+      "back": "The CNI plugin that Kubernetes invokes when a Pod is scheduled or terminated on a node.",
+      "explanation": "It asks the Cilium API on that node to set up networking, load balancing and network policies for the Pod.",
+      "example": "Like a hook the kubelet calls to plug a new Pod into the network, which then hands the real work to the local agent.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: CNI Plugin”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The CNI plugin (cilium-cni) is invoked by Kubernetes when a pod is scheduled or terminated on a node.",
+      "introduces": [
+        "Cilium CNI plugin",
+        "cilium-cni"
+      ],
+      "uses": [
+        "Cilium CNI plugin",
+        "cilium-cni",
+        "CNI",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.cilium-cni-plugin"
+      ],
+      "order": 1060
+    },
+    {
+      "id": "cca.components.hubble-server",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the Hubble server?",
+      "back": "The Hubble component that runs on each node, embedded in the Cilium agent, and retrieves eBPF-based visibility from Cilium.",
+      "explanation": "Embedding it in the agent is done, the docs say, to achieve high performance and low overhead.",
+      "example": "Like a flow log kept locally on each node, which you can only read node by node unless something gathers them.",
+      "source": "Cilium documentation, “Component Overview”, “Hubble: Server”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Hubble server runs on each node and retrieves the eBPF-based visibility from Cilium. It is embedded into the Cilium agent in order to achieve high performance and low-overhead.",
+      "introduces": [
+        "Hubble server"
+      ],
+      "uses": [
+        "Hubble server",
+        "Hubble",
+        "Cilium agent",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.hubble-server"
+      ],
+      "order": 1070
+    },
+    {
+      "id": "cca.components.relay",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is Hubble Relay (`hubble-relay`)?",
+      "back": "A standalone component that knows every running Hubble server and gives cluster-wide visibility through one API.",
+      "explanation": "Each Hubble server sees only its own node, so something must join their gRPC APIs into a single view.",
+      "example": "Like a switchboard that connects you to every node's flow log at once, instead of calling each node separately.",
+      "source": "Cilium documentation, “Component Overview”, “Hubble: Relay”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Relay (hubble-relay) is a standalone component which is aware of all running Hubble servers and offers cluster-wide visibility by connecting to their respective gRPC APIs",
+      "introduces": [
+        "Hubble Relay"
+      ],
+      "uses": [
+        "Hubble Relay",
+        "Hubble server",
+        "grpc",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.hubble-relay"
+      ],
+      "order": 1080
+    },
+    {
+      "id": "cca.components.hubble-cli",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the Hubble CLI (`hubble`)?",
+      "back": "A command-line tool that retrieves flow events from either Hubble Relay's gRPC API or a local Hubble server.",
+      "explanation": "It is the terminal client for Hubble data; where it connects decides whether it sees one node or the cluster.",
+      "example": "Like `kubectl logs`, but for network flows instead of container output.",
+      "source": "Cilium documentation, “Component Overview”, “Hubble: Client (CLI)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Hubble CLI (hubble) is a command-line tool able to connect to either the gRPC API of hubble-relay or the local server to retrieve flow events.",
+      "introduces": [
+        "Hubble CLI",
+        "hubble"
+      ],
+      "uses": [
+        "Hubble CLI",
+        "hubble",
+        "Hubble Relay",
+        "Hubble server",
+        "grpc"
+      ],
+      "conceptIDs": [
+        "cca.hubble-cli"
+      ],
+      "order": 1090
+    },
+    {
+      "id": "cca.components.hubble-ui",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the Hubble UI (`hubble-ui`)?",
+      "back": "Hubble's graphical user interface, which uses Relay-based visibility to draw a service dependency and connectivity map.",
+      "explanation": "It relies on Hubble Relay for its data, so it shows the cluster rather than a single node.",
+      "example": "Like a live map of which services call which, drawn from the flows Relay gathers.",
+      "source": "Cilium documentation, “Component Overview”, “Hubble: Graphical UI (GUI)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The graphical user interface (hubble-ui) utilizes relay-based visibility to provide a graphical service dependency and connectivity map.",
+      "introduces": [
+        "Hubble UI"
+      ],
+      "uses": [
+        "Hubble UI",
+        "Hubble",
+        "Hubble Relay"
+      ],
+      "conceptIDs": [
+        "cca.hubble-ui"
+      ],
+      "order": 1100
+    },
+    {
+      "id": "cca.components.kvstore",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "In Cilium, what is a key-value store (kvstore)?",
+      "back": "An optional data store, currently etcd, that Cilium can use instead of relying only on Kubernetes CRDs to store and propagate state.",
+      "explanation": "The docs describe it as an optimisation for scalability, because change notifications and storage are more efficient with direct key-value store use.",
+      "example": "Like giving the agents a dedicated noticeboard instead of posting every update through the Kubernetes API.",
+      "source": "Cilium documentation, “Component Overview”, “Data Store: Key-Value Store”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#data-store",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A key-value store can optionally be used as an optimization to improve the scalability of a cluster as change notifications and storage requirements are more efficient with direct key-value store usage.",
+      "introduces": [
+        "key-value store",
+        "kvstore"
+      ],
+      "uses": [
+        "key-value store",
+        "kvstore",
+        "etcd",
+        "CustomResourceDefinition",
+        "CRD",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.kvstore"
+      ],
+      "order": 1110
+    },
+    {
+      "id": "cca.components.envoy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "In Cilium, what is Envoy used for?",
+      "back": "As the proxy that parses application-layer protocols such as HTTP, gRPC and DNS.",
+      "explanation": "Cilium splits the work: eBPF handles IP, TCP and UDP processing, and a proxy handles protocols above them.",
+      "example": "Like a customs officer who opens the parcel: eBPF reads the address label, Envoy reads what is inside.",
+      "source": "Cilium documentation, “Service Mesh”, “Why Cilium Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#why-cilium-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For all network processing including protocols such as IP, TCP, and UDP, Cilium uses eBPF as the highly efficient in-kernel datapath. Protocols at the application layer such as HTTP, gRPC, and DNS are parsed using a proxy such as Envoy.",
+      "introduces": [
+        "Envoy"
+      ],
+      "uses": [
+        "Envoy",
+        "Cilium",
+        "ebpf",
+        "http",
+        "grpc",
+        "DNS",
+        "service proxy"
+      ],
+      "conceptIDs": [
+        "cca.envoy"
+      ],
+      "order": 1120
+    },
+    {
+      "id": "cca.components.envoy-ds",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is the Envoy DaemonSet (`cilium-envoy`)?",
+      "back": "The DaemonSet that runs Cilium's per-node Envoy proxy; Cilium Ingress and Gateway API support often expose it through a LoadBalancer or NodePort Service.",
+      "explanation": "Ingress and Gateway API traffic to backends passes through the per-node Envoy proxy, so that proxy must run on the nodes.",
+      "example": "Like the Cilium agent DaemonSet, one Pod per node, but running the L7 proxy instead of the agent.",
+      "source": "Cilium documentation, “Gateway API Support”, “externalTrafficPolicy for Loadbalancer or NodePort Services”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/#externaltrafficpolicy-for-loadbalancer-or-nodeport-services",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium’s ingress support (both for Ingress and Gateway API) often uses a Loadbalancer or NodePort Service to expose the Envoy Daemonset.",
+      "introduces": [
+        "Envoy DaemonSet",
+        "cilium-envoy"
+      ],
+      "uses": [
+        "Envoy DaemonSet",
+        "cilium-envoy",
+        "Envoy",
+        "DaemonSet",
+        "Ingress",
+        "Gateway API",
+        "LoadBalancer",
+        "NodePort",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.cilium-envoy-daemonset"
+      ],
+      "order": 1130
+    },
+    {
+      "id": "cca.components.endpoint",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "In Cilium, what is an endpoint?",
+      "back": "The group of all application containers that share a common IP address, such as a Kubernetes Pod.",
+      "explanation": "Cilium makes containers reachable by giving them IP addresses, and it groups containers by shared address.",
+      "example": "Like a flat with one postal address: however many people live there, the post office sees one delivery point.",
+      "source": "Cilium documentation, “Terminology”, “Endpoint”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#endpoint",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "All application containers which share a common address are grouped together in what Cilium refers to as an endpoint.",
+      "introduces": [
+        "endpoint"
+      ],
+      "uses": [
+        "endpoint",
+        "Cilium",
+        "Pod",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.endpoint"
+      ],
+      "order": 1140
+    },
+    {
+      "id": "cca.components.ciliumendpoint",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a CiliumEndpoint?",
+      "back": "A custom resource Cilium creates for each Pod it manages, with the same name and namespace as the Pod.",
+      "explanation": "It exposes each endpoint's state through the Kubernetes API, so it can be listed for all Pods at once.",
+      "example": "Like a Pod's shadow object that records how Cilium sees it.",
+      "source": "Cilium documentation, “Endpoint CRD”, “Endpoint CRD”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/ciliumendpoint/#ciliumendpoint",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "One CiliumEndpoint is created for each pod managed by Cilium, with the same name and in the same namespace.",
+      "introduces": [
+        "CiliumEndpoint"
+      ],
+      "uses": [
+        "CiliumEndpoint",
+        "custom resource",
+        "Pod",
+        "namespace",
+        "Cilium",
+        "endpoint"
+      ],
+      "conceptIDs": [
+        "cca.ciliumendpoint"
+      ],
+      "order": 1150
+    },
+    {
+      "id": "cca.components.ciliumnode",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a CiliumNode?",
+      "back": "A Cilium custom resource (`ciliumnodes.cilium.io`) named after a Kubernetes node, holding Cilium's per-node data such as its address pools.",
+      "explanation": "The agent on each node watches the CiliumNode matching its node name, so the resource is how per-node settings reach it.",
+      "example": "Like the Kubernetes Node object, but for the facts Cilium needs about that node.",
+      "source": "Cilium documentation, “CRD-Backed”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/crd/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "each Cilium agent will start watching for a Kubernetes custom resource ciliumnodes.cilium.io with a name matching the Kubernetes node on which the agent is running.",
+      "introduces": [
+        "CiliumNode"
+      ],
+      "uses": [
+        "CiliumNode",
+        "custom resource",
+        "node",
+        "Cilium agent"
+      ],
+      "conceptIDs": [
+        "cca.ciliumnode"
+      ],
+      "order": 1160
+    },
+    {
+      "id": "cca.components.cni-chaining",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is CNI chaining?",
+      "back": "Running Cilium together with another CNI plugin, which keeps base connectivity and address management while Cilium adds eBPF features.",
+      "explanation": "Cilium attaches eBPF programs to the network devices the other plugin created, which gives it visibility and policy enforcement.",
+      "example": "Like keeping your broadband router but adding a separate firewall box behind it.",
+      "source": "Cilium documentation, “CNI Chaining”, “CNI Chaining”",
+      "sourceURL": "https://docs.cilium.io/en/stable/installation/cni-chaining/#cni-chaining",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With Cilium CNI chaining, the base network connectivity and IP address management is managed by the non-Cilium CNI plugin, but Cilium attaches eBPF programs to the network devices created by the non-Cilium plugin",
+      "introduces": [
+        "CNI chaining"
+      ],
+      "uses": [
+        "CNI chaining",
+        "CNI",
+        "Cilium",
+        "ebpf"
+      ],
+      "conceptIDs": [
+        "cca.cni-chaining"
+      ],
+      "order": 1170
+    },
+    {
+      "id": "cca.components.ebpf-foundation",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "At the foundation of Cilium is a Linux kernel technology called {{c1::eBPF}}, which allows security, visibility and control logic to be inserted dynamically inside Linux.",
+      "explanation": "Because this logic runs inside the kernel, Cilium policies can change without touching application code or container configuration.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “What is Cilium?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#what-is-cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "At the foundation of Cilium is a new Linux kernel technology called eBPF, which enables the dynamic insertion of powerful security visibility and control logic within Linux itself.",
+      "uses": [
+        "Cilium",
+        "ebpf",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cca.cilium"
+      ],
+      "order": 1180
+    },
+    {
+      "id": "cca.components.no-app-change",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why can Cilium security policies be applied and updated without changing application code or container configuration?",
+      "back": "Because eBPF runs inside the Linux kernel.",
+      "explanation": "Enforcement happens below the application, in the kernel, so the workload itself never has to be rebuilt or reconfigured.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “What is Cilium?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#what-is-cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Because eBPF runs inside the Linux kernel, Cilium security policies can be applied and updated without any changes to the application code or container configuration.",
+      "uses": [
+        "Cilium",
+        "ebpf",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cca.cilium"
+      ],
+      "order": 1190
+    },
+    {
+      "id": "cca.components.iptables-filter",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What do traditional Linux network security approaches such as iptables filter on?",
+      "back": "IP addresses and TCP/UDP ports.",
+      "explanation": "In dynamic microservices, IP addresses churn often, so rules keyed on them must be rewritten again and again.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Why Cilium & Hubble?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#why-cilium-hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Traditional Linux network security approaches (e.g., iptables) filter on IP address and TCP/UDP ports, but IP addresses frequently churn in dynamic microservices environments.",
+      "uses": [
+        "ip address",
+        "port"
+      ],
+      "conceptIDs": [
+        "cca.why-cilium"
+      ],
+      "order": 1200
+    },
+    {
+      "id": "cca.components.identity-basis",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Instead of IP addresses, what does Cilium base its security visibility and enforcement on?",
+      "back": "Service, Pod or container identity; it can also filter at the application layer, such as HTTP.",
+      "explanation": "Decoupling security from addressing keeps policies simple in environments where addresses keep changing.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Why Cilium & Hubble?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#why-cilium-hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "but does so in a way that is based on service / pod / container identity (in contrast to IP address identification in traditional systems) and can filter on application-layer (e.g. HTTP).",
+      "uses": [
+        "Cilium",
+        "Pod",
+        "http"
+      ],
+      "conceptIDs": [
+        "cca.why-cilium"
+      ],
+      "order": 1210
+    },
+    {
+      "id": "cca.components.decoupling",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Cilium makes security policies simple to apply in a highly dynamic environment by {{c1::decoupling security from addressing}}.",
+      "explanation": "Policies no longer need rewriting when containers are started or destroyed and their addresses change.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Why Cilium & Hubble?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#why-cilium-hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium not only makes it simple to apply security policies in a highly dynamic environment by decoupling security from addressing",
+      "uses": [
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.why-cilium"
+      ],
+      "order": 1220
+    },
+    {
+      "id": "cca.components.identity-packets",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In Cilium network policy, what is attached to the network packets a group of application containers sends?",
+      "back": "The security identity assigned to that group, which the receiving node can validate.",
+      "explanation": "Container firewalls that filter on source IPs must be changed on every server whenever a container starts; identities avoid that limit on scale.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Network Policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#network-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The identity is then associated with all network packets emitted by the application containers, allowing the identity to be validated at the receiving node.",
+      "uses": [
+        "Cilium",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.why-cilium"
+      ],
+      "order": 1230
+    },
+    {
+      "id": "cca.components.func-cni",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Cilium functionality area offers overlay (encapsulation) networking and a native routing mode as deployment options?",
+      "back": "Cilium as a CNI plugin (the networking layer).",
+      "explanation": "Built on eBPF, the CNI plugin is the layer that gives Pods their network, and these are its deployment options.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Functionality Overview: CNI”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#cni-container-network-interface",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium as a CNI plugin provides a fast, scalable, and secure networking layer for Kubernetes clusters. Built on eBPF, it offers several deployment options:",
+      "uses": [
+        "Cilium",
+        "CNI"
+      ],
+      "conceptIDs": [
+        "cca.functionality-overview"
+      ],
+      "order": 1240
+    },
+    {
+      "id": "cca.components.func-lb",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Cilium functionality area covers traffic between application containers and to or from external services, using eBPF hash tables?",
+      "back": "Load balancing (distributed load balancing).",
+      "explanation": "The docs credit the efficient hash tables with high service density and low latency at scale.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Functionality Overview: Load Balancing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#load-balancing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The load balancing is implemented in eBPF using efficient hash tables, enabling high service density and low latency at scale.",
+      "uses": [
+        "Cilium",
+        "ebpf",
+        "load balancer"
+      ],
+      "conceptIDs": [
+        "cca.functionality-overview"
+      ],
+      "order": 1250
+    },
+    {
+      "id": "cca.components.func-mesh",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Cilium functionality area connects multiple Kubernetes clusters, with global service discovery?",
+      "back": "Cluster Mesh.",
+      "explanation": "The docs aim it at operators of hybrid or multi-cloud environments who want the same security and connectivity experience everywhere.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Functionality Overview: Cluster Mesh”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#cluster-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium Cluster Mesh enables secure, seamless connectivity across multiple Kubernetes clusters. For operators running hybrid or multi-cloud environments, Cluster Mesh ensures a consistent security and connectivity experience.",
+      "uses": [
+        "Cilium",
+        "cluster",
+        "service discovery"
+      ],
+      "conceptIDs": [
+        "cca.functionality-overview"
+      ],
+      "order": 1260
+    },
+    {
+      "id": "cca.components.func-policy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Cilium functionality area provides identity-aware enforcement across L3 to L7?",
+      "back": "Network policy (Cilium Network Policy).",
+      "explanation": "Its rules reach from the network layer up to the application layer, and they are keyed on identity.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Functionality Overview: Network Policy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#network-policy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium Network Policy provides identity-aware enforcement across L3-L7.",
+      "uses": [
+        "Cilium",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cca.functionality-overview"
+      ],
+      "order": 1270
+    },
+    {
+      "id": "cca.components.func-sm",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Cilium functionality area offers mutual authentication and acts as a Gateway API compliant data plane?",
+      "back": "Service mesh (Cilium Service Mesh).",
+      "explanation": "The docs present it as giving traffic control, encryption, observability and access control without the cost and complexity of traditional proxy-based designs.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Functionality Overview: Service Mesh”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With Cilium Service Mesh, operators gain the benefits of fine-grained traffic control, encryption, observability, and access control without the cost and complexity of traditional proxy-based designs.",
+      "uses": [
+        "Cilium",
+        "service mesh",
+        "Gateway API"
+      ],
+      "conceptIDs": [
+        "cca.functionality-overview"
+      ],
+      "order": 1280
+    },
+    {
+      "id": "cca.components.func-obs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which Cilium functionality area includes Hubble, Prometheus integration and drop reasons?",
+      "back": "Observability and troubleshooting.",
+      "explanation": "The docs say observability is built into Cilium from the ground up rather than bolted on.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Functionality Overview: Observability and Troubleshooting”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#observability-and-troubleshooting",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Observability is built into Cilium from the ground up, providing rich visibility that helps operators diagnose and understand system behavior including:",
+      "uses": [
+        "Cilium",
+        "Hubble",
+        "Prometheus",
+        "observability"
+      ],
+      "conceptIDs": [
+        "cca.functionality-overview"
+      ],
+      "order": 1290
+    },
+    {
+      "id": "cca.components.arch-figure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In a Cilium deployment, which components run on every node, and which run once for the cluster?",
+      "back": "Every node: Cilium agent with embedded Hubble server, plus cilium-cni and cilium-dbg. Once per cluster: Cilium Operator and Hubble Relay.",
+      "explanation": "Per-node work (eBPF programs, local flows) sits with the agent; cluster-wide duties and the cluster-wide flow view need a single component.",
+      "source": "Cilium documentation, “Component Overview”, “Component Overview”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#component-overview",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A deployment of Cilium and Hubble consists of the following components running in a cluster:",
+      "uses": [
+        "Cilium agent",
+        "Hubble server",
+        "cilium-cni",
+        "cilium-dbg",
+        "Cilium Operator",
+        "Hubble Relay",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.architecture"
+      ],
+      "image": {
+        "file": "media/cca-components.svg",
+        "alt": "Diagram of a cluster. A band labelled \"Once per cluster\" holds the Cilium Operator, Hubble Relay and Hubble UI; the UI points to Relay. Outside the band, the Hubble CLI, a client tool, also points to Relay. Below, two boxes labelled \"Each node\" each hold a Cilium agent with an embedded Hubble server, plus cilium-cni and cilium-dbg, above eBPF programs in the Linux kernel. Dashed arrows run from Hubble Relay to the Hubble server on each node, labelled \"Relay connects to every Hubble server's gRPC API\".",
+        "credit": "Drawn for this deck from the Cilium documentation, “Component Overview”",
+        "licence": "B · Apache 2.0",
+        "side": "back"
+      },
+      "order": 1300
+    },
+    {
+      "id": "cca.components.agent-config",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two kinds of requirement the Cilium agent accepts configuration for, via Kubernetes or APIs?",
+      "back": "Any two of: networking, service load-balancing, network policies, visibility and monitoring.",
+      "explanation": "The agent is the per-node component that turns all of these into datapath behaviour on its node.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Agent”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the agent accepts configuration via Kubernetes or APIs that describes networking, service load-balancing, network policies, and visibility & monitoring requirements.",
+      "uses": [
+        "Cilium agent"
+      ],
+      "conceptIDs": [
+        "cca.cilium-agent"
+      ],
+      "order": 1310
+    },
+    {
+      "id": "cca.components.agent-events",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why does the Cilium agent listen for events from orchestration systems such as Kubernetes?",
+      "back": "To learn when containers or workloads are started and stopped.",
+      "explanation": "Each start or stop changes what traffic the agent's eBPF programs must allow on that node.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Agent”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Cilium agent listens for events from orchestration systems such as Kubernetes to learn when containers or workloads are started and stopped.",
+      "uses": [
+        "Cilium agent"
+      ],
+      "conceptIDs": [
+        "cca.cilium-agent"
+      ],
+      "order": 1320
+    },
+    {
+      "id": "cca.components.agent-ebpf",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "The Cilium agent manages the {{c1::eBPF programs}} which the Linux kernel uses to control all network access in and out of containers.",
+      "explanation": "The kernel enforces the rules, but it is the agent on each node that writes and loads them.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Agent”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It manages the eBPF programs which the Linux kernel uses to control all network access in / out of those containers.",
+      "uses": [
+        "Cilium agent",
+        "ebpf",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cca.cilium-agent-role"
+      ],
+      "order": 1330
+    },
+    {
+      "id": "cca.components.dbg-api",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which API does `cilium-dbg` interact with?",
+      "back": "The REST API of the Cilium agent running on the same node.",
+      "explanation": "Because it talks to the local agent only, its output describes that one node's agent.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Debug Client (CLI)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It interacts with the REST API of the Cilium agent running on the same node.",
+      "uses": [
+        "cilium-dbg",
+        "Cilium agent",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.cilium-dbg"
+      ],
+      "order": 1340
+    },
+    {
+      "id": "cca.components.dbg-maps",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Besides agent state and status, what can `cilium-dbg` access directly to validate their state?",
+      "back": "The eBPF maps.",
+      "explanation": "eBPF maps hold the datapath's state, so reading them shows what the kernel is actually working from.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Debug Client (CLI)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The debug CLI allows inspecting the state and status of the local agent. It also provides tooling to directly access the eBPF maps to validate their state.",
+      "uses": [
+        "cilium-dbg",
+        "ebpf"
+      ],
+      "conceptIDs": [
+        "cca.cilium-dbg"
+      ],
+      "order": 1350
+    },
+    {
+      "id": "cca.components.cilium-cli-remote",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Where is the `cilium` command-line tool typically installed, and how does it reach Cilium?",
+      "back": "Remote from the cluster; it uses kubeconfig information to reach Cilium through the Kubernetes API.",
+      "explanation": "It is meant for quick-installing, managing and troubleshooting Cilium from outside, unlike the in-agent debug CLI.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Debug Client (CLI), Note”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "That tool is typically installed remote from the cluster, and uses kubeconfig information to access Cilium running on the cluster via the Kubernetes API.",
+      "uses": [
+        "Cilium",
+        "cluster",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cca.cilium-cli-vs-dbg"
+      ],
+      "order": 1360
+    },
+    {
+      "id": "cca.components.operator-critical",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "The Cilium Operator is {{c1::not in the critical path}} for any forwarding or network policy decision.",
+      "explanation": "That is why a cluster generally keeps working if the operator is briefly unavailable.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Operator”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Cilium operator is not in the critical path for any forwarding or network policy decision. A cluster will generally continue to function if the operator is temporarily unavailable.",
+      "uses": [
+        "Cilium Operator"
+      ],
+      "conceptIDs": [
+        "cca.operator-not-critical"
+      ],
+      "order": 1370
+    },
+    {
+      "id": "cca.components.operator-ipam-delay",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Depending on configuration, how can an unavailable Cilium Operator delay the scheduling of new workloads?",
+      "back": "Address management for new Pods is delayed when the operator is needed to allocate new IP addresses.",
+      "explanation": "Existing traffic does not depend on the operator, but handing out new addresses can.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Operator”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Delays in IP Address Management (IPAM) and thus delay in scheduling of new workloads if the operator is required to allocate new IP addresses",
+      "uses": [
+        "Cilium Operator",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.operator-not-critical"
+      ],
+      "order": 1380
+    },
+    {
+      "id": "cca.components.operator-heartbeat",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When a kvstore is used, what happens if the Cilium Operator fails to update the kvstore heartbeat key?",
+      "back": "The agents declare the kvstore unhealthy and restart.",
+      "explanation": "Agents read the heartbeat to confirm they can still receive kvstore updates.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Operator”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Failure to update the kvstore heartbeat key which will lead agents to declare kvstore unhealthiness and restart.",
+      "uses": [
+        "Cilium Operator",
+        "kvstore",
+        "Cilium agent"
+      ],
+      "conceptIDs": [
+        "cca.operator-not-critical"
+      ],
+      "order": 1390
+    },
+    {
+      "id": "cca.components.operator-ha",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "How does the Cilium Operator provide high availability, and which Helm option sets its replica count?",
+      "back": "Kubernetes leader election with lease locks; the replica count is set by `operator.replicas`.",
+      "explanation": "The docs say this has been Cilium's default behaviour since release 1.9.",
+      "source": "Cilium documentation, “Cilium Operator” (internals), “Highly Available Cilium Operator”",
+      "sourceURL": "https://docs.cilium.io/en/stable/internals/cilium_operator/#highly-available-cilium-operator",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Cilium Operator uses Kubernetes leader election library in conjunction with lease locks to provide HA functionality. The capability is supported on Kubernetes versions 1.14 and above. It is Cilium’s default behavior since the 1.9 release. The number of replicas for the HA deployment can be configured using Helm option operator.replicas.",
+      "uses": [
+        "Cilium Operator",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "cca.operator-duties"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "order": 1400
+    },
+    {
+      "id": "cca.components.operator-crds",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "By default, which component registers the CRDs Cilium uses, such as CiliumNetworkPolicy and CiliumNode?",
+      "back": "The Cilium Operator.",
+      "explanation": "Registering CRDs is a cluster-wide job, so it belongs with the operator rather than every agent.",
+      "source": "Cilium documentation, “Cilium Operator” (internals), “CRD Registration”",
+      "sourceURL": "https://docs.cilium.io/en/stable/internals/cilium_operator/#crd-registration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The default behavior of the Cilium Operator is to register the CRDs used by Cilium.",
+      "uses": [
+        "Cilium Operator",
+        "CRD",
+        "CiliumNode"
+      ],
+      "conceptIDs": [
+        "cca.operator-duties"
+      ],
+      "order": 1410
+    },
+    {
+      "id": "cca.components.operator-gc-nodes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "When a Kubernetes Node object is deleted, which component garbage-collects the orphaned CiliumNode?",
+      "back": "The Cilium Operator.",
+      "explanation": "The docs note that the cleanup cannot be done reliably from the agent itself.",
+      "source": "Cilium documentation, “Cilium Operator” (internals), “K8s Nodes synchronization”",
+      "sourceURL": "https://docs.cilium.io/en/stable/internals/cilium_operator/#k8s-nodes-synchronization",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When a Node object is deleted it is not possible to reliably cleanup the corresponding CiliumNode object from the Agent itself. The Cilium Operator holds the responsibility to garbage collect orphaned CiliumNodes.",
+      "uses": [
+        "Cilium Operator",
+        "CiliumNode",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.operator-duties"
+      ],
+      "order": 1420
+    },
+    {
+      "id": "cca.components.operator-envoyconfig",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "When Ingress or Gateway API support is on, what does the Cilium Operator convert those objects into?",
+      "back": "`CiliumEnvoyConfig` objects, which configure the per-node Envoy proxy.",
+      "explanation": "It also syncs their Secrets into a Cilium-managed namespace, which the docs say reduces the permissions the agent needs.",
+      "source": "Cilium documentation, “Cilium Operator” (internals), “Ingress and Gateway API Support”",
+      "sourceURL": "https://docs.cilium.io/en/stable/internals/cilium_operator/#ingress-and-gateway-api-support",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the Cilium Operator performs the task of parsing Ingress or Gateway API objects and converting them into CiliumEnvoyConfig objects used for configuring the per-node Envoy proxy.",
+      "uses": [
+        "Cilium Operator",
+        "Ingress",
+        "Gateway API",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "cca.operator-duties"
+      ],
+      "order": 1430
+    },
+    {
+      "id": "cca.components.operator-cep-gc",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which component garbage-collects orphaned CiliumEndpoint objects, and when is one orphaned?",
+      "back": "The Cilium Operator; when its owner is no longer active, including a Pod in PodFailed or PodSucceeded state.",
+      "explanation": "The agent creates a CiliumEndpoint per Pod, so something cluster-wide must remove those left behind.",
+      "source": "Cilium documentation, “Cilium Operator” (internals), “CiliumEndpoint garbage collection”",
+      "sourceURL": "https://docs.cilium.io/en/stable/internals/cilium_operator/#ciliumendpoint-garbage-collection",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "An orphaned CiliumEndpoint object means that the owner of the endpoint object is not active anymore in the cluster. CiliumEndpoints are also considered orphaned if the owner is an existing Pod in PodFailed or PodSucceeded state.",
+      "uses": [
+        "Cilium Operator",
+        "CiliumEndpoint",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.operator-duties"
+      ],
+      "order": 1440
+    },
+    {
+      "id": "cca.components.cni-api",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does `cilium-cni` interact with to set up a new Pod's networking?",
+      "back": "The Cilium API on the node, which triggers the datapath configuration.",
+      "explanation": "The plugin itself does little; it hands the Pod to the local agent, which configures networking, load balancing and policy.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: CNI Plugin”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It interacts with the Cilium API of the node to trigger the necessary datapath configuration to provide networking, load-balancing and network policies for the pod.",
+      "uses": [
+        "cilium-cni",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.cilium-cni-plugin"
+      ],
+      "order": 1450
+    },
+    {
+      "id": "cca.components.server-grpc",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does the Hubble server's gRPC service offer?",
+      "back": "Retrieval of flows and Prometheus metrics.",
+      "explanation": "It is the per-node source of flow data that Hubble Relay and the Hubble CLI connect to.",
+      "source": "Cilium documentation, “Component Overview”, “Hubble: Server”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It offers a gRPC service to retrieve flows and Prometheus metrics.",
+      "uses": [
+        "Hubble server",
+        "grpc",
+        "Prometheus"
+      ],
+      "conceptIDs": [
+        "cca.hubble-server"
+      ],
+      "order": 1460
+    },
+    {
+      "id": "cca.components.relay-goal",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "According to Hubble internals, what is Hubble Relay's main goal?",
+      "back": "To offer a rich API that can be safely exposed to, and consumed by, the Hubble UI and CLI.",
+      "explanation": "The Hubble server's gRPC services can be consumed locally, but more typically through Relay.",
+      "source": "Cilium documentation, “Hubble internals”, “Hubble internals”",
+      "sourceURL": "https://docs.cilium.io/en/stable/internals/hubble/#hubble-internals",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Hubble Relay’s main goal is to offer a rich API that can be safely exposed and consumed by the Hubble UI and CLI.",
+      "uses": [
+        "Hubble Relay",
+        "Hubble UI",
+        "Hubble CLI"
+      ],
+      "conceptIDs": [
+        "cca.hubble-relay"
+      ],
+      "order": 1470
+    },
+    {
+      "id": "cca.components.crd-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What is Cilium's default data store for storing data and propagating state between agents?",
+      "back": "Kubernetes custom resource definitions (CRDs).",
+      "explanation": "All state storage and propagation needs can be met with CRDs, so no extra store is required by default.",
+      "source": "Cilium documentation, “Component Overview”, “Data Store: Kubernetes CRDs (Default)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#data-store",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The default choice to store any data and propagate state is to use Kubernetes custom resource definitions (CRDs).",
+      "uses": [
+        "CustomResourceDefinition",
+        "CRD",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.data-store"
+      ],
+      "order": 1480
+    },
+    {
+      "id": "cca.components.kvstore-etcd",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which key-value store does Cilium currently support, and which etcd cluster can it use?",
+      "back": "etcd; either the Kubernetes etcd cluster directly or a dedicated etcd cluster.",
+      "explanation": "Both options are allowed, so a separate etcd is a choice rather than a requirement.",
+      "source": "Cilium documentation, “Component Overview”, “Data Store: Key-Value Store”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#data-store",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The currently supported key-value stores are: etcd Note It is possible to leverage the etcd cluster of Kubernetes directly or to maintain a dedicated etcd cluster.",
+      "uses": [
+        "kvstore",
+        "etcd"
+      ],
+      "conceptIDs": [
+        "cca.kvstore"
+      ],
+      "order": 1490
+    },
+    {
+      "id": "cca.components.envoy-per-node",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "In Cilium, what does Ingress and Gateway API traffic bound for backend services pass through?",
+      "back": "A per-node Envoy proxy.",
+      "explanation": "That proxy can do policy lookups in the eBPF policy engine, which makes it a network policy enforcement point.",
+      "source": "Cilium documentation, “Kubernetes Ingress Support”, “Cilium’s ingress config and CiliumNetworkPolicy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/ingress/#cilium-s-ingress-config-and-ciliumnetworkpolicy",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Ingress and Gateway API traffic bound to backend services via Cilium passes through a per-node Envoy proxy.",
+      "uses": [
+        "Ingress",
+        "Gateway API",
+        "Envoy",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.cilium-envoy-daemonset"
+      ],
+      "order": 1500
+    },
+    {
+      "id": "cca.components.endpoint-ports",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why can several Pods on the same node all bind to a well-known port such as 80 without conflict?",
+      "back": "Each endpoint gets its own IP address, so each can use the entire Layer 4 port range.",
+      "explanation": "Ports only clash within one address; separate addresses give separate port spaces.",
+      "source": "Cilium documentation, “Terminology”, “Endpoint”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#endpoint",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Allocating individual IP addresses enables the use of the entire Layer 4 port range by each endpoint.",
+      "uses": [
+        "endpoint",
+        "ip address",
+        "port",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.endpoint"
+      ],
+      "order": 1510
+    },
+    {
+      "id": "cca.components.endpoint-id",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Within what scope is a Cilium endpoint id unique?",
+      "back": "Within an individual cluster node.",
+      "explanation": "Cilium assigns the internal endpoint id on each node, so the same number can recur on another node.",
+      "source": "Cilium documentation, “Terminology”, “Identification”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#identification",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For identification purposes, Cilium assigns an internal endpoint id to all endpoints on a cluster node. The endpoint id is unique within the context of an individual cluster node.",
+      "uses": [
+        "endpoint",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.endpoint"
+      ],
+      "order": 1520
+    },
+    {
+      "id": "cca.components.endpoint-labels",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A Pod starts with the label `app=benchmark`. Which label does its Cilium endpoint carry?",
+      "back": "`k8s:app=benchmark`.",
+      "explanation": "Endpoints derive their metadata from Pod labels via the Kubernetes API, and the prefix records where the label came from.",
+      "source": "Cilium documentation, “Terminology”, “Endpoint Metadata”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#endpoint-metadata",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For example, a Kubernetes pod started with the label app=benchmark is represented by a Cilium endpoint associated with the label k8s:app=benchmark.",
+      "uses": [
+        "endpoint",
+        "label",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.endpoint"
+      ],
+      "order": 1530
+    },
+    {
+      "id": "cca.components.cep-list",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What does a CiliumEndpoint contain, and what advantage does it have over `cilium-dbg endpoint get`?",
+      "back": "The same information as that command's JSON under `.status`, but it can be fetched for all Pods in the cluster.",
+      "explanation": "`cilium-dbg` sees only its own node's agent, while CiliumEndpoints live in the Kubernetes API.",
+      "source": "Cilium documentation, “Endpoint CRD”, “Endpoint CRD”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/ciliumendpoint/#ciliumendpoint",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The CiliumEndpoint objects contain the same information as the json output of cilium-dbg endpoint get under the .status field, but can be fetched for all pods in the cluster.",
+      "uses": [
+        "CiliumEndpoint",
+        "cilium-dbg",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.ciliumendpoint"
+      ],
+      "order": 1540
+    },
+    {
+      "id": "cca.components.ciliumnode-status",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In cluster-scope address management, where do you look for the operator's allocation errors for a node?",
+      "back": "In the node's CiliumNode, field `status.ipam.operator-status`.",
+      "explanation": "The operator writes per-node results into the CiliumNode, so errors appear there, readable with `kubectl get ciliumnodes`.",
+      "source": "Cilium documentation, “Cluster Scope (Default)”, “Look for allocation errors”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/cluster-pool/#look-for-allocation-errors",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Check the Error field in the status.ipam.operator-status field:",
+      "uses": [
+        "CiliumNode",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "cca.ciliumnode"
+      ],
+      "order": 1550
+    },
+    {
+      "id": "cca.components.kernel",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What minimum Linux kernel does the Cilium 1.20 container image require on the host?",
+      "back": "Linux kernel 5.10 or later, or an equivalent such as 4.18 on Red Hat Enterprise Linux 8.10.",
+      "explanation": "Cilium builds on kernel eBPF functionality, and newer kernels can add features the agent detects at start-up.",
+      "source": "Cilium documentation, “System Requirements”, “Summary”",
+      "sourceURL": "https://docs.cilium.io/en/stable/operations/system_requirements/#summary",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Linux kernel >= 5.10 or equivalent (e.g., 4.18 on RHEL 8.10)",
+      "uses": [
+        "kernel",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.kernel-version"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "order": 1560
+    },
+    {
+      "id": "cca.components.chain-plugins",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What are two CNI plugins the Cilium docs cover for CNI chaining?",
+      "back": "Any two of: Calico, Weave Net, Azure CNI (Legacy), among others.",
+      "explanation": "The docs keep a guide per supported plugin, as each creates its network devices differently.",
+      "source": "Cilium documentation, “CNI Chaining”, “CNI Chaining”",
+      "sourceURL": "https://docs.cilium.io/en/stable/installation/cni-chaining/#cni-chaining",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Azure CNI (Legacy) Calico Generic Veth Chaining",
+      "uses": [
+        "CNI",
+        "CNI chaining"
+      ],
+      "conceptIDs": [
+        "cca.cni-chaining"
+      ],
+      "order": 1570
+    },
+    {
+      "id": "cca.components.sc-no-rebuild",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team must tighten network security for a service but may not rebuild its image or change its container configuration. Why does Cilium suit this?",
+      "back": "C: Its enforcement runs in eBPF inside the Linux kernel.",
+      "choices": "A) It injects a library into each application\nB) It needs a sidecar added to every Pod spec\nC) Its enforcement runs in eBPF inside the Linux kernel\nD) It rewrites the application's configuration files",
+      "choicesExplained": "A, B and D all change the application or its container configuration, which Cilium does not need.",
+      "explanation": "Policy logic lives in the kernel beneath the workload, so the workload stays untouched.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “What is Cilium?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#what-is-cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Because eBPF runs inside the Linux kernel, Cilium security policies can be applied and updated without any changes to the application code or container configuration.",
+      "uses": [
+        "Cilium",
+        "ebpf",
+        "kernel",
+        "sidecar container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.cilium"
+      ],
+      "order": 1580
+    },
+    {
+      "id": "cca.components.sc-hubble-policy",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A security team asks Hubble: \"Which services had connections blocked by network policy?\" Which kind of question is this, in the Cilium docs' grouping?",
+      "back": "B: Security observability.",
+      "choices": "A) Service dependencies and communication map\nB) Security observability\nC) Network monitoring and alerting\nD) Application monitoring",
+      "choicesExplained": "A covers who talks to whom. D covers HTTP response codes and latency. C covers failing communication, DNS and TCP problems.",
+      "explanation": "The docs list blocked connections, access from outside the cluster and DNS lookups under security observability.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Security observability”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#security-observability",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Security observability Which services had connections blocked due to network policy?",
+      "uses": [
+        "Hubble",
+        "NetworkPolicy"
+      ],
+      "conceptIDs": [
+        "cca.hubble"
+      ],
+      "order": 1590
+    },
+    {
+      "id": "cca.components.sc-hubble-latency",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "An SRE wants the 95th and 99th percentile latency between HTTP requests and responses. Which Hubble question area does this fall in?",
+      "back": "C: Application monitoring.",
+      "choices": "A) Service dependencies and communication map\nB) Security observability\nC) Application monitoring\nD) Network monitoring and alerting",
+      "choicesExplained": "B covers blocked connections and outside access. A covers which services communicate and how often. D covers failing communication and DNS or TCP faults.",
+      "explanation": "Latency percentiles and 5xx/4xx rates describe how the application performs, which the docs group as application monitoring.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Application monitoring”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#application-monitoring",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "What is the 95th and 99th percentile latency between HTTP requests and responses in my cluster?",
+      "uses": [
+        "Hubble",
+        "http"
+      ],
+      "conceptIDs": [
+        "cca.hubble"
+      ],
+      "order": 1600
+    },
+    {
+      "id": "cca.components.sc-hubble-deps",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "An architect asks Hubble: \"What does the service dependency graph look like?\" Which question area is this?",
+      "back": "D: Service dependencies and communication map.",
+      "choices": "A) Network monitoring and alerting\nB) Security observability\nC) Application monitoring\nD) Service dependencies and communication map",
+      "choicesExplained": "A is about failing communication. C is about response codes and latency. B is about blocked or outside access.",
+      "explanation": "Who talks to whom, how often, and with which HTTP calls is the communication map.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Service dependencies & communication map”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#service-dependencies-communication-map",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "What services are communicating with each other? How frequently? What does the service dependency graph look like?",
+      "uses": [
+        "Hubble"
+      ],
+      "conceptIDs": [
+        "cca.hubble"
+      ],
+      "order": 1610
+    },
+    {
+      "id": "cca.components.sc-hubble-dns",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "On-call asks Hubble: \"Is communication failing, and is it DNS?\" Which question area is this?",
+      "back": "C: Network monitoring and alerting.",
+      "choices": "A) Application monitoring\nB) Security observability\nC) Network monitoring and alerting\nD) Service dependencies and communication map",
+      "choicesExplained": "A is about HTTP codes and latency. B is about policy blocks and outside access. D is about who talks to whom.",
+      "explanation": "Failing communication, DNS problems and broken TCP or HTTP connections are grouped as network monitoring and alerting.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Network monitoring & alerting”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#network-monitoring-alerting",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Is any network communication failing? Why is communication failing? Is it DNS? Is it an application or network problem?",
+      "uses": [
+        "Hubble",
+        "DNS"
+      ],
+      "conceptIDs": [
+        "cca.hubble"
+      ],
+      "order": 1620
+    },
+    {
+      "id": "cca.components.sc-why-identity",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team's iptables rules keep going stale because Pods are rescheduled with new IPs every few minutes. Which Cilium design choice addresses this?",
+      "back": "B: Enforcing on workload identity rather than IP address.",
+      "choices": "A) Filtering only on destination ports\nB) Enforcing on workload identity rather than IP address\nC) Adding more iptables chains per node\nD) Pinning Pods to fixed IP addresses",
+      "choicesExplained": "A: the docs say ports no longer distinguish application traffic. C: more rules is the scaling problem itself. D: not what Cilium does; it decouples security from addressing.",
+      "explanation": "IP-keyed rules must be rewritten as addresses churn; identity stays with the workload.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Why Cilium & Hubble?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#why-cilium-hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Traditional Linux network security approaches (e.g., iptables) filter on IP address and TCP/UDP ports, but IP addresses frequently churn in dynamic microservices environments.",
+      "uses": [
+        "Pod",
+        "ip address",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.why-cilium"
+      ],
+      "order": 1630
+    },
+    {
+      "id": "cca.components.sc-agent-ebpf",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Which Cilium component loads and manages the eBPF programs that control traffic in and out of the containers on a node?",
+      "back": "D: The Cilium agent.",
+      "choices": "A) Cilium Operator\nB) Hubble Relay\nC) Cilium CNI plugin\nD) Cilium agent",
+      "choicesExplained": "A handles cluster-wide duties and is not in the forwarding path. B gathers flows. C is only invoked when a Pod is scheduled or terminated.",
+      "explanation": "The per-node agent turns configuration into eBPF programs on its own node.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Agent”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It manages the eBPF programs which the Linux kernel uses to control all network access in / out of those containers.",
+      "uses": [
+        "Cilium agent",
+        "Cilium Operator",
+        "Hubble Relay",
+        "Cilium CNI plugin",
+        "ebpf",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.cilium-agent-role",
+        "cca.cilium-agent"
+      ],
+      "order": 1640
+    },
+    {
+      "id": "cca.components.sc-install-from-laptop",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "From her laptop, with only a kubeconfig, an engineer wants to install Cilium on a new cluster. Which tool suits this?",
+      "back": "C: The `cilium` CLI.",
+      "choices": "A) `hubble`\nB) `cilium-dbg`\nC) The `cilium` CLI\nD) `cilium-cni`",
+      "choicesExplained": "B runs inside the agent and talks only to the local agent. A retrieves flow events. D is called by Kubernetes, not by people.",
+      "explanation": "The `cilium` tool is for installing, managing and troubleshooting from outside the cluster through the Kubernetes API.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Debug Client (CLI), Note”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the cilium command line tool for quick-installing, managing and troubleshooting Cilium on Kubernetes clusters. That tool is typically installed remote from the cluster",
+      "uses": [
+        "Cilium",
+        "cilium-dbg",
+        "hubble",
+        "cilium-cni",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.cilium-cli-vs-dbg"
+      ],
+      "order": 1650
+    },
+    {
+      "id": "cca.components.sc-inspect-maps",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "You need to check the eBPF map contents on node `worker-3`. Which approach fits?",
+      "back": "B: Run `cilium-dbg` inside the Cilium agent Pod on `worker-3`.",
+      "choices": "A) Run `cilium status` from your laptop\nB) Run `cilium-dbg` inside the Cilium agent Pod on `worker-3`\nC) Open the Hubble UI\nD) Read the Cilium Operator logs",
+      "choicesExplained": "A reports cluster status through the Kubernetes API, not a node's maps. C shows a service map from flows. D: the operator does not run each node's datapath.",
+      "explanation": "Only the in-agent debug CLI reaches the local agent and its eBPF maps.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Debug Client (CLI)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It also provides tooling to directly access the eBPF maps to validate their state.",
+      "uses": [
+        "cilium-dbg",
+        "Cilium agent",
+        "Hubble UI",
+        "Cilium Operator",
+        "ebpf",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.cilium-cli-vs-dbg",
+        "cca.cilium-dbg"
+      ],
+      "order": 1660
+    },
+    {
+      "id": "cca.components.sc-operator-down",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "The Cilium Operator Pod crashes for ten minutes. Existing Pods keep talking. What else should you expect, depending on configuration?",
+      "back": "C: New Pods may wait for IP addresses if the operator must allocate them.",
+      "choices": "A) All traffic stops until the operator returns\nB) Network policies stop being enforced\nC) New Pods may wait for IP addresses if the operator must allocate them\nD) The Hubble server stops recording flows",
+      "choicesExplained": "A and B: the operator is not in the critical path for forwarding or policy. D: the Hubble server is embedded in the agent, not the operator.",
+      "explanation": "Forwarding and policy do not wait on the operator, but address allocation for new workloads can.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Operator”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Delays in IP Address Management (IPAM) and thus delay in scheduling of new workloads if the operator is required to allocate new IP addresses",
+      "uses": [
+        "Cilium Operator",
+        "Pod",
+        "Hubble server",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.operator-not-critical",
+        "cca.cilium-operator"
+      ],
+      "order": 1670
+    },
+    {
+      "id": "cca.components.sc-relay",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Running `hubble observe` against one node's local Hubble server shows only that node's flows. What gives a cluster-wide view?",
+      "back": "B: Connecting the Hubble CLI to Hubble Relay.",
+      "choices": "A) Restarting the Cilium Operator\nB) Connecting the Hubble CLI to Hubble Relay\nC) Running `cilium-dbg` on each node in turn\nD) Enabling CNI chaining",
+      "choicesExplained": "A: the operator has no flow data. C inspects agents node by node, not flows cluster-wide. D is about combining CNI plugins.",
+      "explanation": "Relay connects to every Hubble server and presents them as one API.",
+      "source": "Cilium documentation, “Component Overview”, “Hubble: Relay”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "offers cluster-wide visibility by connecting to their respective gRPC APIs and providing an API that represents all servers in the cluster.",
+      "uses": [
+        "Hubble CLI",
+        "Hubble Relay",
+        "Hubble server",
+        "Cilium Operator",
+        "cilium-dbg",
+        "CNI chaining"
+      ],
+      "conceptIDs": [
+        "cca.hubble-relay",
+        "cca.hubble-cli"
+      ],
+      "order": 1680
+    },
+    {
+      "id": "cca.components.sc-ui-empty",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "The Hubble UI loads but shows no service map. `cilium status` reports Hubble Relay as unavailable. What is the most likely link?",
+      "back": "D: The UI uses Relay-based visibility, so without Relay it has no data.",
+      "choices": "A) The UI reads each node's eBPF maps directly\nB) The UI needs the Cilium Operator for its data\nC) The UI only works when a kvstore is configured\nD) The UI uses Relay-based visibility, so without Relay it has no data",
+      "choicesExplained": "A: the UI does not read maps. B: the operator is not a flow source. C: the default CRD data store is enough.",
+      "explanation": "Hubble UI draws its map from Relay, which in turn gathers flows from every Hubble server.",
+      "source": "Cilium documentation, “Component Overview”, “Hubble: Graphical UI (GUI)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The graphical user interface (hubble-ui) utilizes relay-based visibility to provide a graphical service dependency and connectivity map.",
+      "uses": [
+        "Hubble UI",
+        "Hubble Relay",
+        "Cilium Operator",
+        "kvstore",
+        "ebpf"
+      ],
+      "conceptIDs": [
+        "cca.hubble-ui"
+      ],
+      "order": 1690
+    },
+    {
+      "id": "cca.components.sc-server-where",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "Where does the Hubble server run?",
+      "back": "B: Embedded in the Cilium agent on each node.",
+      "choices": "A) As a separate Deployment with one replica\nB) Embedded in the Cilium agent on each node\nC) As a sidecar in each application Pod\nD) Inside the Cilium Operator",
+      "choicesExplained": "A describes a standalone component such as Relay. D: the operator handles cluster-wide duties, not flows. C: Hubble needs no sidecars; it reads eBPF visibility from Cilium.",
+      "explanation": "Embedding it in the agent is done for high performance and low overhead.",
+      "source": "Cilium documentation, “Component Overview”, “Hubble: Server”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#hubble",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It is embedded into the Cilium agent in order to achieve high performance and low-overhead.",
+      "uses": [
+        "Hubble server",
+        "Cilium agent",
+        "Cilium Operator",
+        "Deployment",
+        "sidecar container",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.hubble-server",
+        "cca.architecture"
+      ],
+      "order": 1700
+    },
+    {
+      "id": "cca.components.sc-cni-invoked",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A Pod is scheduled on a node. Which Cilium component does Kubernetes call directly at that moment?",
+      "back": "B: The Cilium CNI plugin.",
+      "choices": "A) The Cilium Operator\nB) The Cilium CNI plugin\nC) Hubble Relay\nD) The `cilium` CLI",
+      "choicesExplained": "A handles cluster-wide duties, not per-Pod set-up. C gathers flows. D is run by people from outside the cluster.",
+      "explanation": "Kubernetes invokes `cilium-cni` on Pod scheduling and termination, and it then asks the local Cilium API to configure the datapath.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: CNI Plugin”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The CNI plugin (cilium-cni) is invoked by Kubernetes when a pod is scheduled or terminated on a node.",
+      "uses": [
+        "Cilium CNI plugin",
+        "Cilium Operator",
+        "Hubble Relay",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.cilium-cni-plugin",
+        "cca.architecture"
+      ],
+      "order": 1710
+    },
+    {
+      "id": "cca.components.sc-kvstore",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A very large cluster finds that propagating Cilium state through CRDs is becoming a bottleneck. Which optional change do the docs describe for scalability?",
+      "back": "A: Using a key-value store such as etcd.",
+      "choices": "A) Using a key-value store such as etcd\nB) Adding more Hubble Relay replicas\nC) Switching to CNI chaining\nD) Removing the Cilium Operator",
+      "choicesExplained": "B scales flow retrieval, not state storage. C hands networking to another plugin. D: the operator is still needed for cluster-wide duties.",
+      "explanation": "Direct key-value store use makes change notifications and storage more efficient.",
+      "source": "Cilium documentation, “Component Overview”, “Data Store: Key-Value Store”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#data-store",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A key-value store can optionally be used as an optimization to improve the scalability of a cluster",
+      "uses": [
+        "kvstore",
+        "etcd",
+        "CRD",
+        "Hubble Relay",
+        "CNI chaining",
+        "Cilium Operator"
+      ],
+      "conceptIDs": [
+        "cca.kvstore",
+        "cca.data-store"
+      ],
+      "order": 1720
+    },
+    {
+      "id": "cca.components.sc-chaining",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A team must keep its existing CNI plugin for Pod addressing but wants Cilium's L3/L4 visibility and policy. What fits?",
+      "back": "A: CNI chaining.",
+      "choices": "A) CNI chaining\nB) Replacing the existing plugin with Cilium only\nC) Running Hubble without Cilium\nD) Installing the Envoy DaemonSet alone",
+      "choicesExplained": "B loses the existing plugin they must keep. C: Hubble is built on top of Cilium. D: Envoy handles application-layer protocols, not base connectivity or L3/L4 policy.",
+      "explanation": "In chaining, the other plugin keeps connectivity and addressing while Cilium adds eBPF programs to its devices.",
+      "source": "Cilium documentation, “CNI Chaining”, “CNI Chaining”",
+      "sourceURL": "https://docs.cilium.io/en/stable/installation/cni-chaining/#cni-chaining",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium attaches eBPF programs to the network devices created by the non-Cilium plugin to provide L3/L4 network visibility, policy enforcement and other advanced features.",
+      "uses": [
+        "CNI chaining",
+        "CNI",
+        "Hubble",
+        "Envoy DaemonSet",
+        "Envoy"
+      ],
+      "conceptIDs": [
+        "cca.cni-chaining"
+      ],
+      "order": 1730
+    },
+    {
+      "id": "cca.components.sc-envoy-l7",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A policy must allow only HTTP `GET` requests to one path. Which part of Cilium parses the HTTP?",
+      "back": "C: A proxy such as Envoy.",
+      "choices": "A) The Cilium CNI plugin\nB) eBPF alone, in the kernel\nC) A proxy such as Envoy\nD) The Cilium Operator",
+      "choicesExplained": "A only sets up Pod networking. B: the docs say eBPF handles IP, TCP and UDP, and application-layer protocols go to a proxy. D does cluster-wide duties.",
+      "explanation": "Cilium splits processing by layer: eBPF below, a proxy for HTTP, gRPC and DNS.",
+      "source": "Cilium documentation, “Service Mesh”, “Why Cilium Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#why-cilium-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Protocols at the application layer such as HTTP, gRPC, and DNS are parsed using a proxy such as Envoy.",
+      "uses": [
+        "Envoy",
+        "Cilium CNI plugin",
+        "Cilium Operator",
+        "http",
+        "ebpf"
+      ],
+      "conceptIDs": [
+        "cca.envoy"
+      ],
+      "order": 1740
+    },
+    {
+      "id": "cca.components.sc-endpoint",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A Pod runs three containers that share one IP address. How many Cilium endpoints represent it?",
+      "back": "C: One.",
+      "choices": "A) Three, one per container\nB) None, only the node is an endpoint\nC) One\nD) Two, one for IPv4 and one for IPv6",
+      "choicesExplained": "A: containers sharing an address are grouped together. B: endpoints are the address-sharing groups, not nodes. D: one endpoint can hold both address families.",
+      "explanation": "Cilium groups all containers sharing a common address into one endpoint.",
+      "source": "Cilium documentation, “Terminology”, “Endpoint”",
+      "sourceURL": "https://docs.cilium.io/en/stable/gettingstarted/terminology/#endpoint",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Multiple application containers can share the same IP address; a typical example for this model is a Kubernetes Pod.",
+      "uses": [
+        "endpoint",
+        "Pod",
+        "ip address",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.endpoint"
+      ],
+      "order": 1750
+    },
+    {
+      "id": "cca.components.sc-cep-find",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "You want each Pod's Cilium labels, security identity and policy state across all namespaces, without logging into nodes. What do you query?",
+      "back": "C: `kubectl get ciliumendpoints --all-namespaces -o json`.",
+      "choices": "A) The Hubble UI service map\nB) `cilium-dbg endpoint get` on one node\nC) `kubectl get ciliumendpoints --all-namespaces -o json`\nD) `kubectl get ciliumnodes`",
+      "choicesExplained": "B sees only that node's agent. A shows traffic, not policy state. D holds per-node data, not per-Pod endpoints.",
+      "explanation": "CiliumEndpoints mirror each endpoint's status in the Kubernetes API, and `-o json` adds labels, identity and policy.",
+      "source": "Cilium documentation, “Endpoint CRD”, “Endpoint CRD”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/ciliumendpoint/#ciliumendpoint",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Adding the -o json will export more information about each endpoint. This includes the endpoint’s labels, security identity and the policy in effect on it.",
+      "uses": [
+        "CiliumEndpoint",
+        "cilium-dbg",
+        "Hubble UI",
+        "CiliumNode",
+        "Pod",
+        "namespace",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "cca.ciliumendpoint"
+      ],
+      "order": 1760
+    },
+    {
+      "id": "cca.components.sc-ciliumnode",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Under cluster-scope address management, new Pods on one node get no IPs. Which object do you inspect first for the operator's error?",
+      "back": "A: That node's CiliumNode.",
+      "choices": "A) That node's CiliumNode\nB) That node's CiliumEndpoint objects\nC) The Hubble Relay Deployment\nD) The `cilium-envoy` DaemonSet",
+      "choicesExplained": "B: CiliumEndpoints describe Pods already managed. C and D serve flows and L7 proxying, not addressing.",
+      "explanation": "The operator records per-node allocation status in the CiliumNode under `status.ipam.operator-status`.",
+      "source": "Cilium documentation, “Cluster Scope (Default)”, “Look for allocation errors”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/cluster-pool/#look-for-allocation-errors",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Check the Error field in the status.ipam.operator-status field:",
+      "uses": [
+        "CiliumNode",
+        "CiliumEndpoint",
+        "Hubble Relay",
+        "cilium-envoy",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.ciliumnode"
+      ],
+      "order": 1770
+    },
+    {
+      "id": "cca.components.sc-kernel",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Which host can run the Cilium 1.20 container image without a kernel upgrade?",
+      "back": "C: A Red Hat Enterprise Linux 8.10 host on its 4.18 kernel.",
+      "choices": "A) An x86 host on Linux kernel 4.19 (not Red Hat)\nB) An AArch64 host on Linux kernel 5.4\nC) A Red Hat Enterprise Linux 8.10 host on its 4.18 kernel\nD) An x86 host on Linux kernel 5.4",
+      "choicesExplained": "A, B and D run kernels below 5.10 without being a named equivalent.",
+      "explanation": "The minimum is 5.10, with 4.18 on Red Hat Enterprise Linux 8.10 named as an equivalent.",
+      "source": "Cilium documentation, “System Requirements”, “Summary”",
+      "sourceURL": "https://docs.cilium.io/en/stable/operations/system_requirements/#summary",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Linux kernel >= 5.10 or equivalent (e.g., 4.18 on RHEL 8.10)",
+      "uses": [
+        "kernel",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.kernel-version"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "order": 1780
+    },
+    {
+      "id": "cca.components.sc-func-area",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A company wants services in its on-premises cluster to fail over to backends in a cloud cluster. Which Cilium functionality area is this?",
+      "back": "C: Cluster Mesh.",
+      "choices": "A) Network policy\nB) Service mesh\nC) Cluster Mesh\nD) Observability",
+      "choicesExplained": "A controls which traffic is allowed. B covers mutual authentication and L7 traffic control. D gives visibility, not connectivity.",
+      "explanation": "Global service discovery lets workloads fail over to backends in another cluster.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Functionality Overview: Cluster Mesh”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#cluster-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This enables fault tolerance, like automatically failing over to backends in another cluster",
+      "uses": [
+        "Cilium",
+        "cluster",
+        "service mesh",
+        "NetworkPolicy",
+        "observability"
+      ],
+      "conceptIDs": [
+        "cca.functionality-overview"
+      ],
+      "order": 1790
+    },
+    {
+      "id": "cca.components.vs-cli-dbg",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does the `cilium` CLI differ from `cilium-dbg`?",
+      "back": "`cilium` runs remotely via kubeconfig and the Kubernetes API; `cilium-dbg` is installed with the agent and talks to the local agent's REST API.",
+      "explanation": "The component overview warns the two should not be confused: one manages the cluster, the other inspects one node.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Debug Client (CLI), Note”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The in-agent Cilium debug CLI client described here should not be confused with the cilium command line tool for quick-installing, managing and troubleshooting Cilium on Kubernetes clusters.",
+      "uses": [
+        "cilium-dbg",
+        "Cilium agent",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.cilium-cli-vs-dbg"
+      ],
+      "order": 1800
+    },
+    {
+      "id": "cca.components.vs-agent-operator",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does the Cilium agent's scope differ from the Cilium Operator's?",
+      "back": "The agent runs on every node and manages its eBPF programs; the operator handles duties done once for the whole cluster.",
+      "explanation": "That split is why the operator can be briefly unavailable without stopping forwarding or policy decisions.",
+      "source": "Cilium documentation, “Component Overview”, “Cilium: Operator”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#cilium",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Cilium operator is not in the critical path for any forwarding or network policy decision.",
+      "uses": [
+        "Cilium agent",
+        "Cilium Operator",
+        "ebpf",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.cilium-operator",
+        "cca.cilium-agent"
+      ],
+      "order": 1810
+    },
+    {
+      "id": "cca.components.vs-server-relay",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does the Hubble server differ from Hubble Relay?",
+      "back": "The server is embedded in each node's agent and serves that node's flows; Relay is standalone and joins all servers into one cluster-wide API.",
+      "explanation": "Clients that need the whole cluster, such as the Hubble UI, therefore go through Relay.",
+      "source": "Cilium documentation, “Hubble internals”, “Hubble internals”",
+      "sourceURL": "https://docs.cilium.io/en/stable/internals/hubble/#hubble-internals",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Hubble Relay is a standalone component which is aware of all Hubble instances and offers full cluster visibility by connecting to their respective gRPC APIs.",
+      "uses": [
+        "Hubble server",
+        "Hubble Relay",
+        "Hubble UI",
+        "Cilium agent",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.hubble-relay",
+        "cca.hubble-server"
+      ],
+      "order": 1820
+    },
+    {
+      "id": "cca.components.vs-crd-kvstore",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Kubernetes CRDs or a kvstore: which is Cilium's default data store, and what is the other for?",
+      "back": "CRDs are the default and meet all requirements; a kvstore such as etcd is optional, to improve scalability.",
+      "explanation": "A kvstore is an optimisation, not a requirement, when Cilium runs on Kubernetes.",
+      "source": "Cilium documentation, “Component Overview”, “Data Store”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/component-overview/#data-store",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "All requirements for state storage and propagation can be met with Kubernetes CRDs as configured in the default configuration of Cilium.",
+      "uses": [
+        "CRD",
+        "kvstore",
+        "etcd",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.data-store"
+      ],
+      "order": 1830
+    },
+    {
+      "id": "cca.components.vs-ebpf-envoy",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "In Cilium, which traffic does eBPF handle and which does Envoy handle?",
+      "back": "eBPF handles network processing such as IP, TCP and UDP; Envoy parses application-layer protocols such as HTTP, gRPC and DNS.",
+      "explanation": "Cilium uses eBPF as the in-kernel datapath and sends only application-layer parsing to a proxy.",
+      "source": "Cilium documentation, “Service Mesh”, “Why Cilium Service Mesh?”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/servicemesh/#why-cilium-service-mesh",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For all network processing including protocols such as IP, TCP, and UDP, Cilium uses eBPF as the highly efficient in-kernel datapath.",
+      "uses": [
+        "ebpf",
+        "Envoy",
+        "http",
+        "grpc",
+        "DNS",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.envoy"
+      ],
+      "order": 1840
+    }
+  ]
+}

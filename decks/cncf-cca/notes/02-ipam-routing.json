@@ -1,0 +1,1885 @@
+{
+  "topic": "IPAM, routing and kube-proxy replacement",
+  "notes": [
+    {
+      "id": "cca.ipam-routing.ipam",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "In Cilium, what is IP address management (IPAM)?",
+      "back": "The function that allocates and manages the IP addresses used by the network endpoints Cilium manages.",
+      "explanation": "Several IPAM modes exist because users' environments differ, from plain Kubernetes to cloud provider networks.",
+      "example": "Like a hotel front desk assigning room numbers to arriving guests, except the guests are Pods.",
+      "source": "Cilium documentation, “IP Address Management (IPAM)”, “IP Address Management (IPAM)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/#address-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "IP Address Management (IPAM) is responsible for the allocation and management of IP addresses used by network endpoints (container and others) managed by Cilium.",
+      "introduces": [
+        "IP address management",
+        "IPAM"
+      ],
+      "uses": [
+        "IP address management",
+        "IPAM",
+        "endpoint",
+        "Cilium",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.ipam"
+      ],
+      "order": 2010
+    },
+    {
+      "id": "cca.ipam-routing.podcidr",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a PodCIDR?",
+      "back": "The address range assigned to one node, out of which that node's Pods get their IP addresses.",
+      "explanation": "Giving each node its own range lets the node hand out Pod addresses locally without clashing with other nodes.",
+      "example": "Like giving each street its own block of house numbers, such as 10.0.1.0/24 for one node and 10.0.2.0/24 for the next.",
+      "source": "Cilium documentation, “Kubernetes Host Scope”, “Kubernetes Host Scope”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/kubernetes/#kubernetes-host-scope",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "IPs are allocated out of the PodCIDR range associated to each node by Kubernetes.",
+      "introduces": [
+        "PodCIDR"
+      ],
+      "uses": [
+        "PodCIDR",
+        "Pod",
+        "node",
+        "cidr",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.podcidr"
+      ],
+      "order": 2020
+    },
+    {
+      "id": "cca.ipam-routing.cluster-scope",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is cluster-scope IPAM?",
+      "back": "Cilium's default IPAM mode: the Cilium Operator assigns a PodCIDR to each node through CiliumNode, and each node allocates Pod IPs from it.",
+      "explanation": "Because Cilium, not Kubernetes, hands out the per-node ranges, it works even when Kubernetes is not set up to do so.",
+      "example": "Like a head office assigning each branch a block of account numbers, which the branch then issues itself.",
+      "source": "Cilium documentation, “Cluster Scope (Default)”, “Cluster Scope (Default)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/cluster-pool/#cluster-scope-default",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The difference is that instead of Kubernetes assigning the per-node PodCIDRs via the Kubernetes v1.Node resource, the Cilium operator will manage the per-node PodCIDRs via the v2.CiliumNode resource.",
+      "introduces": [
+        "cluster-scope IPAM"
+      ],
+      "uses": [
+        "cluster-scope IPAM",
+        "IPAM",
+        "Cilium Operator",
+        "PodCIDR",
+        "CiliumNode",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.ipam-cluster-pool"
+      ],
+      "order": 2030
+    },
+    {
+      "id": "cca.ipam-routing.host-scope",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is Kubernetes host-scope IPAM?",
+      "back": "An IPAM mode, enabled with `ipam: kubernetes`, where each node allocates Pod IPs from the PodCIDR that Kubernetes assigned it.",
+      "explanation": "The per-node ranges come from the Kubernetes Node object, so Kubernetes must be configured to hand them out.",
+      "example": "Like cluster-scope IPAM, but the ranges are read from the Kubernetes Node object instead of CiliumNode.",
+      "source": "Cilium documentation, “Kubernetes Host Scope”, “Kubernetes Host Scope”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/kubernetes/#kubernetes-host-scope",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Kubernetes host-scope IPAM mode is enabled with ipam: kubernetes and delegates the address allocation to each individual node in the cluster.",
+      "introduces": [
+        "Kubernetes host-scope IPAM"
+      ],
+      "uses": [
+        "Kubernetes host-scope IPAM",
+        "IPAM",
+        "PodCIDR",
+        "node",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.ipam-kubernetes"
+      ],
+      "order": 2040
+    },
+    {
+      "id": "cca.ipam-routing.multi-pool",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is multi-pool IPAM?",
+      "back": "An IPAM mode that allocates PodCIDRs from several different IP pools, chosen by workload annotations and node labels.",
+      "explanation": "Different workloads can then draw addresses from different ranges within one cluster.",
+      "example": "Like a car park with separate zones for staff and visitors, where your pass decides which zone you park in.",
+      "source": "Cilium documentation, “Multi-Pool”, “Multi-Pool”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/multi-pool/#multi-pool",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Multi-Pool IPAM mode supports allocating PodCIDRs from multiple different IPAM pools, depending on workload annotations and node labels defined by the user.",
+      "introduces": [
+        "multi-pool IPAM"
+      ],
+      "uses": [
+        "multi-pool IPAM",
+        "IPAM",
+        "PodCIDR",
+        "label",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.ipam-multi-pool"
+      ],
+      "order": 2050
+    },
+    {
+      "id": "cca.ipam-routing.crd-backed",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is CRD-backed IPAM?",
+      "back": "An IPAM mode, `ipam: crd`, where each node's usable addresses are listed in a custom resource, so IPAM can be delegated to external operators.",
+      "explanation": "It gives an extendable interface: whoever writes the CiliumNode resource controls the addresses.",
+      "example": "Like a guest list someone else writes: the door staff (the agent) admit only the names on it.",
+      "source": "Cilium documentation, “CRD-Backed”, “CRD-Backed”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/crd/#crd-backed",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The CRD-backed IPAM mode provides an extendable interface to control the IP address management via a Kubernetes Custom Resource Definition (CRD). This allows to delegate IPAM to external operators or make it user configurable per node.",
+      "introduces": [
+        "CRD-backed IPAM"
+      ],
+      "uses": [
+        "CRD-backed IPAM",
+        "IPAM",
+        "CRD",
+        "custom resource",
+        "CiliumNode",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.ipam-crd"
+      ],
+      "order": 2060
+    },
+    {
+      "id": "cca.ipam-routing.aws-eni",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is AWS ENI IPAM?",
+      "back": "An IPAM mode for Cilium in the AWS cloud that allocates Pod IPs from AWS Elastic Network Interfaces (ENIs) via the EC2 API.",
+      "explanation": "Pods then get addresses that belong to the cloud network itself rather than an overlay.",
+      "example": "Like giving each Pod a real address on the cloud network, as a virtual machine would get.",
+      "source": "Cilium documentation, “AWS ENI”, “AWS ENI”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/eni/#aws-eni",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The AWS ENI allocator is specific to Cilium deployments running in the AWS cloud and performs IP allocation based on IPs of AWS Elastic Network Interfaces (ENI) by communicating with the AWS EC2 API.",
+      "introduces": [
+        "AWS ENI IPAM"
+      ],
+      "uses": [
+        "AWS ENI IPAM",
+        "IPAM",
+        "Pod",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.ipam-eni"
+      ],
+      "order": 2070
+    },
+    {
+      "id": "cca.ipam-routing.encap",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is encapsulation mode in Cilium routing?",
+      "back": "The routing mode in which all cluster nodes form a mesh of tunnels and all traffic between Cilium nodes is encapsulated.",
+      "explanation": "Wrapping Pod packets inside node-to-node packets means the underlying network only needs to reach the nodes.",
+      "example": "Like posting a letter inside another envelope addressed to the destination office, which opens it and delivers the inner letter.",
+      "source": "Cilium documentation, “Routing”, “Encapsulation”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#encapsulation",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In this mode, all cluster nodes form a mesh of tunnels using the UDP-based encapsulation protocols VXLAN or Geneve. All traffic between Cilium nodes is encapsulated.",
+      "introduces": [
+        "encapsulation mode"
+      ],
+      "uses": [
+        "encapsulation mode",
+        "node",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.encapsulation"
+      ],
+      "order": 2080
+    },
+    {
+      "id": "cca.ipam-routing.vxlan",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is VXLAN, in Cilium routing?",
+      "back": "A UDP-based encapsulation protocol, and Cilium's default tunnel protocol in encapsulation mode.",
+      "explanation": "Cilium's `tunnel-protocol` option chooses between the two supported protocols, and defaults to this one.",
+      "example": "Like the standard envelope size the post office uses unless you ask for another.",
+      "source": "Cilium documentation, “Routing”, “Configuration”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "tunnel-protocol: Set the encapsulation protocol to vxlan or geneve, defaults to vxlan.",
+      "introduces": [
+        "VXLAN"
+      ],
+      "uses": [
+        "VXLAN",
+        "encapsulation mode"
+      ],
+      "conceptIDs": [
+        "cca.vxlan"
+      ],
+      "order": 2090
+    },
+    {
+      "id": "cca.ipam-routing.geneve",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is Geneve, in Cilium routing?",
+      "back": "The other UDP-based encapsulation protocol Cilium supports in encapsulation mode, selected with `tunnel-protocol: geneve`.",
+      "explanation": "It is the alternative to the default, VXLAN, and uses its own UDP port.",
+      "example": "Like choosing a different courier for the outer envelope; the inner letter is the same.",
+      "source": "Cilium documentation, “Routing”, “Encapsulation”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#encapsulation",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "all cluster nodes form a mesh of tunnels using the UDP-based encapsulation protocols VXLAN or Geneve.",
+      "introduces": [
+        "Geneve"
+      ],
+      "uses": [
+        "Geneve",
+        "VXLAN",
+        "encapsulation mode"
+      ],
+      "conceptIDs": [
+        "cca.geneve"
+      ],
+      "order": 2100
+    },
+    {
+      "id": "cca.ipam-routing.native",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is native routing mode in Cilium?",
+      "back": "A routing mode, `routing-mode: native`, that uses the routing capabilities of the underlying network instead of encapsulation.",
+      "explanation": "Packets for non-local endpoints go to the Linux routing subsystem, as if a local process had sent them.",
+      "example": "Like sending the letter with no outer envelope: every sorting office on the way must know the Pod address.",
+      "source": "Cilium documentation, “Routing”, “Native-Routing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#native-routing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The native packet forwarding mode leverages the routing capabilities of the network Cilium runs on instead of performing encapsulation.",
+      "introduces": [
+        "native routing mode"
+      ],
+      "uses": [
+        "native routing mode",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.native-routing"
+      ],
+      "order": 2110
+    },
+    {
+      "id": "cca.ipam-routing.adnr",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does the Cilium option `auto-direct-node-routes: true` do?",
+      "back": "In native routing, it makes each node install routes to the other nodes' Pod IPs, when all nodes share a single L2 network.",
+      "explanation": "Native routing needs every node to know how to reach every other node's Pods, and this option handles that on a shared L2 network.",
+      "example": "Like neighbours on one street telling each other which house numbers they own, so nobody needs a map.",
+      "source": "Cilium documentation, “Routing”, “Requirements on the network (native routing)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#id4",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If all nodes share a single L2 network, then this can be taken care of by enabling the option auto-direct-node-routes: true.",
+      "introduces": [
+        "auto-direct-node-routes"
+      ],
+      "uses": [
+        "auto-direct-node-routes",
+        "native routing mode",
+        "node",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.auto-direct-node-routes"
+      ],
+      "order": 2120
+    },
+    {
+      "id": "cca.ipam-routing.nrcidr",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What does `ipv4-native-routing-cidr` set?",
+      "back": "The CIDR in which native routing can be performed; it must be set to run native routing mode.",
+      "explanation": "Cilium needs to know which destinations the network can route directly without encapsulation.",
+      "example": "Like telling a courier which postcodes it can deliver to directly: `10.0.0.0/8`.",
+      "source": "Cilium documentation, “Routing”, “Configuration (native routing)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#id5",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "ipv4-native-routing-cidr: x.x.x.x/y: Set the CIDR in which native routing can be performed.",
+      "introduces": [
+        "ipv4-native-routing-cidr"
+      ],
+      "uses": [
+        "ipv4-native-routing-cidr",
+        "native routing mode",
+        "cidr"
+      ],
+      "conceptIDs": [
+        "cca.native-routing-cidr"
+      ],
+      "order": 2130
+    },
+    {
+      "id": "cca.ipam-routing.masq",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is masquerading in Cilium?",
+      "back": "Rewriting the source IP of traffic leaving the cluster to the node's IPv4 address.",
+      "explanation": "Pod IPv4 addresses are usually private and not publicly routable, while the node's address already is.",
+      "example": "Like staff sending letters from the office address rather than their home addresses, so replies come back to the office.",
+      "source": "Cilium documentation, “Masquerading”, “Masquerading”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/masquerading/#masquerading",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium will automatically masquerade the source IP address of all traffic that is leaving the cluster to the IPv4 address of the node as the node’s IP address is already routable on the network.",
+      "introduces": [
+        "masquerading"
+      ],
+      "uses": [
+        "masquerading",
+        "Cilium",
+        "node",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.masquerading"
+      ],
+      "order": 2140
+    },
+    {
+      "id": "cca.ipam-routing.socket-lb",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is socket-LB in Cilium?",
+      "back": "Socket-level load balancing: east-west service connections are rewritten at the socket level (`connect()`) to a backend.",
+      "explanation": "Choosing the backend once, at connect time, avoids the overhead of per-packet address translation.",
+      "example": "Like a receptionist who gives you the right extension before you dial, so no-one has to transfer the call.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Load Balancing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#load-balancing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "East-west load balancing rewrites service connections at the socket level (connect()), avoiding the overhead of per-packet NAT and fully replacing kube-proxy.",
+      "introduces": [
+        "socket-LB"
+      ],
+      "uses": [
+        "socket-LB",
+        "Cilium",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.socket-lb"
+      ],
+      "order": 2150
+    },
+    {
+      "id": "cca.ipam-routing.kpr",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is Cilium's kube-proxy replacement (KPR)?",
+      "back": "Cilium's eBPF implementation of Kubernetes Service handling, which lets a cluster run without kube-proxy.",
+      "explanation": "It depends on socket-LB, and replaces the Service handling kube-proxy would otherwise do.",
+      "example": "Like kube-proxy's job of sending Service traffic to Pods, done in eBPF with no kube-proxy DaemonSet.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Kubernetes Without kube-proxy”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#kubeproxy-free",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This guide explains how to provision a Kubernetes cluster without kube-proxy, and to use Cilium to fully replace it.",
+      "introduces": [
+        "kube-proxy replacement",
+        "KPR"
+      ],
+      "uses": [
+        "kube-proxy replacement",
+        "KPR",
+        "kube-proxy",
+        "Service",
+        "ebpf",
+        "socket-LB"
+      ],
+      "conceptIDs": [
+        "cca.kube-proxy-replacement"
+      ],
+      "order": 2160
+    },
+    {
+      "id": "cca.ipam-routing.maglev",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is Maglev consistent hashing in Cilium?",
+      "back": "A variant of Maglev hashing that Cilium's kube-proxy replacement can use to select backends consistently.",
+      "explanation": "Nodes pick the same backend for a given 5-tuple without synchronising state with each other.",
+      "example": "Like every branch using the same rule to route a customer to the same adviser, with no phone calls between branches.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Maglev Consistent Hashing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#maglev",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cilium’s eBPF kube-proxy replacement supports consistent hashing by implementing a variant of The Maglev hashing in its load balancer for backend selection.",
+      "introduces": [
+        "Maglev consistent hashing"
+      ],
+      "uses": [
+        "Maglev consistent hashing",
+        "kube-proxy replacement"
+      ],
+      "conceptIDs": [
+        "cca.maglev"
+      ],
+      "order": 2170
+    },
+    {
+      "id": "cca.ipam-routing.dsr",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is Direct Server Return (DSR) in Cilium?",
+      "back": "A load-balancing mode in which backends reply directly to the external client, using the service IP and port as the source.",
+      "explanation": "Replies skip the extra hop back through the node that first received the request.",
+      "example": "Like a shop that forwards your order to a warehouse, which then posts the parcel straight to you.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Direct Server Return (DSR)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#dsr-mode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In this mode, the backends reply directly to the external client without taking the extra hop, meaning, backends reply by using the service IP/port as a source.",
+      "introduces": [
+        "Direct Server Return",
+        "DSR"
+      ],
+      "uses": [
+        "Direct Server Return",
+        "DSR",
+        "Service",
+        "port",
+        "ip address"
+      ],
+      "conceptIDs": [
+        "cca.dsr"
+      ],
+      "order": 2180
+    },
+    {
+      "id": "cca.ipam-routing.ipam-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Cilium's default IPAM mode is {{c1::cluster scope}} (also called cluster-pool).",
+      "explanation": "The IPAM table marks this mode \"(default)\", so it applies unless another mode is chosen.",
+      "source": "Cilium documentation, “IP Address Management (IPAM)”, “IP Address Management (IPAM)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/#address-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Various IPAM modes are supported to meet the needs of different users: Feature Kubernetes Host Scope Cluster Scope (default) Multi-Pool",
+      "uses": [
+        "cluster-scope IPAM",
+        "IPAM"
+      ],
+      "conceptIDs": [
+        "cca.ipam-modes"
+      ],
+      "order": 2190
+    },
+    {
+      "id": "cca.ipam-routing.ipam-no-change",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why do the Cilium docs warn against changing the IPAM mode of a live cluster?",
+      "back": "It may cause persistent disruption of connectivity for existing workloads.",
+      "explanation": "The safest path they give is a fresh cluster with the new IPAM configuration.",
+      "source": "Cilium documentation, “IP Address Management (IPAM)”, “IP Address Management (IPAM)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/#address-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Changing the IPAM mode in a live environment may cause persistent disruption of connectivity for existing workloads. The safest path to change IPAM mode is to install a fresh Kubernetes cluster with the new IPAM configuration.",
+      "uses": [
+        "IPAM",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cca.ipam-modes"
+      ],
+      "order": 2200
+    },
+    {
+      "id": "cca.ipam-routing.ipam-migration",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which IPAM mode change is the only online migration path Cilium currently offers?",
+      "back": "From cluster-pool (cluster scope) to multi-pool.",
+      "explanation": "Any other change of mode means the fresh-cluster route the docs recommend.",
+      "source": "Cilium documentation, “IP Address Management (IPAM)”, “IP Address Management (IPAM)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/#address-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The only currently available online migration path is from cluster-pool IPAM to multi-pool IPAM.",
+      "uses": [
+        "cluster-scope IPAM",
+        "multi-pool IPAM",
+        "IPAM"
+      ],
+      "conceptIDs": [
+        "cca.ipam-modes"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "order": 2210
+    },
+    {
+      "id": "cca.ipam-routing.pool-advantage",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What advantage does cluster-scope IPAM have over Kubernetes host-scope IPAM?",
+      "back": "It does not depend on Kubernetes being configured to hand out per-node PodCIDRs.",
+      "explanation": "The docs call it useful when Kubernetes cannot be configured that way, or when more control is needed.",
+      "source": "Cilium documentation, “Cluster Scope (Default)”, “Cluster Scope (Default)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/cluster-pool/#cluster-scope-default",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The advantage of this mode is that it does not depend on Kubernetes being configured to hand out per-node PodCIDRs.",
+      "uses": [
+        "cluster-scope IPAM",
+        "Kubernetes host-scope IPAM",
+        "PodCIDR"
+      ],
+      "conceptIDs": [
+        "cca.ipam-cluster-pool"
+      ],
+      "order": 2220
+    },
+    {
+      "id": "cca.ipam-routing.pool-expand",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "The cluster pool is exhausted. How should you expand `clusterPoolIPv4PodCIDRList`?",
+      "back": "Add a new element to the list; do not change existing elements.",
+      "explanation": "Changing existing elements causes unexpected behaviour, according to the docs.",
+      "source": "Cilium documentation, “Cluster Scope (Default)”, “Expanding the cluster pool”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/cluster-pool/#expanding-the-cluster-pool",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Don’t change any existing elements of the clusterPoolIPv4PodCIDRList list, as changes cause unexpected behavior. If the pool is exhausted, add a new element to the list instead.",
+      "uses": [
+        "cluster-scope IPAM"
+      ],
+      "conceptIDs": [
+        "cca.ipam-cluster-pool"
+      ],
+      "order": 2230
+    },
+    {
+      "id": "cca.ipam-routing.pool-default-cidr",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What is the default Pod CIDR in cluster-scope IPAM, and what happens if the node network overlaps it?",
+      "back": "`10.0.0.0/8`; nodes lose connectivity to other nodes, as egress is assumed to target local Pods.",
+      "explanation": "The fix is a non-conflicting `clusterPoolIPv4PodCIDRList` or a different node CIDR.",
+      "source": "Cilium documentation, “Cluster Scope (Default)”, “Check for conflicting node CIDRs”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/cluster-pool/#check-for-conflicting-node-cidrs",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "10.0.0.0/8 is the default pod CIDR. If your node network is in the same range you will lose connectivity to other nodes.",
+      "uses": [
+        "cluster-scope IPAM",
+        "cidr",
+        "node",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.ipam-cluster-pool"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · Cilium 1.20 documentation",
+      "order": 2240
+    },
+    {
+      "id": "cca.ipam-routing.host-podcidr-source",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In Kubernetes host-scope IPAM, where does the Cilium agent read each node's PodCIDR from?",
+      "back": "The Kubernetes v1.Node object, via `spec.podCIDRs` or `spec.podCIDR` (or annotations).",
+      "explanation": "The agent waits on startup until that range appears for every enabled address family.",
+      "source": "Cilium documentation, “Kubernetes Host Scope”, “Kubernetes Host Scope”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/kubernetes/#kubernetes-host-scope",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In this mode, the Cilium agent will wait on startup until the PodCIDR range is made available via the Kubernetes v1.Node object for all enabled address families",
+      "uses": [
+        "Kubernetes host-scope IPAM",
+        "Cilium agent",
+        "PodCIDR",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.ipam-kubernetes"
+      ],
+      "order": 2250
+    },
+    {
+      "id": "cca.ipam-routing.host-kcm-flag",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "For Kubernetes host-scope IPAM, which flag must kube-controller-manager run with?",
+      "back": "`--allocate-node-cidrs`.",
+      "explanation": "Without it, Kubernetes does not allocate PodCIDR ranges for nodes, and the agent has nothing to use.",
+      "source": "Cilium documentation, “Kubernetes Host Scope”, “Kubernetes Host Scope, Note”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/kubernetes/#kubernetes-host-scope",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It is important to run the kube-controller-manager with the flag --allocate-node-cidrs to indicate to Kubernetes that PodCIDR ranges should be allocated.",
+      "uses": [
+        "Kubernetes host-scope IPAM",
+        "PodCIDR"
+      ],
+      "conceptIDs": [
+        "cca.ipam-kubernetes",
+        "cca.podcidr"
+      ],
+      "order": 2260
+    },
+    {
+      "id": "cca.ipam-routing.mp-annotation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In multi-pool IPAM, how do you explicitly name the pool a Pod gets its IP from?",
+      "back": "With the `ipam.cilium.io/ip-pool=<pool-name>` annotation, on the Pod or on its namespace.",
+      "explanation": "An explicit annotation is the first thing Cilium checks when choosing a pool.",
+      "source": "Cilium documentation, “Multi-Pool”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/multi-pool/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You can explicitly name the pool for a pod using the ipam.cilium.io/ip-pool=<pool-name> annotation, either on the pod or the namespace of the pod.",
+      "uses": [
+        "multi-pool IPAM",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cca.ipam-multi-pool"
+      ],
+      "order": 2270
+    },
+    {
+      "id": "cca.ipam-routing.mp-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In multi-pool IPAM, where does a Pod get its IP if neither it nor its namespace has a pool annotation or matching selector?",
+      "back": "From the pool named `default`.",
+      "explanation": "Setting `ipam.cilium.io/require-pool-match=\"true\"` instead blocks allocation until the Pod matches a non-default pool.",
+      "source": "Cilium documentation, “Multi-Pool”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/multi-pool/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "or if the pod or namespace don’t match any selectors, the pod’s IP will be allocated from the pool named default.",
+      "uses": [
+        "multi-pool IPAM",
+        "Pod",
+        "namespace",
+        "selector"
+      ],
+      "conceptIDs": [
+        "cca.ipam-multi-pool"
+      ],
+      "order": 2280
+    },
+    {
+      "id": "cca.ipam-routing.mp-overlap",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In multi-pool IPAM, what happens if a Pod matches more than one pool for the same IP family?",
+      "back": "IP allocation fails and an error is logged.",
+      "explanation": "A Pod must match exactly one pool per family, so pool selectors must not overlap.",
+      "source": "Cilium documentation, “Multi-Pool”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/multi-pool/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A pod must match exactly one pool for a given IP family. If it matches more than one pool, IP allocation fails and an error is logged.",
+      "uses": [
+        "multi-pool IPAM",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.ipam-multi-pool"
+      ],
+      "order": 2290
+    },
+    {
+      "id": "cca.ipam-routing.eni-single-operator",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "In AWS ENI IPAM, why does only a single operator talk to the EC2 service API?",
+      "back": "To avoid rate-limiting problems in large clusters.",
+      "explanation": "A pre-allocation watermark also keeps spare IPs on each node, so new Pods need no API call.",
+      "source": "Cilium documentation, “AWS ENI”, “AWS ENI”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/eni/#aws-eni",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The architecture ensures that only a single operator communicates with the EC2 service API to avoid rate-limiting issues in large clusters.",
+      "uses": [
+        "AWS ENI IPAM",
+        "Cilium Operator"
+      ],
+      "conceptIDs": [
+        "cca.ipam-eni"
+      ],
+      "order": 2300
+    },
+    {
+      "id": "cca.ipam-routing.encap-default",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "With no routing configuration, Cilium runs in {{c1::encapsulation}} mode, the mode with the fewest requirements on the underlying network.",
+      "explanation": "It only needs nodes to reach each other, which most networks already provide.",
+      "source": "Cilium documentation, “Routing”, “Encapsulation”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#encapsulation",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When no configuration is provided, Cilium automatically runs in this mode as it is the mode with the fewest requirements on the underlying networking infrastructure.",
+      "uses": [
+        "encapsulation mode",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.encap-default"
+      ],
+      "order": 2310
+    },
+    {
+      "id": "cca.ipam-routing.vxlan-port",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Firewalls between Cilium nodes must allow VXLAN encapsulation on port {{c1::8472/UDP}}.",
+      "explanation": "Encapsulated traffic between nodes travels on this port, so blocking it breaks cross-node Pod traffic.",
+      "source": "Cilium documentation, “Routing”, “Requirements on the network”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#requirements-on-the-network",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The underlying network and firewalls must allow encapsulated packets: Encapsulation Mode Port Range / Protocol VXLAN (Default) 8472/UDP Geneve 6081/UDP",
+      "uses": [
+        "VXLAN",
+        "firewall",
+        "port"
+      ],
+      "conceptIDs": [
+        "cca.tunnel-ports"
+      ],
+      "order": 2320
+    },
+    {
+      "id": "cca.ipam-routing.geneve-port",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Firewalls between Cilium nodes must allow Geneve encapsulation on port {{c1::6081/UDP}}.",
+      "explanation": "Geneve has its own port, different from VXLAN's, so switching protocol changes the firewall rule.",
+      "source": "Cilium documentation, “Routing”, “Requirements on the network”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#requirements-on-the-network",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The underlying network and firewalls must allow encapsulated packets: Encapsulation Mode Port Range / Protocol VXLAN (Default) 8472/UDP Geneve 6081/UDP",
+      "uses": [
+        "Geneve",
+        "firewall",
+        "port"
+      ],
+      "conceptIDs": [
+        "cca.tunnel-ports"
+      ],
+      "order": 2330
+    },
+    {
+      "id": "cca.ipam-routing.encap-reqs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does encapsulation mode require of the network between nodes?",
+      "back": "Only normal node-to-node connectivity: if the nodes can reach each other, the routing requirements are met.",
+      "explanation": "The network carries only node-addressed packets, so it never has to know about Pod addresses.",
+      "source": "Cilium documentation, “Routing”, “Requirements on the network”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#requirements-on-the-network",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Encapsulation relies on normal node to node connectivity. This means that if Cilium nodes can already reach each other, all routing requirements are already met.",
+      "uses": [
+        "encapsulation mode",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.encapsulation"
+      ],
+      "order": 2340
+    },
+    {
+      "id": "cca.ipam-routing.encap-simplicity",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In encapsulation mode, what does the network connecting the nodes not need to be made aware of?",
+      "back": "The PodCIDRs.",
+      "explanation": "The docs list this as the simplicity advantage: the underlying topology does not matter as long as nodes reach each other over IP/UDP.",
+      "source": "Cilium documentation, “Routing”, “Advantages of the model”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#advantages-of-the-model",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Simplicity The network which connects the cluster nodes does not need to be made aware of the PodCIDRs.",
+      "uses": [
+        "encapsulation mode",
+        "PodCIDR"
+      ],
+      "conceptIDs": [
+        "cca.encap-advantages"
+      ],
+      "order": 2350
+    },
+    {
+      "id": "cca.ipam-routing.encap-mtu",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How much per-packet overhead does VXLAN encapsulation add, and how can its effect be largely reduced?",
+      "back": "50 bytes per packet; enabling jumbo frames largely mitigates it.",
+      "explanation": "The headers lower the payload MTU and so the maximum throughput; 50 bytes matters less in a 9000-byte frame than a 1500-byte one.",
+      "source": "Cilium documentation, “Routing”, “Disadvantages of the model”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#disadvantages-of-the-model",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "the effective MTU available for payload is lower than with native-routing (50 bytes per network packet for VXLAN). This results in a lower maximum throughput rate for a particular network connection. This can be largely mitigated by enabling jumbo frames",
+      "uses": [
+        "VXLAN",
+        "encapsulation mode"
+      ],
+      "conceptIDs": [
+        "cca.encap-mtu"
+      ],
+      "order": 2360
+    },
+    {
+      "id": "cca.ipam-routing.native-delegate",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In native routing mode, what does Cilium do with packets not addressed to a local endpoint?",
+      "back": "It hands them to the Linux kernel's routing subsystem, as if a local process had sent them.",
+      "explanation": "That is why the network between nodes must be able to route PodCIDRs.",
+      "source": "Cilium documentation, “Routing”, “Native-Routing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#native-routing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In native routing mode, Cilium will delegate all packets which are not addressed to another local endpoint to the routing subsystem of the Linux kernel.",
+      "uses": [
+        "native routing mode",
+        "endpoint",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cca.native-routing"
+      ],
+      "order": 2370
+    },
+    {
+      "id": "cca.ipam-routing.native-figure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In native routing, how does a packet from a Pod on one node reach a Pod on another node?",
+      "back": "Unencapsulated, via the Linux routing table, which needs a route to the other node's PodCIDR.",
+      "explanation": "Each node must know how to forward to every other node's Pods, so the routes, not a tunnel, carry the traffic.",
+      "source": "Cilium documentation, “Routing”, “Requirements on the network (native routing)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#id4",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Linux kernel on the node must be aware on how to forward packets of pods or other workloads of all nodes running Cilium.",
+      "uses": [
+        "native routing mode",
+        "PodCIDR",
+        "Pod",
+        "node",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cca.native-routing",
+        "cca.native-routing-reqs"
+      ],
+      "image": {
+        "file": "media/cca-native-routing.svg",
+        "alt": "Two nodes, 192.168.1.11 with PodCIDR 10.0.1.0/24 and 192.168.1.12 with PodCIDR 10.0.2.0/24. Each has a Pod and a Linux kernel routing table: node 1 has \"10.0.2.0/24 via 192.168.1.12\", node 2 has \"10.0.1.0/24 via 192.168.1.11\". Arrows run from the Pod 10.0.1.5 through node 1's routing table, across a node network that must be able to route PodCIDRs, into node 2's routing table and to Pod 10.0.2.7, as plain packets with no tunnel.",
+        "credit": "Drawn for this deck from the Cilium documentation, “Routing”; addresses are examples",
+        "licence": "B · Apache 2.0",
+        "side": "back"
+      },
+      "order": 2380
+    },
+    {
+      "id": "cca.ipam-routing.native-cloud",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In native routing, how can a node forward Pod traffic if it does not itself know all Pod routes?",
+      "back": "A router on the network knows how to reach all Pods, and the node has a default route to it.",
+      "explanation": "The docs say this model is used for cloud provider network integration.",
+      "source": "Cilium documentation, “Routing”, “Requirements on the network (native routing)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#id4",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The node itself does not know how to route all pod IPs but a router exists on the network that knows how to reach all other pods. In this scenario, the Linux node is configured to contain a default route to point to such a router.",
+      "uses": [
+        "native routing mode",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.native-routing-reqs"
+      ],
+      "order": 2390
+    },
+    {
+      "id": "cca.ipam-routing.native-bgp",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In native routing, what is needed to distribute Pod routes when the nodes do not share a single L2 network?",
+      "back": "An additional component such as a BGP daemon.",
+      "explanation": "`auto-direct-node-routes` only covers nodes on one shared L2 network.",
+      "source": "Cilium documentation, “Routing”, “Requirements on the network (native routing)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#id4",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Otherwise, an additional system component such as a BGP daemon must be run to distribute the routes.",
+      "uses": [
+        "native routing mode",
+        "auto-direct-node-routes",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.auto-direct-node-routes",
+        "cca.native-routing-reqs"
+      ],
+      "order": 2400
+    },
+    {
+      "id": "cca.ipam-routing.native-required-opts",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which two options must be set to run Cilium's datapath in native routing mode?",
+      "back": "`routing-mode: native` and `ipv4-native-routing-cidr: x.x.x.x/y`.",
+      "explanation": "One switches the mode; the other tells Cilium which range the network can route natively.",
+      "source": "Cilium documentation, “Routing”, “Configuration (native routing)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#id5",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The following configuration options must be set to run the datapath in native routing mode: routing-mode: native: Enable native routing mode. ipv4-native-routing-cidr: x.x.x.x/y: Set the CIDR in which native routing can be performed.",
+      "uses": [
+        "native routing mode",
+        "ipv4-native-routing-cidr"
+      ],
+      "conceptIDs": [
+        "cca.native-routing-cidr"
+      ],
+      "order": 2410
+    },
+    {
+      "id": "cca.ipam-routing.masq-disable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which options turn off Cilium's automatic masquerading?",
+      "back": "`enable-ipv4-masquerade: false` for IPv4 and `enable-ipv6-masquerade: false` for IPv6.",
+      "explanation": "Masquerading is on by default, so it must be disabled explicitly, per address family.",
+      "source": "Cilium documentation, “Masquerading”, “Masquerading”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/masquerading/#masquerading",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This behavior can be disabled with the option enable-ipv4-masquerade: false for IPv4 and enable-ipv6-masquerade: false for IPv6 traffic leaving the host.",
+      "uses": [
+        "masquerading",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.masquerading"
+      ],
+      "order": 2420
+    },
+    {
+      "id": "cca.ipam-routing.masq-routable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "With `ipv4-native-routing-cidr: 10.0.0.0/8` set, which destinations does Cilium not masquerade?",
+      "back": "All destinations within `10.0.0.0/8`.",
+      "explanation": "Pods can reach natively routable destinations directly without address translation.",
+      "source": "Cilium documentation, “Masquerading”, “Configuration: Setting the routable CIDR”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/masquerading/#configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If the pod IPs are routable across a wider network, that network can be specified with the option: ipv4-native-routing-cidr: 10.0.0.0/8 (or ipv6-native-routing-cidr: fd00::/100 for IPv6 addresses) in which case all destinations within that CIDR will not be masqueraded.",
+      "uses": [
+        "masquerading",
+        "ipv4-native-routing-cidr"
+      ],
+      "conceptIDs": [
+        "cca.masquerading"
+      ],
+      "order": 2430
+    },
+    {
+      "id": "cca.ipam-routing.masq-cloud",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In a public cloud, what does Cilium use as the native routing range if `ipv4-native-routing-cidr` is not set?",
+      "back": "The VPC CIDR range, which it detects automatically.",
+      "explanation": "So Pod traffic to other resources in the same VPC, such as virtual machines, is sent without masquerading.",
+      "source": "Cilium documentation, “Masquerading”, “Configuration: Setting the routable CIDR”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/masquerading/#configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In the public cloud environment, if you don’t configure ipv4-native-routing-cidr, Cilium will automatically detect the VPC CIDR range as the native routing range.",
+      "uses": [
+        "masquerading",
+        "ipv4-native-routing-cidr",
+        "cidr"
+      ],
+      "conceptIDs": [
+        "cca.masquerading"
+      ],
+      "order": 2440
+    },
+    {
+      "id": "cca.ipam-routing.masq-ebpf",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which masquerading implementation do the Cilium docs call the most efficient, and how is it enabled?",
+      "back": "The eBPF-based implementation, enabled with the Helm option `bpf.masquerade=true`.",
+      "explanation": "The alternative, iptables-based, is the legacy implementation.",
+      "source": "Cilium documentation, “Masquerading”, “Implementation Modes: eBPF-based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/masquerading/#ebpf-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The eBPF-based implementation is the most efficient implementation. It can be enabled with the bpf.masquerade=true helm option.",
+      "uses": [
+        "masquerading",
+        "ebpf",
+        "Helm chart"
+      ],
+      "conceptIDs": [
+        "cca.masq-modes"
+      ],
+      "order": 2450
+    },
+    {
+      "id": "cca.ipam-routing.masq-iptables",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What is the iptables-based masquerading implementation's main advantage?",
+      "back": "It is the legacy implementation that works on all kernel versions.",
+      "explanation": "By default it masquerades all traffic leaving on a non-Cilium network device.",
+      "source": "Cilium documentation, “Masquerading”, “Implementation Modes: iptables-based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/masquerading/#iptables-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This is the legacy implementation that will work on all kernel versions. The default behavior will masquerade all traffic leaving on a non-Cilium network device.",
+      "uses": [
+        "masquerading",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cca.masq-modes"
+      ],
+      "order": 2460
+    },
+    {
+      "id": "cca.ipam-routing.kpr-socketlb",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Cilium's kube-proxy replacement depends on the {{c1::socket-LB}} feature.",
+      "explanation": "Service translation for in-cluster connections happens at the socket, which the replacement relies on.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Kubernetes Without kube-proxy, Note”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#kubeproxy-free",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note Cilium’s kube-proxy replacement depends on the socket-LB feature.",
+      "uses": [
+        "kube-proxy replacement",
+        "socket-LB"
+      ],
+      "conceptIDs": [
+        "cca.kube-proxy-replacement",
+        "cca.socket-lb"
+      ],
+      "order": 2470
+    },
+    {
+      "id": "cca.ipam-routing.kpr-kubeadm",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "With kubeadm, how do you initialise a control plane without installing kube-proxy?",
+      "back": "`kubeadm init --skip-phases=addon/kube-proxy`.",
+      "explanation": "Skipping the add-on leaves Service handling to Cilium's kube-proxy replacement.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Quick-Start”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#quick-start",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Initialize the control-plane node via kubeadm init and skip the installation of the kube-proxy add-on:",
+      "uses": [
+        "kubeadm",
+        "kube-proxy",
+        "control plane"
+      ],
+      "conceptIDs": [
+        "cca.skip-kube-proxy"
+      ],
+      "order": 2480
+    },
+    {
+      "id": "cca.ipam-routing.kpr-helm",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In a cluster without kube-proxy, why must Cilium be given `k8sServiceHost` and `k8sServicePort`?",
+      "back": "No kube-proxy provisions the kube-apiserver Service, so the agent must be told the API server's real address and port.",
+      "explanation": "The environment still exports the ClusterIP of the kube-apiserver Service, but nothing is there to translate it.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Quick-Start”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#quick-start",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "there is no kube-proxy in our setup provisioning that service. Therefore, the Cilium agent needs to be made aware of this information with the following configuration:",
+      "uses": [
+        "kube-proxy",
+        "kube-apiserver",
+        "ClusterIP",
+        "Cilium agent",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.skip-kube-proxy",
+        "cca.kube-proxy-replacement"
+      ],
+      "order": 2490
+    },
+    {
+      "id": "cca.ipam-routing.kpr-remove-breaks",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What happens to existing Service connections when you remove kube-proxy from a running cluster?",
+      "back": "They break, and Service traffic stops until Cilium's replacement is installed.",
+      "explanation": "The docs warn of this before giving the commands that delete the kube-proxy DaemonSet and ConfigMap.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Quick-Start, Warning”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#quick-start",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Be aware that removing kube-proxy will break existing service connections. It will also stop service related traffic until the Cilium replacement has been installed.",
+      "uses": [
+        "kube-proxy",
+        "Service",
+        "DaemonSet",
+        "ConfigMap"
+      ],
+      "conceptIDs": [
+        "cca.kube-proxy-replacement"
+      ],
+      "order": 2500
+    },
+    {
+      "id": "cca.ipam-routing.kpr-validate",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How can you check that the Cilium agent is running with kube-proxy replacement?",
+      "back": "`kubectl -n kube-system exec ds/cilium -- cilium-dbg status | grep KubeProxyReplacement`, which should show `True`.",
+      "explanation": "The agent's own status reports the mode it is running in, including socket-LB details with `--verbose`.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Validate the Setup”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#validate-the-setup",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "we can first validate that the Cilium agent is running in the desired mode: $ kubectl -n kube-system exec ds/cilium -- cilium-dbg status | grep KubeProxyReplacement KubeProxyReplacement: True",
+      "uses": [
+        "kube-proxy replacement",
+        "Cilium agent",
+        "cilium-dbg",
+        "kubectl"
+      ],
+      "conceptIDs": [
+        "cca.kube-proxy-replacement"
+      ],
+      "order": 2510
+    },
+    {
+      "id": "cca.ipam-routing.socketlb-connect",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "After socket-LB selects a backend at `connect()`, why is no lower-layer address translation needed for the connection?",
+      "back": "The kernel socket is already connected to the backend address, though the application believes it is connected to the service.",
+      "explanation": "The translation is done once, at the socket, instead of on every packet.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Socket LoadBalancer Bypass in Pod Namespace”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#socketlb-host-netns-only",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This means that although the application assumes it is connected to the service address, the corresponding kernel socket is actually connected to the backend address and therefore no additional lower layer NAT is required.",
+      "uses": [
+        "socket-LB",
+        "kernel",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.socket-lb"
+      ],
+      "order": 2520
+    },
+    {
+      "id": "cca.ipam-routing.maglev-enable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which Helm setting enables Maglev hashing for service load balancing?",
+      "back": "`loadBalancer.algorithm=maglev`.",
+      "explanation": "It is set alongside `kubeProxyReplacement=true`, as Maglev is part of the kube-proxy replacement's load balancer.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Maglev Consistent Hashing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#maglev",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Maglev hashing for services load balancing can be enabled by setting loadBalancer.algorithm=maglev:",
+      "uses": [
+        "Maglev consistent hashing",
+        "Helm chart",
+        "kube-proxy replacement"
+      ],
+      "conceptIDs": [
+        "cca.maglev"
+      ],
+      "order": 2530
+    },
+    {
+      "id": "cca.ipam-routing.maglev-ns",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which traffic does Maglev hashing apply to?",
+      "back": "Only external (north-south) traffic.",
+      "explanation": "In-cluster connections are assigned to backends directly at the socket, for example at TCP connect time, so they never reach Maglev.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Maglev Consistent Hashing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#maglev",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note that Maglev hashing is applied only to external (N-S) traffic. For in-cluster service connections (E-W), sockets are assigned to service backends directly, e.g. at TCP connect time, without any intermediate hop and thus are not subject to Maglev.",
+      "uses": [
+        "Maglev consistent hashing",
+        "socket-LB"
+      ],
+      "conceptIDs": [
+        "cca.maglev"
+      ],
+      "order": 2540
+    },
+    {
+      "id": "cca.ipam-routing.dsr-enable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which Helm option switches Cilium's NodePort handling to DSR, and what does DSR preserve for the backend?",
+      "back": "`loadBalancer.mode=dsr`; the client's source IP is preserved, so backend policy can match it.",
+      "explanation": "In SNAT mode the source IP is replaced, so the backend node cannot match on it; DSR needs native routing and does not work in encapsulation mode.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Direct Server Return (DSR)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#dsr-mode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Another advantage in DSR mode is that the client’s source IP is preserved, so policy can match on it at the backend node. In the SNAT mode this is not possible.",
+      "uses": [
+        "DSR",
+        "Helm chart",
+        "NodePort"
+      ],
+      "conceptIDs": [
+        "cca.dsr"
+      ],
+      "order": 2550
+    },
+    {
+      "id": "cca.ipam-routing.sc-no-kcm",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Your managed platform will not let you run kube-controller-manager with `--allocate-node-cidrs`. Which IPAM mode still gives each node a PodCIDR?",
+      "back": "A: Cluster-scope IPAM.",
+      "choices": "A) Cluster-scope IPAM\nB) Kubernetes host-scope IPAM\nC) CNI chaining\nD) Native routing mode",
+      "choicesExplained": "B needs Kubernetes to allocate PodCIDRs. C combines CNI plugins and hands IPAM to the other plugin. D is a routing mode, not an IPAM mode.",
+      "explanation": "In cluster scope the Cilium Operator assigns PodCIDRs through CiliumNode, independent of Kubernetes.",
+      "source": "Cilium documentation, “Cluster Scope (Default)”, “Cluster Scope (Default)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/cluster-pool/#cluster-scope-default",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This is useful if Kubernetes cannot be configured to hand out PodCIDRs or if more control is needed.",
+      "uses": [
+        "cluster-scope IPAM",
+        "Kubernetes host-scope IPAM",
+        "CNI chaining",
+        "native routing mode",
+        "PodCIDR"
+      ],
+      "conceptIDs": [
+        "cca.ipam-cluster-pool",
+        "cca.cluster-pool-vs-host-scope",
+        "cca.ipam-kubernetes",
+        "cca.podcidr"
+      ],
+      "order": 2560
+    },
+    {
+      "id": "cca.ipam-routing.sc-firewall-8472",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A default Cilium install works within each node, but Pods on different nodes cannot reach each other. The node firewall allows only 22/TCP and 6443/TCP. What is missing?",
+      "back": "C: 8472/UDP for VXLAN.",
+      "choices": "A) 6081/UDP for Geneve\nB) 51871/UDP\nC) 8472/UDP for VXLAN\nD) 4240/TCP only",
+      "choicesExplained": "A is Geneve's port, not the default protocol. B is not an encapsulation port. D alone would not carry encapsulated Pod traffic.",
+      "explanation": "The default is encapsulation with VXLAN, and firewalls must allow its encapsulated packets.",
+      "source": "Cilium documentation, “Routing”, “Requirements on the network”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#requirements-on-the-network",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The underlying network and firewalls must allow encapsulated packets: Encapsulation Mode Port Range / Protocol VXLAN (Default) 8472/UDP",
+      "uses": [
+        "VXLAN",
+        "Geneve",
+        "encapsulation mode",
+        "firewall",
+        "Pod",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.tunnel-ports",
+        "cca.vxlan",
+        "cca.encap-default"
+      ],
+      "order": 2570
+    },
+    {
+      "id": "cca.ipam-routing.sc-geneve-port",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "You set `tunnel-protocol: geneve`. Which port must the firewall between nodes allow for encapsulated traffic?",
+      "back": "C: 6081/UDP.",
+      "choices": "A) 6443/TCP\nB) 8472/UDP\nC) 6081/UDP\nD) 4789/TCP",
+      "choicesExplained": "B is VXLAN's port. A is the usual kube-apiserver port. D is not in Cilium's encapsulation table.",
+      "explanation": "Each encapsulation protocol has its own default port, set by `tunnel-port`.",
+      "source": "Cilium documentation, “Routing”, “Configuration”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "tunnel-port: Set the port for the encapsulation protocol. Defaults to 8472 for vxlan and 6081 for geneve.",
+      "uses": [
+        "Geneve",
+        "firewall",
+        "port"
+      ],
+      "conceptIDs": [
+        "cca.tunnel-ports",
+        "cca.geneve"
+      ],
+      "order": 2580
+    },
+    {
+      "id": "cca.ipam-routing.sc-l3-native",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Your nodes sit in three racks, each its own routed subnet, and you want native routing. Why is `auto-direct-node-routes: true` alone not enough?",
+      "back": "D: It only works when all nodes share a single L2 network.",
+      "choices": "A) It only works with Geneve\nB) It requires AWS ENI IPAM\nC) It disables IP forwarding\nD) It only works when all nodes share a single L2 network",
+      "choicesExplained": "A: it is a native routing option, not a tunnel setting. B: it is not tied to an IPAM mode. C: Cilium enables IP forwarding for native routing.",
+      "explanation": "Across routed subnets, the docs call for a component such as a BGP daemon to distribute routes.",
+      "source": "Cilium documentation, “Routing”, “Requirements on the network (native routing)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#id4",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If all nodes share a single L2 network, then this can be taken care of by enabling the option auto-direct-node-routes: true. Otherwise, an additional system component such as a BGP daemon must be run to distribute the routes.",
+      "uses": [
+        "auto-direct-node-routes",
+        "native routing mode",
+        "Geneve",
+        "AWS ENI IPAM",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.auto-direct-node-routes",
+        "cca.native-routing-reqs"
+      ],
+      "order": 2590
+    },
+    {
+      "id": "cca.ipam-routing.sc-choose-encap",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "The network team will not add routes for Pod ranges, but nodes can reach each other over IP. Which routing mode suits this cluster?",
+      "back": "D: Encapsulation mode.",
+      "choices": "A) Native routing with `auto-direct-node-routes`\nB) AWS ENI datapath\nC) Native routing with a BGP daemon\nD) Encapsulation mode",
+      "choicesExplained": "A and C both need the network or nodes to route PodCIDRs. B is only for AWS.",
+      "explanation": "Encapsulation needs only node-to-node reachability; the network never sees Pod addresses.",
+      "source": "Cilium documentation, “Routing”, “Requirements on the network”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#requirements-on-the-network",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Encapsulation relies on normal node to node connectivity. This means that if Cilium nodes can already reach each other, all routing requirements are already met.",
+      "uses": [
+        "encapsulation mode",
+        "native routing mode",
+        "auto-direct-node-routes",
+        "PodCIDR",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.encap-vs-native",
+        "cca.encapsulation",
+        "cca.encap-advantages"
+      ],
+      "order": 2600
+    },
+    {
+      "id": "cca.ipam-routing.sc-mtu",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "After moving to VXLAN encapsulation, large transfers between Pods are slower than before. What is the likely cause and mitigation?",
+      "back": "A: The VXLAN header overhead; enable jumbo frames.",
+      "choices": "A) The VXLAN header overhead; enable jumbo frames\nB) Masquerading on every packet; disable masquerading\nC) Maglev lookups; switch to random selection\nD) The Cilium Operator being down; restart it",
+      "choicesExplained": "B: masquerading applies to traffic leaving the cluster. C: Maglev applies to external traffic only. D: the operator is not in the forwarding path.",
+      "explanation": "Encapsulation headers lower the payload size per packet and so throughput; bigger frames shrink the relative overhead.",
+      "source": "Cilium documentation, “Routing”, “Disadvantages of the model”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#disadvantages-of-the-model",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This can be largely mitigated by enabling jumbo frames (50 bytes of overhead for each 1500 bytes vs 50 bytes of overhead for each 9000 bytes).",
+      "uses": [
+        "VXLAN",
+        "masquerading",
+        "Maglev consistent hashing",
+        "Cilium Operator",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.encap-mtu"
+      ],
+      "order": 2610
+    },
+    {
+      "id": "cca.ipam-routing.sc-native-network",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "Which statement is true of native routing mode but not of encapsulation mode?",
+      "back": "D: The network connecting nodes must be able to route PodCIDRs.",
+      "choices": "A) Nodes need only reach each other over IP/UDP\nB) All traffic between nodes is wrapped in tunnels\nC) It is what Cilium runs when no routing configuration is given\nD) The network connecting nodes must be able to route PodCIDRs",
+      "choicesExplained": "A, B and C describe encapsulation mode.",
+      "explanation": "Native routing forwards plain Pod packets, so the network must know where Pod addresses live.",
+      "source": "Cilium documentation, “Routing”, “Native-Routing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#native-routing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "As a result, the network connecting the cluster nodes must be capable of routing PodCIDRs.",
+      "uses": [
+        "native routing mode",
+        "encapsulation mode",
+        "PodCIDR",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.native-routing",
+        "cca.native-routing-reqs",
+        "cca.encap-vs-native"
+      ],
+      "order": 2620
+    },
+    {
+      "id": "cca.ipam-routing.sc-native-cidr",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "You set `routing-mode: native` and nothing else. Which other option must be set to run the datapath in native routing mode?",
+      "back": "B: `ipv4-native-routing-cidr`.",
+      "choices": "A) `tunnel-protocol`\nB) `ipv4-native-routing-cidr`\nC) `auto-direct-node-routes`\nD) `enable-ipv4-masquerade`",
+      "choicesExplained": "A only matters in encapsulation mode. C is optional in native routing. D controls masquerading and is on by default.",
+      "explanation": "Native routing needs both the mode and the CIDR in which native routing can be performed.",
+      "source": "Cilium documentation, “Routing”, “Configuration (native routing)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#id5",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The following configuration options must be set to run the datapath in native routing mode: routing-mode: native: Enable native routing mode. ipv4-native-routing-cidr: x.x.x.x/y: Set the CIDR in which native routing can be performed.",
+      "uses": [
+        "native routing mode",
+        "ipv4-native-routing-cidr",
+        "auto-direct-node-routes",
+        "Cilium"
+      ],
+      "conceptIDs": [
+        "cca.native-routing-cidr"
+      ],
+      "order": 2630
+    },
+    {
+      "id": "cca.ipam-routing.sc-multipool",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Pods in the `payments` namespace must get IPs from `10.50.0.0/16`, and all other Pods from the usual range. Which IPAM approach fits?",
+      "back": "C: Multi-pool IPAM with the `payments` namespace annotated for a dedicated pool.",
+      "choices": "A) Cluster-scope IPAM with a longer `clusterPoolIPv4PodCIDRList`\nB) Kubernetes host-scope IPAM\nC) Multi-pool IPAM with the `payments` namespace annotated for a dedicated pool\nD) CNI chaining",
+      "choicesExplained": "A and B give each node a range but cannot pick a range by namespace. D hands IPAM to another plugin.",
+      "explanation": "Multi-pool chooses a pool from Pod or namespace annotations and selectors.",
+      "source": "Cilium documentation, “Multi-Pool”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/multi-pool/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You can explicitly name the pool for a pod using the ipam.cilium.io/ip-pool=<pool-name> annotation, either on the pod or the namespace of the pod.",
+      "uses": [
+        "multi-pool IPAM",
+        "cluster-scope IPAM",
+        "Kubernetes host-scope IPAM",
+        "CNI chaining",
+        "namespace",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.ipam-multi-pool",
+        "cca.ipam-modes"
+      ],
+      "order": 2640
+    },
+    {
+      "id": "cca.ipam-routing.sc-multipool-default",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "In multi-pool IPAM, a new Pod got an address from the `default` pool because its pool did not exist yet. How do you make such Pods wait instead?",
+      "back": "B: Set `ipam.cilium.io/require-pool-match=\"true\"` on the Pod or namespace.",
+      "choices": "A) Change the annotation on the running Pod\nB) Set `ipam.cilium.io/require-pool-match=\"true\"` on the Pod or namespace\nC) Delete the `default` pool while Pods use it\nD) Switch to cluster-scope IPAM on the live cluster",
+      "choicesExplained": "A: annotations are only read when a Pod is created. C: in-use pools must not be deleted. D: changing IPAM mode live risks lasting disruption.",
+      "explanation": "The annotation blocks allocation until the Pod matches a non-default pool.",
+      "source": "Cilium documentation, “Multi-Pool”, “Architecture”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/multi-pool/#architecture",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If this is undesired behaviour, you can set the ipam.cilium.io/require-pool-match=\"true\" annotation on the pod or namespace to block IP allocation until the pod matches a non-default pool.",
+      "uses": [
+        "multi-pool IPAM",
+        "cluster-scope IPAM",
+        "Pod",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cca.ipam-multi-pool"
+      ],
+      "order": 2650
+    },
+    {
+      "id": "cca.ipam-routing.sc-change-ipam",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team wants to move a production cluster from Kubernetes host-scope IPAM to cluster-scope IPAM. What do the docs advise?",
+      "back": "D: Install a fresh cluster with the new IPAM configuration.",
+      "choices": "A) Edit the IPAM mode in the ConfigMap and restart agents\nB) Change it one node at a time\nC) Run the online migration tool for this pair\nD) Install a fresh cluster with the new IPAM configuration",
+      "choicesExplained": "A and B change IPAM live, which may cause persistent disruption. C: the only online migration is cluster-pool to multi-pool.",
+      "explanation": "Changing IPAM mode in a live environment may cause lasting connectivity disruption.",
+      "source": "Cilium documentation, “IP Address Management (IPAM)”, “IP Address Management (IPAM)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/#address-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The safest path to change IPAM mode is to install a fresh Kubernetes cluster with the new IPAM configuration.",
+      "uses": [
+        "Kubernetes host-scope IPAM",
+        "cluster-scope IPAM",
+        "IPAM",
+        "ConfigMap"
+      ],
+      "conceptIDs": [
+        "cca.ipam-modes",
+        "cca.ipam"
+      ],
+      "order": 2660
+    },
+    {
+      "id": "cca.ipam-routing.sc-masq-vm",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Pods must reach a legacy VM at `10.20.5.9` and the VM must see the real Pod IPs; Pod IPs are routable across `10.0.0.0/8`. What setting achieves this?",
+      "back": "A: `ipv4-native-routing-cidr: 10.0.0.0/8`.",
+      "choices": "A) `ipv4-native-routing-cidr: 10.0.0.0/8`\nB) `tunnel-protocol: geneve`\nC) `enable-ipv4-masquerade: true`\nD) `loadBalancer.mode=dsr`",
+      "choicesExplained": "C is the default and would hide Pod IPs. B changes the tunnel protocol, not masquerading. D is for NodePort replies.",
+      "explanation": "Destinations inside the native routing CIDR are not masqueraded, so the VM sees Pod source addresses.",
+      "source": "Cilium documentation, “Masquerading”, “Configuration: Setting the routable CIDR”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/masquerading/#configuration",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "in which case all destinations within that CIDR will not be masqueraded.",
+      "uses": [
+        "ipv4-native-routing-cidr",
+        "masquerading",
+        "Geneve",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.masquerading",
+        "cca.native-routing-cidr"
+      ],
+      "order": 2670
+    },
+    {
+      "id": "cca.ipam-routing.sc-masq-kernel",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "Which masquerading implementation is the one the docs describe as working on all kernel versions?",
+      "back": "C: iptables-based.",
+      "choices": "A) eBPF-based\nB) eBPF-based ip-masq-agent\nC) iptables-based\nD) Socket-LB",
+      "choicesExplained": "A and B are eBPF implementations, which the docs call the most efficient. D is load balancing, not masquerading.",
+      "explanation": "It is the legacy implementation, kept for compatibility.",
+      "source": "Cilium documentation, “Masquerading”, “Implementation Modes: iptables-based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/masquerading/#iptables-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This is the legacy implementation that will work on all kernel versions.",
+      "uses": [
+        "masquerading",
+        "socket-LB",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cca.masq-modes"
+      ],
+      "order": 2680
+    },
+    {
+      "id": "cca.ipam-routing.sc-kpr-apiserver",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "You built a cluster with `kubeadm init --skip-phases=addon/kube-proxy` and installed Cilium with `kubeProxyReplacement=true`, but agents cannot reach the Kubernetes API. What was probably missed?",
+      "back": "C: Setting `k8sServiceHost` and `k8sServicePort` to the API server's address and port.",
+      "choices": "A) Enabling Maglev\nB) Opening 8472/UDP\nC) Setting `k8sServiceHost` and `k8sServicePort` to the API server's address and port\nD) Enabling CNI chaining",
+      "choicesExplained": "A changes backend selection. B carries Pod traffic between nodes, not the agent's API access. D is about combining CNI plugins.",
+      "explanation": "Without kube-proxy, the kube-apiserver Service's ClusterIP is not provisioned, so the agent needs the real address.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Quick-Start”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#quick-start",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Specifying this is necessary as kubeadm init is run explicitly without setting up kube-proxy",
+      "uses": [
+        "kubeadm",
+        "kube-proxy",
+        "kube-proxy replacement",
+        "Maglev consistent hashing",
+        "CNI chaining",
+        "kube-apiserver"
+      ],
+      "conceptIDs": [
+        "cca.skip-kube-proxy",
+        "cca.kube-proxy-replacement"
+      ],
+      "order": 2690
+    },
+    {
+      "id": "cca.ipam-routing.sc-kpr-ew",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "How does Cilium's kube-proxy replacement balance a Pod's connection to a ClusterIP Service inside the cluster?",
+      "back": "B: It picks the backend at the socket level, at `connect()`.",
+      "choices": "A) It translates every packet with iptables rules\nB) It picks the backend at the socket level, at `connect()`\nC) It sends the traffic through Envoy\nD) It applies Maglev hashing to each packet",
+      "choicesExplained": "A is kube-proxy's traditional approach. C: Envoy parses application-layer protocols. D: Maglev is for external traffic.",
+      "explanation": "East-west traffic uses socket-LB, avoiding per-packet translation.",
+      "source": "Cilium documentation, “Introduction to Cilium & Hubble”, “Load Balancing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/overview/intro/#load-balancing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "East-west load balancing rewrites service connections at the socket level (connect()), avoiding the overhead of per-packet NAT and fully replacing kube-proxy.",
+      "uses": [
+        "kube-proxy replacement",
+        "socket-LB",
+        "ClusterIP",
+        "Service",
+        "Envoy",
+        "Maglev consistent hashing",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.socket-lb",
+        "cca.kube-proxy-replacement"
+      ],
+      "order": 2700
+    },
+    {
+      "id": "cca.ipam-routing.sc-dsr",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "External clients reach a NodePort Service, and backend network policy must match the client's real source IP. Which setting helps?",
+      "back": "D: `loadBalancer.mode=dsr`.",
+      "choices": "A) `loadBalancer.mode=snat`\nB) `loadBalancer.algorithm=maglev`\nC) `tunnel-protocol: vxlan`\nD) `loadBalancer.mode=dsr`",
+      "choicesExplained": "A replaces the source IP, so policy cannot match it. B changes backend selection only. C is a tunnel setting.",
+      "explanation": "In DSR mode the client's source IP is preserved at the backend node.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Direct Server Return (DSR)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#dsr-mode",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Another advantage in DSR mode is that the client’s source IP is preserved, so policy can match on it at the backend node.",
+      "uses": [
+        "DSR",
+        "Maglev consistent hashing",
+        "VXLAN",
+        "NodePort",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.dsr"
+      ],
+      "order": 2710
+    },
+    {
+      "id": "cca.ipam-routing.sc-maglev",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "Backends of an externally exposed Service are often added and removed, and you want nodes to pick the same backend for a flow without sharing state. Which feature fits?",
+      "back": "D: Maglev consistent hashing.",
+      "choices": "A) Hybrid DSR and SNAT mode\nB) CRD-backed IPAM\nC) Socket-LB bypass\nD) Maglev consistent hashing",
+      "choicesExplained": "A changes how replies return. C falls back to the tc load balancer for special Pods. B is address management.",
+      "explanation": "Maglev gives consistent backend selection per 5-tuple across nodes and limits disruption when backends change.",
+      "source": "Cilium documentation, “Kubernetes Without kube-proxy”, “Maglev Consistent Hashing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/#maglev",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Nodes added to the cluster will make consistent backend selection throughout the cluster for a given 5-tuple without having to synchronize state with the other Nodes.",
+      "uses": [
+        "Maglev consistent hashing",
+        "DSR",
+        "socket-LB",
+        "CRD-backed IPAM",
+        "Service"
+      ],
+      "conceptIDs": [
+        "cca.maglev"
+      ],
+      "order": 2720
+    },
+    {
+      "id": "cca.ipam-routing.sc-eni",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A large Cilium cluster on AWS keeps hitting EC2 API rate limits when Pods start. Which part of AWS ENI IPAM's design addresses this?",
+      "back": "D: A single operator talks to the EC2 API and keeps a pre-allocation watermark.",
+      "choices": "A) Each agent calls the EC2 API itself\nB) Pods get IPs from a VXLAN overlay\nC) Masquerading is disabled\nD) A single operator talks to the EC2 API and keeps a pre-allocation watermark",
+      "choicesExplained": "A is the opposite of the design. B: ENI IPs are routable in the VPC, not overlay addresses. C does not change API calls.",
+      "explanation": "Spare IPs kept on nodes mean a new Pod needs no EC2 call, and one caller avoids rate-limiting.",
+      "source": "Cilium documentation, “AWS ENI”, “AWS ENI”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/eni/#aws-eni",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A pre-allocation watermark is used to maintain a number of IP addresses to be available for use on nodes at all times without needing to contact the EC2 API when a new pod is scheduled in the cluster.",
+      "uses": [
+        "AWS ENI IPAM",
+        "VXLAN",
+        "masquerading",
+        "Pod"
+      ],
+      "conceptIDs": [
+        "cca.ipam-eni"
+      ],
+      "order": 2730
+    },
+    {
+      "id": "cca.ipam-routing.sc-crd-ipam",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "An in-house controller must decide exactly which IPs each node may hand to Pods. Which IPAM mode fits?",
+      "back": "B: CRD-backed IPAM.",
+      "choices": "A) Kubernetes host-scope IPAM\nB) CRD-backed IPAM\nC) Cluster-scope IPAM\nD) AWS ENI IPAM",
+      "choicesExplained": "A takes ranges from Kubernetes. C lets the Cilium Operator assign ranges. D is AWS-specific.",
+      "explanation": "CRD-backed IPAM lets an external operator write the available addresses into each CiliumNode.",
+      "source": "Cilium documentation, “CRD-Backed”, “CRD-Backed”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/crd/#crd-backed",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This allows to delegate IPAM to external operators or make it user configurable per node.",
+      "uses": [
+        "CRD-backed IPAM",
+        "Kubernetes host-scope IPAM",
+        "cluster-scope IPAM",
+        "AWS ENI IPAM",
+        "node"
+      ],
+      "conceptIDs": [
+        "cca.ipam-crd"
+      ],
+      "order": 2740
+    },
+    {
+      "id": "cca.ipam-routing.vs-pool-host",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Cluster-scope versus Kubernetes host-scope IPAM: who assigns each node's PodCIDR, and through which object?",
+      "back": "Cluster scope: the Cilium Operator, via CiliumNode. Host scope: Kubernetes, via the v1.Node object.",
+      "explanation": "Both then allocate Pod IPs on the node with a host-scope allocator; only the source of the range differs.",
+      "source": "Cilium documentation, “Cluster Scope (Default)”, “Cluster Scope (Default)”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/ipam/cluster-pool/#cluster-scope-default",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The cluster-scope IPAM mode assigns per-node PodCIDRs to each node and allocates IPs using a host-scope allocator on each node. It is thus similar to the Kubernetes Host Scope mode.",
+      "uses": [
+        "cluster-scope IPAM",
+        "Kubernetes host-scope IPAM",
+        "Cilium Operator",
+        "CiliumNode",
+        "PodCIDR"
+      ],
+      "conceptIDs": [
+        "cca.cluster-pool-vs-host-scope"
+      ],
+      "order": 2750
+    },
+    {
+      "id": "cca.ipam-routing.vs-encap-native",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Encapsulation versus native routing: what must the underlying network do in each?",
+      "back": "Encapsulation: only connect the nodes. Native routing: be able to route the PodCIDRs themselves.",
+      "explanation": "Encapsulation hides Pod addresses inside tunnels at an MTU cost; native routing avoids that overhead but exposes Pod addresses to the network.",
+      "source": "Cilium documentation, “Routing”, “Native-Routing”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/routing/#native-routing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The native packet forwarding mode leverages the routing capabilities of the network Cilium runs on instead of performing encapsulation.",
+      "uses": [
+        "encapsulation mode",
+        "native routing mode",
+        "PodCIDR"
+      ],
+      "conceptIDs": [
+        "cca.encap-vs-native"
+      ],
+      "order": 2760
+    },
+    {
+      "id": "cca.ipam-routing.vs-masq-modes",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "eBPF-based versus iptables-based masquerading: how do they differ?",
+      "back": "eBPF-based is the most efficient, enabled with `bpf.masquerade=true`; iptables-based is the legacy one that works on all kernels.",
+      "explanation": "The docs also note behaviour differences, such as traffic to cluster nodes' External IPs not being masqueraded under eBPF.",
+      "source": "Cilium documentation, “Masquerading”, “Implementation Modes: eBPF-based”",
+      "sourceURL": "https://docs.cilium.io/en/stable/network/concepts/masquerading/#ebpf-based",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When eBPF-masquerading is enabled, traffic from pods to the External IP of cluster nodes will also not be masqueraded. The eBPF implementation differs from the iptables-based masquerading on that aspect.",
+      "uses": [
+        "masquerading",
+        "ebpf",
+        "kernel"
+      ],
+      "conceptIDs": [
+        "cca.masq-modes"
+      ],
+      "order": 2770
+    }
+  ]
+}
