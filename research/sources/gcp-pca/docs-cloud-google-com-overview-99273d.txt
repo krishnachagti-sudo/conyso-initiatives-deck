@@ -1,0 +1,270 @@
+Overview of Cloud Deploy  |  Google Cloud Documentation
+
+ Skip to main content
+
+ Home
+
+ Documentation
+
+ Application development
+
+ Cloud Deploy
+
+ Guides
+
+ Send feedback
+
+ # 
+ Overview of Cloud Deploy
+
+ Stay organized with collections
+
+ Save and categorize content based on your preferences.
+
+Cloud Deploy is a managed service that automates delivery of your
+applications to a series of target
+environments in a defined promotion sequence. When you want to deploy your
+updated application, you create a release,
+whose lifecycle
+is managed by a delivery pipeline.
+
+## How a Cloud Deploy pipeline works
+ {#how_a_pipeline_works}
+
+The Cloud Deploy delivery pipeline contains the following information:
+
+A name, which you use when referring to the delivery pipeline, and a
+description.
+
+The promotion sequence, describing the order in which to deploy to the
+configured targets.
+
+Optionally, labels and annotations.
+
+Also optionally, the target definitions themselves.
+
+Targets can be defined in the
+same delivery pipeline configuration file, or in
+one or more separate files. Multiple delivery pipelines can use the same
+target or targets, but a given target can be used only once in a given delivery
+pipeline.
+
+### The Cloud Deploy delivery process
+ {#the_delivery_process}
+
+The following is a description of a Cloud Deploy continuous delivery
+scenario.
+
+You define your delivery pipeline
+in a YAML configuration file.
+
+This configuration file defines the promotion sequence in which to deploy
+your application to a series of targets.
+
+You also need a configuration 
+for Skaffold, which Cloud Deploy needs in order to
+perform render and deploy operations.
+
+You define your targets, either in the pipeline configuration file or in a
+separate file or files.
+
+You register your pipeline with the Cloud Deploy service.
+
+Now that the service knows about your application, it manages the deployment
+to targets according to your defined promotion sequence.
+
+The output of your CI process includes a call to Cloud Deploy to
+initiate your delivery pipeline.
+
+This call creates a release resource, representing the rendered manifest
+for each target, each of which is generated using the provided rendering
+source, skaffold.yaml, and references to specific container images to deploy.
+For this first call to create a release,
+Cloud Deploy automatically creates a rollout
+resource, which associates the release with the first target environment.
+Based on that rollout, your application is deployed to the first target.
+
+You can use any CI tool as long as it outputs one or more container images to
+provide to your Cloud Deploy delivery pipeline.
+
+Furthermore, the call to create a release and invoke a delivery pipeline
+doesn't have to come from the CI tool. It can come from a script or any
+system responding to the completion of the CI process.
+
+When you're ready to deploy your application to the next target, you call
+Cloud Deploy to promote it.
+
+In each case, the call to invoke the promotion causes Cloud Deploy
+to create a new rollout.
+
+Promotion continues through all targets in your promotion sequence, the last
+of which is prod (or whatever name you use for your final target to put the
+application into production).
+
+The process of release creation and promotion is described in more detail in
+Cloud Deploy service architecture.
+
+Throughout pipeline execution, Cloud Deploy collects metrics and
+audit details.
+
+### Promotion
+ {#promotion}
+
+To promote a release
+is to deploy it to the next target in the promotion sequence defined in your
+pipeline. The first call to Cloud Deploy creates a release, then a
+rollout resource that's used to deploy to the first target in the promotion
+sequence. Each subsequent call to promote the release results in a rollout to
+the next target.
+
+### Approvals
+ {#approvals}
+
+You can specify that an approval is needed for promotion to any target. For
+example, you might want to require approval for promotion into a production
+target. To require approval for a target, set the requireApproval property in
+the target definition.
+
+When a target requires approval, Cloud Deploy generates a
+Pub/Sub message that can be consumed by an integrated system.
+For example, a ticketing system could subscribe to the message to kick off an
+approval workflow.
+
+See Require approval for more
+information on promotions and managing approval for promotions.
+
+### Notifications
+ {#notifications}
+
+Cloud Deploy provides Pub/Sub notifications for the following
+events:
+
+Render: start, success, and failure
+
+Deploy: start, success, and failure
+
+Approval required
+
+Approval approved
+
+Approval rejected
+
+Cloud Deploy uses a Pub/Sub topic to send these
+notifications.
+
+See Using Cloud Deploy notifications for more details.
+
+### Rollbacks
+ {#rollbacks}
+
+Cloud Deploy supports rolling back your deployed application in any
+target. A rollback in Cloud Deploy consists of triggering a rollout
+against the last successfully deployed release. The new rollout uses the same
+parameters that were used in that successful deployment.
+
+See Rolling back a deployment for more details.
+
+## About Skaffold and Cloud Deploy
+ {#about_skaffold_and}
+
+Cloud Deploy uses Skaffold for rendering, deployment,
+and verification. With Skaffold, you can also connect your local development
+loop to a Cloud Deploy continuous delivery pipeline.
+
+To learn more about how Cloud Deploy integrates with Skaffold, see
+the Skaffold overview.
+
+## Cloud Deploy with other Google Cloud tools
+ {#with_other_tools}
+
+Cloud Deploy supports almost any tool upstream in a CI/CD pipeline.
+That is, you can use any development environment and source code repository, any
+continuous integration (CI) system, and any artifact repository.
+
+Downstream, Cloud Deploy deploys to Cloud Run and
+Google Kubernetes Engine, including GKE attached clusters.
+
+If you used mostly Google Cloud tools, your source-to-prod flow
+would look like this:
+
+Use Cloud Code to create your application source.
+
+Cloud Code extends several popular IDEs (VS Code, IntelliJ,
+Cloud Shell) to make it easier to build applications to deploy and run on
+Google Cloud.
+
+Use Skaffold to manage your local development loop.
+
+Cloud Deploy uses Skaffold, through Cloud Build, to
+render and deploy your manifests. This integration means that you need to
+maintain a skaffold.yaml file, but does not otherwise mean you need to make
+Skaffold part of your local development flow. But you can take advantage of
+it for continuous development.
+
+Build your application using Cloud Build.
+
+Cloud Build lets you set up a CI pipeline that can be
+triggered from a commit to your source code repository. The output from
+Cloud Build will be artifacts including deployable container
+images. You can add a call to Cloud Deploy to create a release
+and invoke your delivery pipeline.
+
+Store your artifacts in Artifact Registry.
+
+Cloud Deploy retrieves the container image or images from
+Artifact Registry, which lets you centrally store
+artifacts and dependencies.
+
+Configure your delivery pipeline in Cloud Deploy to take the
+container image and deploy it in a progression of n targets.
+
+Targets identified in your delivery pipeline represent
+GKE clusters, Cloud Run services or
+jobs, or GKE attached clusters where your application is ultimately
+deployed.
+
+Manage your application on GKE or
+Cloud Run.
+
+GKE is the
+Google Cloud managed environment for running containerized
+applications on Kubernetes.
+
+With Cloud Run, you can run containers in a
+serverless environment.
+
+GKE attached clusters
+provide a consistent development and operations experience for cloud and
+on-premises environments.
+
+Monitor the performance of your application using Google Cloud Observability.
+
+Google Cloud Observability offers integrated monitoring and
+logging for your application.
+
+## What's next
+ {#whats_next}
+
+For a quick-and-easy look at how to create a delivery pipeline and use it to
+deploy an application, try the quickstarts.
+
+Try out one of the Cloud Deploy walkthroughs.
+
+Learn more about how Cloud Deploy components work together.
+
+Review Google Cloud Well-Architected Framework: Operational excellence
+for articles on how to use the principles of operational excellence to build an
+automated delivery foundation.
+
+Learn how to combine Google Cloud CI/CD tools to develop and deliver
+software effectively to GKE.
+
+ Send feedback
+
+ Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License. For details, see the Google Developers Site Policies. Java is a registered trademark of Oracle and/or its affiliates.
+
+ Last updated 2026-09-24 UTC.
+
+ Need to tell us more?
+
+ [[["Easy to understand","easyToUnderstand","thumb-up"],["Solved my problem","solvedMyProblem","thumb-up"],["Other","otherUp","thumb-up"]],[["Hard to understand","hardToUnderstand","thumb-down"],["Incorrect information or sample code","incorrectInformationOrSampleCode","thumb-down"],["Missing the information/samples I need","missingTheInformationSamplesINeed","thumb-down"],["Other","otherDown","thumb-down"]],["Last updated 2026-09-24 UTC."],[],[]]

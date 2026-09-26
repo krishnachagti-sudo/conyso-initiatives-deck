@@ -1,0 +1,356 @@
+Concepts in service monitoring  |  Google Cloud Observability  |  Google Cloud Documentation
+
+ Skip to main content
+
+ Home
+
+ Documentation
+
+ Observability
+
+ Google Cloud Observability
+
+ Send feedback
+
+ # 
+ Concepts in service monitoring
+
+ Stay organized with collections
+
+ Save and categorize content based on your preferences.
+
+Service monitoring and the SLO API help you manage your services like
+Google manages its own services. The core notions of service monitoring include
+the following:
+
+Selecting metrics that act as service-level indicators (SLIs).
+
+Using the SLIs to set service-level objectives (SLOs) for the SLI values.
+
+Using the error budget implied by the SLO to mitigate risk in your
+service.
+
+This page introduces these concepts and describes some of the things
+to consider when designing an SLO. The other pages in this section put
+these concepts into practice.
+
+## Terminology
+ {#svcmon-terms}
+
+Service monitoring has a set of core concepts, which are introduced here:
+
+Service-level indicator (SLI): a measurement of performance.
+
+Service-level objective (SLO): a statement of desired performance.
+
+Error budget: starts at 1 - SLO and declines as the actual performance
+misses the SLO.
+
+### Service-level indicators
+ {#defn-sli}
+
+Cloud Monitoring collects metrics that measure the performance of
+the service infrastructure. Examples of performance metrics include the
+following:
+
+Request count: for example, the number of HTTP requests per minute
+that result in 2xx or 5xx responses.
+
+Response latencies: for example, the latency for HTTP 2xx responses.
+
+The performance metrics are automatically identified based for a set of
+known service types: Cloud Service Mesh, Istio on Google Kubernetes Engine, and App Engine. You can also define your own service type
+and select performance metrics for it.
+
+The performance metrics are the basis of the SLIs for your service.
+An SLI describes the performance of some aspect
+of your service. For services on Cloud Service Mesh, Istio on Google Kubernetes Engine, and App Engine, useful SLIs are already known.
+For example, if your service has request-count or response-latencies metrics,
+standard service-level indicators (SLIs) can be derived from those metrics
+by creating ratios as follows:
+
+An availability SLI is the ratio of the number
+of successful responses to the number of all responses.
+
+A latency SLI is the ratio of the number of calls below
+a latency threshold to the number of all calls.
+
+You can also set up service-specific SLIs for some other measure of
+what “good performance” means. These SLIs generally fall into
+two categories:
+
+Request-based SLIs, where good service is measured by counting atomic
+units of service, like the number of successful HTTP requests.
+
+Windows-based SLIs, where good service is measured by counting the number
+of time periods, or windows, during which performance meets a goodness
+criterion, like response latency below a given threshold.
+
+These SLIs are described in more detail in
+Compliance in request- and windows-based SLOs.
+
+For examples that create SLIs for selected services, see
+
+Creating SLIs from metrics.
+
+### Service-level objectives
+ {#defn-slo}
+
+An SLO is a target value for an SLI, measured
+over a period of time. The service determines the available SLIs, and
+you specify SLOs based on the SLIs. The SLO defines what qualifies as good
+service. You can create up to 500 SLOs
+for each service in Cloud Monitoring.
+
+An SLO is built on the following kinds of information:
+
+An SLI, which measures the performance of the service.
+
+A performance goal, which specifies the desired level of performance.
+
+A time period, called the compliance period, for measuring how the SLI
+compares to the performance goal.
+
+For example, you might have requirements like these:
+
+Latency can exceed 300 ms in only 5 percent of the requests over a rolling
+30-day period.
+
+The system must have 99% availability measured over a calendar week.
+
+Requirements like these can provide the basis for SLOs. See Designing and using
+SLOs for guidance on setting good SLOs.
+
+Changes in SLO compliance can also indicate the onset of failures. Monitoring
+these changes might give you enough warning that you can fix a problem before
+it cascades. So alerting policies are typically used to monitor SLO compliance.
+For more information, see Alerting on your error budget.
+
+A useful SLO targets less than 100%, because the SLO determines your error
+budget. SLOs are typically described as a “number of nines”: 99% (2
+nines), 99.9% (3 nines), and so forth. The highest value you can set is 99.9%,
+but you can use any lower value that is appropriate for your service.
+
+### Error budgets
+ {#defn-error-budget}
+
+An SLO specifies the degree to which a service must perform during a
+compliance period. What's left over in the compliance period becomes the
+error budget. The error budget quantifies the degree to which a service
+can fail to perform during the compliance period and still meet the SLO.
+
+Error budgets let you track how many bad individual events (like requests) are
+allowed to occur during the remainder of your compliance period before you
+violate the SLO. You can use the error budget to help you manage maintenance
+tasks like deployment of new versions. If the error budget is close to depleted,
+then taking risky actions like pushing new updates might result in your
+violating an SLO.
+
+Your error budget for a compliance period is (1 − SLO goal) ×
+(eligible events in compliance period). For example, if your SLO is for 85%
+of requests to be good in a 7-day rolling period, then your error budget allows
+15% of these requests to be bad. If you received, say, 60,480 requests in the
+past week, your error budget is 15% of that total, or 9,072 requests that are
+permitted to be bad. If you served more errors than this, your service was out
+of SLO for the 7-day compliance period.
+
+## Designing and using SLOs
+ {#slo-tips}
+
+What makes a good SLO? What are things to consider in making the choices?
+This section provides an overview of some of the general concepts behind
+designing and using SLOs. This topic is covered in much more detail in
+Site Reliability Engineering: How Google Runs Production
+Systems, in the chapter on SLOs.
+
+SLOs define the target performance you want from your service.
+In general, SLOs should be no higher than necessary or meaningful.
+If your users cannot tell the difference between 99% availability and
+99.9% availability of your service, use the lower value as the SLO. The higher
+value is more expensive to meet, and it won't make a difference to
+your users. A service required to meet a 100% SLO goal has no error budget.
+Setting such an SLO is bad practice.
+
+SLOs are typically more stringent than public or contractual
+commitments. You want an SLO to be tighter than a public commitment. This way,
+if something happens that causes violation of the SLO, you are aware of and
+fixing the problem before it causes a violation of a commitment or contract.
+Violating a commitment or contract may have reputational, financial, or legal
+implications. An SLO is part of an early-warning system to prevent that from
+happening.
+
+### Compliance periods
+ {#compliance-period}
+
+There are two types of compliance periods for SLOs:
+
+Calendar-based periods (from date to date)
+
+Rolling periods (from n days ago to now, where n ranges from 1 to 30
+days)
+
+#### Calendar-based compliance periods
+ {#compiliance-period-calendar}
+
+Compliance periods can be set to calendar periods like a week or a month.
+The compliance period and error budget reset on well-known calendar boundaries.
+For the possible values, see CalendarPeriod.
+
+With a calendar period, you get a performance score at the end of the period.
+Measured against the performance threshold, the performance score lets you
+know whether your service was compliant or not. When you use a calendar
+period, you only get a compliance rating once every compliance period, even
+though you see the performance throughout the period. But the end-of-period
+score gives you an easy-to-read value that matches easily against your
+customer billing periods (if you have external paying customers).
+
+Like months on a calendar, monthly compliance periods vary in the number of days
+they cover.
+
+#### Rolling window-based compliance periods
+ {#compiliance-period-rolling}
+
+You can also measure compliance over a rolling period, so that you are
+always evaluating, for example, the last 30 days. With a rolling period,
+the oldest data in the previous calculation drops out of the current
+calculation and new data replaces it.
+
+With a rolling window, you get more compliance measurements; that is,
+you get a measure of compliance for the last 30 days, rather than one per
+month. Services can transition between compliance and noncompliance
+as the SLO status changes daily, as old data points are dropped and new ones
+added.
+
+### Compliance in request- and windows-based SLOs
+ {#slo-types}
+
+Determining whether an SLO is in compliance depends on two factors:
+
+How the compliance period is determined. This determination is discussed
+in Compliance periods.
+
+The type of SLO. There are two types of SLOs:
+
+Request-based SLOs
+
+Windows-based SLOs
+
+Compliance is the ratio of good events to total events,
+measured over the compliance period. The type of SLO determines what
+constitutes an “event”.
+
+If your SLO is 99.9%, then you're meeting it if your compliance is at
+least 99.9%. The max value is 100%.
+
+#### Request-based SLOs
+ {#slo-type-request}
+
+A request-based SLO is based on an SLI that is defined as the
+ratio of the number of good requests to the total number of requests.
+A request-based SLO is met when that ratio meets or exceeds the goal for
+the compliance period.
+
+For example, consider this request-based SLO: “Latency is below 100 ms
+for at least 95% of requests.” A good request is one with a response
+time less than 100 ms, so the measure of compliance is the fraction
+of requests with response times under 100 ms. The service is compliant if
+this fraction is at least 0.95.
+
+Request-based SLOs give you a sense of what percentage of work your service
+did properly over the entire compliance period, no matter how the load was
+distributed throughout the compliance period.
+
+#### Windows-based SLOs
+ {#slo-type-time}
+
+A windows-based SLO is based on an SLI defined as the ratio of the
+number of measurement intervals that meets some goodness criterion to the total
+number of intervals. A windows-based SLO is met when that ratio meets or exceeds
+the goal for the compliance period.
+
+For example, consider this SLO: “The 95th percentile latency metric is
+less than 100 ms for at least 99% of 10-minute windows”. A good
+measurement period is a 10-minute span in which 95% of the requests
+have latency under 100 ms. The measure of compliance is the fraction of
+such good periods. The service is compliant if this fraction is at least 0.99.
+
+Note: If the raw metric available to you is a latency percentile, then you
+must use a windows-based SLO.
+For another example, suppose you configure your compliance period to be a
+rolling 30 days, the measurement interval to be a minute, and the SLO goal to
+be 99%. To meet this SLO, your service must have 42,768 “good”
+intervals out of 43,200 minutes (99% of the number of minutes in 30 days).
+
+A windows-based SLO gives you an idea of what percentage of the time your
+customers found the service to be working well or poorly. This
+type of SLO can hide the effects of “bursty” behavior: A
+measurement interval that failed every one of its calls counts against the
+SLO as much as a measurement interval that had one error too many. Also,
+intervals with a low number of calls count against the SLO as much as a
+measurement interval with heavy activity.
+
+### Trajectory of error budgets
+ {#trajectory}
+
+The error budget is the difference between 100% good service and your
+SLO, the desired level of good service. The difference between them is
+your wiggle room.
+
+In general, an error budget starts as a maximum value and drops over time,
+triggering an SLO violation when the error budget drops below 0.
+
+There are a couple of notable exceptions to this pattern:
+
+If you have a request-based SLO measured over a calendar compliance period,
+and the service has increased activity over the compliance period, the
+remaining error budget can actually rise.
+
+How is that possible? The SLO system can't know in advance how much
+activity the service will have in each compliance period, so it extrapolates
+a likely value. This value is the ratio of calls up to the
+present time over the elapsed time since the beginning of the compliance
+period, multiplied by the length of the compliance period.
+
+As activity rate goes up, the expected traffic for the period also goes up,
+and as a result, the error budget rises.
+
+If you are measuring an SLO over a rolling compliance period, you are
+effectively always at the end of a compliance period. Rather than starting
+from scratch, old data points are continuously dropped and new data points
+are continuously added.
+
+If a period of poor compliance rolls out of the compliance window, and
+if the present time, replacing it, is compliant, the error budget goes up.
+At any point in time, an error budget ≥ 0 indicates a compliant rolling
+SLO window, and an error budget < 0 indicates a non-compliant rolling
+SLO window.
+
+## Monitoring your error budget
+ {#slo-alerts}
+
+You can create alerting policies to warn you that your error budget is being
+consumed at a faster than desired rate. See Alerting on your error
+budget for more information.
+
+## What's next
+ {#whats_next}
+
+Microservices describes microservices and how to use
+the Google Cloud console to configure, view, and manage your microservices.
+
+Alerting on your burn rate describes how to monitor
+your SLIs so that you are alerted to possible problems.
+
+Working with the SLO API shows how to use the SLO API,
+a subset of the Cloud Monitoring API, to create services, SLOs and related
+structures.
+
+ Send feedback
+
+ Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License. For details, see the Google Developers Site Policies. Java is a registered trademark of Oracle and/or its affiliates.
+
+ Last updated 2026-09-25 UTC.
+
+ Need to tell us more?
+
+ [[["Easy to understand","easyToUnderstand","thumb-up"],["Solved my problem","solvedMyProblem","thumb-up"],["Other","otherUp","thumb-up"]],[["Hard to understand","hardToUnderstand","thumb-down"],["Incorrect information or sample code","incorrectInformationOrSampleCode","thumb-down"],["Missing the information/samples I need","missingTheInformationSamplesINeed","thumb-down"],["Other","otherDown","thumb-down"]],["Last updated 2026-09-25 UTC."],[],[]]

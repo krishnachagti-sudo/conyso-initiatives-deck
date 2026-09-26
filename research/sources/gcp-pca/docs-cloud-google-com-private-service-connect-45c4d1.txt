@@ -1,0 +1,380 @@
+Private Service Connect  |  Virtual Private Cloud  |  Google Cloud Documentation
+
+ Skip to main content
+
+ Home
+
+ Documentation
+
+ Networking
+
+ Virtual Private Cloud
+
+ Guides
+
+ Send feedback
+
+ Stay organized with collections
+
+ Save and categorize content based on your preferences.
+
+ # Private Service Connect
+ {#private-service-connect}
+
+This document provides an overview of Private Service Connect.
+
+Private Service Connect is a capability of Google Cloud networking that
+allows consumers to access managed services privately from
+inside their VPC network. Similarly, it allows managed service
+producers to host these services in their own separate VPC
+networks and offer a private connection to their consumers. For example, when
+you use Private Service Connect to access Cloud SQL, you are
+the service consumer, and Google is the service producer.
+
+With Private Service Connect, consumers can use their own internal IP
+addresses to access services without leaving their VPC networks.
+Traffic remains entirely within Google Cloud. Private Service Connect
+provides service-oriented access between consumers and producers with granular
+control over how services are accessed.
+
+ Private Service Connect lets you send
+ traffic to endpoints and backends that forward the traffic to managed
+ services, including Google APIs and published services. Private Service Connect interfaces let managed services
+ initiate connections to consumer VPC networks.
+
+## Choosing a Private Service Connect feature
+ {#choose}
+
+The following table summarizes which Private Service Connect
+features to use for different use cases.
+
+ Use case
+
+ Private Service Connect feature
+
+ Consume services
+
+ Endpoints provide layer 4 connectivity to
+ services.
+
+ If you need load balancer features, such as custom URLs or
+ advanced traffic management, use backends.
+
+ Produce services
+
+ Published services let consumers
+ send requests to your service.
+
+ If you need to initiate connections to consumers, use
+ interfaces.
+
+## Private Service Connect types
+ {#types}
+
+Private Service Connect is available in different types that
+provide different capabilities and modes of communication.
+
+Service producers publish their applications to consumers by creating
+Private Service Connect services. Service consumers access
+those Private Service Connect services directly through one of
+these Private Service Connect types:
+
+Private Service Connect endpoints. Endpoints
+are deployed by using forwarding rules that provide the consumer an IP
+address that is mapped to the Private Service Connect
+service.
+
+Private Service Connect backends. Backends are
+deployed by using network endpoint groups (NEGs) that let consumers direct
+traffic to their load balancer before reaching a
+Private Service Connect service.
+
+Service producers can initiate connections to service consumers by using
+Private Service Connect interfaces.
+Private Service Connect interfaces provide bidirectional
+communication and can be used in the same VPC network as
+endpoints and backends.
+
+### Endpoints
+ {#endpoints}
+
+Private Service Connect endpoints are internal IP addresses in a
+consumer VPC network that can be directly accessed by clients in
+that network. Endpoints are created by deploying a forwarding
+rule 
+that references a service attachment, a bundle of
+global Google APIs,
+or a regional or multi-regional API.
+
+The following diagram shows a Private Service Connect endpoint
+that targets a published service that is running in a separate
+VPC network and organization.
+Private Service Connect endpoints and published services let two
+independent companies communicate with each other by using internal IP addresses.
+For more information, see About accessing published services through
+endpoints.
+
+ Private Service Connect lets you send
+ traffic to endpoints that forward the traffic to published services in
+ another VPC network.
+
+Similarly, a Private Service Connect endpoint can be used to
+access Google APIs such as Cloud Storage or BigQuery.
+This functionality is similar to Private Google Access, except that you can
+use your own internal IP addresses for endpoints.
+Private Service Connect lets you more directly control routing
+and create as many endpoints as necessary for your network. For more
+information, see About accessing Google APIs through
+endpoints.
+
+ Private Service Connect lets you send
+ traffic to endpoints that forward the traffic to Google APIs.
+
+### Backends
+ {#backends}
+
+Private Service Connect backends
+let Google Cloud load
+balancers send traffic through Private Service Connect to reach
+published services or Google APIs. The backends are deployed through
+Private Service Connect network endpoint groups
+(NEGs) 
+that reference a producer service attachment or a supported Google API. Placing a
+load balancer in front of a managed service provides the consumer with more
+visibility and control than is possible through a
+Private Service Connect endpoint. Backends let you create
+configurations such as the following:
+
+Customer-owned domains and certificates in front of managed services
+
+Consumer-controlled failover between managed services in different
+regions
+
+Centralized security configuration and access control for managed services
+
+The following diagram shows an internal Application Load Balancer deployed with
+Private Service Connect backends that reference a published
+service. There are two load balancers in the configuration:
+
+The consumer load balancer that provides control, visibility, and security
+of traffic to the service.
+
+The producer load balancer that load balances traffic across the service
+backends.
+
+ Private Service Connect lets you send
+ traffic to backends that forward the traffic to published services.
+
+Similarly to Private Service Connect endpoints, backends also
+support targeting Google APIs. The following diagram shows an internal Application Load Balancer
+that targets a Cloud Storage bucket and terminates traffic by using a
+customer-owned domain.
+
+ Private Service Connect lets you send
+ traffic to backends that forward the traffic to a regional Google API.
+
+### Interfaces
+ {#interfaces}
+
+A Private Service Connect interface is a special type of
+network interface
+that refers to a network attachment.
+
+A service producer can create a Private Service Connect interface
+and request a connection to a network attachment. If the service consumer
+accepts the connection, Google Cloud allocates the interface an IP address
+from a subnet in the consumer VPC network that's specified by the
+network attachment. The VM of the Private Service Connect
+interface has a second standard network interface that connects to the
+producer's VPC network.
+
+A connection between a Private Service Connect interface and a
+network attachment is similar to the connection between a
+Private Service Connect endpoint
+and a
+service attachment, but
+it has two key differences:
+
+A Private Service Connect interface lets a producer
+VPC network initiate connections to a consumer VPC
+network (managed service egress). An endpoint works in the reverse direction,
+letting a consumer VPC network initiate connections to a producer
+VPC network (managed service ingress).
+
+A Private Service Connect interface connection is transitive.
+This means that workloads in a producer network can initiate connections to
+other workloads that are
+connected to the consumer VPC network.
+Private Service Connect endpoints can only initiate connections
+to the producer VPC network.
+
+ Private Service Connect interfaces
+ let service producers initiate connections to service consumers.
+
+## Private Service Connect managed services
+ {#managed-services}
+
+Managed services are services that are owned and managed by someone other than
+the service consumer. Private Service Connect can be used to
+access managed services that are owned by Google, third-party software as a
+service (SaaS) companies, or other teams within the consumer's own company. Both
+published services and Google APIs can be targets of
+Private Service Connect.
+
+Private Service Connect supports access to the following types of
+managed services:
+
+Published VPC-hosted services
+
+Google APIs
+
+### Published services
+ {#published-services}
+
+Published services are VPC-hosted
+services that are deployed in the producer's VPC network and are
+accessed from the consumer's VPC network. Publishing a service
+lets the service producer own and control the deployment of the service in their
+own VPC network. Published services can include the following:
+
+ Google services
+
+ such as GKE, Apigee, or Managed Service for Apache Airflow.
+ These services run in tenant projects and VPC networks that
+ are managed by Google.
+
+ Third-party services
+
+ where third parties offer private access to a published service in
+ Google Cloud.
+
+ Intra-organization services where a single company has clients
+ accessing internal applications across different VPC
+ networks. Some organizations use separate VPC networks for
+ internal segmentation. Given that configuration, one team can offer a
+ managed service to a different team that operates in a separate
+ VPC network.
+
+#### Service attachments
+ {#service-attachments}
+
+Service
+attachments 
+are resources that are used to create Private Service Connect
+published services.
+
+Service attachments can be accessed by using
+endpoints or
+backends. Multiple backends or
+endpoints can connect to the same service attachment, which lets multiple
+VPC networks or multiple consumers access the same service
+instance.
+
+A service attachment targets a producer load balancer and lets clients in a
+consumer VPC network access the load balancer. The service
+attachment configuration defines the following:
+
+A consumer accept list that defines which consumers are allowed to connect
+to the service.
+
+The NAT subnet where
+translated traffic is sourced from in the producer VPC
+network.
+
+An optional DNS
+domain, if
+provided, that is used in the DNS entries for
+endpoints that are
+automatically created in the consumer's Cloud DNS zone.
+
+### Google APIs
+ {#google-apis}
+
+Using Private Service Connect to access Google APIs is an
+alternative to using Private Google Access or the public domain names
+for Google APIs. In this case, the producer is Google.
+
+Google APIs can be accessed by using endpoints or backends.
+
+Endpoints let you target a bundle of global Google
+APIs, or a
+regional or multi-regional Google API.
+
+Backends let you target a global Google
+API, a
+regional Google API, or a
+multi-regional Google API.
+
+Using Private Service Connect lets you do the following:
+
+Create one or more internal IP addresses to access Google APIs for different
+use cases.
+
+Direct on-premises traffic to specific IP addresses and regions when
+accessing Google APIs.
+
+Centralize Google API traffic through a
+supported load balancer
+to apply your own certificates, security policies, or observability.
+
+## Private Service Connect characteristics
+ {#characteristics}
+
+Private Service Connect provides private connectivity that has
+the following characteristics:
+
+Service-oriented design. Producer services are published through load
+balancers that expose a single IP address to the consumer
+VPC network. Consumer traffic that accesses producer services
+is unidirectional and can only access the service IP address, rather than
+having access to an entire peered VPC network.
+
+Explicit authorization. Private Service Connect provides
+an authorization model that gives consumers and producers granular control,
+ensuring that only the intended service endpoints and no other resources can
+connect to a service.
+
+No shared dependencies. Traffic between consumer and producers uses NAT
+so that no IP address coordination or other shared resource dependencies
+exist between the consumer and producer VPC networks. This
+independence helps to simplify deployment and scaling of the service.
+
+Line-rate performance. Private Service Connect traffic
+goes directly from the physical machine that hosts the consumer client
+VM to the physical machine that hosts the producer load balancer VM. The physical host machines perform NAT directly, reducing latency. The
+bandwidth capacity of Private Service Connect is limited only
+by the bandwidth capacity of the physical host machines that are
+directly communicating.
+
+To learn more about the internal design of
+Private Service Connect, see
+Private Service Connect architecture and
+performance.
+
+## What's next
+ {#whats-next}
+
+Learn about 
+ accessing published services through endpoints.
+
+Learn about 
+ accessing Google APIs through endpoints.
+
+Learn about backends.
+
+Learn about publishing
+ services.
+
+Complete a codelab to 
+ use Private Service Connect to publish and consume services with
+ GKE.
+
+ Send feedback
+
+ Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License. For details, see the Google Developers Site Policies. Java is a registered trademark of Oracle and/or its affiliates.
+
+ Last updated 2026-09-18 UTC.
+
+ Need to tell us more?
+
+ [[["Easy to understand","easyToUnderstand","thumb-up"],["Solved my problem","solvedMyProblem","thumb-up"],["Other","otherUp","thumb-up"]],[["Hard to understand","hardToUnderstand","thumb-down"],["Incorrect information or sample code","incorrectInformationOrSampleCode","thumb-down"],["Missing the information/samples I need","missingTheInformationSamplesINeed","thumb-down"],["Other","otherDown","thumb-down"]],["Last updated 2026-09-18 UTC."],[],[]]

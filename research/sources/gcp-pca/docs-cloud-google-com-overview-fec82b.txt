@@ -1,0 +1,330 @@
+Cloud Trace overview  |  Google Cloud Documentation
+
+ Skip to main content
+
+ Home
+
+ Documentation
+
+ Observability
+
+ Cloud Trace
+
+ Guides
+
+ Send feedback
+
+ # 
+ Cloud Trace overview
+
+ Stay organized with collections
+
+ Save and categorize content based on your preferences.
+
+Cloud Trace is a distributed tracing system for Google Cloud
+that tracks request latency and helps you troubleshoot performance bottlenecks
+across services and generative AI applications. By collecting latency data from
+Google Cloud services and instrumented applications, Trace
+helps you understand how requests are processed in a microservices architecture
+and identify relevant logs.
+
+With Trace, you can measure end-to-end request latency, compare
+performance trends over time, and pinpoint which downstream dependencies cause
+delays. For a walkthrough of correlating traces and logs,
+see Using traces and logs together for root-cause analysis.
+
+## Environment support
+ {#environment_support}
+
+Trace runs on Linux in the following environments:
+
+Compute Engine
+
+Google Kubernetes Engine (GKE)
+
+Apigee (Public Preview)
+
+App Engine flexible environment
+
+App Engine standard environment
+
+Cloud Run
+
+Cloud Service Mesh
+
+Cloud SQL query insights
+
+Non-Google Cloud environments
+
+## Components
+ {#components}
+
+Trace consists of a tracing client, which collects traces and
+sends them to your Google Cloud project. You can then use the
+Google Cloud console to view and analyze the data collected by the tracing client.
+For information about the data model, see
+Traces and spans.
+
+### Tracing client
+ {#tracing_client}
+
+A tracing client collects latency and span data from your application and
+exports it to your Google Cloud project. Depending on your environment
+and requirements, you can collect trace data automatically or manually by
+instrumenting your application code.
+
+### Tracing interface
+ {#tracing_interface}
+
+To view and analyze your span data, you can use the
+Trace Explorer and Observability Analytics pages in the
+Google Cloud console:
+
+Trace Explorer: Displays aggregate information about
+your trace data and lets you examine individual traces in detail. The
+aggregated latency data is shown on a heatmap, which you can explore with
+your pointer. To restrict which data is displayed, you can add filters.
+You can also view and explore individual spans and traces:
+
+For information about how to view trace data stored in multiple
+projects, see Create and manage trace scope.
+
+For information about filtering and viewing your trace data, see
+Find and explore traces.
+
+Observability Analytics: Provides a SQL query interface. Your queries can join
+your trace and log data, and you can view the query results either as a
+table or a chart. You can use BigQuery to analyze your trace
+data if you create a linked BigQuery dataset. For more
+information, see Query and analyze traces.
+
+## Configurations with automatic tracing
+ {#configurations_with_automatic_tracing}
+
+The following configurations automatically capture trace data:
+
+App Engine standard environment
+
+First-generation runtimes automatically intercept and send trace spans to
+Cloud Trace. For more information, see
+Overview of legacy bundled services.
+
+Second-generation runtimes automatically capture overall request
+latency and add the X-Cloud-Trace-Context HTTP header to requests.
+For more information, see
+Runtime support schedule.
+
+Cloud Run functions and Cloud Run
+
+For incoming and outgoing HTTP requests, latency data is automatically
+sent to Trace.
+
+## Instrument your application
+ {#instrument_your_application}
+
+Instrument your application to collect specific information that helps you understand its
+performance and troubleshoot failures.
+Several open-source instrumentation frameworks collect log, metric, and trace
+data, and can send that data to any vendor, including Google Cloud. For your
+agentic applications, some frameworks can collect your prompts and responses or
+pass context that allows tracing of some remote
+Google Cloud MCP servers calls.
+
+To instrument your application, we recommend that you use an
+open-source, vendor-neutral instrumentation framework, such as
+OpenTelemetry, instead of
+vendor- and product-specific APIs or client libraries.
+For information about these frameworks, see
+
+ Instrumentation and observability and
+Choose an instrumentation approach.
+
+The instrumentation samples we provide use
+OpenTelemetry:
+
+For samples that use a collector-based export, see the following:
+
+Go
+
+Java
+
+Node.js
+
+Python
+
+These samples send metric and trace data that follows the
+OpenTelemetry Protocol (OTLP) format to your project by using the
+Telemetry API. The samples use a Google Cloud exporter for log data.
+
+For information about how to use a direct export of trace data and send
+that data to the Telemetry API, see
+Migrate from the Trace exporter to the OTLP endpoint.
+
+For samples that show you how to configure an agentic application to collect
+prompts and responses, see
+How to instrument your generative AI applications.
+
+For information about Google Cloud MCP servers that can generate trace spans,
+see Investigate MCP calls using Trace.
+
+Although you can use Cloud Trace client libraries to instrument your
+application, we recommend that you use OpenTelemetry.
+OpenTelemetry libraries are preferable to
+Trace client libraries because they are simpler and
+export trace data in OTLP format, which OpenTelemetry defines. For more information,
+see Instrument for Trace and
+Client libraries for Cloud Trace.
+
+## Cloud Trace and agentic applications
+ {#trace-agentic-apps}
+
+To understand the behavior of your agentic applications, configure them to
+collect prompts and responses or to generate spans when they call remote
+Google Cloud MCP servers. Prompts and responses help you understand the
+reasoning your agentic application uses. Spans that record tool calls help you
+confirm tool invocation, call statuses, and request latencies.
+
+Several instrumentation samples show you how to configure an application to
+collect prompts and responses. These samples rely on
+OpenTelemetry. For more information, see
+How to instrument your generative AI applications.
+
+Google Cloud MCP servers can generate trace spans. For more information, see
+Investigate MCP calls using Trace.
+
+## APIs that ingest trace data
+ {#supported-apis}
+
+You can send trace data to your project by using either the
+Telemetry API or the Cloud Trace API.
+We recommend the Telemetry API for the following reasons:
+
+The API provides compatibility with the open source OpenTelemetry ecosystem, and
+its limits are often more generous than the limits of
+the Cloud Trace API, which is a proprietary Google Cloud API.
+
+Your trace data is stored in a format that is generally consistent with the
+proto files defined by OTLP. Some fields might
+be converted from an OpenTelemetry-specific data type to a JSON data type before
+storage. For information about the storage format, see
+Schema for trace data.
+
+For collector-based export of trace data, your instrumentation doesn't rely
+on a Google Cloud-specific exporter.
+
+Some features, like Application Monitoring, rely on information that is available only
+when you send trace data to the Telemetry API.
+
+To prevent your Google Cloud project from storing trace data, disable the
+Cloud Trace API. Disabling the Cloud Trace API has the following effects:
+
+Google Cloud services don't send trace data to your project.
+
+Google Cloud replies to requests sent to a Cloud Trace API endpoint with
+an error code.
+
+Google Cloud Observability discards trace data sent to the trace-specific
+Telemetry API endpoint. Don't disable the Telemetry API, as that
+API can receive log, metric, and trace data.
+
+If you manage an organization and want to prevent usage of Cloud Trace, then
+create an
+organization policy constraint.
+
+## VPC Service Controls support
+ {#data-security}
+
+Google Cloud services and your applications can send trace data to your project
+by using either the Cloud Trace API or the Telemetry API. Visualization
+services provided by Cloud Trace use the Cloud Trace API to fetch the trace
+data that they display:
+
+Cloud Trace is a VPC Service Controls-supported service. The
+Trace service name is cloudtrace.googleapis.com.
+For details and limitations, see
+Supported products: Cloud Trace.
+
+The Telemetry API is a VPC Service Controls-supported service. The service
+name is telemetry.googleapis.com. For details and limitations, see
+Supported products: Telemetry API.
+
+To set defaults that specify the Google Cloud region
+where your trace data is stored and whether a
+customer-managed key encrypts the data, use the Observability API. You also
+use this API to configure
+linked BigQuery datasets, which let you
+query your trace data using BigQuery services, and to configure
+trace scopes, which let you aggregate trace data stored
+in multiple projects.
+
+The Observability API is a VPC Service Controls-supported service. The
+service name is observability.googleapis.com. For details and limitations,
+see Supported products: Observability API.
+
+For more information, see the following:
+
+VPC Service Controls documentation.
+
+Supported products and limitations.
+
+## Cloud Trace and data residency
+ {#trace-data-residency}
+
+If you are using Assured Workloads
+because you have data-residency or
+Impact Level 4 (IL4) requirements,
+then don't use the Cloud Trace API to send trace spans.
+
+To prevent your Google Cloud project from storing trace data, disable the
+Cloud Trace API. Don't disable the Telemetry API, as that API can receive
+log, metric, and trace data.
+
+## Trace retention
+ {#trace_retention_periods}
+
+ Category
+
+ Retention period
+
+ Spans stored in the
+ _Trace bucket
+
+ 30 days
+
+## IAM roles
+ {#trace-roles}
+
+Cloud Trace uses Identity and Access Management (IAM) to control access to resources.
+For a list of Cloud Trace API and Telemetry API roles, see
+Control access with IAM.
+
+Because the Telemetry API is a consumer API, sending data to the
+Telemetry API requires that you specify a quota project and grant the
+application's service account permission to use that quota. For more
+information, see Telemetry API: Authentication.
+
+## Pricing
+ {#pricing}
+
+To learn about pricing for Cloud Trace, see the Google Cloud Observability pricing page.
+
+## What's next
+ {#whats_next}
+
+Try the Quickstart.
+
+For information about quotas and limits, see
+Quotas and limits.
+
+Read our resources about DevOps and explore the
+DevOps Research and Assessment research program.
+
+ Send feedback
+
+ Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License. For details, see the Google Developers Site Policies. Java is a registered trademark of Oracle and/or its affiliates.
+
+ Last updated 2026-09-25 UTC.
+
+ Need to tell us more?
+
+ [[["Easy to understand","easyToUnderstand","thumb-up"],["Solved my problem","solvedMyProblem","thumb-up"],["Other","otherUp","thumb-up"]],[["Hard to understand","hardToUnderstand","thumb-down"],["Incorrect information or sample code","incorrectInformationOrSampleCode","thumb-down"],["Missing the information/samples I need","missingTheInformationSamplesINeed","thumb-down"],["Other","otherDown","thumb-down"]],["Last updated 2026-09-25 UTC."],[],[]]

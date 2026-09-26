@@ -1,0 +1,269 @@
+Use a canary deployment strategy  |  Cloud Deploy  |  Google Cloud Documentation
+
+ Skip to main content
+
+ Home
+
+ Documentation
+
+ Application development
+
+ Cloud Deploy
+
+ Guides
+
+ Send feedback
+
+ # 
+ Use a canary deployment strategy
+
+ Stay organized with collections
+
+ Save and categorize content based on your preferences.
+
+This document describes how to configure and use a canary deployment strategy.
+
+## What is a canary deployment?
+ {#what_is_a_canary_deployment}
+
+A canary deployment is a progressive rollout of an application that splits
+traffic between an already-deployed version and a new version, rolling it out
+to a subset of users before rolling out fully.
+
+### Supported target types
+ {#supported_target_types}
+
+Canary deployment in Cloud Deploy supports all target types,
+including the following:
+
+Google Kubernetes Engine and GKE attached clusters
+
+Using service networking
+
+Using Gateway API
+
+Cloud Run (services and worker pools—not
+jobs)
+
+Canary also works with
+multi-targets.
+
+### Why use a canary deployment strategy?
+ {#why_use_a_canary_deployment_strategy}
+
+A canary deployment gives you a chance to partially release your application. In
+this way, you can ensure the new version of your application is reliable before
+you deliver it to all users.
+
+If you're deploying to GKE (or GKE attached clusters)
+for example, you would deploy the new version of your application to a limited
+number of pods. The old version would continue to run, but with more of the
+traffic being sent to the new pods.
+
+If you're deploying to Cloud Run, Cloud Run
+itself splits traffic between the old and new revisions, according to the
+percentages you configure.
+
+### Types of canary
+ {#types_of_canary}
+
+Cloud Deploy lets you configure the following types of canary
+deployment:
+
+Automated
+
+With an automated canary deployment (for service networking, gateway api or Cloud Run), you configure Cloud Deploy with a series of
+percentages that express a progressive deployment. Cloud Deploy
+performs additional operations on your behalf, to apportion traffic
+percentages between the old and new versions.
+
+Custom-automated
+
+For a custom-automated canary (for service networking, gateway api or Cloud Run), you can provide the
+following:
+
+The phase name
+
+The percentage goal
+
+The Skaffold profile to use for the phase
+
+Whether or not to include a verify job
+
+Whether or not to include a predeploy or postdeploy job, or both
+
+But you don't need to provide traffic-balancing information;
+Cloud Deploy
+creates the necessary resources (for service networking, gateway api or Cloud Run).
+
+Custom
+
+With a custom canary, you
+configure each canary phase separately, including the following:
+
+The phase name
+
+The percentage goal
+
+The Skaffold profile to use for the phase
+
+Whether or not to include a verify job
+
+Whether or not to include a predeploy or postdeploy job, or both
+
+Additionally for a fully custom canary, you provide all of the
+traffic-balancing configuration.
+
+All target types
+are supported for custom canary.
+
+### Phases of a canary deployment
+ {#canary_phases}
+
+When you create a release for a canary deployment, the rollout is created with
+a phase for each canary increment, plus a final stable phase for 100%.
+
+For example, if you configure a canary for 25%, 50%, and 75% increments, the
+rollout will have the following phases:
+
+canary-25
+
+canary-50
+
+canary-75
+
+stable
+
+Note: For a
+GKE, Gateway API configuration,
+100% is allowed. This supports a 100% deployment from canary before switching
+over to stable. The 100% configuration is not allowed for GKE
+service-based canary, GKE attached clusters, or
+Cloud Run.
+You can read more about rollout phases, jobs, and job runs in
+Manage rollouts.
+
+## Use parallel deployment with a canary deployment strategy
+ {#parallel_canary}
+
+You can run a canary deployment using parallel deployment.
+This means the target you're progressively deploying to can comprise two or more
+child targets. For example, you can deploy progressively to clusters in separate
+regions, at the same time.
+
+### How is a parallel canary different from single-target canaries
+ {#how_is_a_parallel_canary_different_from_single-target_canaries}
+
+As with single-target canary deployment, if you're deploying to
+GKE targets, you need a Kubernetes Deployment configuration and
+a Kubernetes Service configuration in your manifest.
+
+As with single-target canary deployment, your delivery pipeline configuration
+must include a strategy.canary stanza inside the stage definition for the
+applicable stage.
+
+Additionally, you need to
+configure a multi-target,
+and you need to
+configure the child targets
+which that multi-target references.
+
+When you create a release, a controller rollout
+and the child rollouts are created.
+
+Both types of rollout—controller and child—have separate phases
+for all of the configured canary percentages, and a stable phase for the
+canary 100%.
+
+You can't advance
+a child rollout.
+
+You can advance controller rollouts only. When you advance the controller
+rollout to the next stage, the child rollouts are advanced too, by
+Cloud Deploy.
+
+You can't retry
+failed jobs in the controller rollout.
+
+You can retry a job in child rollouts only.
+
+You can't ignore
+failed jobs in the controller rollout.
+
+You can ignore failed jobs in child rollouts only.
+
+You can cancel a controller rollout,
+but you can't cancel child rollouts.
+
+You can
+terminate job runs
+under a child rollout only, not a controller rollout.
+
+### What to do if a parallel rollout fails in canary
+ {#parallel_canary_fail}
+
+When a child rollout fails, the controller rollout can transition to different
+states, depending on what happens with the child rollouts:
+
+If one or more child rollouts fail, but at least one child rollout is still
+IN_PROGRESS, the controller rollout remains IN_PROGRESS.
+
+If one or more child rollouts fail, but at least one child rollout succeeds,
+the controller rollout is HALTED if there are more phases after the current
+one.
+
+If this is the stable phase, the controller rollout is FAILED.
+
+HALTED gives you a chance to either
+ignore,
+retry
+failed jobs within the failed child rollout, or
+cancel the controller rollout
+and prevent further actions on the child rollouts.
+
+If the controller rollout is in a HALTED state because of a failed child
+rollout, and you ignore the failed job in the child rollout, the controller
+rollout reverts to an IN_PROGRESS state.
+
+## Use deploy analysis with a canary deployment strategy
+ {#analysis_canary}
+
+In a canary deployment strategy, you can use
+deploy analysis with some or all phases (except
+stable) to help determine when to advance a rollout to the next phase. And you
+can combine the analysis with an
+advanceRolloutRule
+automation so that the rollout advances automatically.
+
+To do so, include an analysis stanza
+inside the configuration for each phase you want to analyze.
+
+This analysis can
+use metrics from Google Cloud Observability
+or
+from the metrics provider of your choice.
+
+## What's next
+ {#whats_next}
+
+Try the canary deployment quickstart.
+
+Find out how to manage the lifecycle of your canary's rollouts.
+
+Proceed to the guide relevant to your specific target environment:
+
+Canary Deployments to Cloud Run
+
+Canary Deployments to GKE/GKE Enterprise using Service Networking
+
+Canary Deployments to GKE/GKE Enterprise using Gateway API
+
+ Send feedback
+
+ Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License. For details, see the Google Developers Site Policies. Java is a registered trademark of Oracle and/or its affiliates.
+
+ Last updated 2026-09-24 UTC.
+
+ Need to tell us more?
+
+ [[["Easy to understand","easyToUnderstand","thumb-up"],["Solved my problem","solvedMyProblem","thumb-up"],["Other","otherUp","thumb-up"]],[["Hard to understand","hardToUnderstand","thumb-down"],["Incorrect information or sample code","incorrectInformationOrSampleCode","thumb-down"],["Missing the information/samples I need","missingTheInformationSamplesINeed","thumb-down"],["Other","otherDown","thumb-down"]],["Last updated 2026-09-24 UTC."],[],[]]

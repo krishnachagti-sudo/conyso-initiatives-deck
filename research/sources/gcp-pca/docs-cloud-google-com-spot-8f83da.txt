@@ -1,0 +1,400 @@
+Spot VMs  |  Compute Engine  |  Google Cloud Documentation
+
+ Skip to main content
+
+ Home
+
+ Documentation
+
+ Compute
+
+ Compute Engine
+
+ Guides
+
+ Send feedback
+
+ # 
+ Spot VMs
+
+ Stay organized with collections
+
+ Save and categorize content based on your preferences.
+
+This page describes Spot VMs: virtual machine (VM)
+instances that are excess Compute Engine capacity. Spot VMs
+have significant discounts, but Compute Engine might preemptively
+stop or delete (preempt) Spot VMs to reclaim the capacity
+at any time. Spot VMs are the latest version of
+preemptible VMs.
+
+Spot VMs are VMs that use the
+spot provisioning model.
+This provisioning model lets you obtain resources at much lower prices compared
+to standard VMs. However, Compute Engine can preempt
+Spot VMs at any time to reclaim resources. Use Spot VMs to
+reduce costs for fault-tolerant workloads.
+
+To learn more about Compute Engine VMs in general, read the
+Virtual machine instances documentation.
+To learn how to create Spot VMs, read
+Create and use Spot VMs.
+
+## What are Spot VMs?
+ {#what-are-spot-vms}
+
+Spot VMs are available at much lower
+prices—up to 91% discounts for many machine types, GPUs, TPUs,
+and Local SSDs—compared to the on-demand price for standard VMs.
+
+However, Compute Engine might preempt Spot VMs at any time,
+such as when it needs the resources for other tasks. At this uncertain
+preemption time, Compute Engine either stops (default) or deletes your
+Spot VMs depending on your specified termination action for each
+Spot VM.
+
+Spot VMs are excess Compute Engine capacity, so their
+availability varies based on Compute Engine usage. You can help
+mitigate availability issues for Spot VMs by following the best
+practices, like viewing the availability of Spot VMs before creation,
+as explained later in this document. Spot VMs don't have a minimum
+or maximum runtime unless you specifically
+limit the runtime.
+
+If your workloads are fault-tolerant and can withstand possible VM
+preemption, Spot VMs can reduce your Compute Engine
+costs significantly. For example, batch processing jobs can run on
+Spot VMs. If some of those VMs stop during processing, the
+job slows but does not completely stop. Spot VMs complete your
+batch processing tasks without placing additional load on your existing
+VMs and without requiring you to pay full price for additional standard VMs.
+
+## Spot VMs limitations
+ {#limitations}
+
+Spot VMs function like standard VMs but have the
+following limitations:
+
+Spot VMs don't support the following machines:
+
+The A4X machine series
+
+Bare metal instances
+
+The Google Cloud Free Tier credits for
+Compute Engine don't apply to Spot VMs.
+
+Compute Engine might preempt Spot VMs to reclaim
+the resources at any time. Compute Engine preempts
+Spot VMs for a variety of reasons—for example, system events.
+The probability that Compute Engine preempts Spot VMs is
+generally low, but might vary from day to day and from zone to zone depending
+on current conditions. For more information, see
+Preemption selection in this document.
+
+Spot VMs are finite Compute Engine resources, so they
+might not always be available.
+
+Spot VMs can't
+live migrate
+to become standard VMs while they are running or be set to
+automatically restart
+when there is a host event.
+
+Due to the preceding limitations, Spot VMs are not covered by any
+Service Level Agreement and are excluded from the
+Compute Engine SLA.
+
+Additional limitations apply to TPU Spot VMs.
+
+## Preemption of Spot VMs
+ {#preemption}
+
+This section describes how Compute Engine preempts Spot VMs
+and which VMs are selected for preemption. Additionally, instructions to detect,
+handle, and test preemption of Spot VMs are explained later in
+Manage preemption of Spot VMs.
+
+### Preemption process
+ {#preemption-process}
+
+Compute Engine performs the following steps to preempt
+Spot VMs:
+
+Compute Engine sends a preemption notice to the VM by updating
+the preempted value in your VM's default metadata to TRUE, which your
+workload can monitor to detect preemption.
+
+ The preemption notice duration
+is the duration between this metadata signal and when
+Compute Engine sends a
+ACPI G2 Soft Off 
+signal to begin the shutdown period. The preemption notice duration affects
+how your workload can handle preemption and can be set to one of the
+following values while you are creating a Spot VM:
+
+120 seconds (Preview):
+We recommend setting the preemption notice duration to 120 seconds for any
+workloads that need a dedicated duration or longer than 30 seconds to
+handle preemption.
+
+0 seconds (default): If the preemption notice duration for a
+Spot VM isn't specified or is set to 0, then there is no
+dedicated delay between detecting preemption in metadata and the
+ACPI G2 Soft Off signal. Your workload can handle the preemption notice
+during the following shutdown period by using a shutdown script.
+
+When the ACPI G2 Soft Off signal is sent, it
+triggers any
+shutdown script
+that you have configured for the Spot VM and represents the
+beginning of the shutdown period. The shutdown period for Spot VMs
+is best effort and up to 30 seconds, which is shorter than the
+shutdown period for other instances.
+
+If the Spot VM hasn't stopped after the shutdown period,
+Compute Engine sends an
+ACPI G3 Mechanical Off 
+signal to the operating system.
+
+The final state of Spot VMs varies
+depending on your specified termination action for each VM:
+
+If the termination action is set to STOP or not specified, then
+Compute Engine stops the VM, transitioning the VM to a
+TERMINATED state.
+
+If the termination action is set to DELETE, then Compute Engine
+deletes the VM.
+
+You can simulate the preemption of a VM by
+stopping the VM
+or deleting the VM accordingly.
+
+If the preempted VM was stopped, it still appears in your project, but you are
+not charged for the VM hours while it remains in a TERMINATED state. You can
+access and recover data from any persistent disks that are attached to the VM,
+but those disks still incur storage charges until you delete them.
+As with standard VMs, persistent disks that are marked for auto-delete
+are deleted when you delete Spot VMs.
+
+If Compute Engine preempts Spot VMs less than one minute
+after they are created, you are not billed for the use of those VMs. This
+ensures that you don't pay for Spot VMs unless they have had time to
+complete a significant amount of work. However, the charges for
+premium operating systems are still calculated as
+normal.
+
+### Preemption selection
+ {#preemption-selection}
+
+Preemption can happen when Spot VMs are in a RUNNING state; while
+in a TERMINATED state, Spot VMs are not considered for preemption.
+As a result, you can reset the preemption process by
+stopping
+then restarting
+Spot VMs, since stopping VMs leaves them in a TERMINATED state.
+You can stop and restart preempted Spot VMs as many times as you
+would like, as long as there is capacity. Notably,
+resetting or rebooting VMs
+instead leaves VMs in a RUNNING state and, thus, don't reset the preemption
+process.
+
+You can't view why any given preemption event occurred. Similar to
+resource availability errors,
+preemption rates can vary in different zones, at different times, or with
+different resources. For specific suggestions on reducing your preemption rate,
+see the
+best practices.
+
+ Tip: Before you create Spot VMs, you can view the
+ expected uptime and
+ historical
+ preemption rate for the machine types that you want to use. This
+ information helps you choose the machine type and location where to create
+ your Spot VMs that best fits your workload and costs.
+
+## Pricing
+ {#pricing}
+
+Spot prices, the prices for Spot VMs, provide significant discounts
+for VMs. Spot prices give you discounts of up to 91% off of the on-demand price
+for many machine types, GPUs, TPUs, and Local SSD disks.
+
+Important: Spot prices can change up to once every day. To view the historical
+pricing trends for the machine types that you want your Spot VMs to
+use, see
+View the preemption rate and pricing for Spot VMs.
+
+Notably, if a preempted VM was stopped, you are not charged for the VM hours
+while it remains in a TERMINATED state. You can access and recover data from
+any persistent disks that are attached to the VM, but those disks still incur
+storage charges until you delete them. Learn more about
+instance uptime
+and disk pricing.
+
+To see the latest prices for Spot VMs, refer to the
+Spot VMs pricing page,
+use the Cloud Billing Catalog API,
+or sign up for pricing announcements for Spot VMs.
+
+## Using Spot VMs with Compute Engine
+ {#using-spot}
+
+This section provides notable information about using Spot VMs with
+other Compute Engine offerings. Learn about using Spot VMs
+with managed instance groups (MIGs), premium operating systems, local SSDs, and
+GPUs. Additionally, understand how Spot VMs affect your quotas for
+Compute Engine resources.
+
+### Spot VMs in a MIG
+ {#spot-with-instance-groups}
+
+You can create Spot VMs in a
+MIG by specifying the spot
+provisioning model in an instance template
+before you create or update the group.
+
+MIGs can create or add new Spot VMs only when additional Compute Engine resources are available. If these resources are limited,
+MIGs are unable to resize or automatically scale the number of Spot VMs in the group.
+
+When using instance flexibility
+that allows multiple machine types in the MIG, the MIG automatically selects
+machine types with the lowest observed preemption rates to minimize workload
+disruption.
+
+MIGs always attempt to maintain their target size or the size specified by the
+autoscaler for that group. If
+Compute Engine stops one or more Spot VMs in a MIG, the
+group repeatedly tries to recreate those VMs using the specified
+instance template. If the necessary
+resources become available again, the group recreates the VMs and maintains the
+target group size.
+
+### Premium operating systems on Spot VMs
+ {#spot-with-premium-os}
+
+Spot VMs don't reduce the cost of
+premium operating systems and
+don't change the way that you're billed for the use of those operating systems.
+If Compute Engine stops Spot VMs that run a premium
+operating system, you are billed for that operating system as if you stopped
+the VMs yourself. The charges for minimum usage still apply, and bills for
+premium operating systems are still calculated by rounding up to the nearest
+usage increment.
+
+The machine types on Spot VMs that run premium operating systems
+are always billed by the second, and follow the prices listed on the
+Machine type pricing
+page.
+
+### Local SSDs on Spot VMs
+ {#spot-with-local-ssd}
+
+You can start Spot VMs with
+local SSD disks and Compute Engine
+charges you spot prices
+for the local SSD disk usage. Local SSD disks attached to Spot VMs
+work like normal local SSD disks, retain the same
+data persistence characteristics,
+and remain attached for the life of the VM.
+
+Compute Engine doesn't charge you for local SSD disks if their VMs
+are preempted in the first minute after they start running.
+
+For more information about local SSD disks, see
+About Local SSD disks.
+
+### GPUs on Spot VMs
+ {#spot-with-gpu}
+
+You can add GPUs to your Spot VMs
+at lower spot prices for the GPUs. GPUs
+attached to Spot VMs work like normal GPUs but persist only for
+the life of the VM. Spot VMs with GPUs follow the same
+preemption process
+as all Spot VMs.
+
+Consider requesting dedicated Preemptible GPU quota to use for GPUs on
+Spot VMs. For more information, see
+Quotas for Spot VMs.
+
+During maintenance events, Spot VMs with GPUs are preempted by
+default and cannot be automatically restarted. If you want to recreate your
+VMs after they have been preempted, use a
+managed instance group.
+Managed instance groups recreate your VM instances if the vCPU, memory, and
+GPU resources are available.
+
+If you want a warning before your VMs are preempted, or want to
+configure your VMs to automatically restart after a maintenance event, use
+standard VMs with a GPU. For standard VMs with GPUs,
+Compute Engine provides
+one hour advance notice
+before preemption.
+
+Compute Engine does not
+charge you for GPUs if their VMs are preempted in the first
+minute after they start running.
+
+To learn how to create Spot VMs with GPUs attached, read
+Create a VM with attached GPUs
+and Creating Spot VMs.
+For example, see
+Create an A3 Ultra or A4 instance using Spot VMs.
+
+### Quotas for Spot VMs
+ {#quotas}
+
+Like other VMs, Spot VMs require available
+CPU quotas. Additionally, if you plan
+to use Spot VMs with local SSDs or with GPUs, Spot VMs
+also require disk quota and
+GPU quota respectively.
+
+If you use Spot VMs with these resources and have not requested
+preemptible quota, Spot VMs consume your standard quota for these
+resources. If you plan to use Spot VMs, consider requesting
+preemptible quota for those resources to prevent Spot VMs from
+consuming your other quotas.
+
+After Compute Engine grants you preemptible quota in a region, all
+Spot VMs (and any preemptible VMs)
+in that region count against that quota. All standard VMs in that region
+continue to count against the standard quota. In regions where you don't have
+preemptible quota, you can use standard quota to launch Spot VMs.
+
+Note: Once you request preemptible quota in a region, you are limited to using
+that quota for Spot VMs in that region. You can't consume standard
+quota in its place.
+Preemptible quota is not visible in the gcloud CLI or
+Google Cloud console quota pages unless Compute Engine has granted
+the quota. For more information, see
+Allocation quotas for preemptible resources.
+
+## What's next?
+ {#whats_next}
+
+View the availability of Spot VMs
+
+ ## 
+ Try it for yourself
+
+ {#try-it-for-yourself}
+
+ If you're new to Google Cloud, create an account to evaluate how
+ Compute Engine performs in real-world
+ scenarios. New customers also get $300 in free credits to run, test, and
+ deploy workloads.
+
+ Try Compute Engine free
+
+ Send feedback
+
+ Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License. For details, see the Google Developers Site Policies. Java is a registered trademark of Oracle and/or its affiliates.
+
+ Last updated 2026-09-24 UTC.
+
+ Need to tell us more?
+
+ [[["Easy to understand","easyToUnderstand","thumb-up"],["Solved my problem","solvedMyProblem","thumb-up"],["Other","otherUp","thumb-up"]],[["Hard to understand","hardToUnderstand","thumb-down"],["Incorrect information or sample code","incorrectInformationOrSampleCode","thumb-down"],["Missing the information/samples I need","missingTheInformationSamplesINeed","thumb-down"],["Other","otherDown","thumb-down"]],["Last updated 2026-09-24 UTC."],[],[]]

@@ -1,0 +1,832 @@
+Disaster recovery scenarios for applications  |  Cloud Architecture Center  |  Google Cloud Documentation
+
+ Skip to main content
+
+ Home
+
+ Documentation
+
+ Cloud Architecture Center
+
+ Send feedback
+
+ # 
+ Disaster recovery scenarios for applications
+
+ Stay organized with collections
+
+ Save and categorize content based on your preferences.
+
+ Last reviewed 2024-08-05 UTC
+
+This document is part of a series that discusses
+disaster recovery (DR) 
+in Google Cloud. This part explores common disaster recovery scenarios for
+applications.
+
+The series consists of these parts:
+
+Disaster recovery planning guide 
+
+Disaster recovery building blocks 
+
+Disaster recovery scenarios for data 
+
+Disaster recovery scenarios for applications (this document)
+
+Architecting disaster recovery for locality-restricted workloads 
+
+Disaster recovery use cases: locality-restricted data analytic applications 
+
+Architecting disaster recovery for cloud infrastructure outages 
+
+## Introduction
+ {#introduction}
+
+This document frames DR scenarios for applications in terms of
+DR patterns 
+that indicate how readily the application can recover from a disaster event. It
+uses the concepts discussed in the
+DR building blocks 
+document to describe how you can implement an end-to-end DR plan appropriate for
+your
+recovery goals.
+
+To begin, consider some typical workloads to illustrate how thinking about your
+recovery goals and architecture has a direct influence on your DR plan.
+
+### Batch processing workloads
+ {#batch_processing_workloads}
+
+Batch processing workloads tend not to be mission critical, so you typically
+don't need to incur the cost of designing a high availability (HA) architecture
+to maximize uptime; in general, batch processing workloads can deal with
+interruptions. This type of workload can take advantage of cost-effective
+products such as Spot VMs and
+preemptible VM instances which is an instance you can create and run at a much lower price than normal instances. (However,
+Compute Engine might preemptively stop or delete these instances if it
+requires access to those resources for other tasks.
+
+By implementing regular checkpoints as part of the processing task, the
+processing job can resume from the point of failure when new VMs are launched.
+If you're using Managed Service for Apache Spark, the process of
+launching preemptible worker nodes 
+is managed by a managed instance group. This can be considered a warm pattern,
+where there's a short pause waiting for replacement VMs to continue processing.
+
+### Ecommerce sites
+ {#ecommerce_sites}
+
+In ecommerce sites, some parts of the application can have larger RTO values.
+For example, the actual purchasing pipeline needs to have high availability, but
+the email process that sends order notifications to customers can tolerate a few
+hours' delay. Customers know about their purchase, and so although they expect a
+confirmation email, the notification is not a crucial part of the process. This
+is a mix of a hot (purchasing) and warm and cold (notification) patterns.
+
+The transactional part of the application needs high uptime with a minimal RTO
+value. Therefore, you use HA, which maximizes the availability
+of this part of the application. This approach can be considered
+a hot pattern.
+
+The ecommerce scenario illustrates how you can have varying RTO values within
+the same application.
+
+### Video streaming
+ {#video_streaming}
+
+A video streaming solution has many components that need to be highly available,
+from the search experience to the actual process of streaming content to the
+user. In addition, the system requires low latency to create a satisfactory user
+experience. If any aspect of the solution fails to provide a great experience,
+it's bad for the supplier as well as the customer. Moreover, customers today
+can turn to a competitive product.
+
+In this scenario, an HA architecture is a must-have, and small RTO values
+are needed. This scenario requires a hot pattern throughout the application
+architecture to help ensure minimal impact in case of a disaster.
+
+## DR and HA architectures for production on-premises
+ {#dr_and_ha_architectures_for_production_on-premises}
+
+This section examines how to implement three patterns—cold, warm, and hot—when
+your application runs on-premises and your DR solution is on
+Google Cloud.
+
+### Cold pattern: Recovery to Google Cloud
+ {#cold-pattern-recovery-to-gcp}
+
+In a cold pattern, you have minimal resources in the DR Google Cloud
+project—just enough to enable a recovery scenario. When there's a problem that
+prevents the production environment from running production workloads, the
+failover strategy requires a mirror of the production environment to be started
+in Google Cloud. Clients then start using the services from the DR
+environment.
+
+In this section we examine an example of this pattern. In the example,
+Cloud Interconnect is configured with a self-managed (non-Google Cloud) VPN solution to provide
+connectivity to Google Cloud. Data is copied to Cloud Storage as
+part of the production environment.
+
+This pattern uses the following DR building blocks:
+
+Cloud DNS
+
+Cloud Interconnect
+
+Self-managed VPN solution
+
+Cloud Storage
+
+Compute Engine
+
+Cloud Load Balancing
+
+Deployment Manager
+
+The following diagram illustrates this example architecture:
+
+The following steps outline how you can configure the environment:
+
+Create a VPC network.
+
+Configure connectivity 
+between your on-premises network and the Google Cloud network.
+
+Create a Cloud Storage bucket 
+as the target for your data backup.
+
+Create a service account.
+
+Create an
+IAM policy 
+to restrict who can access the bucket and its objects. You include the
+service account created specifically for this purpose. You also add the
+user account or group to the policy for your operator or system
+administrator, granting to all these identities the relevant permissions.
+For details about permissions for access to Cloud Storage, see
+IAM permissions for Cloud Storage.
+
+Use Service account impersonation to provide access for your local Google Cloud
+user (or service account) to impersonate the service account you created
+earlier. Alternatively you can create a new user specifically for this purpose.
+
+Test that you can
+upload and download 
+files in the target bucket.
+
+Create a data-transfer script.
+
+Create a scheduled task to run the script. You can use tools such as Linux
+crontab and Windows Task Scheduler.
+
+Create
+custom images 
+that are configured for each server in the production environment. Each
+image should be of the same configuration as its on-premises equivalent.
+
+As part of the custom image configuration for the database server,
+create a startup script 
+that will automatically copy the latest backup from a
+Cloud Storage bucket to the instance and then invoke the restore
+process.
+
+Configure Cloud DNS 
+to point to your internet-facing web services.
+
+Create a
+Deployment Manager template 
+that
+will create application servers in your Google Cloud network using the
+previously configured custom images. This template should also set up the
+appropriate firewall rules required.
+
+You need to implement processes to ensure that the custom images have the same
+version of the application as on-premises. Ensure that you incorporate upgrades
+to the custom images as part of your standard upgrade cycle, and ensure that
+your Deployment Manager template is using the latest custom
+image.
+
+#### Failover process and post-restart tasks
+ {#failover_process_and_post-restart_tasks}
+
+If a disaster occurs, you can recover to the system that's running on
+Google Cloud. To do this, you launch your recovery process in order to
+create the recovery environment using the Deployment Manager
+template you create. When the instances in the recovery environment are ready to
+accept production traffic, you adjust the DNS to point to the web server in
+Google Cloud.
+
+A typical recovery sequence is this:
+
+Use the Deployment Manager template to
+create a deployment 
+in
+Google Cloud.
+
+Apply the most recent database backup in Cloud Storage to the
+database server running in Google Cloud by following the instructions
+your database system for recovering backup files.
+
+Apply the most recent transaction logs in Cloud Storage.
+
+Test that the application works as expected by simulating user scenarios
+on the recovered environment.
+
+When tests succeed,
+configure Cloud DNS 
+to point to the web server on Google Cloud. (For example, you can use
+an anycast IP address behind a Google Cloud load balancer, with
+multiple web servers behind the load balancer.)
+
+The following diagram shows the recovered environment:
+
+When the production environment is running on-premises again and the environment
+can support production workloads, you reverse the steps that you followed to
+failover to the Google Cloud recovery environment. A typical sequence to
+return to the production environment is this:
+
+Take a backup of the database running on Google Cloud.
+
+Copy the backup file to your production environment.
+
+Apply the backup file to your production database system.
+
+Prevent connections to the application in Google Cloud. For example,
+prevent connections to the global load balancer. From this point your
+application will be unavailable until you finish restoring the production
+environment.
+
+Copy any transaction log files over to the production environment and
+apply them to the database server.
+
+Configure Cloud DNS 
+to point to your on-premises web service.
+
+Ensure that the process you had in place to copy data to
+Cloud Storage is operating as expected.
+
+Delete your deployment.
+
+### Warm standby: Recovery to Google Cloud
+ {#warm-standby-recovery-to-gcp}
+
+A warm pattern is typically implemented to keep RTO and RPO values as small as
+possible without the effort and expense of a fully HA configuration. The smaller
+the RTO and RPO value, the higher the costs as you approach having a fully
+redundant environment that can serve traffic from two environments. Therefore,
+implementing a warm pattern for your DR scenario is a good trade-off between
+budget and availability.
+
+An example of this approach is to use Cloud Interconnect configured
+with a self-managed VPN solution to provide connectivity to Google Cloud. A
+multitiered application is running on-premises while using a minimal recovery
+suite on Google Cloud. The recovery suite consists of an operational
+database server instance on Google Cloud. This instance must run at all
+times so that it can receive replicated transactions through asynchronous or
+semisynchronous replication techniques. To reduce costs, you can run the
+database on the smallest machine type that's capable of running the database
+service. Because you can use a long-running instance, sustained use discounts
+will apply.
+
+This pattern uses the following DR building blocks:
+
+Cloud DNS
+
+Cloud Interconnect
+
+Self-managed VPN solution
+
+Compute Engine
+
+Deployment Manager
+
+Compute Engine snapshots provide a way to take backups that you can roll
+back to a previous state. Snapshots are used in this example because updated web
+pages and application binaries are written frequently to the production
+web and to application servers. These updates are regularly replicated to the
+reference web server and application server instances on Google Cloud. (The
+reference servers don't accept production traffic; they are used to create the
+snapshots.)
+
+The following diagram illustrates an architecture that implements this approach.
+The replication targets are not shown in the diagram.
+
+The following steps outline how you can configure the environment:
+
+Create a VPC network.
+
+Configure connectivity 
+between your on-premises network and the Google Cloud network.
+
+Replicate your on-premises servers to Google Cloud VM instances. One
+option is to use a partner solution; the method you employ depends on your
+circumstances.
+
+Create a
+custom image 
+of your database server on Google Cloud that has the same
+configuration as your on-premises database server.
+
+Create snapshots 
+of the web server and application server instances.
+
+Start a database instance in Google Cloud using the custom image you
+created earlier. Use the smallest machine type that is capable of
+accepting replicated data from the on-premises production database.
+
+Attach persistent disks 
+to the Google Cloud database instance for the databases and
+transaction logs.
+
+Configure replication between your on-premises database server and the
+database server in Google Cloud by following the instructions for your
+database software.
+
+Set the
+auto delete 
+flag on the persistent disks attached to the database instance to
+no-auto-delete.
+
+Configure a scheduled task to create regular snapshots of the persistent
+disks of the database instance on Google Cloud.
+
+Create reservations 
+to assure capacity for your web server and application
+servers as needed.
+
+Test the process of creating instances from snapshots and of taking
+snapshots of the persistent disks.
+
+Create instances of the web server and the application server using the
+snapshots created earlier.
+
+Create a script that copies updates to the web application and the
+application server whenever the corresponding on-premises servers are
+updated. Write the script to create a snapshot of the updated
+servers.
+
+Configure Cloud DNS 
+to point to your internet-facing web service on premises.
+
+#### Failover process and post-restart tasks
+ {#failover_process_and_post-restart_tasks_2}
+
+To manage a failover, you typically use your monitoring and alerting system to
+invoke an automated failover process. When the on-premises application needs to
+fail over, you configure the database system on Google Cloud so it is able
+to accept production traffic. You also start instances of the web and
+application server.
+
+The following diagram shows the configuration after failover to
+Google Cloud enabling production workloads to be served from
+Google Cloud:
+
+A typical recovery sequence is this:
+
+Resize 
+the database server instance so that it can handle production loads.
+
+Use the web server and application snapshots on Google Cloud
+to create 
+new web server and application instances.
+
+Test that the application works as expected by simulating user scenarios
+on the recovered environment.
+
+When tests succeed,
+configure Cloud DNS 
+to point to your web service on Google Cloud.
+
+When the production environment is running on-premises again and can support
+production workloads, you reverse the steps that you followed to fail over to
+the Google Cloud recovery environment. A typical sequence to return to the
+production environment is this:
+
+Take a backup of the database running on Google Cloud.
+
+Copy the backup file to your production environment.
+
+Apply the backup file to your production database system.
+
+Prevent connections to the application in Google Cloud. One way to
+do this is to prevent connections to the web server by
+modifying the firewall rules.
+From this point your application will be unavailable until you finish
+restoring the production environment.
+
+Copy any transaction log files over to the production environment and
+apply them to the database server.
+
+Test that the application works as expected by simulating user scenarios
+on the production environment.
+
+Configure Cloud DNS 
+to point to your on-premises web service.
+
+Delete the web server and application server instances that are running in
+Google Cloud. Leave the reference servers running.
+
+Resize 
+the database server on Google Cloud back to the minimum instance size
+that can accept replicated data from the on-premises production database.
+
+Configure replication between your on-premises database server and the
+database server in Google Cloud by following the instructions for your
+database software.
+
+### Hot HA across on-premises and Google Cloud
+ {#hot-ha-across-on-premises-and-gcp}
+
+If you have small RTO and RPO values, you can achieve these only by running
+HA across your production environment and Google Cloud concurrently. This
+approach gives you a hot pattern, because both on-premises and Google Cloud
+are serving production traffic.
+
+The key difference from the warm pattern is that the resources in both
+environments are running in production mode and serving production traffic.
+
+This pattern uses the following DR building blocks:
+
+Cloud Interconnect
+
+Cloud VPN
+
+Compute Engine
+
+Managed instance groups
+
+Cloud Monitoring
+
+Cloud Load Balancing
+
+The following diagram illustrates this example architecture. By implementing
+this architecture, you have a DR plan that requires minimal intervention in the
+event of a disaster.
+
+The following steps outline how you can configure the environment:
+
+Create a VPC network.
+
+Configure connectivity 
+between your on-premises network and your Google Cloud network.
+
+Create
+custom images 
+in Google Cloud that are configured for each server in the on-premises
+production environment. Each Google Cloud image should have the same
+configuration as its on-premises equivalent.
+
+Configure replication between your on-premises database server and the
+database server in Google Cloud by following the instructions for your
+database software.
+
+Many database systems permit only a single writeable database instance when
+you configure replication. Therefore, you might need to ensure that one of
+the database replicas acts as a read-only server.
+
+Create individual
+instance templates 
+that use the images for the application servers and the web servers.
+
+Configure
+regional managed instance groups 
+for the application and web servers.
+
+Configure health checks using
+Cloud Monitoring.
+
+Configure load balancing 
+using the regional managed instance groups that were configured earlier.
+
+Configure a scheduled task to create regular snapshots of the persistent
+disks.
+
+Configure a DNS service to distribute traffic between your on-premises
+environment and the Google Cloud environment.
+
+With this hybrid approach, you need to use a DNS service that supports weighted
+routing to the two production environments so that you can serve the same
+application from both.
+
+You need to design the system for failures that might occur in only part of an
+environment (partial failures). In that case, traffic should be rerouted to the
+equivalent service in the other backup environment. For example, if the
+on-premises web servers become unavailable, you can disable DNS routing to that
+environment. If your DNS service supports health checks, this will occur
+automatically when the health check determines that web servers in one of the
+environments can't be reached.
+
+If you're using a database system that allows only a single writeable instance,
+in many cases the database system will automatically promote the read-only
+replica to be the writeable primary when the heartbeat between the original
+writable database and the read replica loses contact. Be sure that you
+understand this aspect of your database replication in case you need to
+intervene after a disaster.
+
+You must implement processes to ensure that the custom VM images in
+Google Cloud have the same version of the application as the versions
+on-premises. Incorporate upgrades to the custom images as part of your standard
+upgrade cycle, and ensure that your Deployment Manager template
+is using the latest custom image.
+
+#### Failover process and post-restart tasks
+ {#failover_process_and_post-restart_tasks_3}
+
+In the configuration described here for a hot scenario, a disaster means
+that one of the two environments isn't available. There is no failover process
+in the same way that there is with the warm or cold scenarios, where you need to
+move data or processing to the second environment. However, you might need to
+handle the following configuration changes:
+
+If your DNS service doesn't automatically reroute traffic based on a
+health check failure, you need to manually configure DNS routing to send
+traffic to the system that's still up.
+
+If your database system doesn't automatically promote a read-only replica
+to be the writeable primary on failure, you need to intervene to ensure
+that the replica is promoted.
+
+When the second environment is running again and can handle production traffic,
+you need to resynchronize databases. Because both environments support
+production workloads, you don't have to take any further action to change which
+database is the primary. After the databases are synchronized, you can allow
+production traffic to be distributed across both environments again by adjusting
+the DNS settings.
+
+## DR and HA architectures for production on Google Cloud
+ {#dr-and-ha-architectures-for-production-on-gcp}
+
+When you design your application architecture for production workload on
+Google Cloud, the HA features of the platform have a direct influence on
+your DR architecture.
+
+Backup and DR Service is a centralized, cloud-native solution for
+backing up and recovering cloud and hybrid workloads. It offers swift data
+recovery and facilitates the quick resumption of essential business operations.
+
+For more information about using Backup and DR Service for applications scenarios on
+Google Cloud, see the following:
+
+Backup and DR Service for Compute Engine 
+describes the concepts and details of using Google Cloud Backup and DR Service
+to incrementally back up data from your Persistent Disks at the instance level.
+
+Backup and DR Service for Google Cloud VMware Engine 
+describes the concepts and details of using Google Cloud Backup and DR Service
+to incrementally backup data from your VMDKs at the VM level.
+
+Backup and DR Service for Filestore and file systems 
+describes the concepts and details of using Google Cloud Backup and DR Service
+to capture and back up data from production SMB, NFS, and Filestore
+file systems.
+
+### Cold: recoverable application server
+ {#cold_recoverable_application_server}
+
+In a cold failover scenario where you need a single active server instance,
+only one instance should write to disk. In an on-premises environment, you often
+use an active / passive cluster. When you run a production environment on
+Google Cloud, you can create a VM in a
+managed instance group 
+that only runs one instance.
+
+This pattern uses the following DR building blocks:
+
+Compute Engine
+
+Managed instance groups
+
+This cold failover scenario is shown in the following example architecture
+image:
+
+The following steps outline how to configure this cold failover scenario:
+
+Create a VPC network.
+
+Create a
+custom VM image 
+that's configured with your application web service.
+
+Configure the VM so that the data processed by the application service is
+written to an attached
+persistent disk.
+
+Create a snapshot 
+from the attached persistent disk.
+
+Create an
+instance template 
+that references the custom VM image for the web server.
+
+Configure a startup script 
+to create a persistent disk from the latest snapshot and to mount the disk.
+This script must be able to get the latest snapshot of the disk.
+
+Create a
+managed instance group 
+and health checks with a target size of one that references the instance
+template.
+
+Create a
+scheduled task to create regular snapshots of the persistent disk.
+
+Configure an
+external Application Load Balancer.
+
+Configure alerts using Cloud Monitoring 
+to send an alert when the service fails.
+
+This cold failover scenario takes advantage of some of the HA features available
+in Google Cloud. If a VM fails, the managed instance group tries to recreate
+the VM automatically. You don't have to initiate this failover step. The
+external Application Load Balancer makes sure that even when a replacement VM is needed,
+the same IP address is used in front of the application server. The instance
+template and custom image make sure that the replacement VM is configured
+identically to the instance it replaces.
+
+Your RPO is determined by the last snapshot taken. The more often you take
+snapshots, the smaller the RPO value.
+
+The managed instance group provides HA in depth. The managed instance group
+provides ways to react to failures at the application or VM level. You don't
+manually intervene if any of those scenarios occur. A target size of one makes
+sure that you only ever have one active instance that runs in the managed
+instance group and serves traffic.
+
+Persistent disks are zonal, so you must take snapshots to re-create disks if
+there's a zonal failure. Snapshots are also available across
+regions, which lets
+you restore a disk to a different region similar to restoring it to
+the same region.
+
+In the unlikely event of a zonal failure, you must manually intervene to
+recover, as outlined in the next section.
+
+#### Failover process
+ {#failover_process}
+
+If a VM fails, the managed instance group automatically tries to recreate a VM
+in the same zone. The startup script in the instance template creates a
+persistent disk from the latest snapshot and attaches it to the new VM.
+
+However, a managed instance group with size one doesn't recover if there's a
+zone failure. In the scenario where a zone fails, you must react to the
+Cloud Monitoring alert, or other monitoring platform, when the service
+fails and manually create an instance group in another zone.
+
+A variation on this configuration is to use regional persistent disks instead of
+zonal persistent disks. With this approach, you don't need to use snapshots to
+restore the persistent disk as part of the recovery step. However, this
+variation consumes twice as much storage and you need to budget for that. 
+
+The approach you choose is dictated by your budget and RTO and RPO values.
+
+### Warm: static site failover
+ {#warm_static_site_failover}
+
+If Compute Engine instances fail, you can mitigate service interruption
+by having a
+Cloud Storage-based static site on standby.
+This pattern is appropriate when your web application is mostly static.
+
+In this scenario, the primary application runs on Compute Engine
+instances. These instances are grouped into managed instance groups, and the
+instance groups serve as
+backend services 
+for an HTTPS load balancer. The HTTP load balancer directs incoming traffic to
+the instances according to the load balancer configuration, the configuration of
+each instance groups, and the health of each instance.
+
+This pattern uses the following DR building blocks:
+
+Compute Engine
+
+Cloud Storage
+
+Cloud Load Balancing
+
+Cloud DNS
+
+The following diagram illustrates this example architecture:
+
+The following steps outline how to configure this scenario:
+
+Create a VPC network.
+
+Create a
+custom image 
+that's configured with the application web service.
+
+Create an
+instance template 
+that uses the image for the web servers.
+
+Configure a
+managed instance group 
+for the web servers.
+
+Configure health checks using Monitoring.
+
+Configure
+load balancing 
+using the managed instance groups that you configured earlier.
+
+Create a
+Cloud Storage-based static site.
+
+In the production configuration, Cloud DNS is configured to point at
+this primary application, and the standby static site sits dormant. If the
+Compute Engine application goes down, you would configure
+Cloud DNS to point to this static site.
+
+#### Failover process
+ {#failover_process_2}
+
+If the application server or servers go down, your recovery sequence is to
+configure Cloud DNS 
+to point to your static website. The following diagram shows the architecture
+in its recovery mode:
+
+When the application Compute Engine instances are running again and can
+support production workloads, you reverse the recovery step: you
+configure Cloud DNS 
+to point to the load balancer that fronts the instances.
+
+Alternatively, you can use Persistent Disk Asynchronous Replication. It offers block
+storage replication with low recovery point objective (RPO) and low recovery
+time objective (RTO) for cross-region active-passive DR. This storage option lets you manage replication for Compute Engine
+workloads at the infrastructure level, rather than at the workload level.
+
+### Hot: HA web application
+ {#hot_ha_web_application}
+
+A hot pattern when your production environment is running on Google Cloud
+is to establish a well-architected HA deployment.
+
+This pattern uses the following DR building blocks:
+
+Compute Engine
+
+Cloud Load Balancing
+
+Cloud SQL
+
+The following diagram illustrates this example architecture:
+
+This scenario takes advantage of HA features in Google Cloud—you don't
+have to initiate any failover steps, because they will occur automatically in
+the event of a disaster.
+
+As shown in the diagram, the architecture uses a regional managed instance group
+together with global load balancing and Cloud SQL. The example here
+uses a regional managed instance group, so the instances are distributed across
+three zones.
+
+With this approach, you get HA in depth. Regional managed instance groups
+provide mechanisms to react to failures at the application, instance, or zone
+level, and you don't have to manually intervene if any of those scenarios
+occurs.
+
+To address application-level recovery, as part of setting up the managed
+instance group, you configure HTTP health checks that verify that the services
+are running properly on the instances in that group. If a health check
+determines that a service has failed on an instance, the group automatically
+re-creates that instance.
+
+For more informations about building scalable and resilient applications on
+Google Cloud, see
+Patterns for scalable and resilient apps .
+
+## What's next
+ {#whats_next}
+
+Read about Google Cloud geography and regions.
+
+Read other documents in this DR series:
+
+Disaster recovery planning guide 
+
+Disaster recovery building blocks 
+
+Disaster recovery scenarios for data 
+
+Architecting disaster recovery for locality-restricted workloads 
+
+Disaster recovery use cases: locality-restricted data analytic applications 
+
+Architecting disaster recovery for cloud infrastructure outages 
+
+Explore reference architectures, diagrams, and best practices about Google Cloud.
+Take a look at our
+Cloud Architecture Center.
+
+ Send feedback
+
+ Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License. For details, see the Google Developers Site Policies. Java is a registered trademark of Oracle and/or its affiliates.
+
+ Last updated 2024-08-05 UTC.
+
+ Need to tell us more?
+
+ [[["Easy to understand","easyToUnderstand","thumb-up"],["Solved my problem","solvedMyProblem","thumb-up"],["Other","otherUp","thumb-up"]],[["Hard to understand","hardToUnderstand","thumb-down"],["Incorrect information or sample code","incorrectInformationOrSampleCode","thumb-down"],["Missing the information/samples I need","missingTheInformationSamplesINeed","thumb-down"],["Other","otherDown","thumb-down"]],["Last updated 2024-08-05 UTC."],[],[]]

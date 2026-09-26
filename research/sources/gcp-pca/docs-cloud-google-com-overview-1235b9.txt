@@ -1,0 +1,271 @@
+Access Context Manager Overview  |  Google Cloud Documentation
+
+ Skip to main content
+
+ Home
+
+ Documentation
+
+ Security
+
+ Access Context Manager
+
+ Guides
+
+ Send feedback
+
+ # 
+ Access Context Manager Overview
+
+ Stay organized with collections
+
+ Save and categorize content based on your preferences.
+
+This document provides a general overview of the Access Context Manager service and
+its functions. Google Cloud organization administrators can use Access Context Manager
+to define fine-grained, attribute-based access control for projects and
+resources in Google Cloud. As an administrator, you first define an
+access policy, which is an organization-wide container for
+access levels and service perimeters.
+
+Access levels describe the requirements for requests to be honored.
+Examples include the following:
+
+Device type and operating system
+
+IP address
+
+User identity
+
+Service perimeters define sandboxes of resources. Resources within the perimeter
+can freely exchange data but cannot export data outside of the perimeter.
+Access Context Manager isn't responsible for policy enforcement. Rather,
+Access Context Manager is designed to define specific rules or context. Policy is
+configured and enforced across various points, such as
+VPC Service Controls. You can read more about these
+services in their respective user guides.
+
+You can configure and enforce Access Context Manager policies across the following
+Chrome Enterprise Premium solution components:
+
+VPC Service Controls
+
+Identity-Aware Proxy
+
+Context-Aware Access for Google Workspace
+
+Identity and Access Management (IAM) conditions
+
+## Benefits
+ {#access-context-manager}
+
+Many companies rely on a perimeter security model like a firewall to
+help secure internal resources. A perimeter security model is heavily guarded
+with a single point of entry and exit. Anything located outside the perimeter is
+considered dangerous. Anything inside is trusted.
+
+Firewalls and the perimeter security model work well if there is a well-defined
+boundary around specific users and services. However, if a workforce is
+mobile, the variety of devices increases as users bring their own devices (BYOD)
+and utilize cloud-based services. This scenario results in additional attack
+vectors that aren't considered by the perimeter model. Given this, the perimeter
+is no longer only the physical location of the enterprise, and what lies inside
+cannot be assumed as safe.
+
+You can use Access Context Manager to reduce the size of the privileged network and
+move to a model where endpoints don't carry ambient authority based on the
+network. Instead, you can grant access based on the context of the request, such
+as device type, user identity, and more, while still checking for corporate
+network access when necessary.
+
+Access Context Manager is an integral part of the BeyondCorp effort at Google. For
+more information, see BeyondCorp.
+
+## Access policies
+ {#access-policies}
+
+An access policy is a container for all of your Access Context Manager resources,
+such as access levels and
+service perimeters.
+
+You can create an access policy in the context of an organization and use the
+organization-level access policy anywhere in your organization. To delegate
+administration of an access policy, you can create a scoped access policy and set the scope of the policy at the folder or
+project level. The delegated administrator to whom the scoped policy is assigned
+can manage only the scoped access policy and not the organization-level access
+policy.
+
+An access policy is versioned using an etag.
+You can use etag to target changes to your access policy, such as
+modifications to access levels or to a specific version of the policy. If
+multiple sources change your access policy, using the etag field for
+the gcloud command-line tool and API calls helps prevent unintended overwrites and conflicts.
+
+To learn how to create access policies, see Creating an access policy.
+
+## Access levels
+ {#access-levels}
+
+Access levels are used for permitting access to resources based on contextual
+information about the request. Using access levels, you can start to organize
+tiers of trust. For example, you might create an access level called
+High_Level that will permit requests from a small group of highly-privileged
+individuals. You might also identify a more general group to trust, such as an
+IP range that you want to permit requests from. In that case, you might create
+an access level called Medium_Level to permit those requests.
+
+After you've defined access levels, enforcement services can use them to
+determine whether to honor a request. For example, you might specify that, while
+many resources are available to Medium_Trust, certain more sensitive resources
+require the High_Trust level. These checks are applied in addition to
+standard IAM policy.
+
+Access levels are customizable; the High_Trust and Medium_Trust access
+levels are examples. You can specify multiple access levels as part of an
+access policy.
+
+Access Context Manager provides two ways to define access levels:
+
+A basic access level consists of a collection of conditions that are used to
+test requests.
+
+Conditions can be defined as a group of attributes
+that you want to test, such as device type, IP address, or user identity. The
+attributes are combined as either an AND operation (all must be true) or a
+NOR operation (none must be true) to determine whether the condition is
+met.
+
+Custom access levels are created using a subset of
+Common Expression Language. In addition to the request context used for basic
+access levels, you can also use custom access levels to permit requests based
+on data from third-party services. For more information, see
+Custom Access Levels.
+
+Warning: When nesting access levels and when combining all logic, keep in mind
+that, if any of the operands of the boolean operators AND (&&) and OR
+(||) uniquely determines the result, the other operand might or might not be
+evaluated. In addition, if that evaluation produces a runtime error, it is
+ignored. For example, in the following expression, the evaluation of
+origin.region_code fails, but the levels.ip_check evaluation succeeds.
+Because at least one of the checks is successful, the overall condition, which
+is combined by OR, becomes true, and access is GRANTED.
+
+!(origin.region_code in ['RU', 'BY', 'UA']) -> FAILED // levels.regions_check
+
+inIpRange(origin.ip, ['205.220.128.0/23']) -> GRANTED // levels.ip_check
+
+!(origin.region_code in ['RU', 'BY', 'UA']) || inIpRange(origin.ip, ['205.220.128.0/23']) -> GRANTED
+
+levels.regions_check || levels.ip_check -> GRANTED
+
+### IP address
+ {#ip-address}
+
+You can grant an access level based on the IP address of the originating
+request. The range of IP addresses to allow is specified in the form of a
+Classless Inter-Domain Routing (CIDR)
+block, which allows for fine-grained control over the IP addresses allowed.
+
+A single access level can contain multiple IP ranges.
+
+To learn how to create an access level that only allows access to a specified
+range of IP addresses such as those within a single corporate network, see Creating an Access Level for Corporate Network Access.
+
+The following IP ranges are treated as private ranges by Access Context Manager:
+
+10.0.0.0/8 (RFC 1918)
+
+172.16.0.0/12 (RFC 1918)
+
+192.168.0.0/16 (RFC 1918)
+
+100.64.0.0/10 (RFC 6598 Shared Address Space)
+
+fc00::/7 (IPv6 Unique Local Addresses RFC 4193)
+
+### Device type
+ {#device-type}
+Note: This feature is available only as part of a paid enterprise security
+subscription. If you're interested, consider signing up.
+Access Context Manager uses
+Endpoint Verification
+to gather information about user devices such as the operating system, device
+type, or version. You can grant an access level based on this data. For example,
+you can grant a more permissive access level to devices that run the latest
+version of the primary operating system deployed at your company.
+
+To learn how to grant an access level based on such device attributes, see
+Limit access by device type.
+
+### User identity
+ {#user-identity}
+
+In some scenarios, you might want to grant an access level to specific entities.
+In these scenarios, the identity of the caller determines whether the condition
+is met. This scenario is often used together with Service Accounts and
+VPC Service Controls.
+
+For example, you can use this
+scenario to enable a Cloud Function to access data protected by
+VPC Service Controls.
+
+You can create and manage identity-only access levels with the gcloud command-line tool, but not
+with the Google Cloud console.
+
+To get started with creating a basic access level, see
+Create an access level for Access Context Manager.
+
+For information about creating an access level that allows access based on the
+context of a request, see Create a custom access level.
+
+### Combining conditions
+ {#combining-conditions}
+
+A single access level can contain multiple conditions. The conditions can be
+evaluated using either the AND or OR operator. You can specify the mode when
+creating or updating an access level.
+
+The AND case is the stricter and default option. This option only grants the
+Access Level if all conditions pass. For example, you might require a request
+come from within the corporate network and from a device that runs a latest
+version of an operating system.
+
+OR is a less restrictive option. This option only requires one of many
+conditions to be true. This is sometimes valuable when dealing with user
+identities—for example, to exclude specific entities (such as Service Accounts)
+from the normal requirements.
+
+### Nesting conditions
+ {#nesting-conditions}
+
+Conditions can be nested such that one condition depends on another condition.
+For example, if you have the two access levels of "Medium" and "High" trust, you
+can set the requirements for "High" to require "Medium," in addition to other
+conditions.
+
+Nesting conditions can make managing access levels more convenient. For example,
+imagine your most permissive access level contains a minimum operating system
+version, and you set your more restrictive levels to depend on it. If you
+update the minimum version in the future, you only have to update a single
+condition, rather than every access level in the policy.
+
+## Learn more
+ {#learn_more}
+
+Quickstart: Create an access level for Access Context Manager
+
+Create a basic access level
+
+Create a custom access level
+
+Example Access Level YAML
+
+ Send feedback
+
+ Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License. For details, see the Google Developers Site Policies. Java is a registered trademark of Oracle and/or its affiliates.
+
+ Last updated 2026-09-24 UTC.
+
+ Need to tell us more?
+
+ [[["Easy to understand","easyToUnderstand","thumb-up"],["Solved my problem","solvedMyProblem","thumb-up"],["Other","otherUp","thumb-up"]],[["Hard to understand","hardToUnderstand","thumb-down"],["Incorrect information or sample code","incorrectInformationOrSampleCode","thumb-down"],["Missing the information/samples I need","missingTheInformationSamplesINeed","thumb-down"],["Other","otherDown","thumb-down"]],["Last updated 2026-09-24 UTC."],[],[]]

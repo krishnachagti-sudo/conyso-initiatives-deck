@@ -1,0 +1,315 @@
+Overview of Cloud Build  |  Google Cloud Documentation
+
+ Skip to main content
+
+ Home
+
+ Documentation
+
+ Application development
+
+ Cloud Build
+
+ Guides
+
+ Send feedback
+
+ # 
+ Overview of Cloud Build
+
+ Stay organized with collections
+
+ Save and categorize content based on your preferences.
+
+Cloud Build is a service that executes your builds on Google Cloud.
+
+Cloud Build can import source code from a variety of repositories or
+Cloud Storage, execute a build to your specifications, and produce
+artifacts such as Docker containers or Java archives.
+
+You can also use Cloud Build to help protect your software supply chain. Cloud Build features meet the requirements of Supply chain Levels for Software Artifacts (SLSA) level 3. For guidance on protecting your build processes, see Safeguard builds.
+
+## Build configuration and build steps
+ {#build_configuration_and_build_steps}
+
+You can write a build config to provide
+instructions to Cloud Build on what tasks to perform. You can
+configure builds to fetch dependencies, run unit tests, static analyses, and
+integration tests, and create artifacts with build tools such as docker, gradle,
+maven, bazel, and gulp.
+
+Cloud Build executes your build as a series of build steps, where each
+build step is run in a Docker container. Executing build steps is analogous to
+executing commands in a script.
+
+You can either use the build steps provided by Cloud Build and the
+Cloud Build community, or write your own custom build steps:
+
+Build steps provided by Cloud Build:
+Cloud Build has published a set of
+supported
+open-source build steps for common languages and tasks.
+
+Community-contributed build steps: The
+Cloud Build user community has provided open-source
+build steps.
+
+Custom build steps: You can 
+create your own build steps for use in your builds.
+
+Each build step is run with its container attached to a local Docker network
+named cloudbuild. This allows build steps to communicate with each other and
+share data. For more information on the cloudbuild network, see
+Cloud Build network.
+
+You can use standard Docker Hub images in
+Cloud Build, such as Ubuntu and
+Gradle.
+
+## Starting builds
+ {#starting_builds}
+
+You can manually start builds in
+Cloud Build using the Google Cloud CLI or the Cloud Build
+API, or use
+Cloud Build's build triggers to create an
+automated continuous integration/continuous delivery (CI/CD) workflow that
+starts new builds in response to code changes.
+
+You can integrate build triggers with many code repositories, including Cloud
+Source Repositories, GitHub, and Bitbucket.
+
+## Viewing build results
+ {#viewing_build_results}
+
+You can view your build results using the gcloud CLI, the
+Cloud Build
+API or use the
+Build History page in the Cloud Build section in
+Google Cloud console, which displays details and logs for every build
+Cloud Build executes. For instructions see Viewing Build
+Results.
+
+## How builds work
+ {#how_builds_work}
+
+The following steps describe, in general, the lifecycle of a
+Cloud Build build:
+
+Prepare your application code and any needed assets.
+
+Create a build config file in YAML or JSON format, which contains
+instructions for Cloud Build.
+
+Submit the build to Cloud Build.
+
+Cloud Build executes your build based on the build config you
+provided.
+
+If applicable, any built artifacts are pushed to Artifact Registry.
+
+### Docker
+ {#docker}
+
+Cloud Build uses Docker 
+to execute builds. For each build step, Cloud Build executes a Docker container
+as an instance of docker run. Currently, Cloud Build is running
+Docker engine version 20.10.24.
+
+## Cloud Build interfaces
+ {#interfaces}
+
+You can use Cloud Build with the Google Cloud console, gcloud
+command-line tool, or Cloud Build's REST API.
+
+In the Google Cloud console, you can view the Cloud Build build
+results in the Build History page, and
+automate builds in Build Triggers.
+
+You can use the gcloud CLI to create and manage
+builds. You can run commands to perform tasks
+such as submitting a build,
+listing builds, and canceling a
+build.
+
+You can request builds using the Cloud Build REST
+API.
+
+As with other Cloud Platform APIs, you must authorize
+access using OAuth2. After you have authorized access,
+you can then use the API to start new builds, view build status and details,
+list builds per project, and cancel builds that are currently in process.
+
+For more information, see the
+API documentation.
+
+## Default pools and private pools
+ {#default_pools_and_private_pools}
+
+By default, when you run a build on Cloud Build, the build runs in a
+secure, hosted environment with access to the public internet. Each build runs on
+its own worker and is isolated from other workloads. You can customize your
+build in multiple ways including increasing the size of the machine type or
+allocating more disk space. The default pool has limits on how much you
+can customize the environment, particularly around private network access.
+
+Private pools are private, dedicated pools of workers that offer greater
+customization over the build environment, including the ability to access resources
+in a private network. Private pools, similar to default pools, are hosted and
+fully-managed by Cloud Build and scale up and down to zero, with no
+infrastructure to set up, upgrade, or scale. Because private pools are
+customer-specific resources, you can configure them in more ways.
+
+To learn more about private pools and the feature difference between default
+pool and private pool, see Private pool overview.
+
+## Build security
+ {#build_security}
+
+Cloud Build provides several features to secure your builds including:
+
+ Automated Builds
+
+ An automated build or scripted build defines all build steps in build script
+ or build configuration, including steps to retrieve source code and steps to
+ build the code. The only manual command, if any, is the command to run the
+ build. Cloud Build uses a
+ build config file to provide build
+ steps to Cloud Build.
+
+ Automated builds provide consistency in the build steps. However, it's also
+ important to run builds in a consistent, trusted environment.
+
+ Although local builds can be useful for debugging purposes, releasing
+ software from local builds can introduce a lot of security concerns,
+ inconsistencies and inefficiencies into the build process.
+
+ Allowing local builds provides a way for an attacker with malicious
+ intent to modify the build process.
+
+ Inconsistencies in developer local environments and developer practices
+ make it difficult to reproduce builds and diagnose build issues.
+
+ In the requirements
+ for the SLSA framework, automated builds are a
+ requirement for SLSA level 1, and using a build service instead of developer
+ environments for builds is a requirement for SLSA level 2.
+
+ Build provenance
+
+ Build provenance is a collection of verifiable data about a build.
+
+ Provenance metadata includes details such as the digests of the built
+ images, the input source locations, the build toolchain, and the build
+ duration.
+
+ Generating build provenance helps you to:
+
+ Verify that a built artifact was created from trusted source location
+ and by a trusted build system.
+
+ Identify code injected from an untrusted source location or build
+ system.
+
+ You can use alerting and policy mechanisms to proactively use build
+ provenance data. For example, you can create policies that only allow
+ deployments of code built from verified sources.
+
+ Cloud Build can generate build provenance for container images
+ that provide SLSA level 3 assurance. For more information, see
+ Viewing build provenance.
+
+ Ephemeral build environment
+
+ Ephemeral environments are temporary environments that are meant to last for
+ a single build invocation. After the build, the environment is wiped or
+ deleted. Ephemeral builds ensure that the build service and build steps run in
+ an ephemeral environment, such as a container or virtual machine (VM). Instead of reusing an
+ existing build environment, the build service provisions a new environment for
+ each build and then destroys it after the build process is complete.
+
+ Ephemeral environments ensure clean builds since there are no residual files
+ or environment settings from previous builds that can interfere with the build
+ process. A non-ephemeral environment provides an opportunity for attackers to
+ inject malicious files and content. An ephemeral environment also reduces
+ maintenance overhead and reduces inconsistencies in the build
+ environment.
+
+ Cloud Build sets up a new VM
+ environment for every build and destroys it after the build.
+
+ Deployment policies
+
+ You can integrate Cloud Build
+ with Binary Authorization to check for build attestations and block deployments
+ of images that aren't generated by Cloud Build. This process can
+ reduce the risk of deploying unauthorized software.
+
+ Customer-managed encryption keys
+
+ Cloud Build provides
+ customer-managed encryption keys (CMEK)
+ compliance by default. Users do not need to configure anything specifically.
+ Cloud Build provides CMEK compliance by encrypting the build-time
+ persistent disk (PD) with an ephemeral key that is generated for each build.
+ The key is uniquely generated for each build.
+
+ As soon as the build completes, the key is wiped from memory and destroyed.
+ It is not stored anywhere, is not accessible to Google engineers or support
+ staff, and cannot be restored. The data that was protected using such a key is
+ permanently inaccessible. For more information, see
+ CMEK compliance in Cloud Build.
+
+ Security insights panel
+
+ Cloud Build includes a Security insights panel in
+ the Google Cloud console that displays a high-level overview of multiple
+ security metrics. You can use this panel to identify and mitigate risks in
+ your build process.
+
+ This panel displays the following information:
+
+ Supply-chain Levels for Software Artifacts (SLSA) Level:
+ Identifies the maturity level of your software build process in accordance
+ with the SLSA specification.
+
+ Vulnerabilities: An overview of any vulnerabilities found
+ in your artifacts, and the name of the image that
+ Artifact Analysis
+ has scanned. You can click the image name to view vulnerability
+ details.
+
+ Build details: Details of the build such as the builder
+ and the link to view logs.
+
+ Build provenance: Provenance for the build.
+
+To learn how you can use Cloud Build with other Google Cloud products
+and features to safeguard your software supply chain, see
+Software supply chain security.
+
+## What's next
+ {#whats_next}
+
+Read the Docker quickstart to
+ learn how to use Cloud Build to build Docker images.
+
+Learn how to build, test, and deploy
+ artifacts
+ in Cloud Build.
+
+Learn about different types of Cloud Build triggers.
+
+Read our resources about DevOps and
+ explore the DevOps Research and Assessment research
+ program.
+
+ Send feedback
+
+ Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License. For details, see the Google Developers Site Policies. Java is a registered trademark of Oracle and/or its affiliates.
+
+ Last updated 2026-09-24 UTC.
+
+ Need to tell us more?
+
+ [[["Easy to understand","easyToUnderstand","thumb-up"],["Solved my problem","solvedMyProblem","thumb-up"],["Other","otherUp","thumb-up"]],[["Hard to understand","hardToUnderstand","thumb-down"],["Incorrect information or sample code","incorrectInformationOrSampleCode","thumb-down"],["Missing the information/samples I need","missingTheInformationSamplesINeed","thumb-down"],["Other","otherDown","thumb-down"]],["Last updated 2026-09-24 UTC."],[],[]]
