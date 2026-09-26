@@ -1,0 +1,27 @@
+# dot-hazmat audit, part B (topics 4–8)
+
+Scope: 04-packing-groups, 05-hazardous-materials-table, 06-shipping-papers, 07-emergency-response-information, 08-marking (234 cards). Sources: 49 CFR parts 171–173, 177, 178 (govinfo, 1 October 2025) and the 4 August 2026 final rules (91 FR 49305, 49325, 49332, 49335). Table cells were checked with `pdftotext -layout` on the govinfo PDFs: § 173.121(a)(1) Class 3 table (p. 108), § 173.116(a) hazard zone table (p. 106), § 173.2a precedence table and note 1 (pp. 6–7), and the part 172 illustrations. Every scenario key matches its choice, and every choicesExplained covers exactly the three wrong letters.
+
+Figures checked against the CFR: orientation-arrows (§ 172.312(a); the border is optional, as the alt says), limited-quantity-mark (§ 172.315(a)(1): black top, bottom and border, white centre), marine-pollutant-mark (§ 172.322(e)(1)), hot-id-marking (§ 172.325(c), UN 3257 elevated temperature liquid), orange-panel (§ 172.332(b)(4), shown for liquefied petroleum gas, 1075). All match, with the right credit and licence.
+
+Volatile items checked: the ERI electronic-format rule (91 FR 49325, effective 3 September 2026, § 172.602(b)(1)); the 25 mm limited quantity label mark (91 FR 49332, effective 3 September 2026, § 172.315(a)(2)(iii), with § 173.25(a)(6) barring it on overpacks); and the CERCLA appendix A change (91 FR 49305, effective 2 December 2026). The cards match all three rules.
+
+## Findings
+
+hazmat.hazardous-materials-table.d-symbol | unsupported | The explanation says an alternate name may be chosen "when international transportation is involved". The CFR allows it for domestic or international transport. | "An alternate proper shipping name may be selected when either domestic or international transportation is involved." (§ 172.101(b)(3), p. 3)
+hazmat.marking.lq-cartons-by-truck | ambiguous | "By truck" also covers private motor carriage, where some small PG II/III limited quantity loads need no mark, so "the limited quantity mark" is not always the answer. | "for highway transportation by private motor carrier, the limited quantity marking is not required to be displayed on a package containing materials assigned to Packing Group II and III" (§ 172.315(a)(3), p. 249)
+hazmat.packing-groups.pih-liquid-zones | ambiguous | The front ends "What is it?", which could be answered "a poison" or "PG I". The card is after its status as a material poisonous by inhalation. | "is a material poisonous by inhalation subject to the additional hazard communication requirements" (§ 173.133(a)(2) note 2, p. 117)
+hazmat.packing-groups.zone-basis | unclear | "How little … it takes to be lethal to test animals" misstates LC50, which is the concentration that kills half of the animals tested. | "causes death within 14 days in half of the animals tested" (§ 173.132(b)(3), p. 115)
+hazmat.packing-groups.zone-a-gas | unclear | "Zones B, C and D follow at 1000, 3000 and 5000 ppm" reads as if those are starting points. They are upper limits. | "LC50 greater than 200 ppm and less than or equal to 1000 ppm" (§ 173.116(a) table, p. 106)
+hazmat.packing-groups.scenario-zone | minor | The explanation for choice C gives Zone D without its 5000 ppm upper limit. | "LC50 greater than 3000 ppm or less than or equal to 5000 ppm" (§ 173.116(a), p. 106)
+hazmat.marking.limited-quantity-mark | minor | The back reads as if the mark is always required outside air transport. The private motor carrier exception and the alternative "Y" mark go unmentioned. | "As an alternative, a packaging may display the limited quantity ‘‘Y’’ mark" (§ 172.315(a), p. 248); § 172.315(a)(3), p. 249
+hazmat.marking.lq-mark-size | minor | The size question is unqualified, but since 3 September 2026 a 25 mm mark on the shipping label is also allowed. The fix pins the front to the 2025 text. | "Each marking must be a minimum of 25 mm on each side" (91 FR 49332, § 172.315(a)(2)(iii), p. 4)
+hazmat.shipping-papers.which-has-no-pg | minor | choicesExplained reads "B, C and A:", out of order and with three options lumped into one. | "The packing group in Roman numerals, as designated … in Column (5)" (§ 172.202(a)(4), p. 234)
+hazmat.emergency-response-information.phone-numeric | minor | "Not on the carrier" is an inference that § 172.604 does not state. | "A person who offers a hazardous material for transportation must provide a numeric emergency response telephone number" (§ 172.604(a), p. 302)
+
+## Checked, no finding
+- Class 3 packing group bands (§ 173.121 table), Division 2.3 zone bands (§ 173.116 table), the precedence scenario (the 3 III × 6.1 II cell reads 6.1) and note 1's example: all correct.
+- Hazardous Materials Table columns 1–10 and symbols +, A, D, G, I, W: correct except d-symbol. The § 173.24 remark in scenario-column-8 matches § 172.101(i).
+- Shipping papers: entry order, the three methods for mixed papers, retention periods (2 years, 3 for waste, 1 for the carrier), certification wording and signers, and where the paper goes in the cab: all correct.
+- ERI's seven elements, § 172.604 monitoring, call-back and placement rules, and the ERI provider identifier: all correct.
+- Note: 91 FR 49335 (SP 21478, effective 3 September 2026) lets empty IBCs holding residue travel under § 173.29(d) without shipping papers or ID numbers. shipping-papers.residue-tote still holds, because its tote travels with a shipping paper.
