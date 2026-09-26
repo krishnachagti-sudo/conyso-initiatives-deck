@@ -1,0 +1,499 @@
+URL: https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/
+
+-
+
+ User Management
+
+-
+
+ Security
+
+-
+
+ TLS configuration
+
+-
+
+ Mutual TLS (mTLS) for repo-server
+
+-
+
+ Cluster Management
+
+-
+
+ Cluster Bootstrapping
+
+-
+
+ Secret Management
+
+-
+
+ Disaster Recovery
+
+-
+
+ Reconcile Optimization
+
+-
+
+ Webhook Configuration
+
+-
+
+ Resource Health
+
+-
+
+ Resource Actions
+
+-
+
+ Custom Tooling
+
+-
+
+ Custom Styles
+
+-
+
+ UI Customization
+
+-
+
+ Metrics
+
+-
+
+ Web-based Terminal
+
+-
+
+ Config Management Plugins
+
+-
+
+ Deep Links
+
+-
+
+ Git Configuration
+
+-
+
+ Managed By URL Annotation
+
+-
+
+ Notifications
+
+-
+
+ Troubleshooting Tools
+
+-
+
+ ApplicationSet
+
+-
+
+ Template fields
+
+-
+
+ Controlling Resource Modification
+
+-
+
+ Application Pruning & Resource Deletion
+
+-
+
+ Progressive Syncs
+
+-
+
+ Git File Generator Globbing
+
+-
+
+ ApplicationSet Specification Reference
+
+-
+
+ ApplicationSet in any namespace
+
+-
+
+ Server Configuration Parameters
+
+-
+
+ Upgrading
+
+-
+
+ Project Specification Reference
+
+-
+
+ User Guide
+
+-
+
+ Automated Sync Policy
+
+ Automated Sync Policy
+
+-
+
+ Diffing
+
+-
+
+ Orphaned Resources Monitoring
+
+-
+
+ Compare Options
+
+-
+
+ Sync Options
+
+-
+
+ Parameter Overrides
+
+-
+
+ Environment Variables
+
+-
+
+ Build Environment
+
+-
+
+ Tracking and Deployment Strategies
+
+-
+
+ Resource Tracking
+
+-
+
+ Resource hooks
+
+-
+
+ Selective Sync
+
+-
+
+ Sync Phases and Waves
+
+-
+
+ Sync Windows
+
+-
+
+ Sync Applications with Kubectl
+
+-
+
+ Skip Application Reconcile
+
+-
+
+ Generating Applications with ApplicationSet
+
+-
+
+ Managing ApplicationSets in the Web UI
+
+-
+
+ Automation from CI Pipelines
+
+-
+
+ App Deletion
+
+-
+
+ Best Practices
+
+-
+
+ Status Badge
+
+-
+
+ External URL Links
+
+-
+
+ Add extra Application info
+
+-
+
+ Application Notice
+
+-
+
+ Notification subscriptions
+
+-
+
+ Annotations and Labels used by Argo CD
+
+-
+
+ Command Reference
+
+-
+
+ Application Specification Reference
+
+-
+
+ Developer Guide
+
+-
+
+ Code Contribution Guide
+
+-
+
+ Toolchain Guide
+
+-
+
+ MacOS users
+
+-
+
+ Release Process And Cadence
+
+-
+
+ Running Argo CD locally
+
+-
+
+ Debugging a local Argo CD instance
+
+-
+
+ Debugging a Remote ArgoCD Environment
+
+-
+
+ API Docs
+
+-
+
+ E2E Tests
+
+-
+
+ Managing Dependencies
+
+-
+
+ Continuous Integration (CI)
+
+-
+
+ Releasing
+
+-
+
+ Documentation Site
+
+-
+
+ Code Quality and Security Scanning
+
+-
+
+ Extensions
+
+-
+
+ Contribution FAQ
+
+-
+
+ Tilt Development
+
+-
+
+ Custom resource icons
+
+-
+
+ Maintaining Internal Argo CD Forks
+
+-
+
+ FAQ
+
+-
+
+ Security Considerations
+
+-
+
+ Support
+
+-
+
+ Roadmap
+
+-
+
+ Releases ⧉
+
+-
+
+ Blog ⧉
+
+# {#automated-sync-policy} Automated Sync Policy¶
+
+Argo CD has the ability to automatically sync an application when it detects differences between
+the desired manifests in Git, and the live state in the cluster. A benefit of automatic sync is that
+CI/CD pipelines no longer need direct access to the Argo CD API server to perform the deployment.
+Instead, the pipeline makes a commit and push to the Git repository with the changes to the
+manifests in the tracking Git repo.
+
+To configure automated sync run:
+argocd app set <APPNAME> --sync-policy automated
+
+Alternatively, if creating the application an application manifest, specify a syncPolicy with an
+automated policy.
+spec:
+ syncPolicy:
+ automated: {}
+
+Application CRD now also support explicitly setting automated sync to be turned on or off by using spec.syncPolicy.automated.enabled flag to true or false. When enable field is set to true, Automated Sync is active and when set to false controller will skip automated sync even if prune, self-heal and allowEmpty are set.
+spec:
+ syncPolicy:
+ automated:
+ enabled: true
+
+Note
+
+Setting the spec.syncPolicy.automated.enabled flag to null will be treated as if automated sync is enabled. When the enabled field is set to false, fields like prune, selfHeal and allowEmpty can be set without enabling them.
+
+## {#temporarily-toggling-auto-sync-for-applications-managed-by-applicationsets} Temporarily toggling auto-sync for applications managed by ApplicationSets¶
+
+For a standalone application, toggling auto-sync is performed by changing the application's spec.syncPolicy.automated field. For an ApplicationSet managed application, changing the application's spec.syncPolicy.automated field will, however, have no effect.
+Controlling Resource Modification has more details about how to perform the toggling for applications managed by ApplicationSets.
+
+## {#automatic-pruning} Automatic Pruning¶
+
+By default (and as a safety mechanism), automated sync will not delete resources when Argo CD detects
+the resource is no longer defined in Git. To prune the resources, a manual sync can always be
+performed (with pruning checked). Pruning can also be enabled to happen automatically as part of the
+automated sync by running:
+
+argocd app set <APPNAME> --auto-prune
+
+Or by setting the prune option to true in the automated sync policy:
+
+spec:
+ syncPolicy:
+ automated:
+ prune: true
+
+## {#automatic-pruning-with-allow-empty-v18} Automatic Pruning with Allow-Empty (v1.8)¶
+
+By default (and as a safety mechanism), automated sync with prune have a protection from any automation/human errors
+when there are no target resources. It prevents application from having empty resources. To allow applications have empty resources, run:
+
+argocd app set <APPNAME> --allow-empty
+
+Or by setting the allow empty option to true in the automated sync policy:
+
+spec:
+ syncPolicy:
+ automated:
+ prune: true
+ allowEmpty: true
+
+## {#automatic-self-healing} Automatic Self-Healing¶
+
+By default, changes that are made to the live cluster will not trigger automated sync. To enable automatic sync
+when the live cluster's state deviates from the state defined in Git, run:
+
+argocd app set <APPNAME> --self-heal
+
+Or by setting the self-heal option to true in the automated sync policy:
+
+spec:
+ syncPolicy:
+ automated:
+ selfHeal: true
+
+Note
+
+Disabling self-heal does not guarantee that live cluster changes in multi-source applications will persist. Although one of the resource's sources remains unchanged, changes in another can trigger autosync. To handle such cases, consider disabling autosync.
+
+## {#automatic-retry-with-a-limit} Automatic Retry with a limit¶
+
+Argo CD can automatically retry a failed sync operation using exponential backoff. To enable, configure the retry field in the sync policy:
+
+spec:
+ syncPolicy:
+ retry:
+ limit: 5 # number of retries (-1 for unlimited retries)
+ backoff:
+ duration: 5s # base duration between retries
+ factor: 2 # exponential backoff factor
+ maxDuration: 3m # maximum duration between retries
+
+- limit: number of retry attempts. Set to -1 for unlimited retries.
+
+- backoff.duration: base wait time before the first retry.
+
+- backoff.factor: multiplier applied after each failed attempt.
+
+- backoff.maxDuration: maximum wait time between retries, regardless of the number of attempts.
+
+## {#automatic-retry-refresh-on-new-revisions} Automatic Retry Refresh on new revisions¶
+
+This feature allows users to configure their applications to refresh on new revisions when the current sync is retrying. To enable automatic refresh during sync retries, run:
+
+argocd app set <APPNAME> --sync-retry-refresh
+
+Or by setting the retry.refresh option to true in the sync policy:
+
+spec:
+ syncPolicy:
+ retry:
+ refresh: true
+
+## {#automated-sync-semantics} Automated Sync Semantics¶
+
+- An automated sync will only be performed if the application is OutOfSync. Applications in a
+ Synced or error state will not attempt automated sync.
+
+- Automated sync will only attempt one synchronization per unique combination of commit SHA1 and
+ application parameters. If the most recent successful sync in the history was already performed
+ against the same commit-SHA and parameters, a second sync will not be attempted, unless selfHeal flag is set to true.
+
+- If the selfHeal flag is set to true, then the sync will be attempted again after self-heal timeout (5 seconds by default)
+which is controlled by --self-heal-timeout-seconds flag of argocd-application-controller deployment.
+
+-
+Automatic sync will not reattempt a sync if the previous sync attempt against the same commit-SHA
+ and parameters had failed.
+
+-
+Rollback cannot be performed against an application with automated sync enabled.
+
+- The automatic sync interval is determined by the timeout.reconciliation value in the argocd-cm ConfigMap, which defaults to 120s with added jitter of 60s for a maximum period of 3 minutes.

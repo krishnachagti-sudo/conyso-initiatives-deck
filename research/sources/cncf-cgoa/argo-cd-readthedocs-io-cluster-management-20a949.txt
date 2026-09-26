@@ -1,0 +1,403 @@
+URL: https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-management/
+
+-
+
+ User Management
+
+-
+
+ Security
+
+-
+
+ TLS configuration
+
+-
+
+ Mutual TLS (mTLS) for repo-server
+
+-
+
+ Cluster Management
+
+ Cluster Management
+
+-
+
+ Cluster Bootstrapping
+
+-
+
+ Secret Management
+
+-
+
+ Disaster Recovery
+
+-
+
+ Reconcile Optimization
+
+-
+
+ Webhook Configuration
+
+-
+
+ Resource Health
+
+-
+
+ Resource Actions
+
+-
+
+ Custom Tooling
+
+-
+
+ Custom Styles
+
+-
+
+ UI Customization
+
+-
+
+ Metrics
+
+-
+
+ Web-based Terminal
+
+-
+
+ Config Management Plugins
+
+-
+
+ Deep Links
+
+-
+
+ Git Configuration
+
+-
+
+ Managed By URL Annotation
+
+-
+
+ Notifications
+
+-
+
+ Troubleshooting Tools
+
+-
+
+ ApplicationSet
+
+-
+
+ Template fields
+
+-
+
+ Controlling Resource Modification
+
+-
+
+ Application Pruning & Resource Deletion
+
+-
+
+ Progressive Syncs
+
+-
+
+ Git File Generator Globbing
+
+-
+
+ ApplicationSet Specification Reference
+
+-
+
+ ApplicationSet in any namespace
+
+-
+
+ Server Configuration Parameters
+
+-
+
+ Upgrading
+
+-
+
+ Project Specification Reference
+
+-
+
+ User Guide
+
+-
+
+ Automated Sync Policy
+
+-
+
+ Diffing
+
+-
+
+ Orphaned Resources Monitoring
+
+-
+
+ Compare Options
+
+-
+
+ Sync Options
+
+-
+
+ Parameter Overrides
+
+-
+
+ Environment Variables
+
+-
+
+ Build Environment
+
+-
+
+ Tracking and Deployment Strategies
+
+-
+
+ Resource Tracking
+
+-
+
+ Resource hooks
+
+-
+
+ Selective Sync
+
+-
+
+ Sync Phases and Waves
+
+-
+
+ Sync Windows
+
+-
+
+ Sync Applications with Kubectl
+
+-
+
+ Skip Application Reconcile
+
+-
+
+ Generating Applications with ApplicationSet
+
+-
+
+ Managing ApplicationSets in the Web UI
+
+-
+
+ Automation from CI Pipelines
+
+-
+
+ App Deletion
+
+-
+
+ Best Practices
+
+-
+
+ Status Badge
+
+-
+
+ External URL Links
+
+-
+
+ Add extra Application info
+
+-
+
+ Application Notice
+
+-
+
+ Notification subscriptions
+
+-
+
+ Annotations and Labels used by Argo CD
+
+-
+
+ Command Reference
+
+-
+
+ Application Specification Reference
+
+-
+
+ Developer Guide
+
+-
+
+ Code Contribution Guide
+
+-
+
+ Toolchain Guide
+
+-
+
+ MacOS users
+
+-
+
+ Release Process And Cadence
+
+-
+
+ Running Argo CD locally
+
+-
+
+ Debugging a local Argo CD instance
+
+-
+
+ Debugging a Remote ArgoCD Environment
+
+-
+
+ API Docs
+
+-
+
+ E2E Tests
+
+-
+
+ Managing Dependencies
+
+-
+
+ Continuous Integration (CI)
+
+-
+
+ Releasing
+
+-
+
+ Documentation Site
+
+-
+
+ Code Quality and Security Scanning
+
+-
+
+ Extensions
+
+-
+
+ Contribution FAQ
+
+-
+
+ Tilt Development
+
+-
+
+ Custom resource icons
+
+-
+
+ Maintaining Internal Argo CD Forks
+
+-
+
+ FAQ
+
+-
+
+ Security Considerations
+
+-
+
+ Support
+
+-
+
+ Roadmap
+
+-
+
+ Releases ⧉
+
+-
+
+ Blog ⧉
+
+# {#cluster-management} Cluster Management¶
+
+This guide is for operators looking to manage clusters on the CLI. If you want to use Kubernetes resources for this, check out Declarative Setup.
+
+Not all commands are described here, see the argocd cluster Command Reference for all available commands.
+
+## {#adding-a-cluster} Adding a cluster¶
+
+Run argocd cluster add context-name.
+
+If you're unsure about the context names, run kubectl config get-contexts to get them all listed.
+
+This will connect to the cluster and install the necessary resources for ArgoCD to connect to it.
+Note that you will need privileged access to the cluster.
+
+## {#skipping-cluster-reconciliation} Skipping cluster reconciliation¶
+
+You can stop the controller from reconciling a cluster without removing it by annotating its secret:
+
+kubectl -n argocd annotate secret <cluster-secret-name> argocd.argoproj.io/skip-reconcile=true
+
+The cluster will still appear in argocd cluster list but the controller will skip reconciliation
+for all apps targeting it. To resume, remove the annotation:
+
+kubectl -n argocd annotate secret <cluster-secret-name> argocd.argoproj.io/skip-reconcile-
+
+See Declarative Setup - Skipping Cluster Reconciliation for details.
+
+## {#removing-a-cluster} Removing a cluster¶
+
+Run argocd cluster rm context-name.
+
+This removes the cluster with the specified name.
+
+Note
+
+in-cluster cannot be removed
+
+The in-cluster cluster cannot be removed with this. If you want to disable the in-cluster configuration, you need to update your argocd-cm ConfigMap. Set cluster.inClusterEnabled to "false"

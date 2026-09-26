@@ -1,0 +1,652 @@
+{
+  "topic": "Related practices",
+  "notes": [
+    {
+      "id": "cgoa.related-practices.configuration-as-code",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3000,
+      "front": "What is configuration as code (CaC)?",
+      "back": "Keeping configuration files, such as Kubernetes manifests, in a version control system like Git, rather than applying them straight from a desktop.",
+      "explanation": "No openly licensed source defines the term, so the deck ties it to Kubernetes' advice, which calls version control your safety net because you can roll back, compare changes or recreate the setup.",
+      "example": "Like keeping a shop's price list in a tracked, shared document instead of on sticky notes by the till, but for manifests.",
+      "source": "Kubernetes documentation, “Configuration Good Practices”, “Store configuration in version control”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/overview/#store-configuration-in-version-control",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Never apply manifest files directly from your desktop. Always keep them in a version control system like Git, it's your safety net.",
+      "introduces": [
+        "configuration as code",
+        "CaC"
+      ],
+      "uses": [
+        "configuration as code",
+        "CaC",
+        "version control",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.configuration-as-code",
+        "cgoa.never-apply-from-desktop"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.sops",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 3010,
+      "front": "What is SOPS, in Flux's handling of Secrets?",
+      "back": "A tool that encrypts Secrets with age, OpenPGP or key management service keys, so they can be kept in Git; Flux's only supported encryption provider.",
+      "explanation": "Decryption is configured in the optional `.spec.decryption` field.",
+      "example": "Like a sealed envelope you can file in an open cabinet, but for a Secret kept in a Git repository.",
+      "source": "Flux documentation, “Kustomizations”, “Decryption”",
+      "sourceURL": "https://fluxcd.io/flux/components/kustomize/kustomizations/#decryption",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In order to store Secrets safely in Git repositorioes you can use an encryption provider and the optional field .spec.decryption to configure decryption for Secrets that are a part of the Kustomization. The only supported encryption provider is SOPS.",
+      "introduces": [
+        "SOPS"
+      ],
+      "uses": [
+        "SOPS",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cgoa.sops"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · project docs as published"
+    },
+    {
+      "id": "cgoa.related-practices.scenario-laptop-fix",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3110,
+      "front": "At two in the morning, an engineer fixes production by running `kubectl apply -f` on a file edited on their laptop and never committed. Which practice did this skip?",
+      "back": "C: keeping configuration in version control rather than applying it from a desktop.",
+      "choices": "A) Pinning remote bases to a tag or commit\nB) Writing configuration in YAML rather than another format\nC) Keeping manifests in version control instead of applying them from a desktop\nD) Encrypting Secrets with SOPS",
+      "choicesExplained": "B: the file's format is not the problem; where it came from is. A: no remote base is involved. D: nothing here concerns Secrets.",
+      "explanation": "The fix now exists only on one laptop, so no previous commit holds it for comparing, rolling back or recreating the setup.",
+      "source": "Kubernetes documentation, “Configuration Good Practices”, “Store configuration in version control”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/overview/#store-configuration-in-version-control",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Never apply manifest files directly from your desktop. Always keep them in a version control system like Git, it's your safety net.",
+      "uses": [
+        "kubectl apply",
+        "manifest",
+        "version control",
+        "yaml",
+        "SOPS",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cgoa.never-apply-from-desktop",
+        "cgoa.configuration-as-code"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.yaml-over-json",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3130,
+      "front": "Which format does Kubernetes' configuration advice prefer for configuration files?",
+      "back": "YAML rather than `JSON`.",
+      "explanation": "Both work technically, but the advice calls YAML easier for humans: cleaner to read, less noisy and widely used.",
+      "source": "Kubernetes documentation, “Configuration Good Practices”, “Write configs in YAML not JSON”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/overview/#write-configs-in-yaml-not-json",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Write your configuration files using YAML rather than JSON. Both work technically, but YAML is just easier for humans. It's cleaner to read and less noisy and widely used in the community.",
+      "uses": [
+        "yaml"
+      ],
+      "conceptIDs": [
+        "cgoa.yaml-over-json"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.yaml-booleans",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3140,
+      "front": "Which boolean values does Kubernetes' configuration advice say to use in YAML?",
+      "back": "Only `true` or `false`. Quote anything else that looks like a boolean, such as \"yes\".",
+      "explanation": "Values such as yes, no, on or off might work in one version of YAML but break in another.",
+      "source": "Kubernetes documentation, “Configuration Good Practices”, “Write configs in YAML not JSON”",
+      "sourceURL": "https://kubernetes.io/docs/concepts/configuration/overview/#write-configs-in-yaml-not-json",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use only true or false. Don't write yes, no, on or off. They might work in one version of YAML but break in another. To be safe, quote anything that looks like a Boolean (for example \"yes\").",
+      "uses": [
+        "yaml"
+      ],
+      "conceptIDs": [
+        "cgoa.yaml-over-json"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.gitops-covers-infrastructure",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3150,
+      "front": "According to Flux's definition, what does GitOps manage?",
+      "back": "Your infrastructure and applications, so that the whole system is described declaratively and version controlled.",
+      "explanation": "Nothing in the definition limits GitOps to application workloads: the whole system is in scope.",
+      "source": "Flux documentation, “Core Concepts”, “GitOps”",
+      "sourceURL": "https://fluxcd.io/flux/concepts/#gitops",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "GitOps is a way of managing your infrastructure and applications so that whole system is described declaratively and version controlled",
+      "uses": [
+        "GitOps",
+        "version control"
+      ],
+      "conceptIDs": [
+        "cgoa.gitops-apps-and-infra"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.scenario-namespaces-by-hand",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3160,
+      "front": "A team deploys its applications through GitOps, but creates namespaces, Ingress controllers and cluster policies by hand. By Flux's definition, how much can GitOps cover?",
+      "back": "D: infrastructure as well as applications.",
+      "choices": "A) Applications only; infrastructure needs a separate process\nB) Only what a CI pipeline pushes to the cluster\nC) Only resources inside application namespaces\nD) Infrastructure as well as applications, so that the whole system is declarative and version controlled",
+      "choicesExplained": "A and C: Flux's definition names infrastructure alongside applications. B: GitOps does not rest on a pipeline pushing to the cluster; an automated process matches the environment to Git.",
+      "explanation": "The hand-made namespaces and policies are part of the whole system the definition says should be described declaratively and version controlled.",
+      "source": "Flux documentation, “Core Concepts”, “GitOps”",
+      "sourceURL": "https://fluxcd.io/flux/concepts/#gitops",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "GitOps is a way of managing your infrastructure and applications so that whole system is described declaratively and version controlled, and having an automated process that ensures that the deployed environment matches the state specified in one or more Git repositories.",
+      "uses": [
+        "GitOps",
+        "Ingress",
+        "CI",
+        "infrastructure as code"
+      ],
+      "conceptIDs": [
+        "cgoa.gitops-apps-and-infra"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.single-unified-process",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3170,
+      "front": "The CNCF glossary says GitOps helps organisations manage the entire infrastructure, application development and deployment lifecycle using a single and {{c1::unified}} process.",
+      "explanation": "The glossary gives this before the further advantages GitOps brings, such as traceability of changes and self-healing.",
+      "source": "Cloud Native Glossary, “GitOps”, “How it helps”",
+      "sourceURL": "https://glossary.cncf.io/gitops/#how-it-helps",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "GitOps helps organizations manage the entire infrastructure, application development, and deployment lifecycle using a single and unified process.",
+      "uses": [
+        "GitOps",
+        "devops"
+      ],
+      "conceptIDs": [
+        "cgoa.gitops-unified-process"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.ci-updates-manifests",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3190,
+      "front": "In the CI workflow Argo CD suggests, what comes after building and publishing a new container image?",
+      "back": "Update the local manifests with your templating tool and push the changes to Git.",
+      "explanation": "The step's output is a change in Git; the pipeline does not touch the cluster itself.",
+      "source": "Argo CD documentation, “Automation from CI Pipelines”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/ci_automation/#update-the-local-manifests-using-your-preferred-templating-tool-and-push-the-changes-to-git",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Update The Local Manifests Using Your Preferred Templating Tool, And Push The Changes To Git",
+      "uses": [
+        "CI",
+        "container image",
+        "manifest",
+        "Argo CD",
+        "sync"
+      ],
+      "conceptIDs": [
+        "cgoa.ci-to-gitops-workflow"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.separate-config-repo",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3200,
+      "front": "Where does Argo CD highly recommend keeping Kubernetes manifests, relative to the application's source code?",
+      "back": "In a different Git repository, separate from the application source code.",
+      "explanation": "Argo CD's docs point to their best practices page for the fuller rationale.",
+      "source": "Argo CD documentation, “Automation from CI Pipelines”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/ci_automation/#update-the-local-manifests-using-your-preferred-templating-tool-and-push-the-changes-to-git",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The use of a different Git repository to hold your Kubernetes manifests (separate from your application source code), is highly recommended. See best practices for further rationale.",
+      "uses": [
+        "Argo CD",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.ci-to-gitops-workflow",
+        "cgoa.separate-config-repo"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.scenario-after-image-push",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3210,
+      "front": "A CI pipeline has built image v2.1 and pushed it to the registry. The application is managed by Argo CD. What should the pipeline do next?",
+      "back": "D: update the image in the manifests and push that change to Git.",
+      "choices": "A) Run `kubectl set image` against the cluster\nB) Restart the Argo CD application controller\nC) Nothing more: Argo CD reads new images straight from the registry\nD) Update the image in the manifests and push the change to Git",
+      "choicesExplained": "A: changing the cluster directly skips Git, where Argo CD's model puts changes first. B: a restart does not change the desired state. C: in the documented workflow the new image reaches Argo CD through a manifest change in Git.",
+      "explanation": "In Argo CD's workflow, CI's job ends with a commit to Git; the cluster then syncs to it.",
+      "source": "Argo CD documentation, “Automation from CI Pipelines”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/ci_automation/#automation-from-ci-pipelines",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Argo CD follows the GitOps model of deployment, where desired configuration changes are first pushed to Git, and the cluster state then syncs to the desired state in git.",
+      "uses": [
+        "CI",
+        "container image",
+        "registry",
+        "Argo CD",
+        "application controller",
+        "manifest",
+        "desired state"
+      ],
+      "conceptIDs": [
+        "cgoa.ci-to-gitops-workflow"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.scenario-sync-step-failing",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 3230,
+      "front": "The last step of a CI job, `argocd app sync`, keeps failing because its token has expired. The application has automated sync enabled. What is the simplest fix that fits Argo CD's docs?",
+      "back": "A: remove the sync step; the controller syncs on its own.",
+      "choices": "A) Remove the sync step, since the controller detects and syncs the new config itself\nB) Give the CI job an administrator token that never expires\nC) Switch the application to manual sync\nD) Have CI run `kubectl apply` instead",
+      "choicesExplained": "B: it keeps a step the docs call unnecessary, with wider access than needed. C: manual sync makes the CI step necessary again. D: it pushes to the cluster directly instead of going through Git.",
+      "explanation": "With automated sync configured, the docs call the sync step unnecessary.",
+      "source": "Argo CD documentation, “Automation from CI Pipelines”, “Synchronize The App (Optional)”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/ci_automation/#synchronize-the-app-optional",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If automated synchronization is configured for the application, this step is unnecessary. The controller will automatically detect the new config",
+      "uses": [
+        "CI",
+        "automated sync policy",
+        "sync",
+        "kubectl apply"
+      ],
+      "conceptIDs": [
+        "cgoa.ci-sync-step-optional"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · project docs as published"
+    },
+    {
+      "id": "cgoa.related-practices.base64-secrets-unsafe",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3240,
+      "front": "Is a base64-encoded Secret safe in a private Git repository with tight access control?",
+      "back": "No. Secrets in Git in plain text or base64 are unsafe, whatever the repository's visibility or access restrictions.",
+      "explanation": "To store Secrets safely in Git, Flux's docs point to an encryption provider and decryption settings.",
+      "source": "Flux documentation, “Kustomizations”, “Decryption”",
+      "sourceURL": "https://fluxcd.io/flux/components/kustomize/kustomizations/#decryption",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Storing Secrets in Git repositories in plain text or base64 is unsafe, regardless of the visibility or access restrictions of the repository. In order to store Secrets safely in Git repositorioes you can use an encryption provider",
+      "uses": [
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cgoa.no-plain-secrets-in-git"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.scenario-private-repo-secrets",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3250,
+      "front": "A team keeps base64-encoded Secret manifests in a repository only three people can read. An auditor flags it; the team replies that the repository is private. Who is right, per Flux's docs?",
+      "back": "B: the auditor; visibility and access restrictions do not make it safe.",
+      "choices": "A) The team: a private repository makes base64 safe\nB) The auditor: plain or base64 Secrets in Git are unsafe whatever the repository's visibility\nC) The auditor, but only if the repository becomes public\nD) The team, provided the three readers are administrators",
+      "choicesExplained": "A, D and C: each makes safety depend on who can read the repository, which the docs rule out.",
+      "explanation": "The team can keep Secrets in Git safely only by encrypting them, for example with SOPS.",
+      "source": "Flux documentation, “Kustomizations”, “Decryption”",
+      "sourceURL": "https://fluxcd.io/flux/components/kustomize/kustomizations/#decryption",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Storing Secrets in Git repositories in plain text or base64 is unsafe, regardless of the visibility or access restrictions of the repository.",
+      "uses": [
+        "Secret",
+        "manifest",
+        "SOPS"
+      ],
+      "conceptIDs": [
+        "cgoa.no-plain-secrets-in-git"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.sops-key-types",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3260,
+      "front": "What are two kinds of keys SOPS can use to encrypt Secrets for Flux?",
+      "back": "Two of: age keys; OpenPGP keys; keys from key management services such as Azure Key Vault or OpenBao/Vault.",
+      "explanation": "Flux's docs name several key management services, cloud and self-hosted.",
+      "source": "Flux documentation, “Kustomizations”, “Decryption”",
+      "sourceURL": "https://fluxcd.io/flux/components/kustomize/kustomizations/#decryption",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With SOPS you can encrypt your secrets with age or OpenPGP keys, or with keys from Key Management Services (KMS), like AWS KMS, Azure Key Vault, GCP KMS or OpenBao/Vault.",
+      "uses": [
+        "SOPS",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cgoa.sops"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · project docs as published"
+    },
+    {
+      "id": "cgoa.related-practices.sops-plain-fields",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3270,
+      "front": "When encrypting a Secret with SOPS for Flux, which fields must stay in plain text?",
+      "back": "`metadata`, `kind` and `apiVersion`.",
+      "explanation": "An easy way is to limit encryption with `--encrypted-regex '^(data|stringData)$'` in the `sops encrypt` command.",
+      "source": "Flux documentation, “Kustomizations”, “Decryption”",
+      "sourceURL": "https://fluxcd.io/flux/components/kustomize/kustomizations/#decryption",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note: You must leave metadata, kind or apiVersion in plain text. An easy way to do this is limiting the encrypted keys with the flag --encrypted-regex '^(data|stringData)$' in your sops encrypt command.",
+      "uses": [
+        "SOPS",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cgoa.sops"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.scenario-encrypted-everything",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3280,
+      "front": "An engineer encrypts an entire Secret file with SOPS, `kind` and `apiVersion` included, for Flux to decrypt. What should they change?",
+      "back": "C: encrypt only the data fields, leaving the rest in plain text.",
+      "choices": "A) Nothing: encrypting every field is the safest choice\nB) Store the Secret in base64 instead\nC) Encrypt only `data` and `stringData`, for example with `--encrypted-regex`\nD) Switch Flux to a different encryption provider",
+      "choicesExplained": "A: Flux's docs say `metadata`, `kind` and `apiVersion` must stay in plain text. B: base64 in Git is unsafe. D: SOPS is the only supported encryption provider.",
+      "explanation": "Limiting the encrypted keys to `data` and `stringData` is the docs' easy way to keep the required fields readable.",
+      "source": "Flux documentation, “Kustomizations”, “Decryption”",
+      "sourceURL": "https://fluxcd.io/flux/components/kustomize/kustomizations/#decryption",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Note: You must leave metadata, kind or apiVersion in plain text. An easy way to do this is limiting the encrypted keys with the flag --encrypted-regex '^(data|stringData)$' in your sops encrypt command.",
+      "uses": [
+        "SOPS",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cgoa.sops"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.destination-cluster-recommended",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3290,
+      "front": "Of the two general ways to populate secrets when doing GitOps, which does Argo CD strongly recommend?",
+      "back": "On the destination cluster, rather than in Argo CD during manifest generation.",
+      "explanation": "Argo CD says it is more secure and gives a better user experience.",
+      "source": "Argo CD documentation, “Secret Management”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/secret-management/#secret-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "There are two general ways to populate secrets when doing GitOps: on the destination cluster, or in Argo CD during manifest generation. We strongly recommend the former, as it is more secure and provides a better user experience.",
+      "uses": [
+        "Argo CD",
+        "GitOps",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cgoa.destination-cluster-secrets"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.destination-cluster-tools",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3300,
+      "front": "What are two tools Argo CD's docs give as examples of populating secrets on the destination cluster?",
+      "back": "Two of: Sealed Secrets; External Secrets Operator; Kubernetes Secrets Store `CSI` Driver.",
+      "explanation": "In this approach Argo CD does not need to manage the secrets directly.",
+      "source": "Argo CD documentation, “Secret Management”, “Destination Cluster Secret Management”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/secret-management/#destination-cluster-secret-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In this approach, secrets are populated on the destination cluster, and Argo CD does not need to directly manage them. Sealed Secrets, External Secrets Operator, and Kubernetes Secrets Store CSI Driver are examples of this style of secret management.",
+      "uses": [
+        "Argo CD",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cgoa.destination-cluster-secrets"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.destination-advantage-security",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3310,
+      "front": "What security advantage does Argo CD give for populating secrets on the destination cluster?",
+      "back": "Argo CD does not need access to the secrets, which reduces the risk of leaking them.",
+      "explanation": "It is the first of the two main advantages the docs list for this approach.",
+      "source": "Argo CD documentation, “Secret Management”, “Destination Cluster Secret Management”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/secret-management/#destination-cluster-secret-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "1) Security: Argo CD does not need to have access to the secrets, which reduces the risk of leaking them.",
+      "uses": [
+        "Argo CD",
+        "Secret"
+      ],
+      "conceptIDs": [
+        "cgoa.destination-secrets-advantages"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.destination-advantage-ux",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3320,
+      "front": "What user-experience advantage does Argo CD give for populating secrets on the destination cluster?",
+      "back": "Secret updates are decoupled from app sync operations.",
+      "explanation": "That reduces the risk of unintentionally applying Secret updates during an unrelated release.",
+      "source": "Argo CD documentation, “Secret Management”, “Destination Cluster Secret Management”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/secret-management/#destination-cluster-secret-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "2) User Experience: Secret updates are decoupled from app sync operations, which reduces the risk of unintentionally applying Secret updates during an unrelated release.",
+      "uses": [
+        "Argo CD",
+        "Secret",
+        "sync"
+      ],
+      "conceptIDs": [
+        "cgoa.destination-secrets-advantages"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.manifest-generation-risk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 3330,
+      "front": "What security risk does Argo CD give for injecting secrets during manifest generation?",
+      "back": "Argo CD needs access to the secrets, and it stores generated manifests in plain text in its Redis cache.",
+      "explanation": "Both raise the risk of leaking the secrets, which is why Argo CD strongly cautions against this approach.",
+      "source": "Argo CD documentation, “Secret Management”, “Argo CD Manifest Generation-Based Secret Management”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/secret-management/#argo-cd-manifest-generation-based-secret-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "We strongly caution against this style of secret management, as it has several disadvantages: 1) Security: Argo CD needs access to the secrets, which increases the risk of leaking them. Argo CD stores generated manifests in plaintext in its Redis cache, so injecting secrets into the manifests increases risk.",
+      "uses": [
+        "Argo CD",
+        "Secret",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.secrets-two-approaches"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.scenario-vault-plugin",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 3340,
+      "front": "A team plans to inject secrets from a vault with a Config Management Plugin during Argo CD's manifest generation. What do Argo CD's docs advise?",
+      "back": "C: avoid it and populate secrets on the destination cluster instead.",
+      "choices": "A) Go ahead, but commit the rendered manifests to Git for review\nB) Go ahead: plugins are Argo CD's recommended route for secrets\nC) Avoid it: populate the secrets on the destination cluster, for example with External Secrets Operator\nD) Store the secrets in base64 in the application repository instead",
+      "choicesExplained": "B: Argo CD strongly cautions against manifest generation-based secret management. A: rendered manifests would then hold the secrets in Git. D: base64 in Git is unsafe whatever the repository's visibility.",
+      "explanation": "Argo CD strongly recommends the destination-cluster approach and strongly cautions against injecting secrets during manifest generation.",
+      "source": "Argo CD documentation, “Secret Management”, “Argo CD Manifest Generation-Based Secret Management”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/secret-management/#argo-cd-manifest-generation-based-secret-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In this approach, Argo CD's manifest generation step is used to inject secrets. This may be done using a Config Management Plugin like argocd-vault-plugin. We strongly caution against this style of secret management",
+      "uses": [
+        "Argo CD",
+        "Secret",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.destination-cluster-secrets",
+        "cgoa.secrets-two-approaches"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.flux-impersonation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3350,
+      "front": "How can Flux restrict what it does on behalf of a tenant?",
+      "back": "Its controllers impersonate the service account named in the tenant's object, for example in `.spec.serviceAccountName`, so RBAC limits them.",
+      "explanation": "Flux's docs present this as giving users control over the authorization.",
+      "source": "Flux documentation, “Multi-tenancy”, “Flux authorization model”",
+      "sourceURL": "https://fluxcd.io/flux/installation/configuration/multitenancy/#flux-authorization-model",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "To give users control over the authorization, the Flux controllers can impersonate (assume the identity of) a service account mentioned in the apply specification",
+      "uses": [
+        "multitenancy",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-impersonation"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.flux-default-cluster-admin",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3355,
+      "front": "By default, which role does the service account that Flux's controllers run under have?",
+      "back": "The `cluster-admin` role.",
+      "explanation": "Flux's docs call this convenient for a deployment in which all users are trusted.",
+      "source": "Flux documentation, “Multi-tenancy”, “Flux authorization model”",
+      "sourceURL": "https://fluxcd.io/flux/installation/configuration/multitenancy/#flux-authorization-model",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By default, this means operations are constrained by the service account under which the controllers run, which has the cluster-admin role bound to it. This is convenient for a deployment in which all users are trusted.",
+      "uses": [
+        "RBAC",
+        "multitenancy"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-impersonation"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · project docs as published"
+    },
+    {
+      "id": "cgoa.related-practices.flux-policy-validation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 3360,
+      "front": "What are two kinds of policy-driven validation that Flux's docs say Flux works with?",
+      "back": "Two of: `OPA`; Kyverno; admission controllers.",
+      "explanation": "Flux's docs list them among the common Kubernetes tooling it works with, beside Kustomize, Helm and RBAC.",
+      "source": "Flux documentation, home page",
+      "sourceURL": "https://fluxcd.io/flux/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Flux works with any Kubernetes and all common Kubernetes tooling | Kustomize, Helm, RBAC, and policy-driven validation (OPA, Kyverno, admission controllers)",
+      "uses": [
+        "policy as code",
+        "Kustomize",
+        "RBAC"
+      ],
+      "conceptIDs": [
+        "cgoa.policy-validation"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.gitops-vs-imperative-pipelines",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 3400,
+      "front": "How does Argo CD's GitOps model of deployment differ from imperative pipelines?",
+      "back": "GitOps: changes are pushed to Git first, then the cluster syncs to them. Imperative pipelines traditionally do not hold application config in Git.",
+      "contrast": "Where the change lands first: in Git, or straight in the cluster.",
+      "explanation": "Argo CD calls its model a departure from imperative pipelines.",
+      "source": "Argo CD documentation, “Automation from CI Pipelines”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/ci_automation/#automation-from-ci-pipelines",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Argo CD follows the GitOps model of deployment, where desired configuration changes are first pushed to Git, and the cluster state then syncs to the desired state in git. This is a departure from imperative pipelines which do not traditionally use Git repositories to hold application config.",
+      "uses": [
+        "Argo CD",
+        "GitOps",
+        "sync"
+      ],
+      "conceptIDs": [
+        "cgoa.gitops-vs-imperative-pipelines"
+      ]
+    },
+    {
+      "id": "cgoa.related-practices.secrets-cluster-vs-generation",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 3410,
+      "front": "How does populating secrets on the destination cluster differ from injecting them during Argo CD's manifest generation?",
+      "back": "Destination cluster: secrets are populated there, and Argo CD need not manage them. Manifest generation: Argo CD injects them while generating manifests.",
+      "contrast": "Whether Argo CD handles the secret values.",
+      "explanation": "Argo CD strongly recommends the first and strongly cautions against the second.",
+      "source": "Argo CD documentation, “Secret Management”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/secret-management/#secret-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "There are two general ways to populate secrets when doing GitOps: on the destination cluster, or in Argo CD during manifest generation. We strongly recommend the former, as it is more secure and provides a better user experience.",
+      "uses": [
+        "Argo CD",
+        "Secret",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.secrets-two-approaches"
+      ]
+    }
+  ]
+}

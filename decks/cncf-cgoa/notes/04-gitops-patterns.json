@@ -1,0 +1,1877 @@
+{
+  "topic": "GitOps patterns",
+  "notes": [
+    {
+      "id": "cgoa.gitops-patterns.flagger",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4000,
+      "front": "What is Flagger?",
+      "back": "A progressive delivery tool that automates releasing applications on Kubernetes, shifting traffic to a new version gradually.",
+      "explanation": "It lowers the risk of a new version in production by measuring metrics and running conformance tests while the traffic moves.",
+      "example": "A shop releases a new checkout: Flagger sends a small share of shoppers to it, watches the error rate, and only then sends everyone.",
+      "source": "Flagger docs, “Flagger”, “Flagger”",
+      "sourceURL": "https://fluxcd.io/flagger/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Flagger is a progressive delivery tool that automates the release process for applications running on Kubernetes. It reduces the risk associated with introducing a new software version in production by gradually shifting traffic to the new version while measuring metrics and running conformance tests.",
+      "introduces": [
+        "Flagger"
+      ],
+      "uses": [
+        "Flagger",
+        "progressive delivery"
+      ],
+      "conceptIDs": [
+        "cgoa.flagger"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.ab-testing",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4010,
+      "front": "In Flagger, what is A/B testing?",
+      "back": "Routing the users who meet HTTP match conditions, such as a header or cookie, to the new version for a set number of iterations.",
+      "explanation": "Because it selects users by match condition, Flagger ignores the weight settings a canary release would use.",
+      "example": "Like letting only visitors whose browser carries a `beta=yes` cookie see the redesigned page, while everyone else keeps the old one.",
+      "source": "Flagger docs, “Deployment Strategies”, “A/B Testing”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/#ab-testing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You can enable A/B testing by specifying the HTTP match conditions and the number of iterations. If Flagger finds a HTTP match condition, it will ignore the maxWeight and stepWeight settings.",
+      "introduces": [
+        "A/B testing"
+      ],
+      "uses": [
+        "A/B testing",
+        "Flagger",
+        "http"
+      ],
+      "conceptIDs": [
+        "cgoa.ab-testing"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.blue-green-mirroring",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "order": 4020,
+      "front": "In Flagger, what is Blue/Green mirroring?",
+      "back": "A rollout in which each incoming request is copied to the new version too; users get the old version’s response and the copy’s is discarded.",
+      "explanation": "Metrics are collected on both requests, so the rollout goes ahead only if the new version’s metrics are healthy.",
+      "example": "Like a trainee cashier ringing up a copy of every sale for practice, while only the senior cashier’s receipt goes to the customer.",
+      "source": "Flagger docs, “Deployment Strategies”, “Blue/Green with Traffic Mirroring”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/#bluegreen-with-traffic-mirroring",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Traffic mirroring will copy each incoming request, sending one request to the primary and one to the canary service. The response from the primary is sent back to the user. The response from the canary is discarded. Metrics are collected on both requests so that the deployment will only proceed if the canary metrics are healthy.",
+      "introduces": [
+        "Blue/Green mirroring"
+      ],
+      "uses": [
+        "Blue/Green mirroring",
+        "Flagger"
+      ],
+      "conceptIDs": [
+        "cgoa.blue-green-mirroring"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.receiver",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4030,
+      "front": "In Flux, what is a Receiver?",
+      "back": "A custom resource defining an incoming webhook that triggers reconciliation of a group of Flux resources.",
+      "explanation": "Its direction is inward: events arrive from outside, and it turns them into reconciliations of the resources it lists.",
+      "example": "Like a parcel locker’s text message: the courier’s scan tells you a parcel is waiting, but you still go and collect it yourself.",
+      "source": "Flux docs, “Receivers”, “Receivers”",
+      "sourceURL": "https://fluxcd.io/flux/components/notification/receivers/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Receiver API defines an incoming webhook receiver that triggers the reconciliation for a group of Flux Custom Resources.",
+      "introduces": [
+        "Receiver"
+      ],
+      "uses": [
+        "Receiver",
+        "custom resource",
+        "reconciliation"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-receiver"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.monorepo",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4040,
+      "front": "In the Flux repository guide, what is a monorepo?",
+      "back": "One Git repository holding all the Kubernetes manifests, with every environment’s config on the same branch, such as `main`.",
+      "explanation": "Staging and production are told apart inside that one branch, not by giving each environment a branch of its own.",
+      "example": "Like one shared binder with a tab for each office, rather than a binder per office.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Monorepo”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#monorepo",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In a monorepo approach you would store all your Kubernetes manifests in a single Git repository. The various environments specific configs are all stored in the same branch (e.g. main).",
+      "introduces": [
+        "monorepo"
+      ],
+      "uses": [
+        "monorepo",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.monorepo"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.repo-per-environment",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4050,
+      "front": "In the Flux repository guide, what is repo per environment?",
+      "back": "A layout like the monorepo, except that an environment such as production gets a repository of its own.",
+      "explanation": "A separate production repository lets you give access to only some team members, while everyone can still clone staging and open pull requests.",
+      "example": "Like keeping the payroll ledger in a locked cabinet while the staff rota stays on the open shelf.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repo per environment”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repo-per-environment",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Having a separate repository for production means that you can grant access to a subset of team members while allowing everyone to clone staging and open pull requests.",
+      "introduces": [
+        "repo per environment"
+      ],
+      "uses": [
+        "repo per environment",
+        "monorepo"
+      ],
+      "conceptIDs": [
+        "cgoa.repo-per-environment"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.repo-per-team",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4060,
+      "front": "In the Flux repository guide, what is repo per team?",
+      "back": "A layout where a platform admin team keeps the cluster and infrastructure repository, and each dev team keeps its own repository for its apps.",
+      "explanation": "It separates concerns: the platform team manages infrastructure changes but hands app delivery to the dev teams.",
+      "example": "Like a landlord who looks after a building’s wiring and plumbing while each tenant furnishes its own flat.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repo per team”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repo-per-team",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The main difference is the separation of concerns, the platform admin team handles the change management of the infrastructure, but delegates the apps delivery to the dev teams.",
+      "introduces": [
+        "repo per team"
+      ],
+      "uses": [
+        "repo per team"
+      ],
+      "conceptIDs": [
+        "cgoa.repo-per-team"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.repo-per-app",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4070,
+      "front": "In the Flux repository guide, what is repo per app?",
+      "back": "Keeping an app’s deployment manifests in the same repository as its source code.",
+      "explanation": "Those manifests can then serve as the base config for a monorepo or a repo-per-team layout.",
+      "example": "Like a recipe card taped to the lid of the jar it describes.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repo per app”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repo-per-app",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It is common to use the same repository to store both the application source code and its deployment manifests. The deployment manifests from an app repo can serve as the base config for both the monorepo and the repo-per-team approaches.",
+      "introduces": [
+        "repo per app"
+      ],
+      "uses": [
+        "repo per app",
+        "manifest",
+        "monorepo",
+        "repo per team"
+      ],
+      "conceptIDs": [
+        "cgoa.repo-per-app"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.bootstrap",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 4080,
+      "front": "In Flux, what is a bootstrap?",
+      "back": "Installing the Flux components in a GitOps manner, so that their own manifests end up in a Git repository.",
+      "explanation": "The manifests are applied, a `GitRepository` and a `Kustomization` are created for Flux’s components, and the manifests are pushed to a new or existing repository.",
+      "example": "Like a new manager who files their own contract in the office records on day one, so later changes to it go through the same paperwork.",
+      "source": "Flux docs, “Core Concepts”, “Bootstrap”",
+      "sourceURL": "https://fluxcd.io/flux/concepts/#bootstrap",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The process of installing the Flux components in a GitOps manner is called a bootstrap. The manifests are applied to the cluster, a GitRepository and Kustomization are created for the Flux components, then the manifests are pushed to an existing Git repository (or a new one is created).",
+      "introduces": [
+        "bootstrap"
+      ],
+      "uses": [
+        "bootstrap",
+        "GitOps",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-bootstrap"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.canary-traffic-shifting",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4100,
+      "front": "Among Flagger’s strategies, a canary release works by {{c1::progressive traffic shifting}}.",
+      "explanation": "Flagger lists each strategy with the kind of routing it relies on; the canary release is the weight-based one.",
+      "source": "Flagger docs, “Deployment Strategies”, “Deployment Strategies”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Canary Release (progressive traffic shifting)",
+      "uses": [
+        "Flagger",
+        "canary strategy"
+      ],
+      "conceptIDs": [
+        "cgoa.flagger-strategies"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.ab-routing-basis",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4110,
+      "front": "Which Flagger strategy routes traffic by HTTP headers and cookies?",
+      "back": "A/B testing.",
+      "explanation": "Flagger lists A/B testing as the strategy based on header and cookie routing, rather than on traffic weights.",
+      "source": "Flagger docs, “Deployment Strategies”, “Deployment Strategies”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A/B Testing (HTTP headers and cookies traffic routing)",
+      "uses": [
+        "A/B testing",
+        "Flagger",
+        "http"
+      ],
+      "conceptIDs": [
+        "cgoa.flagger-strategies",
+        "cgoa.ab-testing"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.blue-green-switching",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4120,
+      "front": "Flagger’s Blue/Green strategy works by traffic {{c1::switching}}.",
+      "explanation": "Flagger sets it beside the canary release, whose traffic shifting is progressive.",
+      "source": "Flagger docs, “Deployment Strategies”, “Deployment Strategies”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Blue/Green (traffic switching) - Kubernetes CNI, Istio",
+      "uses": [
+        "Flagger",
+        "blue-green strategy"
+      ],
+      "conceptIDs": [
+        "cgoa.flagger-strategies"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.mirroring-istio-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4130,
+      "front": "Which provider does Flagger list for Blue/Green mirroring?",
+      "back": "Istio only.",
+      "explanation": "Flagger’s strategy list pairs each strategy with its providers, and this one has a single entry.",
+      "source": "Flagger docs, “Deployment Strategies”, “Deployment Strategies”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Blue/Green Mirroring (traffic shadowing) - Istio",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · project docs as published",
+      "uses": [
+        "Blue/Green mirroring",
+        "Flagger",
+        "Istio"
+      ],
+      "conceptIDs": [
+        "cgoa.flagger-strategies",
+        "cgoa.blue-green-mirroring"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.session-affinity-strategy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4140,
+      "front": "Which Flagger strategy combines progressive traffic shifting with cookie-based routing?",
+      "back": "Canary release with session affinity.",
+      "explanation": "It is the canary’s weight-based shifting, combined with routing by cookie.",
+      "source": "Flagger docs, “Deployment Strategies”, “Deployment Strategies”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Canary Release with Session Affinity (progressive traffic shifting combined with cookie based routing)",
+      "uses": [
+        "Flagger",
+        "canary strategy",
+        "A/B testing"
+      ],
+      "conceptIDs": [
+        "cgoa.flagger-strategies"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.session-affinity-effect",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4150,
+      "front": "With session affinity, what happens to a user once traffic weights have sent them to the new version?",
+      "back": "They are always routed to the new version, never back to the old one.",
+      "explanation": "Weights decide who first reaches the new version; after that, the user stays on it.",
+      "source": "Flagger docs, “Deployment Strategies”, “Canary Release with Session Affinity”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/#canary-release-with-session-affinity",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This means once a user is exposed to the new version of our application (based on the traffic weights), they’re always routed to that version, i.e. they’re never routed back to the old version of our application.",
+      "uses": [
+        "Flagger",
+        "canary strategy"
+      ],
+      "conceptIDs": [
+        "cgoa.flagger-strategies"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.l7-needed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4160,
+      "front": "Which two Flagger strategies need Layer 7 traffic management, such as a service mesh or an ingress controller?",
+      "back": "Canary releases and A/B testing.",
+      "explanation": "Flagger states the requirement for canary releases and A/B testing, and says plain Blue/Green needs neither a service mesh nor an ingress controller.",
+      "source": "Flagger docs, “Deployment Strategies”, “Deployment Strategies”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For Canary releases and A/B testing you’ll need a Layer 7 traffic management solution like a service mesh or an ingress controller.",
+      "uses": [
+        "Flagger",
+        "canary strategy",
+        "A/B testing",
+        "service mesh",
+        "ingress controller"
+      ],
+      "conceptIDs": [
+        "cgoa.l7-for-canary-ab"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.blue-green-no-mesh",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4170,
+      "front": "For Blue/Green deployments, Flagger needs {{c1::no service mesh or ingress controller}}.",
+      "explanation": "Flagger says so directly, in contrast with canary releases and A/B testing.",
+      "source": "Flagger docs, “Deployment Strategies”, “Deployment Strategies”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For Blue/Green deployments no service mesh or ingress controller is required.",
+      "uses": [
+        "Flagger",
+        "blue-green strategy",
+        "service mesh",
+        "ingress controller"
+      ],
+      "conceptIDs": [
+        "cgoa.l7-for-canary-ab"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.analysis-trigger-podspec",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4180,
+      "front": "A Flagger canary analysis is triggered by a change to the Deployment’s {{c1::PodSpec}}, such as its container image, command, ports or env.",
+      "explanation": "The PodSpec covers fields such as the container image, command, ports, env and resources.",
+      "source": "Flagger docs, “Deployment Strategies”, “Deployment Strategies”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A canary analysis is triggered by changes in any of the following objects: - Deployment PodSpec (container image, command, ports, env, resources, etc)",
+      "uses": [
+        "Flagger",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "cgoa.canary-analysis-triggers"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.analysis-trigger-configmap",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "extra",
+      "order": 4185,
+      "front": "Only a ConfigMap changes, one that is mounted as a volume in a Flagger-managed Deployment. Does that start a canary analysis?",
+      "back": "Yes. ConfigMaps mounted as volumes or mapped to environment variables are among the triggers.",
+      "explanation": "Flagger lists ConfigMaps alongside the PodSpec and Secrets as objects whose changes start an analysis.",
+      "source": "Flagger docs, “Deployment Strategies”, “Deployment Strategies”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "ConfigMaps mounted as volumes or mapped to environment variables",
+      "uses": [
+        "Flagger",
+        "ConfigMap",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "cgoa.canary-analysis-triggers"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.control-loop",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4190,
+      "front": "While Flagger shifts traffic to a canary, what does it measure to decide on promotion?",
+      "back": "Key performance indicators such as HTTP request success rate, average request duration and pod health.",
+      "explanation": "Based on its analysis of those indicators, the canary is either promoted or aborted.",
+      "source": "Flagger docs, “Deployment Strategies”, “Canary Release”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/#canary-release",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Flagger implements a control loop that gradually shifts traffic to the canary while measuring key performance indicators like HTTP requests success rate, requests average duration and pod health. Based on analysis of the KPIs a canary is promoted or aborted.",
+      "uses": [
+        "Flagger",
+        "controller / control loop",
+        "canary strategy",
+        "http"
+      ],
+      "conceptIDs": [
+        "cgoa.flagger-automates"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.analysis-ends",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4195,
+      "front": "Flagger’s canary analysis runs periodically until it reaches the maximum traffic weight or the {{c1::failed checks threshold}}.",
+      "explanation": "Reaching the maximum weight leads towards promotion; hitting the threshold of failed checks leads to rollback.",
+      "source": "Flagger docs, “Deployment Strategies”, “Canary Release”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/#canary-release",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The canary analysis runs periodically until it reaches the maximum traffic weight or the failed checks threshold.",
+      "uses": [
+        "Flagger",
+        "canary strategy",
+        "rollback"
+      ],
+      "conceptIDs": [
+        "cgoa.flagger-automates"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.failing-canary",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4197,
+      "front": "During a Flagger canary, the new version’s HTTP success rate keeps failing its checks until the failed-checks threshold is reached. Is the canary promoted?",
+      "back": "No. Flagger aborts it: the analysis of its indicators decides between promotion and abort.",
+      "explanation": "The analysis runs until it reaches either the maximum traffic weight or the failed checks threshold; here the threshold comes first, so the canary is aborted.",
+      "source": "Flagger docs, “Deployment Strategies”, “Canary Release”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/#canary-release",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Based on analysis of the KPIs a canary is promoted or aborted. The canary analysis runs periodically until it reaches the maximum traffic weight or the failed checks threshold.",
+      "uses": [
+        "Flagger",
+        "canary strategy",
+        "http"
+      ],
+      "conceptIDs": [
+        "cgoa.flagger-automates"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.min-promotion-formula",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4200,
+      "front": "Which formula gives the minimum time Flagger needs to validate and promote a canary?",
+      "back": "`interval * (maxWeight / stepWeight)`",
+      "explanation": "The number of weight steps, times the time spent on each step.",
+      "source": "Flagger docs, “Deployment Strategies”, “Canary Release”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/#canary-release",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You can determine the minimum time it takes to validate and promote a canary deployment using this formula: interval * (maxWeight / stepWeight)",
+      "uses": [
+        "Flagger",
+        "canary strategy"
+      ],
+      "conceptIDs": [
+        "cgoa.canary-min-duration"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.promotion-time-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 4210,
+      "front": "A Flagger canary has `interval: 2m`, `maxWeight: 40` and `stepWeight: 10`. If every check passes, what is the minimum time before it can be promoted?",
+      "back": "C: 8 minutes, since 2 × (40 / 10) = 8.",
+      "choices": "A) 2 minutes\nB) 4 minutes\nC) 8 minutes\nD) 20 minutes",
+      "choicesExplained": "A is a single interval. B is the number of steps without the interval. D multiplies the interval by the step weight.",
+      "explanation": "Flagger’s formula multiplies the interval by the number of weight steps.",
+      "source": "Flagger docs, “Deployment Strategies”, “Canary Release”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/#canary-release",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You can determine the minimum time it takes to validate and promote a canary deployment using this formula: interval * (maxWeight / stepWeight)",
+      "uses": [
+        "Flagger",
+        "canary strategy"
+      ],
+      "conceptIDs": [
+        "cgoa.canary-min-duration"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.ab-ignores-weights",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4215,
+      "front": "An engineer’s Flagger analysis has HTTP header match conditions and also sets `maxWeight: 50` and `stepWeight: 10`. Will Flagger shift traffic by those weights?",
+      "back": "No. With a match condition present, Flagger runs A/B testing and ignores `maxWeight` and `stepWeight`.",
+      "explanation": "A/B testing is driven by the match conditions and the number of iterations, not by weights.",
+      "source": "Flagger docs, “Deployment Strategies”, “A/B Testing”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/#ab-testing",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "You can enable A/B testing by specifying the HTTP match conditions and the number of iterations. If Flagger finds a HTTP match condition, it will ignore the maxWeight and stepWeight settings.",
+      "uses": [
+        "A/B testing",
+        "Flagger",
+        "http"
+      ],
+      "conceptIDs": [
+        "cgoa.ab-testing"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.mirroring-idempotent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4225,
+      "front": "Which requests does Flagger say mirroring should be used for?",
+      "back": "Requests that are idempotent, or that can safely be processed twice: once by the primary and once by the canary.",
+      "explanation": "Every mirrored request is handled by both versions, so a duplicated write needs thought first.",
+      "source": "Flagger docs, “Deployment Strategies”, “Blue/Green with Traffic Mirroring”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/#bluegreen-with-traffic-mirroring",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Mirroring should be used for requests that are idempotent or capable of being processed twice (once by the primary and once by the canary). Reads are idempotent. Before using mirroring on requests that may be writes, you should consider what will happen if a write is duplicated",
+      "uses": [
+        "Blue/Green mirroring",
+        "Flagger",
+        "idempotence"
+      ],
+      "conceptIDs": [
+        "cgoa.blue-green-mirroring"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.progressive-techniques",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4245,
+      "front": "What are two techniques the Flux docs name for progressive delivery?",
+      "back": "Any two of: feature flags; canary releases; A/B testing.",
+      "explanation": "The docs give these as examples of ways to minimise the chance of bugs or errors harming users.",
+      "source": "Flux docs, “Core Concepts”, “Progressive Delivery”",
+      "sourceURL": "https://fluxcd.io/flux/concepts/#progressive-delivery",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Developers can use techniques like feature flags, canary releases, and A/B testing to minimize the chances of introducing bugs or errors that could harm users or interrupt business operations.",
+      "uses": [
+        "progressive delivery",
+        "A/B testing",
+        "canary strategy"
+      ],
+      "conceptIDs": [
+        "cgoa.progressive-delivery-techniques"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.feature-switch",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4247,
+      "front": "A team ships a new search page switched off, then turns it on for a few customers from a settings panel. Is that among the progressive delivery techniques the Flux docs name?",
+      "back": "Yes: feature flags.",
+      "explanation": "The docs list feature flags beside canary releases and A/B testing as ways to limit the harm from bugs.",
+      "source": "Flux docs, “Core Concepts”, “Progressive Delivery”",
+      "sourceURL": "https://fluxcd.io/flux/concepts/#progressive-delivery",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Developers can use techniques like feature flags, canary releases, and A/B testing to minimize the chances of introducing bugs or errors that could harm users or interrupt business operations.",
+      "uses": [
+        "progressive delivery",
+        "A/B testing",
+        "canary strategy"
+      ],
+      "conceptIDs": [
+        "cgoa.progressive-delivery-techniques"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.flagger-is-flux-controller",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4250,
+      "front": "Which controller does the Flux project offer for progressive delivery techniques?",
+      "back": "Flagger, which the Flux docs call a specialised controller.",
+      "explanation": "The docs describe Flagger as implementing various progressive delivery techniques.",
+      "source": "Flux docs, “Core Concepts”, “Progressive Delivery”",
+      "sourceURL": "https://fluxcd.io/flux/concepts/#progressive-delivery",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Flux project offers a specialised controller called Flagger that implements various progressive delivery techniques.",
+      "uses": [
+        "Flagger",
+        "progressive delivery"
+      ],
+      "conceptIDs": [
+        "cgoa.progressive-delivery-techniques",
+        "cgoa.flagger"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.progressive-or-cd",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4255,
+      "front": "A team releases a feature to 5% of its users, watches their error reports for a week, adjusts it, then releases it to everyone. Is that continuous delivery alone, or progressive delivery?",
+      "back": "Progressive delivery: a gradual rollout to a subset of users before everyone.",
+      "explanation": "The Flux docs describe exactly this controlled, monitored first audience as what progressive delivery adds.",
+      "source": "Flux docs, “Core Concepts”, “Progressive Delivery”",
+      "sourceURL": "https://fluxcd.io/flux/concepts/#progressive-delivery",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "gradually rolling out new features or updates to a subset of users, allowing developers to test and monitor the new features in a controlled environment and make necessary adjustments before releasing them to everyone.",
+      "uses": [
+        "progressive delivery",
+        "continuous delivery"
+      ],
+      "conceptIDs": [
+        "cgoa.progressive-builds-on-cd"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.infra-promotion-steps",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4270,
+      "front": "In the Flux guide, what must happen before an infrastructure change is promoted to production?",
+      "back": "It is merged to staging, the cluster reconciles successfully, and the new cluster state passes conformance tests.",
+      "explanation": "The guide notes infrastructure changes can cause cluster-wide outages, so they are made in steps.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Delivery management”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#delivery-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Changes to infrastructure can be disruptive and could cause cluster-wide outages. These config changes can be made in steps, first you merge a change to staging, when the cluster is successfully reconciled, and the new cluster state passes conformance tests, you then promote the change to production.",
+      "uses": [
+        "reconciliation",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cgoa.environment-promotion"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.promotion-gates",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4275,
+      "front": "What gates the promotion of a change to production in the Flux guide’s monorepo workflow?",
+      "back": "Pull request reviews and end-to-end testing.",
+      "explanation": "Reviews and end-to-end tests stand between staging and production.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Delivery management”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#delivery-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The promotion process is gated by PR reviews and end-to-end testing.",
+      "uses": [
+        "monorepo"
+      ],
+      "conceptIDs": [
+        "cgoa.environment-promotion"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.promotion-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4280,
+      "front": "A platform engineer changes a cluster-wide network setting in the `infrastructure` overlays. Following the Flux guide, what should happen first?",
+      "back": "A: merge to staging, reconcile, pass conformance tests, then promote to production.",
+      "choices": "A) Merge it to staging, wait for a successful reconcile and passing conformance tests, then promote it\nB) Merge it to production and staging together so both clusters stay identical\nC) Apply it with `kubectl` on production first, then commit it once it works\nD) Skip staging, since infrastructure changes cannot be tested before production",
+      "choicesExplained": "B loses the staged check the guide asks for. C bypasses Git, so it is not a GitOps change at all. D is the opposite of the guide, which tests in staging because infrastructure changes can cause outages.",
+      "explanation": "The guide stages infrastructure changes because they can be disruptive and cause cluster-wide outages.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Delivery management”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#delivery-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "These config changes can be made in steps, first you merge a change to staging, when the cluster is successfully reconciled, and the new cluster state passes conformance tests, you then promote the change to production.",
+      "uses": [
+        "reconciliation",
+        "cluster",
+        "GitOps"
+      ],
+      "conceptIDs": [
+        "cgoa.environment-promotion"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.trunk-small-batches",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4285,
+      "front": "In trunk-based development, changes are made in {{c1::small batches}} and merged into the main branch often; other branches are short-lived and deleted once merged.",
+      "explanation": "Branches other than main live only until their pull request is merged.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Delivery management”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#delivery-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In trunk-based development, the changes are made in small batches and are merged into the main branch often. Besides main, branches are short-lived, once a pull request is merged, the branch gets deleted.",
+      "uses": [],
+      "conceptIDs": [
+        "cgoa.trunk-based-delivery"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.staging-auto-prod-manual",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4290,
+      "front": "In the Flux guide, how can new app releases reach staging automatically but need manual approval for production?",
+      "back": "Use Flux image updates to Git for staging; for production, have Flux push version bumps to a new branch and open a pull request.",
+      "explanation": "The pull request is the point where a person approves the production bump.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Delivery management”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#delivery-management",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "New app release can be automatically delivered to staging using Flux’s image updates to Git. For production, you may choose to manually approve app version bumps by configuring Flux to push the changes to a new branch from which you can create a pull request.",
+      "uses": [],
+      "conceptIDs": [
+        "cgoa.prod-approval-branch"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.flux-pull-based",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4310,
+      "front": "Is Flux push-based or pull-based by design?",
+      "back": "Pull-based.",
+      "explanation": "Webhooks can notify its controllers of source changes, which makes a pull-based pipeline as responsive as a push-based one.",
+      "source": "Flux docs, “Setup Webhook Receivers”, “Setup Webhook Receivers”",
+      "sourceURL": "https://fluxcd.io/flux/guides/webhook-receivers/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Flux is by design pull-based. In order to notify the Flux controllers about changes in Git or Helm repositories, you can setup webhooks and trigger a cluster reconciliation every time a source changes. Using webhook receivers make pull-based pipelines as responsive as push-based pipelines.",
+      "uses": [
+        "pull"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-pull-based"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.webhooks-still-pull",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4315,
+      "front": "A colleague says that once webhook receivers are set up, Flux has become a push-based system. Is that right?",
+      "back": "No. Flux stays pull-based; the webhook only tells it to reconcile, and the pipeline becomes as responsive as a push-based one.",
+      "explanation": "The webhook is a notification: the controllers still fetch the change from the source themselves.",
+      "source": "Flux docs, “Setup Webhook Receivers”, “Setup Webhook Receivers”",
+      "sourceURL": "https://fluxcd.io/flux/guides/webhook-receivers/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Flux is by design pull-based. In order to notify the Flux controllers about changes in Git or Helm repositories, you can setup webhooks and trigger a cluster reconciliation every time a source changes. Using webhook receivers make pull-based pipelines as responsive as push-based pipelines.",
+      "uses": [
+        "reconciliation",
+        "pull"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-pull-based",
+        "cgoa.pull-vs-event-driven"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.polling-vs-webhook",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4320,
+      "front": "Polling or webhook events: how does each make Argo CD notice a new commit?",
+      "back": "Polling checks the repositories on a fixed schedule; a webhook event arrives when the change happens, removing the polling delay.",
+      "explanation": "Argo CD’s webhook support exists to eliminate the delay that polling leaves between a push and its detection.",
+      "source": "Argo CD docs, “Git Webhook Configuration”, “Overview”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/webhook/#overview",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Argo CD polls Git/OCI/Helm repositories every three minutes to detect changes to the manifests. To eliminate this delay from polling, the API server can be configured to receive webhook events.",
+      "uses": [
+        "Argo CD"
+      ],
+      "conceptIDs": [
+        "cgoa.pull-vs-event-driven"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.slow-detection-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4325,
+      "front": "Developers complain that Flux takes several minutes to notice their pushes to the config repository. What does the Flux guide offer for this, without giving up the pull model?",
+      "back": "B: a webhook receiver triggers a reconciliation every time the source changes.",
+      "choices": "A) Replace Flux with a CI job that runs `kubectl apply` after each push\nB) Set up a webhook receiver, so each push triggers a reconciliation\nC) Remove the `interval` from every `GitRepository`\nD) Give developers direct write access to the cluster",
+      "choicesExplained": "A swaps pulling for pushing from CI, which is what the question rules out. D bypasses Git altogether. C does not help: the interval is what drives polling, and removing it adds no notification.",
+      "explanation": "Webhook receivers make a pull-based pipeline as responsive as a push-based one.",
+      "source": "Flux docs, “Setup Webhook Receivers”, “Setup Webhook Receivers”",
+      "sourceURL": "https://fluxcd.io/flux/guides/webhook-receivers/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "you can setup webhooks and trigger a cluster reconciliation every time a source changes. Using webhook receivers make pull-based pipelines as responsive as push-based pipelines.",
+      "uses": [
+        "reconciliation",
+        "pull"
+      ],
+      "conceptIDs": [
+        "cgoa.pull-vs-event-driven",
+        "cgoa.flux-pull-based"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.argocd-poll-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4335,
+      "front": "A team runs Argo CD with no webhooks configured and pushes a manifest change. How does Argo CD find out about it?",
+      "back": "A: Argo CD polls repositories every three minutes.",
+      "choices": "A) At its next poll of the repository; it polls every three minutes\nB) The Git host pushes the change into the cluster straight away\nC) Only when someone runs a manual sync\nD) Once a day, when the application controller restarts",
+      "choicesExplained": "B describes a webhook, and none is configured. C is not needed: polling detects the change without anyone acting. D is invented; polling is far more frequent.",
+      "explanation": "Without webhooks, polling is how Argo CD detects changes, and the three-minute schedule sets the delay.",
+      "source": "Argo CD docs, “Git Webhook Configuration”, “Overview”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/webhook/#overview",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Argo CD polls Git/OCI/Helm repositories every three minutes to detect changes to the manifests. To eliminate this delay from polling, the API server can be configured to receive webhook events.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · project docs as published",
+      "uses": [
+        "Argo CD",
+        "manifest",
+        "sync",
+        "application controller"
+      ],
+      "conceptIDs": [
+        "cgoa.argocd-polls-3-minutes"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.argocd-webhook-endpoint",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4340,
+      "front": "Which Argo CD endpoint should a Git provider’s webhook payload address use?",
+      "back": "`/api/webhook`, for example `https://argocd.example.com/api/webhook`.",
+      "explanation": "If you want a shared secret, you enter it in the same webhook form.",
+      "source": "Argo CD docs, “Git Webhook Configuration”, “1. Create The WebHook In The Git Provider”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/webhook/#1-create-the-webhook-in-the-git-provider",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The payload URL configured in the Git provider should use the /api/webhook endpoint of your Argo CD instance (e.g. https://argocd.example.com/api/webhook). If you wish to use a shared secret, input an arbitrary value in the secret.",
+      "uses": [
+        "Argo CD",
+        "api"
+      ],
+      "conceptIDs": [
+        "cgoa.argocd-webhook-endpoint"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.receiver-verifies",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4350,
+      "front": "How does a Flux Receiver for GitHub check an incoming push event?",
+      "back": "It verifies the payload’s integrity and authenticity using a signature in the `X-Hub-Signature` HTTP header.",
+      "explanation": "The check covers both the payload’s integrity and its authenticity.",
+      "source": "Flux docs, “Receivers”, “Example”",
+      "sourceURL": "https://fluxcd.io/flux/components/notification/receivers/#example",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When a GitHub push event is received, the controller verifies the payload’s integrity and authenticity, using HMAC and the X-Hub-Signature HTTP header.",
+      "uses": [
+        "Receiver",
+        "http"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-receiver"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.receiver-when-reconciles",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4355,
+      "front": "When does a Flux Receiver trigger reconciliation of the resources in its `.spec.resources`?",
+      "back": "When the event type matches `.spec.events` and the payload is verified.",
+      "explanation": "Both tests must pass: an unverified payload, or an event type not listed, triggers nothing.",
+      "source": "Flux docs, “Receivers”, “Example”",
+      "sourceURL": "https://fluxcd.io/flux/components/notification/receivers/#example",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If the event type matches .spec.events and the payload is verified, then the controller triggers a reconciliation for the flux-system GitRepository which is listed under .spec.resources.",
+      "uses": [
+        "Receiver",
+        "reconciliation"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-receiver"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.receiver-targets-sources",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4360,
+      "front": "Should a Flux Receiver reconcile source kinds, or the appliers downstream of them?",
+      "back": "Source kinds. Flux then notifies the downstream appliers of a new revision by itself.",
+      "explanation": "Kustomizations, HelmReleases and image automations downstream of a source are notified automatically, with no extra configuration.",
+      "source": "Flux docs, “Setup Webhook Receivers”, “Define a Git repository receiver”",
+      "sourceURL": "https://fluxcd.io/flux/guides/webhook-receivers/#define-a-git-repository-receiver",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Receivers should reconcile source kinds, not the appliers downstream of them. When any Flux image or source kind detects a new artifact revision, Flux will automatically notify Kustomization, HelmRelease, or ImageUpdateAutomation resources downstream of those without any further configuration.",
+      "uses": [
+        "Receiver"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-receiver"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.webhook-flow",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4365,
+      "front": "After Flux’s notification controller validates a GitHub push event, what do the source and kustomize controllers do?",
+      "back": "The source controller pulls the changes and updates the `GitRepository` revision; the kustomize controller then reconciles the Kustomizations that reference it.",
+      "explanation": "The webhook only starts the chain; each controller still does its own pulling and reconciling.",
+      "source": "Flux docs, “Setup Webhook Receivers”, “Define a Git repository receiver”",
+      "sourceURL": "https://fluxcd.io/flux/guides/webhook-receivers/#define-a-git-repository-receiver",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Source controller is notified about the changes - Source controller pulls the changes into the cluster and updates the GitRepository revision - Kustomize controller is notified about the revision change - Kustomize controller reconciles all the Kustomizations that reference the GitRepository object",
+      "uses": [
+        "reconciliation",
+        "pull"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-receiver"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.receiver-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4370,
+      "front": "A team wants every GitHub push to their config repository to make Flux reconcile at once, instead of at the next interval. Which Flux object do they add?",
+      "back": "C: a Receiver, an incoming webhook that triggers reconciliation of the listed resources.",
+      "choices": "A) A second `GitRepository` with a shorter interval\nB) An AppProject that lists the repository\nC) A Receiver whose `.spec.resources` names the `GitRepository`\nD) A ConfigMap holding the GitHub token",
+      "choicesExplained": "A still polls, only more often. B is an Argo CD object, not a Flux one. D could store data, but nothing would listen for GitHub’s events.",
+      "explanation": "The Receiver is the incoming-webhook object, and it should point at the source kind.",
+      "source": "Flux docs, “Receivers”, “Receivers”",
+      "sourceURL": "https://fluxcd.io/flux/components/notification/receivers/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The Receiver API defines an incoming webhook receiver that triggers the reconciliation for a group of Flux Custom Resources.",
+      "uses": [
+        "Receiver",
+        "reconciliation",
+        "AppProject",
+        "ConfigMap"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-receiver"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.receiver-port",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4375,
+      "front": "Flux’s notification controller handles webhook requests on port {{c1::9292}}, and its `webhook-receiver` Service maps that port to 80 inside the cluster.",
+      "explanation": "To receive Git push events, that endpoint must be exposed outside the cluster on a public address.",
+      "source": "Flux docs, “Setup Webhook Receivers”, “Expose the webhook receiver”",
+      "sourceURL": "https://fluxcd.io/flux/guides/webhook-receivers/#expose-the-webhook-receiver",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In order to receive Git push or Helm chart upload events, you’ll have to expose the webhook receiver endpoint outside of your Kubernetes cluster on a public address. The notification controller handles webhook requests on port 9292 and comes with a Kubernetes Service named webhook-receiver that maps the port to 80 inside the cluster.",
+      "volatile": true,
+      "validAsOf": "2026-09-26 · project docs as published",
+      "uses": [
+        "Service",
+        "port"
+      ],
+      "conceptIDs": [
+        "cgoa.webhook-receiver-port"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.same-or-other-clusters",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4400,
+      "front": "One reconciler per cluster, or one cluster managing others: which does Flux support?",
+      "back": "Both. One Kubernetes cluster running Flux can manage apps in the same cluster or in other clusters.",
+      "explanation": "The Flux site presents multi-cluster apps and infrastructure as working out of the box.",
+      "source": "Flux docs, “Flux Documentation”, “Flux does Multi-Tenancy”",
+      "sourceURL": "https://fluxcd.io/flux/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Multi-cluster infrastructure and apps work out of the box with Cluster API: Flux can use one Kubernetes cluster to manage apps in either the same or other clusters",
+      "uses": [
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cgoa.in-cluster-vs-external-reconciler",
+        "cgoa.flux-manages-other-clusters"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.flux-cluster-lifecycle",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4405,
+      "front": "Besides deploying apps to its own or other clusters, what else does the Flux site say a Flux cluster can do?",
+      "back": "Spin up additional clusters, and manage clusters, including their lifecycle and fleets.",
+      "explanation": "The site ties this to Cluster API, with which multi-cluster setups work out of the box.",
+      "source": "Flux docs, “Flux Documentation”, “Flux does Multi-Tenancy”",
+      "sourceURL": "https://fluxcd.io/flux/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Multi-cluster infrastructure and apps work out of the box with Cluster API: Flux can use one Kubernetes cluster to manage apps in either the same or other clusters, spin up additional clusters themselves, and manage clusters including lifecycle and fleets.",
+      "uses": [
+        "cluster",
+        "api"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-manages-other-clusters"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.store-fleet-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4410,
+      "front": "A retailer runs Flux on one management cluster. It wants that cluster to deploy apps to its store clusters, spin up new store clusters as shops open, and manage the fleet’s lifecycle. Which of these does the Flux site say one Flux cluster can do?",
+      "back": "D: all three, working out of the box with Cluster API.",
+      "choices": "A) Only deploy apps inside its own cluster\nB) Deploy apps to other clusters, but not create clusters\nC) Create clusters, but each store cluster needs its own Flux for apps\nD) All three: apps in other clusters, new clusters, and lifecycle and fleets",
+      "choicesExplained": "A: one Flux cluster can manage apps in other clusters too. B: the site says Flux can also spin up additional clusters. C: apps in other clusters can be managed from the one cluster.",
+      "explanation": "The Flux site lists managing apps in the same or other clusters, spinning up additional clusters and managing lifecycle and fleets, with Cluster API.",
+      "source": "Flux docs, “Flux Documentation”, “Flux does Multi-Tenancy”",
+      "sourceURL": "https://fluxcd.io/flux/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Multi-cluster infrastructure and apps work out of the box with Cluster API: Flux can use one Kubernetes cluster to manage apps in either the same or other clusters, spin up additional clusters themselves, and manage clusters including lifecycle and fleets.",
+      "uses": [
+        "cluster",
+        "api"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-manages-other-clusters",
+        "cgoa.in-cluster-vs-external-reconciler"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.kubeconfig-field",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4415,
+      "front": "Which Flux Kustomization field lets it apply and manage resources on a remote cluster?",
+      "back": "`.spec.kubeConfig`.",
+      "explanation": "The field supplies the kubeconfig for the other cluster, either from a Secret or built from a ConfigMap.",
+      "source": "Flux docs, “Kustomizations”, “KubeConfig (Remote clusters)”",
+      "sourceURL": "https://fluxcd.io/flux/components/kustomize/kustomizations/#kubeconfig-remote-clusters",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "With the .spec.kubeConfig field a Kustomization can apply and manage resources on a remote cluster. Two authentication alternatives are available: - .spec.kubeConfig.secretRef: Secret-based authentication using a static kubeconfig stored in a Kubernetes Secret",
+      "uses": [
+        "kubeconfig",
+        "cluster",
+        "Secret",
+        "ConfigMap"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-kubeconfig-remote"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.argocd-cluster-add",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4425,
+      "front": "Which command connects Argo CD to another cluster, and what access does it need?",
+      "back": "`argocd cluster add <context-name>`; it needs privileged access to that cluster.",
+      "explanation": "The command connects to the cluster and installs the resources Argo CD needs there.",
+      "source": "Argo CD docs, “Cluster Management”, “Adding a cluster”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-management/#adding-a-cluster",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Run argocd cluster add context-name. If you're unsure about the context names, run kubectl config get-contexts to get them all listed. This will connect to the cluster and install the necessary resources for ArgoCD to connect to it. Note that you will need privileged access to the cluster.",
+      "uses": [
+        "Argo CD",
+        "cluster",
+        "kubeconfig"
+      ],
+      "conceptIDs": [
+        "cgoa.argocd-cluster-add"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.cluster-add-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4430,
+      "front": "An engineer wants Argo CD to deploy to a new staging cluster. Their kubeconfig has a `staging` context, but only read-only rights there. What will they need?",
+      "back": "C: `argocd cluster add` needs privileged access to the target cluster.",
+      "choices": "A) A second Argo CD installed in the staging cluster\nB) Nothing more: read-only rights are enough for `argocd cluster add`\nC) Privileged access to the staging cluster, then `argocd cluster add staging`\nD) A new AppProject, which adds the cluster by itself",
+      "choicesExplained": "B is wrong: the command installs resources in that cluster, which read-only rights do not allow. A is not required: one Argo CD can manage other clusters. D restricts destinations but does not connect a cluster.",
+      "explanation": "The command installs resources in the cluster so Argo CD can connect, which needs privileges there.",
+      "source": "Argo CD docs, “Cluster Management”, “Adding a cluster”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-management/#adding-a-cluster",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "This will connect to the cluster and install the necessary resources for ArgoCD to connect to it. Note that you will need privileged access to the cluster.",
+      "uses": [
+        "Argo CD",
+        "kubeconfig",
+        "AppProject",
+        "cluster"
+      ],
+      "conceptIDs": [
+        "cgoa.argocd-cluster-add"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.cluster-secret-label",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4435,
+      "front": "Which label marks a Kubernetes Secret as an Argo CD cluster credential?",
+      "back": "`argocd.argoproj.io/secret-type: cluster`",
+      "explanation": "Argo CD stores cluster credentials in Secrets, just as it stores repository credentials.",
+      "source": "Argo CD docs, “Declarative Setup”, “Clusters”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#clusters",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cluster credentials are stored in secrets same as repositories or repository credentials. Each secret must have label argocd.argoproj.io/secret-type: cluster.",
+      "uses": [
+        "Argo CD",
+        "Secret",
+        "label"
+      ],
+      "conceptIDs": [
+        "cgoa.argocd-cluster-secret"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.in-cluster-destination",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4440,
+      "front": "In Argo CD’s AppProject example, which destination server stands for the same cluster Argo CD runs in?",
+      "back": "`https://kubernetes.default.svc`",
+      "explanation": "The example comment limits applications to the guestbook namespace “in the same cluster”, using that address.",
+      "source": "Argo CD docs, “Declarative Setup”, “Projects”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#projects",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Only permit applications to deploy to the guestbook namespace in the same cluster destinations: - namespace: guestbook server: https://kubernetes.default.svc",
+      "uses": [
+        "Argo CD",
+        "AppProject",
+        "cluster",
+        "namespace"
+      ],
+      "conceptIDs": [
+        "cgoa.argocd-in-cluster",
+        "cgoa.in-cluster-vs-external-reconciler"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.apps-infra-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4455,
+      "front": "Why does the Flux monorepo example keep `apps` and `infrastructure` apart?",
+      "back": "So you can define the order a cluster is reconciled: add-ons and other controllers first, then the applications.",
+      "explanation": "Its example order puts cluster add-ons and Kubernetes controllers ahead of the applications.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repository structure”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repository-structure",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The separation between apps and infrastructure makes it possible to define the order in which a cluster is reconciled, e.g. first the cluster addons and other Kubernetes controllers, then the applications.",
+      "uses": [
+        "reconciliation",
+        "cluster",
+        "controller / control loop"
+      ],
+      "conceptIDs": [
+        "cgoa.apps-infra-separation"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.apps-infra-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4460,
+      "front": "An app’s manifests use custom resources from a controller that the platform team also installs through GitOps. How does the Flux monorepo example help the controller arrive first?",
+      "back": "B: separating infrastructure from apps lets you reconcile add-ons and controllers before applications.",
+      "choices": "A) It puts everything in one directory so that one apply handles both\nB) It keeps infrastructure apart from apps, so the cluster add-ons and controllers can be reconciled first\nC) It keeps the controller on a separate branch that is merged later\nD) It relies on the app failing and retrying until the controller appears",
+      "choicesExplained": "A removes the separation that makes ordering possible. C contradicts the monorepo, which keeps everything on one branch. D is not what the guide describes.",
+      "explanation": "The guide gives this ordering as the reason for the apps and infrastructure split.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repository structure”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repository-structure",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The separation between apps and infrastructure makes it possible to define the order in which a cluster is reconciled, e.g. first the cluster addons and other Kubernetes controllers, then the applications.",
+      "uses": [
+        "manifest",
+        "custom resource",
+        "GitOps",
+        "monorepo",
+        "controller / control loop"
+      ],
+      "conceptIDs": [
+        "cgoa.apps-infra-separation"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.who-reads-production",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4465,
+      "front": "Monorepo or repo per environment: who can read the production config?",
+      "back": "Monorepo: every team member, as Git cannot restrict access to files. Repo per environment: only those given access to the production repository.",
+      "explanation": "Hosting tools can add permissions on top of Git, but a separate repository is what lets you grant access to a subset of people.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repo per environment”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repo-per-environment",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Git is not designed to restrict access to certain files in a repository. Access control can be provided by tools like GitHub or GitLab, as they provide additional layers of security and permission management on top of Git. Having a separate repository for production means that you can grant access to a subset of team members",
+      "uses": [
+        "monorepo",
+        "repo per environment"
+      ],
+      "conceptIDs": [
+        "cgoa.monorepo-vs-repo-per-env"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.spotting-production-changes",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4470,
+      "front": "Monorepo or dedicated production repository: in which are unintended production changes harder to spot?",
+      "back": "The monorepo, especially in large pull requests. A dedicated production repository limits the scope of changes.",
+      "explanation": "Narrower changes make the review less error prone.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repo per environment”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repo-per-environment",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "When using the same repository for all environments, unintentional changes to production are harder to spot, especially for large pull requests. Having a dedicated production repository, limits the scope of changes and makes the review process less error prone.",
+      "uses": [
+        "monorepo",
+        "repo per environment"
+      ],
+      "conceptIDs": [
+        "cgoa.monorepo-vs-repo-per-env"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.promotion-cost",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4475,
+      "front": "What does repo per environment cost you, compared with a monorepo?",
+      "back": "Promoting changes between environments can take more time, especially infrastructure changes that Flux image updates cannot automate.",
+      "explanation": "The guide lists this among the notable differences from the monorepo.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repo per environment”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repo-per-environment",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Promoting changes from one environment to another can be more time-consuming especially for infrastructure changes that can’t be automated with Flux image updates.",
+      "uses": [
+        "repo per environment",
+        "monorepo"
+      ],
+      "conceptIDs": [
+        "cgoa.monorepo-vs-repo-per-env"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.bank-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4480,
+      "front": "A bank’s policy says only four named engineers may read production configuration, while every developer may clone staging and open pull requests. Which Flux repository layout fits best?",
+      "back": "A: a separate production repository lets you grant access to a subset of team members.",
+      "choices": "A) Repo per environment, with a separate production repository\nB) Repo per app, with manifests beside the source code\nC) A monorepo with a branch per environment\nD) A monorepo with a `production` directory",
+      "choicesExplained": "D lets every team member read production config, since Git cannot restrict files. B puts manifests where every app developer can read them. C is not the Flux monorepo, and branches do not restrict reading either.",
+      "explanation": "Git cannot limit who reads particular files, so the restriction has to come from a separate repository.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repo per environment”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repo-per-environment",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Having a separate repository for production means that you can grant access to a subset of team members while allowing everyone to clone staging and open pull requests.",
+      "uses": [
+        "repo per environment",
+        "monorepo",
+        "repo per app",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.repo-per-environment",
+        "cgoa.monorepo-vs-repo-per-env"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.platform-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4485,
+      "front": "A platform group runs the clusters, CRDs and admission webhooks for twelve product teams; each product team wants to manage its own apps and promotions. Which Flux layout fits?",
+      "back": "B: repo per team separates the platform team’s infrastructure from each dev team’s apps.",
+      "choices": "A) Repo per app only, with no platform repository\nB) Repo per team: a platform admin repository plus a repository for each dev team\nC) One monorepo that only the platform group may change\nD) Repo per environment, with one repository for staging and one for production",
+      "choicesExplained": "A leaves nowhere for the cluster-wide resources the platform group maintains. C takes app delivery away from the product teams. D splits by environment, not by who is responsible.",
+      "explanation": "In repo per team, the platform admin team handles infrastructure change and delegates app delivery to the dev teams.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repo per team”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repo-per-team",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The main difference is the separation of concerns, the platform admin team handles the change management of the infrastructure, but delegates the apps delivery to the dev teams.",
+      "uses": [
+        "repo per team",
+        "repo per app",
+        "monorepo",
+        "repo per environment",
+        "CRD"
+      ],
+      "conceptIDs": [
+        "cgoa.repo-per-team"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.platform-onboards",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4490,
+      "front": "In repo per team, how does the platform admin team bring a dev team’s repository into the clusters?",
+      "back": "It onboards the repository with a Flux `GitRepository` and configures how it is reconciled with a Flux `Kustomization`.",
+      "explanation": "The platform team owns these objects, while the dev team owns what is inside its own repository.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repo per team”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repo-per-team",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Onboards the dev teams repositories using Flux’s GitRepository custom resources. - Configures how the dev teams repositories are reconciled on each cluster using Flux’s Kustomization custom resources.",
+      "uses": [
+        "repo per team",
+        "reconciliation",
+        "custom resource"
+      ],
+      "conceptIDs": [
+        "cgoa.repo-per-team"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.app-repo-pointer",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4500,
+      "front": "With repo per app, how can a config repository use the app’s manifests without copying them?",
+      "back": "It holds a pointer: a `GitRepository` for the app repository and a `Kustomization` naming the manifest directory and any patches.",
+      "explanation": "Flux clones the app repository inside the cluster and patches the manifests for each target environment.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repo per app”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repo-per-app",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Inside the config repo you can define a GitRepository that tells Flux to clone the app repo inside the cluster, then with a Kustomization, you can tell Flux which directory holds the app manifests and how to patch them based on the target environment.",
+      "uses": [
+        "repo per app",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.repo-per-app"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.small-team-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4510,
+      "front": "A three-person team builds one service and wants its deployment manifests to live next to its code, in the same repository. Which Flux layout is that?",
+      "back": "C: repo per app keeps the source code and its deployment manifests together.",
+      "choices": "A) Repo per environment\nB) Repo per team\nC) Repo per app\nD) A monorepo holding every team’s manifests",
+      "choicesExplained": "A splits by environment. B splits platform from dev teams. D gathers all manifests in one config repository, apart from the code.",
+      "explanation": "The guide calls it common to keep an app’s code and deployment manifests in one repository.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Repo per app”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#repo-per-app",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It is common to use the same repository to store both the application source code and its deployment manifests.",
+      "uses": [
+        "repo per app",
+        "repo per environment",
+        "repo per team",
+        "monorepo",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.repo-per-app"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.identify-monorepo",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4515,
+      "front": "A single repository’s `main` branch holds `apps`, `infrastructure` and `clusters` directories, each with `staging` and `production` inside. Which Flux layout is this?",
+      "back": "A monorepo: all the manifests in one repository, with every environment on the same branch.",
+      "explanation": "Environments are separate directories on one branch, which is the monorepo shape in the Flux guide.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Monorepo”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#monorepo",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "In a monorepo approach you would store all your Kubernetes manifests in a single Git repository. The various environments specific configs are all stored in the same branch (e.g. main).",
+      "uses": [
+        "monorepo",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.monorepo"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.monorepo-branches-trap",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4520,
+      "front": "A colleague sets up a “monorepo” with a `staging` branch and a `production` branch. Does that match the Flux guide’s monorepo?",
+      "back": "No. In the Flux monorepo every environment’s config sits on the same branch, such as `main`.",
+      "explanation": "The guide separates environments by directory on one branch, not by branch.",
+      "source": "Flux docs, “Ways of structuring your repositories”, “Monorepo”",
+      "sourceURL": "https://fluxcd.io/flux/guides/repository-structure/#monorepo",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The various environments specific configs are all stored in the same branch (e.g. main).",
+      "uses": [
+        "monorepo"
+      ],
+      "conceptIDs": [
+        "cgoa.monorepo"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.reason-no-ci-build",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4535,
+      "front": "Why might you not want a replica-count change to live in the app’s source repository, according to Argo CD?",
+      "back": "Changing only the manifests there could trigger an entire CI build.",
+      "explanation": "A separate config repository cleanly separates app code from app config.",
+      "source": "Argo CD docs, “Best Practices”, “Separating Config Vs. Source Code Repositories”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/#separating-config-vs-source-code-repositories",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It provides a clean separation of application code vs. application config. There will be times when you wish to modify just the manifests without triggering an entire CI build. For example, you likely do not want to trigger a build if you simply wish to bump the number of replicas in a Deployment spec.",
+      "uses": [
+        "CI",
+        "manifest",
+        "Deployment"
+      ],
+      "conceptIDs": [
+        "cgoa.separate-config-reasons"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.reason-audit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4540,
+      "front": "What does a configuration-only repository give auditors, according to Argo CD?",
+      "back": "A much cleaner Git history of what changed, without the noise of normal development check-ins.",
+      "explanation": "Every commit in such a repository is a configuration change.",
+      "source": "Argo CD docs, “Best Practices”, “Separating Config Vs. Source Code Repositories”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/#separating-config-vs-source-code-repositories",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Cleaner audit log. For auditing purposes, a repo which only holds configuration will have a much cleaner Git history of what changes were made, without the noise coming from check-ins due to normal development activity.",
+      "uses": [],
+      "conceptIDs": [
+        "cgoa.separate-config-reasons"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.reason-multi-repo",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4545,
+      "front": "An app is built from services in several Git repositories but deployed as one unit. Why does that favour a separate config repository?",
+      "back": "It may not make sense to keep the manifests in the source repository of any single component.",
+      "explanation": "Such services often have different versioning schemes and release cycles.",
+      "source": "Argo CD docs, “Best Practices”, “Separating Config Vs. Source Code Repositories”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/#separating-config-vs-source-code-repositories",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Your application may comprise services built from multiple Git repositories, but is deployed as a single unit. Oftentimes, microservices applications comprise services with different versioning schemes, and release cycles (e.g. ELK, Kafka + ZooKeeper). It may not make sense to store the manifests in one of the source code repositories of a single component.",
+      "uses": [
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.separate-config-reasons"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.reason-access",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4550,
+      "front": "How does a separate config repository help separate access, according to Argo CD?",
+      "back": "Developers can get commit access to the source code repository without also getting it for the config repository.",
+      "explanation": "The people developing an app may not necessarily be the ones who can or should push to production.",
+      "source": "Argo CD docs, “Best Practices”, “Separating Config Vs. Source Code Repositories”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/#separating-config-vs-source-code-repositories",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Separation of access. The developers who are developing the application, may not necessarily be the same people who can/should push to production environments, either intentionally or unintentionally. By having separate repos, commit access can be given to the source code repo, and not the application config repo.",
+      "uses": [],
+      "conceptIDs": [
+        "cgoa.separate-config-reasons"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.reason-ci-loop",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4555,
+      "front": "What can happen if an automated CI pipeline pushes manifest changes to the same repository it builds from?",
+      "back": "An infinite loop of build jobs and Git commit triggers.",
+      "explanation": "Pushing config changes to a separate repository prevents it.",
+      "source": "Argo CD docs, “Best Practices”, “Separating Config Vs. Source Code Repositories”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/#separating-config-vs-source-code-repositories",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "If you are automating your CI pipeline, pushing manifest changes to the same Git repository can trigger an infinite loop of build jobs and Git commit triggers. Having a separate repo to push config changes to, prevents this from happening.",
+      "uses": [
+        "CI",
+        "manifest"
+      ],
+      "conceptIDs": [
+        "cgoa.separate-config-reasons"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.ci-loop-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4560,
+      "front": "After each build, a CI job commits the new image tag into the manifests in the app’s own repository, and every commit starts a new build. What does Argo CD’s guide recommend?",
+      "back": "A: a separate repository for config changes prevents the loop of builds and commits.",
+      "choices": "A) Push the config changes to a separate config repository\nB) Add a delay between builds so the loop runs more slowly\nC) Have the CI job force-push over its previous commit\nD) Stop keeping manifests in Git",
+      "choicesExplained": "B slows the loop but does not end it. C still pushes to the same repository, so each push still starts a build. D would abandon GitOps.",
+      "explanation": "The guide names this infinite loop as one reason for a separate config repository.",
+      "source": "Argo CD docs, “Best Practices”, “Separating Config Vs. Source Code Repositories”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/#separating-config-vs-source-code-repositories",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "pushing manifest changes to the same Git repository can trigger an infinite loop of build jobs and Git commit triggers. Having a separate repo to push config changes to, prevents this from happening.",
+      "uses": [
+        "CI",
+        "manifest",
+        "Argo CD",
+        "GitOps",
+        "container image"
+      ],
+      "conceptIDs": [
+        "cgoa.separate-config-reasons",
+        "cgoa.separate-config-repo"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.contractor-classification",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 4565,
+      "front": "Contract developers must be able to commit code but must never be able to change what runs in production. Which reason for a separate config repository does that match?",
+      "back": "Separation of access: commit access to the source repository, but not to the config repository.",
+      "explanation": "The guide notes that the people developing an app may not be the ones who should push to production.",
+      "source": "Argo CD docs, “Best Practices”, “Separating Config Vs. Source Code Repositories”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/#separating-config-vs-source-code-repositories",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "By having separate repos, commit access can be given to the source code repo, and not the application config repo.",
+      "uses": [],
+      "conceptIDs": [
+        "cgoa.separate-config-reasons",
+        "cgoa.separate-config-repo"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.leave-replicas-out",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4570,
+      "front": "If a HorizontalPodAutoscaler manages a Deployment’s replicas, should `replicas` be tracked in Git?",
+      "back": "No. Leave `replicas` out of the manifest so the HPA controls it.",
+      "explanation": "Argo CD’s guide allows room for some imperativeness or automation rather than defining everything in Git.",
+      "source": "Argo CD docs, “Best Practices”, “Leaving Room For Imperativeness”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/#leaving-room-for-imperativeness",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "It may be desired to leave room for some imperativeness/automation, and not have everything defined in your Git manifests. For example, if you want the number of your deployment's replicas to be managed by Horizontal Pod Autoscaler, then you would not want to track replicas in Git.",
+      "uses": [
+        "HorizontalPodAutoscaler",
+        "HPA",
+        "Deployment",
+        "manifest",
+        "imperative"
+      ],
+      "conceptIDs": [
+        "cgoa.leave-room-imperative"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.hpa-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4575,
+      "front": "A team adds an HPA to a Deployment whose manifest in Git sets `replicas: 3`. What does Argo CD’s best practices guide advise?",
+      "back": "A: do not track `replicas` in Git when an HPA manages it.",
+      "choices": "A) Remove `replicas` from the manifest so the HPA controls it\nB) Commit each new replica count to Git whenever the HPA changes it\nC) Remove the HPA, since GitOps must define everything in Git\nD) Keep `replicas: 3` and set the HPA’s minimum to 3 as well",
+      "choicesExplained": "D keeps the field in Git, which the guide advises against. B keeps `replicas` tracked in Git, which the guide advises against when an HPA manages it. C is wrong: the guide expressly leaves room for automation.",
+      "explanation": "The guide’s own example comments out `replicas` so the HPA controls it.",
+      "source": "Argo CD docs, “Best Practices”, “Leaving Room For Imperativeness”",
+      "sourceURL": "https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/#leaving-room-for-imperativeness",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "do not include replicas in the manifests if you want replicas to be controlled by HPA",
+      "uses": [
+        "HPA",
+        "Deployment",
+        "manifest",
+        "GitOps"
+      ],
+      "conceptIDs": [
+        "cgoa.leave-room-imperative"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.bootstrap-tools",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 4580,
+      "front": "With which two tools can a Flux bootstrap be done?",
+      "back": "The `flux` command-line tool, or the Flux Terraform Provider.",
+      "explanation": "Either way, the result is Flux components whose manifests live in Git.",
+      "source": "Flux docs, “Core Concepts”, “Bootstrap”",
+      "sourceURL": "https://fluxcd.io/flux/concepts/#bootstrap",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The bootstrap is done using the flux CLI or using our Terraform Provider.",
+      "uses": [
+        "bootstrap"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-bootstrap"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.manages-itself",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 4585,
+      "front": "After a bootstrap, Flux can {{c1::manage itself}} just as it manages other resources.",
+      "explanation": "Its own manifests are in Git, reconciled by its own `GitRepository` and `Kustomization`.",
+      "source": "Flux docs, “Core Concepts”, “Bootstrap”",
+      "sourceURL": "https://fluxcd.io/flux/concepts/#bootstrap",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Flux can manage itself just as it manages other resources.",
+      "uses": [
+        "bootstrap"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-manages-itself"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.bootstrap-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4590,
+      "front": "An operator wants Flux’s own components to be installed so that later changes to them go through Git like any app. Which approach fits?",
+      "back": "A: a bootstrap installs Flux in a GitOps manner and pushes its manifests to Git.",
+      "choices": "A) Bootstrap Flux, so its manifests are pushed to a Git repository and reconciled from there\nB) Apply the Flux manifests once with `kubectl` and keep no copy in Git\nC) Install Flux by hand on each node\nD) Install Flux with Argo CD’s app of apps pattern only",
+      "choicesExplained": "B leaves Flux itself outside Git. C is not how Flux is installed; it runs in the cluster. D is not what the Flux docs describe for installing Flux.",
+      "explanation": "Bootstrap creates a `GitRepository` and `Kustomization` for Flux’s components, so Flux can manage itself.",
+      "source": "Flux docs, “Core Concepts”, “Bootstrap”",
+      "sourceURL": "https://fluxcd.io/flux/concepts/#bootstrap",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "The manifests are applied to the cluster, a GitRepository and Kustomization are created for the Flux components, then the manifests are pushed to an existing Git repository (or a new one is created). Flux can manage itself just as it manages other resources.",
+      "uses": [
+        "bootstrap",
+        "manifest",
+        "GitOps",
+        "app of apps pattern",
+        "Argo CD"
+      ],
+      "conceptIDs": [
+        "cgoa.flux-bootstrap"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.no-mesh-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4600,
+      "front": "A team runs plain Kubernetes Services with no service mesh and no ingress controller, and wants Flagger to automate releases. Which strategy can they use?",
+      "back": "A: Blue/Green needs no service mesh or ingress controller.",
+      "choices": "A) Blue/Green\nB) Canary release\nC) A/B testing\nD) Blue/Green mirroring",
+      "choicesExplained": "B and C need Layer 7 traffic management, such as a service mesh or ingress controller. D is listed for Istio only.",
+      "explanation": "Flagger requires a service mesh or ingress controller for canary releases and A/B testing, but not for Blue/Green.",
+      "source": "Flagger docs, “Deployment Strategies”, “Deployment Strategies”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "For Canary releases and A/B testing you’ll need a Layer 7 traffic management solution like a service mesh or an ingress controller. For Blue/Green deployments no service mesh or ingress controller is required.",
+      "uses": [
+        "Flagger",
+        "service mesh",
+        "ingress controller",
+        "Service",
+        "A/B testing",
+        "Blue/Green mirroring",
+        "canary strategy",
+        "blue-green strategy"
+      ],
+      "conceptIDs": [
+        "cgoa.l7-for-canary-ab"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.beta-cookie-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 4605,
+      "front": "Only users with a `tester=on` cookie should see a new front end during analysis; everyone else stays on the old one. Which Flagger strategy fits?",
+      "back": "D: A/B testing routes users by HTTP headers and cookies.",
+      "choices": "A) Blue/Green\nB) Canary release with weights only\nC) Blue/Green mirroring\nD) A/B testing",
+      "choicesExplained": "A switches all traffic at promotion. B picks users by weight, not by cookie. C copies every request to the new version but returns only the old version’s responses.",
+      "explanation": "Choosing users by cookie is routing by match condition, which is A/B testing.",
+      "source": "Flagger docs, “Deployment Strategies”, “Deployment Strategies”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "A/B Testing (HTTP headers and cookies traffic routing)",
+      "uses": [
+        "A/B testing",
+        "Flagger",
+        "Blue/Green mirroring",
+        "canary strategy",
+        "blue-green strategy",
+        "http"
+      ],
+      "conceptIDs": [
+        "cgoa.ab-testing",
+        "cgoa.flagger-strategies"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.mirroring-writes-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 4610,
+      "front": "A team wants Blue/Green mirroring for a payments service whose requests create charges. What should they weigh first?",
+      "back": "B: mirroring sends each request to both versions, so writes may be duplicated.",
+      "choices": "A) Nothing: mirrored responses are discarded, so no side effects happen\nB) What happens when a write is duplicated and handled by both versions\nC) Whether the service mesh supports cookies\nD) Whether their Git repository is a monorepo",
+      "choicesExplained": "A confuses the response with the work: the response is discarded, but the request is still processed. C concerns A/B testing, not mirroring. D has no bearing on traffic mirroring.",
+      "explanation": "Flagger advises mirroring for idempotent requests and asks you to consider duplicated writes.",
+      "source": "Flagger docs, “Deployment Strategies”, “Blue/Green with Traffic Mirroring”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/#bluegreen-with-traffic-mirroring",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Before using mirroring on requests that may be writes, you should consider what will happen if a write is duplicated and handled by the primary and canary.",
+      "uses": [
+        "Blue/Green mirroring",
+        "monorepo",
+        "service mesh"
+      ],
+      "conceptIDs": [
+        "cgoa.blue-green-mirroring"
+      ]
+    },
+    {
+      "id": "cgoa.gitops-patterns.canary-vs-ab",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 4620,
+      "front": "Canary release or A/B testing in Flagger: how does each decide which users reach the new version?",
+      "back": "Canary: by traffic weight, shifted progressively. A/B testing: by HTTP headers and cookies.",
+      "explanation": "Flagger’s strategy list names the routing each relies on.",
+      "source": "Flagger docs, “Deployment Strategies”, “Deployment Strategies”",
+      "sourceURL": "https://fluxcd.io/flagger/usage/deployment-strategies/",
+      "sourceLicence": "B · Apache 2.0",
+      "evidence": "Canary Release (progressive traffic shifting) - Istio, Linkerd, App Mesh, NGINX, Skipper, Contour, Gloo Edge, Traefik, Open Service Mesh, Kuma, Gateway API, Apache APISIX - A/B Testing (HTTP headers and cookies traffic routing)",
+      "uses": [
+        "canary strategy",
+        "A/B testing",
+        "Flagger",
+        "http"
+      ],
+      "conceptIDs": [
+        "cgoa.ab-testing",
+        "cgoa.flagger-strategies"
+      ]
+    }
+  ]
+}

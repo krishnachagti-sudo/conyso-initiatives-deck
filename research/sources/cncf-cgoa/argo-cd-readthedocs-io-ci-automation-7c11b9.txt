@@ -1,0 +1,414 @@
+URL: https://argo-cd.readthedocs.io/en/stable/user-guide/ci_automation/
+
+-
+
+ User Management
+
+-
+
+ Security
+
+-
+
+ TLS configuration
+
+-
+
+ Mutual TLS (mTLS) for repo-server
+
+-
+
+ Cluster Management
+
+-
+
+ Cluster Bootstrapping
+
+-
+
+ Secret Management
+
+-
+
+ Disaster Recovery
+
+-
+
+ Reconcile Optimization
+
+-
+
+ Webhook Configuration
+
+-
+
+ Resource Health
+
+-
+
+ Resource Actions
+
+-
+
+ Custom Tooling
+
+-
+
+ Custom Styles
+
+-
+
+ UI Customization
+
+-
+
+ Metrics
+
+-
+
+ Web-based Terminal
+
+-
+
+ Config Management Plugins
+
+-
+
+ Deep Links
+
+-
+
+ Git Configuration
+
+-
+
+ Managed By URL Annotation
+
+-
+
+ Notifications
+
+-
+
+ Troubleshooting Tools
+
+-
+
+ ApplicationSet
+
+-
+
+ Template fields
+
+-
+
+ Controlling Resource Modification
+
+-
+
+ Application Pruning & Resource Deletion
+
+-
+
+ Progressive Syncs
+
+-
+
+ Git File Generator Globbing
+
+-
+
+ ApplicationSet Specification Reference
+
+-
+
+ ApplicationSet in any namespace
+
+-
+
+ Server Configuration Parameters
+
+-
+
+ Upgrading
+
+-
+
+ Project Specification Reference
+
+-
+
+ User Guide
+
+-
+
+ Automated Sync Policy
+
+-
+
+ Diffing
+
+-
+
+ Orphaned Resources Monitoring
+
+-
+
+ Compare Options
+
+-
+
+ Sync Options
+
+-
+
+ Parameter Overrides
+
+-
+
+ Environment Variables
+
+-
+
+ Build Environment
+
+-
+
+ Tracking and Deployment Strategies
+
+-
+
+ Resource Tracking
+
+-
+
+ Resource hooks
+
+-
+
+ Selective Sync
+
+-
+
+ Sync Phases and Waves
+
+-
+
+ Sync Windows
+
+-
+
+ Sync Applications with Kubectl
+
+-
+
+ Skip Application Reconcile
+
+-
+
+ Generating Applications with ApplicationSet
+
+-
+
+ Managing ApplicationSets in the Web UI
+
+-
+
+ Automation from CI Pipelines
+
+ Automation from CI Pipelines
+
+-
+
+ App Deletion
+
+-
+
+ Best Practices
+
+-
+
+ Status Badge
+
+-
+
+ External URL Links
+
+-
+
+ Add extra Application info
+
+-
+
+ Application Notice
+
+-
+
+ Notification subscriptions
+
+-
+
+ Annotations and Labels used by Argo CD
+
+-
+
+ Command Reference
+
+-
+
+ Application Specification Reference
+
+-
+
+ Developer Guide
+
+-
+
+ Code Contribution Guide
+
+-
+
+ Toolchain Guide
+
+-
+
+ MacOS users
+
+-
+
+ Release Process And Cadence
+
+-
+
+ Running Argo CD locally
+
+-
+
+ Debugging a local Argo CD instance
+
+-
+
+ Debugging a Remote ArgoCD Environment
+
+-
+
+ API Docs
+
+-
+
+ E2E Tests
+
+-
+
+ Managing Dependencies
+
+-
+
+ Continuous Integration (CI)
+
+-
+
+ Releasing
+
+-
+
+ Documentation Site
+
+-
+
+ Code Quality and Security Scanning
+
+-
+
+ Extensions
+
+-
+
+ Contribution FAQ
+
+-
+
+ Tilt Development
+
+-
+
+ Custom resource icons
+
+-
+
+ Maintaining Internal Argo CD Forks
+
+-
+
+ FAQ
+
+-
+
+ Security Considerations
+
+-
+
+ Support
+
+-
+
+ Roadmap
+
+-
+
+ Releases ⧉
+
+-
+
+ Blog ⧉
+
+# {#automation-from-ci-pipelines} Automation from CI Pipelines¶
+
+Argo CD follows the GitOps model of deployment, where desired configuration changes are first
+pushed to Git, and the cluster state then syncs to the desired state in git. This is a departure
+from imperative pipelines which do not traditionally use Git repositories to hold application
+config.
+
+To push new container images to a cluster managed by Argo CD, the following workflow (or
+variations) might be used:
+
+## {#build-and-publish-a-new-container-image} Build And Publish A New Container Image¶
+
+docker build -t mycompany/guestbook:v2.0 .
+docker push mycompany/guestbook:v2.0
+
+## {#update-the-local-manifests-using-your-preferred-templating-tool-and-push-the-changes-to-git} Update The Local Manifests Using Your Preferred Templating Tool, And Push The Changes To Git¶
+
+Tip
+
+The use of a different Git repository to hold your Kubernetes manifests (separate from
+your application source code), is highly recommended. See best practices
+for further rationale.
+
+git clone https://github.com/mycompany/guestbook-config.git
+cd guestbook-config
+
+# kustomize
+kustomize edit set image mycompany/guestbook:v2.0
+
+# plain yaml
+kubectl patch --local -f config-deployment.yaml -p '{"spec":{"template":{"spec":{"containers":[{"name":"guestbook","image":"mycompany/guestbook:v2.0"}]}}}}' -o yaml > config-deployment.yaml
+
+git commit -am "Update guestbook to v2.0"
+git push
+
+## {#synchronize-the-app-optional} Synchronize The App (Optional)¶
+
+For convenience, the argocd CLI can be downloaded directly from the API server. This is
+useful so that the CLI used in the CI pipeline is always kept in-sync and uses argocd binary
+that is always compatible with the Argo CD API server.
+
+export ARGOCD_SERVER=argocd.example.com
+export ARGOCD_AUTH_TOKEN=<JWT token generated from project>
+curl -sSL -o /usr/local/bin/argocd https://${ARGOCD_SERVER}/download/argocd-linux-amd64
+argocd app sync guestbook
+argocd app wait guestbook
+
+If automated synchronization is configured for the application, this step is
+unnecessary. The controller will automatically detect the new config (fast tracked using a
+webhook, or polled at least every 3 minutes by default), and automatically sync the new manifests.

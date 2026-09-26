@@ -1,0 +1,441 @@
+URL: https://argo-cd.readthedocs.io/en/stable/user-guide/best_practices/
+
+-
+
+ User Management
+
+-
+
+ Security
+
+-
+
+ TLS configuration
+
+-
+
+ Mutual TLS (mTLS) for repo-server
+
+-
+
+ Cluster Management
+
+-
+
+ Cluster Bootstrapping
+
+-
+
+ Secret Management
+
+-
+
+ Disaster Recovery
+
+-
+
+ Reconcile Optimization
+
+-
+
+ Webhook Configuration
+
+-
+
+ Resource Health
+
+-
+
+ Resource Actions
+
+-
+
+ Custom Tooling
+
+-
+
+ Custom Styles
+
+-
+
+ UI Customization
+
+-
+
+ Metrics
+
+-
+
+ Web-based Terminal
+
+-
+
+ Config Management Plugins
+
+-
+
+ Deep Links
+
+-
+
+ Git Configuration
+
+-
+
+ Managed By URL Annotation
+
+-
+
+ Notifications
+
+-
+
+ Troubleshooting Tools
+
+-
+
+ ApplicationSet
+
+-
+
+ Template fields
+
+-
+
+ Controlling Resource Modification
+
+-
+
+ Application Pruning & Resource Deletion
+
+-
+
+ Progressive Syncs
+
+-
+
+ Git File Generator Globbing
+
+-
+
+ ApplicationSet Specification Reference
+
+-
+
+ ApplicationSet in any namespace
+
+-
+
+ Server Configuration Parameters
+
+-
+
+ Upgrading
+
+-
+
+ Project Specification Reference
+
+-
+
+ User Guide
+
+-
+
+ Automated Sync Policy
+
+-
+
+ Diffing
+
+-
+
+ Orphaned Resources Monitoring
+
+-
+
+ Compare Options
+
+-
+
+ Sync Options
+
+-
+
+ Parameter Overrides
+
+-
+
+ Environment Variables
+
+-
+
+ Build Environment
+
+-
+
+ Tracking and Deployment Strategies
+
+-
+
+ Resource Tracking
+
+-
+
+ Resource hooks
+
+-
+
+ Selective Sync
+
+-
+
+ Sync Phases and Waves
+
+-
+
+ Sync Windows
+
+-
+
+ Sync Applications with Kubectl
+
+-
+
+ Skip Application Reconcile
+
+-
+
+ Generating Applications with ApplicationSet
+
+-
+
+ Managing ApplicationSets in the Web UI
+
+-
+
+ Automation from CI Pipelines
+
+-
+
+ App Deletion
+
+-
+
+ Best Practices
+
+ Best Practices
+
+-
+
+ Status Badge
+
+-
+
+ External URL Links
+
+-
+
+ Add extra Application info
+
+-
+
+ Application Notice
+
+-
+
+ Notification subscriptions
+
+-
+
+ Annotations and Labels used by Argo CD
+
+-
+
+ Command Reference
+
+-
+
+ Application Specification Reference
+
+-
+
+ Developer Guide
+
+-
+
+ Code Contribution Guide
+
+-
+
+ Toolchain Guide
+
+-
+
+ MacOS users
+
+-
+
+ Release Process And Cadence
+
+-
+
+ Running Argo CD locally
+
+-
+
+ Debugging a local Argo CD instance
+
+-
+
+ Debugging a Remote ArgoCD Environment
+
+-
+
+ API Docs
+
+-
+
+ E2E Tests
+
+-
+
+ Managing Dependencies
+
+-
+
+ Continuous Integration (CI)
+
+-
+
+ Releasing
+
+-
+
+ Documentation Site
+
+-
+
+ Code Quality and Security Scanning
+
+-
+
+ Extensions
+
+-
+
+ Contribution FAQ
+
+-
+
+ Tilt Development
+
+-
+
+ Custom resource icons
+
+-
+
+ Maintaining Internal Argo CD Forks
+
+-
+
+ FAQ
+
+-
+
+ Security Considerations
+
+-
+
+ Support
+
+-
+
+ Roadmap
+
+-
+
+ Releases ⧉
+
+-
+
+ Blog ⧉
+
+# {#best-practices} Best Practices¶
+
+## {#separating-config-vs-source-code-repositories} Separating Config Vs. Source Code Repositories¶
+
+Using a separate Git repository to hold your Kubernetes manifests, keeping the config separate
+from your application source code, is highly recommended for the following reasons:
+
+-
+It provides a clean separation of application code vs. application config. There will be times
+ when you wish to modify just the manifests without triggering an entire CI build. For example,
+ you likely do not want to trigger a build if you simply wish to bump the number of replicas in
+ a Deployment spec.
+
+-
+Cleaner audit log. For auditing purposes, a repo which only holds configuration will have a much
+ cleaner Git history of what changes were made, without the noise coming from check-ins due to
+ normal development activity.
+
+-
+Your application may comprise services built from multiple Git repositories, but is
+ deployed as a single unit. Oftentimes, microservices applications comprise services
+ with different versioning schemes, and release cycles (e.g. ELK, Kafka + ZooKeeper). It may not
+ make sense to store the manifests in one of the source code repositories of a single component.
+
+-
+Separation of access. The developers who are developing the application, may not necessarily be
+ the same people who can/should push to production environments, either intentionally or
+ unintentionally. By having separate repos, commit access can be given to the source code repo,
+ and not the application config repo.
+
+-
+If you are automating your CI pipeline, pushing manifest changes to the same Git repository can
+ trigger an infinite loop of build jobs and Git commit triggers. Having a separate repo to push
+ config changes to, prevents this from happening.
+
+## {#leaving-room-for-imperativeness} Leaving Room For Imperativeness¶
+
+It may be desired to leave room for some imperativeness/automation, and not have everything defined
+in your Git manifests. For example, if you want the number of your deployment's replicas to be
+managed by Horizontal Pod Autoscaler,
+then you would not want to track replicas in Git.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: nginx-deployment
+spec:
+ # do not include replicas in the manifests if you want replicas to be controlled by HPA
+ # replicas: 1
+ template:
+ spec:
+ containers:
+ - image: nginx:1.7.9
+ name: nginx
+ ports:
+ - containerPort: 80
+...
+
+## {#ensuring-manifests-at-git-revisions-are-truly-immutable} Ensuring Manifests At Git Revisions Are Truly Immutable¶
+
+When using templating tools like helm or kustomize, it is possible for manifests to change
+their meaning from one day to the next. This is typically caused by changes made to an upstream helm
+repository or kustomize base.
+
+For example, consider the following kustomization.yaml
+
+resources:
+- github.com/argoproj/argo-cd//manifests/cluster-install
+
+The above kustomization has a remote base to the HEAD revision of the argo-cd repo. Since this
+is not a stable target, the manifests for this kustomize application can suddenly change meaning, even without
+any changes to your own Git repository.
+
+A better version would be to use a Git tag or commit SHA. For example:
+
+bases:
+- github.com/argoproj/argo-cd//manifests/cluster-install?ref=v0.11.1
