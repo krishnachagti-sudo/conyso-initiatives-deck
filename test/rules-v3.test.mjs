@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { checkDeck } from '../build/check.mjs';
-import { loadDeck, loadConcepts, licenceRules } from '../src/decks.mjs';
+import { loadDeck, loadConcepts, licenceRules, noFetch } from '../src/decks.mjs';
 
 const fresh = () => loadDeck('test/fixtures/decks/example');
 const concepts = loadConcepts('test/fixtures/concepts', 'example');
@@ -85,4 +85,10 @@ test("a pool question's own wording may carry abbreviations; our explanation may
   assert.equal(messages(d, 'abbreviation', { pool: [] }).length, 0, 'a label from the question and choices');
   n.explanation = 'Unlike PLVQ, it sends one tone.';
   assert.equal(messages(d, 'abbreviation', { pool: [] }).length, 1, 'a new abbreviation in our own words');
+});
+
+test('sites whose terms forbid automated or AI use are never fetched, but an allowed subdomain is', () => {
+  for (const u of ['https://www.finra.org/rules', 'https://iapp.org/x', 'https://www.comptia.org/x', 'https://www.aicpa-cima.com/x', 'https://aws.amazon.com/terms']) assert.ok(noFetch(u), u);
+  assert.equal(noFetch('https://docs.aws.amazon.com/whitepapers/latest/x.html'), false);
+  assert.equal(noFetch('https://docs.cloud.google.com/x'), false);
 });

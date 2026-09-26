@@ -22,13 +22,24 @@ GitHub Foundations, SIE, ISTQB CTFL, CCSP, CIPP/E.
 7. Google Cloud: Cloud Digital Leader, Professional Cloud Architect, Generative AI Leader (check licence).
 8. OSHA 10/30 and DOT hazmat (29 and 49 CFR).
 9. Insurance producer exams, Life & Health and Property & Casualty (check state sources first).
-10. CPA REG (IRS law tier B; AICPA blueprint tier C).
+10. CPA REG: parked (see below).
 11. CNCF extras: GitOps, Cilium, Kyverno, Backstage, platform engineering.
 12. Actuarial (SOA P, FM, SRM; CAS 5, 6U) and the rest of the B tier.
 
 ## Parked
 Series 7, 24, 9/10, 6, 63, 65, 66 and the other FINRA and NASAA exams, until
 their rules can be sourced from SEC and Federal Register text alone; KCS v6.
-The IAPP exams (CIPP/E, AIGP, CIPT, CIPM): the IAPP's Conditions of Use bar
+The CPA exam sections: the AICPA's and NASBA's terms object to AI use and bar
+automated access, so the blueprints cannot even be read. CompTIA exams (Security+, A+, Network+ and the rest): its terms bar putting
+its content into AI tools. The IAPP exams (CIPP/E, AIGP, CIPT, CIPM): the IAPP's Conditions of Use bar
 using its site with any AI system. CIPP/US is written from US law alone and
 waits for a decision on publishing it without the IAPP's names.
+
+## Waiting for a decision
+- Terraform Associate: researched (578 cards budgeted), but HashiCorp's docs are
+  under the Business Source License 1.1, so every card would be tier C. The
+  OpenTofu docs (MPL 2.0) could carry the facts instead; decide before writing.
+- CIPP/US: written from US law alone, but its topic plan came from the IAPP body
+  of knowledge; decide whether to publish without the IAPP's names.
+- AWS Cloud Practitioner: research is using docs.aws.amazon.com only (CC BY-SA
+  4.0 under the AWS Site Terms); a person should confirm that reading.

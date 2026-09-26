@@ -33,7 +33,10 @@ The Series 7, 63, 65 and 66 decks are parked. The IAPP's Conditions of Use
 is tier D too, and CIPP/US, whose topic plan came from the IAPP body of
 knowledge, is held for a decision. The lesson: read a site's terms
 before research starts, not when its pages are already cached. BRIEF.md now
-says so.
+says so, and the rule paid off at once: researchers stopped at the terms page
+for CompTIA (Security+), the AICPA and NASBA (the CPA exam) and aws.amazon.com,
+before reading any exam content. AWS's own terms license docs.aws.amazon.com
+under CC BY-SA 4.0, so an AWS deck can rest on the docs alone.
 
 **Two usage-limit stops killed every agent at once.** Topic files saved as
 each topic was finished survived both. A file half-written when the limit

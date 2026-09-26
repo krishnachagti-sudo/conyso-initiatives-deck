@@ -126,6 +126,7 @@ export const slugify = (s) =>
 /** True for a host whose terms forbid automated requests (src/no-fetch.json). */
 export function noFetch(url, base = '.') {
   let host; try { host = new URL(url).hostname.replace(/^www\./, ''); } catch { return false; }
-  const { hosts } = JSON.parse(readFileSync(join(base, 'src/no-fetch.json'), 'utf8'));
-  return hosts.some((h) => host === h || host.endsWith(`.${h}`));
+  const { hosts, allow = [] } = JSON.parse(readFileSync(join(base, 'src/no-fetch.json'), 'utf8'));
+  const under = (h) => host === h || host.endsWith(`.${h}`);
+  return !allow.some(under) && hosts.some(under);
 }
