@@ -8,6 +8,17 @@ test('option labels swap, the article "A" does not', () => {
   assert.equal(swapLabels('Answer A. A mistake here costs time.', 'A', 'D'), 'Answer D. A mistake here costs time.');
 });
 
+test('labels used as the subject of a sentence swap too', () => {
+  assert.equal(swapLabels('B is wrong: it only logs. D and C match by pattern. A would work too.', 'A', 'B'), 'A is wrong: it only logs. D and C match by pattern. B would work too.');
+  assert.equal(swapLabels('C confuses the two. A policy applies here.', 'A', 'C'), 'A confuses the two. A policy applies here.');
+});
+
+test('letters that name things are left alone', () => {
+  const s = 'Class B airspace, Schedule C, Part D, C++, U.S.A., B-tree and IPv4 stay.';
+  assert.equal(swapLabels(s, 'B', 'C'), s);
+  assert.equal(swapLabels(s, 'A', 'D'), s);
+});
+
 test('the right option moves, and the back and explanations follow it', () => {
   const card = { id: 'x.y.some-scenario', back: 'A) Tuesday', choices: 'A) Tuesday\nB) Monday\nC) Friday\nD) Sunday', choicesExplained: 'B: too early. C: too late. D is never a business day.' };
   const before = card.choices;

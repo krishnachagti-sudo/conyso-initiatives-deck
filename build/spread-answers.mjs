@@ -21,17 +21,41 @@ export function parseChoices(choices) {
   return out.map((m) => ({ letter: m[1], text: m[2] }));
 }
 
+// A letter after one of these words names something else: Class B airspace,
+// Schedule C, Part D, vitamin E.
+const NOT_A_LABEL_AFTER = new Set(('class classes type types part parts schedule schedules tier tiers section sections plan plans form forms vitamin '
+  + 'appendix category categories level levels grade grades zone zones item line box column row group groups division subpart chapter unit '
+  + 'figure table annex article title runway taxiway phase model series rule step stage exhibit attachment block range size area sector '
+  + 'scale rating network address note hepatitis list amendment app channel band mode test drive paragraph question').split(' '));
+// Words that can follow the option "A" but never the article "a".
+const VERB_AFTER_A = /^(is|are|was|were|would|will|does|do|doesn't|did|can|cannot|can't|could|might|may|must|should|only|also|just|still|alone|too|either|neither|has|have|isn't|aren't|wouldn't|won't|instead|here)\b/;
+
+/**
+ * Is the lone capital at text[i] an option label ("B is wrong", "A:", "C and
+ * D", "option B") rather than part of a word, a name or the article "A"?
+ * Labels written as "X is wrong" were missed before 2026-09-26, which left
+ * explanations calling the right answer wrong (sc-900 audits).
+ */
+export function isLabel(text, i) {
+  const l = text[i];
+  const before = text.slice(0, i), after = text.slice(i + 1);
+  if (/[A-Za-z0-9'’\-_./+#&]$/.test(before)) return false;
+  if (/^[A-Za-z0-9'’\-_+#&]/.test(after) || /^\.[A-Za-z0-9]/.test(after)) return false;
+  const prevWord = before.match(/([A-Za-z]+)\s*$/)?.[1]?.toLowerCase();
+  if (prevWord && NOT_A_LABEL_AFTER.has(prevWord)) return false;
+  if (/^\s*([):,;.!?]|$)/.test(after)) return true;
+  if (/^(options?|answers?|choices?)$/.test(prevWord || '')) return true;
+  if (l !== 'A') return true;
+  // "A" is also the article: a label only before a verb or "and/or <label>".
+  const next = after.trimStart();
+  return /^(and|or|nor)\s+[A-E]\b/.test(next) || VERB_AFTER_A.test(next);
+}
+
 /** Swap the letters a and b wherever they are used as option labels. */
 export function swapLabels(text, a, b) {
-  if (!text) return text;
-  // A label is a lone capital followed by ) : , ; . or "and/or X", or after
-  // "option". The article "A" is always followed by a word, so it never matches.
-  const labelled = new RegExp(`(^|[^A-Za-z0-9])([${a}${b}])(?=\\s*[):,;.]|\\s+(?:and|or)\\s+[A-E]\\b|\\s*$)`, 'g');
-  const named = new RegExp(`(\\b[Oo]ptions?\\s+)([${a}${b}])\\b`, 'g');
+  if (typeof text !== 'string' || !text) return text;
   const flip = (l) => (l === a ? b : a);
-  // One pass per pattern, each on the original text's matches: mark first, then resolve.
-  const marked = String(text).replace(labelled, (m, pre, l) => `${pre}\u0000${l}`).replace(named, (m, pre, l) => `${pre}\u0000${l}`);
-  return marked.replace(/\u0000\u0000?([A-E])/g, (m, l) => flip(l));
+  return text.replace(new RegExp(`[${a}${b}]`, 'g'), (l, i) => (isLabel(text, i) ? flip(l) : l));
 }
 
 export function spread(card) {

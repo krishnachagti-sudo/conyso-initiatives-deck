@@ -8,6 +8,7 @@
 import { existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { locate } from '../src/evidence.mjs';
+import { mislettered } from './answer-letters.mjs';
 import { NOTE_TYPES, KINDS, AFTER_PRIMERS, PRIORITIES, LICENCE_TIERS, LIMITS } from '../src/schema.mjs';
 
 const ID_RE = /^[a-z0-9]+(?:[.-][a-z0-9]+)*(?:\.[a-z0-9-]+)+$/;
@@ -263,6 +264,13 @@ export function checkDeck(deck, ctx = {}) {
       .map((n) => String(n.back || '').match(/^\s*([A-E])[):]/)?.[1]).filter(Boolean);
     const top = Object.entries(letters.reduce((m, l) => ({ ...m, [l]: (m[l] || 0) + 1 }), {})).sort((a, b) => b[1] - a[1])[0];
     if (letters.length >= 20 && top && top[1] / letters.length > 0.5) add(null, 'answer-position', `${top[1]} of ${letters.length} scenario cards have the answer at ${top[0]}: spread the right answer across the options`);
+    // Explanations that call the right answer wrong and skip a wrong option:
+    // letters that did not follow the answer when it moved. Options that use
+    // letters as names ("Test C", "A || B") are left to the auditors.
+    for (const n of notes) {
+      const names = String(n.choices || '').replace(/^\s*[A-E]\)/gm, '');
+      if (!/\b[A-E]\b/.test(names) && mislettered(n)) add(n.id, 'answer-letters', 'choicesExplained explains the right answer as a wrong option and skips one wrong option: re-letter it to match the choices');
+    }
   }
 
   // ── Deck-level: official pool questions verbatim ────────────────────────
