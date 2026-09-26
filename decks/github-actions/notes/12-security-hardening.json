@@ -1,0 +1,3342 @@
+{
+  "topic": "Security hardening and optimisation",
+  "notes": [
+    {
+      "id": "gha.security-hardening.what-is-github-token",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12000,
+      "front": "What is the `GITHUB_TOKEN`?",
+      "back": "A unique secret that GitHub creates automatically at the start of each workflow job, used to authenticate in that job.",
+      "explanation": "GitHub creates it automatically, so nobody has to create or store it.",
+      "example": "Like a visitor badge printed at the front desk for one visit: issued on arrival, handed back when you leave.",
+      "introduces": [
+        "GITHUB_TOKEN"
+      ],
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “About the GITHUB_TOKEN”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#about-the-github_token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "At the start of each workflow job, GitHub automatically creates a unique `GITHUB_TOKEN` secret to use in your workflow. You can use the `GITHUB_TOKEN` to authenticate in the workflow job.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "secret",
+        "job",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "gha.github-token"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-an-installation-access-token",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12005,
+      "front": "The `GITHUB_TOKEN` is an installation access token. What is an installation access token?",
+      "back": "A token that authenticates on behalf of a GitHub App installed on your repository; GitHub installs such an app when you enable Actions.",
+      "explanation": "This is why the `GITHUB_TOKEN` acts for the app, with permissions limited to the workflow’s repository.",
+      "example": "Like a contractor’s site pass issued to the company, not to any one worker.",
+      "introduces": [
+        "installation access token"
+      ],
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “About the GITHUB_TOKEN”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#about-the-github_token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you enable GitHub Actions, GitHub installs a GitHub App on your repository. The `GITHUB_TOKEN` secret is a GitHub App installation access token. You can use the installation access token to authenticate on behalf of the GitHub App installed on your repository.",
+      "uses": [
+        "installation access token",
+        "GITHUB_TOKEN",
+        "repository"
+      ],
+      "conceptIDs": [
+        "gha.github-token-app"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-permissions",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12010,
+      "front": "What does the `permissions` key in a workflow do?",
+      "back": "It modifies the default permissions granted to the `GITHUB_TOKEN`, adding or removing access so that only the minimum required access is allowed.",
+      "explanation": "It can be set for the whole workflow or for individual jobs.",
+      "example": "Like setting which rooms a key card opens before handing it over, instead of giving a master key.",
+      "introduces": [
+        "permissions"
+      ],
+      "source": "GitHub Docs, “Workflow syntax for GitHub Actions”, “permissions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can use `permissions` to modify the default permissions granted to the `GITHUB_TOKEN`, adding or removing access as required, so that you only allow the minimum required access.",
+      "uses": [
+        "permissions",
+        "GITHUB_TOKEN"
+      ],
+      "conceptIDs": [
+        "gha.permissions-key"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-a-pat",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12015,
+      "front": "In GitHub Actions, when do the docs point to a personal access token (PAT) instead of the `GITHUB_TOKEN`?",
+      "back": "For example, when a job on a self-hosted runner runs longer than 24 hours, the limit to which the `GITHUB_TOKEN` can be refreshed.",
+      "explanation": "A personal access token, or PAT, is a token a person creates, so it is not bound to one job as the `GITHUB_TOKEN` is.",
+      "example": "Like using your own house key rather than a hotel card that stops working at checkout.",
+      "introduces": [
+        "personal access token",
+        "PAT"
+      ],
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “About the GITHUB_TOKEN”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#about-the-github_token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "However, because the `GITHUB_TOKEN` is an installation access token, it can only be refreshed for up to 24 hours. If your job runs longer than 24 hours, use a personal access token or other authentication method instead.",
+      "uses": [
+        "personal access token",
+        "PAT",
+        "GITHUB_TOKEN",
+        "installation access token",
+        "self-hosted runner",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.token-vs-pat"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-oidc",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12020,
+      "front": "What does OpenID Connect (OIDC) let a workflow do?",
+      "back": "Exchange short-lived tokens directly from your cloud provider, instead of presenting a stored cloud secret.",
+      "explanation": "After a trust connection is set up, the workflow requests a short-lived access token from the provider each time.",
+      "example": "Like showing your staff badge at a partner’s reception to get a day pass, rather than keeping a copy of their door key.",
+      "introduces": [
+        "OpenID Connect",
+        "OIDC"
+      ],
+      "source": "GitHub Docs, “OpenID Connect”, “Overview of OpenID Connect (OIDC)”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/openid-connect#overview-of-openid-connect-oidc",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "After you have established a trust connection with a cloud provider that supports OIDC, you can configure your workflow to request a short-lived access token directly from the cloud provider.",
+      "uses": [
+        "OpenID Connect",
+        "OIDC",
+        "workflow",
+        "secret"
+      ],
+      "conceptIDs": [
+        "gha.oidc"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-a-jwt",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12025,
+      "front": "What form does the OIDC token that a job receives from GitHub’s OIDC provider take?",
+      "back": "A JSON Web Token (JWT), automatically generated and unique to each workflow job.",
+      "explanation": "The cloud provider checks the claims inside this JWT against the conditions on its trust definition.",
+      "example": "Like a boarding pass printed for one flight: it carries your details and is only good for that journey.",
+      "introduces": [
+        "JSON Web Token",
+        "JWT"
+      ],
+      "source": "GitHub Docs, “OpenID Connect”, “Understanding the OIDC token”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/openid-connect#understanding-the-oidc-token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each job requests an OIDC token from GitHub's OIDC provider, which responds with an automatically generated JSON web token (JWT) that is unique for each workflow job where it is generated.",
+      "uses": [
+        "JSON Web Token",
+        "JWT",
+        "OIDC",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.oidc-flow"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-id-token",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12030,
+      "front": "What is the `id-token` permission for?",
+      "back": "Fetching an OIDC token. It must be set to `write` so GitHub’s OIDC provider can create a JWT for the job.",
+      "explanation": "It is one of the `GITHUB_TOKEN` permissions, and it accepts only `write` or `none`.",
+      "example": "Like ticking the box on a form that allows the office to issue you an identity card.",
+      "introduces": [
+        "id-token"
+      ],
+      "source": "GitHub Docs, “OpenID Connect reference”, “Required permission”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/oidc#required-permission",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The job or workflow must grant the `id-token: write` permission to allow GitHub's OIDC provider to create a JSON Web Token (JWT)",
+      "uses": [
+        "id-token",
+        "OIDC",
+        "JWT",
+        "permissions",
+        "GITHUB_TOKEN"
+      ],
+      "conceptIDs": [
+        "gha.id-token-write"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-a-subject-claim",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12035,
+      "front": "What is the subject (`sub`) claim in an OIDC token?",
+      "back": "A claim joining key workflow metadata, such as organisation, repository, branch or job environment, for the cloud provider to validate.",
+      "explanation": "Trust conditions on a cloud role usually test the subject, often together with the audience claim.",
+      "example": "Like the address line on a parcel: the depot checks it before handing anything over.",
+      "introduces": [
+        "subject claim"
+      ],
+      "source": "GitHub Docs, “OpenID Connect reference”, “OIDC claims used to define trust conditions on cloud roles”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/oidc#oidc-claims-used-to-define-trust-conditions-on-cloud-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Subject: By default, has a predefined format and is a concatenation of some of the key metadata about the workflow, such as the GitHub organization, repository, branch, or associated job environment.",
+      "uses": [
+        "subject claim",
+        "OIDC",
+        "organization",
+        "repository",
+        "branch",
+        "environment"
+      ],
+      "conceptIDs": [
+        "gha.oidc-sub-claim"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-script-injection",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12040,
+      "front": "What is script injection in a GitHub Actions workflow?",
+      "back": "An attacker adds malicious commands to a context, and when the workflow runs, those strings are interpreted as code and executed on the runner.",
+      "explanation": "Workflows, custom actions and composite actions can all be affected.",
+      "example": "Like a form where someone writes an instruction in the “name” box, and the clerk carries it out instead of filing it.",
+      "introduces": [
+        "script injection"
+      ],
+      "source": "GitHub Docs, “Script injections”, “Understanding the risk of script injections”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/script-injections#understanding-the-risk-of-script-injections",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This can occur when an attacker adds malicious commands and scripts to a context. When your workflow runs, those strings might be interpreted as code which is then executed on the runner.",
+      "uses": [
+        "script injection",
+        "context",
+        "workflow",
+        "runner"
+      ],
+      "conceptIDs": [
+        "gha.script-injection"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-untrusted-input",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12045,
+      "front": "In a workflow, what is untrusted input?",
+      "back": "Content that attackers can set, such as fields of the `github` context like an issue title or pull request body.",
+      "explanation": "Such values should not flow into anything that could interpret them as executable code.",
+      "example": "Like a comment card from the public: you read it, but you never follow it as an order.",
+      "introduces": [
+        "untrusted input"
+      ],
+      "source": "GitHub Docs, “Script injections”, “Understanding the risk of script injections”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/script-injections#understanding-the-risk-of-script-injections",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Attackers can add their own malicious content to the `github` context, which should be treated as potentially untrusted input.",
+      "uses": [
+        "untrusted input",
+        "github context",
+        "pull request",
+        "issue"
+      ],
+      "conceptIDs": [
+        "gha.untrusted-inputs"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-an-intermediate-environment-variable",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12050,
+      "front": "What is an intermediate environment variable, in script-injection defence?",
+      "back": "An environment variable set to the value of an expression, so an inline script reads the variable instead of having the expression pasted into it.",
+      "explanation": "The docs call it the preferred approach for handling untrusted input in inline scripts.",
+      "example": "Like handing a stranger’s note to the clerk in a sealed envelope, rather than reading it aloud as part of your instructions.",
+      "introduces": [
+        "intermediate environment variable"
+      ],
+      "source": "GitHub Docs, “Secure use reference”, “Use an intermediate environment variable”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#use-an-intermediate-environment-variable",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For inline scripts, the preferred approach to handling untrusted input is to set the value of the expression to an intermediate environment variable.",
+      "uses": [
+        "intermediate environment variable",
+        "environment variable",
+        "expression",
+        "untrusted input"
+      ],
+      "conceptIDs": [
+        "gha.intermediate-env-var"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-a-deployment-protection-rule",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12055,
+      "front": "What is a deployment protection rule?",
+      "back": "A condition that must pass before a job referencing an environment can proceed, such as manual approval, a delay or a branch restriction.",
+      "explanation": "The rules belong to the environment, so every job that references it is held to them.",
+      "example": "Like the checks at an airport gate: you only board once each one has been passed.",
+      "introduces": [
+        "deployment protection rule"
+      ],
+      "source": "GitHub Docs, “Deployments and environments”, “Deployment protection rules”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#deployment-protection-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Deployment protection rules require specific conditions to pass before a job referencing the environment can proceed. You can use deployment protection rules to require a manual approval, delay a job, or restrict the environment to certain branches.",
+      "uses": [
+        "deployment protection rule",
+        "environment",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.env-protection-rules"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-a-required-reviewer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12060,
+      "front": "What is a required reviewer on an environment?",
+      "back": "A specific person or team who must approve workflow jobs that reference the environment before they proceed.",
+      "explanation": "It is the deployment protection rule that asks for a manual approval.",
+      "example": "Like a manager who must countersign an expense claim before it is paid.",
+      "introduces": [
+        "required reviewer"
+      ],
+      "source": "GitHub Docs, “Deployments and environments”, “Required reviewers”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#required-reviewers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use required reviewers to require a specific person or team to approve workflow jobs that reference the environment.",
+      "uses": [
+        "required reviewer",
+        "environment",
+        "job",
+        "team",
+        "deployment protection rule"
+      ],
+      "conceptIDs": [
+        "gha.required-reviewers"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-a-wait-timer",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12065,
+      "front": "What is a wait timer on an environment?",
+      "back": "A deployment protection rule that delays a job for a set amount of time after it is first triggered.",
+      "explanation": "It holds the job back without needing anyone to approve it.",
+      "example": "Like a cooling-off period after signing a contract before it takes effect.",
+      "introduces": [
+        "wait timer"
+      ],
+      "source": "GitHub Docs, “Deployments and environments”, “Wait timer”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#wait-timer",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use a wait timer to delay a job for a specific amount of time after the job is initially triggered.",
+      "uses": [
+        "wait timer",
+        "deployment protection rule",
+        "job",
+        "environment"
+      ],
+      "conceptIDs": [
+        "gha.wait-timer"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-a-deployment-branch",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12070,
+      "front": "What are deployment branches (and tags) on an environment?",
+      "back": "A rule restricting which branches and tags can deploy to the environment.",
+      "explanation": "Runs from other branches or tags are kept away from the environment.",
+      "example": "Like a loading bay that accepts lorries only from approved depots.",
+      "introduces": [
+        "deployment branch"
+      ],
+      "source": "GitHub Docs, “Deployments and environments”, “Deployment branches and tags”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#deployment-branches-and-tags",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use deployment branches and tags to restrict which branches and tags can deploy to the environment.",
+      "uses": [
+        "deployment branch",
+        "branch",
+        "environment"
+      ],
+      "conceptIDs": [
+        "gha.deployment-branches"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-a-custom-deployment-protection-rule",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12075,
+      "front": "What is a custom deployment protection rule?",
+      "back": "A protection rule you enable to gate deployments with a third-party service, powered by a GitHub App; currently in public preview.",
+      "explanation": "It lets outside systems, such as observability or change management tools, decide whether a deployment may go ahead.",
+      "example": "Like a building site that will not open until an outside safety inspector signs off.",
+      "introduces": [
+        "custom deployment protection rule"
+      ],
+      "source": "GitHub Docs, “Deployments and environments”, “Custom deployment protection rules”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#custom-deployment-protection-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can enable your own custom protection rules to gate deployments with third-party services. For example, you can use services such as Datadog, Honeycomb, and ServiceNow to provide automated approvals for deployments to GitHub.",
+      "uses": [
+        "custom deployment protection rule",
+        "deployment protection rule"
+      ],
+      "conceptIDs": [
+        "gha.custom-protection-rules"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.what-is-provenance",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12080,
+      "front": "In software supply chains, what does a build’s provenance tell its consumers?",
+      "back": "Where and how the software was built.",
+      "explanation": "Artifact attestations record it so that people who use your software can check it.",
+      "example": "Like a food label stating the farm and the factory a product came through.",
+      "introduces": [
+        "provenance"
+      ],
+      "source": "GitHub Docs, “Artifact attestations”, “Overview”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Artifact attestations enable you to create unfalsifiable provenance and integrity guarantees for the software you build. In turn, people who consume your software can verify where and how your software was built.",
+      "uses": [
+        "provenance"
+      ],
+      "conceptIDs": [
+        "gha.artifact-attestations"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-an-artifact-attestation",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12085,
+      "front": "What is an artifact attestation?",
+      "back": "A cryptographically signed claim, generated with your software, that establishes the build’s provenance.",
+      "explanation": "Consumers can verify it to see where and how the software was built.",
+      "example": "Like a signed certificate of origin shipped with goods.",
+      "introduces": [
+        "artifact attestation"
+      ],
+      "source": "GitHub Docs, “Artifact attestations”, “Overview”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you generate artifact attestations with your software, you create cryptographically signed claims that establish your build's provenance",
+      "uses": [
+        "artifact attestation",
+        "provenance"
+      ],
+      "conceptIDs": [
+        "gha.artifact-attestations"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-slsa",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12090,
+      "front": "What is the SLSA (Supply-chain Levels for Software Artifacts) framework?",
+      "back": "An industry standard for evaluating supply chain security, organised into levels of increasing security and trustworthiness.",
+      "explanation": "Artifact attestations are described in terms of the SLSA level they reach.",
+      "example": "Like hygiene ratings for kitchens: each higher level means stricter practice.",
+      "introduces": [
+        "Supply-chain Levels for Software Artifacts",
+        "SLSA"
+      ],
+      "source": "GitHub Docs, “Artifact attestations”, “SLSA levels for artifact attestations”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#slsa-levels-for-artifact-attestations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The SLSA framework is an industry standard used to evaluate supply chain security. It is organized into levels. Each level represents an increasing degree of security and trustworthiness for a software supply chain.",
+      "uses": [
+        "Supply-chain Levels for Software Artifacts",
+        "SLSA",
+        "artifact attestation"
+      ],
+      "conceptIDs": [
+        "gha.slsa-level"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-sigstore",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12095,
+      "front": "What is Sigstore, as used by GitHub for artifact attestations?",
+      "back": "An open source project offering a solution for signing and verifying software artifacts through attestations.",
+      "explanation": "GitHub uses it to generate artifact attestations.",
+      "example": "Like a notary service that stamps and records signed documents.",
+      "introduces": [
+        "Sigstore"
+      ],
+      "source": "GitHub Docs, “Artifact attestations”, “How GitHub generates artifact attestations”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#how-github-generates-artifact-attestations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To generate artifact attestations, GitHub uses Sigstore, which is an open source project that offers a comprehensive solution for signing and verifying software artifacts via attestations.",
+      "uses": [
+        "Sigstore",
+        "artifact attestation",
+        "open source"
+      ],
+      "conceptIDs": [
+        "gha.sigstore"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-an-sbom",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12100,
+      "front": "What is a software bill of materials (SBOM), in artifact attestations?",
+      "back": "A list of the open source dependencies used in a build, which can be associated with the build’s attestation.",
+      "explanation": "The docs say associating builds with it provides transparency and helps consumers comply with data protection standards.",
+      "example": "Like the ingredients list on a packet, naming everything that went in.",
+      "introduces": [
+        "software bill of materials",
+        "SBOM"
+      ],
+      "source": "GitHub Docs, “Artifact attestations”, “Overview”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can also generate artifact attestations that include an associated software bill of materials (SBOM). Associating your builds with a list of the open source dependencies used in them provides transparency and enables consumers to comply with data protection standards.",
+      "uses": [
+        "software bill of materials",
+        "SBOM",
+        "artifact attestation",
+        "open source"
+      ],
+      "conceptIDs": [
+        "gha.attest-sbom"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-is-cache-eviction",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12105,
+      "front": "What is cache eviction in GitHub Actions dependency caching?",
+      "back": "Deleting caches, oldest last access first, to make space once a repository reaches its maximum cache storage.",
+      "explanation": "It keeps the repository within its cache size limit.",
+      "example": "Like a library clearing the books nobody has borrowed for longest when the shelves are full.",
+      "introduces": [
+        "cache eviction"
+      ],
+      "source": "GitHub Docs, “Dependency caching reference”, “Usage limits and eviction policy”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#usage-limits-and-eviction-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Once a repository has reached its maximum cache storage, the cache eviction policy will create space by deleting the caches in order of last access date, from oldest to most recent.",
+      "uses": [
+        "cache eviction",
+        "dependency caching",
+        "repository"
+      ],
+      "conceptIDs": [
+        "gha.cache-limit-10gb"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-are-usage-metrics",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "order": 12110,
+      "front": "What are GitHub Actions usage metrics?",
+      "back": "Organisation-level figures that help you understand how and where your Actions minutes are being used.",
+      "explanation": "They can help with the bill, but that is not their main purpose.",
+      "example": "Like an itemised phone log that shows who used the minutes, rather than the invoice.",
+      "introduces": [
+        "usage metrics"
+      ],
+      "source": "GitHub Docs, “Billing and usage”, “GitHub Actions usage metrics”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/billing-and-usage#github-actions-usage-metrics",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Organization owners and users with the \"View organization Actions metrics\" permission can view GitHub Actions usage metrics for their organization. These metrics can help you understand how and where your Actions minutes are being used.",
+      "uses": [
+        "usage metrics",
+        "organization"
+      ],
+      "conceptIDs": [
+        "gha.usage-metrics"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.token-scope-repo",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12115,
+      "front": "The `GITHUB_TOKEN`’s permissions are limited to {{c1::the repository that contains your workflow}}.",
+      "back": "the repository that contains your workflow",
+      "explanation": "It is issued for the GitHub App installed on that repository.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “About the GITHUB_TOKEN”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#about-the-github_token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The token's permissions are limited to the repository that contains your workflow.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "repository",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "gha.github-token-app"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.token-scope-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12120,
+      "front": "A workflow in `acme/app` uses the `GITHUB_TOKEN` to open an issue in `acme/docs` and gets a permissions error. What explains it?",
+      "back": "B) The token’s permissions are limited to the repository containing the workflow",
+      "choices": "A) Issues cannot be opened by workflows\nB) The token’s permissions are limited to the repository containing the workflow\nC) The token expired before the step ran\nD) `permissions: write-all` was missing",
+      "choicesExplained": "A: workflows can work with issues through the `issues` permission. C: the token lasts until the job finishes. D: no permission setting reaches another repository.",
+      "explanation": "Work in another repository needs another credential, such as a personal access token or a GitHub App.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “About the GITHUB_TOKEN”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#about-the-github_token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The token's permissions are limited to the repository that contains your workflow.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "repository",
+        "issue",
+        "permissions",
+        "personal access token"
+      ],
+      "conceptIDs": [
+        "gha.github-token-app"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.token-expiry",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12125,
+      "front": "When does the `GITHUB_TOKEN` expire?",
+      "back": "When the job finishes, or after its effective maximum lifetime.",
+      "explanation": "GitHub fetches a fresh installation access token before each job begins.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “About the GITHUB_TOKEN”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#about-the-github_token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Before each job begins, GitHub fetches an installation access token for the job. The `GITHUB_TOKEN` expires when the job finishes or after its effective maximum lifetime.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "job",
+        "installation access token"
+      ],
+      "conceptIDs": [
+        "gha.github-token-lifetime"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.token-hosted-lifetime",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12130,
+      "front": "On GitHub-hosted runners, the `GITHUB_TOKEN` can live for a maximum of {{c1::6 hours}}.",
+      "back": "6 hours",
+      "explanation": "That is the maximum job execution time on those runners.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “About the GITHUB_TOKEN”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#about-the-github_token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The maximum job execution time is 6 hours, so the `GITHUB_TOKEN` can live for a maximum of 6 hours.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "GitHub-hosted runner",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.github-token-lifetime"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.token-self-hosted-lifetime",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12135,
+      "front": "On a self-hosted runner a job may run for 5 days. For how long can the `GITHUB_TOKEN` be refreshed?",
+      "back": "Up to 24 hours.",
+      "explanation": "As an installation access token it cannot be refreshed beyond that, whatever the job length.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “About the GITHUB_TOKEN”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#about-the-github_token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The maximum job execution time is 5 days. However, because the `GITHUB_TOKEN` is an installation access token, it can only be refreshed for up to 24 hours.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "self-hosted runner",
+        "job",
+        "installation access token"
+      ],
+      "conceptIDs": [
+        "gha.github-token-lifetime"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.token-long-job-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12140,
+      "front": "A data migration job on a self-hosted runner takes about 30 hours and calls GitHub throughout. What do the docs recommend for authentication?",
+      "back": "D) Use a personal access token or another authentication method",
+      "choices": "A) Add `permissions: write-all`\nB) Split the token into two secrets\nC) Move the job to a GitHub-hosted runner, where the token lasts longer\nD) Use a personal access token or another authentication method",
+      "choicesExplained": "A: permissions do not extend the token’s life. B: a secret does not change the token’s lifetime. C: hosted jobs are capped at 6 hours.",
+      "explanation": "The `GITHUB_TOKEN` can be refreshed for only up to 24 hours.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “About the GITHUB_TOKEN”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#about-the-github_token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If your job runs longer than 24 hours, use a personal access token or other authentication method instead.",
+      "uses": [
+        "self-hosted runner",
+        "GitHub-hosted runner",
+        "personal access token",
+        "permissions",
+        "GITHUB_TOKEN",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.github-token-lifetime",
+        "gha.token-vs-pat"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.token-context",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12145,
+      "front": "Besides the `secrets` context, the `GITHUB_TOKEN` is also available in the {{c1::`github.token`}} context.",
+      "back": "`github.token`",
+      "explanation": "It is the same token, reachable through the `github` context.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “About the GITHUB_TOKEN”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#about-the-github_token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The token is also available in the `github.token` context.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "github context",
+        "secrets context"
+      ],
+      "conceptIDs": [
+        "gha.github-token"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.token-no-new-runs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12150,
+      "front": "In general, do events triggered by the `GITHUB_TOKEN` create new workflow runs?",
+      "back": "No, apart from some exceptions such as `workflow_dispatch` and `repository_dispatch`.",
+      "explanation": "The docs say this prevents you from accidentally creating recursive workflow runs.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “When GITHUB_TOKEN triggers workflow runs”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#when-github_token-triggers-workflow-runs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you use the repository's `GITHUB_TOKEN` to perform tasks, events triggered by the `GITHUB_TOKEN` will not create a new workflow run, with the following exceptions:",
+      "uses": [
+        "GITHUB_TOKEN",
+        "event",
+        "workflow run",
+        "workflow_dispatch",
+        "repository_dispatch"
+      ],
+      "conceptIDs": [
+        "gha.github-token"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.token-push-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12155,
+      "front": "A workflow commits a formatting fix and pushes it with the `GITHUB_TOKEN`. Another workflow in the repository runs `on: push`, but no run appears. Why?",
+      "back": "A) Events triggered by the `GITHUB_TOKEN` do not create new workflow runs, to prevent recursion",
+      "choices": "A) Events triggered by the `GITHUB_TOKEN` do not create new workflow runs, to prevent recursion\nB) The `GITHUB_TOKEN` lacked `contents: write`\nC) `on: push` ignores bot accounts by default\nD) The push was too small to count as an event",
+      "choicesExplained": "D: every push is an event. B: the push succeeded, so write access was there. C: there is no such default; the token is the cause.",
+      "explanation": "The docs give this exact case: a push made with the token does not start the push workflow.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “When GITHUB_TOKEN triggers workflow runs”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#when-github_token-triggers-workflow-runs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For example, if a workflow run pushes code using the repository's `GITHUB_TOKEN`, a new workflow will not run even when the repository contains a workflow configured to run when `push` events occur.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "push",
+        "workflow run",
+        "event",
+        "permissions"
+      ],
+      "conceptIDs": [
+        "gha.github-token"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.token-dispatch-exception",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12160,
+      "front": "Which two events always create workflow runs, even when triggered with the `GITHUB_TOKEN`?",
+      "back": "`workflow_dispatch` and `repository_dispatch`.",
+      "explanation": "They are the named exceptions to the rule that token-triggered events create no runs.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “When GITHUB_TOKEN triggers workflow runs”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#when-github_token-triggers-workflow-runs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "`workflow_dispatch` and `repository_dispatch` events always create workflow runs.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "workflow_dispatch",
+        "repository_dispatch",
+        "workflow run"
+      ],
+      "conceptIDs": [
+        "gha.github-token"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.token-pr-approval-required",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12165,
+      "front": "A workflow uses the `GITHUB_TOKEN` to open a pull request. What happens to the runs from the resulting `pull_request` event?",
+      "back": "They are created in an approval-required state; a user with write access can start them with Approve workflows to run.",
+      "explanation": "This applies to the `opened`, `synchronize` and `reopened` activity types.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “When GITHUB_TOKEN triggers workflow runs”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#when-github_token-triggers-workflow-runs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "when a workflow using `GITHUB_TOKEN` creates or updates a pull request, the resulting `pull_request` event creates workflow runs in an **approval-required** state.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "pull_request",
+        "activity type",
+        "workflow run",
+        "pull request"
+      ],
+      "conceptIDs": [
+        "gha.github-token"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.token-pr-no-approval-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12170,
+      "front": "A bot workflow opens dependency pull requests, and CI on them should start without anyone approving. What should it use to create the pull requests?",
+      "back": "C) A GitHub App installation access token or a personal access token",
+      "choices": "A) The `GITHUB_TOKEN` with `pull-requests: write`\nB) The `GITHUB_TOKEN` with `permissions: write-all`\nC) A GitHub App installation access token or a personal access token\nD) A `workflow_run` trigger on the CI workflow",
+      "choicesExplained": "A and B: any pull request made with the `GITHUB_TOKEN` gets approval-required runs, whatever its permissions. D: this does not change how the `pull_request` runs are created.",
+      "explanation": "The docs name these two token types for runs that must not wait for approval.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “When GITHUB_TOKEN triggers workflow runs”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#when-github_token-triggers-workflow-runs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you need workflow runs from workflow-created pull requests to execute without requiring approval, use a GitHub App installation access token or a personal access token instead of `GITHUB_TOKEN` when creating or updating the pull request.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "installation access token",
+        "personal access token",
+        "workflow_run",
+        "pull_request",
+        "permissions"
+      ],
+      "conceptIDs": [
+        "gha.token-vs-pat"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.permissions-where",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12175,
+      "front": "Where can the `permissions` key be set, and what does each placement affect?",
+      "back": "At the top level, for all jobs in the workflow; or within a job, for that job’s actions and run commands only.",
+      "explanation": "Job-level settings let each job have a different set of permissions if required.",
+      "source": "GitHub Docs, “Workflow syntax for GitHub Actions”, “permissions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can use `permissions` either as a top-level key, to apply to all jobs in the workflow, or within specific jobs. When you add the `permissions` key within a specific job, all actions and run commands within that job that use the `GITHUB_TOKEN` gain the access rights you specify.",
+      "uses": [
+        "permissions",
+        "job",
+        "workflow",
+        "GITHUB_TOKEN"
+      ],
+      "conceptIDs": [
+        "gha.permissions-job"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.permissions-levels",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12180,
+      "front": "Which access levels can each `GITHUB_TOKEN` permission take?",
+      "back": "`read` (where applicable), `write` or `none`; `write` includes `read`.",
+      "explanation": "Some permissions, such as `id-token`, have no `read` level.",
+      "source": "GitHub Docs, “Workflow syntax for GitHub Actions”, “permissions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For each of the available permissions, shown in the table below, you can assign one of the access levels: `read` (if applicable), `write`, or `none`. `write` includes `read`.",
+      "uses": [
+        "permissions",
+        "GITHUB_TOKEN",
+        "id-token"
+      ],
+      "conceptIDs": [
+        "gha.permissions-key"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.permissions-unspecified-none",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12185,
+      "front": "If you specify the access for any permission, all permissions that are not specified are set to {{c1::`none`}}.",
+      "back": "`none`",
+      "explanation": "Naming one permission switches the rest off, so every permission a job needs must be listed.",
+      "source": "GitHub Docs, “Workflow syntax for GitHub Actions”, “permissions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you specify the access for any of these permissions, all of those that are not specified are set to `none`.",
+      "uses": [
+        "permissions"
+      ],
+      "conceptIDs": [
+        "gha.permissions-key"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.permissions-unspecified-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12190,
+      "front": "A workflow in a private repository adds `permissions: pull-requests: write` so it can label pull requests. Now `actions/checkout` fails. What happened?",
+      "back": "B) Listing one permission set all the others, including `contents`, to `none`",
+      "choices": "A) `pull-requests: write` conflicts with checkout\nB) Listing one permission set all the others, including `contents`, to `none`\nC) Labels require `issues: write` instead\nD) Checkout needs `write-all`",
+      "choicesExplained": "A: the two do not conflict. D: checkout needs `contents: read`, not everything. C: `pull-requests: write` does permit adding a label.",
+      "explanation": "Adding `contents: read` alongside restores checkout.",
+      "source": "GitHub Docs, “Workflow syntax for GitHub Actions”, “permissions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you specify the access for any of these permissions, all of those that are not specified are set to `none`.",
+      "uses": [
+        "permissions",
+        "pull request",
+        "label"
+      ],
+      "conceptIDs": [
+        "gha.permissions-key"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.permissions-read-all",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12195,
+      "front": "What single value gives the `GITHUB_TOKEN` read access for every available permission?",
+      "back": "`permissions: read-all` (the counterpart is `write-all`).",
+      "explanation": "It sets all permissions at once instead of listing each one.",
+      "source": "GitHub Docs, “Workflow syntax for GitHub Actions”, “Defining access for the GITHUB_TOKEN scopes”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#defining-access-for-the-github_token-scopes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can use the following syntax to define one of `read-all` or `write-all` access for all of the available permissions:",
+      "uses": [
+        "permissions",
+        "GITHUB_TOKEN"
+      ],
+      "conceptIDs": [
+        "gha.permissions-key"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.permissions-id-token-levels",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "order": 12200,
+      "front": "Which access levels does the `id-token` permission accept?",
+      "back": "`write` or `none` only; it has no `read` level.",
+      "explanation": "Fetching an OIDC token requires `id-token: write`.",
+      "source": "GitHub Docs, “Workflow syntax for GitHub Actions”, “Defining access for the GITHUB_TOKEN scopes”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#defining-access-for-the-github_token-scopes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "deployments: read|write|none\n  id-token: write|none\n  issues: read|write|none",
+      "uses": [
+        "id-token",
+        "permissions",
+        "OIDC"
+      ],
+      "conceptIDs": [
+        "gha.permissions-key",
+        "gha.id-token-write"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.permissions-job-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12205,
+      "front": "A workflow has `build`, `test` and `comment` jobs. Only `comment` posts on pull requests. How should `permissions` be set to follow least privilege?",
+      "back": "C) Read-only at workflow level, with `pull-requests: write` added in the `comment` job",
+      "choices": "A) `pull-requests: write` at workflow level\nB) `write-all` at workflow level\nC) Read-only at workflow level, with `pull-requests: write` added in the `comment` job\nD) No `permissions` key, so defaults apply",
+      "choicesExplained": "B: gives every job every write permission. A: gives the write permission to jobs that do not need it. D: leaves access at whatever the default is rather than the minimum.",
+      "explanation": "The docs advise a read-only default for contents, raised only for the jobs that need more.",
+      "source": "GitHub Docs, “Secure use reference”, “Use secrets for sensitive information”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#use-secrets-for-sensitive-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "It's good security practice to set the default permission for the `GITHUB_TOKEN` to read access only for repository contents. The permissions can then be increased, as required, for individual jobs within the workflow file.",
+      "uses": [
+        "permissions",
+        "job",
+        "pull request",
+        "GITHUB_TOKEN"
+      ],
+      "conceptIDs": [
+        "gha.permissions-job"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.permissions-default-read",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12210,
+      "front": "What default permission for the `GITHUB_TOKEN` do the docs call good security practice?",
+      "back": "Read access only for repository contents, increased for individual jobs as required.",
+      "explanation": "Actions can read the token from the `github.token` context, so its permissions should be the minimum required.",
+      "source": "GitHub Docs, “Secure use reference”, “Use secrets for sensitive information”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#use-secrets-for-sensitive-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You should therefore make sure that the `GITHUB_TOKEN` is granted the minimum required permissions. It's good security practice to set the default permission for the `GITHUB_TOKEN` to read access only for repository contents.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "permissions",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.permissions-job"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.permissions-fork-downgrade",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12215,
+      "front": "A `pull_request` from a fork triggers a workflow whose job sets `contents: write`. The admin has not selected “Send write tokens to workflows from pull requests”. What access does the token get?",
+      "back": "C) Read only: write permissions are changed to read",
+      "choices": "A) `contents: write`, as the job asked for it\nB) No token at all\nC) Read only: write permissions are changed to read\nD) Write access, but only to the fork",
+      "choicesExplained": "A: the fork downgrade comes after the job-level setting. B: the token is still issued. D: the token is for the base repository, and is downgraded.",
+      "explanation": "Without that setting, a fork pull request cannot be granted write access through `permissions`.",
+      "source": "GitHub Docs, “Workflow syntax for GitHub Actions”, “How permissions are calculated for a workflow job”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#how-permissions-are-calculated-for-a-workflow-job",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Finally, if the workflow was triggered by a pull request event other than `pull_request_target` from a forked repository, and the **Send write tokens to workflows from pull requests** setting is not selected, the permissions are adjusted to change any write permissions to read only.",
+      "uses": [
+        "pull_request",
+        "pull_request_target",
+        "fork",
+        "permissions",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.permissions-calculation"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.permissions-prt-write",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12220,
+      "front": "When a workflow is triggered by `pull_request_target`, what repository permission does the `GITHUB_TOKEN` get, even from a public fork?",
+      "back": "Read/write repository permission.",
+      "explanation": "The write access applies even when the run comes from a public fork.",
+      "source": "GitHub Docs, “Workflow syntax for GitHub Actions”, “permissions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When a workflow is triggered by the `pull_request_target` event, the `GITHUB_TOKEN` is granted read/write repository permission, even when it is triggered from a public fork.",
+      "uses": [
+        "pull_request_target",
+        "GITHUB_TOKEN",
+        "fork"
+      ],
+      "conceptIDs": [
+        "gha.prt-risk"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.write-access-reads-secrets",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12225,
+      "front": "Who has read access to all secrets configured in a repository?",
+      "back": "Any user with write access to the repository.",
+      "explanation": "The docs draw from this that credentials used in workflows should have the least privileges required.",
+      "source": "GitHub Docs, “Secure use reference”, “Use secrets for sensitive information”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#use-secrets-for-sensitive-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Any user with write access to your repository has read access to all secrets configured in your repository. Therefore, you should ensure that the credentials being used within workflows have the least privileges required.",
+      "uses": [
+        "secret",
+        "repository"
+      ],
+      "conceptIDs": [
+        "gha.secret-good-practices"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.pat-least-scopes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12230,
+      "front": "When generating a personal access token (classic) for a workflow, what do the docs recommend?",
+      "back": "Select the fewest scopes necessary. For a fine-grained token, select the minimum permissions and repository access required.",
+      "explanation": "Both follow the rule of granting the minimum permissions possible.",
+      "source": "GitHub Docs, “Secrets”, “Limiting credential permissions”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/secrets#limiting-credential-permissions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When generating a personal access token (classic), select the fewest scopes necessary. When generating a fine-grained personal access token, select the minimum permissions and repository access required.",
+      "uses": [
+        "personal access token",
+        "permissions"
+      ],
+      "conceptIDs": [
+        "gha.token-vs-pat"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.app-vs-pat",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12235,
+      "front": "Why might a GitHub App be preferable to a personal access token for a workflow?",
+      "back": "It uses fine-grained permissions and short-lived tokens, and is not tied to a user, so the workflow keeps working if that user leaves.",
+      "explanation": "A personal access token belongs to the person who created it.",
+      "source": "GitHub Docs, “Secrets”, “Limiting credential permissions”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/secrets#limiting-credential-permissions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Unlike a personal access token, a GitHub App is not tied to a user, so the workflow will continue to work even if the user who installed the app leaves your organization.",
+      "uses": [
+        "personal access token",
+        "workflow",
+        "organization"
+      ],
+      "conceptIDs": [
+        "gha.token-vs-pat"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.app-vs-pat-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12240,
+      "front": "A release workflow authenticates with an engineer’s PAT. The team worries the workflow will break when she leaves the company. What do the docs suggest?",
+      "back": "C) Use a GitHub App, which is not tied to a user",
+      "choices": "A) Store the PAT as an environment secret\nB) Switch to a classic PAT with more scopes\nC) Use a GitHub App, which is not tied to a user\nD) Set `permissions: write-all`",
+      "choicesExplained": "A: the token still belongs to her. B: more scopes add risk and are still hers. D: this changes the `GITHUB_TOKEN`, not the PAT.",
+      "explanation": "The workflow keeps working even if the person who installed the app leaves.",
+      "source": "GitHub Docs, “Secrets”, “Limiting credential permissions”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/secrets#limiting-credential-permissions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Instead of using a personal access token, consider using a GitHub App, which uses fine-grained permissions and short lived tokens, similar to a fine-grained personal access token.",
+      "uses": [
+        "PAT",
+        "personal access token",
+        "environment secret",
+        "permissions",
+        "GITHUB_TOKEN"
+      ],
+      "conceptIDs": [
+        "gha.token-vs-pat"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.token-vs-pat",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 12245,
+      "front": "How does the `GITHUB_TOKEN` differ from a personal access token in who creates it and how long it lasts?",
+      "back": "`GITHUB_TOKEN`: created by GitHub for each job, expiring with it (refreshable to 24 hours). PAT: created by a person; the docs’ alternative for longer jobs.",
+      "explanation": "The `GITHUB_TOKEN` is an installation access token, which caps how long it can be refreshed.",
+      "source": "GitHub Docs, “GITHUB_TOKEN”, “About the GITHUB_TOKEN”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/github_token#about-the-github_token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "However, because the `GITHUB_TOKEN` is an installation access token, it can only be refreshed for up to 24 hours. If your job runs longer than 24 hours, use a personal access token or other authentication method instead.",
+      "uses": [
+        "GITHUB_TOKEN",
+        "personal access token",
+        "PAT",
+        "installation access token",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.token-vs-pat"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.oidc-benefit-no-secrets",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12250,
+      "front": "Which OIDC benefit means you no longer duplicate cloud credentials as long-lived GitHub secrets?",
+      "back": "No cloud secrets.",
+      "explanation": "The trust is configured on the cloud provider, and workflows request short-lived tokens instead.",
+      "source": "GitHub Docs, “OpenID Connect”, “Benefits of using OIDC”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/openid-connect#benefits-of-using-oidc",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "No cloud secrets: You won't need to duplicate your cloud credentials as long-lived GitHub secrets.",
+      "uses": [
+        "OIDC",
+        "secret"
+      ],
+      "conceptIDs": [
+        "gha.oidc-benefits"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.oidc-benefit-authz",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12255,
+      "front": "Which OIDC benefit gives you more granular control, using the cloud provider’s own authentication and authorisation tools?",
+      "back": "Authentication and authorisation management.",
+      "explanation": "Access to cloud resources is then controlled on the provider’s side.",
+      "source": "GitHub Docs, “OpenID Connect”, “Benefits of using OIDC”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/openid-connect#benefits-of-using-oidc",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Authentication and authorization management: You have more granular control over how workflows can use credentials, using your cloud provider's authentication (authN) and authorization (authZ) tools to control access to cloud resources.",
+      "uses": [
+        "OIDC",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "gha.oidc-benefits"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.oidc-benefit-rotating",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12260,
+      "front": "Which OIDC benefit means each cloud access token is valid for a single job and then expires automatically?",
+      "back": "Rotating credentials.",
+      "explanation": "The credential lasts only as long as the job that requested it.",
+      "source": "GitHub Docs, “OpenID Connect”, “Benefits of using OIDC”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/openid-connect#benefits-of-using-oidc",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Rotating credentials: With OIDC, your cloud provider issues a short-lived access token that is only valid for a single job, and then automatically expires.",
+      "uses": [
+        "OIDC",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.oidc-benefits"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.oidc-benefit-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12265,
+      "front": "A security review finds a cloud access key stored as a repository secret two years ago and never rotated. Which change removes the stored key altogether?",
+      "back": "B) Configure OIDC trust on the cloud provider and request short-lived tokens",
+      "choices": "A) Move it to an environment secret with a required reviewer\nB) Configure OIDC trust on the cloud provider and request short-lived tokens\nC) Rotate it every 90 days\nD) Add `::add-mask::` for the key",
+      "choicesExplained": "A: the key would still be stored. C: rotation shortens exposure but keeps a stored key. D: masking hides it in logs but it is still stored.",
+      "explanation": "With OIDC there are no cloud secrets to store, and each token expires after the job.",
+      "source": "GitHub Docs, “OpenID Connect”, “Benefits of using OIDC”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/openid-connect#benefits-of-using-oidc",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Instead, you can configure the OIDC trust on your cloud provider, and then update your workflows to request a short-lived access token from the cloud provider through OIDC.",
+      "uses": [
+        "OIDC",
+        "repository secret",
+        "environment secret",
+        "required reviewer",
+        "add-mask"
+      ],
+      "conceptIDs": [
+        "gha.oidc-benefits"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.oidc-flow-1",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12270,
+      "front": "What is the first step in using OIDC between GitHub Actions and a cloud provider?",
+      "back": "Establish an OIDC trust relationship in the cloud provider, allowing specific workflows to request tokens for a defined cloud role.",
+      "explanation": "Every later step relies on the provider already trusting GitHub’s tokens.",
+      "source": "GitHub Docs, “OpenID Connect”, “How OIDC integrates with GitHub Actions”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/openid-connect#how-oidc-integrates-with-github-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You establish an OIDC trust relationship in the cloud provider, allowing specific GitHub workflows to request cloud access tokens on behalf of a defined cloud role.",
+      "uses": [
+        "OIDC",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "gha.oidc-flow"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.oidc-flow-2",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12275,
+      "front": "Every time a job runs, {{c1::GitHub’s OIDC provider}} auto-generates an OIDC token containing claims about the workflow.",
+      "back": "GitHub’s OIDC provider",
+      "explanation": "The claims establish a verifiable identity for the specific workflow trying to authenticate.",
+      "source": "GitHub Docs, “OpenID Connect”, “How OIDC integrates with GitHub Actions”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/openid-connect#how-oidc-integrates-with-github-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Every time your job runs, GitHub's OIDC provider auto-generates an OIDC token. This token contains multiple claims to establish a security-hardened and verifiable identity about the specific workflow that is trying to authenticate.",
+      "uses": [
+        "OIDC",
+        "job",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "gha.oidc-flow"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.oidc-flow-3-4",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12280,
+      "front": "After a step presents its OIDC token, what does the cloud provider do?",
+      "back": "Validates the token’s claims and, if they match, provides a short-lived cloud access token available only for the duration of the job.",
+      "explanation": "The token serves as proof of the workflow’s identity.",
+      "source": "GitHub Docs, “OpenID Connect”, “How OIDC integrates with GitHub Actions”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/openid-connect#how-oidc-integrates-with-github-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Once the cloud provider successfully validates the claims presented in the token, it then provides a short-lived cloud access token that is available only for the duration of the job.",
+      "uses": [
+        "OIDC",
+        "step",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.oidc-flow"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.oidc-validation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12285,
+      "front": "How does a cloud provider validate an OIDC token?",
+      "back": "It checks whether the token’s subject and other claims match the conditions preconfigured on the cloud role’s OIDC trust definition.",
+      "explanation": "A token whose claims do not match the conditions is not accepted.",
+      "source": "GitHub Docs, “OpenID Connect”, “Understanding the OIDC token”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/openid-connect#understanding-the-oidc-token",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To validate the token, the cloud provider checks if the OIDC token's subject and other claims are a match for the conditions that were preconfigured on the cloud role's OIDC trust definition.",
+      "uses": [
+        "OIDC",
+        "subject claim"
+      ],
+      "conceptIDs": [
+        "gha.oidc-flow"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.id-token-write-required",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12290,
+      "front": "Without {{c1::`id-token: write`}}, the OIDC JWT cannot be requested.",
+      "back": "`id-token: write`",
+      "explanation": "The permission can be granted at workflow level or for a single job.",
+      "source": "GitHub Docs, “OpenID Connect reference”, “Required permission”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/oidc#required-permission",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Without `id-token: write`, the OIDC JWT ID token cannot be requested.",
+      "uses": [
+        "id-token",
+        "OIDC",
+        "JWT"
+      ],
+      "conceptIDs": [
+        "gha.id-token-write"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.id-token-no-other-write",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12295,
+      "front": "Does `id-token: write` give the workflow write access to repository contents?",
+      "back": "No. It only enables fetching and setting the OIDC token; it does not grant write access to other resources.",
+      "explanation": "The word “write” refers to creating the token, not to changing anything else.",
+      "source": "GitHub Docs, “OpenID Connect reference”, “Required permission”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/oidc#required-permission",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This setting only enables fetching and setting the OIDC token; it does not grant write access to other resources.",
+      "uses": [
+        "id-token",
+        "OIDC"
+      ],
+      "conceptIDs": [
+        "gha.id-token-write"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.id-token-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12300,
+      "front": "A deploy job’s cloud login step fails because it cannot obtain an OIDC token. The workflow sets `permissions: contents: read`. What is missing?",
+      "back": "B) `id-token: write`",
+      "choices": "A) A cloud secret named `OIDC_TOKEN`\nB) `id-token: write`\nC) `permissions: read-all`\nD) `contents: write`",
+      "choicesExplained": "A: OIDC does not need a stored cloud secret. D: contents access does not fetch tokens. C: `read-all` cannot grant `id-token`, which has no `read` level.",
+      "explanation": "Listing `contents` set every other permission, including `id-token`, to `none`.",
+      "source": "GitHub Docs, “OpenID Connect reference”, “Required permission”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/oidc#required-permission",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Without `id-token: write`, the OIDC JWT ID token cannot be requested.",
+      "uses": [
+        "id-token",
+        "OIDC",
+        "permissions",
+        "job",
+        "step"
+      ],
+      "conceptIDs": [
+        "gha.id-token-write"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.audience-claim",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12305,
+      "front": "By default, what value does the audience (`aud`) claim use, and what condition can it support?",
+      "back": "The web address of the organisation or repository owner; it can restrict the cloud role to workflows in that organisation.",
+      "explanation": "Audience and subject claims are typically combined in trust conditions.",
+      "source": "GitHub Docs, “OpenID Connect reference”, “OIDC claims used to define trust conditions on cloud roles”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/oidc#oidc-claims-used-to-define-trust-conditions-on-cloud-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Audience: By default, this value uses the URL of the organization or repository owner. This can be used to set a condition that only the workflows in the specific organization can access the cloud role.",
+      "uses": [
+        "OIDC",
+        "subject claim",
+        "organization"
+      ],
+      "conceptIDs": [
+        "gha.oidc-sub-claim"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.at-least-one-condition",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12310,
+      "front": "Why must you define at least one condition on the cloud role’s OIDC trust?",
+      "back": "So that untrusted repositories cannot request access tokens for your cloud resources.",
+      "explanation": "The condition is what ties the role to your workflows.",
+      "source": "GitHub Docs, “OpenID Connect reference”, “OIDC claims used to define trust conditions on cloud roles”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/oidc#oidc-claims-used-to-define-trust-conditions-on-cloud-roles",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To control how your cloud provider issues access tokens, you **must** define at least one condition, so that untrusted repositories can’t request access tokens for your cloud resources.",
+      "uses": [
+        "OIDC",
+        "repository"
+      ],
+      "conceptIDs": [
+        "gha.oidc-sub-claim"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.sub-environment-syntax",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12315,
+      "front": "What is the subject claim syntax for filtering on a specific environment?",
+      "back": "`repo:ORG-NAME/REPO-NAME:environment:ENVIRONMENT-NAME`",
+      "explanation": "The environment name is included when the job references an environment.",
+      "source": "GitHub Docs, “OpenID Connect reference”, “Filtering for a specific environment”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/oidc#filtering-for-a-specific-environment",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "that is owned by the `octo-org` organization:\n\n* Syntax: `repo:ORG-NAME/REPO-NAME:environment:ENVIRONMENT-NAME`",
+      "uses": [
+        "subject claim",
+        "environment"
+      ],
+      "conceptIDs": [
+        "gha.oidc-sub-claim"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.sub-branch-only-if",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12320,
+      "front": "When does the subject claim include the workflow’s branch name?",
+      "back": "Only if the job does not reference an environment and the workflow is not triggered by a pull request event.",
+      "explanation": "An environment reference, or a pull request trigger, replaces the branch in the subject.",
+      "source": "GitHub Docs, “OpenID Connect reference”, “Filtering for a specific branch”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/oidc#filtering-for-a-specific-branch",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The subject claim includes the branch name of the workflow, but only if the job doesn't reference an environment, and if the workflow is not triggered by a pull request event.",
+      "uses": [
+        "subject claim",
+        "branch",
+        "environment",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.oidc-sub-claim"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.sub-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12325,
+      "front": "A cloud role trusts only `repo:acme/shop:ref:refs/heads/main`. A job on `main` in `acme/shop` adds `environment: production` and is now refused. Why?",
+      "back": "A) The subject now names the environment instead of the branch",
+      "choices": "A) The subject now names the environment instead of the branch\nB) Environments cannot use OIDC\nC) The audience claim changed to the environment\nD) `id-token: write` is ignored in environments",
+      "choicesExplained": "B: the subject even has a format for environments. C: the audience is the owner’s address by default. D: there is no such rule.",
+      "explanation": "The trust condition must match `repo:acme/shop:environment:production` instead.",
+      "source": "GitHub Docs, “OpenID Connect reference”, “Filtering for a specific environment”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/oidc#filtering-for-a-specific-environment",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The subject claim includes the environment name when the job references an environment.",
+      "uses": [
+        "subject claim",
+        "environment",
+        "job",
+        "OIDC",
+        "id-token",
+        "branch"
+      ],
+      "conceptIDs": [
+        "gha.oidc-sub-claim",
+        "gha.oidc-flow"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.untrusted-field-endings",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12330,
+      "front": "What are two endings that typically mark `github` context fields as untrusted input?",
+      "back": "Any two, among others: `body`, `title`, `head_ref`, `message`, `label`, `email`, `name`, `ref`.",
+      "explanation": "Examples are `github.event.issue.title` and `github.event.pull_request.body`.",
+      "source": "GitHub Docs, “Script injections”, “Understanding the risk of script injections”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/script-injections#understanding-the-risk-of-script-injections",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "These contexts typically end with `body`, `default_branch`, `email`, `head_ref`, `label`, `message`, `name`, `page_name`,`ref`, and `title`.",
+      "uses": [
+        "untrusted input",
+        "github context"
+      ],
+      "conceptIDs": [
+        "gha.untrusted-inputs"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.untrusted-less-obvious",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12335,
+      "front": "What are two less obvious sources of untrusted input that the docs name?",
+      "back": "Branch names and email addresses.",
+      "explanation": "They can be quite flexible in what characters they allow.",
+      "source": "GitHub Docs, “Script injections”, “Understanding the risk of script injections”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/script-injections#understanding-the-risk-of-script-injections",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In addition, there are other less obvious sources of potentially untrusted input, such as branch names and email addresses, which can be quite flexible in terms of their permitted content.",
+      "uses": [
+        "untrusted input",
+        "branch"
+      ],
+      "conceptIDs": [
+        "gha.untrusted-inputs"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.inline-why-vulnerable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12340,
+      "front": "Why is `run: title=\"${{ github.event.pull_request.title }}\"` open to script injection?",
+      "back": "The expression is evaluated and substituted into a temporary shell script before the script runs, so the title becomes part of the code.",
+      "explanation": "A title containing a quote and a command can break out of the string.",
+      "source": "GitHub Docs, “Script injections”, “Example of a script injection attack”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/script-injections#example-of-a-script-injection-attack",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This example is vulnerable to script injection because the `run` command executes within a temporary shell script on the runner. Before the shell script is run, the expressions inside `${{ }}` are evaluated and then substituted with the resulting values, which can make it vulnerable to shell command injection.",
+      "uses": [
+        "script injection",
+        "run",
+        "expression",
+        "runner"
+      ],
+      "conceptIDs": [
+        "gha.script-injection"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.injection-classify",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 12345,
+      "front": "Which step is open to script injection?",
+      "back": "A) `run: echo \"${{ github.event.issue.title }}\"`",
+      "choices": "A) `run: echo \"${{ github.event.issue.title }}\"`\nB) `run: echo \"$TITLE\"` with `env: TITLE: ${{ github.event.issue.title }}`\nC) `uses: some/action@<SHA>` with `with: title: ${{ github.event.issue.title }}`\nD) `run: echo \"${{ github.run_id }}\"`",
+      "choicesExplained": "B: the title reaches the script through an intermediate environment variable. C: the value is passed to the action as an argument. D: the run identifier is not attacker-controlled input like a title.",
+      "explanation": "An attacker-set title is pasted straight into the generated shell script.",
+      "source": "GitHub Docs, “Script injections”, “Example of a script injection attack”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/script-injections#example-of-a-script-injection-attack",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Before the shell script is run, the expressions inside `${{ }}` are evaluated and then substituted with the resulting values, which can make it vulnerable to shell command injection.",
+      "uses": [
+        "script injection",
+        "run",
+        "untrusted input",
+        "intermediate environment variable",
+        "with",
+        "uses"
+      ],
+      "conceptIDs": [
+        "gha.script-injection",
+        "gha.untrusted-inputs",
+        "gha.use-action-not-inline"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.mitigate-action",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12350,
+      "front": "What is the docs’ recommended approach to script injection when processing a context value?",
+      "back": "Create a JavaScript action that takes the value as an argument.",
+      "explanation": "The value is passed to the action rather than used to generate a shell script, so the attack does not apply.",
+      "source": "GitHub Docs, “Secure use reference”, “Use an action instead of an inline script”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#use-an-action-instead-of-an-inline-script",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The recommended approach is to create a JavaScript action that processes the context value as an argument. This approach is not vulnerable to the injection attack, since the context value is not used to generate a shell script, but is instead passed to the action as an argument",
+      "uses": [
+        "JavaScript action",
+        "script injection",
+        "context"
+      ],
+      "conceptIDs": [
+        "gha.use-action-not-inline"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.intermediate-why",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12355,
+      "front": "Why does an intermediate environment variable stop script injection in an inline script?",
+      "back": "The expression’s value is stored in memory and used as a variable, so it does not interact with the script generation process.",
+      "explanation": "The script text never contains the attacker’s characters.",
+      "source": "GitHub Docs, “Secure use reference”, “Use an intermediate environment variable”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#use-an-intermediate-environment-variable",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "With this approach, the value of the `${{ github.event.pull_request.title }}` expression is stored in memory and used as a variable, and doesn't interact with the script generation process.",
+      "uses": [
+        "intermediate environment variable",
+        "script injection",
+        "expression"
+      ],
+      "conceptIDs": [
+        "gha.intermediate-env-var"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.intermediate-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12360,
+      "front": "A step runs `if [[ \"${{ github.event.pull_request.title }}\" =~ ^fix ]]`. Which rewrite follows the docs’ preferred approach for inline scripts?",
+      "back": "A) Set `env: TITLE: ${{ github.event.pull_request.title }}` and test `\"$TITLE\"`",
+      "choices": "A) Set `env: TITLE: ${{ github.event.pull_request.title }}` and test `\"$TITLE\"`\nB) Move the check to an `if:` on the job\nC) Pin the step to a commit SHA\nD) Wrap the expression in single quotes",
+      "choicesExplained": "D: the value is still pasted into the script, so a quote in the title can still break out. B: the question asks for the docs’ preferred fix for an inline script, which this is not. C: pinning protects against changed actions, not injected titles.",
+      "explanation": "The title then reaches the script as a variable, not as script text.",
+      "source": "GitHub Docs, “Secure use reference”, “Use an intermediate environment variable”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#use-an-intermediate-environment-variable",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For inline scripts, the preferred approach to handling untrusted input is to set the value of the expression to an intermediate environment variable.",
+      "uses": [
+        "intermediate environment variable",
+        "untrusted input",
+        "step",
+        "if conditional",
+        "commit SHA"
+      ],
+      "conceptIDs": [
+        "gha.intermediate-env-var"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.prt-checkout-risk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12365,
+      "front": "Which two triggers expose a repository to compromise when used with a checkout of an untrusted pull request?",
+      "back": "`pull_request_target` and `workflow_run`.",
+      "explanation": "These workflows are privileged: they may have write access and access to referenced secrets.",
+      "source": "GitHub Docs, “Secure use reference”, “Mitigating the risks of untrusted code checkout”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#mitigating-the-risks-of-untrusted-code-checkout",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The `pull_request_target` and `workflow_run` workflow triggers, when used with the checkout of an untrusted pull request, expose the repository to security compromises.",
+      "uses": [
+        "pull_request_target",
+        "workflow_run",
+        "pull request"
+      ],
+      "conceptIDs": [
+        "gha.prt-risk"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.prt-privileged",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12370,
+      "front": "What makes `pull_request_target` and `workflow_run` workflows “privileged”?",
+      "back": "They share the main branch’s cache with other privileged triggers, and may have repository write access and access to referenced secrets.",
+      "explanation": "The docs warn these vulnerabilities can be exploited to take over a repository.",
+      "source": "GitHub Docs, “Secure use reference”, “Mitigating the risks of untrusted code checkout”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#mitigating-the-risks-of-untrusted-code-checkout",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "These workflows are privileged, which means they share the same cache of the main branch with other privileged workflow triggers, and may have repository write access and access to referenced secrets.",
+      "uses": [
+        "pull_request_target",
+        "workflow_run",
+        "secret"
+      ],
+      "conceptIDs": [
+        "gha.prt-risk"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.prt-avoid",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12375,
+      "front": "Which trigger do the docs call better than `pull_request_target` for privilege separation between workflows?",
+      "back": "`workflow_run`.",
+      "explanation": "The docs advise avoiding `pull_request_target` if it is not necessary.",
+      "source": "GitHub Docs, “Secure use reference”, “Good practices”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#good-practices",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Avoid using the `pull_request_target` workflow trigger if it's not necessary. For privilege separation between workflows, `workflow_run` is a better trigger.",
+      "uses": [
+        "pull_request_target",
+        "workflow_run"
+      ],
+      "conceptIDs": [
+        "gha.prt-risk"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.prt-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12380,
+      "front": "A `pull_request_target` workflow checks out the pull request’s head commit from a fork and runs its test script with a deploy secret in the environment. What is the problem?",
+      "back": "A) It runs untrusted code in a privileged workflow that may have write access and secrets",
+      "choices": "A) It runs untrusted code in a privileged workflow that may have write access and secrets\nB) `pull_request_target` cannot read secrets\nC) Forks cannot trigger `pull_request_target`\nD) The checkout needs `fetch-depth: 0`",
+      "choicesExplained": "B: it may have access to referenced secrets. C: it runs for pull requests from forks. D: the depth of the checkout is irrelevant.",
+      "explanation": "Workflows on this trigger must not explicitly check out untrusted code.",
+      "source": "GitHub Docs, “Secure use reference”, “Good practices”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#good-practices",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Workflows that use these triggers must not explicitly check out untrusted code, including from pull request forks or from repositories that are not under your control.",
+      "uses": [
+        "pull_request_target",
+        "fork",
+        "secret",
+        "pull request"
+      ],
+      "conceptIDs": [
+        "gha.prt-risk"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.compromised-action-impact",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12385,
+      "front": "What could a single compromised action in a workflow have access to?",
+      "back": "All secrets configured on the repository, and possibly the `GITHUB_TOKEN` to write to the repository.",
+      "explanation": "Jobs can interact with and compromise one another, so one action’s reach is wide.",
+      "source": "GitHub Docs, “Secure use reference”, “Using third-party actions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#using-third-party-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This means that a compromise of a single action within a workflow can be very significant, as that compromised action would have access to all secrets configured on your repository, and may be able to use the `GITHUB_TOKEN` to write to the repository.",
+      "uses": [
+        "action",
+        "secret",
+        "GITHUB_TOKEN"
+      ],
+      "conceptIDs": [
+        "gha.pin-full-sha"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.sha-only-immutable",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12390,
+      "front": "Pinning an action to {{c1::a full-length commit SHA}} is currently the only way to use an action as an immutable release.",
+      "back": "a full-length commit SHA",
+      "explanation": "Tags and branches can be moved; a full commit SHA cannot point elsewhere.",
+      "source": "GitHub Docs, “Secure use reference”, “Using third-party actions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#using-third-party-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Pinning an action to a full-length commit SHA is currently the only way to use an action as an immutable release.",
+      "uses": [
+        "commit SHA",
+        "immutable release",
+        "action"
+      ],
+      "conceptIDs": [
+        "gha.sha-only-immutable"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.sha-collision",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12395,
+      "front": "Why does pinning to a particular commit SHA help against a backdoor in the action’s repository?",
+      "back": "A bad actor would need to generate a SHA-1 collision for a valid Git object payload.",
+      "explanation": "Pinning to a particular SHA ties the workflow to one exact commit of the action.",
+      "source": "GitHub Docs, “Secure use reference”, “Using third-party actions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#using-third-party-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Pinning to a particular SHA helps mitigate the risk of a bad actor adding a backdoor to the action's repository, as they would need to generate a SHA-1 collision for a valid Git object payload.",
+      "uses": [
+        "commit SHA",
+        "action",
+        "Git"
+      ],
+      "conceptIDs": [
+        "gha.pin-full-sha"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.sha-verify-source",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12400,
+      "front": "When choosing a commit SHA to pin an action to, what should you verify?",
+      "back": "That the SHA is from the action’s repository, not from a fork of it.",
+      "explanation": "The check is about where the commit comes from, not only what it is called.",
+      "source": "GitHub Docs, “Secure use reference”, “Using third-party actions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#using-third-party-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When selecting a SHA, you should verify it is from the action's repository and not a repository fork.",
+      "uses": [
+        "commit SHA",
+        "fork",
+        "action"
+      ],
+      "conceptIDs": [
+        "gha.pin-full-sha"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.pin-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12405,
+      "front": "Which reference to a third-party action is the most secure, according to the docs?",
+      "back": "B) `uses: vendor/deploy@3f4c1e9a7b2d8c6e5f0a1b2c3d4e5f6a7b8c9d0e`",
+      "choices": "A) `uses: vendor/deploy@v3`\nB) `uses: vendor/deploy@3f4c1e9a7b2d8c6e5f0a1b2c3d4e5f6a7b8c9d0e`\nC) `uses: vendor/deploy@main`\nD) `uses: vendor/deploy@v3.2.1`",
+      "choicesExplained": "A and D: tags can be moved or deleted if the repository is compromised. C: a branch moves with every new commit.",
+      "explanation": "A full-length commit SHA is the only way to use the action as an immutable release.",
+      "source": "GitHub Docs, “Secure use reference”, “Using third-party actions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#using-third-party-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Although pinning to a commit SHA is the most secure option, specifying a tag is more convenient and is widely used.",
+      "uses": [
+        "uses",
+        "commit SHA",
+        "major version tag",
+        "branch"
+      ],
+      "conceptIDs": [
+        "gha.pin-full-sha",
+        "gha.sha-only-immutable"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.tag-risk",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12410,
+      "front": "Why is pinning to a tag risky even when you trust the action’s author?",
+      "back": "A tag can be moved or deleted if a bad actor gains access to the repository storing the action.",
+      "explanation": "The same tag name could then point to different code.",
+      "source": "GitHub Docs, “Secure use reference”, “Using third-party actions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#using-third-party-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Note that there is risk to this approach even if you trust the author, because a tag can be moved or deleted if a bad actor gains access to the repository storing the action.",
+      "uses": [
+        "action",
+        "repository"
+      ],
+      "conceptIDs": [
+        "gha.tag-risk"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.tag-trust",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12415,
+      "front": "If you pin an action to a tag, what do the docs say you should be sure of, and what signal helps?",
+      "back": "That you trust the action’s creators; the Verified creator badge on GitHub Marketplace is a useful signal.",
+      "explanation": "The badge means the team’s identity has been verified by GitHub.",
+      "source": "GitHub Docs, “Secure use reference”, “Using third-party actions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#using-third-party-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you’d like to specify a tag, then be sure that you trust the action's creators. The ‘Verified creator’ badge on GitHub Marketplace is a useful signal, as it indicates that the action was written by a team whose identity has been verified by GitHub.",
+      "uses": [
+        "verified creator",
+        "GitHub Marketplace",
+        "action"
+      ],
+      "conceptIDs": [
+        "gha.tag-risk"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.tag-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12420,
+      "front": "A team pins `vendor/lint@v2`. An attacker takes over the vendor’s repository and points `v2` at malicious code. What happens on the team’s next run?",
+      "back": "B) The run uses the malicious code, because a tag can be moved",
+      "choices": "A) GitHub blocks the run, because tags are immutable\nB) The run uses the malicious code, because a tag can be moved\nC) The run fails with a checksum error\nD) Dependabot rolls the tag back automatically",
+      "choicesExplained": "A: tags can be moved or deleted. C: the docs describe no such check; a moved tag is simply followed. D: Dependabot opens pull requests; it does not undo tag changes.",
+      "explanation": "Only a full-length commit SHA pins the exact code.",
+      "source": "GitHub Docs, “Secure use reference”, “Using third-party actions”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#using-third-party-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "because a tag can be moved or deleted if a bad actor gains access to the repository storing the action.",
+      "uses": [
+        "major version tag",
+        "action",
+        "commit SHA"
+      ],
+      "conceptIDs": [
+        "gha.tag-risk"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.dependabot-version-updates",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12425,
+      "front": "What can Dependabot version updates do for the actions in your workflows?",
+      "back": "Open pull requests to update actions (and reusable workflows) to the latest version when a new one is released.",
+      "explanation": "Dependabot security updates go to the minimum patched version instead.",
+      "source": "GitHub Docs, “Secure use reference”, “Keeping the actions in your workflows secure and up to date”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#keeping-the-actions-in-your-workflows-secure-and-up-to-date",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Dependabot version updates open pull requests to update actions to the latest version when a new version is released.",
+      "uses": [
+        "action",
+        "reusable workflow",
+        "pull request"
+      ],
+      "conceptIDs": [
+        "gha.dependabot-actions"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.dependabot-sha-alerts",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12430,
+      "front": "Does Dependabot create alerts for vulnerable actions pinned to SHA values?",
+      "back": "No. It creates alerts only for vulnerable actions that use semantic versioning.",
+      "explanation": "SHA pinning therefore needs another way of watching for advisories.",
+      "source": "GitHub Docs, “Secure use reference”, “Monitoring the actions in your workflows”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#monitoring-the-actions-in-your-workflows",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Dependabot only creates alerts for vulnerable actions that use semantic versioning and will not create alerts for actions pinned to SHA values.",
+      "uses": [
+        "semantic versioning",
+        "commit SHA",
+        "action"
+      ],
+      "conceptIDs": [
+        "gha.dependabot-sha-no-alerts"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.codeowners-workflows",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12435,
+      "front": "How can `CODEOWNERS` help protect workflow files?",
+      "back": "Add `.github/workflows` to the code owners list, so proposed changes first require approval from a designated reviewer.",
+      "explanation": "Changes to workflows then cannot slip in without that review.",
+      "source": "GitHub Docs, “Secure use reference”, “Using CODEOWNERS to monitor changes”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#using-codeowners-to-monitor-changes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For example, if all your workflow files are stored  `.github/workflows`, you can add this directory to the code owners list, so that any proposed changes to these files will first require approval from a designated reviewer.",
+      "uses": [
+        "CODEOWNERS",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "gha.codeowners-workflows"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.hosted-ephemeral",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12440,
+      "front": "How do GitHub-hosted runners limit persistent compromise?",
+      "back": "They execute code in ephemeral, clean, isolated virtual machines.",
+      "explanation": "Nothing an attacker leaves behind survives into the next job.",
+      "source": "GitHub Docs, “Secure use reference”, “Hardening for self-hosted runners”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#hardening-for-self-hosted-runners",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**GitHub-hosted** runners execute code within ephemeral and clean isolated virtual machines, meaning there is no way to persistently compromise this environment",
+      "uses": [
+        "GitHub-hosted runner"
+      ],
+      "conceptIDs": [
+        "gha.self-hosted-public-risk"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.self-hosted-persistent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12445,
+      "front": "Do self-hosted runners guarantee a clean, ephemeral machine for each job?",
+      "back": "No. They can be persistently compromised by untrusted code in a workflow.",
+      "explanation": "This is the basis for the docs’ caution about who can run workflows on them.",
+      "source": "GitHub Docs, “Secure use reference”, “Hardening for self-hosted runners”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#hardening-for-self-hosted-runners",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Self-hosted** runners for GitHub do not have guarantees around running in ephemeral clean virtual machines, and can be persistently compromised by untrusted code in a workflow.",
+      "uses": [
+        "self-hosted runner",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "gha.self-hosted-public-risk"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.self-hosted-public",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12450,
+      "front": "Why should self-hosted runners almost never be used for public repositories?",
+      "back": "Any user can open pull requests against the repository and compromise the environment.",
+      "explanation": "Private and internal repositories carry a similar risk: anyone who can fork them and open a pull request, usually anyone with read access, could compromise the runner.",
+      "source": "GitHub Docs, “Secure use reference”, “Hardening for self-hosted runners”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#hardening-for-self-hosted-runners",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "As a result, self-hosted runners should almost never be used for public repositories on GitHub, because any user can open pull requests against the repository and compromise the environment.",
+      "uses": [
+        "self-hosted runner",
+        "pull request"
+      ],
+      "conceptIDs": [
+        "gha.self-hosted-public-risk"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.self-hosted-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12455,
+      "front": "An open source project wants faster builds and proposes running its pull request workflows on a self-hosted machine in the office. What do the docs advise?",
+      "back": "B) Almost never use self-hosted runners for public repositories",
+      "choices": "A) Fine, as long as the runner has a label\nB) Almost never use self-hosted runners for public repositories\nC) Fine, if the runner is in a runner group\nD) Fine, if environment secrets are used",
+      "choicesExplained": "A: labels only route jobs. D: environments control secrets but do not isolate the runner. C: groups limit which repositories use a runner, not who opens pull requests.",
+      "explanation": "Anyone can open a pull request and compromise the machine.",
+      "source": "GitHub Docs, “Secure use reference”, “Hardening for self-hosted runners”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#hardening-for-self-hosted-runners",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "As a result, self-hosted runners should almost never be used for public repositories on GitHub, because any user can open pull requests against the repository and compromise the environment.",
+      "uses": [
+        "self-hosted runner",
+        "runner label",
+        "runner group",
+        "environment secret",
+        "open source"
+      ],
+      "conceptIDs": [
+        "gha.self-hosted-public-risk"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.structured-data-fails",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12460,
+      "front": "Why should you never use structured data, such as a JSON blob, as a secret?",
+      "back": "Redaction largely relies on an exact match of the secret value, so structured data can make redaction fail.",
+      "explanation": "The docs advise creating individual secrets for each sensitive value.",
+      "source": "GitHub Docs, “Secure use reference”, “Use secrets for sensitive information”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#use-secrets-for-sensitive-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Structured data can cause secret redaction within logs to fail, because redaction largely relies on finding an exact match for the specific secret value.",
+      "uses": [
+        "secret",
+        "redaction"
+      ],
+      "conceptIDs": [
+        "gha.secret-good-practices"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.register-derived",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12465,
+      "front": "A workflow uses a private key secret to generate a signed JWT. What should it do with the JWT?",
+      "back": "Register it as a secret, so that it will be redacted if it ever appears in the logs.",
+      "explanation": "Only registered values are redacted; a derived value is not known to redaction by default.",
+      "source": "GitHub Docs, “Secure use reference”, “Use secrets for sensitive information”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#use-secrets-for-sensitive-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For example, if using a private key to generate a signed JWT to access a web API, be sure to register that JWT as a secret or else it won’t be redacted if it ever enters the log output.",
+      "uses": [
+        "JWT",
+        "secret",
+        "redaction"
+      ],
+      "conceptIDs": [
+        "gha.secret-good-practices"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.exposed-secret-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12470,
+      "front": "You find an unredacted secret value in a workflow run log. What do the docs say to do?",
+      "back": "B) Delete the log and rotate the secret",
+      "choices": "A) Re-run the job with debug logging off\nB) Delete the log and rotate the secret\nC) Rename the secret\nD) Add the value to `.gitignore`",
+      "choicesExplained": "A: the exposed value is already in the log. C: renaming leaves the exposed value valid. D: logs are not files in the repository.",
+      "explanation": "Rotation makes the exposed value useless, and deletion removes the copy.",
+      "source": "GitHub Docs, “Secure use reference”, “Use secrets for sensitive information”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#use-secrets-for-sensitive-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If an unredacted secret is sent to a workflow run log, you should delete the log and rotate the secret.",
+      "uses": [
+        "secret",
+        "workflow run log",
+        "redaction",
+        "step debug logging"
+      ],
+      "conceptIDs": [
+        "gha.secret-good-practices"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.redaction-by-runner",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12475,
+      "front": "Which component performs secret redaction, and what follows from that?",
+      "back": "The workflow runners; a secret is only redacted if it was used within a job and is accessible by the runner.",
+      "explanation": "Values the runner never saw as secrets cannot be recognised in logs.",
+      "source": "GitHub Docs, “Secure use reference”, “Use secrets for sensitive information”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/security/secure-use#use-secrets-for-sensitive-information",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Redacting of secrets is performed by your workflow runners. This means a secret will only be redacted if it was used within a job and is accessible by the runner.",
+      "uses": [
+        "redaction",
+        "runner",
+        "secret",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.secret-good-practices"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.max-six-rules",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12480,
+      "front": "How many deployment protection rules can be enabled on one environment at the same time?",
+      "back": "A maximum of 6.",
+      "explanation": "Any number of app-based rules can be installed on the repository, but only six enabled per environment.",
+      "source": "GitHub Docs, “Deployments and environments”, “Deployment protection rules”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#deployment-protection-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Any number of GitHub Apps-based deployment protection rules can be installed on a repository. However, a maximum of 6 deployment protection rules can be enabled on any environment at the same time.",
+      "uses": [
+        "deployment protection rule",
+        "environment"
+      ],
+      "conceptIDs": [
+        "gha.env-protection-rules"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.reviewers-up-to-six",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12485,
+      "front": "You can list up to {{c1::six}} users or teams as required reviewers for an environment.",
+      "back": "six",
+      "explanation": "Reviewers must have at least read access to the repository.",
+      "source": "GitHub Docs, “Deployments and environments”, “Required reviewers”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#required-reviewers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can list up to six users or teams as reviewers. The reviewers must have at least read access to the repository.",
+      "uses": [
+        "required reviewer",
+        "environment",
+        "team"
+      ],
+      "conceptIDs": [
+        "gha.required-reviewers"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.reviewers-one-approves",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12490,
+      "front": "How many of an environment’s required reviewers must approve a job for it to proceed?",
+      "back": "Only one.",
+      "explanation": "Listing several reviewers widens who can approve; it does not require them all.",
+      "source": "GitHub Docs, “Deployments and environments”, “Required reviewers”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#required-reviewers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Only one of the required reviewers needs to approve the job for it to proceed.",
+      "uses": [
+        "required reviewer",
+        "job",
+        "environment"
+      ],
+      "conceptIDs": [
+        "gha.required-reviewers"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.reviewers-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12495,
+      "front": "The `production` environment lists four required reviewers. A deployment job is waiting. What lets it proceed?",
+      "back": "D) Approval from any one of them",
+      "choices": "A) Approval from all four\nB) Approval from a majority\nC) Approval from a repository administrator only\nD) Approval from any one of them",
+      "choicesExplained": "A and B: the docs require only one approval. C: any listed reviewer may approve.",
+      "explanation": "One reviewer’s approval is enough for the job to proceed.",
+      "source": "GitHub Docs, “Deployments and environments”, “Required reviewers”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#required-reviewers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Only one of the required reviewers needs to approve the job for it to proceed.",
+      "uses": [
+        "required reviewer",
+        "environment",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.required-reviewers"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.prevent-self-review",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12500,
+      "front": "What does the “prevent self-reviews” option on a protected environment do?",
+      "back": "The user who initiates a deployment cannot approve that deployment job, even if they are a required reviewer.",
+      "explanation": "Deployments are then always reviewed by more than one person.",
+      "source": "GitHub Docs, “Deployments and environments”, “Required reviewers”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#required-reviewers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you enable this setting, users who initiate a deployment cannot approve the deployment job, even if they are a required reviewer. This ensures that deployments to protected environments are always reviewed by more than one person.",
+      "uses": [
+        "required reviewer",
+        "environment",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.prevent-self-review"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.wait-timer-range",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12505,
+      "front": "A wait timer’s time, in minutes, must be an integer between 1 and {{c1::43,200 (30 days)}}.",
+      "back": "43,200 (30 days)",
+      "explanation": "The timer counts from when the job is first triggered.",
+      "source": "GitHub Docs, “Deployments and environments”, “Wait timer”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#wait-timer",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The time (in minutes) must be an integer between 1 and 43,200 (30 days).",
+      "uses": [
+        "wait timer",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.wait-timer"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.wait-timer-billing",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12510,
+      "front": "Does time spent in a wait timer count towards billable time?",
+      "back": "No.",
+      "explanation": "A long delay before deployment therefore adds nothing to the bill.",
+      "source": "GitHub Docs, “Deployments and environments”, “Wait timer”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#wait-timer",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Wait time will not count towards your billable time.",
+      "uses": [
+        "wait timer"
+      ],
+      "conceptIDs": [
+        "gha.wait-timer"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.wait-timer-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12515,
+      "front": "A team wants production deployments to pause for two hours after triggering, so monitoring can catch problems in staging first, without anyone approving. What should they configure?",
+      "back": "C) A wait timer of 120 minutes on the environment",
+      "choices": "A) `timeout-minutes: 120` on the job\nB) A required reviewer\nC) A wait timer of 120 minutes on the environment\nD) A `schedule` trigger",
+      "choicesExplained": "B: needs a person to approve. A: this limits how long a job may run, not when it starts. D: this starts runs on a timetable, not after a trigger.",
+      "explanation": "A wait timer delays the job for a set time with no approval needed.",
+      "source": "GitHub Docs, “Deployments and environments”, “Wait timer”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#wait-timer",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use a wait timer to delay a job for a specific amount of time after the job is initially triggered. The time (in minutes) must be an integer between 1 and 43,200 (30 days).",
+      "uses": [
+        "wait timer",
+        "required reviewer",
+        "timeout-minutes",
+        "schedule",
+        "environment"
+      ],
+      "conceptIDs": [
+        "gha.wait-timer",
+        "gha.env-protection-rules"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.plan-limits",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12520,
+      "front": "On GitHub Free, GitHub Pro or GitHub Team, where are required reviewers and wait timers available?",
+      "back": "Only in public repositories.",
+      "explanation": "The same plan note appears under both rules.",
+      "source": "GitHub Docs, “Deployments and environments”, “Required reviewers”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#required-reviewers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you are on a GitHub Free, GitHub Pro, or GitHub Team plan, required reviewers are only available for public repositories.",
+      "uses": [
+        "GitHub Free",
+        "GitHub Pro",
+        "GitHub Team",
+        "required reviewer",
+        "wait timer"
+      ],
+      "conceptIDs": [
+        "gha.env-plan-limits"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.branches-no-restriction",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12525,
+      "front": "Which deployment branches and tags option lets any branch or tag deploy to the environment?",
+      "back": "No restriction.",
+      "explanation": "It applies no branch or tag filter at all.",
+      "source": "GitHub Docs, “Deployments and environments”, “Deployment branches and tags”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#deployment-branches-and-tags",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "No restriction: No restriction on which branch or tag can deploy to the environment.",
+      "uses": [
+        "deployment branch",
+        "branch",
+        "environment"
+      ],
+      "conceptIDs": [
+        "gha.deployment-branches"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.branches-protected-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12530,
+      "front": "Which deployment branches option allows only branches with branch protection rules enabled to deploy?",
+      "back": "Protected branches only.",
+      "explanation": "If no branch in the repository has protection rules, all branches can deploy.",
+      "source": "GitHub Docs, “Deployments and environments”, “Deployment branches and tags”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#deployment-branches-and-tags",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Protected branches only: Only branches with branch protection rules enabled can deploy to the environment.",
+      "uses": [
+        "deployment branch",
+        "branch protection rule"
+      ],
+      "conceptIDs": [
+        "gha.deployment-branches"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.branches-selected",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12535,
+      "front": "Which deployment branches and tags option allows only names matching your specified patterns to deploy?",
+      "back": "Selected branches and tags.",
+      "explanation": "The patterns are matched against the run’s `GITHUB_REF`.",
+      "source": "GitHub Docs, “Deployments and environments”, “Deployment branches and tags”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#deployment-branches-and-tags",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Selected branches and tags: Only branches and tags that match your specified name patterns can deploy to the environment.",
+      "uses": [
+        "deployment branch",
+        "branch"
+      ],
+      "conceptIDs": [
+        "gha.deployment-branches"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.protected-none-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12540,
+      "front": "An environment is set to “Protected branches only”, but the repository has no branch protection rules at all. A run from `feature/x` deploys to it. Why?",
+      "back": "A) If no branch protection rules exist, all branches can deploy",
+      "choices": "A) If no branch protection rules exist, all branches can deploy\nB) Feature branches are exempt\nC) The setting only applies to tags\nD) Administrators bypassed the rule",
+      "choicesExplained": "B: there is no feature-branch exemption. C: the option is about branches. D: nothing suggests a bypass; the missing rules explain it.",
+      "explanation": "The option relies on branch protection rules existing somewhere in the repository.",
+      "source": "GitHub Docs, “Deployments and environments”, “Deployment branches and tags”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#deployment-branches-and-tags",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If no branch protection rules are defined for any branch in the repository, then all branches can deploy.",
+      "uses": [
+        "deployment branch",
+        "branch protection rule",
+        "branch",
+        "environment"
+      ],
+      "conceptIDs": [
+        "gha.deployment-branches"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.pattern-slash",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12545,
+      "front": "A deployment branch rule is `release/*`. Can `release/v2/hotfix` deploy?",
+      "back": "No. Wildcards do not match `/`; `release/*/*` would match it.",
+      "explanation": "Each extra path level needs its own wildcard.",
+      "source": "GitHub Docs, “Deployments and environments”, “Deployment branches and tags”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#deployment-branches-and-tags",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Wildcard characters will not match `/`, to match branches or tags that begin with `release/` and contain an additional single slash, use `release/*/*`.",
+      "uses": [
+        "deployment branch",
+        "branch"
+      ],
+      "conceptIDs": [
+        "gha.deployment-branches"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.admin-bypass",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12550,
+      "front": "By default, can administrators bypass an environment’s protection rules?",
+      "back": "Yes, they can force deployments. You can configure the environment to disallow bypassing.",
+      "explanation": "Disallowing it holds everyone, administrators included, to the rules.",
+      "source": "GitHub Docs, “Deployments and environments”, “Allow administrators to bypass configured protection rules”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#allow-administrators-to-bypass-configured-protection-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, administrators can bypass the protection rules and force deployments to specific environments.",
+      "uses": [
+        "deployment protection rule",
+        "environment"
+      ],
+      "conceptIDs": [
+        "gha.admin-bypass"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.custom-rules-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "order": 12555,
+      "front": "A company wants production deployments to proceed only when its change management system has approved the change. Which feature fits?",
+      "back": "A) A custom deployment protection rule",
+      "choices": "A) A custom deployment protection rule\nB) Deployment branches\nC) Prevent self-reviews\nD) A wait timer",
+      "choicesExplained": "D: this only delays. B: this filters branches. C: this concerns who may approve, not outside systems.",
+      "explanation": "Custom rules, powered by GitHub Apps, let third-party systems control deployments.",
+      "source": "GitHub Docs, “Deployments and environments”, “Deployment protection rules”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#deployment-protection-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Third-party systems can be observability systems, change management systems, code quality systems, or other manual configurations that you use to assess readiness before deployments are safely rolled out to environments.",
+      "uses": [
+        "custom deployment protection rule",
+        "wait timer",
+        "deployment branch"
+      ],
+      "conceptIDs": [
+        "gha.custom-protection-rules"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.attestation-contents",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12560,
+      "front": "What are two items that an artifact attestation’s signed claims include?",
+      "back": "Any two: a link to the workflow; the repository, organisation, environment, commit SHA and triggering event; other information from the OIDC token.",
+      "explanation": "Together these establish the build’s provenance.",
+      "source": "GitHub Docs, “Artifact attestations”, “Overview”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A link to the workflow associated with the artifact * The repository, organization, environment, commit SHA, and triggering event for the artifact * Other information from the OIDC token used to establish provenance.",
+      "uses": [
+        "artifact attestation",
+        "commit SHA",
+        "OIDC",
+        "provenance"
+      ],
+      "conceptIDs": [
+        "gha.artifact-attestations"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.slsa-level-2",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12565,
+      "front": "Artifact attestations by themselves provide SLSA v1.0 {{c1::Build Level 2}}.",
+      "back": "Build Level 2",
+      "explanation": "They link an artifact to its build instructions; a higher level needs vetted build instructions too.",
+      "source": "GitHub Docs, “Artifact attestations”, “SLSA levels for artifact attestations”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#slsa-levels-for-artifact-attestations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Artifact attestations by itself provides SLSA v1.0 Build Level 2.",
+      "uses": [
+        "artifact attestation",
+        "SLSA"
+      ],
+      "conceptIDs": [
+        "gha.slsa-level"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.slsa-level-3-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12570,
+      "front": "An organisation already generates artifact attestations and wants to meet SLSA v1.0 Build Level 3. What do the docs suggest?",
+      "back": "B) Run the build in a shared reusable workflow that isolates the build from the calling workflow",
+      "choices": "A) Sign every source file individually\nB) Run the build in a shared reusable workflow that isolates the build from the calling workflow\nC) Switch to private repositories\nD) Pin every action to a tag",
+      "choicesExplained": "A: the docs advise against signing individual source files. C: the docs tie Build Level 3 to reusable-workflow isolation, not to visibility. D: tags can be moved; this is not the documented route.",
+      "explanation": "Reusable workflows can provide the isolation that Build Level 3 needs.",
+      "source": "GitHub Docs, “Artifact attestations”, “SLSA levels for artifact attestations”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#slsa-levels-for-artifact-attestations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Reusable workflows can provide isolation between the build process and the calling workflow, to meet SLSA v1.0 Build Level 3.",
+      "uses": [
+        "reusable workflow",
+        "artifact attestation",
+        "SLSA",
+        "caller workflow"
+      ],
+      "conceptIDs": [
+        "gha.slsa-level",
+        "gha.attest-reusable-l3"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.sigstore-public",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12575,
+      "front": "Which Sigstore instance do public repositories use for artifact attestations, and where is the bundle written?",
+      "back": "The Sigstore Public Good Instance; the bundle is stored with GitHub and written to an immutable, publicly readable transparency log.",
+      "explanation": "Anyone on the internet can read the public log.",
+      "source": "GitHub Docs, “Artifact attestations”, “How GitHub generates artifact attestations”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#how-github-generates-artifact-attestations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A copy of the generated Sigstore bundle is stored with GitHub and is also written to an immutable transparency log that is publicly readable on the internet.",
+      "uses": [
+        "Sigstore",
+        "artifact attestation"
+      ],
+      "conceptIDs": [
+        "gha.sigstore"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.sigstore-private",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12580,
+      "front": "How does GitHub’s Sigstore instance, used by private repositories, differ from the Public Good Instance?",
+      "back": "Same codebase, but it has no transparency log and only federates with GitHub Actions.",
+      "explanation": "Private repositories’ attestations are therefore not published to a public log.",
+      "source": "GitHub Docs, “Artifact attestations”, “How GitHub generates artifact attestations”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#how-github-generates-artifact-attestations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "GitHub's Sigstore instance uses the same codebase as the Sigstore Public Good Instance, but it does not have a transparency log and only federates with GitHub Actions.",
+      "uses": [
+        "Sigstore"
+      ],
+      "conceptIDs": [
+        "gha.sigstore"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.verify-for-benefit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12585,
+      "front": "Does generating attestations alone provide a security benefit?",
+      "back": "No. The attestations must be verified for the benefit to be realised.",
+      "explanation": "A signature nobody checks proves nothing to anyone.",
+      "source": "GitHub Docs, “Artifact attestations”, “When to generate attestations”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#when-to-generate-attestations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Generating attestations alone doesn't provide any security benefit, the attestations must be verified for the benefit to be realized.",
+      "uses": [
+        "artifact attestation"
+      ],
+      "conceptIDs": [
+        "gha.gh-attestation-verify"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.what-to-sign",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "order": 12590,
+      "front": "Which of these should you sign with an artifact attestation?",
+      "back": "A) A binary you release for people to run",
+      "choices": "A) A binary you release for people to run\nB) Each source code file\nC) Embedded images in the documentation\nD) Every build run for automated testing",
+      "choicesExplained": "D: frequent test-only builds should not be signed. B and C: individual files like source code or embedded images should not be signed.",
+      "explanation": "Sign releases people are expected to verify, such as binaries and packages.",
+      "source": "GitHub Docs, “Artifact attestations”, “When to generate attestations”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#when-to-generate-attestations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Binaries people will run, packages people will download, or manifests that include hashes of detailed contents.",
+      "uses": [
+        "artifact attestation"
+      ],
+      "conceptIDs": [
+        "gha.artifact-attestations"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.not-a-guarantee",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12595,
+      "front": "Is an artifact attestation a guarantee that an artifact is secure?",
+      "back": "No. It links you to the source code and build instructions; you still define policy and make an informed risk decision.",
+      "explanation": "It tells you where and how something was built, not whether it is safe.",
+      "source": "GitHub Docs, “Artifact attestations”, “Verifying artifact attestations”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#verifying-artifact-attestations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "It is important to remember that artifact attestations are *not* a guarantee that an artifact is secure. Instead, artifact attestations link you to the source code and the build instructions that produced them.",
+      "uses": [
+        "artifact attestation"
+      ],
+      "conceptIDs": [
+        "gha.attest-not-guarantee"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.attest-permissions",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12600,
+      "front": "Which permissions does a workflow need to generate build provenance for a binary?",
+      "back": "`id-token: write`, `contents: read` and `attestations: write`.",
+      "explanation": "The `id-token` permission lets the job obtain the OIDC token used in the attestation.",
+      "source": "GitHub Docs, “Using artifact attestations to establish provenance for builds”, “Generating build provenance for binaries”",
+      "sourceURL": "https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations#generating-build-provenance-for-binaries",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "add the following permissions.\n\n```yaml\npermissions:\n  id-token: write\n  contents: read\n  attestations: write",
+      "uses": [
+        "permissions",
+        "id-token",
+        "provenance",
+        "OIDC"
+      ],
+      "conceptIDs": [
+        "gha.attest-permissions"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.attest-permissions-image",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12605,
+      "front": "Attesting a container image needs the binary’s permissions plus which one?",
+      "back": "`packages: write`.",
+      "explanation": "The image is pushed to a registry, which needs package access.",
+      "source": "GitHub Docs, “Using artifact attestations to establish provenance for builds”, “Generating build provenance for container images”",
+      "sourceURL": "https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations#generating-build-provenance-for-container-images",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "contents: read\n  attestations: write\n  packages: write",
+      "uses": [
+        "permissions"
+      ],
+      "conceptIDs": [
+        "gha.attest-permissions"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.attest-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12610,
+      "front": "A release workflow adds `actions/attest` after building a binary, with `permissions: contents: read` only. The attestation step fails. What is needed?",
+      "back": "D) `id-token: write` and `attestations: write` as well",
+      "choices": "A) `packages: write` only\nB) A personal access token\nC) `write-all`\nD) `id-token: write` and `attestations: write` as well",
+      "choicesExplained": "A: that is the extra permission for container images. C: far more than the documented minimum. B: the documented set uses the `GITHUB_TOKEN` permissions.",
+      "explanation": "The step needs an OIDC token and the right to write attestations, which `contents: read` alone does not give.",
+      "source": "GitHub Docs, “Using artifact attestations to establish provenance for builds”, “Generating build provenance for binaries”",
+      "sourceURL": "https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations#generating-build-provenance-for-binaries",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "add the following permissions.\n\n```yaml\npermissions:\n  id-token: write\n  contents: read\n  attestations: write",
+      "uses": [
+        "permissions",
+        "id-token",
+        "personal access token",
+        "GITHUB_TOKEN"
+      ],
+      "conceptIDs": [
+        "gha.attest-permissions"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.attest-subject-path",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12615,
+      "front": "In the `actions/attest` step for a binary, the {{c1::`subject-path`}} parameter is set to the path of the binary to attest.",
+      "back": "`subject-path`",
+      "explanation": "For container images, `subject-name` and `subject-digest` are used instead.",
+      "source": "GitHub Docs, “Using artifact attestations to establish provenance for builds”, “Generating build provenance for binaries”",
+      "sourceURL": "https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations#generating-build-provenance-for-binaries",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The value of the `subject-path` parameter should be set to the path to the binary you want to attest.",
+      "uses": [
+        "artifact attestation"
+      ],
+      "conceptIDs": [
+        "gha.attest-permissions"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.attest-sbom-input",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12620,
+      "front": "Which `actions/attest` input do you add to generate an SBOM attestation?",
+      "back": "`sbom-path`, set to the path of the SBOM file.",
+      "explanation": "You first create the SBOM, for example with an SBOM-generating action.",
+      "source": "GitHub Docs, “Using artifact attestations to establish provenance for builds”, “Generating an attestation for a software bill of materials (SBOM)”",
+      "sourceURL": "https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations#generating-an-attestation-for-a-software-bill-of-materials-sbom",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Include a step in your workflow that uses the `attest` action with the `sbom-path` input.",
+      "uses": [
+        "SBOM",
+        "artifact attestation",
+        "step"
+      ],
+      "conceptIDs": [
+        "gha.attest-sbom"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.verify-command",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12625,
+      "front": "Which `gh` command verifies an artifact attestation for a binary?",
+      "back": "`gh attestation verify PATH/TO/BINARY -R ORGANIZATION_NAME/REPOSITORY_NAME`",
+      "explanation": "The `-R` option names the repository the build is expected to come from.",
+      "source": "GitHub Docs, “Using artifact attestations to establish provenance for builds”, “Verifying artifact attestations with the GitHub CLI”",
+      "sourceURL": "https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations#verifying-artifact-attestations-with-the-github-cli",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "use the following GitHub CLI command.\n\n```bash copy\ngh attestation verify PATH/TO/YOUR/BUILD/ARTIFACT-BINARY -R ORGANIZATION_NAME/REPOSITORY_NAME",
+      "uses": [
+        "artifact attestation"
+      ],
+      "conceptIDs": [
+        "gha.gh-attestation-verify"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.verify-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12630,
+      "front": "A customer downloads your released binary and wants to confirm that it was built by a workflow in `acme/tool`. What should they run?",
+      "back": "C) `gh attestation verify` on the binary with `-R acme/tool`",
+      "choices": "A) `sha256sum` on the binary\nB) `gh release download` again\nC) `gh attestation verify` on the binary with `-R acme/tool`\nD) Nothing: an attestation proves the binary is safe",
+      "choicesExplained": "A: a hash alone says nothing about where it was built. B: downloading again verifies nothing. D: attestations are not a guarantee of safety, and must be verified to be of use.",
+      "explanation": "Verification is the step that turns a published attestation into a security benefit.",
+      "source": "GitHub Docs, “Using artifact attestations to establish provenance for builds”, “Verifying artifact attestations with the GitHub CLI”",
+      "sourceURL": "https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations#verifying-artifact-attestations-with-the-github-cli",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "use the following GitHub CLI command.\n\n```bash copy\ngh attestation verify PATH/TO/YOUR/BUILD/ARTIFACT-BINARY -R ORGANIZATION_NAME/REPOSITORY_NAME",
+      "uses": [
+        "artifact attestation"
+      ],
+      "conceptIDs": [
+        "gha.gh-attestation-verify"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.attestation-vs-verification",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "order": 12635,
+      "front": "How do generating and verifying an artifact attestation differ in who does it and what it achieves?",
+      "back": "The producer generates signed provenance; the consumer verifies it. Only verification realises the security benefit.",
+      "explanation": "Generation alone gives no benefit until someone checks the attestation.",
+      "source": "GitHub Docs, “Artifact attestations”, “When to generate attestations”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/security/artifact-attestations#when-to-generate-attestations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Generating attestations alone doesn't provide any security benefit, the attestations must be verified for the benefit to be realized.",
+      "uses": [
+        "artifact attestation",
+        "provenance"
+      ],
+      "conceptIDs": [
+        "gha.gh-attestation-verify"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.cache-7-days",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12640,
+      "front": "GitHub removes cache entries that have not been accessed in over {{c1::7 days}}.",
+      "back": "7 days",
+      "explanation": "There is no limit on the number of caches, only on their total size.",
+      "source": "GitHub Docs, “Dependency caching reference”, “Usage limits and eviction policy”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#usage-limits-and-eviction-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "GitHub will remove any cache entries that have not been accessed in over 7 days.",
+      "uses": [
+        "dependency caching"
+      ],
+      "conceptIDs": [
+        "gha.cache-limit-10gb"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.cache-10gb",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12645,
+      "front": "By default, what is the total cache size limit per repository, and can it change?",
+      "back": "10 gigabytes; enterprise owners, organisation owners or repository administrators can increase it.",
+      "explanation": "Usage beyond 10 gigabytes is billed to the account.",
+      "source": "GitHub Docs, “Dependency caching reference”, “Usage limits and eviction policy”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#usage-limits-and-eviction-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, the limit is 10 GB per repository, but this limit can be increased by enterprise owners, organization owners, or repository administrators. Any usage beyond 10 GB is billed to your account.",
+      "uses": [
+        "dependency caching",
+        "repository"
+      ],
+      "conceptIDs": [
+        "gha.cache-limit-10gb"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.cache-eviction-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12650,
+      "front": "A repository is at its cache limit. Cache `A` was last used 5 days ago, `B` 2 days ago and `C` an hour ago. A new cache is saved. Which is evicted first?",
+      "back": "D) `A`, the one with the oldest last access",
+      "choices": "A) None: the new cache is rejected\nB) `B`\nC) `C`\nD) `A`, the one with the oldest last access",
+      "choicesExplained": "B and C: they were accessed more recently. A: GitHub saves the new cache and then evicts.",
+      "explanation": "Eviction runs in order of last access date, oldest first.",
+      "source": "GitHub Docs, “Dependency caching reference”, “Usage limits and eviction policy”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#usage-limits-and-eviction-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you exceed the limit, GitHub will save the new cache but will begin evicting caches until the total size is less than the repository limit.",
+      "uses": [
+        "cache eviction",
+        "dependency caching"
+      ],
+      "conceptIDs": [
+        "gha.cache-limit-10gb"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.cache-thrashing",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12655,
+      "front": "What is cache thrashing, and what steps can reduce it?",
+      "back": "Caches being created and deleted at a high frequency; remove caching from specific workflows or increase the cache size.",
+      "explanation": "The docs link it to the eviction process at the size limit.",
+      "source": "GitHub Docs, “Dependency caching reference”, “Usage limits and eviction policy”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#usage-limits-and-eviction-policy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The cache eviction process may cause cache thrashing, where caches are created and deleted at a high frequency. To reduce this, you can review the caches for a repository and take corrective steps, such as removing caching from specific workflows or increasing your cache size.",
+      "uses": [
+        "cache eviction",
+        "dependency caching"
+      ],
+      "conceptIDs": [
+        "gha.cache-thrashing"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.job-time-hosted",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12660,
+      "front": "How long can a job run on a GitHub-hosted runner before it is terminated?",
+      "back": "Up to 6 hours of execution time; then the job is terminated and fails.",
+      "explanation": "This is also why the `GITHUB_TOKEN` there lives for at most 6 hours.",
+      "source": "GitHub Docs, “Actions limits”, “Existing system limits”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/limits#existing-system-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each job in a workflow can run for up to 6 hours of execution time. If a job reaches this limit, the job is terminated and fails.",
+      "uses": [
+        "job",
+        "GitHub-hosted runner",
+        "GITHUB_TOKEN"
+      ],
+      "conceptIDs": [
+        "gha.job-time-limits"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.job-time-self-hosted",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12665,
+      "front": "On self-hosted runners, each job can run for up to {{c1::5 days}} of execution time.",
+      "back": "5 days",
+      "explanation": "The `GITHUB_TOKEN`, though, can be refreshed for only 24 hours.",
+      "source": "GitHub Docs, “Actions limits”, “Existing system limits”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/limits#existing-system-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each job in a workflow can run for up to 5 days of execution time. If a job reaches this limit, the job is terminated and fails.",
+      "uses": [
+        "self-hosted runner",
+        "job",
+        "GITHUB_TOKEN"
+      ],
+      "conceptIDs": [
+        "gha.job-time-limits"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.job-time-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12670,
+      "front": "A 9-hour simulation job keeps failing on `ubuntu-latest`. What explains it, and what is one documented way round it?",
+      "back": "C) Hosted jobs stop at 6 hours; a self-hosted runner allows up to 5 days",
+      "choices": "A) The runner image is out of date; pin a version\nB) The job needs `timeout-minutes: 600` to override the limit\nC) Hosted jobs stop at 6 hours; a self-hosted runner allows up to 5 days\nD) The workflow file is too large",
+      "choicesExplained": "A: the image version does not set the time limit. B: a job setting cannot exceed the system limit. D: file size stops runs from starting, not jobs midway.",
+      "explanation": "The two runner types have different job execution limits.",
+      "source": "GitHub Docs, “Actions limits”, “Existing system limits”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/limits#existing-system-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each job in a workflow can run for up to 6 hours of execution time. If a job reaches this limit, the job is terminated and fails.",
+      "uses": [
+        "GitHub-hosted runner",
+        "self-hosted runner",
+        "-latest label",
+        "timeout-minutes",
+        "job"
+      ],
+      "conceptIDs": [
+        "gha.job-time-limits"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.run-35-days",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12675,
+      "front": "What is the maximum workflow run time, and what does it include?",
+      "back": "35 days per workflow run, including execution, waiting and approval time.",
+      "explanation": "A run that reaches the limit is cancelled.",
+      "source": "GitHub Docs, “Actions limits”, “Existing system limits”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/limits#existing-system-limits",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If a workflow run reaches this limit, the workflow run is cancelled. This period includes execution duration, and time spent on waiting and approval.",
+      "uses": [
+        "workflow run"
+      ],
+      "conceptIDs": [
+        "gha.run-35-days"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.workflow-file-size",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12680,
+      "front": "What is the size limit for a workflow file, and how can you get under it?",
+      "back": "500 kilobytes; move shared logic into a reusable workflow or a composite action.",
+      "explanation": "A larger file will not start runs at all.",
+      "source": "GitHub Docs, “Actions limits”, “Workflow file size”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/limits#workflow-file-size",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each workflow file in the `.github/workflows` directory must be 500 KB or smaller to trigger a run. To reduce the size of a workflow file, move shared logic into a reusable workflow or a composite action.",
+      "uses": [
+        "reusable workflow",
+        "composite action",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "gha.workflow-file-500kb"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · GitHub Docs as published"
+    },
+    {
+      "id": "gha.security-hardening.metrics-no-multipliers",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12685,
+      "front": "Do GitHub Actions usage metrics apply minute multipliers?",
+      "back": "No. They can help you understand the bill, but their main purpose is to show how and where minutes are used.",
+      "explanation": "The figures may not match billed minutes for runners with multipliers.",
+      "source": "GitHub Docs, “Billing and usage”, “GitHub Actions usage metrics”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/billing-and-usage#github-actions-usage-metrics",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you view usage metrics, it is important to remember that GitHub Actions usage metrics do not apply minute multipliers to the metrics displayed.",
+      "uses": [
+        "usage metrics"
+      ],
+      "conceptIDs": [
+        "gha.usage-metrics"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.metrics-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12690,
+      "front": "A finance lead compares the organisation’s usage metrics with the invoice and finds the minute totals differ. What explains it?",
+      "back": "B) Usage metrics do not apply minute multipliers",
+      "choices": "A) Metrics exclude private repositories\nB) Usage metrics do not apply minute multipliers\nC) Metrics lag by 90 days\nD) Metrics count only self-hosted runners",
+      "choicesExplained": "A, C and D: the docs state none of these; the stated difference is the multipliers.",
+      "explanation": "The metrics show where minutes go; the bill applies multipliers.",
+      "source": "GitHub Docs, “Billing and usage”, “GitHub Actions usage metrics”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/billing-and-usage#github-actions-usage-metrics",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you view usage metrics, it is important to remember that GitHub Actions usage metrics do not apply minute multipliers to the metrics displayed.",
+      "uses": [
+        "usage metrics",
+        "self-hosted runner"
+      ],
+      "conceptIDs": [
+        "gha.usage-metrics"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.billing-reusable",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "order": 12695,
+      "front": "When you reuse a workflow, which workflow is billed?",
+      "back": "Always the caller workflow.",
+      "explanation": "Runner assignment also uses only the caller’s context.",
+      "source": "GitHub Docs, “Billing and usage”, “Billing for reusable workflows”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/billing-and-usage#billing-for-reusable-workflows",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you reuse a workflow, billing is always associated with the caller workflow. Assignment of GitHub-hosted runners is always evaluated using only the caller's context.",
+      "uses": [
+        "reusable workflow",
+        "caller workflow"
+      ],
+      "conceptIDs": [
+        "gha.billing-reusable"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.concurrency-cancel-superseded",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "order": 12700,
+      "front": "Which `concurrency` setting cancels earlier in-progress runs of the same workflow on the same branch when a new one starts?",
+      "back": "`group: ${{ github.workflow }}-${{ github.ref }}` with `cancel-in-progress: true`.",
+      "explanation": "Building the group from the workflow name keeps other workflows’ runs from being cancelled.",
+      "source": "GitHub Docs, “Control the concurrency of workflows and jobs”, “Example: Only cancel in-progress jobs or runs for the current workflow”",
+      "sourceURL": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency#example-only-cancel-in-progress-jobs-or-runs-for-the-current-workflow",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To only cancel in-progress runs of the same workflow, you can use the `github.workflow` property to build the concurrency group:",
+      "uses": [
+        "concurrency group",
+        "cancel-in-progress",
+        "github context"
+      ],
+      "conceptIDs": [
+        "gha.concurrency-cancel-superseded"
+      ]
+    },
+    {
+      "id": "gha.security-hardening.concurrency-scenario",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "order": 12705,
+      "front": "Developers push several times a minute to feature branches, and each push starts a full test run. Which change saves the most runner time on superseded commits?",
+      "back": "A) Add `concurrency` with a per-branch group and `cancel-in-progress: true`",
+      "choices": "A) Add `concurrency` with a per-branch group and `cancel-in-progress: true`\nB) Add `timeout-minutes: 5`\nC) Increase the cache size\nD) Raise `max-parallel`",
+      "choicesExplained": "D: runs more jobs at once rather than fewer. B: would cut off valid long runs too. C: speeds restores but still runs every superseded commit.",
+      "explanation": "A new run in the group cancels the in-progress one it supersedes.",
+      "source": "GitHub Docs, “Control the concurrency of workflows and jobs”, “Using concurrency in different scenarios”",
+      "sourceURL": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency#using-concurrency-in-different-scenarios",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To also cancel any currently running job or workflow in the same concurrency group, specify `cancel-in-progress: true`.",
+      "uses": [
+        "concurrency group",
+        "cancel-in-progress",
+        "max-parallel",
+        "timeout-minutes",
+        "push"
+      ],
+      "conceptIDs": [
+        "gha.concurrency-cancel-superseded"
+      ]
+    }
+  ]
+}

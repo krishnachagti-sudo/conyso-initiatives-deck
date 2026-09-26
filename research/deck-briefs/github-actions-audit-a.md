@@ -1,0 +1,24 @@
+# github-actions audit A: topics 01–04
+
+Scope: decks/github-actions/notes/01-triggers.json to 04-workflow-data.json. That is 373 cards (90 + 104 + 99 + 80). None are pool cards. I checked every card against its `evidence` first. Where a claim went beyond the evidence, I grepped research/sources/github-actions/. The pages I searched were: events that trigger workflows, trigger a workflow, manually run a workflow, workflow syntax, GITHUB_TOKEN, managing Actions settings for a repository, Docker service containers, contexts, expressions, enable debug logging and the VS Code extension README. All of these are GitHub Docs or GitHub text, tier B (CC BY 4.0; CONTENT-POLICY.md §3, tier B). I fetched nothing from the web.
+
+I checked every scenario card's choicesExplained letters against its choices and its key with a script and then by eye. One card is wrong (scenario-one-of-several-values). I also checked every inline YAML snippet. Six put nested mappings on one line, which is not valid YAML. I have rewritten them so the key sits in the prose and the snippet is valid.
+
+Terms from github-foundations: only one card re-teaches a topic-0 term. what-is-the-push-event introduces "push", which foundations already teaches as the Git push. No other card in T1–T4 defines workflow, event, job, action or runner again.
+
+id | severity | problem | evidence (source words, with page)
+---|---|---|---
+gha.contexts-expressions-variables.scenario-one-of-several-values | wrong | choicesExplained says "A compares with one long string", but A is the key. The single-string distractor is C, and C is left unexplained. | Choices: "C) `inputs.target == 'dev,test,prod'`"
+gha.triggers.closed-pull-requests | unsupported | choicesExplained D says "forks do not receive pull request events". The source does not say this, and a fork does get `pull_request` events for its own pull requests. | events-that-trigger-workflows §pull_request: "To trigger workflows by different activity types, use the `types` keyword."
+gha.triggers.fork-secrets | ambiguous | "Only `GITHUB_TOKEN`, and it is read-only" reads as absolute. The explanation leaves out the settings that can send secrets and write tokens to fork pull request workflows. | managing-github-actions-settings-for-a-repository: "Send write tokens to workflows from pull requests - Allows pull requests from forks to use a `GITHUB_TOKEN` with write permission"; "Send secrets to workflows from pull requests - Makes all secrets available to the pull request."
+gha.workflow-data.summaries-per-job | unclear | The explanation "The limit counts summaries written by steps, not jobs" is hard to parse and does not say why. | workflow-commands §Step isolation and limits: "A maximum of 20 job summaries from steps are displayed per job."
+gha.triggers.workflow-run-three-levels | minor | "Beyond the third level" leaves open whether the first workflow counts. The docs' example settles it. | events-that-trigger-workflows §workflow_run: "(that is: `A` → `B` → `C` → `D` → `E` → `F`), workflows `E` and `F` will not be run."
+gha.workflow-data.debug-messages-need-secret | minor | The back says a secret must exist. The debug-logging guide says a variable of the same name also works. | enable-debug-logging: "set the following secret or variable ... `ACTIONS_STEP_DEBUG` to `true`. If both the secret and variable are set, the value of the secret takes precedence over the variable."
+gha.contexts-expressions-variables.scenario-string-quotes | minor | Choice D puts backticks inside a backtick code span, so it renders as broken code. | expressions §Literals: "you must use single quotes (`'`) around the string"
+gha.triggers.release-tags-missed | minor | The YAML `on: push: branches: [main]` has nested mappings on one line, which is invalid. | workflow-syntax (all examples put each nested key on its own indented line)
+gha.triggers.reusable-input-choice | minor | The YAML `on: workflow_call: inputs: size: type: choice` has nested mappings on one line, which is invalid. | as above
+gha.jobs.with-input-env | minor | The YAML `with: first_name: Mona` has nested mappings on one line, which is invalid. | workflow-syntax §steps[*].with example: "with:\n first_name: Mona"
+gha.jobs.what-is-with | minor | The example's YAML `with: python-version: '3.12'` has nested mappings on one line, which is invalid. | as above
+gha.jobs.exclude-removes-os | minor | The YAML `exclude: - os: windows-latest` puts a list item on the key's line, which is invalid. | workflow-syntax §matrix.exclude example (list items on their own lines)
+gha.jobs.pass-an-input | minor | Choice B's YAML `env: NODE_VERSION: 22` has nested mappings on one line, which is invalid. | as above
+gha.triggers.what-is-the-push-event | minor | The card introduces "push", a github-foundations topic-0 term (the Git push). The new term is the push event. | writers.md: "Their registry terms (topic 0) count as taught: never re-introduce them."
