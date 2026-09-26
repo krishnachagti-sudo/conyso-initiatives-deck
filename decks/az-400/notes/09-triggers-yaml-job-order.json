@@ -1,0 +1,2323 @@
+{
+  "topic": "Triggers, YAML and job order",
+  "notes": [
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-a-ci-trigger",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a CI trigger in Azure Pipelines?",
+      "back": "A trigger that runs a pipeline when a push is made to a branch matching its criteria; set with the `trigger` keyword.",
+      "explanation": "CI stands for continuous integration: the trigger reacts to pushes rather than to pull requests or a clock.",
+      "example": "Like a doorbell wired to `main`: every push to `main` starts the pipeline, but pushes to other branches can be filtered out.",
+      "introduces": [
+        "CI trigger"
+      ],
+      "source": "Microsoft, “Specify events that trigger pipelines”, “CI triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/build/triggers.md#ci-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "CI triggers run a pipeline when a push is made to a branch that meets the criteria defined by the trigger. Use the `trigger` keyword to configure a CI trigger.",
+      "uses": [
+        "CI trigger",
+        "push",
+        "branch"
+      ],
+      "conceptIDs": [
+        "az400.ci-trigger"
+      ],
+      "order": 9005
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-a-pr-trigger",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a PR trigger in Azure Pipelines?",
+      "back": "A trigger that runs a pipeline when a pull request is opened or changes are pushed to its source branch; set with the `pr` keyword.",
+      "explanation": "PR stands for pull request: the trigger validates proposed changes before they are merged.",
+      "example": "Like a CI trigger, but it fires on pull requests aimed at a branch rather than on pushes to it.",
+      "introduces": [
+        "PR trigger"
+      ],
+      "source": "Microsoft, “Specify events that trigger pipelines”, “PR triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/build/triggers.md#pr-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Pull request (PR) triggers cause a pipeline to run whenever you open a pull request, or when you push changes to the source branch of a pull request. Use the `pr` keyword to configure a PR trigger.",
+      "uses": [
+        "PR trigger",
+        "pull request",
+        "branch"
+      ],
+      "conceptIDs": [
+        "az400.pr-trigger"
+      ],
+      "order": 9014
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-a-comment-trigger",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a comment trigger in Azure Pipelines?",
+      "back": "A trigger that runs a pipeline when a contributor comments on a pull request with a command such as `/azp run`; GitHub repositories only.",
+      "explanation": "It lets people start a validation run by hand from the pull request conversation instead of on every update.",
+      "example": "Like a PR trigger that waits for someone to type a command in the pull request discussion before it fires.",
+      "introduces": [
+        "comment trigger"
+      ],
+      "source": "Microsoft, “Specify events that trigger pipelines”, “Comment triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/build/triggers.md#comment-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Comment triggers configure a pipeline to run when contributors make a pull request comment containing a pull request command like `/azp run`. Comment triggers are supported only for GitHub repositories.",
+      "uses": [
+        "comment trigger",
+        "pull request"
+      ],
+      "conceptIDs": [
+        "az400.comment-trigger"
+      ],
+      "order": 9023
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-a-scheduled-trigger",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a scheduled trigger in Azure Pipelines?",
+      "back": "A trigger that runs a pipeline on a predefined schedule, written in YAML under `schedules` with cron syntax.",
+      "explanation": "It starts runs from the clock rather than from an event such as a push or a pull request.",
+      "example": "Like an alarm clock for the pipeline: a nightly build at a fixed time, whoever is or isn’t pushing code.",
+      "introduces": [
+        "scheduled trigger"
+      ],
+      "source": "Microsoft, “Specify events that trigger pipelines”, “Scheduled triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/build/triggers.md#scheduled-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To define a scheduled trigger in YAML, use the `schedules` keyword and define your schedule by using cron syntax.",
+      "uses": [
+        "scheduled trigger"
+      ],
+      "conceptIDs": [
+        "az400.scheduled-trigger"
+      ],
+      "order": 9032
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-a-pipeline-completion-trigger",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a pipeline completion trigger?",
+      "back": "A trigger, set on a pipeline resource, that runs one pipeline when another (the triggering pipeline) completes.",
+      "explanation": "It suits products whose components build independently, so a downstream pipeline can rebuild when an upstream one finishes.",
+      "example": "Like a relay baton: when the library pipeline finishes, it hands over and the app pipeline starts.",
+      "introduces": [
+        "pipeline completion trigger"
+      ],
+      "source": "Microsoft, “Trigger one pipeline after another”, “Configure pipeline resource triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/pipeline-triggers.md#configure-pipeline-resource-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To trigger a pipeline upon the completion of another pipeline, configure a pipeline resource trigger.",
+      "uses": [
+        "pipeline completion trigger"
+      ],
+      "conceptIDs": [
+        "az400.pipeline-completion-trigger"
+      ],
+      "order": 9041
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-a-resource-trigger",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a resource trigger in a YAML pipeline?",
+      "back": "A trigger on a resource declared under `resources` (such as a repository) that starts the pipeline when that resource changes.",
+      "explanation": "A repository resource trigger uses CI-style filters so commits or pull requests in another repository can start the current pipeline.",
+      "example": "Like a CI trigger, but watching a second repository that the pipeline declares as a resource instead of its own.",
+      "introduces": [
+        "resource trigger"
+      ],
+      "source": "Microsoft, “Specify events that trigger pipelines”, “Resource triggers for YAML pipelines” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/build/triggers.md#resource-triggers-for-yaml-pipelines",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Repository resource triggers let you start a pipeline when changes land in a repo defined as a `repositories` resource.",
+      "uses": [
+        "resource trigger",
+        "repository",
+        "commit"
+      ],
+      "conceptIDs": [
+        "az400.resource-trigger"
+      ],
+      "order": 9050
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-a-generic-webhook-trigger",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a generic webhook trigger in a YAML pipeline?",
+      "back": "A trigger that starts a pipeline from any external service’s webhook, declared as a `webhook` resource under `resources.webhooks`.",
+      "explanation": "It extends automatic triggering beyond the built-in resources, so services such as Nexus or Artifactory can start runs.",
+      "example": "Like a pipeline completion trigger, but the signal comes from an outside service posting an event instead of another pipeline.",
+      "introduces": [
+        "generic webhook trigger"
+      ],
+      "source": "Microsoft, “Specify events that trigger pipelines”, “Generic webhook based triggers for YAML pipelines” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/build/triggers.md#generic-webhook-based-triggers-for-yaml-pipelines",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Webhook trigger support in YAML pipelines lets you subscribe to events from any external service (such as GitHub, GitHub Enterprise, Nexus, or Artifactory) via its webhooks and automatically trigger pipelines.",
+      "uses": [
+        "generic webhook trigger",
+        "webhook"
+      ],
+      "conceptIDs": [
+        "az400.webhook-trigger"
+      ],
+      "order": 9059
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-the-workflow-run-event",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is the `workflow_run` event in GitHub Actions?",
+      "back": "An event that occurs when a workflow run is requested or completed, so one workflow can run after another.",
+      "explanation": "It lets a workflow react to the execution or completion of a separate workflow.",
+      "example": "Like a pipeline completion trigger in Azure Pipelines, but between two GitHub Actions workflows in the same repository.",
+      "introduces": [
+        "workflow_run event"
+      ],
+      "source": "GitHub Docs, “Events that trigger workflows”, “workflow_run”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_run",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This event occurs when a workflow run is requested or completed. It allows you to execute a workflow based on execution or completion of another workflow.",
+      "uses": [
+        "workflow_run event",
+        "workflow",
+        "event"
+      ],
+      "conceptIDs": [
+        "az400.workflow-run-event"
+      ],
+      "order": 9068
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-the-workflow-dispatch-event",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the `workflow_dispatch` event in GitHub Actions?",
+      "back": "The event you configure so that a workflow can be triggered manually.",
+      "explanation": "Without it, a workflow runs only on the events and schedules listed under its `on` key.",
+      "example": "Like a “run now” button bolted onto a workflow that normally waits for pushes.",
+      "introduces": [
+        "workflow_dispatch event"
+      ],
+      "source": "GitHub Docs, “Events that trigger workflows”, “workflow_dispatch”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To enable a workflow to be triggered manually, you need to configure the `workflow_dispatch` event.",
+      "uses": [
+        "workflow_dispatch event",
+        "workflow",
+        "event"
+      ],
+      "conceptIDs": [
+        "az400.workflow-dispatch"
+      ],
+      "order": 9077
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-the-schedule-event",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the `schedule` event in GitHub Actions?",
+      "back": "The event that triggers a workflow at a scheduled time, given as a cron expression.",
+      "explanation": "It is the GitHub Actions counterpart of a timed run: the clock, not repository activity, starts the workflow.",
+      "example": "Like a scheduled trigger in Azure Pipelines, written as a `schedule` list under the workflow’s `on` key, each entry with a `cron` line.",
+      "introduces": [
+        "schedule event"
+      ],
+      "source": "GitHub Docs, “Events that trigger workflows”, “schedule”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The `schedule` event allows you to trigger a workflow at a scheduled time.",
+      "uses": [
+        "schedule event",
+        "workflow",
+        "event"
+      ],
+      "conceptIDs": [
+        "az400.schedule-event"
+      ],
+      "order": 9086
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-an-azure-pipelines-stage",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an Azure Pipelines stage?",
+      "back": "A logical boundary in a pipeline, such as build, test or production, containing one or more jobs.",
+      "explanation": "Stages mark separation of concerns, and they are where a pipeline can pause for checks.",
+      "example": "Like the chapters of a book: “Build”, “Test” and “Deploy” each group their own jobs.",
+      "introduces": [
+        "Azure Pipelines stage"
+      ],
+      "source": "Microsoft, “Key Azure Pipelines concepts”, “Stages” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/get-started/key-pipelines-concepts.md#stages",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A stage is a logical boundary in a pipeline that can mark separation of concerns, for example build, test, and production. Each stage contains one or more jobs.",
+      "uses": [
+        "Azure Pipelines stage",
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.stage"
+      ],
+      "order": 9095
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-an-azure-pipelines-job",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an Azure Pipelines job?",
+      "back": "An execution boundary of a set of steps that run sequentially on the same agent.",
+      "explanation": "The jobs page also calls a job the smallest unit of work that can be scheduled to run.",
+      "example": "Like a GitHub Actions job: a named group of steps that one machine runs from top to bottom.",
+      "introduces": [
+        "Azure Pipelines job"
+      ],
+      "source": "Microsoft, “Key Azure Pipelines concepts”, “Jobs” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/get-started/key-pipelines-concepts.md#jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A job represents an execution boundary of a set of steps that run sequentially on the same agent.",
+      "uses": [
+        "Azure Pipelines job",
+        "agent"
+      ],
+      "conceptIDs": [
+        "az400.job"
+      ],
+      "order": 9104
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-are-a-step-and-a-task",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "In Azure Pipelines, what is a step, and what is a task?",
+      "back": "A step is a pipeline’s smallest building block, either a script or a task; a task is a prepackaged procedure configured by inputs.",
+      "explanation": "A script is custom code written for one pipeline, whereas a task packages reusable automation behind a set of inputs.",
+      "example": "Like a GitHub Actions step that either runs a shell command or uses a ready-made action.",
+      "introduces": [
+        "step and task"
+      ],
+      "source": "Microsoft, “Key Azure Pipelines concepts”, “Steps” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/get-started/key-pipelines-concepts.md#steps",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A step is the smallest building block of a pipeline. By default, steps run one after another in a job. A step can either be a script or a task.",
+      "uses": [
+        "step and task",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.step-task"
+      ],
+      "order": 9113
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-an-agentless-job",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an agentless job (server job) in Azure Pipelines?",
+      "back": "A job whose tasks the server orchestrates and runs itself, needing no agent or target computer.",
+      "explanation": "Only a few tasks are supported in it, such as waiting, calling a REST API or pausing for manual validation.",
+      "example": "Like a job with no machine behind it: the Azure DevOps service itself waits or calls out, then carries on.",
+      "introduces": [
+        "agentless job"
+      ],
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Server jobs” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#server-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The server orchestrates and executes tasks in a server job. A server job doesn't require an agent or any target computers.",
+      "uses": [
+        "agentless job",
+        "agent"
+      ],
+      "conceptIDs": [
+        "az400.server-job"
+      ],
+      "order": 9122
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-a-container-job",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a container job in Azure Pipelines?",
+      "back": "A job in which the agent first fetches and starts a container, then runs each step of the job inside it.",
+      "explanation": "It gives exact versions of the operating system, tools and dependencies instead of whatever is installed on the agent host.",
+      "example": "Like an agent pool job, but the steps run inside a chosen image, say a pinned Linux distribution, on that agent.",
+      "introduces": [
+        "container job"
+      ],
+      "source": "Microsoft, “Container jobs in YAML pipelines” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/container-phases.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For a container job, the agent first fetches and starts the container, and then runs each step of the job inside the container.",
+      "uses": [
+        "container job",
+        "agent"
+      ],
+      "conceptIDs": [
+        "az400.container-job"
+      ],
+      "order": 9131
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-an-expression",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an expression in Azure Pipelines YAML?",
+      "back": "A construct used to specify a string, boolean or number value while authoring a pipeline, most often in conditions.",
+      "explanation": "Expressions can be evaluated when the YAML is compiled or at run time, depending on their syntax.",
+      "example": "Like a spreadsheet formula in a pipeline: `eq(variables['Build.SourceBranch'], 'refs/heads/main')` works out true or false.",
+      "introduces": [
+        "expression"
+      ],
+      "source": "Microsoft, “Expressions” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/expressions.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use expressions when you need to specify a string, boolean, or number value while authoring a pipeline.",
+      "uses": [
+        "expression"
+      ],
+      "conceptIDs": [
+        "az400.expression"
+      ],
+      "order": 9140
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-a-matrix-strategy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a matrix strategy in GitHub Actions?",
+      "back": "Variables in a single job definition that automatically create one job run for each combination of their values.",
+      "explanation": "One job definition then covers several language versions or operating systems without copying the job.",
+      "example": "Like a times table: two values of one variable and three of another give six runs of one job.",
+      "introduces": [
+        "matrix strategy"
+      ],
+      "source": "GitHub Docs source, reusable text “About matrix strategies” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/data/reusables/actions/jobs/about-matrix-strategy.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A matrix strategy lets you use variables in a single job definition to automatically create multiple job runs that are based on the combinations of the variables.",
+      "uses": [
+        "matrix strategy",
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.matrix-strategy"
+      ],
+      "order": 9149
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.what-is-a-concurrency-group",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a concurrency group in GitHub Actions?",
+      "back": "A string or expression naming a group in which only a single job or workflow runs at a time.",
+      "explanation": "Jobs or workflows that share the group name wait for, or replace, each other instead of running side by side.",
+      "example": "Like a single-occupancy lift: everything labelled `production` takes turns.",
+      "introduces": [
+        "concurrency group"
+      ],
+      "source": "GitHub Docs source, reusable text “Using concurrency in jobs” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/data/reusables/actions/jobs/section-using-concurrency-jobs.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can use `jobs.<job_id>.concurrency` to ensure that only a single job or workflow using the same concurrency group will run at a time. A concurrency group can be any string or expression.",
+      "uses": [
+        "concurrency group",
+        "job",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "az400.concurrency-group"
+      ],
+      "order": 9158
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.ci-default-all-branches",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "If a YAML pipeline has no `trigger` section, which branches have CI triggers?",
+      "back": "All branches, by default, unless “Disable implied CI trigger” is set or trigger settings in the web interface override the YAML.",
+      "explanation": "The trigger is implied, so an unconfigured pipeline reacts to pushes anywhere; the two settings named are the exceptions.",
+      "source": "Microsoft, “Specify events that trigger pipelines”, “CI triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/build/triggers.md#ci-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you don't explicitly configure your pipeline, all branches have CI triggers enabled by default, unless Disable implied CI trigger is set or UI settings override YAML trigger.",
+      "uses": [
+        "CI trigger",
+        "branch"
+      ],
+      "conceptIDs": [
+        "az400.ci-trigger"
+      ],
+      "order": 9167
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-ci-trigger-main",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team wants its YAML pipeline to run on every push to `main` and on no other push. What should the pipeline contain?",
+      "back": "A CI trigger listing `main`: `trigger:` followed by `- main`.",
+      "explanation": "Naming the branch replaces the implied trigger on all branches with one that matches only `main`.",
+      "source": "Microsoft, “Specify events that trigger pipelines”, “CI triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/build/triggers.md#ci-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For example, to run a pipeline when a push is made to the `main` branch, specify the following trigger. ```yml trigger: - main",
+      "uses": [
+        "CI trigger",
+        "push",
+        "branch"
+      ],
+      "conceptIDs": [
+        "az400.ci-trigger"
+      ],
+      "order": 9176
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.pr-default-enabled",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "If a YAML pipeline has no `pr` section, when do PR triggers fire?",
+      "back": "They are enabled by default: pull requests to any branch trigger a run, unless trigger settings in the web interface override the YAML.",
+      "explanation": "Like CI triggers, PR triggers start switched on; `pr: none` is the way to turn them off.",
+      "source": "Microsoft, “Specify events that trigger pipelines”, “PR triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/build/triggers.md#pr-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you don't explicitly configure PR triggers in your pipeline, they're enabled by default, unless UI settings override YAML trigger. Pull requests to any branch trigger a pipeline run.",
+      "uses": [
+        "PR trigger",
+        "pull request"
+      ],
+      "conceptIDs": [
+        "az400.pr-trigger"
+      ],
+      "order": 9185
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.azure-repos-pr-branch-policy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How does Azure Repos Git implement PR triggers?",
+      "back": "Through branch policies, not through the YAML `pr` keyword.",
+      "explanation": "A `pr` section in YAML therefore has no effect for Azure Repos Git; the pull request run is set up on the target branch’s policy.",
+      "source": "Microsoft, “Specify events that trigger pipelines”, “PR triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/build/triggers.md#pr-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure Repos Git uses branch policies to implement PR triggers.",
+      "uses": [
+        "PR trigger",
+        "branch policy"
+      ],
+      "conceptIDs": [
+        "az400.pr-trigger-azure-repos"
+      ],
+      "order": 9194
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-azure-repos-pr",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A pipeline for an Azure Repos Git repository has a `pr` trigger listing `main` in its YAML, yet pull requests into `main` never start it. What should the team do?",
+      "choices": "A) Move the `pr` section into a template file\nB) Add `drafts: true` under `pr`\nC) Configure a branch policy on `main` that runs the pipeline\nD) Replace `pr` with `trigger: none`",
+      "back": "C) Configure a branch policy on `main` that runs the pipeline",
+      "choicesExplained": "A: triggers can be set only in the main YAML file, not in templates. B: drafts only matters for GitHub PR triggers and defaults to true anyway. D: `trigger: none` switches off CI triggers and does nothing for pull requests.",
+      "explanation": "For Azure Repos Git the PR trigger is a branch policy, so the YAML `pr` keyword is not what starts pull request runs.",
+      "source": "Microsoft, “Specify events that trigger pipelines”, “PR triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/build/triggers.md#pr-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure Repos Git uses branch policies to implement PR triggers.",
+      "uses": [
+        "PR trigger",
+        "branch policy",
+        "pull request"
+      ],
+      "conceptIDs": [
+        "az400.pr-trigger-azure-repos"
+      ],
+      "order": 9203
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.no-variables-in-triggers",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why can’t variables be used in trigger branch or path filters?",
+      "back": "Variables are evaluated at run time, after the trigger has already fired.",
+      "explanation": "The trigger decision comes first, so a value that only exists during the run cannot shape it.",
+      "source": "Microsoft, “Build GitHub repositories”, “PR triggers: Branches” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/repos/github.md#branches",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You cannot use variables in triggers, as variables are evaluated at runtime (after the trigger has fired).",
+      "uses": [
+        "CI trigger",
+        "PR trigger"
+      ],
+      "conceptIDs": [
+        "az400.trigger-branch-filters"
+      ],
+      "order": 9212
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.exclude-needs-full-syntax",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A `pr` trigger must validate `main` and `releases/*` but skip `releases/old*`. Which form of the syntax is needed?",
+      "back": "The full syntax, with `branches:` holding an `include` list and an `exclude` list.",
+      "explanation": "The short list form can only name branches to include, so excluding one requires the longer form.",
+      "source": "Microsoft, “Build GitHub repositories”, “PR triggers: Branches” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/repos/github.md#branches",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For more complex triggers that need to exclude certain branches, you must use the full syntax as shown in the following example.",
+      "uses": [
+        "PR trigger",
+        "branch"
+      ],
+      "conceptIDs": [
+        "az400.trigger-branch-filters"
+      ],
+      "order": 9221
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.paths-case-sensitive",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Are CI and PR trigger path filters case-sensitive?",
+      "back": "Yes: paths in Git are case-sensitive, including trigger path filters.",
+      "explanation": "A filter written as `Docs` will not match a folder called `docs`, so the case must match the real folders.",
+      "source": "Microsoft, “Specify events that trigger pipelines”, “CI triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/build/triggers.md#pr-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Paths in Git are case-sensitive, including CI and PR trigger path filters.",
+      "uses": [
+        "CI trigger",
+        "PR trigger",
+        "Git"
+      ],
+      "conceptIDs": [
+        "az400.trigger-branch-filters"
+      ],
+      "order": 9230
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.draft-pr-validation",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "How do you stop a GitHub PR trigger from firing on draft pull requests?",
+      "back": "Set `drafts: false` under `pr`; by default draft pull requests trigger runs too.",
+      "explanation": "Draft and ready-for-review pull requests are treated alike unless the property is changed.",
+      "source": "Microsoft, “Build GitHub repositories”, “Draft PR validation” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/repos/github.md#draft-pr-validation",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, pull request triggers fire on draft pull requests and pull requests that are ready for review. To disable pull request triggers for draft pull requests, set the `drafts` property to `false`.",
+      "uses": [
+        "PR trigger",
+        "draft pull request"
+      ],
+      "conceptIDs": [
+        "az400.draft-pr-validation"
+      ],
+      "order": 9239
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.skip-ci",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "To stop a push starting CI, include {{c1::`[skip ci]`}} in the message or description of any commit in the push.",
+      "explanation": "Azure Pipelines reads the commit messages of the push and skips CI for the whole push when it finds the marker.",
+      "source": "Microsoft, “Build GitHub repositories”, “Skipping CI for individual commits” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/repos/github.md#skipping-ci-for-individual-commits",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Just include `[skip ci]` in the message or description of any of the commits that are part of a push, and Azure Pipelines will skip running CI for this push.",
+      "uses": [
+        "CI trigger",
+        "commit",
+        "push"
+      ],
+      "conceptIDs": [
+        "az400.skip-ci"
+      ],
+      "order": 9248
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-comment-trigger",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A public GitHub project wants pull requests from unknown contributors to build only after a team member has read the code. What should it enable?",
+      "choices": "A) `drafts: false` on the PR trigger\nB) “Require a team member’s comment before building a pull request”, so a member starts the build with a comment\nC) A pipeline completion trigger on the CI pipeline\nD) `pr: none` and a nightly scheduled trigger",
+      "back": "B) “Require a team member’s comment before building a pull request”, so a member starts the build with a comment",
+      "choicesExplained": "A only skips draft pull requests. D stops pull request validation altogether. C reacts to another pipeline, not to reviewed pull requests.",
+      "explanation": "The source gives this as a common security measure when building contributed code from forked repositories.",
+      "source": "Microsoft, “Build GitHub repositories”, “Comment triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/repos/github.md#comment-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You may not want to automatically build pull requests from unknown users until their changes can be reviewed. You want one of your team members to first review their code and then run the pipeline.",
+      "uses": [
+        "comment trigger",
+        "PR trigger",
+        "fork"
+      ],
+      "conceptIDs": [
+        "az400.comment-trigger"
+      ],
+      "order": 9266
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.cron-utc",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In which time zone are Azure Pipelines cron schedules written?",
+      "back": "UTC.",
+      "explanation": "A local-time schedule must be converted to UTC, which might even change its days of the week.",
+      "source": "Microsoft, “Configure schedules for pipelines”, “Scheduled triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/scheduled-triggers.md#scheduled-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The time zone for cron schedules is UTC.",
+      "uses": [
+        "scheduled trigger"
+      ],
+      "conceptIDs": [
+        "az400.cron-utc"
+      ],
+      "order": 9275
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-cron-utc",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team in India (UTC+5:30) writes `cron: '0 18 * * 1-5'` expecting a 6 pm local build on weekdays. Builds start at 11:30 pm local time. Why?",
+      "choices": "A) The cron expression is read in UTC, so 18:00 UTC is 23:30 in India\nB) Scheduled triggers run only when code has changed\nC) The `batch` property delays each run\nD) Cron fields start with the hour, not the minute",
+      "back": "A) The cron expression is read in UTC, so 18:00 UTC is 23:30 in India",
+      "choicesExplained": "B: skipping unchanged code affects whether a run happens, not its hour. C: `batch` only stops a new run while a previous one is in progress. D: the first field is minutes.",
+      "explanation": "A local time has to be converted to UTC before it is written as an Azure Pipelines cron expression.",
+      "source": "Microsoft, “Configure schedules for pipelines”, “Use GitHub Copilot to create a cron expression” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/scheduled-triggers.md#use-github-copilot-to-create-a-cron-expression",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure Pipelines cron schedules are defined in UTC, so schedules like Build every Monday, Wednesday, and Friday at 6:00 PM must be created using cron syntax, and converted from your local time zone to UTC.",
+      "uses": [
+        "scheduled trigger"
+      ],
+      "conceptIDs": [
+        "az400.cron-utc"
+      ],
+      "order": 9284
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.always-keyword",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "To make a schedule run even when the code has not changed, set {{c1::`always: true`}} on it.",
+      "explanation": "The `always` property defaults to false, which ties scheduled runs to source or pipeline changes.",
+      "source": "Microsoft, “Configure schedules for pipelines”, “Running even when there are no code changes” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/scheduled-triggers.md#running-even-when-there-are-no-code-changes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To force a pipeline to run even when there are no code changes, you can use the `always` keyword.",
+      "uses": [
+        "scheduled trigger"
+      ],
+      "conceptIDs": [
+        "az400.schedule-always"
+      ],
+      "order": 9293
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-always",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A weekly dependency scan is scheduled with cron, but in quiet weeks no run appears. Which change makes it run every week?",
+      "choices": "A) Set `batch: true` on the schedule\nB) Move the schedule into a template file\nC) Add a CI trigger on `main`\nD) Add `always: true` to the schedule",
+      "back": "D) Add `always: true` to the schedule",
+      "choicesExplained": "A: `batch` only prevents a new run while one is in progress. B: schedules must be in the main YAML file, not templates. C: a CI trigger reacts to pushes, which are exactly what quiet weeks lack.",
+      "explanation": "Without `always`, a schedule skips runs when nothing has changed since the last successful scheduled run.",
+      "source": "Microsoft, “Configure schedules for pipelines”, “Running even when there are no code changes” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/scheduled-triggers.md#running-even-when-there-are-no-code-changes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To force a pipeline to run even when there are no code changes, you can use the `always` keyword.",
+      "uses": [
+        "scheduled trigger",
+        "CI trigger"
+      ],
+      "conceptIDs": [
+        "az400.schedule-always"
+      ],
+      "order": 9302
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.schedule-constraints",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two constraints on writing YAML schedules in Azure Pipelines?",
+      "back": "Pipeline variables cannot be used in them; and with templates, schedules go in the main YAML file, not template files.",
+      "explanation": "Triggers have matching rules: variables can’t be used in them, and they go only in the main YAML file.",
+      "source": "Microsoft, “Configure schedules for pipelines”, “Scheduled triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/scheduled-triggers.md#scheduled-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can't use pipeline variables when specifying schedules. - If you use templates in your YAML file, then the schedules must be specified in the main YAML file and not in the template files.",
+      "uses": [
+        "scheduled trigger"
+      ],
+      "conceptIDs": [
+        "az400.scheduled-trigger"
+      ],
+      "order": 9311
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.schedule-branch-own-yaml",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A scheduled run is added for a branch only when that branch matches the schedule’s branch filters in which copy of the YAML?",
+      "back": "The YAML file in that particular branch.",
+      "explanation": "Adding a branch to the filters in `main` alone does not schedule it; the branch’s own YAML must list it.",
+      "source": "Microsoft, “Configure schedules for pipelines”, “Branch considerations for scheduled triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/scheduled-triggers.md#branch-considerations-for-scheduled-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Scheduled runs for a branch are added only if the branch matches the branch filters for the scheduled triggers in the YAML file in that particular branch",
+      "uses": [
+        "scheduled trigger",
+        "branch"
+      ],
+      "conceptIDs": [
+        "az400.scheduled-trigger"
+      ],
+      "order": 9320
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-schedule-release-branch",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "An engineer adds `release` to the schedule’s branch filters in the YAML on `main`, but the `release` branch is never built on schedule. What fixes it?",
+      "choices": "A) Add `release` to the schedule’s branch filters in the YAML on the `release` branch\nB) Add `always: true` to the schedule on `main`\nC) Rewrite the cron expression in local time\nD) Define the schedule in a variable template",
+      "back": "A) Add `release` to the schedule’s branch filters in the YAML on the `release` branch",
+      "choicesExplained": "B: `always` affects runs without changes, not which branches are scheduled. C: cron is in UTC and the timing is not the problem. D: schedules cannot live in templates.",
+      "explanation": "Scheduled runs for a branch depend on the filters in that branch’s own copy of the YAML.",
+      "source": "Microsoft, “Configure schedules for pipelines”, “Branch considerations for scheduled triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/scheduled-triggers.md#branch-considerations-for-scheduled-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Only when the `release` branch is added to the branch filters in the YAML file in the release branch will the scheduled build be added to the scheduler.",
+      "uses": [
+        "scheduled trigger",
+        "release branch"
+      ],
+      "conceptIDs": [
+        "az400.scheduled-trigger"
+      ],
+      "order": 9329
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.completion-project-property",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In a pipeline resource trigger, when must `project` be set?",
+      "back": "When the triggering (source) pipeline is in another Azure DevOps project.",
+      "explanation": "The property is optional when both pipelines sit in the same project.",
+      "source": "Microsoft, “Trigger one pipeline after another”, “Configure pipeline resource triggers” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/pipeline-triggers.md#configure-pipeline-resource-triggers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If the triggering pipeline is in another Azure DevOps project, you must specify the project name. This property is optional if both the source pipeline and the triggered pipeline are in the same project.",
+      "uses": [
+        "pipeline completion trigger"
+      ],
+      "conceptIDs": [
+        "az400.pipeline-completion-trigger"
+      ],
+      "order": 9338
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.completion-stage-filter",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "How can a downstream pipeline start when particular stages of the source pipeline finish, rather than the whole run?",
+      "back": "Add a `stages` filter to the pipeline resource trigger; with several stages listed, all must complete.",
+      "explanation": "By default the target pipeline waits for the entire source pipeline to complete.",
+      "source": "Microsoft, “Trigger one pipeline after another”, “Stage filters” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/pipeline-triggers.md#stage-filters",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If your source pipeline has stages, you can use stage filters to trigger your pipeline to run when one or more stages of the source pipeline complete (instead of the entire pipeline) by configuring a `stages` filter with one or more stages.",
+      "uses": [
+        "pipeline completion trigger",
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.pipeline-completion-trigger"
+      ],
+      "order": 9347
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-double-run",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Pipelines A and B share a repository and both have CI triggers; B also has a completion trigger on A. Every push gives two runs of B. What prevents this?",
+      "choices": "A) Set `always: true` on B\nB) Move B’s triggers into a template\nC) Add `project:` to B’s pipeline resource\nD) Disable B’s CI trigger with `trigger: none`",
+      "back": "D) Disable B’s CI trigger with `trigger: none`",
+      "choicesExplained": "A: `always` concerns schedules. B: triggers cannot live in templates. C: `project` only identifies a source pipeline in another project.",
+      "explanation": "The push starts B through its CI trigger, and A’s completion starts it again, so one of B’s two triggers must go.",
+      "source": "Microsoft, “Trigger one pipeline after another”, “Combining trigger types” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/pipeline-triggers.md#combining-trigger-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To prevent triggering two runs of `B` in this example, you must disable its CI trigger (`trigger: none`)",
+      "uses": [
+        "pipeline completion trigger",
+        "CI trigger"
+      ],
+      "conceptIDs": [
+        "az400.pipeline-completion-trigger"
+      ],
+      "order": 9356
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.workflow-file-location",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In which directory are GitHub Actions workflow files defined?",
+      "back": "`.github/workflows` in the repository.",
+      "explanation": "When an event occurs, GitHub searches that directory for workflow files whose `on:` values match it.",
+      "source": "GitHub Docs source, reusable text “About workflows” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/data/reusables/actions/about-workflows-long.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Workflows are defined in the `.github/workflows` directory in a repository.",
+      "uses": [
+        "workflow",
+        "repository"
+      ],
+      "conceptIDs": [
+        "az400.workflow-file"
+      ],
+      "order": 9365
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-workflow-file",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A developer commits `build.yml` to a `ci/` folder at the repository root, and the workflow never runs. Where must the file go?",
+      "choices": "A) `ci/workflows/`\nB) The root of the default branch only\nC) `.azure-pipelines/`\nD) `.github/workflows/`",
+      "back": "D) `.github/workflows/`",
+      "choicesExplained": "A and C are not where GitHub looks for workflows. B: GitHub searches the `.github/workflows` directory, not the repository root itself.",
+      "explanation": "GitHub looks for workflow files only in that directory at the commit or ref of the event.",
+      "source": "GitHub Docs source, reusable text “About workflow triggers” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/data/reusables/actions/about-triggers.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "searches the `.github/workflows` directory in the root of your repository for workflow files that are present in the associated commit SHA or Git ref of the event.",
+      "uses": [
+        "workflow",
+        "repository",
+        "commit"
+      ],
+      "conceptIDs": [
+        "az400.workflow-file"
+      ],
+      "order": 9374
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.pull-request-default-types",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "With no `types` given, which activity types of the `pull_request` event run a workflow?",
+      "back": "`opened`, `synchronize` and `reopened`.",
+      "explanation": "Other activity types, such as `labeled` or `closed`, must be requested with the `types` keyword.",
+      "source": "GitHub Docs, “Events that trigger workflows”, “pull_request”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, a workflow only runs when a `pull_request` event's activity type is `opened`, `synchronize`, or `reopened`.",
+      "uses": [
+        "event",
+        "pull request",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "az400.workflow-trigger-events"
+      ],
+      "order": 9383
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.pull-request-target-context",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How does `pull_request_target` protect a repository compared with `pull_request`?",
+      "back": "It runs in the base repository’s context instead of the merge commit, so unsafe code from the pull request head isn’t executed.",
+      "explanation": "That context is what lets it label or comment on pull requests from forks, but it should not be used to build or run the pull request’s code.",
+      "source": "GitHub Docs, “Events that trigger workflows”, “pull_request_target”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request_target",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "rather than in the context of the merge commit, as the `pull_request` event does. This prevents execution of unsafe code from the head of the pull request that could alter your repository or steal any secrets you use in your workflow.",
+      "uses": [
+        "event",
+        "pull request",
+        "fork"
+      ],
+      "conceptIDs": [
+        "az400.pull-request-target"
+      ],
+      "order": 9392
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-pull-request-target",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A workflow must add labels to pull requests opened from forks. It does not build or run their code. Which event suits it?",
+      "choices": "A) `pull_request`\nB) `pull_request_target`\nC) `schedule`\nD) `workflow_dispatch`",
+      "back": "B) `pull_request_target`",
+      "choicesExplained": "A runs against the merge commit and is the event to use when building pull request code, not for privileged actions on fork pull requests. D needs someone to run it by hand. C ignores pull request activity.",
+      "explanation": "The source names labelling or commenting on fork pull requests as what this event allows, and warns against it when the code must be built.",
+      "source": "GitHub Docs, “Events that trigger workflows”, “pull_request_target”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request_target",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This event allows your workflow to do things like label or comment on pull requests from forks. Avoid using this event if you need to build or run code from the pull request.",
+      "uses": [
+        "event",
+        "pull request",
+        "fork",
+        "label"
+      ],
+      "conceptIDs": [
+        "az400.pull-request-target",
+        "az400.workflow-trigger-events"
+      ],
+      "order": 9401
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.schedule-default-branch",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "On which branch do scheduled GitHub Actions workflows run?",
+      "back": "Only on the default branch.",
+      "explanation": "A `schedule` block on any other branch has no effect; the run uses the last commit on the default branch.",
+      "source": "GitHub Docs, “Events that trigger workflows”, “schedule”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Scheduled workflows will only run on the default branch.",
+      "uses": [
+        "schedule event",
+        "branch"
+      ],
+      "conceptIDs": [
+        "az400.schedule-event"
+      ],
+      "order": 9410
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-schedule-event",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team adds `on: schedule` with `cron: '@daily'` to a workflow on a feature branch. What are two reasons it never runs?",
+      "back": "GitHub Actions does not support `@daily`-style syntax; and scheduled workflows run only on the default branch.",
+      "explanation": "Both the cron form and the branch are fixed by the `schedule` event’s rules.",
+      "source": "GitHub Docs, “Events that trigger workflows”, “schedule”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "does not support the non-standard syntax `@yearly`, `@monthly`, `@weekly`, `@daily`, `@hourly`, and `@reboot`.",
+      "uses": [
+        "schedule event",
+        "feature branch"
+      ],
+      "conceptIDs": [
+        "az400.schedule-event"
+      ],
+      "order": 9419
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.dispatch-run-button",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When is the “Run workflow” button shown for a `workflow_dispatch` workflow?",
+      "back": "When the workflow file exists on the default branch.",
+      "explanation": "Once it has run at least once, it can also be dispatched against any branch or tag through the API or GitHub CLI.",
+      "source": "GitHub Docs, “Events that trigger workflows”, “workflow_dispatch”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "the \"Run workflow\" button will be present if the workflow file exists on the default branch.",
+      "uses": [
+        "workflow_dispatch event",
+        "branch"
+      ],
+      "conceptIDs": [
+        "az400.workflow-dispatch"
+      ],
+      "order": 9428
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-dispatch",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Release managers want to start a deployment workflow by hand and choose a log level each time. What should the workflow declare?",
+      "choices": "A) `on: workflow_run` naming the build workflow\nB) `on: schedule` with a `cron` line\nC) `on: workflow_dispatch` with an `inputs` entry for the log level\nD) `on: push` with a `branches` filter",
+      "back": "C) `on: workflow_dispatch` with an `inputs` entry for the log level",
+      "choicesExplained": "B runs by the clock with no one choosing values. A runs after another workflow, not by hand. D runs on pushes.",
+      "explanation": "Manual triggering needs `workflow_dispatch`, and its declared inputs are what let a person pass values in.",
+      "source": "GitHub Docs, “Events that trigger workflows”, “Providing inputs”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#providing-inputs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can configure custom-defined input properties, default input values, and required inputs for the event directly in your workflow.",
+      "uses": [
+        "workflow_dispatch event",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "az400.workflow-dispatch"
+      ],
+      "order": 9437
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.workflow-run-conclusion",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Does `workflow_run` with `types: [completed]` fire only when the watched workflow succeeds?",
+      "back": "No, it fires whatever the conclusion; test `github.event.workflow_run.conclusion` to act only on success.",
+      "explanation": "The trigger reports completion, so success or failure has to be checked in a job’s `if` condition.",
+      "source": "GitHub Docs, “Events that trigger workflows”, “Running a workflow based on the conclusion of another workflow”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#running-a-workflow-based-on-the-conclusion-of-another-workflow",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A workflow run is triggered regardless of the conclusion of the previous workflow. If you want to run a job or step based on the result of the triggering workflow, you can use a conditional with the `github.event.workflow_run.conclusion` property.",
+      "uses": [
+        "workflow_run event",
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.workflow-run-event"
+      ],
+      "order": 9446
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.yaml-hierarchy",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "An Azure Pipelines pipeline consists of one or more {{c1::stages}} that contain jobs and steps.",
+      "explanation": "The hierarchy runs pipeline, stage, job, step, with a step being a script or a task.",
+      "source": "Microsoft, “Key Azure Pipelines concepts”, “Pipelines” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/get-started/key-pipelines-concepts.md#pipelines",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A pipeline consists of one or more stages that contain jobs and steps.",
+      "uses": [
+        "Azure Pipelines stage",
+        "Azure Pipelines job",
+        "step and task"
+      ],
+      "conceptIDs": [
+        "az400.yaml-hierarchy"
+      ],
+      "order": 9455
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.class-hierarchy-level",
+      "type": "basic",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A YAML item uses a prepackaged procedure, configured by inputs, to publish a build artifact. At which level of the hierarchy does it sit?",
+      "back": "Step level: it is a task, one of a job’s steps.",
+      "explanation": "A task is a prepackaged procedure with inputs, and steps (scripts or tasks) are the smallest building blocks inside a job.",
+      "source": "Microsoft, “Key Azure Pipelines concepts”, “Key concepts overview” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/get-started/key-pipelines-concepts.md#key-concepts-overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A step is the smallest element of a pipeline and can be a task or a script. - A task is a prepackaged script that performs an action, such as invoking a REST API or publishing a build artifact.",
+      "uses": [
+        "step and task",
+        "Azure Pipelines job",
+        "pipeline artifact"
+      ],
+      "conceptIDs": [
+        "az400.step-task",
+        "az400.yaml-hierarchy"
+      ],
+      "order": 9464
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.stages-sequential-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Without `dependsOn`, in what order do the stages of a YAML pipeline run?",
+      "back": "One after another, in the order they are defined in the YAML file.",
+      "explanation": "Dependencies are the exception: with them, stages run in the order the `dependsOn` requirements set.",
+      "source": "Microsoft, “Add stages, dependencies, and conditions”, “Specify dependencies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/stages.md#specify-dependencies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you define multiple stages in a pipeline, they run sequentially by default in the order you define them in the YAML file. The exception to this is when you add dependencies.",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.stage-dependencies"
+      ],
+      "order": 9473
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.dependson-empty",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "To make a stage run in parallel with the stage defined before it, set {{c1::`dependsOn: []`}} on it.",
+      "explanation": "An empty list removes the implicit dependency on the previous stage.",
+      "source": "Microsoft, “Add stages, dependencies, and conditions”, “Specify dependencies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/stages.md#specify-dependencies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "dependsOn: [] # Runs in parallel with FunctionalTest",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.stage-dependencies"
+      ],
+      "order": 9482
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-stage-parallel",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Stages `UnitTest` and `SecurityScan` are defined one after the other and should run at the same time after `Build`. What should both declare?",
+      "choices": "A) `isSkippable: false`\nB) `condition: always()`\nC) `dependsOn: Build`\nD) `trigger: manual`",
+      "back": "C) `dependsOn: Build`",
+      "choicesExplained": "B changes whether a stage runs, not its order. A only stops users skipping a stage. D makes a stage wait for someone to start it.",
+      "explanation": "Stages that depend on the same stage start together once it completes, instead of following their written order.",
+      "source": "Microsoft, “Add stages, dependencies, and conditions”, “Specify dependencies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/stages.md#specify-dependencies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "dependsOn: Test # stage runs after Test - stage: DeployUS2 dependsOn: Test # stage runs in parallel with DeployUS1, after Test",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.stage-dependencies"
+      ],
+      "order": 9491
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-fan-out-fan-in",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "After `Test`, a release deploys to two regions at once and then runs `Smoke` only when both deployments finish. Which `dependsOn` layout does this?",
+      "choices": "A) Each region `dependsOn: []`; `Smoke` `dependsOn: Test`\nB) Each region `dependsOn: Test`; `Smoke` `dependsOn` both regions\nC) Region one `dependsOn: Test`; region two `dependsOn: RegionOne`; `Smoke` `dependsOn: RegionTwo`\nD) No `dependsOn`; `Smoke` `condition: always()`",
+      "back": "B) Each region `dependsOn: Test`; `Smoke` `dependsOn` both regions",
+      "choicesExplained": "A: the regions would start without waiting for Test, and Smoke would not wait for them. C: the regions would run one after the other, not at once. D: stages would run strictly in written order, and `always()` would let Smoke run after failures.",
+      "explanation": "This is fan-out (two stages on one dependency) followed by fan-in (one stage on both).",
+      "source": "Microsoft, “Add stages, dependencies, and conditions”, “Specify dependencies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/stages.md#specify-dependencies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "dependsOn: Test # stage runs in parallel with DeployUS1, after Test - stage: DeployEurope dependsOn: # stage runs after DeployUS1 and DeployUS2",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.fan-out-fan-in"
+      ],
+      "order": 9500
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.yaml-no-queuing-policies",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Do YAML pipelines support stage queuing policies, and what is recommended instead?",
+      "back": "No; each run is independent. Manual approvals are recommended to sequence execution.",
+      "explanation": "Two quick commits can start two runs that go through the same stages without waiting for each other.",
+      "source": "Microsoft, “Add stages, dependencies, and conditions”, “Specify queuing policies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/stages.md#specify-queuing-policies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "YAML pipelines don't support queuing policies. Each run of a pipeline is independent from and unaware of other runs.",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.stage-queuing"
+      ],
+      "order": 9509
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.manual-stage",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "How is a YAML stage made to wait until someone starts it by hand, while the other stages run automatically?",
+      "back": "Add `trigger: manual` to that stage.",
+      "explanation": "One pipeline can then build and test automatically but hold, for example, the production deployment until someone is ready.",
+      "source": "Microsoft, “Add stages, dependencies, and conditions”, “Add a manual trigger” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/stages.md#add-a-manual-trigger",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To use this feature, add the `trigger: manual` property to a stage.",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.manual-stage"
+      ],
+      "order": 9518
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.unskippable-stage",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "How do you stop pipeline users skipping a stage, such as malware detection, when they run the pipeline?",
+      "back": "Mark the stage `isSkippable: false`.",
+      "explanation": "Its checkbox is then disabled in the “Stages to run” panel, so it must run.",
+      "source": "Microsoft, “Add stages, dependencies, and conditions”, “Mark a stage as unskippable” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/stages.md#mark-a-stage-as-unskippable",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Mark a stage as `isSkippable: false` to prevent pipeline users from skipping stages.",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.unskippable-stage"
+      ],
+      "order": 9527
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.jobs-parallel-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Without `dependsOn`, how do multiple jobs in one YAML stage run?",
+      "back": "In parallel.",
+      "explanation": "Jobs need `dependsOn` to run in sequence, whereas stages are sequential unless told otherwise.",
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Dependencies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#dependencies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default Azure DevOps YAML pipeline jobs run in parallel unless the `dependsOn` value is set.",
+      "uses": [
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.job-dependencies"
+      ],
+      "order": 9536
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.parallel-needs-agents",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What two things are needed for jobs to actually run in parallel?",
+      "back": "Multiple agents, since each runs one job at a time; and sufficient parallel jobs.",
+      "explanation": "Parallel YAML jobs still queue if agents or purchased parallel jobs run out.",
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Dependencies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#dependencies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each agent can run only one job at a time. To run multiple jobs in parallel, you must configure multiple agents. You also need sufficient parallel jobs.",
+      "uses": [
+        "agent",
+        "parallel job",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.job-dependencies"
+      ],
+      "order": 9545
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-job-order",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A stage has jobs `Compile` and `Package`. `Package` keeps starting before `Compile` finishes. What fixes it?",
+      "choices": "A) Add `dependsOn: Compile` to `Package`\nB) Move `Package` above `Compile` in the file\nC) Give `Package` a lower priority\nD) Put each job in its own concurrency group",
+      "back": "A) Add `dependsOn: Compile` to `Package`",
+      "choicesExplained": "B: written order does not sequence jobs, which run in parallel by default. C: YAML pipelines have no job priority. D: concurrency groups are a GitHub Actions feature.",
+      "explanation": "Jobs in a stage run in parallel unless a dependency is declared.",
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Dependencies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#dependencies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default Azure DevOps YAML pipeline jobs run in parallel unless the `dependsOn` value is set.",
+      "uses": [
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.job-dependencies",
+        "az400.job"
+      ],
+      "order": 9554
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.class-job-type",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A job must pause a release for a person to confirm, using the Manual Validation task, without holding any build machine. Which job type is it?",
+      "choices": "A) Agent pool job\nB) Agentless (server) job\nC) Deployment group job\nD) Container job",
+      "back": "B) Agentless (server) job",
+      "choicesExplained": "A and D both run on an agent in an agent pool. C runs on machines in a deployment group, and only in Classic release pipelines.",
+      "explanation": "Manual Validation is one of the few tasks supported in agentless jobs, which need no agent.",
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Agentless jobs supported tasks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#agentless-jobs-supported-tasks",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Currently, only the following tasks are supported out of the box for agentless jobs: * Delay task * Invoke Azure Function task * Invoke REST API task * Manual Validation task",
+      "uses": [
+        "agentless job",
+        "container job",
+        "agent pool"
+      ],
+      "conceptIDs": [
+        "az400.job-types",
+        "az400.server-job"
+      ],
+      "order": 9563
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.pool-server",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In YAML, an agentless job is declared with {{c1::`pool: server`}}.",
+      "explanation": "`server` is a reserved value meaning the job runs on the server rather than on an agent.",
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Server jobs” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#server-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "pool: server # note: the value 'server' is a reserved keyword which indicates this is an agentless job",
+      "uses": [
+        "agentless job",
+        "agent pool"
+      ],
+      "conceptIDs": [
+        "az400.server-job"
+      ],
+      "order": 9572
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.agentless-tasks",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two tasks supported out of the box in agentless jobs?",
+      "back": "Any two, among others: Delay; Invoke REST API; Manual Validation.",
+      "explanation": "The list also includes Invoke Azure Function and Query Work Items, and extensions can add more.",
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Agentless jobs supported tasks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#agentless-jobs-supported-tasks",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Currently, only the following tasks are supported out of the box for agentless jobs: * Delay task * Invoke Azure Function task * Invoke REST API task * Manual Validation task",
+      "uses": [
+        "agentless job",
+        "step and task"
+      ],
+      "conceptIDs": [
+        "az400.server-job"
+      ],
+      "order": 9581
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.timeout-zero-self-hosted",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "On a self-hosted agent, how long can a job with timeout set to zero run?",
+      "back": "Forever.",
+      "explanation": "Zero means “use the maximum”, and a self-hosted agent imposes no maximum of its own.",
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Timeouts” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#timeouts",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Setting the value to zero means that the job can run: * Forever on self-hosted agents",
+      "uses": [
+        "self-hosted agent",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.job-timeouts"
+      ],
+      "order": 9590
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.timeout-zero-private",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "On Microsoft-hosted agents with a private project or repository, how long can a job with timeout zero run (without paid extra capacity)?",
+      "back": "60 minutes.",
+      "explanation": "The hosted limit applies whatever job-level timeout is written.",
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Timeouts” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#timeouts",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For 60 minutes on Microsoft-hosted agents with a private project or private repository (unless extra capacity is paid for)",
+      "uses": [
+        "Microsoft-hosted agent",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.job-timeouts"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · documentation as published",
+      "order": 9599
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.timeout-defaults",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What is the default `timeoutInMinutes` for a job when it is not set, and what does `0` mean?",
+      "back": "60 minutes; `0` means the maximum limit is used.",
+      "explanation": "The maximum then depends on the agent: no limit when self-hosted, a fixed limit when Microsoft-hosted.",
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Timeouts” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#timeouts",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The `timeoutInMinutes` allows a limit to be set for the job execution time. When not specified, the default is 60 minutes. When `0` is specified, the maximum limit is used.",
+      "uses": [
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.job-timeouts"
+      ],
+      "order": 9608
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-timeout",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A private project sets `timeoutInMinutes: 180` on a job using Microsoft-hosted agents, with no extra capacity bought. What happens after 60 minutes?",
+      "choices": "A) The job keeps running to 180 minutes\nB) The job pauses and asks for approval\nC) The job is terminated at the hosted limit\nD) The job moves to a self-hosted agent",
+      "back": "C) The job is terminated at the hosted limit",
+      "choicesExplained": "A: a job-level timeout above the hosted maximum has no effect. B and D: nothing in timeout handling pauses for approval or moves a job to another agent.",
+      "explanation": "On Microsoft-hosted agents the hosted limit takes precedence over any job-level timeout.",
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Timeouts” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#timeouts",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When the job is run on a Microsoft-hosted agent, setting the job level timeout greater than the built-in Microsoft-hosted job level timeout has no effect.",
+      "uses": [
+        "Microsoft-hosted agent",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.job-timeouts"
+      ],
+      "order": 9617
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.azp-matrix",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In Azure Pipelines, what do `strategy: matrix` and `maxParallel` do?",
+      "back": "`matrix` dispatches one job several times with different variable sets; `maxParallel` limits how many run at once.",
+      "explanation": "A three-entry matrix with `maxParallel: 2` yields three jobs, of which only two run at the same time.",
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Multi-job configuration” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#multi-job-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The `matrix` strategy enables a job to be dispatched multiple times, with different variable sets. The `maxParallel` tag restricts the amount of parallelism.",
+      "uses": [
+        "Azure Pipelines job",
+        "matrix strategy"
+      ],
+      "conceptIDs": [
+        "az400.multi-job-config"
+      ],
+      "order": 9626
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-multi-config",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team must build one app for `debug` and `release` on `x86` and `x64`, in parallel, from one job definition. Which Azure Pipelines feature fits?",
+      "back": "A multi-configuration job using `strategy: matrix`, one entry per combination.",
+      "explanation": "The source gives multi-configuration builds of this kind as the first use of running one authored job on several agents.",
+      "source": "Microsoft, “Specify jobs in your pipeline”, “Multi-job configuration” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/phases.md#multi-job-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can build multiple configurations in parallel. For example, you could build a Visual C++ app for both `debug` and `release` configurations on both `x86` and `x64` platforms.",
+      "uses": [
+        "Azure Pipelines job",
+        "matrix strategy"
+      ],
+      "conceptIDs": [
+        "az400.multi-job-config"
+      ],
+      "order": 9635
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.container-requirements",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two requirements for container jobs in Azure Pipelines?",
+      "back": "A YAML pipeline, since Classic pipelines don’t support container jobs; and a Windows or Ubuntu agent, since macOS agents don’t support containers.",
+      "explanation": "The list goes on: Docker must be installed on the agent, and nested containers aren’t supported.",
+      "source": "Microsoft, “Container jobs in YAML pipelines”, “Requirements for container jobs” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/container-phases.md#requirements-for-container-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A YAML-based pipeline. Classic pipelines don't support container jobs. - A Windows or Ubuntu hosted agent. MacOS agents don't support containers.",
+      "uses": [
+        "container job",
+        "agent"
+      ],
+      "conceptIDs": [
+        "az400.container-job"
+      ],
+      "order": 9644
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-container-job",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A build must run with an exact pinned toolchain image while still using a Microsoft-hosted Ubuntu agent. What should the job declare?",
+      "choices": "A) `pool: server`\nB) `strategy: parallel`\nC) `container:` naming the image\nD) `trigger: manual`",
+      "back": "C) `container:` naming the image",
+      "choicesExplained": "A makes an agentless job, which cannot run build tools. B only duplicates the job. D only delays when a stage starts.",
+      "explanation": "A container job starts the image on the agent and runs every step inside it, giving exact tool versions.",
+      "source": "Microsoft, “Container jobs in YAML pipelines”, “Single job” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/container-phases.md#single-job",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This example tells the system to fetch the `ubuntu` image tagged `18.04` from Docker Hub and then start the container.",
+      "uses": [
+        "container job",
+        "Microsoft-hosted agent"
+      ],
+      "conceptIDs": [
+        "az400.container-job"
+      ],
+      "order": 9653
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.default-condition-jobs",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "By default, when does a job or stage run?",
+      "back": "When it depends on nothing, or when all its dependencies, direct and indirect, completed and succeeded.",
+      "explanation": "The default is what a custom `condition` replaces.",
+      "source": "Microsoft, “Pipeline conditions”, “Conditions a stage, job, or step runs under” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/conditions.md#conditions-a-stage-job-or-step-runs-under",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, a pipeline job or stage runs if it doesn't depend on any other job or stage, or if all its dependencies completed and succeeded. The dependency requirement applies to direct dependencies and to their indirect dependencies, computed recursively.",
+      "uses": [
+        "Azure Pipelines job",
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.default-condition"
+      ],
+      "order": 9662
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.default-condition-steps",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "By default, when does a step run?",
+      "back": "When nothing in its job has failed yet and the step immediately before it completed.",
+      "explanation": "A failed step therefore stops the later steps in the job unless their conditions say otherwise.",
+      "source": "Microsoft, “Pipeline conditions”, “Conditions a stage, job, or step runs under” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/conditions.md#conditions-a-stage-job-or-step-runs-under",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, a step runs if nothing in its job failed yet and the step immediately preceding it completed.",
+      "uses": [
+        "step and task",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.default-condition"
+      ],
+      "order": 9671
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.condition-overwrites-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What happens to the default condition when you set a `condition` on a stage, job or step?",
+      "back": "It is overwritten, so the item might run even if the build is cancelled.",
+      "explanation": "A custom condition should therefore take the state of its parent into account.",
+      "source": "Microsoft, “Pipeline conditions”, “Conditions a stage, job, or step runs under” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/conditions.md#conditions-a-stage-job-or-step-runs-under",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you specify a `condition` property for a stage, job, or step, you overwrite the default condition. Your stage, job, or step might run even if the build is canceled.",
+      "uses": [
+        "expression",
+        "Azure Pipelines stage",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.conditions"
+      ],
+      "order": 9680
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.and-succeeded",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why is a custom stage condition commonly written as `and(succeeded(), …)`?",
+      "back": "A custom condition removes the default success check, so `succeeded()` restores it.",
+      "explanation": "Without it, the stage runs whatever the outcome of the preceding stage.",
+      "source": "Microsoft, “Add stages, dependencies, and conditions”, “Define conditions” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/stages.md#define-conditions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "So, if you use a custom condition, it's common to use `and(succeeded(),custom_condition)` to check whether the preceding stage ran successfully. Otherwise, the stage runs regardless of the outcome of the preceding stage.",
+      "uses": [
+        "expression",
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.conditions"
+      ],
+      "order": 9689
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-condition-main",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A deployment stage must run only for builds of `main`, and only if earlier stages succeeded. Which condition fits?",
+      "choices": "A) `and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))`\nB) `eq(variables['Build.SourceBranch'], 'refs/heads/main')`\nC) `always()`\nD) `and(failed(), eq(variables['Build.Reason'], 'PullRequest'))`",
+      "back": "A) `and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))`",
+      "choicesExplained": "B replaces the default condition, so it runs on `main` even after failures or cancellation. C runs every time. D runs only after a failure on a pull request build.",
+      "explanation": "Setting a condition drops the default success check, so `succeeded()` must be combined with the branch test.",
+      "source": "Microsoft, “Pipeline conditions”, “Condition settings for various outcomes” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/conditions.md#condition-settings-for-various-outcomes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Run if the source branch is `main` and the parent or preceding stage, job, or step succeeded. | `and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))`",
+      "uses": [
+        "expression",
+        "Azure Pipelines stage",
+        "branch"
+      ],
+      "conceptIDs": [
+        "az400.conditions",
+        "az400.default-condition",
+        "az400.expression"
+      ],
+      "order": 9698
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.runtime-values-same-job",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Can a job’s condition use a variable set earlier in that same job with a `$[ ]` runtime expression?",
+      "back": "No; conditions are evaluated before the stage, job or step starts.",
+      "explanation": "Nothing computed while a stage, job or step runs is available to its own condition.",
+      "source": "Microsoft, “Pipeline conditions”, “Custom conditions” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/conditions.md#custom-conditions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Conditions are evaluated to determine whether to start a stage, job, or step. Therefore, nothing computed during the runtime of a stage, job, or step is available to use within that same stage, job, or step.",
+      "uses": [
+        "expression",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.conditions"
+      ],
+      "order": 9707
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.status-always",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which job status check function evaluates to True even when the pipeline is cancelled?",
+      "back": "`always()`.",
+      "explanation": "A critical failure, such as failing to get sources, might still stop a task from running.",
+      "source": "Microsoft, “Expressions”, “always” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/expressions.md#always",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Always evaluates to `True` (even when canceled). Note: A critical failure might still prevent a task from running.",
+      "uses": [
+        "expression"
+      ],
+      "conceptIDs": [
+        "az400.status-functions"
+      ],
+      "order": 9716
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.status-succeeded-or-failed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which job status check function is like `always()` except that it is False when the pipeline is cancelled?",
+      "back": "`succeededOrFailed()`.",
+      "explanation": "It ignores whether earlier jobs passed or failed, but respects cancellation.",
+      "source": "Microsoft, “Expressions”, “succeededOrFailed” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/expressions.md#succeededorfailed",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This function is like `always()`, except it evaluates to `False` when the pipeline is canceled.",
+      "uses": [
+        "expression"
+      ],
+      "conceptIDs": [
+        "az400.status-functions"
+      ],
+      "order": 9725
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.status-failed",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "For a job, with no arguments, which status function is True if any previous job in the dependency graph failed?",
+      "back": "`failed()`.",
+      "explanation": "Given job names as arguments, it checks only those jobs.",
+      "source": "Microsoft, “Expressions”, “failed” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/expressions.md#failed",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "With no arguments, evaluates to `True` if any previous job in the dependency graph failed.",
+      "uses": [
+        "expression",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.status-functions"
+      ],
+      "order": 9734
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.status-canceled",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which job status check function is True only if the pipeline is cancelled?",
+      "back": "`canceled()`.",
+      "explanation": "It suits steps that should run only on cancellation, such as some clean-up work.",
+      "source": "Microsoft, “Expressions”, “canceled” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/expressions.md#canceled",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Evaluates to `True` if the pipeline is canceled.",
+      "uses": [
+        "expression"
+      ],
+      "conceptIDs": [
+        "az400.status-functions"
+      ],
+      "order": 9743
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.status-succeeded",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "For a job, with no arguments, which status function is True if all previous jobs in the dependency graph succeeded or partially succeeded?",
+      "back": "`succeeded()`.",
+      "explanation": "It is False if the pipeline is cancelled, and it is the check in the default condition.",
+      "source": "Microsoft, “Expressions”, “succeeded” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/expressions.md#succeeded",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "With no arguments, evaluates to `True` if all previous jobs in the dependency graph succeeded or partially succeeded.",
+      "uses": [
+        "expression",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.status-functions"
+      ],
+      "order": 9752
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-cleanup-step",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A step uploads test logs. It must run after earlier steps pass or fail, but not after someone cancels the run. Which condition fits?",
+      "choices": "A) `succeeded()`\nB) `succeededOrFailed()`\nC) `canceled()`\nD) `always()`",
+      "back": "B) `succeededOrFailed()`",
+      "choicesExplained": "A skips the step after a failure. D runs it even after cancellation. C runs it only when the run is cancelled.",
+      "explanation": "Only this function is True for both success and failure yet False on cancellation.",
+      "source": "Microsoft, “Expressions”, “succeededOrFailed” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/expressions.md#succeededorfailed",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This function is like `always()`, except it evaluates to `False` when the pipeline is canceled.",
+      "uses": [
+        "expression",
+        "step and task"
+      ],
+      "conceptIDs": [
+        "az400.status-functions"
+      ],
+      "order": 9761
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.compile-vs-runtime-syntax",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Compile-time expressions use {{c1::`${{ }}`}} syntax, and runtime expressions use `$[ ]`.",
+      "explanation": "Compile-time ones are evaluated when the YAML is compiled into a plan; runtime ones during the run.",
+      "source": "Microsoft, “Expressions”, “Expressions” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/expressions.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Note the syntax ${{}} for compile time and $[] for runtime expressions.",
+      "uses": [
+        "expression"
+      ],
+      "conceptIDs": [
+        "az400.expression"
+      ],
+      "order": 9770
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.compile-vs-runtime-context",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How do compile-time and runtime expressions differ in the context they can reach?",
+      "back": "Compile time: parameters and statically defined variables. Runtime: more variables, but no parameters.",
+      "explanation": "The docs call available context the main difference between the two syntaxes.",
+      "source": "Microsoft, “Expressions”, “Expressions” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/expressions.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In a compile-time expression (`${{ <expression> }}`), you have access to `parameters` and statically defined `variables`. In a runtime expression (`$[ <expression> ]`), you have access to more `variables` but no parameters.",
+      "uses": [
+        "expression"
+      ],
+      "conceptIDs": [
+        "az400.expression"
+      ],
+      "order": 9779
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.stage-dependencies-context",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which expression context references an output variable from a job in another stage?",
+      "back": "`stageDependencies` (the `dependencies` context covers jobs and stages otherwise).",
+      "explanation": "The context name changes once the reference crosses a stage boundary.",
+      "source": "Microsoft, “Expressions”, “Dependencies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/expressions.md#dependencies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The context is called `dependencies` for jobs and stages and works much like variables. If you refer to an output variable from a job in another stage, the context is called `stageDependencies`.",
+      "uses": [
+        "expression",
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.dependencies-syntax"
+      ],
+      "order": 9788
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.run-first-step",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does Azure Pipelines do first when it processes a pipeline for a run?",
+      "back": "It expands templates and evaluates template expressions, then evaluates stage dependencies to pick the first stage.",
+      "explanation": "That is why runtime variables cannot shape template parameters: they do not exist yet at expansion.",
+      "source": "Microsoft, “Pipeline runs”, “Pipeline processing” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/runs.md#pipeline-processing",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "1. Expands templates and evaluates template expressions. 2. Evaluates dependencies at the stage level to pick the first stage to run.",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.pipeline-run-sequence"
+      ],
+      "order": 9797
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-variable-env-name",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A pipeline sets a job-level variable and uses it for the environment name of a deployment, and the run fails authorisation. Why?",
+      "choices": "A) Environment names must be in upper case\nB) Variables cannot be used in any YAML pipeline\nC) Deployment jobs cannot run on Microsoft-hosted agents\nD) Resources are authorised before the stage runs, when stage- and job-level variables do not yet exist",
+      "back": "D) Resources are authorised before the stage runs, when stage- and job-level variables do not yet exist",
+      "choicesExplained": "A is not a rule in the source. B: variables are widely used; only this timing blocks them. C is unrelated to resource authorisation.",
+      "explanation": "The processing order means the resource is checked before the variable has a value.",
+      "source": "Microsoft, “Pipeline runs”, “Variables” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/runs.md#variables",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can't use variables to resolve service connection or environment names, because the pipeline authorizes resources before a stage starts running. Stage- and job-level variables aren't available yet.",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.pipeline-run-sequence"
+      ],
+      "order": 9806
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.step-own-process",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why aren’t environment variables set in one step visible to the next, and how can a step pass a value on?",
+      "back": "Each step runs in its own process; a logging command such as `##vso[task.setVariable …]` creates a pipeline variable for later steps.",
+      "explanation": "Pipeline variables are turned into environment variables in the next step automatically.",
+      "source": "Microsoft, “Pipeline runs”, “Step execution” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/runs.md#step-execution",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each step runs in its own process, isolating its environment from previous steps. Because of this process-per-step model, environment variables aren't preserved between steps.",
+      "uses": [
+        "step and task"
+      ],
+      "conceptIDs": [
+        "az400.pipeline-run-sequence"
+      ],
+      "order": 9815
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.job-worst-outcome",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Can a successful clean-up step return a failed job to success?",
+      "back": "No; a job reflects the worst outcome of its steps and can’t return to success after failing.",
+      "explanation": "Clean-up steps often use `always()` to run, but they only tidy up; they do not change the verdict.",
+      "source": "Microsoft, “Pipeline runs”, “State and conditions” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/runs.md#state-and-conditions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A successful cleanup step doesn't save the job from failing. Jobs can't return to success after failing.",
+      "uses": [
+        "Azure Pipelines job",
+        "step and task"
+      ],
+      "conceptIDs": [
+        "az400.pipeline-run-sequence"
+      ],
+      "order": 9824
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.multistage-benefit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does dividing the delivery process into a multistage pipeline give, according to the Azure DevOps tutorial?",
+      "back": "More visibility into the deployment process, and easier integration of approvals and checks.",
+      "explanation": "Each stage, such as build, dev and staging, becomes a place where checks can be attached.",
+      "source": "Microsoft, “Tutorial: Create a multistage pipeline with Azure DevOps”, “Tutorial: Create a multistage pipeline with Azure DevOps” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/create-multistage-pipeline.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A multistage pipeline gives more visibility into your deployment process and makes it easier to integrate approvals and checks.",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.multistage-pipeline"
+      ],
+      "order": 9833
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-multistage",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team wants one YAML pipeline that builds a package, deploys it to a dev site, then deploys to staging only after someone approves. How should it be structured?",
+      "back": "As a multistage pipeline: Build, Dev and Staging stages, with a manual approval check guarding staging.",
+      "explanation": "The tutorial splits exactly these parts of the cycle into stages, attaching the approval where staging is deployed.",
+      "source": "Microsoft, “Tutorial: Create a multistage pipeline with Azure DevOps”, “Tutorial: Create a multistage pipeline with Azure DevOps” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/create-multistage-pipeline.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Staging: Deploy to a staging Azure App Service instance with a manual approval check",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.multistage-pipeline",
+        "az400.stage"
+      ],
+      "order": 9842
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.needs-keyword",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In GitHub Actions, which key lists the jobs that must complete successfully before a job runs?",
+      "back": "`jobs.<job_id>.needs`, a string or an array of strings.",
+      "explanation": "It plays the part that `dependsOn` plays in Azure Pipelines.",
+      "source": "GitHub Docs source, reusable text “Using jobs in a workflow: needs” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/data/reusables/actions/jobs/section-using-jobs-in-a-workflow-needs.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use `jobs.<job_id>.needs` to identify any jobs that must complete successfully before this job will run. It can be a string or array of strings.",
+      "uses": [
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.github-needs"
+      ],
+      "order": 9851
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.needs-failure-skips",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "If a job that others `need` fails or is skipped, what happens to them?",
+      "back": "They are skipped, unless they use a conditional expression that makes them continue.",
+      "explanation": "The skip carries down the whole dependency chain from the point of failure onwards.",
+      "source": "GitHub Docs source, reusable text “Using jobs in a workflow: needs” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/data/reusables/actions/jobs/section-using-jobs-in-a-workflow-needs.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If a job fails or is skipped, all jobs that need it are skipped unless the jobs use a conditional expression that causes the job to continue.",
+      "uses": [
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.github-needs"
+      ],
+      "order": 9860
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-needs-always",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A `report` job has `needs: [test, lint]` and must run after both finish even if one fails. What should it add?",
+      "choices": "A) `if: ${{ always() }}`\nB) `strategy.fail-fast: false`\nC) `concurrency: report`\nD) `continue-on-error: true` on `report`",
+      "back": "A) `if: ${{ always() }}`",
+      "choicesExplained": "B controls cancelling of matrix jobs, not whether dependants run. C only limits simultaneous runs. D lets `report` fail without failing the run, but does not stop it being skipped.",
+      "explanation": "Dependants of a failed job are skipped unless a conditional such as `always()` lets them continue.",
+      "source": "GitHub Docs source, reusable text “Using jobs in a workflow: needs” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/data/reusables/actions/jobs/section-using-jobs-in-a-workflow-needs.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you would like a job to run even if a job it is dependent on did not succeed, use the `always()` conditional expression in `jobs.<job_id>.if`.",
+      "uses": [
+        "job",
+        "expression"
+      ],
+      "conceptIDs": [
+        "az400.github-needs"
+      ],
+      "order": 9869
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.gh-matrix-count",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A GitHub Actions matrix has `version: [10, 12, 14]` and `os: [ubuntu-latest, windows-latest]`. How many jobs run?",
+      "back": "Six: one for each combination.",
+      "explanation": "A job runs for each possible combination of the matrix variables, so the counts multiply.",
+      "source": "GitHub Docs source, “Running variations of jobs in a workflow”, “Adding a matrix strategy to your workflow job” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/content/actions/how-tos/write-workflows/choose-what-workflows-do/run-job-variations.md#adding-a-matrix-strategy-to-your-workflow-job",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A job will run for each possible combination of the variables. In this example, the workflow will run six jobs, one for each combination of the `os` and `version` variables.",
+      "uses": [
+        "matrix strategy",
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.matrix-strategy"
+      ],
+      "order": 9878
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.gh-matrix-exclude",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "To remove specific configurations defined in a matrix, use {{c1::`jobs.<job_id>.strategy.matrix.exclude`}}.",
+      "explanation": "Its counterpart, `include`, adds new configurations or expands existing ones.",
+      "source": "GitHub Docs source, “Running variations of jobs in a workflow”, “Excluding matrix configurations” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/content/actions/how-tos/write-workflows/choose-what-workflows-do/run-job-variations.md#excluding-matrix-configurations",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To remove specific configurations defined in the matrix, use `jobs.<job_id>.strategy.matrix.exclude`.",
+      "uses": [
+        "matrix strategy"
+      ],
+      "conceptIDs": [
+        "az400.matrix-strategy"
+      ],
+      "order": 9887
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.concurrency-pending-replaced",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In a concurrency group, by default, what happens to a job already `pending` when a newer one is queued?",
+      "back": "It is cancelled, and the new job takes its place.",
+      "explanation": "At most one job or workflow runs in the group; by default only the latest waiting one is kept.",
+      "source": "GitHub Docs source, reusable text “Concurrency group behaviour” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/data/reusables/actions/actions-group-concurrency.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, any existing `pending` job or workflow in the same concurrency group will be canceled and the new queued job or workflow will take its place.",
+      "uses": [
+        "concurrency group",
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.concurrency-group"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · documentation as published",
+      "order": 9896
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.cancel-in-progress",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How do you make a new run also cancel the job or workflow already running in its concurrency group?",
+      "back": "Specify `cancel-in-progress: true`.",
+      "explanation": "Without it, only pending runs are replaced; the running one finishes.",
+      "source": "GitHub Docs source, reusable text “Concurrency group behaviour” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/data/reusables/actions/actions-group-concurrency.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To also cancel any currently running job or workflow in the same concurrency group, specify `cancel-in-progress: true`.",
+      "uses": [
+        "concurrency group"
+      ],
+      "conceptIDs": [
+        "az400.concurrency-group"
+      ],
+      "order": 9905
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.app-concurrency",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Two pushes to `main` in quick succession start two production deployment workflows that clash. What should the workflow add?",
+      "choices": "A) A `matrix` with one entry per push\nB) `needs:` on the deploy job\nC) A `concurrency` group such as `production`\nD) A `schedule` event",
+      "back": "C) A `concurrency` group such as `production`",
+      "choicesExplained": "A would multiply the deployments. B orders jobs within one run, not across runs. D changes when the workflow starts, not whether runs overlap.",
+      "explanation": "Runs that share a concurrency group take turns, so only one deployment runs at a time.",
+      "source": "GitHub Docs source, reusable text “Using concurrency in jobs” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/data/reusables/actions/jobs/section-using-concurrency-jobs.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can use `jobs.<job_id>.concurrency` to ensure that only a single job or workflow using the same concurrency group will run at a time.",
+      "uses": [
+        "concurrency group",
+        "workflow",
+        "push"
+      ],
+      "conceptIDs": [
+        "az400.concurrency-group"
+      ],
+      "order": 9914
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.contrast-stage-job-order",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does the default run order of stages differ from that of jobs within a stage?",
+      "back": "Stages run one after another in written order; jobs in a stage run in parallel. `dependsOn` changes either.",
+      "explanation": "The default for stages is sequential and for jobs parallel, so each needs `dependsOn` for the opposite behaviour.",
+      "source": "Microsoft, “Expressions”, “succeeded” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/expressions.md#succeeded",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use with `dependsOn` when working with jobs and you want to check if a previous job was successful. Jobs run in parallel, while stages run sequentially.",
+      "uses": [
+        "Azure Pipelines stage",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.stage-dependencies",
+        "az400.job-dependencies"
+      ],
+      "order": 9923
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.contrast-schedules",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How do branches differ between Azure Pipelines scheduled triggers and the GitHub Actions `schedule` event?",
+      "back": "Azure schedules have branch include and exclude filters; GitHub scheduled workflows run only on the default branch.",
+      "explanation": "In Azure Pipelines the filters in each branch’s YAML decide whether that branch is scheduled.",
+      "source": "GitHub Docs, “Events that trigger workflows”, “schedule”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Scheduled workflows will only run on the default branch.",
+      "uses": [
+        "scheduled trigger",
+        "schedule event",
+        "branch"
+      ],
+      "conceptIDs": [
+        "az400.scheduled-trigger",
+        "az400.schedule-event"
+      ],
+      "order": 9932
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.contrast-completion-workflow-run",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does a pipeline completion trigger differ from `workflow_run` in what counts as completion?",
+      "back": "A completion trigger fires when the source pipeline run completes successfully; `workflow_run` fires whatever the other workflow’s conclusion.",
+      "explanation": "A `workflow_run` workflow must test the conclusion itself if it should act only on success.",
+      "source": "Microsoft, “Trigger one pipeline after another”, “Trigger one pipeline after another” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/pipeline-triggers.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In situations like these, add a pipeline trigger to run your pipeline upon the successful completion of the triggering pipeline",
+      "uses": [
+        "pipeline completion trigger",
+        "workflow_run event"
+      ],
+      "conceptIDs": [
+        "az400.pipeline-completion-trigger",
+        "az400.workflow-run-event"
+      ],
+      "order": 9941
+    },
+    {
+      "id": "az400.triggers-yaml-job-order.contrast-pr-events",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How do `pull_request` and `pull_request_target` differ in the code they run against?",
+      "back": "`pull_request` runs against the pull request’s merge commit; `pull_request_target` runs in the base repository’s context.",
+      "explanation": "That is why `pull_request_target` suits privileged actions on fork pull requests but not building their code.",
+      "source": "GitHub Docs, “Events that trigger workflows”, “pull_request_target”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request_target",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "rather than in the context of the merge commit, as the `pull_request` event does. This prevents execution of unsafe code from the head of the pull request",
+      "uses": [
+        "event",
+        "pull request"
+      ],
+      "conceptIDs": [
+        "az400.pull-request-target",
+        "az400.workflow-trigger-events"
+      ],
+      "order": 9950
+    }
+  ]
+}

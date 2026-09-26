@@ -1,0 +1,2163 @@
+{
+  "topic": "Deployment strategies",
+  "notes": [
+    {
+      "id": "az400.deployment-strategies.what-is-deployment-job",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a deployment job in an Azure Pipelines YAML pipeline?",
+      "back": "A special type of job: a collection of steps run in order against an environment.",
+      "explanation": "Microsoft recommends putting deployment steps in a deployment job, and it can sit in the same stage as a traditional job.",
+      "example": "Like an ordinary job that runs a build script, but declared with `- deployment:` and pointed at a `staging` environment so each run is recorded there.",
+      "introduces": [
+        "deployment job"
+      ],
+      "source": "Microsoft, “Deployment jobs” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In YAML pipelines, we recommend that you put your deployment steps in a special type of job called a deployment job. A deployment job is a collection of steps that are run sequentially against the environment.",
+      "uses": [
+        "deployment job",
+        "Azure Pipelines job",
+        "environment"
+      ],
+      "conceptIDs": [
+        "az400.deployment-job"
+      ],
+      "order": 11010
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-runonce",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the runOnce strategy for a deployment job?",
+      "back": "The simplest deployment strategy: each lifecycle hook runs once, then either the success or the failure hook runs.",
+      "explanation": "The hooks it runs once are `preDeploy`, `deploy`, `routeTraffic` and `postRouteTraffic`.",
+      "example": "Like running a deployment script by hand once against one test server, but with separate hooks for set-up, deployment, traffic and clean-up.",
+      "introduces": [
+        "runOnce strategy"
+      ],
+      "source": "Microsoft, “Deployment jobs”, “RunOnce deployment strategy” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#runonce-deployment-strategy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "runOnce is the simplest deployment strategy wherein all the lifecycle hooks, namely `preDeploy` `deploy`, `routeTraffic`, and `postRouteTraffic`, are executed once. Then, either `on:` `success` or `on:` `failure` is executed.",
+      "uses": [
+        "runOnce strategy",
+        "deployment job"
+      ],
+      "conceptIDs": [
+        "az400.runonce"
+      ],
+      "order": 11015
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-rolling",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the rolling strategy for a deployment job?",
+      "back": "A strategy that replaces instances of the old version with the new version on a fixed set of virtual machines in each iteration.",
+      "explanation": "The fixed set of machines updated in one iteration is called the rolling set.",
+      "example": "Like repainting a row of ten shopfronts two at a time so the street never has every shop closed at once.",
+      "introduces": [
+        "rolling strategy"
+      ],
+      "source": "Microsoft, “Deployment jobs”, “Rolling deployment strategy” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#rolling-deployment-strategy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A rolling deployment replaces instances of the previous version of an application with instances of the new version of the application on a fixed set of virtual machines (rolling set) in each iteration.",
+      "uses": [
+        "rolling strategy",
+        "deployment job"
+      ],
+      "conceptIDs": [
+        "az400.rolling-strategy"
+      ],
+      "order": 11025
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-canary-strategy",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the canary strategy for a deployment job?",
+      "back": "A strategy that rolls changes out to a small subset of servers first, then to more servers as confidence grows.",
+      "explanation": "It is described as an advanced strategy that helps mitigate the risk of rolling out new versions, routing more traffic to the new version over time.",
+      "example": "Like a restaurant trying a new recipe at one table, then a whole section, before changing the menu for everyone.",
+      "introduces": [
+        "canary strategy"
+      ],
+      "source": "Microsoft, “Deployment jobs”, “Canary deployment strategy” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#canary-deployment-strategy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "is an advanced deployment strategy that helps mitigate the risk involved in rolling out new versions of applications. By using this strategy, you can roll out the changes to a small subset of servers first. As you gain more confidence in the new version, you can release it to more servers in your infrastructure and route more traffic to it.",
+      "uses": [
+        "canary strategy",
+        "deployment job"
+      ],
+      "conceptIDs": [
+        "az400.canary-strategy"
+      ],
+      "order": 11030
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-progressive-exposure",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is progressive exposure in continuous delivery?",
+      "back": "Deployment patterns that limit how many users a release reaches at first, so a problem does not hit the whole user base.",
+      "explanation": "The page also calls this \"controlling the blast radius\" and lists rings, blue/green and feature flags as patterns.",
+      "example": "Like opening a new bridge to one lane of traffic before opening all lanes.",
+      "introduces": [
+        "progressive exposure"
+      ],
+      "source": "Microsoft Learn, “What is continuous delivery?”, “Progressive exposure techniques”",
+      "sourceURL": "https://learn.microsoft.com/en-us/devops/deliver/what-is-continuous-delivery#progressive-exposure-techniques",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "progressive exposure"
+      ],
+      "conceptIDs": [
+        "az400.progressive-exposure"
+      ],
+      "order": 11040
+    },
+    {
+      "id": "az400.deployment-strategies.what-are-deployment-rings",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What are deployment rings?",
+      "back": "A sequence of user groups; each ring gets the deployment and has its experience monitored before the next ring gets it.",
+      "explanation": "Continuous delivery automates the move from one ring to the next, and the first ring can act as a canary.",
+      "example": "Like a school trialling a new timetable with one year group, then a key stage, then the whole school.",
+      "introduces": [
+        "deployment rings"
+      ],
+      "source": "Microsoft Learn, “What is continuous delivery?”, “Progressive exposure techniques”",
+      "sourceURL": "https://learn.microsoft.com/en-us/devops/deliver/what-is-continuous-delivery#progressive-exposure-techniques",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "deployment rings",
+        "progressive exposure"
+      ],
+      "conceptIDs": [
+        "az400.deployment-rings"
+      ],
+      "order": 11045
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-canary-release",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a canary release (canary deployment)?",
+      "back": "A rollout where a small group of internal or external users gets the new version first, then successively larger groups until everyone has it.",
+      "explanation": "The Well-Architected guidance names canary deployments as a common example of progressive exposure.",
+      "example": "Like a publisher sending a new edition to one bookshop chain before shipping it nationwide.",
+      "introduces": [
+        "canary release"
+      ],
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Adopt a progressive exposure model”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#adopt-a-progressive-exposure-model",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "canary release",
+        "progressive exposure"
+      ],
+      "conceptIDs": [
+        "az400.canary-release"
+      ],
+      "order": 11055
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-blue-green",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is blue-green deployment?",
+      "back": "Keeping the current (blue) version live while the new (green) version deploys, then shifting traffic to green.",
+      "explanation": "Load balancing typically moves traffic to green step by step, and traffic can go back to blue if monitoring finds an incident.",
+      "example": "Like building a new platform beside the old one and moving passengers across once it is ready, with the old platform still open.",
+      "introduces": [
+        "blue-green deployment"
+      ],
+      "source": "Microsoft Learn, “What is continuous delivery?”, “Progressive exposure techniques”",
+      "sourceURL": "https://learn.microsoft.com/en-us/devops/deliver/what-is-continuous-delivery#progressive-exposure-techniques",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "blue-green deployment"
+      ],
+      "conceptIDs": [
+        "az400.blue-green"
+      ],
+      "order": 11060
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-feature-flag",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a feature flag?",
+      "back": "A switch in configuration that turns a feature on or off, targets it at chosen users or rolls it out gradually, without redeploying.",
+      "explanation": "Feature management uses feature flags to separate releasing a feature from deploying the code that contains it.",
+      "example": "Like a light switch wired into code that has already shipped: the new search page is in production but only shows when the switch is on.",
+      "introduces": [
+        "feature flag"
+      ],
+      "source": "Microsoft, “Feature management overview”, “Feature management overview” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/concept-feature-management.md#feature-management-overview",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Feature management is a software-development practice that decouples feature release from code deployment and enables quick changes to feature availability on demand. It uses a technique called *feature flags* to dynamically administer a feature's lifecycle, letting you turn functionality on or off, target it to specific users, or roll it out gradually, all without redeploying your application.",
+      "uses": [
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.feature-flag"
+      ],
+      "order": 11070
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-dark-launch",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a dark launch?",
+      "back": "A deployment strategy that deploys new features in an inactive state and enables them in a controlled way after deployment.",
+      "explanation": "Deploying and enabling become separate steps, and the source says the approach typically relies on feature flags.",
+      "example": "Like fitting a new ticket barrier at a station but leaving it switched off until the operator chooses to open it.",
+      "introduces": [
+        "dark launch"
+      ],
+      "source": "Microsoft Learn, “Deliver with DevOps”, “Explore progressive exposure techniques”, “What are progressive exposure techniques?” (MicrosoftDocs/learn on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/learn/blob/main/learn-pr/wwl-azure/deliver-with-devops/includes/4-explore-progressive-exposure-techniques.md#what-are-progressive-exposure-techniques",
+      "sourceLicence": "B · CC BY 4.0",
+      "uses": [
+        "dark launch",
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.dark-launch"
+      ],
+      "order": 11075,
+      "evidence": "Dark launches represent a deployment strategy that involves deploying new features in an inactive state and enabling them in a controlled manner after deployment. This approach typically relies on the use of feature flags."
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-ab-testing",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is A/B testing?",
+      "back": "Letting different users use different variants of a feature and comparing how successful each variant is.",
+      "explanation": "The Application Insights guidance suggests it when you are unsure which variant is more successful.",
+      "example": "Like printing two versions of a flyer, sending each to half of the street and counting which brings more customers.",
+      "introduces": [
+        "A/B testing"
+      ],
+      "source": "Microsoft, “Usage analysis with Application Insights”, “Determine feature success with A/B testing” (MicrosoftDocs/azure-monitor-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-monitor-docs/blob/main/articles/azure-monitor/app/usage.md#determine-feature-success-with-ab-testing",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you're unsure which feature variant is more successful, run an A/B test and let different users access each variant.",
+      "uses": [
+        "A/B testing"
+      ],
+      "conceptIDs": [
+        "az400.ab-testing"
+      ],
+      "order": 11085
+    },
+    {
+      "id": "az400.deployment-strategies.what-are-health-models",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a workload health model?",
+      "back": "A model within your observability platform that shows the health of a workload's components and of the workload overall.",
+      "explanation": "During a rollout it is what tells you whether to halt or to carry on to the next group.",
+      "example": "Like a car dashboard that shows engine, brakes and tyres separately as well as one overall warning light.",
+      "introduces": [
+        "workload health models"
+      ],
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Develop robust workload health models”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#develop-robust-workload-health-models",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "workload health models"
+      ],
+      "conceptIDs": [
+        "az400.health-models"
+      ],
+      "order": 11090
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-rolling-forward",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is rolling forward?",
+      "back": "Fixing a deployment problem by pushing a further change, such as a hotfix, instead of reverting to the previous version.",
+      "explanation": "Both the continuous delivery page and the Well-Architected guidance list it as a way to remediate issues found in production.",
+      "example": "Like fixing a typo on a live poster with a correction sticker instead of taking the poster down.",
+      "introduces": [
+        "rolling forward"
+      ],
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Implement failure-detection mechanisms”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#implement-failure-detection-mechanisms",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "rolling forward"
+      ],
+      "conceptIDs": [
+        "az400.roll-forward"
+      ],
+      "order": 11100
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-auto-swap",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is auto swap in Azure App Service?",
+      "back": "A slot setting that swaps the app into the target slot automatically, after warm-up, every time code is pushed to the source slot.",
+      "explanation": "It streamlines continuous deployment with zero cold starts and zero downtime for the app's customers.",
+      "example": "Like a relay baton that passes itself on as soon as the next runner is up to speed, without a coach calling the handover.",
+      "introduces": [
+        "auto swap"
+      ],
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Configure auto swap” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#configure-auto-swap",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "zero cold starts and zero downtime for customers of the app. When auto swap is enabled from a slot into production, every time you push your code changes to that slot, App Service automatically swaps the app into production after it's warmed up in the source slot.",
+      "uses": [
+        "auto swap",
+        "deployment slot"
+      ],
+      "conceptIDs": [
+        "az400.auto-swap"
+      ],
+      "order": 11105
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-app-configuration",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is Azure App Configuration?",
+      "back": "An Azure service for centrally managing application settings and feature flags.",
+      "explanation": "Spreading settings across distributed components can cause hard-to-troubleshoot deployment errors, so it keeps them in one place.",
+      "example": "Like a single noticeboard for a whole office instead of sticky notes on every desk.",
+      "introduces": [
+        "Azure App Configuration"
+      ],
+      "source": "Microsoft, “What is Azure App Configuration?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/overview.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure App Configuration provides a service to centrally manage application settings and feature flags. Modern programs, especially programs running in a cloud, generally have many components that are distributed in nature. Spreading configuration settings across these components can lead to hard-to-troubleshoot errors during an application deployment.",
+      "uses": [
+        "Azure App Configuration",
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.app-configuration"
+      ],
+      "order": 11115
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-feature-manager",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is the Feature Manager in the Azure portal?",
+      "back": "The portal interface of an App Configuration store for creating and managing the feature flags your applications use.",
+      "explanation": "You find it in the store's resource menu under Operations.",
+      "example": "Like a control panel for a building's lights, but each switch is a feature of your app.",
+      "introduces": [
+        "Feature Manager in the Azure portal"
+      ],
+      "source": "Microsoft, “Quickstart: Manage feature flags in Azure App Configuration”, “Quickstart: Manage feature flags in Azure App Configuration” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/manage-feature-flags.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The feature manager in the Azure portal provides a UI for creating and managing the feature flags that you use in your applications.",
+      "uses": [
+        "Feature Manager in the Azure portal",
+        "Azure App Configuration",
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.feature-manager"
+      ],
+      "order": 11120
+    },
+    {
+      "id": "az400.deployment-strategies.what-is-dacpac",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a DACPAC deployment?",
+      "back": "Deploying a database with a data-tier package (DACPAC), which packages schema changes and data.",
+      "explanation": "Microsoft calls it the simplest way to deploy a database from Azure Pipelines.",
+      "example": "Like shipping a flat-pack kit with its instructions, instead of a list of hand-written building steps.",
+      "introduces": [
+        "DACPAC deployment"
+      ],
+      "source": "Microsoft, “Azure SQL database deployment”, “DACPAC” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/targets/azure-sqldb.md#dacpac",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The simplest way to deploy a database is by using a data-tier package or DACPAC. DACPACs allow you to package and deploy schema changes and data.",
+      "uses": [
+        "DACPAC deployment"
+      ],
+      "conceptIDs": [
+        "az400.dacpac"
+      ],
+      "order": 11130
+    },
+    {
+      "id": "az400.deployment-strategies.dj-strategies-supported",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which three strategies does Azure DevOps support for deployment jobs?",
+      "back": "runOnce, rolling and canary.",
+      "explanation": "The strategy decides how the application is rolled out to the environment.",
+      "source": "Microsoft, “Deployment jobs” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure DevOps supports the *runOnce*, *rolling*, and the *canary* strategies.",
+      "uses": [
+        "runOnce strategy",
+        "rolling strategy",
+        "canary strategy"
+      ],
+      "conceptIDs": [
+        "az400.deployment-strategies"
+      ],
+      "order": 11135
+    },
+    {
+      "id": "az400.deployment-strategies.dj-no-checkout",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A deployment job does not clone the source repository automatically. Which step adds it?",
+      "back": "`checkout: self`",
+      "explanation": "Add the step inside the deployment job whenever its steps need files from the repository.",
+      "source": "Microsoft, “Deployment jobs” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A deployment job doesn't automatically clone the source repo. You can check out the source repo within your job with `checkout: self`.",
+      "uses": [
+        "deployment job",
+        "repository"
+      ],
+      "conceptIDs": [
+        "az400.deployment-job"
+      ],
+      "order": 11145
+    },
+    {
+      "id": "az400.deployment-strategies.dj-vm-no-pool",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why does a deployment job that targets a virtual machine resource need no pool?",
+      "back": "Its steps run against that virtual machine, not against an agent in a pool.",
+      "explanation": "Other resource types, such as Kubernetes, do need a pool so that tasks have somewhere to run.",
+      "source": "Microsoft, “Deployment jobs”, “Schema” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#schema",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For virtual machines, you don't need to define a pool. Any steps that you define in a deployment job with a virtual machine resource runs against that virtual machine and not against the agent in the pool. For other resource types such as Kubernetes, you do need to define a pool so that tasks can run on that machine.",
+      "uses": [
+        "deployment job",
+        "agent pool",
+        "agent"
+      ],
+      "conceptIDs": [
+        "az400.deployment-job"
+      ],
+      "order": 11150
+    },
+    {
+      "id": "az400.deployment-strategies.dj-container",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "A deployment job can also run as a {{c1::container job}}, with service side-car containers if defined.",
+      "explanation": "The documentation lists this, next to pipeline decorators, as an extra option for deployment jobs.",
+      "source": "Microsoft, “Deployment jobs”, “Use pipeline decorators to inject steps automatically” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#use-pipeline-decorators-to-inject-steps-automatically",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In addition, deployment jobs can be run as a container job along with services side-car if defined.",
+      "uses": [
+        "deployment job",
+        "container job"
+      ],
+      "conceptIDs": [
+        "az400.container-deploy"
+      ],
+      "order": 11160
+    },
+    {
+      "id": "az400.deployment-strategies.hook-predeploy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which lifecycle hook runs steps that initialise resources before application deployment starts?",
+      "back": "`preDeploy`",
+      "explanation": "In the canary strategy this hook runs only once, before the increments begin.",
+      "source": "Microsoft, “Deployment jobs”, “Descriptions of lifecycle hooks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#descriptions-of-lifecycle-hooks",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "`preDeploy`: Used to run steps that initialize resources before application deployment starts.",
+      "uses": [
+        "deployment job"
+      ],
+      "conceptIDs": [
+        "az400.lifecycle-hooks"
+      ],
+      "order": 11165
+    },
+    {
+      "id": "az400.deployment-strategies.hook-deploy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which is the only lifecycle hook into which the download artifact task is injected automatically?",
+      "back": "`deploy`",
+      "explanation": "To stop the download, add `- download: none` or name the specific artifacts to download.",
+      "source": "Microsoft, “Deployment jobs”, “Descriptions of lifecycle hooks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#descriptions-of-lifecycle-hooks",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Download artifact task is auto injected only in the `deploy` hook for deployment jobs. To stop downloading artifacts, use `- download: none`",
+      "uses": [
+        "deployment job",
+        "pipeline artifact"
+      ],
+      "conceptIDs": [
+        "az400.lifecycle-hooks"
+      ],
+      "order": 11175
+    },
+    {
+      "id": "az400.deployment-strategies.hook-routetraffic",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which lifecycle hook runs steps that serve traffic to the updated version?",
+      "back": "`routeTraffic`",
+      "explanation": "It sits between `deploy` and `postRouteTraffic`.",
+      "source": "Microsoft, “Deployment jobs”, “Descriptions of lifecycle hooks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#descriptions-of-lifecycle-hooks",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "`routeTraffic`: Used to run steps that serve the traffic to the updated version.",
+      "uses": [
+        "deployment job"
+      ],
+      "conceptIDs": [
+        "az400.lifecycle-hooks"
+      ],
+      "order": 11180
+    },
+    {
+      "id": "az400.deployment-strategies.hook-postroutetraffic",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which lifecycle hook typically monitors the health of the updated version for a defined interval?",
+      "back": "`postRouteTraffic`",
+      "explanation": "It is the hook the documented canary example uses to monitor health at each increment.",
+      "source": "Microsoft, “Deployment jobs”, “Descriptions of lifecycle hooks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#descriptions-of-lifecycle-hooks",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "`postRouteTraffic`: Used to run the steps after the traffic is routed. Typically, these tasks monitor the health of the updated version for defined interval.",
+      "uses": [
+        "deployment job"
+      ],
+      "conceptIDs": [
+        "az400.lifecycle-hooks"
+      ],
+      "order": 11190
+    },
+    {
+      "id": "az400.deployment-strategies.hook-on",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which lifecycle hooks run rollback actions or clean-up?",
+      "back": "`on: failure` or `on: success`",
+      "explanation": "Every strategy ends by running one of these two.",
+      "source": "Microsoft, “Deployment jobs”, “Descriptions of lifecycle hooks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#descriptions-of-lifecycle-hooks",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "`on: failure` or `on: success`: Used to run steps for rollback actions or clean-up.",
+      "uses": [
+        "deployment job"
+      ],
+      "conceptIDs": [
+        "az400.lifecycle-hooks"
+      ],
+      "order": 11195
+    },
+    {
+      "id": "az400.deployment-strategies.rolling-vms-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which resource type does the rolling strategy currently support?",
+      "back": "Virtual machine resources only.",
+      "explanation": "For Kubernetes targets the documentation shows the canary strategy instead.",
+      "source": "Microsoft, “Deployment jobs”, “Rolling deployment strategy” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#rolling-deployment-strategy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "We currently only support the rolling strategy to VM resources.",
+      "uses": [
+        "rolling strategy"
+      ],
+      "conceptIDs": [
+        "az400.rolling-vms-only"
+      ],
+      "order": 11205
+    },
+    {
+      "id": "az400.deployment-strategies.rolling-maxparallel",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In the rolling strategy, which keyword sets how many or what percentage of virtual machine targets are deployed to in parallel?",
+      "back": "`maxParallel`",
+      "explanation": "The other machines keep running the app and handling requests meanwhile, which reduces overall downtime.",
+      "source": "Microsoft, “Deployment jobs”, “Rolling deployment strategy” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#rolling-deployment-strategy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "With `maxParallel: <# or % of VMs>`, you can control the number/percentage of virtual machine targets to deploy to in parallel. This ensures that the app is running on these machines and is capable of handling requests while the deployment is taking place on the rest of the machines, which reduces overall downtime.",
+      "uses": [
+        "rolling strategy"
+      ],
+      "conceptIDs": [
+        "az400.rolling-strategy"
+      ],
+      "order": 11210
+    },
+    {
+      "id": "az400.deployment-strategies.rolling-health-stop",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What can you do between iterations of a rolling deployment if a significant issue appears?",
+      "back": "Run a health check after each iteration and stop the rolling deployment.",
+      "explanation": "A rolling deployment typically waits for each set of machines to finish before starting the next.",
+      "source": "Microsoft, “Deployment jobs”, “Rolling deployment strategy” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#rolling-deployment-strategy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For example, a rolling deployment typically waits for deployments on each set of virtual machines to complete before proceeding to the next set of deployments. You could do a health check after each iteration and if a significant issue occurs, the rolling deployment can be stopped.",
+      "uses": [
+        "rolling strategy"
+      ],
+      "conceptIDs": [
+        "az400.rolling-strategy"
+      ],
+      "order": 11220
+    },
+    {
+      "id": "az400.deployment-strategies.canary-hooks",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In the canary strategy, which lifecycle hook runs once, before the strategy iterates through the others?",
+      "back": "`preDeploy`",
+      "explanation": "`deploy`, `routeTraffic` and `postRouteTraffic` then repeat for each increment before a success or failure hook.",
+      "source": "Microsoft, “Deployment jobs”, “Canary deployment strategy” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#canary-deployment-strategy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Canary deployment strategy supports the `preDeploy` lifecycle hook (executed once) and iterates with the `deploy`, `routeTraffic`, and `postRouteTraffic` lifecycle hooks.",
+      "uses": [
+        "canary strategy"
+      ],
+      "conceptIDs": [
+        "az400.canary-strategy"
+      ],
+      "order": 11225
+    },
+    {
+      "id": "az400.deployment-strategies.canary-increments",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In the documented canary example for Kubernetes with `increments: [10, 20]`, what happens if all goes well after 20 per cent?",
+      "back": "It promotes the change to 100 per cent.",
+      "explanation": "Health is monitored in `postRouteTraffic` at each increment before promotion.",
+      "source": "Microsoft, “Deployment jobs”, “Canary deployment strategy” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#canary-deployment-strategy-1",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "the canary strategy for AKS will first deploy the changes with 10-percent pods, followed by 20 percent, while monitoring the health during `postRouteTraffic`. If all goes well, it will promote to 100 percent.",
+      "uses": [
+        "canary strategy"
+      ],
+      "conceptIDs": [
+        "az400.canary-strategy"
+      ],
+      "order": 11235
+    },
+    {
+      "id": "az400.deployment-strategies.stages-default-order",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "With no `dependsOn`, in what order do the stages of a YAML pipeline run?",
+      "back": "One after another, in the order they are defined in the file.",
+      "explanation": "Adding dependencies changes this: stages then run in the order the `dependsOn` requirements set.",
+      "source": "Microsoft, “Add stages, dependencies, and conditions”, “Specify dependencies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/stages.md#specify-dependencies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you define multiple stages in a pipeline, they run sequentially by default in the order you define them in the YAML file. The exception to this is when you add dependencies.",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.dependency-order"
+      ],
+      "order": 11240
+    },
+    {
+      "id": "az400.deployment-strategies.stages-parallel",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which `dependsOn` value lets a stage run in parallel with the stage defined before it?",
+      "back": "`dependsOn: []`",
+      "explanation": "The documented example uses it to run an acceptance test stage alongside a functional test stage.",
+      "source": "Microsoft, “Add stages, dependencies, and conditions”, “Specify dependencies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/stages.md#specify-dependencies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "dependsOn: [] # Runs in parallel with FunctionalTest",
+      "uses": [
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.dependency-order"
+      ],
+      "order": 11250
+    },
+    {
+      "id": "az400.deployment-strategies.stages-default-condition",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "By default, when does a stage that depends on other stages run?",
+      "back": "When all the stages it depends on have completed and succeeded.",
+      "explanation": "A custom condition can change this, for example to run even after a failure.",
+      "source": "Microsoft, “Add stages, dependencies, and conditions”, “Define conditions” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/stages.md#define-conditions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, a stage runs if it doesn't depend on any other stage, or if all of the stages that it depends on have completed and succeeded. You can customize this behavior by forcing a stage to run even if a previous stage fails or by specifying a custom condition.",
+      "uses": [
+        "Azure Pipelines stage",
+        "expression"
+      ],
+      "conceptIDs": [
+        "az400.dependency-order"
+      ],
+      "order": 11255
+    },
+    {
+      "id": "az400.deployment-strategies.ring-approval",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What can gate the move from one deployment ring to the next, and leave an audit trail?",
+      "back": "An optional manual approval, signed off electronically by a decision maker.",
+      "explanation": "The recorded approval can satisfy regulatory procedures or other control objectives.",
+      "source": "Microsoft Learn, “What is continuous delivery?”, “Progressive exposure techniques”",
+      "sourceURL": "https://learn.microsoft.com/en-us/devops/deliver/what-is-continuous-delivery#progressive-exposure-techniques",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "deployment rings",
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.deployment-rings"
+      ],
+      "order": 11265
+    },
+    {
+      "id": "az400.deployment-strategies.blast-radius",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Progressive exposure is also described as \"controlling the {{c1::blast radius}}\".",
+      "explanation": "The phrase means limiting how many users a faulty deployment can affect.",
+      "source": "Microsoft Learn, “What is continuous delivery?”, “Progressive exposure techniques”",
+      "sourceURL": "https://learn.microsoft.com/en-us/devops/deliver/what-is-continuous-delivery#progressive-exposure-techniques",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "progressive exposure"
+      ],
+      "conceptIDs": [
+        "az400.progressive-exposure"
+      ],
+      "order": 11270
+    },
+    {
+      "id": "az400.deployment-strategies.bg-load-balancing",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In blue-green deployment, what typically moves increasing traffic to the green version, and what happens if monitoring finds an incident?",
+      "back": "Load balancing moves the traffic; on an incident, traffic is sent back to the blue version, which is still running.",
+      "explanation": "The blue version keeps running throughout, so there is somewhere to send traffic back to.",
+      "source": "Microsoft Learn, “What is continuous delivery?”, “Progressive exposure techniques”",
+      "sourceURL": "https://learn.microsoft.com/en-us/devops/deliver/what-is-continuous-delivery#progressive-exposure-techniques",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "blue-green deployment"
+      ],
+      "conceptIDs": [
+        "az400.blue-green"
+      ],
+      "order": 11280
+    },
+    {
+      "id": "az400.deployment-strategies.canary-flags",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In canary deployments, what is typically used to enable the new version for the target users?",
+      "back": "Feature flags.",
+      "explanation": "A flag lets the same deployed code show the new version only to the canary group.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Adopt a progressive exposure model”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#adopt-a-progressive-exposure-model",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "canary release",
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.canary-release"
+      ],
+      "order": 11285
+    },
+    {
+      "id": "az400.deployment-strategies.bake-time",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How long should bake time between rollout groups be, according to the Well-Architected guidance?",
+      "back": "Hours and days rather than minutes, increasing for each group.",
+      "explanation": "Longer bake times let users in different time zones and with different tasks use the workload normally before the next group.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Adopt a progressive exposure model”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#adopt-a-progressive-exposure-model",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "canary release"
+      ],
+      "conceptIDs": [
+        "az400.canary-release"
+      ],
+      "order": 11295
+    },
+    {
+      "id": "az400.deployment-strategies.flags-dark-launch",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "On what basis do feature flags turn features on or off for different user groups, according to the continuous delivery page?",
+      "back": "Identity and group membership.",
+      "explanation": "That is what lets one deployment behave differently for, say, staff and the public.",
+      "source": "Microsoft Learn, “What is continuous delivery?”, “Progressive exposure techniques”",
+      "sourceURL": "https://learn.microsoft.com/en-us/devops/deliver/what-is-continuous-delivery#progressive-exposure-techniques",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.feature-flag"
+      ],
+      "order": 11300
+    },
+    {
+      "id": "az400.deployment-strategies.health-alert-halt",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "During a rollout you receive an alert about a health change affecting end users. What should happen?",
+      "back": "The rollout halts immediately and the cause of the alert is investigated.",
+      "explanation": "If health stays green through the bake time with no user reports, the rollout continues instead.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Develop robust workload health models”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#develop-robust-workload-health-models",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "workload health models"
+      ],
+      "conceptIDs": [
+        "az400.halt-on-health-alert"
+      ],
+      "order": 11310
+    },
+    {
+      "id": "az400.deployment-strategies.recovery-options",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are the three recovery options the Well-Architected guidance lists when a deployment causes an issue?",
+      "back": "Roll back to the last known working configuration; roll forward with a fix; deploy new infrastructure from the last known working configuration.",
+      "explanation": "Which one fits depends on the investigation into cause and severity.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Implement failure-detection mechanisms”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#implement-failure-detection-mechanisms",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "rolling forward"
+      ],
+      "conceptIDs": [
+        "az400.halt-on-health-alert"
+      ],
+      "order": 11315
+    },
+    {
+      "id": "az400.deployment-strategies.guardrail-branching",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which branching structures does the safe deployment guidance recommend, and which does it advise against?",
+      "back": "Release flow or trunk-based branching, instead of Gitflow or environment-based branching.",
+      "explanation": "The recommended structures keep collaboration across the team tightly synced.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Establish deployment safety guardrails”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#establish-deployment-safety-guardrails",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "trunk-based development"
+      ],
+      "conceptIDs": [
+        "az400.safety-guardrails"
+      ],
+      "order": 11325
+    },
+    {
+      "id": "az400.deployment-strategies.emergency-examples",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two ways an emergency (hotfix) protocol might adjust safe deployment practices?",
+      "back": "Any two of: faster promotion and approval; faster smoke and integration testing; shorter bake time.",
+      "explanation": "These are examples; each organisation writes its own protocol for hotfixes and incidents such as a security breach.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Emergency SDP protocols”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#emergency-sdp-protocols",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [],
+      "conceptIDs": [
+        "az400.emergency-sdp"
+      ],
+      "order": 11330
+    },
+    {
+      "id": "az400.deployment-strategies.emergency-gates",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In an emergency deployment, should quality and testing gates be skipped?",
+      "back": "No. They should still run as quickly as possible, out of band, even if the emergency limits them.",
+      "explanation": "The protocol should also name who may approve acceleration and the criteria for it.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Emergency SDP protocols”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#emergency-sdp-protocols",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "deployment gate"
+      ],
+      "conceptIDs": [
+        "az400.emergency-sdp"
+      ],
+      "order": 11340
+    },
+    {
+      "id": "az400.deployment-strategies.ab-property",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How do you set up an A/B test in Application Insights telemetry?",
+      "back": "Attach unique property values to all the telemetry each variant sends, then filter and split on them.",
+      "explanation": "After measuring each version's success you move to a single unified version.",
+      "source": "Microsoft, “Usage analysis with Application Insights”, “Determine feature success with A/B testing” (MicrosoftDocs/azure-monitor-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-monitor-docs/blob/main/articles/azure-monitor/app/usage.md#determine-feature-success-with-ab-testing",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To set up an A/B test, attach unique property values to all the telemetry sent by each variant.",
+      "uses": [
+        "A/B testing",
+        "Application Insights"
+      ],
+      "conceptIDs": [
+        "az400.ab-testing"
+      ],
+      "order": 11345
+    },
+    {
+      "id": "az400.deployment-strategies.slot-tiers",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which App Service plan tiers support separate deployment slots?",
+      "back": "Standard, Premium and Isolated.",
+      "explanation": "The app must run in one of these tiers before you can add slots.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Set up staging environments in Azure App Service” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This approach is available if you run in the Standard, Premium, or Isolated tier of an App Service plan.",
+      "uses": [
+        "deployment slot"
+      ],
+      "conceptIDs": [
+        "az400.slot-swap-downtime"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · documentation as published",
+      "order": 11355
+    },
+    {
+      "id": "az400.deployment-strategies.slot-warm-no-drop",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why does warming up every instance of a slot before swapping it into production eliminate downtime?",
+      "back": "Traffic redirection is seamless, so no requests are dropped by the swap.",
+      "explanation": "Production only receives an app whose instances are already warm.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Set up staging environments in Azure App Service” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This approach eliminates downtime when you deploy your app. The traffic redirection is seamless. No requests are dropped because of swap operations.",
+      "uses": [
+        "deployment slot"
+      ],
+      "conceptIDs": [
+        "az400.slot-swap-downtime"
+      ],
+      "order": 11360
+    },
+    {
+      "id": "az400.deployment-strategies.swap-target-online",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "During a swap, where does all the initialising work happen, and what stays online?",
+      "back": "On the source slot; the target slot stays online whether the swap succeeds or fails.",
+      "explanation": "Microsoft advises always making production the target slot.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Swap operation steps” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#swap-operation-steps",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "At any point in the swap operation, all work of initializing the swapped apps happens on the source slot. The target slot remains online while the source slot is being prepared and warmed up, regardless of whether the swap succeeds or fails.",
+      "uses": [
+        "deployment slot"
+      ],
+      "conceptIDs": [
+        "az400.slot-swap-downtime"
+      ],
+      "order": 11370
+    },
+    {
+      "id": "az400.deployment-strategies.swap-first-step",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What is the first thing App Service does when you swap a staging slot into production?",
+      "back": "It applies the target slot's settings, such as slot-specific app settings, to every instance of the source slot, which restarts them.",
+      "explanation": "If any instance then fails to restart, the swap reverts all changes to the source slot and stops.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Swap operation steps” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#swap-operation-steps",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Apply the following settings from the target slot (for example, the production slot) to all instances of the source slot:",
+      "uses": [
+        "deployment slot",
+        "deployment slot setting"
+      ],
+      "conceptIDs": [
+        "az400.slot-swap-downtime"
+      ],
+      "order": 11375
+    },
+    {
+      "id": "az400.deployment-strategies.swap-cli",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Complete the command to swap a slot into production: `az webapp deployment slot swap --resource-group <group> --name <app> --slot <source> {{c1::--target-slot production}}`",
+      "explanation": "The Azure PowerShell equivalent is `Switch-AzWebAppSlot` with `-DestinationSlotName \"production\"`.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Swap deployment slots” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#swap-two-slots",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "az webapp deployment slot swap --resource-group <group-name> --name <app-name> --slot <source-slot-name> --target-slot production",
+      "uses": [
+        "deployment slot"
+      ],
+      "conceptIDs": [
+        "az400.slot-swap-downtime"
+      ],
+      "order": 11385
+    },
+    {
+      "id": "az400.deployment-strategies.preview-pause",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does a swap with preview do differently from a normal swap?",
+      "back": "It pauses after the first step, so you can check the source slot running with the target slot's settings before completing.",
+      "explanation": "Cancelling the swap reapplies the source slot's own configuration.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Swap with preview (multiple-phase swap)” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#swap-with-preview-multiple-phase-swap",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you perform a swap with preview, App Service performs the same swap operation but pauses after the first step. You can then verify the result on the staging slot before completing the swap.",
+      "uses": [
+        "deployment slot"
+      ],
+      "conceptIDs": [
+        "az400.swap-with-preview"
+      ],
+      "order": 11390
+    },
+    {
+      "id": "az400.deployment-strategies.preview-auth",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When can you not use swap with preview?",
+      "back": "When site authentication is enabled in one of the slots.",
+      "explanation": "In that case you use a normal swap instead.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Swap with preview (multiple-phase swap)” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#swap-with-preview-multiple-phase-swap",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can't use swap with preview when site authentication is enabled in one of the slots.",
+      "uses": [
+        "deployment slot"
+      ],
+      "conceptIDs": [
+        "az400.swap-with-preview"
+      ],
+      "order": 11400
+    },
+    {
+      "id": "az400.deployment-strategies.rollback-swap",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Errors appear in production just after a slot swap. How do you roll back?",
+      "back": "Swap the same two slots again immediately.",
+      "explanation": "After a swap the staging slot holds the previous production app, your last known good site.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Roll back a swap” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#roll-back-a-swap",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If any errors occur in the target slot (for example, the production slot) after a slot swap, restore the slots to their pre-swap states by swapping the same two slots immediately.",
+      "uses": [
+        "deployment slot"
+      ],
+      "conceptIDs": [
+        "az400.slot-rollback"
+      ],
+      "order": 11405
+    },
+    {
+      "id": "az400.deployment-strategies.autoswap-linux",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Where is auto swap not supported?",
+      "back": "In web apps on Linux and in Web App for Containers.",
+      "explanation": "Microsoft also suggests testing auto swap on a non-production target slot first.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Configure auto swap” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#configure-auto-swap",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Auto swap isn't supported in web apps on Linux and in Web App for Containers.",
+      "uses": [
+        "auto swap"
+      ],
+      "conceptIDs": [
+        "az400.auto-swap"
+      ],
+      "order": 11415
+    },
+    {
+      "id": "az400.deployment-strategies.warmup-appinit",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which `Web.config` element specifies custom warm-up actions that a swap waits for?",
+      "back": "`applicationInitialization`",
+      "explanation": "The swap waits for this custom warm-up to finish before swapping with the target slot.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Specify custom warm-up” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#specify-custom-warm-up",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can specify these custom actions by using the `applicationInitialization` configuration element in `Web.config`. The swap operation waits for this custom warm-up to finish before swapping with the target slot.",
+      "uses": [
+        "deployment slot"
+      ],
+      "conceptIDs": [
+        "az400.custom-warm-up"
+      ],
+      "order": 11420
+    },
+    {
+      "id": "az400.deployment-strategies.route-percent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Where do you send a percentage of production traffic to a staging slot in the portal?",
+      "back": "In the Traffic % column of that slot on the Deployment slots page.",
+      "explanation": "The chosen percentage of clients is then routed to the non-production slot at random.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Route production traffic automatically” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#route-production-traffic-automatically",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In the **Traffic %** column of the slot that you want to route to, specify a percentage (between 0 and 100) to represent the amount of total traffic that you want to route.",
+      "uses": [
+        "deployment slot"
+      ],
+      "conceptIDs": [
+        "az400.slot-traffic-routing"
+      ],
+      "order": 11430
+    },
+    {
+      "id": "az400.deployment-strategies.appconf-vs-keyvault",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which service does App Configuration complement for storing application secrets?",
+      "back": "Azure Key Vault.",
+      "explanation": "App Configuration holds settings and feature flags; secrets belong in Key Vault.",
+      "source": "Microsoft, “What is Azure App Configuration?”, “Why use App Configuration?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/overview.md#why-use-app-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "App Configuration complements Azure Key Vault, which is used to store application secrets.",
+      "uses": [
+        "Azure App Configuration"
+      ],
+      "conceptIDs": [
+        "az400.app-configuration"
+      ],
+      "order": 11435
+    },
+    {
+      "id": "az400.deployment-strategies.appconf-no-redeploy",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two scenarios App Configuration makes easier?",
+      "back": "Any two of: central management of hierarchical configuration for environments and geographies; changing settings without redeploy or restart; controlling feature availability in real time.",
+      "explanation": "The page lists these as the scenarios App Configuration makes easier to implement.",
+      "source": "Microsoft, “What is Azure App Configuration?”, “Why use App Configuration?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/overview.md#why-use-app-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "* Dynamically change application settings without the need to redeploy or restart an application * Control feature availability in real-time",
+      "uses": [
+        "Azure App Configuration"
+      ],
+      "conceptIDs": [
+        "az400.app-configuration"
+      ],
+      "order": 11445
+    },
+    {
+      "id": "az400.deployment-strategies.fm-switch",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which App Configuration feature flag scenario gives an instant kill switch for a misbehaving feature?",
+      "back": "Switch (on/off).",
+      "explanation": "It is also used as an operational toggle, such as a maintenance mode.",
+      "source": "Microsoft, “Feature management overview”, “Switch (On/Off)” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/concept-feature-management.md#switch-onoff",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Instant kill switch** – disable a misbehaving feature or dependency in seconds, without redeploying code",
+      "uses": [
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.feature-management-capabilities"
+      ],
+      "order": 11450
+    },
+    {
+      "id": "az400.deployment-strategies.fm-rollout",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which App Configuration feature flag scenario exposes a feature to a growing percentage of users before general availability?",
+      "back": "Rollout.",
+      "explanation": "It also covers targeting specific users or groups, schedules and configuration rollout.",
+      "source": "Microsoft, “Feature management overview”, “Rollout” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/concept-feature-management.md#rollout",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Use when:** You want to gradually expose a feature to a percentage of users, or to specific users and groups, before making it generally available.",
+      "uses": [
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.feature-rollout"
+      ],
+      "order": 11460
+    },
+    {
+      "id": "az400.deployment-strategies.fm-experiment",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which App Configuration feature flag scenario compares variants of a feature to see which performs best?",
+      "back": "Experiment.",
+      "explanation": "It supports A/B testing and control of the traffic allocated to each variant.",
+      "source": "Microsoft, “Feature management overview”, “Experiment” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/concept-feature-management.md#experiment",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Use when:** You want to compare multiple versions, or *variants*, of a feature and measure which one performs best.",
+      "uses": [
+        "feature flag",
+        "A/B testing"
+      ],
+      "conceptIDs": [
+        "az400.feature-experiment"
+      ],
+      "order": 11465
+    },
+    {
+      "id": "az400.deployment-strategies.ff-create-path",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Where in an App Configuration store do you create a feature flag in the portal?",
+      "back": "Operations > Feature manager > Create.",
+      "explanation": "You then choose whether the flag is for Switch, Rollout or Experiment.",
+      "source": "Microsoft, “Quickstart: Manage feature flags in Azure App Configuration”, “Create a feature flag” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/manage-feature-flags.md#create-a-feature-flag",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In the resource menu, under **Operations**, select **Feature manager** > **Create**.",
+      "uses": [
+        "Feature Manager in the Azure portal",
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.create-feature-flag"
+      ],
+      "order": 11475
+    },
+    {
+      "id": "az400.deployment-strategies.ff-keyvalues",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How are feature flags created with the Feature Manager actually stored?",
+      "back": "As regular key-values with the prefix `.appconfig.featureflag/` and a special content type.",
+      "explanation": "You can show them in Configuration explorer by including feature flags in its view settings.",
+      "source": "Microsoft, “Quickstart: Manage feature flags in Azure App Configuration”, “Manage view” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/manage-feature-flags.md#manage-view",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Feature flags created with the Feature manager are stored as regular key-values. They're kept with the special prefix `.appconfig.featureflag/`",
+      "uses": [
+        "Feature Manager in the Azure portal"
+      ],
+      "conceptIDs": [
+        "az400.feature-manager"
+      ],
+      "order": 11480
+    },
+    {
+      "id": "az400.deployment-strategies.dacpac-task",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which task is the primary mechanism for deploying a database to Azure SQL Database from Azure Pipelines?",
+      "back": "The Azure SQL Database deployment task (`SqlAzureDacpacDeployment@1`).",
+      "explanation": "Like other built-in Azure tasks, it needs a connection to your Azure subscription as an input.",
+      "source": "Microsoft, “Azure SQL database deployment”, “DACPAC” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/targets/azure-sqldb.md#dacpac",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The Azure SQL Database deployment task is the primary mechanism to deploy a database to Azure.",
+      "uses": [
+        "DACPAC deployment",
+        "step and task"
+      ],
+      "conceptIDs": [
+        "az400.dacpac"
+      ],
+      "order": 11490
+    },
+    {
+      "id": "az400.deployment-strategies.sql-scripts-firewall",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What must a pipeline add, and later remove, to run SQL scripts against Azure SQL Database?",
+      "back": "Firewall rules in Azure for the agent.",
+      "explanation": "Without them the Azure Pipelines agent cannot communicate with the database.",
+      "source": "Microsoft, “Azure SQL database deployment”, “SQL scripts” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/targets/azure-sqldb.md#sql-scripts",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To run SQL scripts from your pipeline, you'll need to add and remove firewall rules in Azure. Without these rules, the Azure Pipelines agent cannot communicate with Azure SQL Database.",
+      "uses": [
+        "agent"
+      ],
+      "conceptIDs": [
+        "az400.sql-scripts-deploy"
+      ],
+      "order": 11495
+    },
+    {
+      "id": "az400.deployment-strategies.sql-firewall-ip",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which cmdlet in the documented script creates the firewall rule for the agent's address?",
+      "back": "`New-AzSqlServerFirewallRule`, with the agent's IP as start and end address.",
+      "explanation": "A matching `Remove-AzSqlServerFirewallRule` script removes the rule afterwards.",
+      "source": "Microsoft, “Azure SQL database deployment”, “Set Azure firewall rules” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/targets/azure-sqldb.md#set-azure-firewall-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "New-AzSqlServerFirewallRule -ResourceGroupName $ResourceGroupName -ServerName $ServerName -FirewallRuleName $FirewallRuleName -StartIPAddress $agentIP -EndIPAddress $agentIP",
+      "uses": [
+        "agent"
+      ],
+      "conceptIDs": [
+        "az400.sql-firewall"
+      ],
+      "order": 11505
+    },
+    {
+      "id": "az400.deployment-strategies.sql-conditional",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are the two ways to deploy a database only from certain builds in a YAML pipeline?",
+      "back": "Put the deployment steps in a separate job with a condition, or add a condition directly to the step.",
+      "explanation": "The documented example deploys only builds from the main branch.",
+      "source": "Microsoft, “Azure SQL database deployment”, “Deploy database conditionally” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/targets/azure-sqldb.md#deploy-database-conditionally",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "* Isolate the deployment steps into a separate job and apply a condition to that job. * Add a condition directly to the step.",
+      "uses": [
+        "expression",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.dacpac"
+      ],
+      "order": 11510
+    },
+    {
+      "id": "az400.deployment-strategies.sqlpackage-agent",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Where must `SqlPackage.exe` run when the DACPAC task does not cover the SQL action you need?",
+      "back": "On a self-hosted agent with the tool installed.",
+      "explanation": "You invoke it from PowerShell or command-line scripts.",
+      "source": "Microsoft, “Azure SQL database deployment”, “More SQL actions” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/targets/azure-sqldb.md#more-sql-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Before running this tool, make sure you're using a self-hosted agent with the tool installed.",
+      "uses": [
+        "self-hosted agent"
+      ],
+      "conceptIDs": [
+        "az400.sqlpackage-actions"
+      ],
+      "order": 11520
+    },
+    {
+      "id": "az400.deployment-strategies.sqlpackage-publish",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which SqlPackage action incrementally updates a database schema to match a source `.dacpac`, creating the database if it does not exist?",
+      "back": "Publish.",
+      "explanation": "Otherwise it updates the existing database.",
+      "source": "Microsoft, “Azure SQL database deployment”, “More SQL actions” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/targets/azure-sqldb.md#more-sql-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Incrementally updates a database schema to match the schema of a source .dacpac file. If the database doesn’t exist on the server, the publish operation will create it.",
+      "uses": [
+        "DACPAC deployment"
+      ],
+      "conceptIDs": [
+        "az400.sqlpackage-actions"
+      ],
+      "order": 11525
+    },
+    {
+      "id": "az400.deployment-strategies.app-rolling-vms",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team deploys a web app to 20 virtual machines registered in an environment and wants no more than four updated at a time. Which deployment job setting fits?",
+      "choices": "A) `runOnce` with a `pool` per machine\nB) A traditional job with a matrix strategy\nC) `canary` with `increments: [4]`\nD) `rolling` with `maxParallel: 4`",
+      "back": "D) `rolling` with `maxParallel: 4`",
+      "choicesExplained": "A runs every hook once against the whole target set. C is for gradual traffic to a subset, shown for Kubernetes. B has no deployment strategy or environment history.",
+      "explanation": "Rolling replaces the old version on a set of machines per iteration, and `maxParallel` limits how many are updated in parallel.",
+      "source": "Microsoft, “Deployment jobs”, “Rolling deployment strategy” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#rolling-deployment-strategy",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "With `maxParallel: <# or % of VMs>`, you can control the number/percentage of virtual machine targets to deploy to in parallel.",
+      "uses": [
+        "rolling strategy",
+        "runOnce strategy",
+        "canary strategy",
+        "matrix strategy"
+      ],
+      "conceptIDs": [
+        "az400.rolling-vms-only",
+        "az400.rolling-strategy",
+        "az400.deployment-strategies"
+      ],
+      "order": 11535
+    },
+    {
+      "id": "az400.deployment-strategies.app-canary-aks",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "An online shop wants a Kubernetes release to reach a small share of pods, be checked, then a larger share, before full promotion. Which strategy and hook should hold the health checks?",
+      "choices": "A) canary, in `postRouteTraffic`\nB) rolling, in `deploy`\nC) canary, in `routeTraffic`\nD) runOnce, in `preDeploy`",
+      "back": "A) canary, in `postRouteTraffic`",
+      "choicesExplained": "D runs once and cannot step through shares. B supports virtual machines only. C is where traffic is routed, not where health is watched afterwards.",
+      "explanation": "The canary strategy steps through increments, and the documented example monitors health during `postRouteTraffic`.",
+      "source": "Microsoft, “Deployment jobs”, “Canary deployment strategy” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#canary-deployment-strategy-1",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "the canary strategy for AKS will first deploy the changes with 10-percent pods, followed by 20 percent, while monitoring the health during `postRouteTraffic`.",
+      "uses": [
+        "canary strategy",
+        "runOnce strategy",
+        "rolling strategy"
+      ],
+      "conceptIDs": [
+        "az400.canary-strategy"
+      ],
+      "order": 11540
+    },
+    {
+      "id": "az400.deployment-strategies.app-hook-rollback",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "You want a deployment job to restore the previous build automatically if any hook fails. Where do the restore steps go?",
+      "choices": "A) A separate stage with `dependsOn: []`\nB) `preDeploy`\nC) `routeTraffic`\nD) `on: failure`",
+      "back": "D) `on: failure`",
+      "choicesExplained": "B runs before deployment, to initialise resources. C serves traffic to the new version. A would run in parallel, not in response to failure.",
+      "explanation": "The `on: failure` hook is for rollback or clean-up steps.",
+      "source": "Microsoft, “Deployment jobs”, “Descriptions of lifecycle hooks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#descriptions-of-lifecycle-hooks",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "`on: failure` or `on: success`: Used to run steps for rollback actions or clean-up.",
+      "uses": [
+        "deployment job",
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.lifecycle-hooks"
+      ],
+      "order": 11550
+    },
+    {
+      "id": "az400.deployment-strategies.app-dj-history",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Auditors ask for a record of which releases reached each production server and whether they succeeded. What should the pipeline use?",
+      "choices": "A) A traditional job that logs to a text file\nB) A step template\nC) A scheduled trigger\nD) A deployment job targeting an environment",
+      "back": "D) A deployment job targeting an environment",
+      "choicesExplained": "A leaves the history in logs, not per resource. B reuses steps but records nothing. C decides when a run starts, not what it deployed.",
+      "explanation": "Deployment jobs give deployment history down to a specific resource, with status, for auditing.",
+      "source": "Microsoft, “Deployment jobs” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You get the deployment history across pipelines, down to a specific resource and status of the deployments for auditing.",
+      "uses": [
+        "deployment job",
+        "environment",
+        "step template",
+        "scheduled trigger"
+      ],
+      "conceptIDs": [
+        "az400.deployment-job"
+      ],
+      "order": 11555
+    },
+    {
+      "id": "az400.deployment-strategies.app-dependency-order",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A database stage must finish before two web stages for different regions run side by side; a final smoke-test stage needs both web stages. How do you model this?",
+      "choices": "A) Put all four stages in order with no `dependsOn`\nB) Give each web stage `dependsOn` the database stage, and the smoke-test stage `dependsOn` both web stages\nC) Put everything in one stage with four jobs\nD) Give each web stage `dependsOn: []`",
+      "back": "B) Give each web stage `dependsOn` the database stage, and the smoke-test stage `dependsOn` both web stages",
+      "choicesExplained": "A runs the web stages one after another. D lets the web stages start before the database stage. C loses stage ordering altogether unless jobs get their own dependencies.",
+      "explanation": "This is the fan-out and fan-in pattern that `dependsOn` supports.",
+      "source": "Microsoft, “Add stages, dependencies, and conditions”, “Specify dependencies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/stages.md#specify-dependencies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "dependsOn: # stage runs after DeployUS1 and DeployUS2 - DeployUS1 - DeployUS2",
+      "uses": [
+        "Azure Pipelines stage",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.dependency-order"
+      ],
+      "order": 11565
+    },
+    {
+      "id": "az400.deployment-strategies.class-strategy-rings",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A company releases to its own staff first, then to 5 per cent of customers, then to everyone, with an approval before each step. Which technique is this?",
+      "choices": "A) Blue-green deployment\nB) Deployment rings\nC) A/B testing\nD) Rolling forward",
+      "back": "B) Deployment rings",
+      "choicesExplained": "A switches traffic between two full environments rather than user groups. C compares variants to measure success. D is a way of fixing a bad release.",
+      "explanation": "Rings move a release through successive user groups, optionally with a manual approval between rings.",
+      "source": "Microsoft Learn, “What is continuous delivery?”, “Progressive exposure techniques”",
+      "sourceURL": "https://learn.microsoft.com/en-us/devops/deliver/what-is-continuous-delivery#progressive-exposure-techniques",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "deployment rings",
+        "blue-green deployment",
+        "A/B testing",
+        "rolling forward"
+      ],
+      "conceptIDs": [
+        "az400.deployment-rings",
+        "az400.progressive-exposure"
+      ],
+      "order": 11570
+    },
+    {
+      "id": "az400.deployment-strategies.class-strategy-bg",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A team runs two identical environments behind a load balancer, deploys to the idle one, then shifts traffic across and can shift it back at once. Which technique is this?",
+      "choices": "A) Canary release\nB) Dark launch\nC) Blue-green deployment\nD) Rolling strategy",
+      "back": "C) Blue-green deployment",
+      "choicesExplained": "A sends the new version to small user groups, not a second full environment. B hides a feature that is already deployed. D replaces instances batch by batch on the same machines.",
+      "explanation": "Blue-green keeps the current version live while load balancing moves traffic to the new one.",
+      "source": "Microsoft Learn, “What is continuous delivery?”, “Progressive exposure techniques”",
+      "sourceURL": "https://learn.microsoft.com/en-us/devops/deliver/what-is-continuous-delivery#progressive-exposure-techniques",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "blue-green deployment",
+        "canary release",
+        "dark launch",
+        "rolling strategy"
+      ],
+      "conceptIDs": [
+        "az400.blue-green"
+      ],
+      "order": 11580
+    },
+    {
+      "id": "az400.deployment-strategies.class-strategy-ab",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "Product managers cannot agree whether a one-page or a three-step checkout sells more, and want data from real users. Which technique fits?",
+      "choices": "A) A/B testing\nB) Rolling strategy\nC) Swap with preview\nD) Deployment rings",
+      "back": "A) A/B testing",
+      "choicesExplained": "B is about updating machines in batches. C validates settings before a swap. D stages exposure of one version, not a comparison of two.",
+      "explanation": "A/B testing gives different users different variants and compares each variant's success.",
+      "source": "Microsoft, “Usage analysis with Application Insights”, “Determine feature success with A/B testing” (MicrosoftDocs/azure-monitor-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-monitor-docs/blob/main/articles/azure-monitor/app/usage.md#determine-feature-success-with-ab-testing",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "After the A/B test, filter and split your data on the property values so that you can compare the different versions.",
+      "uses": [
+        "A/B testing",
+        "rolling strategy",
+        "deployment rings"
+      ],
+      "conceptIDs": [
+        "az400.ab-testing"
+      ],
+      "order": 11585
+    },
+    {
+      "id": "az400.deployment-strategies.app-bake-time",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A canary group of internal users received a release at 09:00 with no errors. The release manager wants the next, larger group to get it at 09:30. What does the Well-Architected guidance suggest?",
+      "choices": "A) Go ahead: 30 minutes is enough if nothing failed\nB) Skip the canary group next time\nC) Send it to everyone at once\nD) Wait a bake time measured in hours or days, longer for each later group",
+      "back": "D) Wait a bake time measured in hours or days, longer for each later group",
+      "choicesExplained": "A and C ignore that bake times should be hours and days, not minutes. B removes the small first group that canary releases rely on.",
+      "explanation": "Bake time gives users in different regions and roles time to use the workload normally before the next group.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Adopt a progressive exposure model”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#adopt-a-progressive-exposure-model",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "canary release"
+      ],
+      "conceptIDs": [
+        "az400.canary-release"
+      ],
+      "order": 11595
+    },
+    {
+      "id": "az400.deployment-strategies.app-halt",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Halfway through the second rollout group, error rates for signed-in users climb. What does the Well-Architected guidance say to do first?",
+      "choices": "A) Move straight to the final group to get it over with\nB) Finish the group, then decide\nC) Shorten bake time for the next group\nD) Stop the rollout immediately and investigate cause and severity",
+      "back": "D) Stop the rollout immediately and investigate cause and severity",
+      "choicesExplained": "B keeps exposing users to the fault. C and A speed up a release that is already harming users.",
+      "explanation": "The guidance says the rollout must stop immediately when a deployment causes an issue in a rollout group.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Implement failure-detection mechanisms”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#implement-failure-detection-mechanisms",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [],
+      "conceptIDs": [
+        "az400.halt-on-health-alert"
+      ],
+      "order": 11600
+    },
+    {
+      "id": "az400.deployment-strategies.app-hotfix",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A critical vulnerability must be patched today, but the normal release takes a week of bake time. What should the team rely on?",
+      "choices": "A) Skip all gates and deploy straight to production\nB) An emergency protocol that shortens bake time and speeds up approvals and testing, with named approvers\nC) Wait for the next normal release\nD) Turn off monitoring during the change",
+      "back": "B) An emergency protocol that shortens bake time and speeds up approvals and testing, with named approvers",
+      "choicesExplained": "A drops the gates, which should still run as quickly as possible. C leaves the vulnerability open. D removes the signal you need to spot a bad deployment.",
+      "explanation": "Emergency protocols adjust, rather than abandon, safe deployment practices for hotfixes and security issues.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Emergency SDP protocols”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#emergency-sdp-protocols",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [],
+      "conceptIDs": [
+        "az400.emergency-sdp"
+      ],
+      "order": 11610
+    },
+    {
+      "id": "az400.deployment-strategies.app-roll-forward",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A release adds a new database column and a bug appears in one screen. Reverting the schema would be risky. Which recovery option fits best?",
+      "choices": "A) Roll forward with a hotfix for the screen\nB) Delete the production database and restore last month's backup\nC) Roll back the database schema immediately\nD) Carry on the rollout and fix it next quarter",
+      "back": "A) Roll forward with a hotfix for the screen",
+      "choicesExplained": "C is the complex, risky path for stateful changes. B loses a month of data. D leaves users with a known fault.",
+      "explanation": "Rolling forward addresses the issue mid-rollout, and the guidance notes that rolling back database or schema changes can be complex.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Implement failure-detection mechanisms”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#implement-failure-detection-mechanisms",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "rolling forward"
+      ],
+      "conceptIDs": [
+        "az400.roll-forward"
+      ],
+      "order": 11615
+    },
+    {
+      "id": "az400.deployment-strategies.app-slot-zero-downtime",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Users of an App Service web app see errors for a minute after every deployment while the app starts. What removes this?",
+      "choices": "A) Deploy straight to production at night\nB) Deploy to a staging slot, let it warm up, then swap it into production\nC) Scale the plan down to Basic during deployment\nD) Delete and recreate the production slot each time",
+      "back": "B) Deploy to a staging slot, let it warm up, then swap it into production",
+      "choicesExplained": "A still restarts production, just at a quieter time. C removes slots, which need Standard, Premium or Isolated. D causes even more downtime.",
+      "explanation": "Warming up all instances of the slot before the swap eliminates downtime, and no requests are dropped.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Set up staging environments in Azure App Service” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can make sure that all instances of the slot are warmed up before you swap it into production. This approach eliminates downtime when you deploy your app.",
+      "uses": [
+        "deployment slot"
+      ],
+      "conceptIDs": [
+        "az400.slot-swap-downtime"
+      ],
+      "order": 11625
+    },
+    {
+      "id": "az400.deployment-strategies.app-swap-preview",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A mission-critical app uses slot-specific connection strings. The team wants to see the staging slot running with production's settings before any traffic moves. Which option fits?",
+      "choices": "A) Swap with preview\nB) Traffic routing at 50 per cent\nC) Auto swap\nD) Delete the slot and redeploy",
+      "back": "A) Swap with preview",
+      "choicesExplained": "C swaps automatically with no validation pause. B sends real users to the slot before it has production settings. D validates nothing.",
+      "explanation": "Swap with preview pauses after applying the target slot's settings so you can verify the source slot first.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Swap with preview (multiple-phase swap)” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#swap-with-preview-multiple-phase-swap",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Before you swap into production as the target slot, validate that the app runs with the swapped settings.",
+      "uses": [
+        "deployment slot",
+        "auto swap",
+        "deployment slot setting"
+      ],
+      "conceptIDs": [
+        "az400.swap-with-preview"
+      ],
+      "order": 11630
+    },
+    {
+      "id": "az400.deployment-strategies.app-auto-swap",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A Windows web app team wants every push to the staging slot to reach production automatically with no downtime and no manual step. What should they turn on?",
+      "choices": "A) Swap with preview\nB) Auto swap from staging into production\nC) A 0 per cent routing rule\nD) The rolling strategy",
+      "back": "B) Auto swap from staging into production",
+      "choicesExplained": "A needs someone to complete the swap. C hides the slot from users but moves nothing. D supports virtual machine resources, not App Service slots.",
+      "explanation": "With auto swap, every push to the slot is swapped into production after warm-up.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Configure auto swap” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#configure-auto-swap",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Auto swap streamlines Azure DevOps scenarios where you want to deploy your app continuously with zero cold starts and zero downtime for customers of the app.",
+      "uses": [
+        "auto swap",
+        "rolling strategy"
+      ],
+      "conceptIDs": [
+        "az400.auto-swap"
+      ],
+      "order": 11640
+    },
+    {
+      "id": "az400.deployment-strategies.app-slot-rollback",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Minutes after swapping staging into production, checkout fails. What is the quickest way to restore the previous version?",
+      "choices": "A) Rebuild the previous release and redeploy it\nB) Restore a database backup\nC) Scale out production\nD) Swap the same two slots again",
+      "back": "D) Swap the same two slots again",
+      "choicesExplained": "A works but takes a full build and deployment. B touches data, not the app code. C adds instances of the faulty version.",
+      "explanation": "The staging slot now holds the previous production app, so swapping back restores it at once.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Roll back a swap” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#roll-back-a-swap",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "After a swap, the slot with previously staged app now has the previous production app.",
+      "uses": [
+        "deployment slot"
+      ],
+      "conceptIDs": [
+        "az400.slot-rollback"
+      ],
+      "order": 11645
+    },
+    {
+      "id": "az400.deployment-strategies.app-slot-routing",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "You want 10 per cent of real users to try a new version for feedback before you release it to everyone, without a second web address. What do you configure?",
+      "choices": "A) Auto swap\nB) Traffic % of 10 on the staging slot\nC) Swap with preview\nD) A second App Service plan",
+      "back": "B) Traffic % of 10 on the staging slot",
+      "choicesExplained": "A moves all traffic after each push. C validates settings but sends no users. D needs a separate address and deployment.",
+      "explanation": "Routing a share of production traffic to a slot is meant for getting user feedback before release.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Route production traffic automatically” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#route-production-traffic-automatically",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "This feature is useful if you need user feedback for a new update but you're not ready to release it to production.",
+      "uses": [
+        "deployment slot",
+        "auto swap"
+      ],
+      "conceptIDs": [
+        "az400.slot-traffic-routing"
+      ],
+      "order": 11655
+    },
+    {
+      "id": "az400.deployment-strategies.app-feature-kill",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A new recommendation engine is causing timeouts in production. The team needs it off for everyone in seconds without redeploying. What should they have used?",
+      "choices": "A) A Rollout flag at 50 per cent\nB) An Experiment flag with two variants\nC) A Switch feature flag in App Configuration\nD) A deployment ring",
+      "back": "C) A Switch feature flag in App Configuration",
+      "choicesExplained": "A leaves half the users on the failing feature. B splits traffic for measurement, not shut-off. D needs a new deployment to remove the change.",
+      "explanation": "A Switch flag is an instant on/off control for all users, including as a kill switch.",
+      "source": "Microsoft, “Feature management overview”, “Switch (On/Off)” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/concept-feature-management.md#switch-onoff",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Use when:** You need a simple, instant on/off control for all users.",
+      "uses": [
+        "feature flag",
+        "deployment rings"
+      ],
+      "conceptIDs": [
+        "az400.feature-management-capabilities",
+        "az400.feature-flag"
+      ],
+      "order": 11660
+    },
+    {
+      "id": "az400.deployment-strategies.app-feature-rollout",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Marketing wants a new dashboard shown to the beta-tester group now and to 5 per cent of other users, rising over two weeks. Which flag type fits?",
+      "back": "A Rollout flag: default percentage 5, with a group override including the beta testers.",
+      "explanation": "Rollout supports percentage-based gradual release and targeted access for specific groups.",
+      "source": "Microsoft, “Feature management overview”, “Rollout” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/concept-feature-management.md#rollout",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Targeted access** – enable a feature only for specific users, a group, or a custom attribute such as region, device type, or subscription tier",
+      "uses": [
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.feature-rollout"
+      ],
+      "order": 11670
+    },
+    {
+      "id": "az400.deployment-strategies.app-feature-experiment",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team wants to show two onboarding designs to equal halves of users and measure which drives more sign-ups. Which App Configuration flag type fits?",
+      "choices": "A) Switch\nB) Rollout\nC) Experiment, with a variant feature flag\nD) A label on a key-value",
+      "back": "C) Experiment, with a variant feature flag",
+      "choicesExplained": "A turns one feature on or off for everyone. B widens exposure of a single version. D separates settings, not user traffic.",
+      "explanation": "Experiment compares variants with traffic allocated across them, which is A/B testing.",
+      "source": "Microsoft, “Feature management overview”, “Experiment” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/concept-feature-management.md#experiment",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**A/B testing** – compare two, or more than two, variants of a feature against each other",
+      "uses": [
+        "feature flag",
+        "A/B testing"
+      ],
+      "conceptIDs": [
+        "az400.feature-experiment"
+      ],
+      "order": 11675
+    },
+    {
+      "id": "az400.deployment-strategies.app-create-flag",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A developer must add a feature flag to an existing App Configuration store, ready to switch on later. Where do they create it, and how do they keep it off?",
+      "back": "In Feature manager > Create, with Enable feature flag toggled off.",
+      "explanation": "A flag created with the toggle off keeps its configuration but stays disabled.",
+      "source": "Microsoft, “Quickstart: Manage feature flags in Azure App Configuration”, “Create a feature flag” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/manage-feature-flags.md#create-a-feature-flag",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you toggle this off, the new feature flag's configuration is saved but the new feature flag remains disabled.",
+      "uses": [
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.create-feature-flag"
+      ],
+      "order": 11685
+    },
+    {
+      "id": "az400.deployment-strategies.app-feature-manager",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "An auditor wants to see the raw key-values behind the store's feature flags in Configuration explorer. What must you change?",
+      "back": "In Configuration explorer, Manage view > Settings, select \"Include feature flags in the configuration explorer\".",
+      "explanation": "Flags are stored as key-values with the `.appconfig.featureflag/` prefix, hidden from that view by default.",
+      "source": "Microsoft, “Quickstart: Manage feature flags in Azure App Configuration”, “Manage view” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/manage-feature-flags.md#manage-view",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Select **Include feature flags in the configuration explorer** and **Apply**.",
+      "uses": [
+        "Feature Manager in the Azure portal",
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.feature-manager"
+      ],
+      "order": 11690
+    },
+    {
+      "id": "az400.deployment-strategies.app-appconf",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Twelve microservices each keep their own copy of settings, and a wrong value in one caused a failed deployment. The team also stores database passwords. What should they use?",
+      "choices": "A) App Configuration for all values, passwords included\nB) Environment variables baked into each image\nC) App Configuration for settings, with Azure Key Vault for the passwords\nD) A shared text file in the repository",
+      "back": "C) App Configuration for settings, with Azure Key Vault for the passwords",
+      "choicesExplained": "A ignores that App Configuration complements Key Vault for secrets. B and D keep settings spread across components or in code.",
+      "explanation": "App Configuration centralises settings, and Key Vault is the service for application secrets.",
+      "source": "Microsoft, “What is Azure App Configuration?”, “Why use App Configuration?” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/overview.md#why-use-app-configuration",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use App Configuration to store all the settings for your application and secure their accesses in one place.",
+      "uses": [
+        "Azure App Configuration"
+      ],
+      "conceptIDs": [
+        "az400.app-configuration"
+      ],
+      "order": 11700
+    },
+    {
+      "id": "az400.deployment-strategies.app-dacpac",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team keeps its database schema in a Visual Studio SQL Database Project and wants the pipeline to apply schema changes to Azure SQL Database. Which approach is simplest?",
+      "choices": "A) Hand-written `SQLCMD` scripts with firewall rules\nB) A DACPAC deployed with the Azure SQL Database deployment task\nC) Importing a `.bacpac` package on every release\nD) Manual changes in the portal",
+      "back": "B) A DACPAC deployed with the Azure SQL Database deployment task",
+      "choicesExplained": "A works but needs extra firewall steps. C creates a new database from exported data. D is not automated.",
+      "explanation": "A DACPAC is called the simplest way to deploy a database, and the SQL Database Project can create it.",
+      "source": "Microsoft, “Azure SQL database deployment”, “DACPAC” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/targets/azure-sqldb.md#dacpac",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The simplest way to deploy a database is by using a data-tier package or DACPAC.",
+      "uses": [
+        "DACPAC deployment"
+      ],
+      "conceptIDs": [
+        "az400.dacpac"
+      ],
+      "order": 11705
+    },
+    {
+      "id": "az400.deployment-strategies.app-sql-scripts",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A pipeline step runs SQL scripts against Azure SQL Database from a Microsoft-hosted agent and fails to connect. What is the documented fix?",
+      "back": "Add an Azure firewall rule for the agent before the scripts, and remove it after.",
+      "explanation": "The agent cannot reach Azure SQL Database without these rules.",
+      "source": "Microsoft, “Azure SQL database deployment”, “SQL scripts” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/targets/azure-sqldb.md#sql-scripts",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Without these rules, the Azure Pipelines agent cannot communicate with Azure SQL Database.",
+      "uses": [
+        "Microsoft-hosted agent",
+        "agent"
+      ],
+      "conceptIDs": [
+        "az400.sql-scripts-deploy"
+      ],
+      "order": 11715
+    },
+    {
+      "id": "az400.deployment-strategies.app-container-deploy",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "A team wants its deployment steps to run inside a pinned container image with exact tool versions. Their pipeline is Classic. What must change?",
+      "back": "Move to a YAML pipeline; Classic pipelines do not support container jobs.",
+      "explanation": "Container jobs give exact versions of operating systems, tools and dependencies, but need YAML.",
+      "source": "Microsoft, “Container jobs in YAML pipelines”, “Requirements for container jobs” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/container-phases.md#requirements-for-container-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A YAML-based pipeline. Classic pipelines don't support container jobs.",
+      "uses": [
+        "container job"
+      ],
+      "conceptIDs": [
+        "az400.container-deploy"
+      ],
+      "order": 11720
+    },
+    {
+      "id": "az400.deployment-strategies.contrast-canary-bg",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Canary versus blue-green: what does each shift gradually to the new version?",
+      "back": "Canary: successively larger groups of users. Blue-green: traffic from a full blue pool to an identical green pool.",
+      "explanation": "Both are progressive; blue-green needs two pools able to carry full production load.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Adopt a progressive exposure model”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#adopt-a-progressive-exposure-model",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "canary release",
+        "blue-green deployment"
+      ],
+      "conceptIDs": [
+        "az400.canary-vs-blue-green"
+      ],
+      "order": 11730
+    },
+    {
+      "id": "az400.deployment-strategies.contrast-rolling-canary",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Rolling versus canary strategy in a deployment job: what does each iterate over?",
+      "back": "Rolling: batches of virtual machines, `maxParallel` at a time. Canary: traffic increments, such as 10 then 20 per cent.",
+      "explanation": "Rolling supports only virtual machine resources; the documented canary example targets Kubernetes.",
+      "source": "Microsoft, “Deployment jobs”, “Deployment strategies” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/deployment-jobs.md#deployment-strategies",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "`preDeploy`, `deploy`, `routeTraffic`, and `postRouteTraffic` are executed once per batch size defined by `maxParallel`.",
+      "uses": [
+        "rolling strategy",
+        "canary strategy"
+      ],
+      "conceptIDs": [
+        "az400.deployment-strategies"
+      ],
+      "order": 11735
+    },
+    {
+      "id": "az400.deployment-strategies.contrast-back-forward",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Rolling back versus rolling forward: what does each do to a bad deployment?",
+      "back": "Rolling back undoes it and returns to the last known working configuration; rolling forward fixes it with a further change.",
+      "explanation": "Rolling back stateful changes such as schemas can be complex, which is when rolling forward helps.",
+      "source": "Microsoft Learn, “Architecture strategies for safe deployment practices”, “Implement failure-detection mechanisms”",
+      "sourceURL": "https://learn.microsoft.com/en-us/azure/well-architected/operational-excellence/safe-deployments#implement-failure-detection-mechanisms",
+      "sourceLicence": "C · facts only, in our own words",
+      "uses": [
+        "rolling forward"
+      ],
+      "conceptIDs": [
+        "az400.roll-forward"
+      ],
+      "order": 11745
+    },
+    {
+      "id": "az400.deployment-strategies.contrast-preview-auto",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Swap with preview versus auto swap: when does each suit?",
+      "back": "Swap with preview: when you must validate with production settings first. Auto swap: when no pre-swap validation is needed.",
+      "explanation": "Swap with preview pauses mid-swap; auto swap swaps after warm-up on every push.",
+      "source": "Microsoft, “Set up staging environments in Azure App Service”, “Swap with preview (multiple-phase swap)” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/app-service/deploy-staging-slots.md#swap-with-preview-multiple-phase-swap",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can automate this entire workflow by configuring auto swap when pre-swap validation isn't needed.",
+      "uses": [
+        "auto swap"
+      ],
+      "conceptIDs": [
+        "az400.swap-with-preview"
+      ],
+      "order": 11750
+    },
+    {
+      "id": "az400.deployment-strategies.contrast-switch-rollout",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "Switch versus Rollout flag: who gets the feature?",
+      "back": "Switch: everyone or no one. Rollout: a percentage of users or chosen users and groups, widened over time.",
+      "explanation": "Rollout adds schedules and configuration delivery that a plain switch lacks.",
+      "source": "Microsoft, “Feature management overview”, “Rollout” (MicrosoftDocs/azure-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/azure-app-configuration/concept-feature-management.md#rollout",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Percentage-based gradual release** – expose a feature to a small percentage of traffic and increase it over time (canary or staged rollout) to reduce risk",
+      "uses": [
+        "feature flag"
+      ],
+      "conceptIDs": [
+        "az400.feature-rollout"
+      ],
+      "order": 11760
+    }
+  ]
+}

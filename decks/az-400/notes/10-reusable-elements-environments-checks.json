@@ -1,0 +1,2373 @@
+{
+  "topic": "Reusable pipeline elements, environments and checks",
+  "notes": [
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-a-yaml-template",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a YAML template in Azure Pipelines?",
+      "back": "A file of reusable content, logic and parameters that YAML pipelines include or extend from.",
+      "explanation": "Templates speed up development and can also secure a pipeline by controlling what is allowed in it.",
+      "example": "Like a shared recipe card: several pipelines follow the same steps without each copying them out.",
+      "introduces": [
+        "YAML template"
+      ],
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Templates let you define reusable content, logic, and parameters in YAML pipelines.",
+      "uses": [
+        "YAML template"
+      ],
+      "conceptIDs": [
+        "az400.template"
+      ],
+      "order": 10005
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-a-step-template",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a step template?",
+      "back": "A YAML template holding one or more steps that can be inserted into several jobs, each of which may add steps of its own.",
+      "explanation": "The template supplies the common steps; each job can still define more steps around them.",
+      "example": "Like a standard “restore and test” block dropped into both a Linux job and a Windows job.",
+      "introduces": [
+        "step template"
+      ],
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Reuse steps across multiple jobs” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#reuse-steps-across-multiple-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can insert a template to reuse one or more steps across several jobs. In addition to the steps from the template, each job can define more steps.",
+      "uses": [
+        "step template",
+        "YAML template",
+        "step and task",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.step-template"
+      ],
+      "order": 10014
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-a-job-template",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a job template?",
+      "back": "A YAML template holding whole jobs, reused in pipelines much as step templates reuse steps.",
+      "explanation": "A pipeline references it under `jobs:` with `- template:` and the jobs are inserted there.",
+      "example": "Like a step template, but each insertion brings complete jobs rather than individual steps.",
+      "introduces": [
+        "job template"
+      ],
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Reuse jobs across multiple templates” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#reuse-jobs-across-multiple-templates",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Much like steps, jobs can be reused with templates.",
+      "uses": [
+        "job template",
+        "YAML template",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.job-template"
+      ],
+      "order": 10023
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-a-stage-template",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a stage template?",
+      "back": "A YAML template holding whole stages that pipelines can reuse.",
+      "explanation": "Parameters such as a stage name or VM image let one stage template produce differently named stages.",
+      "example": "Like a job template, one level up: each insertion adds a complete stage with its jobs.",
+      "introduces": [
+        "stage template"
+      ],
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Reuse stages across multiple templates” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#reuse-stages-across-multiple-templates",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Stages can also be reused with templates.",
+      "uses": [
+        "stage template",
+        "YAML template",
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.stage-template"
+      ],
+      "order": 10032
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-a-variable-template",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a variable template?",
+      "back": "A YAML file of variables that another pipeline or template includes, so variables can live in one file.",
+      "explanation": "It is included under `variables:` with `- template:`, and it can only define variables.",
+      "example": "Like a shared settings file that every pipeline reads its common values from.",
+      "introduces": [
+        "variable template"
+      ],
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Variable reuse” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#variable-reuse",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Variables can be defined in one YAML and included in another template. This could be useful if you want to store all of your variables in one file.",
+      "uses": [
+        "variable template",
+        "YAML template"
+      ],
+      "conceptIDs": [
+        "az400.variable-template"
+      ],
+      "order": 10041
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-are-template-parameters",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What are template parameters?",
+      "back": "Named, typed inputs declared in a template and given values by the pipeline that uses it.",
+      "explanation": "Declaring a data type lets a wrong value, such as a string for a boolean, fail the build.",
+      "example": "Like the arguments of a function: the template declares `name` and `vmImage`, and each caller passes its own.",
+      "introduces": [
+        "template parameters"
+      ],
+      "source": "Microsoft, “Template parameters”, “Template parameters” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/template-parameters.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can specify parameters and their data types in a template and reference those parameters in a pipeline.",
+      "uses": [
+        "template parameters",
+        "YAML template"
+      ],
+      "conceptIDs": [
+        "az400.template-parameters"
+      ],
+      "order": 10050
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-a-task-group",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a task group?",
+      "back": "In Classic pipelines, a sequence of already defined tasks wrapped into a single reusable task.",
+      "explanation": "It is added to the task catalogue and can be used in the project’s pipelines like any other task.",
+      "example": "Like a step template, but built in the Classic editor from tasks you already have.",
+      "introduces": [
+        "task group"
+      ],
+      "source": "Microsoft, “Task groups in Classic pipelines”, “Task groups in Classic pipelines” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/release/task-groups.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In Classic pipelines, a task group encapsulates a sequence of tasks that are already defined in a pipeline into a single reusable task.",
+      "uses": [
+        "task group",
+        "step and task"
+      ],
+      "conceptIDs": [
+        "az400.task-group"
+      ],
+      "order": 10059
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-a-pipeline-variable",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a pipeline variable in Azure Pipelines?",
+      "back": "A named value you define to use throughout a pipeline; its value can change from run to run or job to job.",
+      "explanation": "User-defined variables can be set at root, stage and job level in YAML, or in the pipeline’s web settings.",
+      "example": "Like a named cell in a spreadsheet: set `buildConfiguration` once, then refer to it in many tasks.",
+      "introduces": [
+        "pipeline variable"
+      ],
+      "source": "Microsoft, “Define variables”, “Define variables” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Variables provide a convenient way to include key data in various parts of the pipeline. The most common use of variables is to define a value that you can use throughout your pipeline.",
+      "uses": [
+        "pipeline variable"
+      ],
+      "conceptIDs": [
+        "az400.variable"
+      ],
+      "order": 10068
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-are-system-variables",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What are system and predefined variables in Azure Pipelines?",
+      "back": "Variables Azure Pipelines provides with predefined values, such as `Build.BuildId`, the ID of each build.",
+      "explanation": "The system sets their current values when the pipeline runs.",
+      "example": "Like the date stamp a camera adds by itself: you don’t define it, but you can read it in scripts and tasks.",
+      "introduces": [
+        "system and predefined variables"
+      ],
+      "source": "Microsoft, “Define variables”, “System variables” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#system-variables",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In addition to user-defined variables, Azure Pipelines has system variables with predefined values. For example, the predefined variable Build.BuildId gives the ID of each build and can be used to identify different pipeline runs.",
+      "uses": [
+        "system and predefined variables",
+        "pipeline variable"
+      ],
+      "conceptIDs": [
+        "az400.system-variables"
+      ],
+      "order": 10077
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-a-variable-group",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a variable group?",
+      "back": "A set of values and secrets that can be passed into a YAML pipeline or shared across pipelines in a project.",
+      "explanation": "Groups are managed in the Library, and secret variables in them are protected resources.",
+      "example": "Like a shared address book of settings: several pipelines link the same group instead of each keeping copies.",
+      "introduces": [
+        "variable group"
+      ],
+      "source": "Microsoft, “Manage variable groups”, “Manage variable groups” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/library/variable-groups.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Variable groups store values and secrets that you can pass into a YAML pipeline or make available across multiple pipelines in a project.",
+      "uses": [
+        "variable group"
+      ],
+      "conceptIDs": [
+        "az400.variable-group"
+      ],
+      "order": 10086
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-an-environment",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is an environment in Azure Pipelines?",
+      "back": "A group of resources that a pipeline targets with deployments; a logical target such as Dev, Test or Production.",
+      "explanation": "Environments record deployment history and can be secured with permissions, approvals and checks.",
+      "example": "Like a named destination on a delivery route, “Staging”, that every deployment to staging goes through.",
+      "introduces": [
+        "environment"
+      ],
+      "source": "Microsoft, “Create and target Azure DevOps environments”, “Create and target Azure DevOps environments” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/environments.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "An environment is a group of resources that you can target with deployments from a pipeline. An environment represents a logical target where your pipeline deploys software.",
+      "uses": [
+        "environment"
+      ],
+      "conceptIDs": [
+        "az400.environment"
+      ],
+      "order": 10095
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-environment-deployment-history",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is environment deployment history?",
+      "back": "The record, on an environment’s Deployments tab, of jobs from all pipelines that deployed to it, with their commits and work items.",
+      "explanation": "Because every pipeline targeting the environment is listed, the history shows the sequence of deployments.",
+      "example": "Like a visitors’ book at a building’s door: every pipeline that deployed there has signed it.",
+      "introduces": [
+        "environment deployment history"
+      ],
+      "source": "Microsoft, “Create and target Azure DevOps environments”, “View deployment history” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/environments.md#view-deployment-history",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "View jobs from all pipelines that target a specific environment. For example, two microservices that each have their own pipeline can deploy to the same environment.",
+      "uses": [
+        "environment deployment history",
+        "environment"
+      ],
+      "conceptIDs": [
+        "az400.environment-deployment-history"
+      ],
+      "order": 10104
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-are-approvals-and-checks",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What are approvals and checks in Azure Pipelines?",
+      "back": "Rules a resource owner sets on a resource, such as an environment, that must be satisfied before a stage using it can start.",
+      "explanation": "They are defined on the resource, not in the pipeline YAML, so the resource owner keeps control.",
+      "example": "Like a signed permit on a building site: the site owner, not the builder, decides when work may start.",
+      "introduces": [
+        "approvals and checks"
+      ],
+      "source": "Microsoft, “Define approvals and checks”, “Define approvals and checks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Checks enable the resource owner to control if and when a stage in any pipeline can consume a resource.",
+      "uses": [
+        "approvals and checks",
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.approvals-and-checks"
+      ],
+      "order": 10113
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-a-reusable-workflow",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a reusable workflow in GitHub Actions?",
+      "back": "A workflow that anyone with access to it can call from another workflow, instead of copying its content.",
+      "explanation": "Reuse avoids duplication, making workflows easier to maintain and quicker to create.",
+      "example": "Like a job template in Azure Pipelines, but a whole workflow file called from another workflow.",
+      "introduces": [
+        "reusable workflow"
+      ],
+      "source": "GitHub Docs, “Reusing workflow configurations”, “Reusable workflows”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/reusing-workflow-configurations#reusable-workflows",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Rather than copying and pasting from one workflow to another, you can make workflows reusable. You and anyone with access to the reusable workflow can then call the reusable workflow from another workflow.",
+      "uses": [
+        "reusable workflow",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "az400.reusable-workflow"
+      ],
+      "order": 10122
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-a-workflow-template",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What is a workflow template in GitHub Actions?",
+      "back": "A starting point offered when someone creates a new workflow, doing some or all of the writing for them.",
+      "explanation": "Organisations use them so that people with permission to create workflows can do so more quickly and easily.",
+      "example": "Like a document template: you start from a filled-in file and adjust it, rather than from a blank page.",
+      "introduces": [
+        "workflow template"
+      ],
+      "source": "GitHub Docs, “Reusing workflow configurations”, “Workflow templates”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/reusing-workflow-configurations#workflow-templates",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When people create a new workflow, they can choose a workflow template and some or all of the work of writing the workflow will be done for them.",
+      "uses": [
+        "workflow template",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "az400.workflow-template"
+      ],
+      "order": 10131
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-is-a-github-deployment-environment",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "core",
+      "front": "What is a GitHub deployment environment?",
+      "back": "A named deployment target, such as `production` or `staging`, that workflow jobs reference and that can carry protection rules and secrets.",
+      "explanation": "Environments can require approval, restrict branches, gate deployments with custom rules or limit access to secrets.",
+      "example": "Like an Azure Pipelines environment, but configured in a GitHub repository and referenced by a workflow job.",
+      "introduces": [
+        "GitHub deployment environment"
+      ],
+      "source": "GitHub Docs source, reusable text “About environments” (github/docs on GitHub)",
+      "sourceURL": "https://github.com/github/docs/blob/main/data/reusables/actions/about-environments.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Environments are used to describe a general deployment target like `production`, `staging`, or `development`.",
+      "uses": [
+        "GitHub deployment environment",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "az400.github-environment"
+      ],
+      "order": 10140
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.what-are-configuration-variables",
+      "type": "basic",
+      "kind": "primer",
+      "priority": "extra",
+      "front": "What are GitHub Actions configuration variables?",
+      "back": "Variables for non-sensitive settings, defined at organisation, repository or environment level and shared across workflows.",
+      "explanation": "They hold non-sensitive configuration; secrets are the choice for passwords and the like.",
+      "example": "Like a variable group in Azure Pipelines, but set in GitHub settings and read by many workflows.",
+      "introduces": [
+        "GitHub Actions configuration variables"
+      ],
+      "source": "GitHub Docs, “Variables”, “Variables”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/variables",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To define a configuration variable across multiple workflows, you can define it at the organization, repository, or environment level.",
+      "uses": [
+        "GitHub Actions configuration variables",
+        "workflow",
+        "organization"
+      ],
+      "conceptIDs": [
+        "az400.github-variables"
+      ],
+      "order": 10149
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.extends-template",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which type of YAML template defines a schema of logic and structure that a pipeline must follow?",
+      "back": "An extends template.",
+      "explanation": "The source calls this useful for enforcing security, compliance or organisational standards.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Extends templates: Control and define a schema for what is allowed in a pipeline. When an extends template is used, it defines logic and structure that a pipeline must follow.",
+      "uses": [
+        "YAML template"
+      ],
+      "conceptIDs": [
+        "az400.includes-vs-extends"
+      ],
+      "order": 10158
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.contrast-includes-extends",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does an includes template differ from an extends template in purpose?",
+      "back": "Includes inserts reusable content; extends controls what the pipeline may contain, for security or compliance.",
+      "explanation": "One is about reuse, the other about enforcing a structure the pipeline must follow.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When an extends template is used, it defines logic and structure that a pipeline must follow. This is useful for enforcing security, compliance, or organizational standards.",
+      "uses": [
+        "YAML template"
+      ],
+      "conceptIDs": [
+        "az400.includes-vs-extends"
+      ],
+      "order": 10167
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.extends-required-approval",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When a pipeline extends from a template, what can be added to increase security further?",
+      "back": "A required template approval (check) on the protected resource.",
+      "explanation": "The extends template controls the pipeline’s shape; the check makes using that template compulsory.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Extend from a template” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#extend-from-a-template",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When extending from a template, you can increase security by adding a required template approval.",
+      "uses": [
+        "YAML template",
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.extends-template-security"
+      ],
+      "order": 10176
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-extends",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A platform team wants every pipeline using the production service connection to follow its approved structure, which rejects script steps. What should it use?",
+      "choices": "A) A variable template listing the approved tasks\nB) A step template that each pipeline may include\nC) A task group shared across the project\nD) An extends template that validates the steps passed in, plus a required template check on the service connection",
+      "back": "D) An extends template that validates the steps passed in, plus a required template check on the service connection",
+      "choicesExplained": "A: a variable template can only define variables. C: task groups are for Classic pipelines, not YAML. B: including a step template is optional and does not stop other steps being added.",
+      "explanation": "An extends template can reject a script step and fail the build, and the required template check fails any pipeline that does not extend it.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Extend from a template” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#extend-from-a-template",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In `start-extends-template.yml`, if a `buildStep` gets passed with a script step, then it's rejected and the pipeline build fails. When extending from a template, you can increase security by adding a required template approval.",
+      "uses": [
+        "YAML template",
+        "approvals and checks",
+        "variable template",
+        "task group",
+        "step template"
+      ],
+      "conceptIDs": [
+        "az400.extends-template-security",
+        "az400.template",
+        "az400.includes-vs-extends",
+        "az400.required-template-check"
+      ],
+      "order": 10185
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.limit-files",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A pipeline may include no more than {{c1::100}} separate YAML files, directly or indirectly.",
+      "explanation": "Azure Pipelines imposes limits to prevent runaway growth in the size and complexity of a pipeline.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Imposed limits on template updates” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#imposed-limits-on-template-updates",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "No more than 100 separate YAML files may be included (directly or indirectly)",
+      "uses": [
+        "YAML template"
+      ],
+      "conceptIDs": [
+        "az400.template-limits"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · documentation as published",
+      "order": 10194
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.limit-nesting",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Templates may be nested (templates including other templates) to no more than {{c1::100}} levels.",
+      "explanation": "The nesting limit is one of three limits on template growth, beside file count and parsing memory.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Imposed limits on template updates” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#imposed-limits-on-template-updates",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "No more than 100 levels of template nesting (templates including other templates)",
+      "uses": [
+        "YAML template"
+      ],
+      "conceptIDs": [
+        "az400.template-limits"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · documentation as published",
+      "order": 10203
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.limit-memory",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Parsing a pipeline’s YAML may consume no more than {{c1::20 megabytes}} of memory.",
+      "explanation": "The source says this is typically between 600 kilobytes and 2 megabytes of YAML on disk, depending on the features used.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Imposed limits on template updates” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#imposed-limits-on-template-updates",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "No more than 20 megabytes of memory consumed while parsing the YAML (in practice, this is typically between 600 KB - 2 MB of on-disk YAML, depending on the specific features used)",
+      "uses": [
+        "YAML template"
+      ],
+      "conceptIDs": [
+        "az400.template-limits"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · documentation as published",
+      "order": 10212
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-template-limits",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A shared template library grows until one pipeline pulls in 120 separate YAML files, directly or indirectly, and the pipeline stops working. Which limit has it broken?",
+      "back": "The limit of 100 separate YAML files included, directly or indirectly.",
+      "explanation": "The other two limits are 100 levels of nesting and 20 megabytes of memory while parsing.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Imposed limits on template updates” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#imposed-limits-on-template-updates",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To help prevent runaway growth, Azure Pipelines imposes the following limits: - No more than 100 separate YAML files may be included (directly or indirectly)",
+      "uses": [
+        "YAML template"
+      ],
+      "conceptIDs": [
+        "az400.template-limits"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · documentation as published",
+      "order": 10221
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.template-other-repo",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How does a pipeline use a template kept in another repository?",
+      "back": "Declare the repository under `resources: repositories:` and reference the template as `file.yml@alias`.",
+      "explanation": "This lets a core repository hold templates that every app repository uses.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Store templates in other repositories” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#store-templates-in-other-repositories",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can put the template in a core repo and then refer to it from each of your app repos:",
+      "uses": [
+        "YAML template",
+        "repository"
+      ],
+      "conceptIDs": [
+        "az400.template"
+      ],
+      "order": 10230
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.template-pin-ref",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How do you make sure a pipeline always uses one fixed version of a template from another repository?",
+      "back": "Pin the repository resource's `ref` to a branch, a tag or a commit's full SHA value.",
+      "explanation": "Without a `ref` the pipeline uses `refs/heads/main`, whose templates can change; a pinned `ref` keeps one fixed version.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Store templates in other repositories” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#store-templates-in-other-repositories",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you want to use a particular, fixed version of the template, be sure to pin to a `ref`. The `refs` are either branches (`refs/heads/<name>`) or tags (`refs/tags/<name>`).",
+      "uses": [
+        "YAML template",
+        "Git tag",
+        "branch"
+      ],
+      "conceptIDs": [
+        "az400.template"
+      ],
+      "order": 10239
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-step-template",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Three jobs in a pipeline repeat the same `npm install` and `npm test` steps, and each job also has its own extra steps. What removes the repetition?",
+      "choices": "A) Three separate pipelines\nB) A variable template\nC) A task group\nD) A step template inserted into each job",
+      "back": "D) A step template inserted into each job",
+      "choicesExplained": "B can only define variables, not steps. C is for Classic pipelines, not YAML. A multiplies the duplication.",
+      "explanation": "A step template supplies shared steps, and each job can still define more steps.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Reuse steps across multiple jobs” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#reuse-steps-across-multiple-jobs",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can insert a template to reuse one or more steps across several jobs. In addition to the steps from the template, each job can define more steps.",
+      "uses": [
+        "step template",
+        "variable template",
+        "task group"
+      ],
+      "conceptIDs": [
+        "az400.step-template"
+      ],
+      "order": 10248
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.class-template-type",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "A shared file begins `stages:` and defines a complete Build stage with its jobs, which several pipelines reference. What kind of template is it?",
+      "choices": "A) Step template\nB) Stage template\nC) Variable template\nD) Workflow template",
+      "back": "B) Stage template",
+      "choicesExplained": "A holds steps only. C can only define variables. D belongs to GitHub Actions and starts new workflows.",
+      "explanation": "Stages, like steps and jobs, can be reused with templates, and a stage template supplies whole stages.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Reuse stages across multiple templates” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#reuse-stages-across-multiple-templates",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Stages can also be reused with templates.",
+      "uses": [
+        "stage template",
+        "step template",
+        "variable template",
+        "workflow template"
+      ],
+      "conceptIDs": [
+        "az400.stage-template",
+        "az400.job-template"
+      ],
+      "order": 10257
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.variable-template-only-vars",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What may a template contain when it is used to include variables in a pipeline?",
+      "back": "Only variable definitions; steps and more complex logic need an extends template.",
+      "explanation": "The variable template’s job is narrow: it supplies values and nothing else.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Variable reuse” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#variable-reuse",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you're using a template to include variables in a pipeline, the included template can only be used to define variables. You can use steps and more complex logic when you're extending from a template.",
+      "uses": [
+        "variable template",
+        "YAML template"
+      ],
+      "conceptIDs": [
+        "az400.variable-template"
+      ],
+      "order": 10266
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.parameters-over-variables",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "For added security, what does the templates guidance recommend using instead of variables, and why?",
+      "back": "Parameters, because they add security such as specifying a type.",
+      "explanation": "A typed parameter rejects a value of the wrong kind, which a string variable cannot do.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Variable reuse” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#variable-reuse",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use parameters instead of variables for added security such as specifying type.",
+      "uses": [
+        "template parameters",
+        "pipeline variable"
+      ],
+      "conceptIDs": [
+        "az400.variable-template"
+      ],
+      "order": 10275
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-variable-template",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Five pipelines in one repository need the same set of non-secret build settings kept in a single file. What fits?",
+      "back": "A variable template, included in each pipeline under `variables:` with `- template:`.",
+      "explanation": "The source suggests variable reuse for storing all of your variables in one file.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Variable reuse” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#variable-reuse",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Variables can be defined in one YAML and included in another template. This could be useful if you want to store all of your variables in one file.",
+      "uses": [
+        "variable template",
+        "pipeline variable"
+      ],
+      "conceptIDs": [
+        "az400.variable-template"
+      ],
+      "order": 10284
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.parameters-need-name-type",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What must every template parameter include?",
+      "back": "A name and a data type.",
+      "explanation": "With a boolean parameter, passing a string such as `apples` makes the build fail.",
+      "source": "Microsoft, “Template parameters”, “Passing parameters” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/template-parameters.md#passing-parameters",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Parameters must include a name and data type. In `azure-pipelines.yml`, if the parameter `yesNo` is set to a boolean value, the build succeeds. If `yesNo` is set to a string like `apples`, the build fails.",
+      "uses": [
+        "template parameters"
+      ],
+      "conceptIDs": [
+        "az400.template-parameters"
+      ],
+      "order": 10293
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.parameter-defaults-literals",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What kind of value can be used as a parameter’s default?",
+      "back": "Only a literal.",
+      "explanation": "A default cannot be computed from an expression or a variable.",
+      "source": "Microsoft, “Template parameters”, “Template parameters” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/template-parameters.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can only use literals for parameter default values.",
+      "uses": [
+        "template parameters"
+      ],
+      "conceptIDs": [
+        "az400.template-parameters"
+      ],
+      "order": 10302
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-template-parameters",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "One job template must build on `ubuntu-latest` in one pipeline and `windows-latest` in another, with a different job name each time. How?",
+      "choices": "A) Copy the template once per operating system\nB) Set a pipeline variable in the web settings of each pipeline\nC) Use a task group with two versions\nD) Declare `name` and `vmImage` parameters in the template and pass values from each pipeline",
+      "back": "D) Declare `name` and `vmImage` parameters in the template and pass values from each pipeline",
+      "choicesExplained": "A duplicates the template it was meant to share. B: variables are untyped, and the guidance prefers parameters for templates. C: task groups belong to Classic pipelines.",
+      "explanation": "Parameters let one template create jobs that differ only in the values passed to it.",
+      "source": "Microsoft, “Use YAML templates in pipelines for reusable and secure processes”, “Add parameters to job, stage, and step templates” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/templates.md#add-parameters-to-job-stage-and-step-templates",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "`templates/npm-with-params.yml` defines two parameters: `name` and `vmImage` and creates a job with the name parameter for the job name and the vmImage parameter for the VM image.",
+      "uses": [
+        "template parameters",
+        "job template",
+        "task group"
+      ],
+      "conceptIDs": [
+        "az400.template-parameters",
+        "az400.job-template"
+      ],
+      "order": 10311
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.parameter-types",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What are two data types that template parameters can have?",
+      "back": "Any two, among others: string; number; boolean; object; `stepList`.",
+      "explanation": "Types such as `stepList` let a parameter carry whole lists of steps into a template.",
+      "source": "Microsoft, “Template parameters”, “Iterating through parameters and their data types” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/template-parameters.md#iterating-through-parameters-and-their-data-types",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure Pipelines allows you to iterate through parameters of various data types, such as strings, objects, numbers, and booleans.",
+      "uses": [
+        "template parameters"
+      ],
+      "conceptIDs": [
+        "az400.parameter-types"
+      ],
+      "order": 10320
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.task-groups-classic-only",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Are task groups supported in YAML pipelines, and what replaces them there?",
+      "back": "No; YAML pipelines use templates instead.",
+      "explanation": "Task groups work in Classic pipelines and Classic release pipelines only.",
+      "source": "Microsoft, “Task groups in Classic pipelines”, “Task groups in Classic pipelines” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/release/task-groups.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Task groups are not supported in YAML pipelines. Instead, you can use Templates.",
+      "uses": [
+        "task group",
+        "YAML template"
+      ],
+      "conceptIDs": [
+        "az400.task-group"
+      ],
+      "order": 10329
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.task-groups-project-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "At what scope are task groups stored?",
+      "back": "At project level; they aren’t accessible outside the project.",
+      "explanation": "To move one to another project, export it and use Import on the Task groups page.",
+      "source": "Microsoft, “Task groups in Classic pipelines”, “Task groups in Classic pipelines” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/release/task-groups.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Task groups are stored at the project level, and aren't accessible outside the project scope.",
+      "uses": [
+        "task group"
+      ],
+      "conceptIDs": [
+        "az400.task-group"
+      ],
+      "order": 10338
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.task-group-central-change",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What happens to pipelines using a task group when the task group is changed centrally?",
+      "back": "The change is reflected automatically in every pipeline definition that uses it.",
+      "explanation": "That is what makes task groups a way to standardise and centrally manage deployment steps.",
+      "source": "Microsoft, “Task groups in Classic pipelines”, “Task groups in Classic pipelines” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/release/task-groups.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you make a change centrally to a task group, the change is automatically reflected in all the pipeline definitions that use the task group. You don't need to change each definition individually.",
+      "uses": [
+        "task group"
+      ],
+      "conceptIDs": [
+        "az400.task-group"
+      ],
+      "order": 10347
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-task-group-yaml",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team moving from Classic to YAML asks how to keep the shared deployment steps it held in a task group. What is the answer?",
+      "choices": "A) Reference the task group by name in the YAML\nB) Rewrite the steps as a YAML template, since task groups are not supported in YAML\nC) Store the steps in a variable group\nD) Export the task group into an environment",
+      "back": "B) Rewrite the steps as a YAML template, since task groups are not supported in YAML",
+      "choicesExplained": "A: YAML pipelines cannot use task groups. C: variable groups hold values and secrets, not steps. D: environments are deployment targets, not step containers.",
+      "explanation": "Templates are the YAML way to reuse a sequence of steps.",
+      "source": "Microsoft, “Task groups in Classic pipelines”, “Task groups in Classic pipelines” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/release/task-groups.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Task groups are not supported in YAML pipelines. Instead, you can use Templates.",
+      "uses": [
+        "task group",
+        "YAML template",
+        "variable group",
+        "environment"
+      ],
+      "conceptIDs": [
+        "az400.task-group"
+      ],
+      "order": 10356
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.task-group-major",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "After a new major version of a task group is published, do pipelines use it automatically?",
+      "back": "No; users must explicitly update to the new version in their pipelines.",
+      "explanation": "Major versions suit substantial changes that might break existing pipelines, so moving is a choice.",
+      "source": "Microsoft, “Task groups in Classic pipelines”, “Create a major version update” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/release/task-groups.md#create-a-major-version-update",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A notification about new version availability appears in all the pipeline definitions that use the task group. Users must explicitly update to the new task group version if they want to use it in their pipelines.",
+      "uses": [
+        "task group"
+      ],
+      "conceptIDs": [
+        "az400.task-group-versions"
+      ],
+      "order": 10365
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.contrast-task-group-template",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does a task group differ from a YAML step template?",
+      "back": "A task group wraps tasks for Classic pipelines, stored per project; a step template is a YAML file reused by YAML pipelines.",
+      "explanation": "Both package reusable steps, but each belongs to one kind of pipeline.",
+      "source": "Microsoft, “Task groups in Classic pipelines”, “Task groups in Classic pipelines” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/release/task-groups.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "In Classic pipelines, a task group encapsulates a sequence of tasks that are already defined in a pipeline into a single reusable task.",
+      "uses": [
+        "task group",
+        "step template"
+      ],
+      "conceptIDs": [
+        "az400.task-group",
+        "az400.step-template"
+      ],
+      "order": 10374
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.variable-scopes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "At which three levels can a variable be set in a YAML file, and what does each reach?",
+      "back": "Root: all jobs; stage: that stage only; job: that job only.",
+      "explanation": "A root-level variable is global to the pipeline’s jobs and stages.",
+      "source": "Microsoft, “Define variables”, “Variable scopes” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#variable-scopes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "At the root level, to make it available to all jobs in the pipeline. - At the stage level, to make it available only to a specific stage. - At the job level, to make it available only to a specific job.",
+      "uses": [
+        "pipeline variable",
+        "Azure Pipelines stage",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.variable-scopes"
+      ],
+      "order": 10383
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.variable-precedence",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When a variable with the same name is defined in several places, which value wins?",
+      "back": "The most locally scoped: job over stage, stage over root, root over the pipeline’s web settings.",
+      "explanation": "Narrower scopes override wider ones.",
+      "source": "Microsoft, “Define variables”, “Define variables” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you define the same variable in multiple places with the same name, the most locally scoped variable takes precedence.",
+      "uses": [
+        "pipeline variable"
+      ],
+      "conceptIDs": [
+        "az400.variable-scopes"
+      ],
+      "order": 10392
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-variable-precedence",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "`configuration` is `Debug` at pipeline root and `Release` in job `Package`. What does `Package` see?",
+      "choices": "A) `Debug`, because root variables are global\nB) `Release`, because job-level variables override root-level ones\nC) Both values joined together\nD) An error for the duplicate name",
+      "back": "B) `Release`, because job-level variables override root-level ones",
+      "choicesExplained": "A: being global does not stop a narrower scope overriding it. C: values are not merged. D: redefining a variable at another scope is allowed.",
+      "explanation": "The most locally scoped definition takes precedence.",
+      "source": "Microsoft, “Define variables”, “Variable scopes” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#variable-scopes",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Variables at the job level override variables at the root and stage level. Variables at the stage level override variables at the root level.",
+      "uses": [
+        "pipeline variable",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.variable-scopes",
+        "az400.variable"
+      ],
+      "order": 10401
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.syntax-macro",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which variable syntax, `$(var)`, is processed at run time just before a task executes, and is left unchanged if no such variable exists?",
+      "back": "Macro syntax.",
+      "explanation": "An unreplaced `$(var)` stays as written, because an empty value might mean something to the task.",
+      "source": "Microsoft, “Define variables”, “Macro syntax variables” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#macro-syntax-variables",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The system processes variables with macro syntax before a task executes during runtime. Runtime happens after template expansion. When the system encounters a macro expression, it replaces the expression with the contents of the variable. If there's no variable by that name, the macro expression doesn't change.",
+      "uses": [
+        "pipeline variable"
+      ],
+      "conceptIDs": [
+        "az400.variable-syntaxes"
+      ],
+      "order": 10410
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.syntax-template",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which variable syntax, `${{ variables.var }}`, is processed at compile time and may appear as a key as well as a value?",
+      "back": "Template expression syntax.",
+      "explanation": "It is replaced before run time starts, and it coalesces to an empty string when no value is found.",
+      "source": "Microsoft, “Define variables”, “Template expression syntax” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#template-expression-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Template expressions, unlike macro and runtime expressions, can appear as either keys (left side) or values (right side).",
+      "uses": [
+        "pipeline variable",
+        "expression"
+      ],
+      "conceptIDs": [
+        "az400.variable-syntaxes"
+      ],
+      "order": 10419
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.syntax-runtime",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which variable syntax, `$[variables.var]`, expands at run time and suits job conditions?",
+      "back": "Runtime expression syntax.",
+      "explanation": "Like template syntax, it coalesces to an empty string when no value is found.",
+      "source": "Microsoft, “Define variables”, “Runtime expression syntax” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#runtime-expression-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use runtime expression syntax for variables that expand at runtime. Runtime expression variables silently coalesce to empty strings when a replacement value isn't found. Use runtime expressions in job conditions to support conditional execution of jobs or whole stages.",
+      "uses": [
+        "pipeline variable",
+        "expression"
+      ],
+      "conceptIDs": [
+        "az400.variable-syntaxes"
+      ],
+      "order": 10428
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.class-variable-syntax",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "An author needs a variable to supply a YAML key (the left side of `key: value`). Which syntax works?",
+      "choices": "A) Macro syntax `$(var)`\nB) Template expression syntax `${{ variables.var }}`\nC) Runtime expression syntax `$[variables.var]`\nD) Any of the three",
+      "back": "B) Template expression syntax `${{ variables.var }}`",
+      "choicesExplained": "A and C: macro and runtime expressions only work as values on the right side. D: only one of the three can be a key.",
+      "explanation": "Only template expressions can appear on either side.",
+      "source": "Microsoft, “Define variables”, “Template expression syntax” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#template-expression-syntax",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Template expressions, unlike macro and runtime expressions, can appear as either keys (left side) or values (right side).",
+      "uses": [
+        "pipeline variable",
+        "expression"
+      ],
+      "conceptIDs": [
+        "az400.variable-syntaxes"
+      ],
+      "order": 10437
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.reserved-prefixes",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two prefixes a user-defined variable name must not start with?",
+      "back": "Any two of: `endpoint`, `input`, `secret`, `path`, `securefile`.",
+      "explanation": "A variable beginning with one of these, in any capitalisation, isn’t available to tasks and scripts.",
+      "source": "Microsoft, “Define variables”, “Variable naming restrictions” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#variable-naming-restrictions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Don't use variable prefixes reserved by the system. These prefixes are: `endpoint`, `input`, `secret`, `path`, and `securefile`.",
+      "uses": [
+        "pipeline variable"
+      ],
+      "conceptIDs": [
+        "az400.variable"
+      ],
+      "order": 10446
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.env-var-conversion",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When the variable `any.variable` is injected as an environment variable on Linux, what is it called?",
+      "back": "`$ANY_VARIABLE`: names become upper case and periods become underscores.",
+      "explanation": "System and user-defined variables, except secrets, are injected as environment variables in this form.",
+      "source": "Microsoft, “Define variables”, “Environment variables” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#environment-variables",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When variables convert into environment variables, variable names become uppercase, and periods turn into underscores. For example, the variable name `any.variable` becomes the variable name `$ANY_VARIABLE`.",
+      "uses": [
+        "pipeline variable"
+      ],
+      "conceptIDs": [
+        "az400.variable"
+      ],
+      "order": 10455
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.secret-not-env",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Are secret variables automatically exported as environment variables to scripts?",
+      "back": "No; they must be mapped to environment variables explicitly.",
+      "explanation": "Secrets should also not be set in the YAML file, since commands and their inputs may be logged.",
+      "source": "Microsoft, “Define variables”, “Set secret variables” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#secret-variables",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Secret variables aren't automatically exported as environment variables. To use secret variables in your scripts, explicitly map them to environment variables.",
+      "uses": [
+        "pipeline variable"
+      ],
+      "conceptIDs": [
+        "az400.variable"
+      ],
+      "order": 10464
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.output-same-job",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How does a later task in the same job reference an output variable `MyVar` set by a step named `ProduceVar`?",
+      "back": "As `$(ProduceVar.MyVar)`, following the `TASK.VARIABLE` pattern.",
+      "explanation": "The step must be given a `name` so that other steps can refer to its outputs.",
+      "source": "Microsoft, “Define variables”, “Use output variables from tasks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#use-output-variables-from-tasks",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To reference a variable from a different task within the same job, use `TASK.VARIABLE`.",
+      "uses": [
+        "pipeline variable",
+        "step and task"
+      ],
+      "conceptIDs": [
+        "az400.output-variables"
+      ],
+      "order": 10473
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.output-other-job",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "To reference a task’s output variable from a different job, use {{c1::`dependencies.JOB.outputs['TASK.VARIABLE']`}}.",
+      "explanation": "Across jobs the reference goes through the dependencies context rather than straight to the task.",
+      "source": "Microsoft, “Define variables”, “Use output variables from tasks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#use-output-variables-from-tasks",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To reference a variable from a task from a different job, use `dependencies.JOB.outputs['TASK.VARIABLE']`.",
+      "uses": [
+        "pipeline variable",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.output-variables"
+      ],
+      "order": 10482
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.is-output",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What must a script do to make a variable it sets available to later jobs?",
+      "back": "Mark it as an output variable with `isOutput=true`.",
+      "explanation": "Such multi-job output variables work only for jobs in the same stage; other stages need the stage dependencies syntax.",
+      "source": "Microsoft, “Define variables”, “Set a multi-job output variable” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#set-a-multi-job-output-variable",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you want to make a variable available to future jobs, you must mark it as an output variable by using `isOutput=true`.",
+      "uses": [
+        "pipeline variable",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.output-variables"
+      ],
+      "order": 10491
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-output-variable",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Job `Version` in stage `Build` computes a version number; job `Publish`, in the same stage, must use it. Which approach works?",
+      "choices": "A) Set an ordinary environment variable in `Version`\nB) Set it with `isOutput=true` and map it into `Publish` through `dependencies`\nC) Store it in the pipeline’s web settings during the run\nD) Put it in a variable template",
+      "back": "B) Set it with `isOutput=true` and map it into `Publish` through `dependencies`",
+      "choicesExplained": "A: environment variables aren’t preserved beyond the step, let alone the job. C: the web settings are not a way for one job to pass values to another. D: a variable template is fixed text expanded before the run.",
+      "explanation": "Output variables are how values move from one job to another in the same stage.",
+      "source": "Microsoft, “Define variables”, “Set a multi-job output variable” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#set-a-multi-job-output-variable",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "you must mark it as an output variable by using `isOutput=true`. Then you can map it into future jobs by using the `$[]` syntax and including the step name that set the variable. Multi-job output variables only work for jobs in the same stage.",
+      "uses": [
+        "pipeline variable",
+        "variable template",
+        "Azure Pipelines job"
+      ],
+      "conceptIDs": [
+        "az400.output-variables"
+      ],
+      "order": 10500
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.vg-secrets-protected",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which variables in a variable group are protected resources, whose access approvals, checks and pipeline permissions can limit?",
+      "back": "The secret variables; access to non-secret variables isn’t limited that way.",
+      "explanation": "Approvals, checks and pipeline permissions can be combined to guard the secrets.",
+      "source": "Microsoft, “Manage variable groups”, “Manage variable groups” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/library/variable-groups.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Secret variables in variable groups are protected resources. You can add combinations of approvals, checks, and pipeline permissions to limit access to secret variables in a variable group. Access to nonsecret variables isn't limited by approvals, checks, or pipeline permissions.",
+      "uses": [
+        "variable group",
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.variable-group"
+      ],
+      "order": 10509
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.vg-authorise",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Why must a YAML pipeline be authorised before it can use a variable group?",
+      "back": "Otherwise anyone who can push code to the repository could name the group in YAML and extract its secrets.",
+      "explanation": "Authorisation is given on the group’s Pipeline permissions tab or with the Azure DevOps CLI.",
+      "source": "Microsoft, “Manage variable groups”, “Use variable groups in pipelines” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/library/variable-groups.md#use-variable-groups-in-pipelines",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you only name the variable group in YAML pipelines, anyone who can push code to your repository could extract the contents of secrets in the variable group. Therefore, to use a variable group with YAML pipelines, you must authorize the pipeline to use the group.",
+      "uses": [
+        "variable group",
+        "push",
+        "repository"
+      ],
+      "conceptIDs": [
+        "az400.variable-group-auth"
+      ],
+      "order": 10518
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.vg-open-access",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does selecting Open access on a variable group’s Pipeline permissions do, and when might it suit?",
+      "back": "It authorises all pipelines in the project to use the group; it might suit a group with no secrets.",
+      "explanation": "Selecting individual pipelines with + authorises just those.",
+      "source": "Microsoft, “Manage variable groups”, “Authorization via the Pipelines user interface” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/library/variable-groups.md#authorization-via-the-pipelines-ui",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Selecting Open access authorizes all project pipelines to use the variable group. Open access might be a good option if you don't have any secrets in the group.",
+      "uses": [
+        "variable group"
+      ],
+      "conceptIDs": [
+        "az400.variable-group-auth"
+      ],
+      "order": 10527
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-vg-auth-error",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A new YAML pipeline references `- group: release-secrets` and fails with a resource authorisation error. What fixes it?",
+      "choices": "A) Authorise the pipeline on the group’s Pipeline permissions tab\nB) Move the group reference into a step template\nC) Mark the variables as output variables\nD) Rename the group without hyphens",
+      "back": "A) Authorise the pipeline on the group’s Pipeline permissions tab",
+      "choicesExplained": "D: the name is not the problem. B: referencing the group from a template does not authorise the pipeline. C: output variables pass values between jobs and have nothing to do with authorisation.",
+      "explanation": "YAML pipelines must be authorised to use a variable group; queuing a run and adding the pipeline after the error also works.",
+      "source": "Microsoft, “Manage variable groups”, “Authorization via the Pipelines user interface” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/library/variable-groups.md#authorization-via-the-pipelines-ui",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Another way to authorize a variable group is to select the pipeline, select **Edit**, and then queue a build manually. You see a resource authorization error and can then explicitly add the pipeline as an authorized user of the variable group.",
+      "uses": [
+        "variable group",
+        "step template"
+      ],
+      "conceptIDs": [
+        "az400.variable-group-auth",
+        "az400.variable-group"
+      ],
+      "order": 10536
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.vg-yaml-syntax",
+      "type": "cloze",
+      "kind": "fact",
+      "priority": "core",
+      "front": "In YAML, a variable group is linked with {{c1::`- group: my-variable-group`}} under `variables:`.",
+      "explanation": "Its variables are then read like the pipeline’s own, for example `$(customer)`.",
+      "source": "Microsoft, “Manage variable groups”, “Link a variable group to a pipeline” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/library/variable-groups.md#link-a-variable-group-to-a-pipeline",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To use variables from a variable group, add a reference to the group name in your YAML pipeline file. ```yaml variables: - group: my-variable-group",
+      "uses": [
+        "variable group"
+      ],
+      "conceptIDs": [
+        "az400.variable-group"
+      ],
+      "order": 10545
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.vg-same-name",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Two linked variable groups both define `apiUrl`. Which value does the pipeline get?",
+      "back": "The value from the last variable group in the file that uses the variable.",
+      "explanation": "Several groups can be linked to one pipeline, so the order of references decides clashes.",
+      "source": "Microsoft, “Manage variable groups”, “Link a variable group to a pipeline” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/library/variable-groups.md#link-a-variable-group-to-a-pipeline",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If multiple variable groups include the variables with the same name, the last variable group that uses the variable in the file sets the variable's value.",
+      "uses": [
+        "variable group"
+      ],
+      "conceptIDs": [
+        "az400.variable-group"
+      ],
+      "order": 10554
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.contrast-vg-variable-template",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does a variable group differ from a variable template?",
+      "back": "A variable group lives in the Library, can hold protected secrets and serves many pipelines; a variable template is a YAML file of variables.",
+      "explanation": "The variables article points to variable groups for sharing across pipelines and to templates for defining variables in one file.",
+      "source": "Microsoft, “Define variables”, “User-defined variables” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/variables.md#user-defined-variables",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can use a variable group to make variables available across multiple pipelines. To define variables in one file for use in multiple pipelines, use templates.",
+      "uses": [
+        "variable group",
+        "variable template"
+      ],
+      "conceptIDs": [
+        "az400.variable-group",
+        "az400.variable-template"
+      ],
+      "order": 10563
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.env-classic",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Can Classic pipelines use Azure DevOps environments?",
+      "back": "No; Classic pipelines use deployment groups for similar functionality.",
+      "explanation": "Environments are a YAML pipeline feature.",
+      "source": "Microsoft, “Create and target Azure DevOps environments”, “Create and target Azure DevOps environments” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/environments.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure DevOps environments aren't available in Classic pipelines. For Classic pipelines, deployment groups provide similar functionality.",
+      "uses": [
+        "environment"
+      ],
+      "conceptIDs": [
+        "az400.checks-yaml-only"
+      ],
+      "order": 10572
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-env-classic",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team still on Classic release pipelines wants what YAML environments offer for its target servers. What should it use?",
+      "choices": "A) A YAML environment referenced from the release\nB) A variable group\nC) Deployment groups\nD) A task group",
+      "back": "C) Deployment groups",
+      "choicesExplained": "A: environments aren’t available in Classic pipelines. B holds values and secrets, not targets. D reuses tasks, not deployment targets.",
+      "explanation": "Deployment groups give Classic pipelines functionality similar to environments.",
+      "source": "Microsoft, “Create and target Azure DevOps environments”, “Create and target Azure DevOps environments” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/environments.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure DevOps environments aren't available in Classic pipelines. For Classic pipelines, deployment groups provide similar functionality.",
+      "uses": [
+        "environment",
+        "variable group",
+        "task group"
+      ],
+      "conceptIDs": [
+        "az400.checks-yaml-only"
+      ],
+      "order": 10581
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.env-resource-types",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "Which resource types do Azure Pipelines environments currently support?",
+      "back": "Kubernetes and virtual machines.",
+      "explanation": "The resources in an environment are the actual deployment targets.",
+      "source": "Microsoft, “Create and target Azure DevOps environments”, “Create and target Azure DevOps environments” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/environments.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Azure Pipelines environments currently support the Kubernetes and virtual machine resource types.",
+      "uses": [
+        "environment"
+      ],
+      "conceptIDs": [
+        "az400.environment-resources"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · documentation as published",
+      "order": 10590
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.env-benefits",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two benefits that environments give, according to the Azure DevOps docs?",
+      "back": "Any two, among others: diagnostic resource health; security over which users and pipelines may target it; deployment history.",
+      "explanation": "Environments also give traceability of the commits and work items newly deployed to them.",
+      "source": "Microsoft, “Create and target Azure DevOps environments”, “Create and target Azure DevOps environments” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/environments.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "**Diagnostic resource health**. You can validate whether the application is functioning at its desired state. - **Security**. You can secure environments by specifying which users and pipelines are allowed to target an environment.",
+      "uses": [
+        "environment",
+        "commit"
+      ],
+      "conceptIDs": [
+        "az400.environment"
+      ],
+      "order": 10599
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-env-history",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "Two microservices, each with its own pipeline, deploy to the shared `Test` environment, and something there changed overnight. Where should the team look first?",
+      "back": "The `Test` environment’s deployment history (Deployments tab), which lists jobs from all pipelines targeting it.",
+      "explanation": "The source says the history helps identify all pipelines that affect the environment and the order of their deployments.",
+      "source": "Microsoft, “Create and target Azure DevOps environments”, “View deployment history” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/environments.md#view-deployment-history",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The deployment history helps identify all pipelines that affect the environment, and also helps visualize the sequence of deployments by each pipeline.",
+      "uses": [
+        "environment deployment history",
+        "environment"
+      ],
+      "conceptIDs": [
+        "az400.environment-deployment-history"
+      ],
+      "order": 10608
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.env-roles",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which environment role cannot manage approvals and checks?",
+      "back": "Reader (Creator, Administrator and User can).",
+      "explanation": "The four environment roles are Creator, Reader, User and Administrator.",
+      "source": "Microsoft, “Create and target Azure DevOps environments”, “Use manual approval checks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/environments.md#use-manual-approval-checks",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The environment **Creator**, **Administrator**, and **User** roles, but not the **Reader** role, can manage approvals and checks.",
+      "uses": [
+        "environment",
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.environment-security"
+      ],
+      "order": 10617
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.env-pipeline-permissions",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "Any pipeline in the project can currently deploy to `Production`. Only the release pipeline should. What should the environment owner change?",
+      "back": "Under Pipeline permissions, select Restrict permission, then add only the release pipeline.",
+      "explanation": "Pipeline permissions sit beside user permissions on the environment’s Security page.",
+      "source": "Microsoft, “Create and target Azure DevOps environments”, “Pipeline permissions” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/environments.md#pipeline-permissions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To remove open access on the environment or resource, select **Restrict permission** in **Pipeline permissions**. - When permissions are restricted, you can allow specific pipelines to deploy to the environment or to a specific resource.",
+      "uses": [
+        "environment"
+      ],
+      "conceptIDs": [
+        "az400.environment-security"
+      ],
+      "order": 10626
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.checks-not-in-yaml",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Where are approvals and checks defined, and can someone editing the pipeline YAML change them?",
+      "back": "On the resource, through the Azure Pipelines web interface; YAML editors can’t modify them.",
+      "explanation": "Resource administrators manage them, so a pipeline author can’t switch them off in code.",
+      "source": "Microsoft, “Define approvals and checks”, “Define approvals and checks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Approvals and other checks aren't defined in the yaml file. Users modifying the pipeline yaml file can't modify the checks performed before start of a stage. Administrators of resources manage checks using the web interface of Azure Pipelines.",
+      "uses": [
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.approvals-and-checks"
+      ],
+      "order": 10635
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.checks-resources",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What are two kinds of resource on which checks can be configured?",
+      "back": "Any two of: environments; service connections; repositories; variable groups; secure files; agent pools.",
+      "explanation": "Checks attach to what a stage consumes, not to the pipeline itself.",
+      "source": "Microsoft, “Define approvals and checks”, “Define approvals and checks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Checks can be configured on environments, service connections, repositories, variable groups, secure files, and agent pools.",
+      "uses": [
+        "approvals and checks",
+        "environment",
+        "variable group",
+        "agent pool"
+      ],
+      "conceptIDs": [
+        "az400.check-types"
+      ],
+      "order": 10644
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.checks-before-stage",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When does Azure Pipelines evaluate the checks for a stage’s resources?",
+      "back": "Before the stage starts: the run pauses before each stage until all checks on all its resources are satisfied.",
+      "explanation": "Checks start once the stage’s conditions are satisfied.",
+      "source": "Microsoft, “Define approvals and checks”, “Define approvals and checks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Before the execution of a stage can begin, all checks on all the resources used in that stage must be satisfied. Azure Pipelines pauses the execution of a pipeline before each stage, and waits for all pending checks to be completed.",
+      "uses": [
+        "approvals and checks",
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.approvals-and-checks"
+      ],
+      "order": 10653
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.checks-order-first",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which category of checks runs first?",
+      "back": "Static checks: branch control, required template and evaluate artifact.",
+      "explanation": "Static checks come before pre-check approvals.",
+      "source": "Microsoft, “Define approvals and checks”, “Define approvals and checks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Static checks run first and then pre-check approvals run. The categories in order are: 1. Static checks: Branch control, Required template, and Evaluate artifact",
+      "uses": [
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.check-types"
+      ],
+      "order": 10662
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.approval-group",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "If a group is named as the approver on an approval check, how many of its members must approve?",
+      "back": "One.",
+      "explanation": "Any single member of the group is enough for the run to proceed.",
+      "source": "Microsoft, “Define approvals and checks”, “Approvals” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#approvals",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If a group is designated as an approver, only one user within the group needs to approve for the run to proceed.",
+      "uses": [
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.approval"
+      ],
+      "order": 10671
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.approval-timeout",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What happens to a stage when its approval isn’t completed within the approval’s timeout?",
+      "back": "The stage is marked as skipped.",
+      "explanation": "The timeout is set when the approval check is created, alongside the approvers and instructions.",
+      "source": "Microsoft, “Define approvals and checks”, “Approvals” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#approvals",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If approvals aren't completed within the specified Timeout, the stage is marked as skipped.",
+      "uses": [
+        "approvals and checks",
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.approval"
+      ],
+      "order": 10680
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-approval",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Deployments to `Production` must wait until a release manager has reviewed the changes. The pipeline YAML is edited by many developers. What should be set up?",
+      "choices": "A) An approval check on the `Production` environment\nB) A `condition` on the deployment stage\nC) A variable group with the approver’s name\nD) A `trigger: manual` stage that any user can start",
+      "back": "A) An approval check on the `Production` environment",
+      "choicesExplained": "B lives in the YAML, which the developers can change. C holds values, not approvals. D lets anyone start the stage, with no review.",
+      "explanation": "A manual approval check on an environment makes deployment wait for the designated reviewer, and YAML editors can’t modify it.",
+      "source": "Microsoft, “Define approvals and checks”, “Define approvals and checks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For example, a manual approval check on an environment ensures that deployment to that environment only happens after the designated user reviews the changes being deployed.",
+      "uses": [
+        "approvals and checks",
+        "environment",
+        "variable group"
+      ],
+      "conceptIDs": [
+        "az400.approval",
+        "az400.approvals-and-checks",
+        "az400.environment"
+      ],
+      "order": 10689
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.deferred-approval",
+      "type": "basic",
+      "kind": "application",
+      "priority": "extra",
+      "front": "An approver agrees at 10 am but wants the deployment to start at 9 pm, when traffic is low. Which feature fits?",
+      "back": "A deferred approval, which sets the time the approval becomes effective.",
+      "explanation": "Deferral covers cases where approval time and deployment time don’t match.",
+      "source": "Microsoft, “Define approvals and checks”, “Deferred approvals” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#deferred-approvals",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To address this scenario, you can defer an approval and set the time the approval becomes effective.",
+      "uses": [
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.deferred-approval"
+      ],
+      "order": 10698
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.branch-control",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does the branch control check verify?",
+      "back": "That all resources linked with the pipeline are built from allowed branches, optionally with branch protection enabled.",
+      "explanation": "Branch names must be fully qualified, as `refs/heads/<branch name>`.",
+      "source": "Microsoft, “Define approvals and checks”, “Branch control” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#branch-control",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Using the branch control check, you can ensure all the resources linked with the pipeline are built from the allowed branches and that the branches have protection enabled.",
+      "uses": [
+        "approvals and checks",
+        "branch"
+      ],
+      "conceptIDs": [
+        "az400.branch-control"
+      ],
+      "order": 10707
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-branch-control",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Builds from feature branches keep reaching the `Production` environment. Only `main`, with policies applied, should deploy there. Which check fits?",
+      "choices": "A) Business hours\nB) Branch control, allowing `refs/heads/main` and requiring protection\nC) Exclusive lock\nD) Invoke REST API",
+      "back": "B) Branch control, allowing `refs/heads/main` and requiring protection",
+      "choicesExplained": "A limits when deployment happens, not from which branch. C limits how many runs proceed at once. D calls an external service, which isn’t needed here.",
+      "explanation": "Branch control fails the stage when any linked resource was built from a branch outside the allowed list.",
+      "source": "Microsoft, “Define approvals and checks”, “Branch control” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#branch-control",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "At run time, the check would validate branches for all linked resources in the run against the allowed list. If any of the branches doesn't match the criteria, the check fails and the stage is marked failed.",
+      "uses": [
+        "approvals and checks",
+        "environment",
+        "feature branch",
+        "branch policy"
+      ],
+      "conceptIDs": [
+        "az400.branch-control"
+      ],
+      "order": 10716
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.business-hours",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "What does the business hours check do to a stage that uses the protected resource?",
+      "back": "It makes the stage wait for the configured business hours before running.",
+      "explanation": "It suits teams that want all deployments to an environment in a specific time window.",
+      "source": "Microsoft, “Define approvals and checks”, “Business hours” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#business-hours",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "When you run a pipeline, the execution of the stage that uses the resource waits for business hours.",
+      "uses": [
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.business-hours"
+      ],
+      "order": 10725
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.required-template-check",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What happens to a pipeline that doesn’t extend the template named in a required template check?",
+      "back": "It fails.",
+      "explanation": "The check is how a resource owner enforces that pipelines use a specific YAML template.",
+      "source": "Microsoft, “Define approvals and checks”, “Required template” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#required-template",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "With the required template check, you can enforce pipelines to use a specific YAML template. When this check is in place, a pipeline fails if it doesn't extend from the referenced template.",
+      "uses": [
+        "approvals and checks",
+        "YAML template"
+      ],
+      "conceptIDs": [
+        "az400.required-template-check"
+      ],
+      "order": 10734
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.exclusive-lock",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "What does the exclusive lock check do?",
+      "back": "It lets only one run of the pipeline proceed with the resource; other stages using it pause until the lock is released.",
+      "explanation": "It can be set at stage or pipeline level with the `lockBehavior` property.",
+      "source": "Microsoft, “Define approvals and checks”, “Exclusive lock” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#exclusive-lock",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "The exclusive lock check allows only a single run from the pipeline to proceed and can be set at the stage or pipeline level. All stages in all runs of that pipeline that use the resource are paused.",
+      "uses": [
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.exclusive-lock"
+      ],
+      "order": 10743
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.lock-behavior-default",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "If an exclusive lock is set on a resource and no `lockBehavior` is given, which behaviour applies?",
+      "back": "`runLatest`: only the latest run acquires the lock.",
+      "explanation": "The other value, `sequential`, makes all runs take the lock in turn.",
+      "source": "Microsoft, “Define approvals and checks”, “Exclusive lock” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#exclusive-lock",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "`runLatest` - Only the latest run acquires the lock to the resource. `runLatest` is the default if no `lockBehavior` is specified.",
+      "uses": [
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.exclusive-lock"
+      ],
+      "order": 10752
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-lock-sequential",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "Every run must deploy to a shared test database one at a time, and none may be dropped. What should the team configure?",
+      "choices": "A) An exclusive lock check with `lockBehavior: runLatest`\nB) A business hours check\nC) An exclusive lock check with `lockBehavior: sequential`\nD) A deferred approval",
+      "back": "C) An exclusive lock check with `lockBehavior: sequential`",
+      "choicesExplained": "A lets only the latest run take the lock, so waiting runs are dropped. B controls the time of day, not one-at-a-time access. D delays one approval, not access by all runs.",
+      "explanation": "`sequential` makes all runs acquire the lock to the protected resource in turn.",
+      "source": "Microsoft, “Define approvals and checks”, “Exclusive lock” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#exclusive-lock",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "`sequential` - All runs acquire the lock to the protected resource sequentially.",
+      "uses": [
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.exclusive-lock"
+      ],
+      "order": 10761
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.invoke-rest-api-check",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "extra",
+      "front": "How does the Invoke REST API check decide whether a stage may continue?",
+      "back": "It calls a REST API periodically and continues if the response is successful; if not by the timeout, the stage is skipped.",
+      "explanation": "Stages that depend on a skipped stage are skipped as well.",
+      "source": "Microsoft, “Define approvals and checks”, “Invoke REST API” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#invoke-rest-api",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Periodically, make a call to a REST API and continue if it returns a successful response.",
+      "uses": [
+        "approvals and checks"
+      ],
+      "conceptIDs": [
+        "az400.invoke-rest-function"
+      ],
+      "order": 10770
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.azure-monitor-alerts-check",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When does the Query Azure Monitor Alerts check succeed?",
+      "back": "When no alert rules are activated at the time of evaluation.",
+      "explanation": "It helps observe an application after a staged or canary rollout before promoting the update.",
+      "source": "Microsoft, “Define approvals and checks”, “Query Azure Monitor Alerts” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#query-azure-monitor-alerts",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Query Azure Monitor Alerts helps you observe Azure Monitor and ensure no alerts are raised for the application after a deployment. The check succeeds if no alert rules are activated at the time of evaluation.",
+      "uses": [
+        "approvals and checks",
+        "Azure Monitor",
+        "alert rule"
+      ],
+      "conceptIDs": [
+        "az400.check-types"
+      ],
+      "order": 10779
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.class-check-type",
+      "type": "scenario",
+      "kind": "classification",
+      "priority": "core",
+      "front": "After a canary release to 5% of users, a team wants the next stage to proceed only if no alerts fired for the app. Which check is this?",
+      "choices": "A) Branch control\nB) Query Azure Monitor Alerts\nC) Required template\nD) Evaluate artifact",
+      "back": "B) Query Azure Monitor Alerts",
+      "choicesExplained": "A checks which branch built the resources. D evaluates artifacts against custom policies. C checks which template the pipeline extends.",
+      "explanation": "The source links this check to canary deployments and staged rollouts.",
+      "source": "Microsoft, “Define approvals and checks”, “Query Azure Monitor Alerts” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md#query-azure-monitor-alerts",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Canary deployments and staged rollouts are common deployment strategies used to lower risk of regressions to critical applications.",
+      "uses": [
+        "approvals and checks",
+        "Azure Monitor"
+      ],
+      "conceptIDs": [
+        "az400.check-types"
+      ],
+      "order": 10788
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.contrast-conditions-checks",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How do stage conditions differ from approvals and checks in who controls them?",
+      "back": "Conditions are written by the pipeline author in YAML; checks are set by the resource owner on the resource.",
+      "explanation": "Both decide whether a stage runs, but checks stay out of reach of people editing the YAML.",
+      "source": "Microsoft, “Define approvals and checks”, “Define approvals and checks” (MicrosoftDocs/azure-devops-docs on GitHub)",
+      "sourceURL": "https://github.com/MicrosoftDocs/azure-devops-docs/blob/main/docs/pipelines/process/approvals.md",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "A pipeline author can control whether a stage should run by defining conditions on the stage. Another way to control if and when a stage should run is through approvals and checks",
+      "uses": [
+        "approvals and checks",
+        "expression",
+        "Azure Pipelines stage"
+      ],
+      "conceptIDs": [
+        "az400.approvals-and-checks"
+      ],
+      "order": 10797
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.workflow-call-event",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which event marks a workflow as one that other workflows can call?",
+      "back": "`workflow_call`.",
+      "explanation": "The called workflow receives the same event payload as the calling workflow.",
+      "source": "GitHub Docs, “Events that trigger workflows”, “workflow_call”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_call",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "`workflow_call` is used to indicate that a workflow can be called by another workflow.",
+      "uses": [
+        "reusable workflow",
+        "event"
+      ],
+      "conceptIDs": [
+        "az400.reusable-workflow"
+      ],
+      "order": 10806
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.called-checkout",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "A called workflow in another repository runs `actions/checkout`. Whose code is checked out?",
+      "back": "The repository hosting the caller workflow.",
+      "explanation": "Actions in a called workflow run as if they were part of the caller workflow.",
+      "source": "GitHub Docs, “Reusing workflow configurations”, “Reusable workflows”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/reusing-workflow-configurations#reusable-workflows",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "For example, if the called workflow uses `actions/checkout`, the action checks out the contents of the repository that hosts the caller workflow, not the called workflow.",
+      "uses": [
+        "reusable workflow",
+        "action",
+        "repository"
+      ],
+      "conceptIDs": [
+        "az400.reusable-workflow"
+      ],
+      "order": 10815
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.reusable-vs-composite-jobs",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How do reusable workflows and composite actions differ in structure?",
+      "back": "A reusable workflow can contain jobs; a composite action is a series of steps run as one step and can’t contain jobs.",
+      "explanation": "A reusable workflow is called directly within a job, whereas a composite action runs as a step.",
+      "source": "GitHub Docs, “Reusing workflow configurations”, “Reusable workflows versus composite actions”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/reusing-workflow-configurations#reusable-workflows-versus-composite-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Composite actions contain a series of steps that are run as a single step within the caller workflow. Unlike reusable workflows, they cannot contain jobs.",
+      "uses": [
+        "reusable workflow",
+        "action",
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.reusable-vs-composite"
+      ],
+      "order": 10824
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.reusable-vs-composite-secrets",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which can use secrets: reusable workflows, composite actions, or both?",
+      "back": "Reusable workflows can use secrets; composite actions cannot.",
+      "explanation": "The GitHub comparison table lists this among the key differences.",
+      "source": "GitHub Docs, “Reusing workflow configurations”, “Key differences between reusable workflows and composite actions”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/reusing-workflow-configurations#key-differences-between-reusable-workflows-and-composite-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Can use secrets | Cannot use secrets",
+      "uses": [
+        "reusable workflow",
+        "action"
+      ],
+      "conceptIDs": [
+        "az400.reusable-vs-composite"
+      ],
+      "order": 10833
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-reusable-vs-composite",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A shared deployment process has three jobs, one of which must run on a different type of runner from the caller’s job. What should it be packaged as?",
+      "choices": "A) A matrix strategy\nB) A composite action\nC) A workflow template\nD) A reusable workflow",
+      "back": "D) A reusable workflow",
+      "choicesExplained": "B runs as a step inside the caller’s job and can’t contain jobs. C is only a starting point for writing new workflows. A multiplies one job over variables.",
+      "explanation": "When steps must run on a machine type that may differ from the calling job’s, the guidance says to use a reusable workflow.",
+      "source": "GitHub Docs, “Reusing workflow configurations”, “Reusable workflows versus composite actions”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/reusing-workflow-configurations#reusable-workflows-versus-composite-actions",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Therefore, if the steps must be run on a type of machine that might be different from the machine chosen for the calling workflow job, then you should use a reusable workflow, not a composite action.",
+      "uses": [
+        "reusable workflow",
+        "action",
+        "workflow template",
+        "matrix strategy",
+        "runner"
+      ],
+      "conceptIDs": [
+        "az400.reusable-vs-composite",
+        "az400.reusable-workflow"
+      ],
+      "order": 10842
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.template-pin-sha",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "An organisation’s workflow template calls a central reusable workflow, and every team must run exactly the same YAML from it. How should the template reference it?",
+      "back": "Reference the reusable workflow by a commit SHA.",
+      "explanation": "If a tag or branch is referenced instead, the guidance says to be sure you can trust that version.",
+      "source": "GitHub Docs, “Reusing workflow configurations”, “Workflow templates”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/reusing-workflow-configurations#workflow-templates",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If you use a commit SHA when referencing the reusable workflow, you can ensure that everyone who reuses that workflow will always be using the same YAML code.",
+      "uses": [
+        "workflow template",
+        "reusable workflow",
+        "commit"
+      ],
+      "conceptIDs": [
+        "az400.workflow-template"
+      ],
+      "order": 10851
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.job-single-environment",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How many environments can one GitHub Actions job reference?",
+      "back": "One.",
+      "explanation": "Each job in a workflow can reference a single environment.",
+      "source": "GitHub Docs, “Deployment environments”, “Deployment environments”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/deployment-environments",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Each job in a workflow can reference a single environment.",
+      "uses": [
+        "GitHub deployment environment",
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.github-environment"
+      ],
+      "order": 10860
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.rules-before-runner",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "When must an environment’s protection rules pass for a GitHub Actions job that references it?",
+      "back": "Before the job is sent to a runner.",
+      "explanation": "Only after it is sent to a runner can the job access the environment’s secrets.",
+      "source": "GitHub Docs, “Deployment environments”, “Deployment environments”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/deployment-environments",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Any protection rules configured for the environment must pass before a job referencing the environment is sent to a runner. The job can access the environment's secrets only after the job is sent to a runner.",
+      "uses": [
+        "GitHub deployment environment",
+        "runner",
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.protection-rules-before-runner"
+      ],
+      "order": 10869
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.rule-required-reviewers",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which deployment protection rule requires a specific person or team to approve jobs that reference the environment?",
+      "back": "Required reviewers (up to six users or teams; one approval is enough).",
+      "explanation": "Self-review can also be prevented, so the person starting a deployment can’t approve it.",
+      "source": "GitHub Docs, “Deployments and environments”, “Required reviewers”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#required-reviewers",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use required reviewers to require a specific person or team to approve workflow jobs that reference the environment. You can list up to six users or teams as reviewers.",
+      "uses": [
+        "GitHub deployment environment",
+        "team"
+      ],
+      "conceptIDs": [
+        "az400.environment-protection-rules"
+      ],
+      "order": 10878
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.rule-wait-timer",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which deployment protection rule delays a job for a set time after it is triggered?",
+      "back": "Wait timer: 1 to 43,200 minutes (30 days).",
+      "explanation": "Wait time does not count towards billable time.",
+      "source": "GitHub Docs, “Deployments and environments”, “Wait timer”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#wait-timer",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use a wait timer to delay a job for a specific amount of time after the job is initially triggered. The time (in minutes) must be an integer between 1 and 43,200 (30 days).",
+      "uses": [
+        "GitHub deployment environment",
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.environment-protection-rules"
+      ],
+      "volatile": true,
+      "validAsOf": "2026-09-26 · documentation as published",
+      "order": 10887
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.rule-deployment-branches",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which deployment protection rule restricts which branches and tags can deploy to an environment?",
+      "back": "Deployment branches and tags.",
+      "explanation": "Options are no restriction, protected branches only, or selected branches and tags by name pattern.",
+      "source": "GitHub Docs, “Deployments and environments”, “Deployment branches and tags”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#deployment-branches-and-tags",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Use deployment branches and tags to restrict which branches and tags can deploy to the environment.",
+      "uses": [
+        "GitHub deployment environment",
+        "branch",
+        "Git tag"
+      ],
+      "conceptIDs": [
+        "az400.environment-protection-rules"
+      ],
+      "order": 10896
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.rule-custom",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which kind of deployment protection rule lets third-party systems, such as change management or observability tools, gate deployments?",
+      "back": "Custom deployment protection rules, powered by GitHub Apps.",
+      "explanation": "Third-party systems can assess readiness before deployments are rolled out.",
+      "source": "GitHub Docs, “Deployments and environments”, “Deployment protection rules”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#deployment-protection-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can also create and implement custom protection rules powered by",
+      "uses": [
+        "GitHub deployment environment"
+      ],
+      "conceptIDs": [
+        "az400.environment-protection-rules"
+      ],
+      "order": 10905
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-protection-rule",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A repository wants production deployments to wait 30 minutes after triggering and then need sign-off from the release team. Which two protection rules?",
+      "back": "A wait timer and required reviewers.",
+      "explanation": "Deployment protection rules can require a manual approval and delay a job, among other things.",
+      "source": "GitHub Docs, “Deployments and environments”, “Deployment protection rules”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#deployment-protection-rules",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "You can use deployment protection rules to require a manual approval, delay a job, or restrict the environment to certain branches.",
+      "uses": [
+        "GitHub deployment environment",
+        "team"
+      ],
+      "conceptIDs": [
+        "az400.environment-protection-rules"
+      ],
+      "order": 10914
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.env-secrets-scope",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "Which jobs can read secrets stored in a GitHub environment, and when?",
+      "back": "Only jobs that reference the environment, and, if approval is required, only after a required reviewer approves.",
+      "explanation": "Environment secrets are scoped to the environment rather than the whole repository.",
+      "source": "GitHub Docs, “Deployments and environments”, “Environment secrets”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#environment-secrets",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Secrets stored in an environment are only available to workflow jobs that reference the environment. If the environment requires approval, a job cannot access environment secrets until one of the required reviewers approves it.",
+      "uses": [
+        "GitHub deployment environment",
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.environment-secrets"
+      ],
+      "order": 10923
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.app-env-secrets",
+      "type": "scenario",
+      "kind": "application",
+      "priority": "core",
+      "front": "A production deploy key must be usable only by the deployment job, and only after a reviewer approves. Where should it be stored?",
+      "choices": "A) In a configuration variable at repository level\nB) In the workflow file under `env`\nC) In an environment secret on a `production` environment with required reviewers\nD) In a repository secret available to all jobs",
+      "back": "C) In an environment secret on a `production` environment with required reviewers",
+      "choicesExplained": "A: configuration variables are for non-sensitive data and render unmasked. B puts the key in the file itself. D is not limited to the deployment job or to approval.",
+      "explanation": "Environment secrets reach only jobs that reference the environment, and only after approval when reviewers are required.",
+      "source": "GitHub Docs, “Deployments and environments”, “Environment secrets”",
+      "sourceURL": "https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments#environment-secrets",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "If the environment requires approval, a job cannot access environment secrets until one of the required reviewers approves it.",
+      "uses": [
+        "GitHub deployment environment",
+        "GitHub Actions configuration variables",
+        "job"
+      ],
+      "conceptIDs": [
+        "az400.environment-secrets",
+        "az400.github-environment",
+        "az400.protection-rules-before-runner"
+      ],
+      "order": 10932
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.gh-vars-unmasked",
+      "type": "basic",
+      "kind": "application",
+      "priority": "core",
+      "front": "A team stores a database password as a repository configuration variable so all workflows can read it. What is wrong, and what should it use?",
+      "back": "Variables render unmasked in build output by default; a password belongs in a secret.",
+      "explanation": "Variables are meant for non-sensitive configuration such as compiler flags or server names.",
+      "source": "GitHub Docs, “Variables”, “Variables”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/variables",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "By default, variables render unmasked in your build outputs. If you need greater security for sensitive information, such as passwords, use secrets instead.",
+      "uses": [
+        "GitHub Actions configuration variables"
+      ],
+      "conceptIDs": [
+        "az400.github-variables"
+      ],
+      "order": 10941
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.gh-env-key",
+      "type": "basic",
+      "kind": "fact",
+      "priority": "core",
+      "front": "How do you define a variable for use in a single GitHub Actions workflow only?",
+      "back": "With the `env` key in the workflow file.",
+      "explanation": "Configuration variables, by contrast, are set at organisation, repository or environment level for many workflows.",
+      "source": "GitHub Docs, “Variables”, “Variables”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/variables",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "To define an environment variable for use in a single workflow, you can use the `env` key in the workflow file.",
+      "uses": [
+        "GitHub Actions configuration variables",
+        "workflow"
+      ],
+      "conceptIDs": [
+        "az400.github-variables"
+      ],
+      "order": 10950
+    },
+    {
+      "id": "az400.reusable-elements-environments-checks.contrast-approvals",
+      "type": "basic",
+      "kind": "contrast",
+      "priority": "core",
+      "front": "How does gating a deployment differ between an Azure Pipelines environment and a GitHub deployment environment?",
+      "back": "Azure: approvals and checks on the environment gate the stage. GitHub: protection rules gate the job before it goes to a runner.",
+      "explanation": "Both put the gate on the deployment target rather than in the pipeline or workflow code.",
+      "source": "GitHub Docs, “Deployment environments”, “Deployment environments”",
+      "sourceURL": "https://docs.github.com/en/actions/concepts/workflows-and-actions/deployment-environments",
+      "sourceLicence": "B · CC BY 4.0",
+      "evidence": "Any protection rules configured for the environment must pass before a job referencing the environment is sent to a runner.",
+      "uses": [
+        "environment",
+        "GitHub deployment environment",
+        "approvals and checks",
+        "runner"
+      ],
+      "conceptIDs": [
+        "az400.github-environment",
+        "az400.approvals-and-checks"
+      ],
+      "order": 10959
+    }
+  ]
+}
