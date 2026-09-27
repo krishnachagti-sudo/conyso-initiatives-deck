@@ -1,0 +1,22 @@
+# Lean Six Sigma Black Belt: notes for every writer (read after DIGEST.md)
+
+- **Slug:** `lssbb`. **Family prefix:** `lssbb` (card ids `lssbb.<topic-slug>.<card-slug>`, concept ids `lssbb.<concept-slug>`). Use the concept ids in `lssbb-concepts.json`; add new ones only when a card needs them.
+- **Builds on:** nothing. Every term gets its primer.
+- **Sources, their tiers and licence labels.** The label must match src/licences.json for the host. Tier A or B: "B · <licence>", with evidence. Tier C: "C · facts only, in our own words", with no evidence.
+  - www.itl.nist.gov → tier B ("With the exception of material marked as copyrighted, information presented on )
+  - en.wikipedia.org → tier B ("Text is available under the Creative Commons Attribution-ShareAlike 4.0 License)
+  - www.nist.gov → tier B ("With the exception of material marked as copyrighted, information presented on )
+  - www.epa.gov → tier C ("These documents may be freely distributed and used for non-commercial, scientif)
+  - www.cms.gov → tier C (No licence or copyright statement in the document; it carries only "Disclaimer: )
+  - www.energy.gov → tier C (No licence statement; the disclaimer reads "This work was prepared as an account)
+  - dam.assets.ohio.gov → tier C (No licence or copyright statement found in the document. State works are not US )
+  - www.moresteam.com → tier C ("MoreSteam hereby grants you a limited, non-exclusive, non-transferable, revocab)
+- **Evidence is required.** The texts are in `research/sources/lssbb/`; the slice prints a passage under each concept.
+- **Volatile facts:** `volatile: true`, `validAsOf: "2026-09-27 · sources as published"`.
+- **Scenarios:** your own. Never reuse a source's worked examples or exercises.
+- **Deck notice:** already in deck.json.
+- **NIST pages** (itl.nist.gov, nist.gov): label "B · public domain" (src/licences.json requires "public domain" or C for .gov hosts).
+- **Tier C hosts** (EPA, CMS, DOE, Ohio, MoreSteam): facts only, own words, no quotes, no evidence.
+- **OpenStax is tier D** and isixsigma.com is no-fetch: never use or recall either.
+- **Ppk:** its Wikipedia article is flagged "factual accuracy is disputed"; write no Ppk card. No Pp card (no source). Leave out the ndc rule and the takt-time formula unless a cached source states them.
+- **Subject deck:** never name ASQ, CSSBB or any certifying body, and never claim to match an exam.

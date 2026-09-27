@@ -1,0 +1,29 @@
+# lssbb audit A: topics 01–03
+
+Scope: decks/lssbb/notes/01-foundations.json, 02-teams.json and 03-define.json, 128 cards (57 + 24 + 47). I checked every card with `evidence` against that evidence first. Claims beyond it were checked in the saved text: the Wikipedia copies in research/sources/lssbb/ (tier B, CONTENT-POLICY.md §3), and the research copies of the tier C sources (CONTENT-POLICY.md §3, tier C): EPA Guide chapters 2–3, the EPA Lean in Government Starter Kit (per-page text for PDF pp. 11, 14, 26–28, 39–41, 88–89, 114–115, 121), the LeanOhio glossary (every cited page confirmed with pdftotext), and the MoreSteam pages (new-to-lean-six-sigma, the DMAIC blog, hoshin-kanri, control-plan, stakeholder template, project charter, CTQC, SIPOC, RACI, affinity diagram).
+
+Checks with no finding:
+- **Scenario letters.** In all 27 scenario cards, the choicesExplained letters match their choices, and the letter in each back matches the keyed choice. A scan of all three files found no letter inside a word that had been changed.
+- **Scenario answers.** Every scenario answer follows from its cited passage, and I found no key a careful reader could dispute.
+- **Certifying bodies.** No card names ASQ, CSSBB or any certifying body, or claims to match an exam. The one "certified" framing is fixed below.
+- **Wikipedia flags.** No card rests on Wikipedia text marked "citation needed", "clarification needed" or "disputed". The flags in Brainstorming, Groupthink and Tuckman all sit outside the evidence used.
+- **Tier D and no-fetch sources.** No text looks drawn from OpenStax or isixsigma.com: a 6-word overlap test against the isixsigma copy found no match.
+- **Process owner.** The back is supported by the control plan ("Chart Champion: Name of the process owner"), but the explanation went beyond that source (first line below).
+
+id | severity | problem | evidence (source words, with page)
+---|---|---|---
+lssbb.foundations.process-owner | unsupported | The explanation draws on MoreSteam's stakeholder template ("rates the impact… as high"). The card does not cite that template, and it goes beyond where the control plan names the process owner. | Control Plan: "The control plan is the centralized document to keep track of the status of all significant process characteristics"; "Chart Champion: Name of the process owner."
+lssbb.define.critical-to-quality | unsupported | The example (oven temperature) is a process setting, not a design element or part characteristic, so it teaches that process inputs are CTQs. | LeanOhio p. 4: "Car door sound when closing might be a CTC, while the dimensional tolerances and cushioning that produce those conditions are CTQ's"
+lssbb.teams.sponsor-vs-team-leader | ambiguous | The kit has two roles, "Implementation Team Leader" (p. 39) and "Team Leader" (p. 41). The contrast with the sponsor is drawn with the implementation team leader, but the card says "team leader", which the facilitator card uses for the other role. | Starter Kit PDF p. 40: "While the implementation team leader focuses on keeping the project team on track with its assignments, the sponsor's role is to push the team to achieve its overall project objectives"
+lssbb.foundations.black-belt-route | minor | "The route to becoming a certified Black Belt" frames LeanOhio as a certifier in a subject deck. | LeanOhio p. 2: "certified following a four-month training and application program and successful completion of two Six Sigma Projects"
+lssbb.foundations.pdca | minor | The attribution to Deming is stated as fact. The origin of the cycle is not settled beyond this source, so the back now says it is the kit's attribution. | Starter Kit PDF p. 11: "originally conceived by Dr. W. Edwards Deming"
+lssbb.foundations.balanced-scorecard | minor | "Not only at recording results" is the card's inference, presented as the source's. | Wikipedia lead: "typically focused on managing the implementation of a strategy or operational activities"
+lssbb.define.charter-roles | minor | "These are the roles the Starter Kit describes" overstates: the kit also describes team members and the implementation team leader. | Starter Kit PDF pp. 39–40: "Implementation Team Leader", "Team Member"
+lssbb.define.critical-to-quality | minor | The back repeats 18 of the tier C source's 20 words (facts in our own words only). | LeanOhio p. 4: "An element of a design or a characteristic of a part that is essential to quality in the eyes of the customer"
+lssbb.teams.stakeholder | minor | The back repeats a 12-word run of tier C text. | LeanOhio p. 13: "People who will be affected by the project or can influence it but who are not directly involved with doing the project work"
+lssbb.teams.facilitator | minor | The explanation repeats a 14-word run of tier C text. | Starter Kit PDF p. 41: "the team leader assists the facilitator in setting the stage for a productive event"
+lssbb.define.charter-follow-up | minor | The explanation repeats a 13-word run of tier C text. | Starter Kit PDF p. 115: "These dates will be confirmed with the team during the project in the context of future needs."
+lssbb.foundations.dmaic-vs-pdca | minor | The explanation repeats an 11-word run of tier C text. | MoreSteam DMAIC blog: "PDCA when the change is small enough not to need a full DMAIC project"
+lssbb.foundations.hoshin-vs-daily | minor | The explanation repeats an 11-word run of tier C text. | MoreSteam Hoshin Kanri: "even well-designed strategic initiatives tend to advance in bursts and stall"
+
+Every finding has a patch in lssbb-fixes-a.jsonl (15 lines: sponsor-vs-team-leader needs front, back and explanation, and critical-to-quality needs example and back). `node build/apply-fixes.mjs lssbb research/deck-briefs/lssbb-fixes-a.jsonl --dry` applies all 15 without breaking any rule.
