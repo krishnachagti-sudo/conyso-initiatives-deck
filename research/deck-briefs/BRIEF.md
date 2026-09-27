@@ -26,6 +26,9 @@ source. The Markdown brief stays under 5,000 words.
   terms of use of the exam owner's site and of every site the outline rests
   on. If they forbid using the content with AI (as FINRA's and the IAPP's do),
   stop and report it: that site is tier D, and the deck may not be possible.
+  An AI ban can also sit in a page footer next to an open licence (every
+  OpenStax book page has one), so grep the first saved page of each source
+  for "language model", "generative", "AI" and "machine learning" too.
 - **Fetch pages, not sites.** Download only the pages and documents the outline
   needs; never mirror a website or clone a repository. Save each one once to the
   scratch folder, extract its text (pdftotext for PDFs) and grep it.

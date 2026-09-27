@@ -98,6 +98,18 @@ export function cacheResearch(slug, opts = {}) {
     const url = s.url.split('#')[0];
     if (!docs.has(url)) docs.set(url, { licence: `${s.tier} · ${s.licence}`, cards: 0, local: s.path });
   }
+  // Concepts may cite pages the sources list only names by site (one entry
+  // for Wikipedia, 58 articles cited): cache those too, under their host's licence.
+  const conceptsFile = join('research/deck-briefs', `${slug}-concepts.json`);
+  if (existsSync(conceptsFile)) {
+    const byHost = new Map(list.map((s) => [new URL(s.url).hostname, `${s.tier} · ${s.licence}`]));
+    for (const c of JSON.parse(readFileSync(conceptsFile, 'utf8'))) {
+      if (!c.source || !/^https?:/.test(c.source)) continue;
+      const url = c.source.split('#')[0];
+      const licence = byHost.get(new URL(url).hostname);
+      if (licence && !docs.has(url)) docs.set(url, { licence, cards: 0 });
+    }
+  }
   return cacheDocs(slug, docs, opts);
 }
 

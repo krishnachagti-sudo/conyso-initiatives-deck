@@ -28,7 +28,7 @@ const NOT_A_LABEL_AFTER = new Set(('class classes type types part parts schedule
   + 'figure table annex article title runway taxiway phase model series rule step stage exhibit attachment block range size area sector '
   + 'scale rating network address note chart hepatitis list amendment app channel band mode test drive paragraph question').split(' '));
 // Words that can follow the option "A" but never the article "a".
-const VERB_AFTER_A = /^(is|are|was|were|would|will|does|do|doesn't|did|can|cannot|can't|could|might|may|must|should|only|also|just|still|alone|too|either|neither|has|have|isn't|aren't|wouldn't|won't|instead|here)\b/;
+const VERB_AFTER_A = /^(is|are|was|were|would|will|does|do|doesn't|did|can|cannot|can't|could|might|may|must|should|only|also|just|still|alone|too|either|neither|has|have|isn't|aren't|wouldn't|won't|instead|here|emerged|came|became|began|ended|happened|occurred|arose|went)\b/;
 
 /**
  * Is the lone capital at text[i] an option label ("B is wrong", "A:", "C and

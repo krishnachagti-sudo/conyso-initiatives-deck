@@ -43,6 +43,17 @@ each topic was finished survived both. A file half-written when the limit
 hit was never on disk, because writers build a topic in the scratchpad and
 write it in one go. Relaunching only the missing topics cost little.
 
+**An open licence can sit beside an AI ban.** OpenStax books carry CC BY or
+CC BY-NC-SA, and the AMA marketing researcher checked the licence and
+robots.txt (which blocks only GPTBot), but every book page also says it "may
+not be used in the training of large language models or otherwise be ingested
+into large language models or generative AI offerings without OpenStax's
+prior written permission". The first writer read it and stopped before
+writing a card; the other writers were stopped, the cached copies deleted,
+and openstax.org is now tier D and on the no-fetch list. The lesson: the
+terms check covers every page's footer, not only the terms page and the
+licence line.
+
 ## What changed in the process
 
 - Research adds 10% to each topic's budget; writers covering every concept
