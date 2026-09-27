@@ -7,6 +7,8 @@
 // llms.txt; drafts and fixtures get pages marked noindex.
 //   node build/build.mjs --only=csv,json only some formats
 //   node build/build.mjs --out=dir       write somewhere other than dist/
+//   node build/build.mjs --personal      only decks marked "personal": true in deck.json,
+//                                        to personal-dist/ (no site pages); the site skips them
 //   node build/build.mjs --origin=https://x.github.io --base=/repo/
 //                                        build for another host: a noindex preview (src/site/config.mjs)
 //
@@ -31,7 +33,8 @@ import { loadConfig } from '../src/site/config.mjs';
 
 const arg = (n) => process.argv.find((a) => a.startsWith(`--${n}=`))?.split('=')[1];
 const only = arg('only')?.split(',');
-const out = arg('out') || 'dist';
+const personal = process.argv.includes('--personal'); // decks for one person's own study, never on the site
+const out = arg('out') || (personal ? 'personal-dist' : 'dist');
 const cfg = loadConfig();
 const sources = [{ decks: 'decks', concepts: 'concepts' }];
 if (process.argv.includes('--fixtures')) sources.push({ decks: 'test/fixtures/decks', concepts: 'test/fixtures/concepts' });
@@ -44,6 +47,7 @@ const built = [];
 for (const src of sources) {
   for (const dir of deckDirs(src.decks)) {
     const deck = loadDeck(dir);
+    if (Boolean(deck.meta.personal) !== personal) continue;
     const { slug, version } = deck.meta;
     // Real decks take their page address from the site config; a deck.json
     // value (the fixtures have one) is kept so tests stay independent of it.
@@ -76,6 +80,8 @@ for (const src of sources) {
     console.log(`✓ ${slug} ${version}: ${deck.notes.length} cards, ${files.length} formats → ${target}`);
   }
 }
+
+if (personal) { if (failed) process.exitCode = 1; process.exit(); }
 
 // Pages. Deck pages are written after every deck is built, so each page's
 // footer can list all of them.
