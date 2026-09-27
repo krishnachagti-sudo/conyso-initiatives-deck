@@ -6,6 +6,7 @@ import { swapLabels, spread } from '../build/spread-answers.mjs';
 test('option labels swap, the article "A" does not', () => {
   assert.equal(swapLabels('A: right. B, C and D miss it; option C is tempting.', 'A', 'C'), 'C: right. B, A and D miss it; option A is tempting.');
   assert.equal(swapLabels('Answer A. A mistake here costs time.', 'A', 'D'), 'Answer D. A mistake here costs time.');
+  assert.equal(swapLabels("C is Côte d'Ivoire's; its sign is C$.", 'A', 'C'), "A is Côte d'Ivoire's; its sign is C$.");
   assert.equal(swapLabels('A emerged around 3150 BC; C came later.', 'A', 'B'), 'B emerged around 3150 BC; C came later.');
 });
 

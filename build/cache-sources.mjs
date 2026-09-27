@@ -96,13 +96,14 @@ export function cacheResearch(slug, opts = {}) {
   const docs = new Map();
   for (const s of list) {
     const url = s.url.split('#')[0];
-    if (!docs.has(url)) docs.set(url, { licence: `${s.tier} · ${s.licence}`, cards: 0, local: s.path });
+    const licence = s.licence.startsWith(`${s.tier} · `) ? s.licence : `${s.tier} · ${s.licence}`;
+    if (!docs.has(url)) docs.set(url, { licence, cards: 0, local: s.path });
   }
   // Concepts may cite pages the sources list only names by site (one entry
   // for Wikipedia, 58 articles cited): cache those too, under their host's licence.
   const conceptsFile = join('research/deck-briefs', `${slug}-concepts.json`);
   if (existsSync(conceptsFile)) {
-    const byHost = new Map(list.map((s) => [new URL(s.url).hostname, `${s.tier} · ${s.licence}`]));
+    const byHost = new Map(list.map((s) => [new URL(s.url).hostname, s.licence.startsWith(`${s.tier} · `) ? s.licence : `${s.tier} · ${s.licence}`]));
     for (const c of JSON.parse(readFileSync(conceptsFile, 'utf8'))) {
       if (!c.source || !/^https?:/.test(c.source)) continue;
       const url = c.source.split('#')[0];

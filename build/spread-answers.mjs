@@ -39,8 +39,9 @@ const VERB_AFTER_A = /^(is|are|was|were|would|will|does|do|doesn't|did|can|canno
 export function isLabel(text, i) {
   const l = text[i];
   const before = text.slice(0, i), after = text.slice(i + 1);
-  if (/[A-Za-z0-9'’\-_./+#&]$/.test(before)) return false;
-  if (/^[A-Za-z0-9'’\-_+#&]/.test(after) || /^\.[A-Za-z0-9]/.test(after)) return false;
+  // Part of a word ("Côte", "C$", "Café") is never a label: Unicode letters count.
+  if (/[\p{L}\p{N}'’\-_./+#&]$/u.test(before)) return false;
+  if (/^[\p{L}\p{N}'’\-_+#&$€£¥%]/u.test(after) || /^\.[\p{L}\p{N}]/u.test(after)) return false;
   const prevWord = before.match(/([A-Za-z]+)\s*$/)?.[1]?.toLowerCase();
   if (prevWord && NOT_A_LABEL_AFTER.has(prevWord)) return false;
   if (/^\s*([):,;.!?]|$)/.test(after)) return true;

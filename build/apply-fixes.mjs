@@ -55,6 +55,8 @@ export function applyFixes(deckDir, lines, { dry = false } = {}) {
       if (fx.op === 'delete') { doc.notes = doc.notes.filter((n) => n.id !== fx.id); where.delete(fx.id); }
       else {
         const n = doc.notes.find((x) => x.id === fx.id);
+        // A line naming a field but no value (a note for later) must not wipe the field.
+        if (!fx.field || !Object.hasOwn(fx, 'value')) { console.log(`  skipped ${fx.id}: no field and value to set`); continue; }
         if (fx.value === null) delete n[fx.field]; else n[fx.field] = fx.value;
       }
     }
