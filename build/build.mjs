@@ -18,7 +18,7 @@
 // (.apkg) and Chromium (PDF); if either is missing the build fails, so a
 // release never ships with a format silently absent.
 
-import { mkdirSync, writeFileSync, readFileSync, statSync, cpSync, rmSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, statSync, cpSync, rmSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 
@@ -33,6 +33,7 @@ import { loadConfig } from '../src/site/config.mjs';
 
 const arg = (n) => process.argv.find((a) => a.startsWith(`--${n}=`))?.split('=')[1];
 const only = arg('only')?.split(',');
+const deckFilter = arg('decks')?.split(','); // preview builds: only these decks
 const personal = process.argv.includes('--personal'); // decks for one person's own study, never on the site
 const out = arg('out') || (personal ? 'personal-dist' : 'dist');
 const cfg = loadConfig();
@@ -48,6 +49,7 @@ for (const src of sources) {
   for (const dir of deckDirs(src.decks)) {
     const deck = loadDeck(dir);
     if (Boolean(deck.meta.personal) !== personal) continue;
+    if (deckFilter && !deckFilter.includes(deck.meta.slug)) continue;
     const { slug, version } = deck.meta;
     // Real decks take their page address from the site config; a deck.json
     // value (the fixtures have one) is kept so tests stay independent of it.
@@ -97,9 +99,24 @@ const pages = { '': homePage(cfg, deckList, { roadmap }), 'method/': methodPage(
 for (const [p, html] of Object.entries(pages)) { mkdirSync(join(out, p), { recursive: true }); writeFileSync(join(out, p, 'index.html'), html); }
 cpSync('src/assets', join(out, 'assets'), { recursive: true }); // fonts travel with their OFL licence files
 
+// Page modules: every src/site/pages/*.mjs exports build(ctx) returning
+// { pages: { 'path/': html }, files: { 'name': string|Buffer }, urls: ['path/'] }.
+// urls are the indexable pages that module adds to the sitemap.
+const extraUrls = [];
+const pageDir = 'src/site/pages';
+if (existsSync(pageDir)) {
+  for (const f of readdirSync(pageDir).filter((x) => x.endsWith('.mjs')).sort()) {
+    const mod = await import(new URL(`../${pageDir}/${f}`, import.meta.url));
+    const res = await mod.build({ cfg, decks: deckList, built, out });
+    for (const [p, html] of Object.entries(res.pages || {})) { mkdirSync(join(out, p), { recursive: true }); writeFileSync(join(out, p, 'index.html'), html); }
+    for (const [name, data] of Object.entries(res.files || {})) { mkdirSync(join(out, name, '..'), { recursive: true }); writeFileSync(join(out, name), data); }
+    extraUrls.push(...(res.urls || []));
+  }
+}
+
 const listed = deckList.filter((d) => d.meta.status === 'released'); // sitemap and llms.txt: released decks only
 const root = `${cfg.origin}${cfg.base}`;
-const urls = [{ loc: root }, { loc: `${root}method/` }, { loc: `${root}formats/` }, ...listed.map((d) => ({ loc: `${root}${d.meta.slug}/`, lastmod: d.meta.updated }))];
+const urls = [{ loc: root }, { loc: `${root}method/` }, { loc: `${root}formats/` }, ...listed.map((d) => ({ loc: `${root}${d.meta.slug}/`, lastmod: d.meta.updated })), ...extraUrls.map((p) => ({ loc: `${root}${p}` }))];
 writeFileSync(join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}</url>`).join('\n')}

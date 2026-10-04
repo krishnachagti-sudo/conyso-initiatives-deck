@@ -81,7 +81,7 @@ ${crumbs(cfg, [[m.familyTitle || m.family, ''], [short, `${m.slug}/`]])}
     <div class="v">${esc(answerV)}</div>
     <p>${answerP}</p>
     ${kindBar(s.kinds, s.cards)}
-    ${released ? '' : `<p class="draft-note"><span class="badge b-draft">Draft</span> Checked against its source; newcomer and expert review still to come.${(m.releaseBlockers || []).length ? ` Before release: ${(m.releaseBlockers).map(esc).join('; ')}.` : ''}</p>`}
+    ${released ? ((m.openReviews || []).length ? `<p class="draft-note">Every card checked against its source by an independent audit. Still to come: ${(m.openReviews).map(esc).join('; ')}.</p>` : '') : `<p class="draft-note"><span class="badge b-draft">Draft</span> Checked against its source; newcomer and expert review still to come.${(m.releaseBlockers || []).length ? ` Before release: ${(m.releaseBlockers).map(esc).join('; ')}.` : ''}</p>`}
     <div class="dl">${apkg ? `<a class="btn btn-primary" href="${esc(apkg.file)}" download>${icon('download')} Download for Anki <small>${kb(apkg.bytes)}</small></a>` : ''}<a class="btn" href="#download">All ${n0(files.size)} formats</a><a class="btn" href="#try">${icon('browser')} Try it here</a></div>
   </div>
   <dl class="facts">${facts.map(([k, v]) => `<div class="fact"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
@@ -200,7 +200,7 @@ ${check ? `<div class="checked"><h3>${icon('check')} What we checked</h3><p><str
     ['Is this deck free?', `Yes. There is no account and no paywall. The deck is licensed ${m.licence}, so you may share and adapt it as long as you credit it and share alike.`],
     ['Is it official?', 'No. It is an independent deck, written from the openly licensed source it cites, and it is not affiliated with, sponsored, endorsed or approved by any exam body or by the source’s authors.'],
     ['Will a new version wipe my progress in Anki?', 'No. Every card keeps a permanent ID, so importing a newer version changes the cards in place and keeps their review history.'],
-    ['How were the cards made?', `Cards are drafted with AI assistance, only from the source they cite. A second, independent pass checks every card against that source, and a person reviews every card before release.${released ? '' : ' This deck is still a draft, so that last review is not finished.'}`],
+    ['How were the cards made?', `Cards are drafted with AI assistance, only from the source they cite. A second, independent pass checks every card against that source, and every fix is recorded in the changelog. ${(m.openReviews || m.releaseBlockers || []).some((r) => /expert/.test(r)) ? 'A review by people who hold the certification is still to come, so if a card looks wrong, report it.' : 'If a card looks wrong, report it.'}`],
     ['What if a card is wrong?', 'Report it with the link below. It is checked against its source and fixed, and the fix is listed in the changelog.'],
   ];
   const about = `
