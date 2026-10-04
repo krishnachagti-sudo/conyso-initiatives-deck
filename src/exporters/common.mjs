@@ -55,6 +55,7 @@ export function tagsFor(deck, note) {
   ];
   if (note.volatile && note.validAsOf) t.push(`valid-as-of::${String(note.validAsOf).slice(0, 4)}`);
   for (const r of note.examRefs || []) t.push(`exam::${slugify(r)}`);
+  if ((note.tags || []).includes('retired')) t.push('retired');
   return t;
 }
 

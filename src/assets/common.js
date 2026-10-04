@@ -1,5 +1,6 @@
 // Site behaviour shared by every page: theme, menu, the measured masthead
-// height, the contents rail's scroll spy, share and copy buttons, back to top.
+// height, random deck, the deck page's phone action bar,
+// the contents rail's scroll spy, share and copy buttons, back to top.
 // Every feature degrades to plain HTML without script.
 (function () {
   'use strict';
@@ -83,6 +84,35 @@
       if (src) copy(src.textContent.trim(), b.nextElementSibling);
     });
   });
+
+  // Random deck: the link goes to a deck picked at build time; with script,
+  // each press picks again from the published list.
+  Array.prototype.forEach.call(document.querySelectorAll('[data-random-deck]'), function (a) {
+    var slugs = (a.dataset.decks || '').split(/\s+/).filter(Boolean);
+    if (slugs.length < 2) return;
+    a.addEventListener('click', function (e) {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+      var here = a.getAttribute('href');
+      var base = here.replace(/[^/]+\/$/, '');
+      var next = here;
+      while (next === here) next = base + slugs[Math.floor(Math.random() * slugs.length)] + '/';
+      a.setAttribute('href', next);
+    });
+  });
+
+  // Phones: the deck page's action bar steps aside while the answer box (which
+  // has the same buttons) or the downloads are on screen.
+  var actbar = document.querySelector('[data-actbar]');
+  if (actbar && 'IntersectionObserver' in window) {
+    var seen = new Set();
+    var watch = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) seen.add(en.target); else seen.delete(en.target); });
+      actbar.classList.toggle('away', seen.size > 0);
+    });
+    ['answer', 'download', 'try'].forEach(function (id) { var el = document.getElementById(id); if (el) watch.observe(el); });
+    var foot = document.querySelector('footer.site');
+    if (foot) watch.observe(foot);
+  }
 
   // Back to top.
   var top = document.querySelector('.totop');

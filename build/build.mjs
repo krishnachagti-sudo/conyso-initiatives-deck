@@ -60,14 +60,24 @@ for (const src of sources) {
       console.error(`✗ ${slug}: ${problems.length} checker problem(s); not exported. Run npm run check.`);
       continue;
     }
+    // Retired cards keep their ids in the source (CARD-STANDARD.md §7). Anki
+    // formats still carry them, tagged "retired", so an update marks them in a
+    // learner's collection; every other format and the site leave them out.
+    const isRetired = (n) => (n.tags || []).includes('retired');
+    const full = deck;
+    if (deck.notes.some(isRetired)) {
+      const topics = deck.topics.map((t) => ({ ...t, notes: t.notes.filter((n) => !isRetired(n)) })).filter((t) => t.notes.length);
+      Object.assign(deck, { all: full.notes, topics, notes: topics.flatMap((t) => t.notes) });
+    }
     const target = join(out, slug);
     mkdirSync(target, { recursive: true });
     const files = [];
     for (const f of FORMATS.filter((x) => !only || only.includes(x.key))) {
       const name = `${slug}-${version}${f.suffix}`;
       const path = join(target, name);
-      if (f.kind === 'text') writeFileSync(path, f.render(deck));
-      else f.write(deck, path);
+      const src = f.key === 'apkg' || f.key === 'anki-text' ? { ...deck, notes: deck.all || deck.notes } : deck;
+      if (f.kind === 'text') writeFileSync(path, f.render(src));
+      else f.write(src, path);
       const buf = readFileSync(path);
       files.push({ format: f.key, label: f.label, file: name, bytes: statSync(path).size, sha256: createHash('sha256').update(buf).digest('hex') });
     }
@@ -88,7 +98,7 @@ if (personal) { if (failed) process.exitCode = 1; process.exit(); }
 // Pages. Deck pages are written after every deck is built, so each page's
 // footer can list all of them.
 const deckList = built.map((b) => b.deck);
-const nav = deckList.map((d) => ({ slug: d.meta.slug, title: d.meta.shortTitle || d.meta.title }));
+const nav = deckList.map((d) => ({ slug: d.meta.slug, title: d.meta.shortTitle || d.meta.title, family: d.meta.familyTitle, status: d.meta.status }));
 for (const b of built) writeFileSync(join(b.target, 'index.html'), deckPage(cfg, b.deck, b.manifest, { decks: nav }));
 // The roadmap figure on the home page: exams in MASTER-LIST.md marked "Build"
 // (buildable now under CONTENT-POLICY.md). Quoted fields may contain commas.

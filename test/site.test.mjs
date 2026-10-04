@@ -8,7 +8,9 @@ import { createHash } from 'node:crypto';
 
 import { loadDeck } from '../src/decks.mjs';
 import { deckPage } from '../src/site/deck-page.mjs';
-import { homePage } from '../src/site/home.mjs';
+import { homePage, newThisWeek, groupByFamily, firstPublished } from '../src/site/home.mjs';
+import { slugify } from '../src/decks.mjs';
+import { familiesOf } from '../src/site/layout.mjs';
 import { FOUNDER, FOUNDER_ID, CONYSO_ID } from '../src/site/identity.mjs';
 import { preflight } from '../build/preflight.mjs';
 
@@ -74,10 +76,46 @@ test('deck page: LearningResource with publisher, author and downloads', () => {
   assert.equal(org.parentOrganization['@id'], CONYSO_ID);
 });
 
-test('home page lists every deck and links its page', () => {
-  const html = homePage(cfg, [deck()]);
-  assert.match(html, /<a class="deck-card" href="\/decks\/example\/">/);
-  assert.match(html, /7 cards · 3 primers/);
+test('home page groups decks by family, links each family hub and deck, and counts cards', () => {
+  const d = deck();
+  assert.doesNotMatch(homePage(cfg, [d]), /href="\/decks\/families\//, 'a family with no released deck has no hub to link');
+  d.meta.status = 'released';
+  const html = homePage(cfg, [d]);
+  const fam = d.meta.familyTitle || d.meta.family;
+  assert.match(html, new RegExp(`<a href="/decks/families/${slugify(fam)}/">`));
+  assert.match(html, /<li><a href="\/decks\/example\/"><span>[^<]+(<i class="tag">draft<\/i>)?<\/span><b>7<span class="sr-only"> cards<\/span><\/b><\/a><\/li>/);
+  assert.match(html, /<form class="site-search" data-site-search action="\/decks\/browse\/"/);
+  assert.match(html, /data-card-of-day/);
+  assert.match(html, /<a class="btn btn-ghost" href="\/decks\/example\/" data-random-deck/);
+  assert.match(html, /<meta property="og:image" content="https:\/\/conyso\.com\/decks\/og\/home\.png">/);
+  assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
+  for (const p of ['browse/', 'daily/', 'new/', 'method/', 'formats/']) assert.match(html, new RegExp(`<nav class="links"[^>]*>.*href="/decks/${p}"`));
+});
+
+test('deck page: share image, family crumb, and the Anki download first', () => {
+  const m = { files: [{ format: 'apkg', label: 'Anki package', file: 'example-0.1.0.apkg', bytes: 4096 }, ...manifest.files] };
+  const d = deck();
+  d.meta.status = 'released';
+  const html = deckPage(cfg, d, m);
+  assert.match(html, /<meta property="og:image" content="https:\/\/conyso\.com\/decks\/og\/example\.png">/);
+  assert.match(html, /<nav class="crumbs"[^>]*><a href="\/decks\/">Home<\/a><span class="sep">\/<\/span><a href="\/decks\/families\/[a-z0-9-]+\/">/);
+  const box = html.slice(html.indexOf('id="answer"'), html.indexOf('<dl class="facts">'));
+  const at = ['Download for Anki', 'Try it here', 'Every other format'].map((t) => box.indexOf(t));
+  assert.ok(at.every((i) => i > 0) && at[0] < at[1] && at[1] < at[2], 'Download, then Try, then every other format');
+});
+
+test('new this week: first changelog date within seven days of the build date', () => {
+  const mk = (slug, dates) => ({ meta: { slug, changelog: dates.map((date) => ({ date })) } });
+  const ds = [mk('a', ['2026-09-20', '2026-10-01']), mk('b', ['2026-09-28']), mk('c', ['2026-10-04']), mk('d', ['2026-09-27']), mk('e', [])];
+  assert.deepEqual(newThisWeek(ds, '2026-10-04').map((d) => d.meta.slug), ['c', 'b']);
+  assert.equal(firstPublished(ds[0]), '2026-09-20');
+});
+
+test('decks group by family, A to Z', () => {
+  const mk = (slug, familyTitle, shortTitle) => ({ meta: { slug, familyTitle, shortTitle } });
+  const g = groupByFamily([mk('x', 'Zeta', 'B'), mk('y', 'Alpha', 'A'), mk('z', 'Zeta', 'A10'), mk('w', 'Zeta', 'A9')]);
+  assert.deepEqual(g.map((f) => f.title), ['Alpha', 'Zeta']);
+  assert.deepEqual(g[1].decks.map((d) => d.meta.slug), ['w', 'z', 'x']);
 });
 
 test('preflight: passes a clean build, catches broken links, bad canonicals and a blocked email', async () => {
@@ -91,6 +129,9 @@ test('preflight: passes a clean build, catches broken links, bad canonicals and 
   const { methodPage, formatsPage } = await import('../src/site/hubs.mjs');
   for (const [p, f] of [['method', methodPage], ['formats', formatsPage]]) { mkdirSync(join(dist, p)); writeFileSync(join(dist, p, 'index.html'), f(cfg, [deck()])); }
   cpSync('src/assets', join(dist, 'assets'), { recursive: true });
+  // Pages and files that page modules and the build write (not under test here).
+  for (const p of ['browse/', 'daily/', 'new/', 'roadmap/', ...familiesOf([deck()]).map((f) => f.path)]) { mkdirSync(join(dist, p), { recursive: true }); writeFileSync(join(dist, p, 'index.html'), '<link rel="canonical" href="https://conyso.com/decks/">'); }
+  for (const f of ['feed.xml', 'llms.txt', 'site.webmanifest', 'apple-touch-icon.png', 'assets/daily.js', 'assets/search.js']) writeFileSync(join(dist, f), '');
   assert.deepEqual(preflight(dist, cfg), []);
   rmSync(join(dist, 'assets', 'study.js'));
   assert.ok(preflight(dist, cfg).some((p) => p.message === 'broken link /decks/assets/study.js'));

@@ -4,8 +4,15 @@
 // this site's words and look.
 
 import { siteOrg, conysoOrg, founderNode } from './identity.mjs';
+import { slugify } from '../decks.mjs';
 
 export const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/** The first candidate that fits in max characters, so nothing needs cutting; the last is clamped. */
+export const fit = (max, ...candidates) => {
+  const c = candidates.map((x) => String(x).replace(/\s+/g, ' ').trim());
+  return c.find((x) => x.length <= max) ?? clamp(c[c.length - 1], max);
+};
 
 /** Titles and descriptions sized for a results page (playbook: 60 / 158). */
 export const clamp = (s, max) => {
@@ -50,15 +57,20 @@ const sprite = () => `<svg width="0" height="0" style="position:absolute" aria-h
 /** The mark: two index cards, the front one with its red header rule. */
 export const mark = (cls = 'mark') => `<svg class="${cls}" viewBox="0 0 38 28" aria-hidden="true"><rect x="7" y="1" width="30" height="20" rx="1.5" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="1.6"/><rect x="1" y="6" width="30" height="21" rx="1.5" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.6"/><path d="M4 11.5h24" stroke="var(--accent)" stroke-width="1.6"/><path d="M4 16h24M4 20.5h24" stroke="var(--rule)" stroke-width="1.2"/></svg>`;
 
-const NAV = [
-  ['decks', '', 'All decks'],
+// The masthead's five ways in (launch contract): the same on every page.
+export const NAV = [
+  ['browse', 'browse/', 'All decks'],
+  ['daily', 'daily/', 'Daily'],
+  ['new', 'new/', 'New'],
   ['method', 'method/', 'The science'],
   ['formats', 'formats/', 'Which file?'],
 ];
 
 /** The ways into the site, for the band at the foot of every page. */
 export const WAYS = [
-  ['', 'All decks', 'Every published deck, by subject'],
+  ['browse/', 'All decks', 'Search and filter every deck, by subject'],
+  ['daily/', 'Today’s ten', 'Ten questions, the same ten for everyone today'],
+  ['new/', 'New this week', 'The decks added most recently'],
   ['method/', 'The science', 'The learning research behind every deck, and its limits'],
   ['formats/', 'Which file for my app?', 'Anki, Quizlet, Brainscape, Mochi, RemNote, Obsidian, Logseq, paper'],
 ];
@@ -67,8 +79,28 @@ export function otherWays(cfg, current = null) {
   return `<section class="ways wrap" aria-labelledby="ways-h"><h2 id="ways-h">Other ways into the decks</h2><div class="ways-grid">${WAYS.filter(([p]) => p !== current).map(([p, t, d]) => `<a href="${cfg.base}${p}"><b>${esc(t)}</b><span>${esc(d)}</span></a>`).join('')}</div></section>`;
 }
 
+/** A family's hub page, relative to base (the discovery agent builds it). */
+export const familyPath = (familyTitle) => `families/${slugify(familyTitle)}/`;
+
+/**
+ * The families named in a page's deck list, A to Z with their deck counts.
+ * Accepts the footer's short records ({ family, status? }) or loaded decks
+ * ({ meta }). Only released decks count: a family with no released deck has
+ * no hub page to link to.
+ */
+export function familiesOf(decks = []) {
+  const n = new Map();
+  for (const d of decks) {
+    const status = d.status ?? d.meta?.status;
+    if (status && status !== 'released') continue;
+    const f = d.family || d.meta?.familyTitle || d.meta?.family;
+    if (f) n.set(f, (n.get(f) || 0) + 1);
+  }
+  return [...n.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([title, count]) => ({ title, count, path: familyPath(title) }));
+}
+
 export function crumbs(cfg, trail) {
-  const parts = [`<a href="${cfg.base}">All decks</a>`, ...trail.map(([label, path], i) =>
+  const parts = [`<a href="${cfg.base}">Home</a>`, ...trail.map(([label, path], i) =>
     i === trail.length - 1 ? `<span aria-current="page">${esc(label)}</span>` : `<a href="${cfg.base}${path}">${esc(label)}</a>`)];
   return `<nav class="crumbs" aria-label="Breadcrumb">${parts.join('<span class="sep">/</span>')}</nav>`;
 }
@@ -98,16 +130,22 @@ ${nets.map(([n, h]) => `<a class="sh-b" href="${esc(h)}" target="_blank" rel="no
 /**
  * @param {object} cfg site config (src/site/config.mjs)
  * @param {{title: string, description: string, path: string, body: string, graph?: object[],
- *   scripts?: string, robots?: string, active?: string, count?: number, decks?: {slug: string, title: string}[]}} o
+ *   scripts?: string, robots?: string, active?: string, count?: number, og?: string,
+ *   decks?: {slug: string, title: string, family?: string}[]}} o
+ *   og is the share image's path under base (1200×630), default og/home.png.
+ *   decks feeds the footer's family links; records may also be loaded decks.
  */
-export function page(cfg, { title, description, path, body, graph = [], scripts = '', robots = 'index, follow, max-snippet:-1, max-image-preview:large', active, count, decks = [] }) {
+export function page(cfg, { title, description, path, body, graph = [], scripts = '', robots = 'index, follow, max-snippet:-1, max-image-preview:large', active, count, decks = [], og = 'og/home.png' }) {
   const url = `${cfg.origin}${cfg.base}${path}`;
   if (cfg.preview) robots = 'noindex, nofollow'; // never let a preview host compete with the real one
   const asset = (p) => `${cfg.base}assets/${p}`;
   const t = esc(clamp(title, 60));
   const d = esc(clamp(description, 158));
+  const image = /^https?:/.test(og) ? og : `${cfg.origin}${cfg.base}${String(og).replace(/^\/+/, '')}`;
   const nav = NAV.map(([k, p, l]) => `<a href="${cfg.base}${p}"${k === active ? ' class="on" aria-current="page"' : ''}>${l}</a>`).join('');
-  const foot = (h, links) => `<nav class="foot-col" aria-label="${esc(h)}"><h2>${esc(h)}</h2>${links.map(([p, l]) => `<a href="${p.startsWith('http') ? p : cfg.base + p}">${esc(l)}</a>`).join('')}</nav>`;
+  const link = (p, l) => `<a href="${/^(https?:|mailto:)/.test(p) ? p : cfg.base + p}">${esc(l)}</a>`;
+  const foot = (h, links, cls = '') => `<nav class="foot-col${cls}" aria-label="${esc(h)}"><h2>${esc(h)}</h2>${links.map(([p, l]) => link(p, l)).join('')}</nav>`;
+  const fams = familiesOf(decks);
   return `<!doctype html>
 <html lang="en-GB">
 <head>
@@ -124,18 +162,25 @@ export function page(cfg, { title, description, path, body, graph = [], scripts 
 <meta property="og:url" content="${esc(url)}">
 <meta property="og:title" content="${t}">
 <meta property="og:description" content="${d}">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="${esc(image)}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${t}">
 <meta name="twitter:description" content="${d}">
+<meta name="twitter:image" content="${esc(image)}">
 <meta name="theme-color" content="#e6dcc6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0c0e12" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="${asset('icon.svg')}" type="image/svg+xml">
+<link rel="alternate" type="application/atom+xml" title="${esc(cfg.brand)}: new decks" href="${cfg.base}feed.xml">
+<link rel="manifest" href="${cfg.base}site.webmanifest">
+<link rel="apple-touch-icon" href="${cfg.base}apple-touch-icon.png">
 <link rel="preload" href="${asset('fonts/atkinson-hyperlegible-latin-400-normal.woff2')}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="${asset('fonts/fraunces-latin-wght-normal.woff2')}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="${asset('fonts/jetbrains-mono-latin-400-normal.woff2')}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="${asset('site.css')}">
 <script>try{var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
-${jsonLd([siteOrg(cfg), conysoOrg(), founderNode(), ...graph])}
+${jsonLd([siteOrg(cfg), conysoOrg(), founderNode(), ...(graph.some((n) => n['@type'] === 'WebSite') ? [] : [{ '@type': 'WebSite', '@id': `${cfg.origin}${cfg.base}#website`, name: cfg.brand, url: `${cfg.origin}${cfg.base}`, inLanguage: 'en', publisher: { '@id': `${cfg.origin}${cfg.base}#organization` } }]), ...graph])}
 </head>
 <body>
 ${sprite()}
@@ -146,9 +191,8 @@ ${sprite()}
     <a class="brand" href="${cfg.base}" aria-label="${esc(cfg.brand)}, home">${mark()}<span class="brand-txt"><span class="brand-name">${esc(cfg.brand)}</span><span class="brand-sub">flashcards for every certification</span></span></a>
     <nav class="links" id="primary-nav" aria-label="Primary">${nav}</nav>
     <div class="right">
-      ${count != null ? `<a class="count" href="${cfg.base}"><span class="count-n">${count.toLocaleString('en-GB')}</span><span class="count-l">cards</span></a>` : ''}
+      ${count != null ? `<a class="count" href="${cfg.base}browse/"><span class="count-n">${count.toLocaleString('en-GB')}</span><span class="count-l">cards</span></a>` : ''}
       <button class="icon-btn" id="theme" type="button" aria-label="Switch between light and dark">${icon('moon', 'i th-moon')}${icon('sun', 'i th-sun')}</button>
-      <button class="icon-btn menu-btn" id="menu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="primary-nav">${icon('menu', 'i m-open')}${icon('close', 'i m-close')}</button>
     </div>
   </div>
 </header>
@@ -163,12 +207,11 @@ ${body}
       <p class="foot-conyso">Created by <a href="https://conyso.com/founder/" rel="author">Krishna Chagti</a> · an initiative by <a href="https://conyso.com/">Conyso</a>.</p>
       <p class="foot-motto">One standard. Every certification.</p>
     </div>
-    ${foot('Decks', [['', 'All decks'], ...decks.map((x) => [`${x.slug}/`, x.title])])}
-    ${foot('Use them', [['formats/', 'Which file for my app?'], ['formats/#anki', 'Importing into Anki'], ['formats/#print', 'Printing the cards']])}
-    ${foot('The project', [['method/', 'The science'], ['method/#checks', 'How cards are checked'], ['method/#ai', 'The part AI plays'], ['https://github.com/krishnachagti-sudo/conyso-initiatives-deck/issues/new?labels=card-report', 'Report a card']])}
+    ${foot('Subjects', [['browse/', 'All decks'], ...fams.map((f) => [f.path, f.title])], fams.length > 6 ? ' foot-fams' : '')}
+    ${foot('About', [['method/', 'The science'], ['method/#checks', 'How cards are checked'], ['formats/', 'Which file for my app?'], ['roadmap/', 'Roadmap: ask for an exam'], ['feed.xml', 'New decks (Atom feed)'], ['llms.txt', 'llms.txt'], ['https://github.com/krishnachagti-sudo/conyso-initiatives-deck/issues/new?labels=card-report', 'Report a card']])}
   </div>
   <div class="wrap foot-share"><span class="fs-lab">Know someone studying for an exam?</span>${shareRow({ live: true })}</div>
-  <div class="wrap foot-rule"><span>Decks licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">CC BY-SA 4.0</a>. Independent: not affiliated with any exam body.</span><span>Report a wrong card and it is checked against its source and fixed.</span></div>
+  <div class="wrap foot-rule"><span>Decks licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">CC BY-SA 4.0</a>. Independent: not affiliated with any exam body.</span><span>An initiative by <a href="https://conyso.com/">Conyso</a>.</span></div>
 </footer>
 <a class="totop" href="#main" aria-label="Back to top" hidden>${icon('up')}</a>
 <script src="${asset('common.js')}" defer></script>

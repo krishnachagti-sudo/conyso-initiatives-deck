@@ -6,9 +6,10 @@
 // checked against its paper in learning-science/. Nothing is added here that
 // is not there.
 
-import { esc, page, crumbs, otherWays, icon } from './layout.mjs';
+import { esc, page, crumbs, otherWays, icon, fit } from './layout.mjs';
 import { FORMATS } from '../exporters/index.mjs';
 import { deckStats } from './deck-data.mjs';
+import { released } from './home.mjs';
 
 const n0 = (n) => Number(n).toLocaleString('en-GB');
 
@@ -25,7 +26,7 @@ ${otherWays(cfg, `${slug}/`)}`;
   const url = `${cfg.origin}${cfg.base}${slug}/`;
   return page(cfg, {
     title, description, path: `${slug}/`, body, active,
-    decks: decks.map((d) => ({ slug: d.meta.slug, title: d.meta.shortTitle || d.meta.title })),
+    decks: decks.map((d) => ({ slug: d.meta.slug, title: d.meta.shortTitle || d.meta.title, family: d.meta.familyTitle || d.meta.family, status: d.meta.status })),
     count: decks.reduce((a, d) => a + d.notes.length, 0),
     graph: [
       { '@type': 'WebPage', '@id': `${url}#page`, name: h1, url, isPartOf: { '@id': `${cfg.origin}${cfg.base}#website` } },
@@ -35,15 +36,16 @@ ${otherWays(cfg, `${slug}/`)}`;
   });
 }
 
-export function methodPage(cfg, decks) {
+export function methodPage(cfg, allDecks) {
+  const decks = released(allDecks);
   const st = decks.map(deckStats);
   const cards = st.reduce((a, s) => a + s.cards, 0);
   const primers = st.reduce((a, s) => a + s.primers, 0);
   const applied = st.reduce((a, s) => a + s.kinds.application + s.kinds.classification, 0);
   return hub(cfg, {
     slug: 'method', name: 'How we teach', active: 'method', decks,
-    title: `How These Flashcards Teach Before They Test | ${cfg.brand}`,
-    description: 'Why every deck explains each idea with a primer card before testing it, cites a source on every card, and mixes facts with application. The research, and its limits.',
+    title: fit(60, `How These Flashcards Teach Before They Test | ${cfg.brand}`, `How These Flashcards Teach Before Testing | ${cfg.brand}`, 'How These Flashcards Teach Before They Test'),
+    description: 'Why every deck explains each idea before testing it, cites a source on every card, and mixes facts with application. The research, and its limits.',
     h1: 'How do these decks teach?',
     kicker: `${n0(cards)} cards · ${n0(primers)} primers · ${n0(applied)} application cards`,
     lead: `Every deck explains each idea with a primer card before any card tests it, explains the answer on the back of every card, and cites where each card came from. Of the ${n0(cards)} cards published so far, ${n0(primers)} are primers and ${n0(applied)} ask you to apply an idea to a situation.`,
@@ -91,7 +93,8 @@ const GROUPS = [
   ['data', 'Spreadsheets and your own tools', 'Plain CSV and JSON, with every field and the licence attribution.'],
 ];
 
-export function formatsPage(cfg, decks) {
+export function formatsPage(cfg, allDecks) {
+  const decks = released(allDecks);
   const allApps = [...new Set(FORMATS.flatMap((f) => f.apps))].filter((a) => !['Print', 'Any PDF reader', 'Developers', 'Excel', 'Google Sheets'].includes(a));
   const NAME = { Developers: 'Your own code', Print: 'Paper', 'Any PDF reader': 'Any PDF reader' };
   const byApp = new Map();
@@ -101,7 +104,7 @@ export function formatsPage(cfg, decks) {
   return hub(cfg, {
     slug: 'formats', name: 'Which file?', active: 'formats', decks,
     title: `Which Flashcard File Works With My App? | ${cfg.brand}`,
-    description: `Every deck comes in ${FORMATS.length} formats: Anki, Quizlet, Brainscape, Mochi, RemNote, Obsidian, Logseq, CSV, JSON and printable PDF cards. Which file to take, and how to import it.`,
+    description: fit(158, `Every deck comes in ${FORMATS.length} formats: Anki, Quizlet, Brainscape, Mochi, RemNote, Obsidian, Logseq, CSV, JSON and printable cards. Which file to take, and how to import it.`, `Each deck comes in ${FORMATS.length} formats, for Anki, Quizlet, Brainscape, Mochi, RemNote, Obsidian, Logseq, spreadsheets and print. Which file to take, and how.`),
     h1: 'Which file works with my app?',
     kicker: `${FORMATS.length} formats · ${allApps.length} apps`,
     lead: `For Anki, take the <code>.apkg</code> package; for any other app, take the file named after it. Every deck is exported in ${FORMATS.length} formats from one source, so the cards are the same whichever you choose.`,

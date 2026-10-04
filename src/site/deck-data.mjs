@@ -1,6 +1,7 @@
 // Figures about a deck that its pages state. Everything here is counted from
 // the deck itself, so a page can never claim more than the cards show.
 
+import { readFileSync } from 'node:fs';
 import { inOrder, plain, clozeQuestion, clozeAnswer } from '../exporters/common.mjs';
 
 export const NEW_PER_DAY = 20;          // Anki's default New cards/day
@@ -37,6 +38,34 @@ export function deckStats(deck) {
 }
 
 /**
+ * The pixel size of a PNG, JPEG or SVG, read from its header, so the page can
+ * reserve the image's space before it loads. Null when it cannot be read.
+ */
+export function imageSize(path) {
+  let b;
+  try { b = readFileSync(path); } catch { return null; }
+  if (b.length > 24 && b.readUInt32BE(0) === 0x89504e47) return { width: b.readUInt32BE(16), height: b.readUInt32BE(20) };
+  if (b.length > 4 && b[0] === 0xff && b[1] === 0xd8) {
+    for (let i = 2; i + 9 < b.length;) {
+      if (b[i] !== 0xff) { i += 1; continue; }
+      const marker = b[i + 1];
+      if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) return { width: b.readUInt16BE(i + 7), height: b.readUInt16BE(i + 5) };
+      i += 2 + b.readUInt16BE(i + 2);
+    }
+    return null;
+  }
+  const svg = b.toString('utf8', 0, Math.min(b.length, 4096)).match(/<svg\b[^>]*>/);
+  if (svg) {
+    const num = (n) => { const m = svg[0].match(new RegExp(`\\s${n}="([\\d.]+)(px)?"`)); return m ? Number(m[1]) : null; };
+    const vb = svg[0].match(/viewBox="[\d.\-]+[\s,]+[\d.\-]+[\s,]+([\d.]+)[\s,]+([\d.]+)"/);
+    const width = num('width') ?? (vb && Number(vb[1]));
+    const height = num('height') ?? (vb && Number(vb[2]));
+    if (width && height) return { width: Math.round(width), height: Math.round(height) };
+  }
+  return null;
+}
+
+/**
  * A card split into labelled parts, for the site's index cards. The exports
  * keep their own flat layout (twoSided); on the page each part gets its own
  * line and the source becomes a short link instead of a raw address.
@@ -58,7 +87,7 @@ export function cardParts(n) {
     validAsOf: n.volatile && n.validAsOf ? n.validAsOf : '',
     source: String(n.source || '').replace(/^.*?“(.+)”.*$/, '$1'),
     sourceURL: n.sourceURL || '',
-    image: n._fig ? { src: `media/${n._fig.name}`, alt: n._fig.alt, credit: n._fig.credit, side: n._fig.side } : null,
+    image: n._fig ? { src: `media/${n._fig.name}`, alt: n._fig.alt, credit: n._fig.credit, side: n._fig.side, ...(imageSize(n._fig.path) || {}) } : null,
   };
 }
 
@@ -68,7 +97,7 @@ const lines = (s) => escH(s).split('\n').join('<br>');
 /** One index card as HTML: the same markup study.js builds in the browser. */
 export function cardHTML(p, { top = '', answer = true, imgPrefix = '' } = {}) {
   const row = (label, text) => (text ? `<p class="ic-x"><b>${label}</b> ${lines(text)}</p>` : '');
-  const fig = p.image ? `<figure class="ic-fig"><img src="${escH(imgPrefix + p.image.src)}" alt="${escH(p.image.alt)}" loading="lazy"><figcaption>${escH(p.image.credit)}</figcaption></figure>` : '';
+  const fig = p.image ? `<figure class="ic-fig"><img src="${escH(imgPrefix + p.image.src)}" alt="${escH(p.image.alt)}"${p.image.width ? ` width="${p.image.width}" height="${p.image.height}"` : ''} loading="lazy"><figcaption>${escH(p.image.credit)}</figcaption></figure>` : '';
   return `<div class="icard k-${escH(p.kind)}"><div class="ic-top"><span>${escH(top || p.topic)}</span><b>${escH(p.kind)}${p.core ? ' · core' : ''}</b></div>`
     + `<div class="ic-q"><p>${lines(p.front)}</p>${p.image?.side === 'front' ? fig : ''}${p.choices ? `<p class="ic-choices">${lines(p.choices)}</p>` : ''}</div>`
     + (answer ? `<div class="ic-rule"></div><div class="ic-a">${p.image?.side === 'back' ? fig : ''}<p class="ic-ans">${lines(p.answer)}</p>${row('Why', p.why)}${row('Why not the others', p.whyNot)}${row('Example', p.example)}${row('Not to confuse', p.contrast)}${row('Valid as of', p.validAsOf)}${p.sourceURL ? `<p class="ic-src"><a href="${escH(p.sourceURL)}">Source: ${escH(p.source)} ↗</a></p>` : ''}</div>` : '')

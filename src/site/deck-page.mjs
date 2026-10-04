@@ -7,7 +7,8 @@
 // section's first sentence. Every card is on the page in HTML, so the page,
 // not the download, is what search and answer engines read.
 
-import { esc, page, icon, crumbs, otherWays, shareRow } from './layout.mjs';
+import { esc, page, icon, crumbs, otherWays, shareRow, familyPath, fit } from './layout.mjs';
+import { hasGlossary, glossaryTerms, glossaryPath } from './pages/glossary.mjs';
 import { siteOrgId, FOUNDER_ID } from './identity.mjs';
 import { FORMATS } from '../exporters/index.mjs';
 import { attribution } from '../exporters/common.mjs';
@@ -53,17 +54,21 @@ export function deckPage(cfg, deck, manifest, { decks = [] } = {}) {
   const released = m.status === 'released';
   const assumed = m.assumedTerms || [];
   const prereq = m.prerequisites || [];
-  const check = (m.checks || [])[0];
+  // The latest check: decks gain new checks after release (last by date, then by position).
+  const check = (m.checks || []).map((c, i) => ({ c, i })).sort((x, y) => String(x.c.date || '').localeCompare(String(y.c.date || '')) || x.i - y.i).pop()?.c;
 
   // ── Head of the entry ────────────────────────────────────────────────────
   const facts = [
     ['Cards', `${n0(s.cards)} <small>${n0(s.core)} core</small>`],
     ['Primers', `${n0(s.primers)} <small>one per term</small>`],
     ['Topics', n0(s.topics.length)],
-    ['Source', esc(m.sourceShort || s.sources[0]?.title || '')],
-    ['Licence', esc(m.licence)],
     ['Checked', check ? esc(check.date) : '—'],
+    ['Source', esc(m.sourceShort || s.sources[0]?.title || ''), 'wide'],
   ];
+  const family = m.familyTitle || m.family;
+  const famHub = released && family; // a family has a hub only once it has a released deck
+  const glossary = hasGlossary(deck) ? { href: `${cfg.base}${glossaryPath(deck)}`, n: glossaryTerms(deck).length } : null;
+  const others = apkg ? 'Every other format' : `All ${plural(files.size, 'format')}`;
 
   const answerQ = `Will this deck teach me ${short} from zero?`;
   const answerV = prereq.length ? `Yes, once you know ${list(prereq)}.` : 'Yes.';
@@ -71,9 +76,9 @@ export function deckPage(cfg, deck, manifest, { decks = [] } = {}) {
   const answerFull = `${answerP} The build refuses a deck in which a card uses a term no earlier card has taught.${assumed.length ? ` The only words it takes as known are everyday ones: ${list(assumed)}.` : ''}`;
 
   const head = `
-${crumbs(cfg, [[m.familyTitle || m.family, ''], [short, `${m.slug}/`]])}
 <div class="entry-head">
-  <div class="meta-row"><span>Deck № ${String(m.number || 1).padStart(3, '0')}</span><span class="badge ${released ? 'b-released' : 'b-draft'}">${released ? 'Released' : 'Draft'}</span><span>${esc(m.familyTitle || m.family)}</span><span>v${esc(m.version)}${m.updated ? ` · updated ${esc(m.updated)}` : ''}</span></div>
+${crumbs(cfg, [...(famHub ? [[family, familyPath(family)]] : []), [short, `${m.slug}/`]])}
+  <div class="meta-row"><span>Deck № ${String(m.number || 1).padStart(3, '0')}</span><span class="badge ${released ? 'b-released' : 'b-draft'}">${released ? 'Released' : 'Draft'}</span>${famHub ? `<a href="${cfg.base}${esc(familyPath(family))}">${esc(family)}</a>` : family ? `<span>${esc(family)}</span>` : ''}<span>v${esc(m.version)}${m.updated ? ` · updated ${esc(m.updated)}` : ''}</span><span>${esc(m.licence)}</span></div>
   <h1>${esc(m.title)}</h1>
   <p class="entry-stmt">${esc(m.description || '')}</p>
   <div class="answer" id="answer">
@@ -81,10 +86,11 @@ ${crumbs(cfg, [[m.familyTitle || m.family, ''], [short, `${m.slug}/`]])}
     <div class="v">${esc(answerV)}</div>
     <p>${answerP}</p>
     ${kindBar(s.kinds, s.cards)}
-    ${released ? ((m.openReviews || []).length ? `<p class="draft-note">Every card checked against its source by an independent audit. Still to come: ${(m.openReviews).map(esc).join('; ')}.</p>` : '') : `<p class="draft-note"><span class="badge b-draft">Draft</span> Checked against its source; newcomer and expert review still to come.${(m.releaseBlockers || []).length ? ` Before release: ${(m.releaseBlockers).map(esc).join('; ')}.` : ''}</p>`}
-    <div class="dl">${apkg ? `<a class="btn btn-primary" href="${esc(apkg.file)}" download>${icon('download')} Download for Anki <small>${kb(apkg.bytes)}</small></a>` : ''}<a class="btn" href="#download">All ${n0(files.size)} formats</a><a class="btn" href="#try">${icon('browser')} Try it here</a></div>
+    <div class="dl">${apkg ? `<a class="btn btn-primary" href="${esc(apkg.file)}" download>${icon('download')} Download for Anki <small>.apkg · ${kb(apkg.bytes)}</small></a>` : ''}<a class="btn" href="#try">${icon('browser')} Try it here</a><a class="dl-more" href="#download">${others} →</a></div>
+    ${released ? ((m.openReviews || []).length ? `<p class="footnote">Every card has been checked against its source by an independent audit. Still to come: ${(m.openReviews).map(esc).join('; ')}.</p>` : '') : `<p class="footnote"><span class="badge b-draft">Draft</span> Checked against its source; newcomer and expert review still to come.${(m.releaseBlockers || []).length ? ` Before release: ${(m.releaseBlockers).map(esc).join('; ')}.` : ''}</p>`}
   </div>
-  <dl class="facts">${facts.map(([k, v]) => `<div class="fact"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
+  <dl class="facts">${facts.map(([k, v, w]) => `<div class="fact${w ? ` ${w}` : ''}"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
+  ${glossary ? `<p class="facts-more"><a class="link" href="${glossary.href}">Glossary: ${plural(glossary.n, 'term')} →</a></p>` : ''}
 </div>`;
 
   // ── 01 The path ─────────────────────────────────────────────────────────
@@ -214,18 +220,21 @@ ${check ? `<div class="checked"><h3>${icon('check')} What we checked</h3><p><str
   const changelog = (m.changelog || []).map((c) => `<li><span class="mono">${esc(c.version)} · ${esc(c.date)}</span><br>${esc(c.notes)}</li>`).join('');
   const aside = `
 <aside class="panel" aria-label="About this deck">
-  <div class="pcard"><h2>Get the deck</h2>${apkg ? `<a class="btn btn-primary" href="${esc(apkg.file)}" download>${icon('download')} Anki package <small>${kb(apkg.bytes)}</small></a>` : ''}<a class="btn" href="#download">Every other format</a><a class="btn" href="#try">${icon('browser')} Try it here</a></div>
+  <div class="pcard pc-get"><h2>Get the deck</h2>${apkg ? `<a class="btn btn-primary" href="${esc(apkg.file)}" download>${icon('download')} Anki package <small>${kb(apkg.bytes)}</small></a>` : ''}<a class="btn" href="#try">${icon('browser')} Try it here</a><a class="dl-more" href="#download">${others} →</a></div>
   <div class="pcard"><h2>Cite this deck</h2><p class="cite" id="cite-text">${esc(citeText)}</p><button class="copy-btn" type="button" data-copy-from="cite-text">Copy citation</button><span class="sh-said" role="status" aria-live="polite"></span></div>
   <div class="pcard"><h2>Pass it on</h2>${shareRow({ url, title: `${m.title}: free flashcards`, text: m.description })}</div>
-  <div class="pcard"><h2>Found a mistake?</h2><p>Quote the card and say what is wrong. It is checked against the source and fixed.</p><p style="margin-top:8px"><a class="link" href="${esc(m.reportURL)}">Report a card</a></p></div>
+  <div class="pcard"><h2>Found a mistake?</h2><p>Quote the card and say what is wrong. It is checked against the source and fixed.</p><p class="pc-more"><a class="link" href="${esc(m.reportURL)}">Report a card</a></p></div>
   ${changelog ? `<div class="pcard"><h2>Changelog</h2><ul>${changelog}</ul></div>` : ''}
 </aside>`;
 
-  const toc = `<nav class="toc" aria-label="On this page"><span class="label">On this page</span><ol>${SECTIONS.map(([id, l], i) => `<li><a href="#${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(l)}</a></li>`).join('')}</ol>${check ? `<p class="toc-foot">Checked ${esc(check.date)} against ${plural(s.sources.length, 'section')} of the source.</p>` : ''}</nav>`;
+  const toc = `<nav class="toc" aria-label="On this page"><span class="label">On this page</span><ol>${SECTIONS.map(([id, l], i) => `<li><a href="#${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(l)}</a></li>`).join('')}${glossary ? `<li><a class="toc-out" href="${glossary.href}"><span>→</span>Glossary</a></li>` : ''}</ol>${check ? `<p class="toc-foot">Checked ${esc(check.date)} against ${plural(s.sources.length, 'section')} of the source.</p>` : ''}</nav>`;
 
-  const body = `<div class="wrap-wide">
-${head}
+  // Phones: the two main actions stay in reach at the foot of the screen.
+  const actbar = `<div class="actbar" data-actbar>${apkg ? `<a class="btn btn-primary" href="${esc(apkg.file)}" download>${icon('download')} Download for Anki</a>` : `<a class="btn btn-primary" href="#download">${icon('download')} Download</a>`}<a class="btn" href="#try">${icon('browser')} Try it</a></div>`;
+
+  const body = `<div class="wrap">
 <div class="entry-grid">
+${head}
 ${toc}
 <article>
 ${path}${tryIt}${download}${time}${importSec}${method}${limits}${everyCard}${sources}${about}
@@ -233,7 +242,8 @@ ${path}${tryIt}${download}${time}${importSec}${method}${limits}${everyCard}${sou
 ${aside}
 </div>
 </div>
-${otherWays(cfg)}`;
+${otherWays(cfg)}
+${actbar}`;
 
   const graph = [
     {
@@ -259,7 +269,8 @@ ${otherWays(cfg)}`;
       '@type': 'BreadcrumbList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: cfg.brand, item: `${cfg.origin}${cfg.base}` },
-        { '@type': 'ListItem', position: 2, name: m.title, item: url },
+        ...(famHub ? [{ '@type': 'ListItem', position: 2, name: family, item: `${cfg.origin}${cfg.base}${familyPath(family)}` }] : []),
+        { '@type': 'ListItem', position: famHub ? 3 : 2, name: m.title, item: url },
       ],
     },
     {
@@ -270,9 +281,14 @@ ${otherWays(cfg)}`;
 
   const core = `${short} Flashcards: Free, Taught From Zero`;
   return page(cfg, {
-    title: `${core} | ${cfg.brand}`.length <= 60 ? `${core} | ${cfg.brand}` : core,
-    description: `Free ${short} flashcards that teach before they test: ${s.cards} sourced cards, ${s.primers} primers, for Anki, Quizlet, Brainscape, Mochi, Obsidian and print.`,
+    title: fit(60, `${core} | ${cfg.brand}`, core, `${short} Flashcards, Free | ${cfg.brand}`, `${short} Flashcards | ${cfg.brand}`, `${short} Flashcards`),
+    description: fit(158,
+      `Free ${short} flashcards that teach before they test: ${n0(s.cards)} sourced cards, ${n0(s.primers)} primers, for Anki, Quizlet, Brainscape, Mochi, Obsidian and print.`,
+      `Free ${short} flashcards that teach before they test: ${n0(s.cards)} sourced cards, ${n0(s.primers)} primers, for Anki, Quizlet and print.`,
+      `Free ${short} flashcards that teach before they test: ${n0(s.cards)} sourced cards, for Anki, Quizlet and print.`,
+      `Free ${short} flashcards: ${n0(s.cards)} sourced cards that teach before they test.`),
     path: `${m.slug}/`,
+    og: `og/${m.slug}.png`,
     body,
     graph,
     scripts: `<script src="${cfg.base}assets/study.js" defer></script>`,
