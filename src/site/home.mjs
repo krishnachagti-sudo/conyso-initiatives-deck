@@ -10,8 +10,12 @@ import { deckStats, cardParts, cardHTML as icard } from './deck-data.mjs';
 import { teachingTrio, trioHTML } from './visuals.mjs';
 import { slugify } from '../decks.mjs';
 import { FORMATS } from '../exporters/index.mjs';
+import { primerStats, loadCompare, scaleBars, sizeClaim, claimHead, pct } from './stats.mjs';
+import { scaleChart, growthChart, notJustSize } from './pages/numbers.mjs';
 
 const n0 = (n) => Number(n).toLocaleString('en-GB');
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const longDay = (iso) => { const [y, m, d] = String(iso).split('-').map(Number); return d ? `${d} ${MONTHS[m - 1]}` : ''; };
 const plural = (n, one, many = `${one}s`) => `${n0(n)} ${n === 1 ? one : many}`;
 // A hand-drawn arrow for margin notes: inline SVG, drawn in the note's colour.
 const ARROW = '<svg class="note-arrow" viewBox="0 0 60 40" aria-hidden="true"><path d="M4 6c14 2 30 6 38 16 3 4 5 8 6 13M40 30l8 6 4-10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -49,7 +53,7 @@ export function groupByFamily(decks) {
     .map(([title, ds]) => ({ title, decks: [...ds].sort((a, b) => name(a).localeCompare(name(b), 'en', { numeric: true })) }));
 }
 
-export function homePage(cfg, allDecks, { roadmap = 0, today = new Date().toISOString().slice(0, 10) } = {}) {
+export function homePage(cfg, allDecks, { roadmap = 0, today = new Date().toISOString().slice(0, 10), compare = loadCompare() } = {}) {
   // The home page shows released decks only (drafts keep their own noindex
   // pages); a build with no released deck, such as the test fixtures, shows all.
   const decks = released(allDecks);
@@ -60,7 +64,13 @@ export function homePage(cfg, allDecks, { roadmap = 0, today = new Date().toISOS
   const sources = new Set(stats.flatMap(({ s }) => s.sources.map((x) => x.url))).size;
   const families = groupByFamily(decks);
   const short = (d) => d.meta.shortTitle || d.meta.title;
+  // The last three words of a headline under the highlighter.
+  const hlLast = (t) => { const w = String(t).split(' '); return w.length > 4 ? `${esc(w.slice(0, -3).join(' '))} <span class="hl">${esc(w.slice(-3).join(' '))}</span>` : esc(t); };
   const deckUrl = (d) => `${cfg.base}${esc(d.meta.slug)}/`;
+  // The Primer as a whole (src/site/stats.mjs), and a size claim only when
+  // src/data/compare.json makes one: its wording is used as written.
+  const ps = primerStats(allDecks);
+  const claim = sizeClaim(compare, ps);
 
   // The hero's sample card and the teaching trio come from the largest deck
   // that has a full trio, so the picture is of a real, typical deck.
@@ -86,7 +96,7 @@ export function homePage(cfg, allDecks, { roadmap = 0, today = new Date().toISOS
 <section class="hero wrap" aria-labelledby="hero-h">
   <div class="hero-grid">
     <div class="hero-main">
-      <p class="eyebrow"><span data-count>${n0(decks.length)}</span> ${decks.length === 1 ? 'deck' : 'decks'} · <span data-count>${n0(cards)}</span> cards · free</p>
+      <p class="eyebrow"><span data-count>${n0(decks.length)}</span> ${decks.length === 1 ? 'deck' : 'decks'} · <span data-count>${n0(cards)}</span> cards · ${ps.families > 1 && !claim ? `${n0(ps.families)} subjects · ` : ''}${claim && claimHead(claim).length <= 72 ? esc(claimHead(claim).replace(/^The /, 'the ')) : 'free'}</p>
       <h1 id="hero-h"><span>Most exam flashcards are someone’s notes.</span><span class="l2"><span class="hl">Few name a source.</span></span><span class="l3">Ours explain each idea before they test it, and every card names its source.</span></h1>
       <form class="site-search" data-site-search action="${cfg.base}browse/" method="get" role="search">
         <label for="home-q" class="sr-only">Search the decks</label>
@@ -113,11 +123,32 @@ export function homePage(cfg, allDecks, { roadmap = 0, today = new Date().toISOS
   // ── 3 Trust strip ───────────────────────────────────────────────────────
   const trust = `
 <div class="wrap"><div class="trust">
-  <div><b class="big"><span class="hl-u" data-count>${n0(cards)}</span></b><span class="big-l">cards in ${plural(decks.length, 'deck')}</span></div>
+  <div><b class="big"><span class="hl-u" data-count>${n0(cards)}</span></b><span class="big-l">cards in ${plural(decks.length, 'deck')}</span>${ps.decks ? `<a class="mo-trust-more" href="${cfg.base}numbers/">The Primer in numbers →</a>` : ''}</div>
   <div><h3>Sourced</h3><p>Every card links the section of the source it was written from.</p></div>
   <div><h3>Explains first</h3><p>${n0(primers)} primer cards teach each term before any card tests it.</p></div>
   <div><h3>Free and open</h3><p>No account, no ads, no tracking. Licensed CC BY-SA 4.0.</p></div>
 </div></div>`;
+
+  // ── 3b Scale (playbook §3.3): the claim, its date, the bars, and why size
+  // is not the point. The bars appear only when compare.json is there.
+  const bars = scaleBars(compare, ps);
+  const g = ps.growth;
+  const scaleBand = ps.decks ? `
+<section class="band wrap mo-band" aria-labelledby="scale-h">
+  <div class="mo-band-grid${bars ? '' : ' no-bars'}">
+    <div class="mo-band-text">
+      <p class="eyebrow">The scale</p>
+      <h2 id="scale-h">${claim ? hlLast(claimHead(claim)) : pct(ps.sourced, ps.cards) === 100 ? `${n0(ps.cards)} cards, and <span class="hl">every one names its source.</span>` : `${n0(ps.cards)} cards, ${pct(ps.sourced, ps.cards)}% with a named source.`}</h2>
+      <p class="mo-date">counted <time datetime="${esc(compare?.counted || ps.counted)}">${esc(compare?.counted || ps.counted)}</time> · <a href="${cfg.base}numbers/#how">how we counted →</a></p>
+      <p class="mo-why">${notJustSize(cfg, ps)}</p>
+      <p class="mo-more"><a class="btn btn-ghost" href="${cfg.base}numbers/">${icon('steps')} The Primer in numbers</a></p>
+    </div>
+    <div class="mo-band-fig">
+      ${bars ? `<div class="mo-sheet">${scaleChart(cfg, bars)}</div>` : ''}
+      ${g.length ? `<div class="mo-grow taped"><p class="mo-grow-h"><b>Growing every week:</b> <span class="hl-u">+${plural(ps.recentDecks, 'deck')}</span> in the ${ps.sinceDays} days to ${esc(longDay(ps.counted))}</p>${growthChart(g, { mini: true, id: 'hgrowth' })}<p class="mo-grow-f">${n0(ps.recentCards)} cards added · <a href="${cfg.base}new/">What’s new →</a></p></div>` : ''}
+    </div>
+  </div>
+</section>` : '';
 
   // ── 4 How a deck teaches ────────────────────────────────────────────────
   const how = trio ? `
@@ -197,7 +228,7 @@ export function homePage(cfg, allDecks, { roadmap = 0, today = new Date().toISOS
       `Free flashcards for ${plural(decks.length, 'certification exam')}. Every idea explained before it is tested, every card sourced. For Anki, Quizlet and print.`),
     path: '',
     og: 'og/home.png',
-    body: `${heroBand}${cotd}${trust}${how}${research}${deckBand}${appsBand}${cta}${otherWays(cfg, '')}`,
+    body: `${heroBand}${cotd}${trust}${scaleBand}${how}${research}${deckBand}${appsBand}${cta}${otherWays(cfg, '')}`,
     graph: [{ '@type': 'WebSite', '@id': `${cfg.origin}${cfg.base}#website`, name: cfg.brand, url: `${cfg.origin}${cfg.base}`, inLanguage: 'en', publisher: { '@id': `${cfg.origin}${cfg.base}#organization` },
       potentialAction: { '@type': 'SearchAction', target: { '@type': 'EntryPoint', urlTemplate: `${cfg.origin}${cfg.base}browse/?q={q}` }, 'query-input': 'required name=q' } },
     { '@type': 'CollectionPage', name: cfg.brand, url: `${cfg.origin}${cfg.base}`, mainEntity: { '@type': 'ItemList', itemListElement: decks.map((d, i) => ({ '@type': 'ListItem', position: i + 1, url: `${cfg.origin}${cfg.base}${d.meta.slug}/`, name: d.meta.title })) } }],

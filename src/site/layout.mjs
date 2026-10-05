@@ -83,6 +83,7 @@ export const WAYS = [
   ['shelf/', 'Your shelf', 'The decks you saved and where you left off, kept in this browser'],
   ['method/', 'The science', 'The learning research behind every deck, and its limits'],
   ['formats/', 'Which file for my app?', 'Anki, Quizlet, Brainscape, Mochi, RemNote, Obsidian, Logseq, paper'],
+  ['numbers/', 'In numbers', 'How big the Primer is, how it is checked, and how fast it grows'],
 ];
 
 export function otherWays(cfg, current = null) {
@@ -271,7 +272,7 @@ ${body}
       <p class="foot-motto">One standard. Every certification.</p>
     </div>
     ${foot('Subjects', [['browse/', 'All decks'], ['which-deck/', 'Which deck should I start with?'], ...fams.map((f) => [f.path, f.title])], fams.length > 6 ? ' foot-fams' : '')}
-    ${foot('About', [['method/', 'The science'], ['method/#checks', 'How cards are checked'], ['formats/', 'Which file for my app?'], ['roadmap/', 'Roadmap: ask for an exam'], ['feed.xml', 'New decks (Atom feed)'], ['daily/archive/', 'Daily ten archive'], ['daily/feed.xml', 'Daily ten (Atom feed)'], ['llms.txt', 'llms.txt'], ['https://github.com/krishnachagti-sudo/conyso-initiatives-deck/issues/new?labels=card-report', 'Report a card']])}
+    ${foot('About', [['method/', 'The science'], ['method/#checks', 'How cards are checked'], ['numbers/', 'The Primer in numbers'], ['formats/', 'Which file for my app?'], ['roadmap/', 'Roadmap: ask for an exam'], ['feed.xml', 'New decks (Atom feed)'], ['daily/archive/', 'Daily ten archive'], ['daily/feed.xml', 'Daily ten (Atom feed)'], ['llms.txt', 'llms.txt'], ['https://github.com/krishnachagti-sudo/conyso-initiatives-deck/issues/new?labels=card-report', 'Report a card']])}
   </div>
   <div class="wrap foot-share"><span class="fs-lab">Know someone studying for an exam?</span>${shareRow({ live: true })}</div>
   <div class="wrap foot-rule"><button class="kbd-hint" type="button" data-kbd-open>Press <kbd>?</kbd> for keyboard shortcuts</button><span>Decks licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">CC BY-SA 4.0</a>. Independent: not affiliated with any exam body.</span><span>An initiative by <a href="https://conyso.com/">Conyso</a>.</span></div>

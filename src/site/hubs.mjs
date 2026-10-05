@@ -71,7 +71,8 @@ export function methodPage(cfg, allDecks) {
 <li><b>A newcomer</b><span>Someone new to the subject studies the cards in order.</span></li>
 <li><b>An expert</b><span>Someone qualified reviews the deck before release.</span></li>
 </ol>
-<p class="hint">${icon('alert')} “Draft” means the first two are done, not the last two. Drafts stay out of search results.</p></section>`,
+<p class="hint">${icon('alert')} “Draft” means the first two are done, not the last two. Drafts stay out of search results.</p>
+<p class="band-more"><a class="link" href="${cfg.base}numbers/#quality">Every audit and fix, counted: the Primer in numbers →</a></p></section>`,
       `<section id="ai"><h2>What part does AI play?</h2>
 <p>AI drafts cards from the cited source only; the audit and people decide what ships.</p></section>`,
     ],
