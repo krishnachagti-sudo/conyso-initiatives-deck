@@ -128,14 +128,30 @@ ${nets.map(([n, h]) => `<a class="sh-b" href="${esc(h)}" target="_blank" rel="no
 }
 
 /**
+/** The head link that advertises a page's Markdown twin (an absolute URL to its index.md). */
+export const markdownLink = (href) => `<link rel="alternate" type="text/markdown" href="${esc(href)}">`;
+
+/**
+ * Advertise a twin in an already rendered page, right after its canonical
+ * link. The build does this for every indexable page once it has written the
+ * page's index.md, so no page can point at a twin that does not exist.
+ */
+export function withMarkdownLink(html, href) {
+  if (html.includes('type="text/markdown"')) return html;
+  return html.replace(/(<link rel="canonical" href="[^"]*">)/, `$1\n${markdownLink(href)}`);
+}
+
+/**
  * @param {object} cfg site config (src/site/config.mjs)
  * @param {{title: string, description: string, path: string, body: string, graph?: object[],
  *   scripts?: string, robots?: string, active?: string, count?: number, og?: string,
  *   decks?: {slug: string, title: string, family?: string}[]}} o
  *   og is the share image's path under base (1200×630), default og/home.png.
  *   decks feeds the footer's family links; records may also be loaded decks.
+ *   markdown: true (or an absolute URL) adds the link to the page's Markdown
+ *   twin, <path>index.md; the build adds it to every indexable page anyway.
  */
-export function page(cfg, { title, description, path, body, graph = [], scripts = '', robots = 'index, follow, max-snippet:-1, max-image-preview:large', active, count, decks = [], og = 'og/home.png' }) {
+export function page(cfg, { title, description, path, body, graph = [], scripts = '', robots = 'index, follow, max-snippet:-1, max-image-preview:large', active, count, decks = [], og = 'og/home.png', markdown = false }) {
   const url = `${cfg.origin}${cfg.base}${path}`;
   if (cfg.preview) robots = 'noindex, nofollow'; // never let a preview host compete with the real one
   const asset = (p) => `${cfg.base}assets/${p}`;
@@ -156,7 +172,7 @@ export function page(cfg, { title, description, path, body, graph = [], scripts 
 <meta name="description" content="${d}">
 <meta name="robots" content="${robots}">
 <link rel="canonical" href="${esc(url)}">
-<meta property="og:site_name" content="${esc(cfg.brand)}">
+${markdown && !/noindex/.test(robots) ? `${markdownLink(markdown === true ? `${url}index.md` : markdown)}\n` : ''}<meta property="og:site_name" content="${esc(cfg.brand)}">
 <meta property="og:locale" content="en_GB">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${esc(url)}">

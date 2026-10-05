@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 
 import { loadDeck } from '../src/decks.mjs';
-import { deckPage } from '../src/site/deck-page.mjs';
+import { deckPage, studyJson } from '../src/site/deck-page.mjs';
 import { homePage, newThisWeek, groupByFamily, firstPublished } from '../src/site/home.mjs';
 import { slugify } from '../src/decks.mjs';
 import { familiesOf } from '../src/site/layout.mjs';
@@ -52,14 +52,15 @@ test('deck page: the answer box states counts the deck proves', () => {
   assert.match(html, /1 day to see every card/);
 });
 
-test('deck page: study data parses and cannot close its script tag', () => {
+test('deck page: study data is a separate study.json the page points to', () => {
   const d = deck();
   d.notes[0].front = 'Is </script><b>x</b> safe?';
   const html = deckPage(cfg, d, manifest);
-  const raw = html.match(/<script type="application\/json" id="study-data">([\s\S]*?)<\/script>/)[1];
-  assert.ok(!raw.includes('<'));
-  const data = JSON.parse(raw);
+  assert.match(html, /<div id="study-data" data-src="[^"]*\/study\.json" hidden><\/div>/);
+  assert.ok(!html.includes('application/json" id="study-data"'));
+  const data = JSON.parse(studyJson(d));
   assert.equal(data.length, 7);
+  assert.ok(!JSON.stringify(data).includes('</script>'));
   assert.deepEqual(Object.keys(data[0]).slice(0, 5), ['id', 'topic', 'kind', 'core', 'front']);
   assert.ok(data.every((c) => c.answer && c.sourceURL));
 });

@@ -66,9 +66,10 @@ export function homePage(cfg, allDecks, { roadmap = 0, today = new Date().toISOS
   const lead = byCards.find(({ deck }) => teachingTrio(deck)) || byCards[0];
   const trio = lead && teachingTrio(lead.deck);
   const heroCard = lead && lead.s.notes.filter((n) => n.kind === 'primer').map(cardParts)[0];
-  // Random deck: chosen from the build date so the link works without script;
-  // common.js picks again from data-decks on each press.
-  const pick = decks.length ? decks[[...today].reduce((a, c) => a + c.charCodeAt(0), 0) % decks.length] : null;
+  // Random deck: a fixed pick from the deck list so the link works without
+  // script; common.js picks again from data-decks on each press. Not from the
+  // build date: that would change the page, and so its lastmod, every day.
+  const pick = decks.length ? decks[[...decks.map((d) => d.meta.slug).join(' ')].reduce((a, c) => a + c.charCodeAt(0), 0) % decks.length] : null;
 
   // ── 1 Hero ──────────────────────────────────────────────────────────────
   const heroBand = `

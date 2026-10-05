@@ -15,6 +15,7 @@ import { attribution } from '../exporters/common.mjs';
 import { slugify } from '../decks.mjs';
 import { deckStats, cardParts, cardHTML, NEW_PER_DAY, REVIEWS_PER_NEW } from './deck-data.mjs';
 import { kindBar } from './visuals.mjs';
+import { LASTMOD_TOKEN } from '../../build/lastmod.mjs';
 
 const kb = (bytes) => (bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
 
@@ -44,6 +45,37 @@ const SECTIONS = [
   ['about', 'About'],
 ];
 
+/** The answer box, in words: the one question the page answers first. Shared with the Markdown twin. */
+export function deckAnswer(deck, s = deckStats(deck)) {
+  const m = deck.meta;
+  const short = m.shortTitle || m.title;
+  const prereq = m.prerequisites || [];
+  const assumed = m.assumedTerms || [];
+  const answerQ = `Will this deck teach me ${short} from zero?`;
+  const answerV = prereq.length ? `Yes, once you know ${list(prereq)}.` : 'Yes.';
+  const answerP = `${plural(s.primers, 'primer card')} explain all ${n0(s.terms.length)} of its terms, each before any card tests it.`;
+  const answerFull = `${answerP} The build refuses a deck in which a card uses a term no earlier card has taught.${assumed.length ? ` The only words it takes as known are everyday ones: ${list(assumed)}.` : ''}`;
+  return { answerQ, answerV, answerP, answerFull };
+}
+
+/** The "About this deck" questions and answers. Shared with the Markdown twin. */
+export function deckFaq(deck, answerFull = deckAnswer(deck).answerFull) {
+  const m = deck.meta;
+  return [
+    ['Will it teach me from zero?', answerFull],
+    ['Is this deck free?', `Yes. There is no account and no paywall. The deck is licensed ${m.licence}, so you may share and adapt it as long as you credit it and share alike.`],
+    ['Is it official?', 'No. It is an independent deck, written from the openly licensed source it cites, and it is not affiliated with, sponsored, endorsed or approved by any exam body or by the source’s authors.'],
+    ['Will a new version wipe my progress in Anki?', 'No. Every card keeps a permanent ID, so importing a newer version changes the cards in place and keeps their review history.'],
+    ['How were the cards made?', `Cards are drafted with AI assistance, only from the source they cite. A second, independent pass checks every card against that source, and every fix is recorded in the changelog. ${(m.openReviews || m.releaseBlockers || []).some((r) => /expert/.test(r)) ? 'A review by people who hold the certification is still to come, so if a card looks wrong, report it.' : 'If a card looks wrong, report it.'}`],
+    ['What if a card is wrong?', 'Report it with the link below. It is checked against its source and fixed, and the fix is listed in the changelog.'],
+  ];
+}
+
+/** The study widget's cards, written beside the deck page as study.json. */
+export function studyJson(deck) {
+  return JSON.stringify(deckStats(deck).notes.map(cardParts));
+}
+
 export function deckPage(cfg, deck, manifest, { decks = [] } = {}) {
   const m = deck.meta;
   const s = deckStats(deck);
@@ -52,8 +84,6 @@ export function deckPage(cfg, deck, manifest, { decks = [] } = {}) {
   const files = new Map((manifest?.files || []).map((f) => [f.format, f]));
   const apkg = files.get('apkg');
   const released = m.status === 'released';
-  const assumed = m.assumedTerms || [];
-  const prereq = m.prerequisites || [];
   // The latest check: decks gain new checks after release (last by date, then by position).
   const check = (m.checks || []).map((c, i) => ({ c, i })).sort((x, y) => String(x.c.date || '').localeCompare(String(y.c.date || '')) || x.i - y.i).pop()?.c;
 
@@ -70,10 +100,7 @@ export function deckPage(cfg, deck, manifest, { decks = [] } = {}) {
   const glossary = hasGlossary(deck) ? { href: `${cfg.base}${glossaryPath(deck)}`, n: glossaryTerms(deck).length } : null;
   const others = apkg ? 'Every other format' : `All ${plural(files.size, 'format')}`;
 
-  const answerQ = `Will this deck teach me ${short} from zero?`;
-  const answerV = prereq.length ? `Yes, once you know ${list(prereq)}.` : 'Yes.';
-  const answerP = `${plural(s.primers, 'primer card')} explain all ${n0(s.terms.length)} of its terms, each before any card tests it.`;
-  const answerFull = `${answerP} The build refuses a deck in which a card uses a term no earlier card has taught.${assumed.length ? ` The only words it takes as known are everyday ones: ${list(assumed)}.` : ''}`;
+  const { answerQ, answerV, answerP, answerFull } = deckAnswer(deck, s);
 
   const head = `
 <div class="entry-head">
@@ -110,7 +137,7 @@ ${crumbs(cfg, [...(famHub ? [[family, familyPath(family)]] : []), [short, `${m.s
 <p>Yes, right here. Say your answer before you turn the card.</p>
 <div id="study-app" class="study" hidden></div>
 <noscript><p>Trying the cards here needs JavaScript. Every card is also listed in full under “Every card”.</p></noscript>
-<script type="application/json" id="study-data">${JSON.stringify(studyData).replace(/</g, '\\u003c')}</script>
+<div id="study-data" data-src="${cfg.base}${esc(m.slug)}/study.json" hidden></div>
 </section>`;
 
   // ── 03 Download ─────────────────────────────────────────────────────────
@@ -201,14 +228,7 @@ ${check ? `<div class="checked"><h3>${icon('check')} What we checked</h3><p><str
 </section>`;
 
   // ── 10 About (FAQ) ──────────────────────────────────────────────────────
-  const faq = [
-    ['Will it teach me from zero?', answerFull],
-    ['Is this deck free?', `Yes. There is no account and no paywall. The deck is licensed ${m.licence}, so you may share and adapt it as long as you credit it and share alike.`],
-    ['Is it official?', 'No. It is an independent deck, written from the openly licensed source it cites, and it is not affiliated with, sponsored, endorsed or approved by any exam body or by the source’s authors.'],
-    ['Will a new version wipe my progress in Anki?', 'No. Every card keeps a permanent ID, so importing a newer version changes the cards in place and keeps their review history.'],
-    ['How were the cards made?', `Cards are drafted with AI assistance, only from the source they cite. A second, independent pass checks every card against that source, and every fix is recorded in the changelog. ${(m.openReviews || m.releaseBlockers || []).some((r) => /expert/.test(r)) ? 'A review by people who hold the certification is still to come, so if a card looks wrong, report it.' : 'If a card looks wrong, report it.'}`],
-    ['What if a card is wrong?', 'Report it with the link below. It is checked against its source and fixed, and the fix is listed in the changelog.'],
-  ];
+  const faq = deckFaq(deck, answerFull);
   const about = `
 <section class="sec faq" id="about" aria-labelledby="about-h"><span class="label">10 · About</span>
 <h2 id="about-h">About this deck</h2>
@@ -258,7 +278,9 @@ ${actbar}`;
       educationalLevel: 'Beginner',
       license: 'https://creativecommons.org/licenses/by-sa/4.0/',
       version: m.version,
-      ...(m.updated ? { dateModified: m.updated } : {}),
+      // A released page: the day its content last changed (build/lastmod.mjs).
+      // A draft is not in the sitemap or the manifest, so it keeps the deck's date.
+      ...(released ? { dateModified: LASTMOD_TOKEN } : m.updated ? { dateModified: m.updated } : {}),
       publisher: { '@id': siteOrgId(cfg) },
       author: { '@id': FOUNDER_ID },
       teaches: s.terms,

@@ -89,8 +89,10 @@
   // ---- Study mode ---------------------------------------------------------
   var app = document.getElementById('study-app');
   var dataEl = document.getElementById('study-data');
-  if (app && dataEl) {
-    all = JSON.parse(dataEl.textContent);
+  // The cards come from <slug>/study.json, fetched when the page loads, so the
+  // HTML does not carry every card twice (an inline block still works).
+  var startStudy = function (data) {
+    all = data;
     var ids = all.map(function (c) { return c.id; });
     var key = 'study:' + location.pathname;
     var saved = {};
@@ -302,6 +304,11 @@
       else if (e.key === '2' && state.shown) { e.preventDefault(); markCard('a'); }
     });
     render();
+  };
+  if (app && dataEl) {
+    if (dataEl.getAttribute('data-src')) {
+      fetch(dataEl.getAttribute('data-src')).then(function (r) { return r.json(); }).then(function (d) { startStudy(d); replan(); }).catch(function () {});
+    } else startStudy(JSON.parse(dataEl.textContent));
   }
 
   // ---- Workload planner ---------------------------------------------------

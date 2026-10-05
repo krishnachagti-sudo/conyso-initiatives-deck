@@ -3,9 +3,11 @@
 //
 //   node build/preflight.mjs [dist]
 //
-// Checks every HTML page for: one canonical on the configured host, parsable
-// JSON-LD, internal links and downloads that resolve to a built file, and no
-// private email address. The address is never written here: text that looks
+// Checks every HTML page for: one canonical on the configured host (the 404
+// page may have none), parsable JSON-LD, internal links and downloads that
+// resolve to a built file, a Markdown twin (index.md) wherever a page
+// advertises one, and no private email address. Every text file is checked
+// for a leaked lastmod token, and the sitemap for a <lastmod> on every URL. The address is never written here: text that looks
 // like an email is hashed and compared with a SHA-256 digest.
 
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
@@ -13,6 +15,7 @@ import { join, dirname, relative, posix } from 'node:path';
 import { createHash } from 'node:crypto';
 
 import { loadConfig } from '../src/site/config.mjs';
+import { LASTMOD_TOKEN } from './lastmod.mjs';
 
 const BLOCKED_EMAIL_SHA256 = ['a2be92ec35247c87b4c5be8ae113136df7f34b1f4b7ea6712a6108970fb837a4'];
 
@@ -33,13 +36,26 @@ export function preflight(dist, cfg, blocked = BLOCKED_EMAIL_SHA256) {
     for (const m of text.matchAll(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g)) {
       if (blocked.includes(sha(m[0]))) add(file, 'contains a private email address');
     }
+    if (text.includes(LASTMOD_TOKEN)) add(file, `contains the unstamped lastmod token ${LASTMOD_TOKEN}`);
+    if (relative(dist, file) === 'sitemap.xml') {
+      const missing = [...text.matchAll(/<url>([\s\S]*?)<\/url>/g)].filter((u) => !/<lastmod>\d{4}-\d\d-\d\d<\/lastmod>/.test(u[1])).length;
+      if (missing) add(file, `${missing} URL(s) without a <lastmod>`);
+    }
     if (!file.endsWith('.html')) continue;
 
     if (cfg.preview && !/<meta name="robots" content="noindex/.test(text)) add(file, 'a preview build must be noindex on every page');
 
     const canon = [...text.matchAll(/<link rel="canonical" href="([^"]+)"/g)].map((x) => x[1]);
-    if (canon.length !== 1) add(file, `has ${canon.length} canonical links, not 1`);
+    const notFound = relative(dist, file) === '404.html';
+    if (notFound && canon.length === 0) { /* a 404 page needs no canonical */ } else if (canon.length !== 1) add(file, `has ${canon.length} canonical links, not 1`);
     else if (!canon[0].startsWith(`${cfg.origin}${cfg.base}`)) add(file, `canonical ${canon[0]} is not under ${cfg.origin}${cfg.base}`);
+
+    // A page that advertises a Markdown twin must have one.
+    for (const m of text.matchAll(/<link rel="alternate" type="text\/markdown" href="([^"]+)"/g)) {
+      const href = m[1].replace(/&amp;/g, '&');
+      const local = href.startsWith(`${cfg.origin}${cfg.base}`) ? href.slice(`${cfg.origin}${cfg.base}`.length) : href.startsWith(cfg.base) ? href.slice(cfg.base.length) : null;
+      if (local === null || !existsSync(join(dist, decodeURIComponent(local)))) add(file, `advertises a Markdown twin that is missing: ${href}`);
+    }
 
     for (const m of text.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
       try { JSON.parse(m[1]); } catch { add(file, 'JSON-LD does not parse'); }
