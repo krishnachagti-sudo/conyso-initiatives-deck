@@ -103,3 +103,18 @@ export function cardHTML(p, { top = '', answer = true, imgPrefix = '' } = {}) {
     + (answer ? `<div class="ic-rule"></div><div class="ic-a">${p.image?.side === 'back' ? fig : ''}<p class="ic-ans">${lines(p.answer)}</p>${row('Why', p.why)}${row('Why not the others', p.whyNot)}${row('Example', p.example)}${row('Not to confuse', p.contrast)}${row('Valid as of', p.validAsOf)}${p.sourceURL ? `<p class="ic-src"><a href="${escH(p.sourceURL)}">Source: ${escH(p.source)} ↗</a></p>` : ''}</div>` : '')
     + '</div>';
 }
+
+/** A card's anchor on its deck page (shared contract 2): "c-" and the ID with dots as dashes. */
+export const cardAnchor = (id) => `c-${String(id).replace(/\./g, '-')}`;
+
+/**
+ * The address that opens a prefilled issue for one card, from the deck's
+ * reportURL: the title names the card. Script adds the card's front and a
+ * prompt to the body when the link is used, so the page itself stays small.
+ */
+export function cardReportURL(reportURL, id) {
+  if (!reportURL) return '';
+  const u = new URL(reportURL);
+  u.searchParams.set('title', `Card report: ${id}`);
+  return u.href;
+}

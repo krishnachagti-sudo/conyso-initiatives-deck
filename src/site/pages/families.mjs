@@ -6,7 +6,7 @@
 // The helpers at the top are shared by the other discovery pages (browse, new,
 // roadmap) and tested in test/discovery.test.mjs.
 
-import { esc, page, crumbs, otherWays, clamp } from '../layout.mjs';
+import { esc, page, crumbs, otherWays, clamp, icon } from '../layout.mjs';
 import { deckStats } from '../deck-data.mjs';
 import { slugify } from '../../decks.mjs';
 
@@ -182,13 +182,54 @@ html[data-theme="dark"] .dx-steps li::before{color:var(--accent)}
 @media(max-width:640px){.dx-item{padding:12px 14px 14px}.dx-item h3{font-size:19.5px}}
 </style>`;
 
+// ── the learner's own state on deck tiles (browse and family hubs) ─────────
+// Each tile carries a save toggle ([data-save-deck], wired by the shelf
+// script) and a progress line that MINE_SCRIPT fills from Primer.store when
+// this browser has studied the deck. Without script neither shows.
+export const TILE_STYLE = `<style>
+html:not(.js) main .dx-item.has-save{padding-right:18px}
+.fx-mine{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:8px}
+.fx-mine[hidden]{display:none}
+.fx-mine .pbar{flex:1 1 140px;max-width:220px;margin:0}
+.fx-ask{display:inline-grid;gap:2px;margin-top:20px;padding:12px 18px 13px;max-width:100%;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--margin);border-radius:var(--r);box-shadow:var(--e1);text-decoration:none;color:var(--ink)}
+.fx-ask b{font-family:var(--serif);font-weight:600;font-size:19px;line-height:1.3}
+.fx-ask b span{color:var(--accent)}
+.fx-ask:hover{box-shadow:var(--e2);border-color:var(--line-strong)}
+.fx-ask:hover b{text-decoration:underline;text-underline-offset:.18em;text-decoration-thickness:1px}
+</style>`;
+
+/**
+ * The save toggle on a deck tile, in the shelf script's own markup
+ * (.tile-save; it wires every [data-save-deck] and shows it once it runs).
+ */
+export const saveButton = (d) => `<button type="button" class="tile-save" data-save-deck="${esc(d.meta.slug)}" data-title="${esc(shortOf(d))}" aria-pressed="false" title="Save to your shelf" hidden>${icon('bookmark')}<span class="sr-only">Save to shelf: ${esc(shortOf(d))}</span></button>`;
+
+/** The learner's progress on a deck tile, filled in by MINE_SCRIPT (the due chip by the shelf script). */
+export const mineLine = (d) => `<div class="fx-mine dx-meta" data-fx-mine="${esc(d.meta.slug)}" hidden><span class="pbar" aria-hidden="true"><i style="width:0"></i></span><span class="fx-seen"></span><span class="due-chip" data-due="${esc(d.meta.slug)}"></span></div>`;
+
+/** A link to the deck finder, as a small index card. */
+export const finderPrompt = (cfg) => `<a class="fx-ask" href="${cfg.base}which-deck/"><span class="eyebrow">Not sure where to start?</span><b>Answer three questions and get one deck <span aria-hidden="true">→</span></b></a>`;
+
+/** Fills [data-fx-mine] from Primer.store.progress, and again after every store write. */
+export const MINE_SCRIPT = `<script>(function(){
+function fill(){var P=window.Primer&&window.Primer.store;if(!P||typeof P.progress!=='function')return;
+[].forEach.call(document.querySelectorAll('[data-fx-mine]'),function(el){var s=el.getAttribute('data-fx-mine'),p;try{p=P.progress(s)}catch(e){return}
+if(!p||!p.seen){el.hidden=true;return}var t=p.total||0,pct=t?Math.min(100,Math.round(p.seen/t*100)):0;
+el.querySelector('.pbar i').style.width=pct+'%';
+el.querySelector('.fx-seen').textContent='Seen '+Number(p.seen).toLocaleString('en-GB')+(t?' of '+Number(t).toLocaleString('en-GB'):'');
+el.hidden=false})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fill);else fill();
+window.addEventListener('primer:store',fill);
+})();</script>`;
+
 function deckItem(cfg, d, byslug, groupTitle) {
   const s = stats(d);
   const pre = (d.meta.prerequisiteDecks || []).map((sl) => byslug.get(sl)).filter(Boolean);
   const topics = s.topics.map((t) => `<a class="chip" href="${cfg.base}${esc(d.meta.slug)}/#t-${slugify(t.topic)}">${esc(t.topic)}</a>`).join('');
-  return `<li class="dx-item" id="d-${esc(d.meta.slug)}">
-<h3><a href="${cfg.base}${esc(d.meta.slug)}/">${esc(shortOf(d))}<small>${esc(d.meta.title)}</small></a></h3>
+  return `<li class="dx-item has-save" id="d-${esc(d.meta.slug)}">
+<h3><a href="${cfg.base}${esc(d.meta.slug)}/">${esc(shortOf(d))}<small>${esc(d.meta.title)}</small></a></h3>${saveButton(d)}
 <div class="dx-meta">${plural(s.cards, 'card')} · ${plural(s.primers, 'primer')} · ${plural(s.topics.length, 'topic')} · v${esc(d.meta.version)}</div>
+${mineLine(d)}
 ${pre.length ? `<p class="dx-pre">Builds on ${andList(pre.map((p) => `${deckLink(cfg, p)}${familyOf(p) !== groupTitle ? ` (${esc(familyOf(p))})` : ''}`))}.</p>` : ''}
 ${topics ? `<div class="chips" aria-label="Topics">${topics}</div>` : ''}
 </li>`;
@@ -208,9 +249,9 @@ function hubPage(cfg, group, all, byslug) {
   if (group.levels.length > 1) faq.push([`Which ${group.title} deck should I start with?`, `${andList(group.levels[0].map(shortOf))}. ${group.levels.length > 2 ? `Then follow the ${n0(group.levels.length)} steps above.` : 'The other decks build on it.'}`]);
   faq.push(['Are these decks free?', 'Yes. Every deck is free to download and study, licensed CC BY-SA 4.0, with no account and no tracking.']);
   faq.push(['Are the decks official?', 'No. They are independent, written from public sources, and not affiliated with or approved by any exam body.']);
-  const body = `${STYLE}<div class="wrap">
+  const body = `${STYLE}${TILE_STYLE}<div class="wrap">
 ${crumbs(cfg, [['Families', 'families/'], [fam, path]])}
-<div class="hub-head"><h1>${esc(fam)} flashcards</h1><p class="kicker">${plural(group.decks.length, 'deck')} · ${plural(group.cards, 'card')} · ${plural(group.primers, 'primer')}</p><p class="lead">${esc(intro)}</p></div>
+<div class="hub-head"><h1>${esc(fam)} flashcards</h1><p class="kicker">${plural(group.decks.length, 'deck')} · ${plural(group.cards, 'card')} · ${plural(group.primers, 'primer')}</p><p class="lead">${esc(intro)}</p>${group.decks.length > 1 ? finderPrompt(cfg) : ''}</div>
 <div class="hub-body prose">
 ${order}
 ${list}
@@ -226,7 +267,7 @@ ${otherWays(cfg, null)}`;
       .map((tail) => `Free ${group.title} flashcards: ${plural(group.decks.length, 'deck')} and ${plural(group.cards, 'card')} for ${andList(names.slice(0, k))}${names.length > k ? ' and more' : ''}.${tail}`))
       .find((d) => d.length <= 158) || clamp(`Free ${group.title} flashcards: ${plural(group.decks.length, 'deck')} and ${plural(group.cards, 'card')}.`, 158),
     path, body, active: 'browse', decks: all, count: all.reduce((a, d) => a + stats(d).cards, 0),
-    og: 'og/browse.png', scripts: searchScript(cfg),
+    og: 'og/browse.png', scripts: `${searchScript(cfg)}${MINE_SCRIPT}`,
     graph: [
       { '@type': 'CollectionPage', '@id': `${url}#page`, name: `${fam} flashcards`, url, description: intro, isPartOf: { '@id': `${cfg.origin}${cfg.base}#website` },
         mainEntity: { '@type': 'ItemList', numberOfItems: group.decks.length, itemListElement: group.decks.map((d, i) => ({ '@type': 'ListItem', position: i + 1, url: `${cfg.origin}${cfg.base}${d.meta.slug}/`, name: d.meta.title })) } },
@@ -247,7 +288,7 @@ function indexPage(cfg, groups, all) {
 ${crumbs(cfg, [['Families', 'families/']])}
 <div class="hub-head"><h1>Which subject are you studying?</h1><p class="kicker">${plural(groups.length, 'family', 'families')} · ${plural(decksN, 'deck')} · ${plural(cards, 'card')}</p><p class="lead">Every deck belongs to a family of related exams. Each family page lists its decks, what they cover and the order to take them in.</p></div>
 <ul class="dx-fams" style="margin-top:26px">${groups.map((g) => `<li><a class="dx-fam" href="${cfg.base}${g.path}"><b>${esc(titleCase(g.title))}</b><span class="dx-meta">${plural(g.decks.length, 'deck')} · ${plural(g.cards, 'card')}</span><span>${esc(andList(g.decks.map(shortOf)))}</span></a></li>`).join('')}</ul>
-<p style="margin-top:26px"><a class="link" href="${cfg.base}browse/">Search and filter every deck</a> · <a class="link" href="${cfg.base}roadmap/">The exams we plan next</a></p>
+<p style="margin-top:26px"><a class="link" href="${cfg.base}which-deck/">Which deck should I start with?</a> · <a class="link" href="${cfg.base}browse/">Search and filter every deck</a> · <a class="link" href="${cfg.base}roadmap/">The exams we plan next</a></p>
 </div>
 ${otherWays(cfg, null)}`;
   return page(cfg, {

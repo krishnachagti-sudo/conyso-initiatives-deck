@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 import { loadDeck } from '../src/decks.mjs';
-import { buildPool, poolCard, build, DAYS_AHEAD } from '../src/site/pages/daily.mjs';
+import { buildPool, poolCard, build, DAYS_AHEAD, FEED_DAYS, dailyFeed, archiveSections, deckLine, dateLong, xesc } from '../src/site/pages/daily.mjs';
 import * as D from '../src/assets/daily-core.js';
 const plain = (x) => JSON.parse(JSON.stringify(x)); // values from the vm realm
 const study = () => { const ctx = {}; vm.runInNewContext(readFileSync('src/assets/study.js', 'utf8'), ctx); return ctx.StudyKit; };
@@ -99,7 +99,7 @@ test('daily: pool cards stand alone, and the page has a no-script sample', async
 
   const cfg = { base: '/primer/', origin: 'https://conyso.com', brand: 'The Exam Primer' };
   const res = await build({ cfg, decks: [released] });
-  assert.deepEqual(res.urls, ['daily/']);
+  assert.deepEqual(res.urls, ['daily/', 'daily/archive/']);
   assert.ok(res.files['daily/pool.json']);
   const html = res.pages['daily/'];
   assert.match(html, /id="daily-app"[^>]*hidden/);
@@ -129,9 +129,10 @@ test('daily: the build\'s day files and the browser\'s own pick are the same ten
   const res = await build({ cfg, decks });
   const pool = JSON.parse(res.files['daily/pool.json']);
   const dayFiles = Object.keys(res.files).filter((f) => f.startsWith('daily/days/'));
-  assert.equal(dayFiles.length, DAYS_AHEAD + 1, 'the build date and 400 days after it');
-  const first = dayFiles.sort()[0].slice(11, 21);
-  assert.equal(first, new Date().toISOString().slice(0, 10));
+  const built = new Date().toISOString().slice(0, 10);
+  assert.equal(dayFiles.length, D.dayIndex(built) - D.dayIndex(D.LAUNCH) + DAYS_AHEAD + 1, 'every day from the launch to 400 days after the build date');
+  assert.equal(dayFiles.sort()[0].slice(11, 21), D.LAUNCH, 'past days too, from Daily #1');
+  const first = built;
   // The browser loads daily-core.js as its own module (import() in daily.js); load a
   // separate instance of the same file the way a browser would, from its source.
   const src = readFileSync('src/assets/daily-core.js', 'utf8');
@@ -146,4 +147,89 @@ test('daily: the build\'s day files and the browser\'s own pick are the same ten
   assert.match(js, /import\(new URL\('daily-core\.js'/, 'the browser uses the shared module');
   assert.doesNotMatch(js, /mulberry32|function pick/, 'and keeps no copy of the selection');
   assert.match(js, /daily\/days\//, 'it reads the day file first');
+});
+
+test('daily: ?day= plays a real past day, from the launch to today, and nothing else', () => {
+  assert.equal(D.replayDay('2026-10-04', '2026-10-20'), '2026-10-04', 'Daily #1');
+  assert.equal(D.replayDay('2026-10-20', '2026-10-20'), '2026-10-20', 'today itself');
+  assert.equal(D.replayDay('2026-10-21', '2026-10-20'), null, 'a day still to come stays unseen');
+  assert.equal(D.replayDay('2026-10-03', '2026-10-20'), null, 'before the launch');
+  for (const bad of ['', null, undefined, '2026-02-30', '2026-13-01', '2026-10-4', '2026-10-04x', '<script>']) assert.equal(D.replayDay(bad, '2026-10-20'), null, String(bad));
+  assert.deepEqual(D.pastDays('2026-10-06'), ['2026-10-06', '2026-10-05', '2026-10-04'], 'newest first, down to the launch');
+  assert.deepEqual(D.pastDays('2026-10-04'), ['2026-10-04']);
+  assert.deepEqual(D.pastDays('2026-11-02', '2026-10-31'), ['2026-11-02', '2026-11-01', '2026-10-31'], 'across a month');
+});
+
+// A small XML well-formedness check: every tag closed in order, attributes
+// quoted, entities known, one root. Enough to catch a feed a reader would reject.
+function wellFormed(xml) {
+  const body = xml.replace(/^<\?xml[^?]*\?>\s*/, '');
+  const stack = [];
+  let roots = 0;
+  const re = /<(\/?)([A-Za-z_][\w:.-]*)((?:\s+[\w:.-]+\s*=\s*(?:"[^"<]*"|'[^'<]*'))*)\s*(\/?)>|<!\[CDATA\[[\s\S]*?\]\]>|<!--[\s\S]*?-->|<|&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/g;
+  let m;
+  while ((m = re.exec(body))) {
+    if (m[0] === '<') throw new Error(`stray < at ${m.index}`);
+    if (m[0].startsWith('&')) throw new Error(`bad entity at ${m.index}: ${body.slice(m.index, m.index + 12)}`);
+    if (!m[2]) continue;
+    if (m[1]) { const open = stack.pop(); if (open !== m[2]) throw new Error(`</${m[2]}> closes <${open}>`); }
+    else if (!m[4]) { if (!stack.length) roots += 1; stack.push(m[2]); }
+    else if (!stack.length) roots += 1;
+  }
+  if (stack.length) throw new Error(`unclosed <${stack.pop()}>`);
+  if (roots !== 1) throw new Error(`${roots} root elements`);
+  return true;
+}
+
+test('daily: the archive lists every day from #1, and the Atom feed is well formed', async () => {
+  const deck = loadDeck('test/fixtures/decks/example');
+  const cfg = { base: '/primer/', origin: 'https://conyso.com', brand: 'The Exam Primer' };
+  const decks = ['a', 'b', 'c'].map((x, i) => ({ ...deck, meta: { ...deck.meta, slug: `${deck.meta.slug}-${x}`, shortTitle: `Deck <${x}> & co`, familyTitle: `F${i}`, status: 'released' } }));
+  const res = await build({ cfg, decks });
+  const built = new Date().toISOString().slice(0, 10);
+  const days = D.pastDays(built);
+
+  const archive = res.pages['daily/archive/'];
+  assert.ok(archive, 'the archive page');
+  for (const key of days) assert.ok(archive.includes(`href="/primer/daily/?day=${key}"`), `${key} is playable`);
+  assert.equal((archive.match(/<li class="pw-day/g) || []).length, days.length, 'one card a day');
+  assert.match(archive, new RegExp(`Daily #${D.dailyNumber(built)}<`), 'numbered');
+  assert.match(archive, /class="pw-day pinned" data-day="\d{4}-\d\d-\d\d"><div class="icard pw-card"><div class="ic-top"><span>Daily #\d+<\/span><b>Today/, 'today is pinned first');
+  assert.match(archive, /data-daily-archive data-built="\d{4}-\d\d-\d\d"/);
+  assert.match(archive, /Deck &lt;a&gt; &amp; co/, 'deck names escaped');
+  assert.doesNotMatch(archive, /—/, 'no em dashes');
+  assert.match(archive, /type="application\/atom\+xml"[^>]*href="\/primer\/daily\/feed\.xml"/, 'the feed is advertised');
+  assert.match(res.pages['daily/'], /type="application\/atom\+xml"[^>]*href="\/primer\/daily\/feed\.xml"/, 'on /daily/ too');
+  assert.match(res.pages['daily/'], /href="\/primer\/daily\/archive\/"/, '/daily/ links the archive');
+
+  const feed = res.files['daily/feed.xml'];
+  assert.ok(wellFormed(feed));
+  assert.throws(() => wellFormed(feed.replace('&amp;', '&')), /bad entity/, 'the checker catches a raw ampersand');
+  assert.throws(() => wellFormed(feed.replace('</entry>', '')), /closes|unclosed/, 'and a missing close tag');
+  assert.match(feed, /^<\?xml version="1\.0" encoding="utf-8"\?>\n<feed xmlns="http:\/\/www\.w3\.org\/2005\/Atom"/);
+  const entries = feed.match(/<entry>/g) || [];
+  assert.equal(entries.length, Math.min(30, days.length), 'the last 30 days at most');
+  assert.ok(feed.includes(`<id>https://conyso.com/primer/daily/?day=${built}</id>`), 'each entry links to its day');
+  assert.ok(feed.indexOf(`day=${built}`) < feed.indexOf(`day=${days[days.length - 1]}`) || days.length === 1, 'newest first');
+  // Each entry carries its day's ten questions (escaped HTML), and never the answers.
+  const today = JSON.parse(res.files[`daily/days/${built}.json`]);
+  const unescape = (s) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+  const content = unescape(feed.match(/<content type="html">([\s\S]*?)<\/content>/)[1]);
+  assert.equal((content.match(/<li>/g) || []).length, today.cards.length);
+  for (const c of today.cards) assert.ok(content.includes(xesc(c.q.split('\n')[0])), 'question front');
+  for (const c of today.cards) assert.ok(!content.includes(`<p>${xesc(c.a)}</p>`) || c.c, 'no answers');
+  assert.match(feed, /<updated>\d{4}-\d\d-\d\dT00:00:00Z<\/updated>/);
+
+  // Feed edge cases: escaping and a feed with more days than it shows.
+  const many = D.pastDays(D.addDays(D.LAUNCH, 44)).map((k) => ({ date: k, num: D.dailyNumber(k), decks: { x: { t: 'A & B' } }, cards: [{ d: 'x', t: 'T <1>', q: 'Is 1 < 2 & "so"?', a: 'yes', c: ['yes', 'no'], k: 0 }] }));
+  assert.ok(wellFormed(dailyFeed(cfg, many.slice(0, FEED_DAYS))));
+  assert.equal((dailyFeed(cfg, many.slice(0, FEED_DAYS)).match(/<entry>/g) || []).length, 30);
+  assert.equal(xesc('a\u0001b & <c>'), 'ab &amp; &lt;c&gt;', 'control characters are dropped');
+  assert.equal(deckLine({ decks: {}, cards: ['A', 'B', 'C', 'D', 'E', 'F'].map((n) => ({ d: n, n })) }), 'A, B, C and 3 more');
+  assert.equal(deckLine({ decks: {}, cards: ['A', 'B'].map((n) => ({ d: n, n })) }), 'A and B');
+  assert.equal(dateLong('2026-10-04'), '4 October 2026');
+  // Archive sections split by month.
+  const html = archiveSections(cfg, many.slice(0, 40), many[0].date);
+  assert.equal((html.match(/class="pw-month"/g) || []).length, 2, 'October and November');
+  assert.ok(html.indexOf('November 2026') < html.indexOf('October 2026'), 'newest month first');
 });

@@ -131,8 +131,8 @@ test('preflight: passes a clean build, catches broken links, bad canonicals and 
   for (const [p, f] of [['method', methodPage], ['formats', formatsPage]]) { mkdirSync(join(dist, p)); writeFileSync(join(dist, p, 'index.html'), f(cfg, [deck()])); }
   cpSync('src/assets', join(dist, 'assets'), { recursive: true });
   // Pages and files that page modules and the build write (not under test here).
-  for (const p of ['browse/', 'daily/', 'new/', 'roadmap/', ...familiesOf([deck()]).map((f) => f.path)]) { mkdirSync(join(dist, p), { recursive: true }); writeFileSync(join(dist, p, 'index.html'), '<link rel="canonical" href="https://conyso.com/decks/">'); }
-  for (const f of ['feed.xml', 'llms.txt', 'site.webmanifest', 'apple-touch-icon.png', 'assets/daily.js', 'assets/search.js']) writeFileSync(join(dist, f), '');
+  for (const p of ['browse/', 'daily/', 'daily/archive/', 'new/', 'roadmap/', 'shelf/', 'which-deck/', ...familiesOf([deck()]).map((f) => f.path)]) { mkdirSync(join(dist, p), { recursive: true }); writeFileSync(join(dist, p, 'index.html'), '<link rel="canonical" href="https://conyso.com/decks/">'); }
+  for (const f of ['feed.xml', 'daily/feed.xml', 'llms.txt', 'site.webmanifest', 'apple-touch-icon.png', 'assets/daily.js', 'assets/search.js']) writeFileSync(join(dist, f), '');
   assert.deepEqual(preflight(dist, cfg), []);
   rmSync(join(dist, 'assets', 'study.js'));
   assert.ok(preflight(dist, cfg).some((p) => p.message === 'broken link /decks/assets/study.js'));

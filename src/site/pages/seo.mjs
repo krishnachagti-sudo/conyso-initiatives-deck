@@ -47,21 +47,35 @@ Sitemap: ${cfg.origin}${cfg.base}sitemap.xml
 `;
 }
 
+/**
+ * The web app manifest: the site installs as an app (src/assets/sw.js keeps it
+ * working offline), scoped to base, in the desk's colour (--bg in site.css),
+ * with shortcuts to the daily ten and the reader's shelf.
+ */
 export function webManifest(cfg) {
   return JSON.stringify({
+    id: cfg.base,
     name: cfg.brand,
     short_name: cfg.brand.replace(/^The /, ''),
     description: 'Free flashcard decks for certification exams, all built to one standard.',
     lang: 'en-GB',
+    dir: 'ltr',
     start_url: cfg.base,
     scope: cfg.base,
-    display: 'minimal-ui',
+    display: 'standalone',
     background_color: '#e6dcc6',
     theme_color: '#e6dcc6',
+    categories: ['education'],
     icons: [
       { src: `${cfg.base}assets/icon.svg`, sizes: 'any', type: 'image/svg+xml' },
-      { src: `${cfg.base}icon-512.png`, sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+      { src: `${cfg.base}icon-192.png`, sizes: '192x192', type: 'image/png' },
+      { src: `${cfg.base}icon-512.png`, sizes: '512x512', type: 'image/png' },
+      { src: `${cfg.base}icon-512.png`, sizes: '512x512', type: 'image/png', purpose: 'maskable' },
       { src: `${cfg.base}apple-touch-icon.png`, sizes: '180x180', type: 'image/png' },
+    ],
+    shortcuts: [
+      { name: 'The daily ten', short_name: 'Daily ten', description: 'Ten questions, the same ten for everyone today', url: `${cfg.base}daily/`, icons: [{ src: `${cfg.base}icon-192.png`, sizes: '192x192', type: 'image/png' }] },
+      { name: 'My shelf', short_name: 'My shelf', description: 'The decks you have saved', url: `${cfg.base}shelf/`, icons: [{ src: `${cfg.base}icon-192.png`, sizes: '192x192', type: 'image/png' }] },
     ],
   }, null, 2) + '\n';
 }
@@ -138,7 +152,7 @@ export function drawImages(out, jobs, { icons = true } = {}) {
     svg: join(ROOT, 'src/assets/icon.svg'),
     jobs: [
       ...jobs.map(({ file, ...j }) => ({ ...j, out: resolve(out, file) })),
-      ...(icons ? [{ kind: 'icon', size: 512, out: resolve(out, 'icon-512.png') }, { kind: 'icon', size: 180, out: resolve(out, 'apple-touch-icon.png') }] : []),
+      ...(icons ? [512, 192, 180].map((size) => ({ kind: 'icon', size, out: resolve(out, size === 180 ? 'apple-touch-icon.png' : `icon-${size}.png`) })) : []),
     ],
   };
   execFileSync(py, [join(ROOT, 'build/og.py')], { input: JSON.stringify(spec), stdio: ['pipe', 'inherit', 'inherit'] });

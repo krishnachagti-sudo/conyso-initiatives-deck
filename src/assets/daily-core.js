@@ -123,3 +123,22 @@ export const clock = (ms) => {
   const pad = (x) => String(x).padStart(2, '0');
   return `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`;
 };
+
+/**
+ * The day a ?day= address asks for, or null when it is not one to play: it must
+ * be a real date written YYYY-MM-DD, on or after the launch, and not after today
+ * (the ten for days still to come stay unseen).
+ */
+export function replayDay(param, today) {
+  if (!param || !/^\d{4}-\d\d-\d\d$/.test(param)) return null;
+  if (keyOfIndex(dayIndex(param)) !== param) return null; // 2026-02-30 and the like
+  if (dayIndex(param) < dayIndex(LAUNCH) || dayIndex(param) > dayIndex(today)) return null;
+  return param;
+}
+
+/** Every day from the launch to `to`, newest first. */
+export function pastDays(to, from = LAUNCH) {
+  const out = [];
+  for (let i = dayIndex(to); i >= dayIndex(from); i--) out.push(keyOfIndex(i));
+  return out;
+}

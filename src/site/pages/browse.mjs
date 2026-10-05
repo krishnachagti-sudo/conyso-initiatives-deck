@@ -6,7 +6,15 @@
 // also matches the terms each deck's primers teach.
 
 import { esc, page, crumbs, otherWays } from '../layout.mjs';
-import { STYLE, n0, plural, releasedDecks, familyGroups, shortOf, familyOf, stats, coversLine, firstDate, titleCase, familyPath, searchScript } from './families.mjs';
+import { STYLE, TILE_STYLE, MINE_SCRIPT, saveButton, mineLine, finderPrompt, n0, plural, releasedDecks, familyGroups, shortOf, familyOf, stats, coversLine, firstDate, titleCase, familyPath, searchScript } from './families.mjs';
+
+/**
+ * The same folding as search.js: lower case, no accents or punctuation,
+ * hyphens and slashes as spaces, Roman II and III as digits.
+ */
+export const normText = (s) => String(s || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+  .replace(/[\u2018\u2019'"\u201c\u201d?!.,;:()[\]{}\u2013\u2014/_-]+/g, ' ')
+  .replace(/\biii\b/g, '3').replace(/\bii\b/g, '2').replace(/\s+/g, ' ').trim();
 
 /**
  * The site search index: one record per released deck with its topics and the
@@ -49,10 +57,11 @@ const CHIP_STYLE = `<style>
 function item(cfg, d) {
   const s = stats(d);
   const topics = s.topics.map((t) => t.topic);
-  const text = [d.meta.title, shortOf(d), familyOf(d), d.meta.slug, ...topics].join(' ').toLowerCase();
-  return `<li class="dx-item" data-slug="${esc(d.meta.slug)}" data-family="${esc(familyOf(d))}" data-cards="${s.cards}" data-date="${esc(firstDate(d))}" data-name="${esc(shortOf(d).toLowerCase())}" data-text="${esc(text)}">
-<h3><a href="${cfg.base}${esc(d.meta.slug)}/">${esc(shortOf(d))}<small>${esc(d.meta.title)}</small></a></h3>
+  const text = normText([d.meta.title, shortOf(d), familyOf(d), d.meta.slug, ...topics].join(' '));
+  return `<li class="dx-item has-save" data-slug="${esc(d.meta.slug)}" data-family="${esc(familyOf(d))}" data-cards="${s.cards}" data-date="${esc(firstDate(d))}" data-name="${esc(shortOf(d).toLowerCase())}" data-text="${esc(text)}">
+<h3><a href="${cfg.base}${esc(d.meta.slug)}/">${esc(shortOf(d))}<small>${esc(d.meta.title)}</small></a></h3>${saveButton(d)}
 <div class="dx-meta"><a href="${cfg.base}${familyPath(familyOf(d))}">${esc(familyOf(d))}</a> · ${plural(s.cards, 'card')} · ${plural(s.primers, 'primer')} · ${plural(topics.length, 'topic')}</div>
+${mineLine(d)}
 <p>${esc(coversLine(d))}</p>
 </li>`;
 }
@@ -67,22 +76,30 @@ tools.hidden=false;
 var params=new URLSearchParams(location.search);q.value=params.get('q')||'';
 if(params.get('family'))fam=params.get('family');
 if(params.get('sort'))sort.value=params.get('sort');
-function norm(s){return String(s||'').toLowerCase().replace(/^\\s*(what|who|which)\\s+(is|are|was|were)\\s+(an?|the)?\\s*/,'').replace(/[?!.,;:"\\u201c\\u201d]+/g,' ').replace(/\\s+/g,' ').trim()}
-function apply(push){
-  var words=norm(q.value).split(' ').filter(Boolean),shown=0;
+function fold(s){return String(s||'').toLowerCase().normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').replace(/[\\u2018\\u2019'"\\u201c\\u201d?!.,;:()[\\]{}\\u2013\\u2014/_-]+/g,' ').replace(/\\biii\\b/g,'3').replace(/\\bii\\b/g,'2').replace(/\\s+/g,' ').trim()}
+function norm(s){return fold(s).replace(/^(what|who|which|how) (is|are|was|were|does|do) /,'').replace(/^(an?|the) /,'')}
+var core=null,fixedQ='';
+function match(words){
+  var shown=0;
   items.forEach(function(li){
-    var hay=li.getAttribute('data-text'),hit='';
+    var hay=li.getAttribute('data-text'),sq=hay.replace(/ /g,''),hit='';
     var ok=!fam||li.getAttribute('data-family')===fam;
     if(ok&&words.length){
-      var all=words.every(function(w){return hay.indexOf(w)>-1});
+      var all=words.every(function(w){return hay.indexOf(w)>-1||sq.indexOf(w)>-1});
       if(!all){var t=terms[li.getAttribute('data-slug')]||[],m=null;
-        for(var i=0;i<t.length&&!m;i++){var tl=t[i].toLowerCase();if(words.every(function(w){return tl.indexOf(w)>-1}))m=t[i]}
+        for(var i=0;i<t.length&&!m;i++){var tl=t[i][1];if(words.every(function(w){return tl.indexOf(w)>-1}))m=t[i][0]}
         if(m)hit=m;else ok=false}
     }
     var h=li.querySelector('.dx-hit');
     if(hit){if(!h){h=document.createElement('p');h.className='dx-hit';li.appendChild(h)}h.textContent='Teaches \\u201c'+hit+'\\u201d'}else if(h)h.remove();
     li.hidden=!ok;if(ok)shown++;
   });
+  return shown;
+}
+function apply(push){
+  var words=norm(q.value).split(' ').filter(Boolean),shown=match(words);fixedQ='';
+  // Nothing found: try the nearest words the index knows ("kubernets" finds Kubernetes).
+  if(!shown&&words.length&&core){var f=core.search(core.items,q.value).fixed;if(f){shown=match(f.split(' '));if(shown)fixedQ=f}}
   var mode=sort.value;
   if(mode==='az'){
     items.forEach(function(li){var g=root.querySelector('.dx-group[data-family="'+CSS.escape(li.getAttribute('data-family'))+'"] ul');if(li.parentNode!==g)g.appendChild(li)});
@@ -95,14 +112,15 @@ function apply(push){
   }
   chips.forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-family')===fam))});
   none.hidden=shown>0;
-  count.textContent=shown===total?'Showing all '+total+' decks':'Showing '+shown+' of '+total+' decks';
+  count.textContent=(shown===total?'Showing all '+total+' decks':'Showing '+shown+' of '+total+' decks')+(fixedQ?', matching \\u201c'+fixedQ+'\\u201d':'');
   if(push){var p=new URLSearchParams();if(q.value.trim())p.set('q',q.value.trim());if(fam)p.set('family',fam);if(sort.value!=='az')p.set('sort',sort.value);var s=p.toString();history.replaceState(null,'',location.pathname+(s?'?'+s:''))}
 }
 chips.forEach(function(b){b.addEventListener('click',function(){fam=b.getAttribute('data-family');apply(true)})});
 q.addEventListener('input',function(){apply(true)});sort.addEventListener('change',function(){apply(true)});
 tools.addEventListener('submit',function(e){e.preventDefault();apply(true)});
 apply(false);
-fetch('${base}search-index.json').then(function(r){return r.json()}).then(function(ix){ix.decks.forEach(function(d){var t=[];d.topics.forEach(function(x){t.push(x[0]);t.push.apply(t,x[1])});terms[d.slug]=t});apply(false)}).catch(function(){});
+fetch('${base}search-index.json').then(function(r){return r.json()}).then(function(ix){ix.decks.forEach(function(d){var t=[];d.topics.forEach(function(x){t.push([x[0],fold(x[0])]);x[1].forEach(function(y){t.push([y,fold(y)])})});terms[d.slug]=t});
+  var c=window.__siteSearchCore;if(c){core={search:c.search,items:c.prepare(ix)}}apply(false)}).catch(function(){});
 })();</script>`;
 
 export async function build({ cfg, decks }) {
@@ -110,9 +128,9 @@ export async function build({ cfg, decks }) {
   const groups = familyGroups(all);
   const cards = groups.reduce((a, g) => a + g.cards, 0);
   const url = `${cfg.origin}${cfg.base}browse/`;
-  const body = `${STYLE}${CHIP_STYLE}<div class="wrap">
+  const body = `${STYLE}${TILE_STYLE}${CHIP_STYLE}<div class="wrap">
 ${crumbs(cfg, [['Browse', 'browse/']])}
-<div class="hub-head"><h1>Every deck</h1><p class="kicker">${plural(all.length, 'deck')} · ${plural(cards, 'card')} · ${plural(groups.length, 'family', 'families')}</p><p class="lead">Every released deck, grouped by family. Each one explains its ideas before it tests them and cites a source on every card.</p></div>
+<div class="hub-head"><h1>Every deck</h1><p class="kicker">${plural(all.length, 'deck')} · ${plural(cards, 'card')} · ${plural(groups.length, 'family', 'families')}</p><p class="lead">Every released deck, grouped by family. Each one explains its ideas before it tests them and cites a source on every card.</p>${finderPrompt(cfg)}</div>
 <form class="dx-tools" id="dx-tools" role="search" action="${cfg.base}browse/" method="get" hidden>
 <div class="dx-row"><label for="dx-q">Filter</label><input class="dx-q" id="dx-q" type="search" name="q" autocomplete="off" placeholder="An exam, a code or a term, such as Sprint Goal"><label for="dx-sort">Sort</label><select class="dx-sort" id="dx-sort" name="sort"><option value="az">A to Z</option><option value="cards">Most cards</option><option value="new">Newest</option></select></div>
 <div class="dx-chips" id="dx-chips" role="group" aria-label="Family"><button type="button" data-family="" aria-pressed="true">All</button>${groups.map((g) => `<button type="button" data-family="${esc(g.title)}" aria-pressed="false">${esc(g.title)} <span class="dx-sr">(${plural(g.decks.length, 'deck')})</span></button>`).join('')}</div>
@@ -124,14 +142,14 @@ ${groups.map((g) => `<section class="dx-group" data-family="${esc(g.title)}" ari
 <ul class="dx-list dx-flat" id="dx-flat" aria-label="Decks" hidden></ul>
 <p class="dx-none" id="dx-none" hidden>No deck matches. <a href="${cfg.base}roadmap/">See the exams we plan next, or ask for one.</a></p>
 </div>
-<p style="margin-top:28px"><a class="link" href="${cfg.base}families/">Every family</a> · <a class="link" href="${cfg.base}new/">New decks</a> · <a class="link" href="${cfg.base}roadmap/">Ask for an exam</a></p>
+<p style="margin-top:28px"><a class="link" href="${cfg.base}which-deck/">Which deck should I start with?</a> · <a class="link" href="${cfg.base}families/">Every family</a> · <a class="link" href="${cfg.base}new/">New decks</a> · <a class="link" href="${cfg.base}roadmap/">Ask for an exam</a></p>
 </div>
 ${otherWays(cfg, 'browse/')}`;
   const html = page(cfg, {
     title: `All Certification Flashcard Decks | ${cfg.brand}`,
     description: `Browse ${plural(all.length, 'free flashcard deck')} with ${n0(cards)} cards across ${plural(groups.length, 'family', 'families')}. Filter by family, sort by size or date, or search for an exam or a term.`,
     path: 'browse/', body, active: 'browse', decks: all, count: cards, og: 'og/browse.png',
-    scripts: `${SCRIPT(cfg.base)}${searchScript(cfg)}`,
+    scripts: `${SCRIPT(cfg.base)}${searchScript(cfg)}${MINE_SCRIPT}`,
     graph: [{ '@type': 'CollectionPage', '@id': `${url}#page`, name: 'Every deck', url, isPartOf: { '@id': `${cfg.origin}${cfg.base}#website` },
       mainEntity: { '@type': 'ItemList', numberOfItems: all.length, itemListElement: all.map((d, i) => ({ '@type': 'ListItem', position: i + 1, url: `${cfg.origin}${cfg.base}${d.meta.slug}/`, name: d.meta.title })) } },
     { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: cfg.brand, item: `${cfg.origin}${cfg.base}` }, { '@type': 'ListItem', position: 2, name: 'Browse', item: url }] }],

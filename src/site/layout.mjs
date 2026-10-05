@@ -50,6 +50,13 @@ const ICONS = {
   print: '<path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="7" y="14" width="10" height="7"/>',
   arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   up: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+  bookmark: '<path d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4.2L6 21V4.5a1 1 0 0 1 1-1z"/>',
+  type: '<path d="M3 19 8 5l5 14M4.8 14h6.4"/><path d="M15.5 10.5a3 3 0 0 1 5.5 1.6V19M21 15.2c-1-.9-5.5-1.2-5.5 1.4 0 2.6 4.4 2.7 5.5.4"/>',
+  keyboard: '<rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M7.5 14h9"/>',
+  phone: '<rect x="6.5" y="2.5" width="11" height="19" rx="2"/><path d="M11 18.5h2"/>',
+  play: '<path d="M7 4.5v15l12.5-7.5z"/>',
+  flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  focus: '<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="12" r="3"/>',
 };
 export const icon = (name, cls = 'i') => `<svg class="${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const sprite = () => `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${Object.entries(ICONS).map(([k, p]) => `<symbol id="i-${k}" viewBox="0 0 24 24">${p}</symbol>`).join('')}</svg>`;
@@ -62,6 +69,7 @@ export const NAV = [
   ['browse', 'browse/', 'All decks'],
   ['daily', 'daily/', 'Daily'],
   ['new', 'new/', 'New'],
+  ['shelf', 'shelf/', 'Shelf'],
   ['method', 'method/', 'The science'],
   ['formats', 'formats/', 'Which file?'],
 ];
@@ -69,8 +77,10 @@ export const NAV = [
 /** The ways into the site, for the band at the foot of every page. */
 export const WAYS = [
   ['browse/', 'All decks', 'Search and filter every deck, by subject'],
+  ['which-deck/', 'Which deck?', 'A few questions, and the deck to start with'],
   ['daily/', 'Today’s ten', 'Ten questions, the same ten for everyone today'],
   ['new/', 'New this week', 'The decks added most recently'],
+  ['shelf/', 'Your shelf', 'The decks you saved and where you left off, kept in this browser'],
   ['method/', 'The science', 'The learning research behind every deck, and its limits'],
   ['formats/', 'Which file for my app?', 'Anki, Quizlet, Brainscape, Mochi, RemNote, Obsidian, Logseq, paper'],
 ];
@@ -128,6 +138,41 @@ ${nets.map(([n, h]) => `<a class="sh-b" href="${esc(h)}" target="_blank" rel="no
 }
 
 /**
+ * The reading settings, a card that drops from the masthead (common.js opens
+ * it; store.js keeps the choices and sets them on <html>). Hidden, with its
+ * button, until script is running: without script there is nothing to set.
+ */
+export function settingsPanel() {
+  const seg = (name, legend, opts) => `<fieldset class="st-set"><legend>${legend}</legend><div class="seg">${opts.map(([v, l, extra = '']) => `<label${extra}><input type="radio" name="st-${name}" value="${v}"><span>${l}</span></label>`).join('')}</div></fieldset>`;
+  return `<div class="settings" id="settings" role="dialog" aria-labelledby="settings-h" hidden>
+<div class="st-top"><h2 id="settings-h">Reading settings</h2><button class="st-x" type="button" data-settings-close aria-label="Close reading settings">${icon('close')}</button></div>
+${seg('text', 'Text size', [['s', 'A<span class="sr-only"> small</span>', ' class="ts-s"'], ['m', 'A<span class="sr-only"> standard</span>', ' class="ts-m"'], ['l', 'A<span class="sr-only"> large</span>', ' class="ts-l"'], ['xl', 'A<span class="sr-only"> largest</span>', ' class="ts-xl"']])}
+${seg('font', 'Typeface', [['default', 'Standard'], ['readable', 'Readable']])}
+${seg('contrast', 'Contrast', [['normal', 'Standard'], ['high', 'High']])}
+<label class="st-focus"><input type="checkbox" role="switch" name="st-focus"><span class="sw" aria-hidden="true"></span><span><b>Focus mode</b><small>Only the study cards and today’s ten, nothing around them.</small></span></label>
+<p class="st-foot"><span>Kept in this browser only.</span><button type="button" data-settings-reset>Reset</button></p>
+</div>`;
+}
+
+/** The keyboard shortcuts sheet (contract 3), opened with "?" by common.js. */
+export function shortcutsSheet() {
+  const k = (...keys) => keys.map((x) => `<kbd>${x}</kbd>`).join('<i>then</i>');
+  const rows = [
+    [`${k('/')}<i>or</i>${k('Ctrl')}<i>+</i>${k('K')}`, 'Search the decks'],
+    [k('?'), 'Show these shortcuts'],
+    [k('g', 'h'), 'Home'],
+    [k('g', 'b'), 'All decks'],
+    [k('g', 'd'), 'Today’s ten'],
+    [k('g', 's'), 'Your shelf'],
+    [k('Esc'), 'Close a sheet or panel'],
+  ];
+  return `<dialog class="kbd-sheet" id="kbd" aria-labelledby="kbd-h">
+<div class="ks-top"><h2 id="kbd-h">Keyboard shortcuts</h2><form method="dialog"><button class="st-x" aria-label="Close keyboard shortcuts">${icon('close')}</button></form></div>
+<dl class="ks-list">${rows.map(([keys, what]) => `<div><dt>${keys}</dt><dd>${what}</dd></div>`).join('')}</dl>
+<p class="ks-note">The study cards and today’s ten have keys of their own, shown beneath them. On a Mac, ${'<kbd>⌘</kbd>'} works in place of Ctrl.</p>
+</dialog>`;
+}
+
 /** The head link that advertises a page's Markdown twin (an absolute URL to its index.md). */
 export const markdownLink = (href) => `<link rel="alternate" type="text/markdown" href="${esc(href)}">`;
 
@@ -158,7 +203,7 @@ export function page(cfg, { title, description, path, body, graph = [], scripts 
   const t = esc(clamp(title, 60));
   const d = esc(clamp(description, 158));
   const image = /^https?:/.test(og) ? og : `${cfg.origin}${cfg.base}${String(og).replace(/^\/+/, '')}`;
-  const nav = NAV.map(([k, p, l]) => `<a href="${cfg.base}${p}"${k === active ? ' class="on" aria-current="page"' : ''}>${l}</a>`).join('');
+  const nav = NAV.map(([k, p, l]) => `<a href="${cfg.base}${p}"${k === active ? ' class="on" aria-current="page"' : ''}>${l}${k === 'shelf' ? '<span class="nav-n" data-shelf-count></span>' : ''}</a>`).join('');
   const link = (p, l) => `<a href="${/^(https?:|mailto:)/.test(p) ? p : cfg.base + p}">${esc(l)}</a>`;
   const foot = (h, links, cls = '') => `<nav class="foot-col${cls}" aria-label="${esc(h)}"><h2>${esc(h)}</h2>${links.map(([p, l]) => link(p, l)).join('')}</nav>`;
   const fams = familiesOf(decks);
@@ -195,7 +240,7 @@ ${markdown && !/noindex/.test(robots) ? `${markdownLink(markdown === true ? `${u
 <link rel="preload" href="${asset('fonts/fraunces-latin-wght-normal.woff2')}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="${asset('fonts/jetbrains-mono-latin-400-normal.woff2')}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="${asset('site.css')}">
-<script>document.documentElement.classList.add('js');try{var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
+<script>(function(h){h.classList.add('js');try{var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme: dark)').matches))h.dataset.theme='dark';var o=JSON.parse(localStorage.getItem('primer:v1:settings')||'{}');if(o.textSize)h.dataset.text=o.textSize;if(o.font)h.dataset.font=o.font;if(o.contrast)h.dataset.contrast=o.contrast;if(o.focus===true)h.dataset.focus='on'}catch(e){}})(document.documentElement)</script>
 ${jsonLd([siteOrg(cfg), conysoOrg(), founderNode(), ...(graph.some((n) => n['@type'] === 'WebSite') ? [] : [{ '@type': 'WebSite', '@id': `${cfg.origin}${cfg.base}#website`, name: cfg.brand, url: `${cfg.origin}${cfg.base}`, inLanguage: 'en', publisher: { '@id': `${cfg.origin}${cfg.base}#organization` } }]), ...graph])}
 </head>
 <body>
@@ -208,7 +253,9 @@ ${sprite()}
     <nav class="links" id="primary-nav" aria-label="Primary">${nav}</nav>
     <div class="right">
       ${count != null ? `<a class="count" href="${cfg.base}browse/"><span class="count-n">${count.toLocaleString('en-GB')}</span><span class="count-l">cards</span></a>` : ''}
+      <button class="icon-btn" id="settings-btn" type="button" aria-label="Reading settings" aria-expanded="false" aria-controls="settings" hidden>${icon('type')}</button>
       <button class="icon-btn" id="theme" type="button" aria-label="Switch between light and dark">${icon('moon', 'i th-moon')}${icon('sun', 'i th-sun')}</button>
+      ${settingsPanel()}
     </div>
   </div>
 </header>
@@ -223,15 +270,20 @@ ${body}
       <p class="foot-conyso">Created by <a href="https://conyso.com/founder/" rel="author">Krishna Chagti</a> · an initiative by <a href="https://conyso.com/">Conyso</a>.</p>
       <p class="foot-motto">One standard. Every certification.</p>
     </div>
-    ${foot('Subjects', [['browse/', 'All decks'], ...fams.map((f) => [f.path, f.title])], fams.length > 6 ? ' foot-fams' : '')}
-    ${foot('About', [['method/', 'The science'], ['method/#checks', 'How cards are checked'], ['formats/', 'Which file for my app?'], ['roadmap/', 'Roadmap: ask for an exam'], ['feed.xml', 'New decks (Atom feed)'], ['llms.txt', 'llms.txt'], ['https://github.com/krishnachagti-sudo/conyso-initiatives-deck/issues/new?labels=card-report', 'Report a card']])}
+    ${foot('Subjects', [['browse/', 'All decks'], ['which-deck/', 'Which deck should I start with?'], ...fams.map((f) => [f.path, f.title])], fams.length > 6 ? ' foot-fams' : '')}
+    ${foot('About', [['method/', 'The science'], ['method/#checks', 'How cards are checked'], ['formats/', 'Which file for my app?'], ['roadmap/', 'Roadmap: ask for an exam'], ['feed.xml', 'New decks (Atom feed)'], ['daily/archive/', 'Daily ten archive'], ['daily/feed.xml', 'Daily ten (Atom feed)'], ['llms.txt', 'llms.txt'], ['https://github.com/krishnachagti-sudo/conyso-initiatives-deck/issues/new?labels=card-report', 'Report a card']])}
   </div>
   <div class="wrap foot-share"><span class="fs-lab">Know someone studying for an exam?</span>${shareRow({ live: true })}</div>
-  <div class="wrap foot-rule"><span>Decks licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">CC BY-SA 4.0</a>. Independent: not affiliated with any exam body.</span><span>An initiative by <a href="https://conyso.com/">Conyso</a>.</span></div>
+  <div class="wrap foot-rule"><button class="kbd-hint" type="button" data-kbd-open>Press <kbd>?</kbd> for keyboard shortcuts</button><span>Decks licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">CC BY-SA 4.0</a>. Independent: not affiliated with any exam body.</span><span>An initiative by <a href="https://conyso.com/">Conyso</a>.</span></div>
 </footer>
 <a class="totop" href="#main" aria-label="Back to top" hidden>${icon('up')}</a>
+<button class="focus-exit" type="button" data-focus-exit>${icon('focus')} Leave focus mode</button>
+${shortcutsSheet()}
+<script src="${asset('store.js')}" defer></script>
 <script src="${asset('common.js')}" defer></script>
+<script src="${asset('shelf.js')}" defer></script>
 ${scripts}
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('${cfg.base}sw.js',{scope:'${cfg.base}'}).catch(function(){})</script>
 </body>
 </html>
 `;

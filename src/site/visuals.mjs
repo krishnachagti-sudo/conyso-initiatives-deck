@@ -4,6 +4,7 @@
 
 import { inOrder } from '../exporters/common.mjs';
 import { cardParts } from './deck-data.mjs';
+import qrcode from './vendor/qrcode.mjs';
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -41,4 +42,29 @@ export function trioHTML(trio, { href = '' } = {}) {
 <div class="trio-step"><span class="trio-n">${steps[i][0]}</span><b>${steps[i][1]}</b><span>${steps[i][2]}</span></div>
 <div class="icard mini"><div class="ic-top"><span>${esc(c.topic)}</span><b>${esc(c.kind)}</b></div><div class="ic-q"><p>${esc(c.front)}</p></div><div class="ic-rule"></div><div class="ic-a"><p class="ic-ans">${esc(c.answer)}</p></div></div>
 </li>`).join('')}</ol>${href ? `<p class="trio-more"><a class="link" href="${href}">See the whole teaching path →</a></p>` : ''}`;
+}
+
+/**
+ * A QR code as inline SVG, drawn at build time (src/site/vendor/qrcode.mjs).
+ * One path, each row's dark runs merged, with the standard four-module quiet
+ * zone. Dark on a white ground in both themes, since scanners expect that.
+ */
+export function qrSVG(text, { label = '', ecl = 'M' } = {}) {
+  const q = qrcode(0, ecl);
+  q.addData(String(text));
+  q.make();
+  const n = q.getModuleCount();
+  const quiet = 4;
+  const size = n + quiet * 2;
+  let d = '';
+  for (let r = 0; r < n; r += 1) {
+    for (let c = 0; c < n; c += 1) {
+      if (!q.isDark(r, c)) continue;
+      let run = 1;
+      while (c + run < n && q.isDark(r, c + run)) run += 1;
+      d += `M${c + quiet} ${r + quiet}h${run}v1h-${run}z`;
+      c += run - 1;
+    }
+  }
+  return `<svg class="qr" viewBox="0 0 ${size} ${size}" role="img" aria-label="${esc(label || `QR code for ${text}`)}" shape-rendering="crispEdges"><rect width="${size}" height="${size}" fill="#fff"/><path d="${d}" fill="#141821"/></svg>`;
 }

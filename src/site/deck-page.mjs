@@ -13,8 +13,8 @@ import { siteOrgId, FOUNDER_ID } from './identity.mjs';
 import { FORMATS } from '../exporters/index.mjs';
 import { attribution } from '../exporters/common.mjs';
 import { slugify } from '../decks.mjs';
-import { deckStats, cardParts, cardHTML, NEW_PER_DAY, REVIEWS_PER_NEW } from './deck-data.mjs';
-import { kindBar } from './visuals.mjs';
+import { deckStats, cardParts, cardHTML, cardAnchor, cardReportURL, NEW_PER_DAY, REVIEWS_PER_NEW } from './deck-data.mjs';
+import { kindBar, qrSVG } from './visuals.mjs';
 import { LASTMOD_TOKEN } from '../../build/lastmod.mjs';
 
 const kb = (bytes) => (bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
@@ -76,6 +76,27 @@ export function studyJson(deck) {
   return JSON.stringify(deckStats(deck).notes.map(cardParts));
 }
 
+/**
+ * "Get it on your phone": a QR code for the Anki package and the steps for
+ * each app. Without script the three sets of steps are listed one after
+ * another; common.js turns them into tabs and opens the reader's own.
+ */
+export function phoneBlock(fileURL, apkg, short) {
+  const panel = (os, label, app, steps) => `<section class="ph-panel" data-tab-panel data-os="${os}" data-label="${label.split(' ')[0]}" aria-label="${label}"><h4>${label}: ${app}</h4><ol>${steps.map((x) => `<li>${x}</li>`).join('')}</ol></section>`;
+  const get = `<a class="link" href="${esc(apkg.file)}" download>Download for Anki</a>`;
+  return `<div class="phone" id="phone">
+<figure class="ph-qr">${qrSVG(fileURL, { label: `QR code: the ${short} Anki package` })}<figcaption>Point your phone’s camera here to download the ${esc(short)} deck.</figcaption></figure>
+<div class="ph-how"><h3>${icon('phone')} Get it on your phone</h3>
+<div class="ph-tabs" data-tabs>
+${panel('ios', 'iPhone and iPad', 'AnkiMobile', ['Install <b>AnkiMobile Flashcards</b> from the App Store. It is the official Anki app for iPhone and iPad, and it is paid.', `Scan the code with the Camera app, or open this page on the phone and tap ${get}.`, 'Open the download from Safari’s downloads or the Files app, tap Share and choose AnkiMobile.'])}
+${panel('android', 'Android', 'AnkiDroid', ['Install <b>AnkiDroid</b> from Google Play. It is free and open source.', `Scan the code with the camera, or open this page on the phone and tap ${get}.`, 'Open the downloaded file and choose AnkiDroid. Or, in AnkiDroid, open the menu, choose Import and pick the file.'])}
+${panel('desktop', 'Computer', 'Anki', ['Install <b>Anki</b> from <a class="link" href="https://apps.ankiweb.net/">apps.ankiweb.net</a>. It is free for Windows, Mac and Linux.', `${get} (.apkg, ${kb(apkg.bytes)}).`, 'Double-click the file, or in Anki choose File, then Import.'])}
+</div>
+<p class="ph-sync">Studying on two devices? A free AnkiWeb account keeps them in step. Import settings are under <a class="link" href="#import">Into Anki</a>.</p>
+</div>
+</div>`;
+}
+
 export function deckPage(cfg, deck, manifest, { decks = [] } = {}) {
   const m = deck.meta;
   const s = deckStats(deck);
@@ -113,7 +134,7 @@ ${crumbs(cfg, [...(famHub ? [[family, familyPath(family)]] : []), [short, `${m.s
     <div class="v">${esc(answerV).replace(/^Yes\b/, '<span class="hl">Yes</span>')}</div>
     <p>${answerP}</p>
     ${kindBar(s.kinds, s.cards)}
-    <div class="dl">${apkg ? `<a class="btn btn-primary" href="${esc(apkg.file)}" download>${icon('download')} Download for Anki <small>.apkg · ${kb(apkg.bytes)}</small></a>` : ''}<a class="btn" href="#try">${icon('browser')} Try it here</a><a class="dl-more" href="#download">${others} →</a></div>
+    <div class="dl">${apkg ? `<a class="btn btn-primary" href="${esc(apkg.file)}" download>${icon('download')} Download for Anki <small>.apkg · ${kb(apkg.bytes)}</small></a>` : ''}<a class="btn" href="#try">${icon('browser')} Try it here</a><button class="btn btn-ghost save-b" type="button" data-save-deck="${esc(m.slug)}" data-title="${esc(short)}" aria-pressed="false" hidden>${icon('bookmark')}<span>Save to shelf</span></button><a class="dl-more" href="#download">${others} →</a><span class="due-chip" data-due="${esc(m.slug)}"></span></div>
     ${released ? ((m.openReviews || []).length ? `<p class="footnote">Every card has been checked against its source by an independent audit. Still to come: ${(m.openReviews).map(esc).join('; ')}.</p>` : '') : `<p class="footnote"><span class="badge b-draft">Draft</span> Checked against its source; newcomer and expert review still to come.${(m.releaseBlockers || []).length ? ` Before release: ${(m.releaseBlockers).map(esc).join('; ')}.` : ''}</p>`}
   </div>
   <dl class="facts">${facts.map(([k, v, w]) => `<div class="fact${w ? ` ${w}` : ''}"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
@@ -126,7 +147,7 @@ ${crumbs(cfg, [...(famHub ? [[family, familyPath(family)]] : []), [short, `${m.s
 <section class="sec" id="path" aria-labelledby="path-h"><span class="label">01 · The path</span>
 <h2 id="path-h">In what order does it teach ${esc(short)}?</h2>
 <p class="lead">${plural(s.topics.length, 'step')}. Each opens by explaining its terms.</p>
-<ol class="path">${s.topics.map((t, i) => `<li><span class="step">${i + 1}</span><h3><a class="link" href="#t-${slugify(t.topic)}">${esc(t.topic)}</a></h3><div class="pmeta">${plural(t.cards, 'card')} · ${plural(t.primers, 'primer')}</div>${t.terms.length ? `<div class="chips">${t.terms.map((x) => `<span class="chip new">${esc(x)}</span>`).join('')}</div>` : ''}<div class="pbar" aria-hidden="true"><i style="width:${Math.round((t.cards / maxCards) * 100)}%"></i></div></li>`).join('')}</ol>
+<ol class="path">${s.topics.map((t, i) => { const ts = slugify(t.topic); return `<li data-topic="${ts}"><span class="step">${i + 1}</span><h3><a class="link" href="#t-${ts}">${esc(t.topic)}</a></h3><div class="pmeta">${plural(t.cards, 'card')} · ${plural(t.primers, 'primer')}<span class="p-prog" data-topic-progress></span></div>${t.terms.length ? `<div class="chips">${t.terms.map((x) => `<span class="chip new">${esc(x)}</span>`).join('')}</div>` : ''}<div class="pfoot"><div class="pbar" aria-hidden="true" style="width:${Math.max(8, Math.round((t.cards / maxCards) * 100))}%"><i></i></div><a class="p-study" href="?topic=${ts}#try">${icon('play')} Study these<span class="sr-only">: ${esc(t.topic)}</span></a></div></li>`; }).join('')}</ol>
 </section>`;
 
   // ── 02 Try it ───────────────────────────────────────────────────────────
@@ -153,6 +174,7 @@ ${crumbs(cfg, [...(famHub ? [[family, familyPath(family)]] : []), [short, `${m.s
 <h2 id="download-h">Which file do I need for my app?</h2>
 <p>For Anki, the package. For anything else, the file named after your app. <a href="${cfg.base}formats/">Details for each app</a>.</p>
 <div class="dl-tiles">${['apkg', 'tsv', 'study-sheet', 'cards-a4'].map(row).join('')}</div>
+${apkg ? phoneBlock(`${url}${apkg.file}`, apkg, short) : ''}
 <details class="more-files"><summary>All ${n0(files.size)} files, by app</summary>
 ${GROUPS.map(([g, keys]) => { const rows = keys.map(row).join(''); return rows ? `<div class="dl-group"><h3>${esc(g)}</h3><div class="dl-tiles">${rows}</div></div>` : ''; }).join('')}
 </details>
@@ -213,7 +235,7 @@ ${s.topics.map((t, ti) => {
     const tnotes = s.notes.filter((n) => n.topic === t.topic);
     return `<details class="topic" id="t-${slugify(t.topic)}"><summary>${esc(t.topic)}<small>${plural(t.cards, 'card')}</small></summary><ol class="cards">${tnotes.map((n) => {
       no = s.notes.indexOf(n) + 1;
-      return `<li id="${esc(n.id)}">${cardHTML(cardParts(n), { top: `№ ${String(no).padStart(3, '0')}` })}</li>`;
+      return `<li id="${cardAnchor(n.id)}"><i id="${esc(n.id)}"></i>${cardHTML(cardParts(n), { top: `№ ${String(no).padStart(3, '0')}` })}<p class="c-tools"><a href="#${cardAnchor(n.id)}">Link to card</a><a href="${esc(cardReportURL(m.reportURL, n.id))}" rel="nofollow">Report card</a></p></li>`;
     }).join('')}</ol></details>`;
   }).join('\n')}
 </section>`;
@@ -253,7 +275,7 @@ ${check ? `<div class="checked"><h3>${icon('check')} What we checked</h3><p><str
   const actbar = `<div class="actbar" data-actbar>${apkg ? `<a class="btn btn-primary" href="${esc(apkg.file)}" download>${icon('download')} Download for Anki</a>` : `<a class="btn btn-primary" href="#download">${icon('download')} Download</a>`}<a class="btn" href="#try">${icon('browser')} Try it</a></div>`;
 
   const body = `<div class="wrap">
-<div class="entry-grid">
+<div class="entry-grid" data-deck="${esc(m.slug)}" data-deck-title="${esc(short)}">
 ${head}
 ${toc}
 <article>

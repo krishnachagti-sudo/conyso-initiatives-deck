@@ -6,9 +6,17 @@
 // the build writes for 400 days ahead. Only if that file is missing (an old
 // build) does it fetch the whole pool, daily/pool.json, and pick here.
 //
-// History and streak live in this browser only (localStorage, wrapped so the
-// page still works in private mode). Text is set with textContent, never
-// innerHTML, so card text cannot inject markup.
+// History and streak live in this browser only: in Primer.store (store.js)
+// when the page has it, else straight in localStorage, wrapped so the page
+// still works in private mode. Scores saved before store.js existed (the bare
+// "daily:history" key) are merged into the store, then the old key is removed,
+// so no streak is lost. Text is
+// set with textContent, never innerHTML, so card text cannot inject markup.
+//
+// /daily/?day=YYYY-MM-DD plays a past day's ten (from the launch to today) as
+// a replay: its score is kept apart ("daily:replays") and never touches the
+// streak. On /daily/archive/ this script adds any days since the build and
+// shows the reader's scores beside each day.
 (function () {
   'use strict';
   if (typeof document === 'undefined' || !document.createElement) return;
@@ -19,9 +27,34 @@
   function main(D) {
   var dayKey = D.dayKey, dailyNumber = D.dailyNumber, shareText = D.shareText, streak = D.streak, bestStreak = D.bestStreak, msToNextDay = D.msToNextDay, clock = D.clock;
   // ── In the browser ─────────────────────────────────────────────────────
-  var store = {
+  var raw = {
     get: function (k) { try { return JSON.parse(window.localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
     set: function (k, v) { try { window.localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* private mode */ } },
+  };
+  var P = window.Primer && window.Primer.store;
+  // store.js copies the old bare keys in on load; once they are safely in the
+  // store (set() reports it reached storage), the old copies go.
+  if (P) {
+    ['daily:history', 'daily:progress'].forEach(function (k) {
+      var old = raw.get(k);
+      if (old == null) return;
+      var cur = P.get(k, null);
+      var merged = old;
+      if (k === 'daily:history') { merged = {}; var x; for (x in old) merged[x] = old[x]; for (x in cur || {}) merged[x] = cur[x]; }
+      else if (cur != null) merged = cur;
+      if (P.set(k, merged) !== false) { try { window.localStorage.removeItem(k); } catch (e) { /* private mode */ } }
+    });
+  }
+  var store = {
+    get: function (k) { var v = P ? P.get(k, null) : null; return v == null ? raw.get(k) : v; },
+    set: function (k, v) { if (P) P.set(k, v); else raw.set(k, v); },
+    // Days played: the old bare key and the store's, merged (the store wins on a clash).
+    history: function () {
+      var h = {}, a = raw.get('daily:history') || {}, b = P ? P.get('daily:history', null) || {} : {};
+      for (var k in a) h[k] = a[k];
+      for (var j in b) h[j] = b[j];
+      return h;
+    },
   };
   var el = function (tag, attrs, text) {
     var n = document.createElement(tag);
@@ -105,31 +138,120 @@
     }).catch(function () { /* the element keeps whatever it shows without script */ });
   }
 
+  var HKEY = 'daily:history';
+  var RKEY = 'daily:replays';
+  var outOf = function (r) { return r && r.n ? r.s + '/' + r.n : ''; };
+
+  // ── The archive: the reader's record and scores, and any days since the build ──
+  var archive = document.querySelector('[data-daily-archive]');
+  if (archive) {
+    var aToday = dayKey();
+    var aHist = store.history(), aReps = store.get(RKEY) || {};
+    var rec = document.querySelector('[data-daily-record]');
+    if (rec && Object.keys(aHist).length) {
+      var aSt = streak(aHist, aToday), aBest = bestStreak(aHist), aN = Object.keys(aHist).length;
+      [['Streak', aSt + (aSt === 1 ? ' day' : ' days')], ['Best streak', aBest + (aBest === 1 ? ' day' : ' days')], ['Days played', String(aN)]].forEach(function (r) {
+        var d = el('div'); d.append(el('dt', null, r[0]), el('dd', null, r[1])); rec.appendChild(d);
+      });
+      rec.hidden = false;
+    }
+    var score = function (span) {
+      var k = span.getAttribute('data-day-score');
+      span.textContent = '';
+      if (aHist[k] && aHist[k].n) span.append('Scored ', el('b', null, outOf(aHist[k])));
+      else if (aReps[k] && aReps[k].n) span.append('Replayed ', el('b', null, outOf(aReps[k])));
+    };
+    var abase = archive.getAttribute('data-base') || '/';
+    var built = archive.getAttribute('data-built') || aToday;
+    // A day the build has not listed yet (the archive was built before today).
+    var item = function (day) {
+      var isToday = day.date === aToday;
+      var li = el('li', { class: 'pw-day' + (isToday ? ' pinned' : ''), 'data-day': day.date });
+      var card = el('div', { class: 'icard pw-card' });
+      var top = el('div', { class: 'ic-top' });
+      var b = el('b');
+      if (isToday) b.textContent = 'Today'; else b.appendChild(el('time', { datetime: day.date }, dateLong(day.date)));
+      top.append(el('span', null, 'Daily #' + day.num), b);
+      var names = [];
+      day.cards.forEach(function (c) { var t = (day.decks[c.d] && day.decks[c.d].t) || c.n || c.d; if (names.indexOf(t) < 0) names.push(t); });
+      var line = names.length <= 4 ? names.slice(0, -1).join(', ') + (names.length > 1 ? ' and ' : '') + names[names.length - 1] : names.slice(0, 3).join(', ') + ' and ' + (names.length - 3) + ' more';
+      var foot = el('p', { class: 'pw-foot' });
+      var a = el('a', { class: 'pw-play', href: abase + 'daily/?day=' + day.date }, isToday ? 'Play today’s ten' : 'Play this ten');
+      a.appendChild(el('span', { class: 'sr-only' }, ', Daily #' + day.num + ', ' + dateLong(day.date)));
+      var sc = el('span', { class: 'pw-score', 'data-day-score': day.date });
+      foot.append(a, sc);
+      card.append(top, el('p', { class: 'pw-decks' }, line), foot);
+      li.appendChild(card);
+      return li;
+    };
+    var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    var listFor = function (key) {
+      var m = key.slice(0, 7);
+      var sec = archive.querySelector('section[data-month="' + m + '"]');
+      if (!sec) {
+        var name = MONTHS[+m.slice(5, 7) - 1] + ' ' + m.slice(0, 4);
+        sec = el('section', { class: 'pw-month', 'data-month': m, 'aria-label': name });
+        sec.append(el('h2', null, name), el('ol', { class: 'pw-days' }));
+        archive.insertBefore(sec, archive.firstChild);
+      }
+      return sec.querySelector('ol');
+    };
+    if (aToday > built) {
+      // The build's "today" is a past day now.
+      var old = archive.querySelector('.pw-day.pinned');
+      if (old) {
+        old.classList.remove('pinned');
+        var ob = old.querySelector('.ic-top b'); ob.textContent = ''; ob.appendChild(el('time', { datetime: built }, dateLong(built)));
+        var oa = old.querySelector('.pw-play'); if (oa && oa.firstChild) oa.firstChild.textContent = 'Play this ten';
+      }
+      var keys = D.pastDays(aToday, D.addDays(built, 1)).slice(0, 62).reverse();
+      keys.reduce(function (p, k) {
+        return p.then(function () { return loadDay(k); }).then(function (day) {
+          var ol = listFor(k); var li = item(day); ol.insertBefore(li, ol.firstChild); score(li.querySelector('[data-day-score]'));
+        }).catch(function () {});
+      }, Promise.resolve());
+    }
+    archive.querySelectorAll('[data-day-score]').forEach(score);
+  }
+
   // ── The player on /daily/ ────────────────────────────────────────────────
   var app = document.getElementById('daily-app');
   if (!app) return;
   var brand = app.getAttribute('data-brand') || 'The Exam Primer';
-  var shareURL = app.getAttribute('data-share-url') || location.href;
-  var plainURL = shareURL.replace(/^https?:\/\//, '');
   var today = dayKey();
-  var num = dailyNumber(today);
-  var HKEY = 'daily:history';
-  var PKEY = 'daily:progress';
+  // ?day=YYYY-MM-DD: a past day's ten, played as a replay.
+  var asked = null;
+  try { asked = new URLSearchParams(location.search).get('day'); } catch (e) { /* old browser */ }
+  var play = D.replayDay(asked, today) || today;
+  var replay = play !== today;
+  var num = dailyNumber(play);
+  var PKEY = replay ? 'daily:replay-progress' : 'daily:progress';
+  var shareURL = (app.getAttribute('data-share-url') || location.href.split('?')[0]) + (replay ? '?day=' + play : '');
+  var plainURL = shareURL.replace(/^https?:\/\//, '');
+  var todayURL = location.pathname;
 
-  loadDay(today, app.getAttribute('data-pool') || null).then(function (pool) {
+  loadDay(play, app.getAttribute('data-pool') || null).then(function (pool) {
     var cards = pool.cards;
     if (!cards.length) return;
-    var history = store.get(HKEY) || {};
+    var history = store.history();
     var prog = store.get(PKEY);
-    var state = prog && prog.key === today && Array.isArray(prog.marks) ? { marks: prog.marks.slice(0, cards.length), picks: prog.picks || [] } : { marks: [], picks: [] };
+    var state = prog && prog.key === play && Array.isArray(prog.marks) ? { marks: prog.marks.slice(0, cards.length), picks: prog.picks || [] } : { marks: [], picks: [] };
     state.i = state.marks.length;
     state.shown = false;
-    var save = function () { store.set(PKEY, { key: today, marks: state.marks, picks: state.picks }); };
+    var save = function () { store.set(PKEY, { key: play, marks: state.marks, picks: state.picks }); };
 
     document.querySelectorAll('[data-daily-fallback]').forEach(function (n) { n.hidden = true; });
-    document.querySelectorAll('[data-daily-num]').forEach(function (n) { n.textContent = 'Daily #' + num + ' · ' + dateLong(today); });
+    document.querySelectorAll('[data-daily-num]').forEach(function (n) { n.textContent = (replay ? 'Replay · ' : '') + 'Daily #' + num + ' · ' + dateLong(play); });
     app.hidden = false;
     app.textContent = '';
+    app.setAttribute('aria-label', replay ? 'Daily #' + num + ', played again' : 'Today’s ten cards');
+    if (replay) {
+      var note = el('p', { class: 'dy-bar' });
+      note.append('A replay of ' + dateLong(play) + '. Your streak is not affected. ', el('a', { href: todayURL, class: 'link' }, 'Today’s ten'));
+      app.appendChild(note);
+    } else if (asked && asked !== today) {
+      app.appendChild(el('p', { class: 'dy-bar' }, /^\d{4}-\d\d-\d\d$/.test(asked) && asked > today ? 'That day’s ten is not out yet, so here is today’s.' : 'There is no daily ten for that date, so here is today’s.'));
+    }
 
     var bar = el('div', { class: 'dy-bar' });
     var pos = el('span', { class: 'dy-pos' });
@@ -214,16 +336,20 @@
       said.textContent = '';
       var marks = state.marks.slice(0, cards.length);
       var right = marks.filter(Boolean).length;
-      if (!history[today]) { history[today] = { s: right, n: cards.length, m: marks.map(function (x) { return x ? 1 : 0; }).join('') }; store.set(HKEY, history); }
+      var result = { s: right, n: cards.length, m: marks.map(function (x) { return x ? 1 : 0; }).join('') };
+      if (replay) { var reps = store.get(RKEY) || {}; reps[play] = result; store.set(RKEY, reps); }
+      else if (!history[today]) { history[today] = result; store.set(HKEY, history); }
       drawBar();
       stage.textContent = '';
       var text = shareText(brand, num, marks, plainURL);
       var res = el('section', { class: 'dy-result', 'aria-labelledby': 'dy-score' });
-      var h = el('h2', { id: 'dy-score', tabindex: '-1' }, 'You scored ' + right + ' out of ' + cards.length);
+      var h = el('h2', { id: 'dy-score', tabindex: '-1' }, 'You scored ' + right + ' out of ' + cards.length + (replay ? ' on Daily #' + num : ''));
       var grid = el('p', { class: 'dy-grid', role: 'img', 'aria-label': right + ' right, ' + (cards.length - right) + ' wrong' }, marks.map(function (m) { return m ? '🟩' : '🟥'; }).join(''));
       var st = streak(history, today), best = bestStreak(history);
       var stats = el('dl', { class: 'dy-stats' });
-      [['Streak', st + (st === 1 ? ' day' : ' days')], ['Best streak', best + (best === 1 ? ' day' : ' days')], ['Days played', String(Object.keys(history).length)]].forEach(function (r) {
+      var rows = [['Streak', st + (st === 1 ? ' day' : ' days')], ['Best streak', best + (best === 1 ? ' day' : ' days')], ['Days played', String(Object.keys(history).length)]];
+      if (replay) rows.splice(2, 0, ['On the day', history[play] ? outOf(history[play]) : 'Not played']);
+      rows.forEach(function (r) {
         var d = el('div'); d.append(el('dt', null, r[0]), el('dd', null, r[1])); stats.appendChild(d);
       });
       var pre = el('pre', { class: 'dy-share-text', id: 'dy-share-text' }, text);
@@ -254,7 +380,11 @@
       next.append('The next ten in ', clk, ' (midnight UTC).');
       var tick = function () {
         var ms = msToNextDay();
-        if (dayKey() !== today) { next.textContent = ''; next.append('A new ten is ready. ', el('a', { href: location.pathname, class: 'link' }, 'Play it now')); clearInterval(timer); return; }
+        if (replay || dayKey() !== today) {
+          next.textContent = '';
+          next.append(replay ? 'This replay leaves your streak as it was. ' : 'A new ten is ready. ', el('a', { href: todayURL, class: 'link' }, replay ? 'Play today’s ten' : 'Play it now'));
+          clearInterval(timer); return;
+        }
         clk.textContent = clock(ms);
       };
       tick();
@@ -264,10 +394,10 @@
 
       // Today's card of the day stays, with the ten to look back over.
       var cod = el('div', { class: 'dy-cod' });
-      cod.append(el('h3', null, 'Today’s card of the day'));
+      cod.append(el('h3', null, replay ? 'The card of the day on ' + dateLong(play) : 'Today’s card of the day'));
       var codBox = el('div'); fillCardOfDay(codBox, pool); cod.appendChild(codBox);
       var rev = el('details', { class: 'dy-review' });
-      rev.appendChild(el('summary', null, 'Look back over today’s ten'));
+      rev.appendChild(el('summary', null, replay ? 'Look back over this ten' : 'Look back over today’s ten'));
       var ol = el('ol', { class: 'dy-list' });
       cards.forEach(function (c, i) {
         var li = el('li');
@@ -308,7 +438,7 @@
   }).catch(function () {
     app.hidden = false;
     app.textContent = '';
-    app.appendChild(el('p', { class: 'dy-said' }, 'Today’s ten could not be loaded. Check your connection and reload the page. The sample below still works.'));
+    app.appendChild(el('p', { class: 'dy-said' }, (replay ? 'This day’s ten' : 'Today’s ten') + ' could not be loaded. Check your connection and reload the page. The sample below still works.'));
   });
   }
 })();

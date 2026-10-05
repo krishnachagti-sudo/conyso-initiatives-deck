@@ -97,6 +97,8 @@ export function homePage(cfg, allDecks, { roadmap = 0, today = new Date().toISOS
     </div>
     ${heroCard ? `<div class="hero-card"><p class="note-hand">A real card from the ${esc(short(lead.deck))} deck${ARROW}</p><div class="stack tilt-r taped">${icard({ ...heroCard, why: '', sourceURL: '' }, { top: `${short(lead.deck)} · ${heroCard.topic}` })}</div></div>` : ''}
   </div>
+  <section class="resume" data-resume hidden aria-labelledby="resume-h"></section>
+  <script>try{(function(){var k=Object.keys(localStorage);if(k.some(function(x){return x==='primer:v1:recent'||x.indexOf('primer:v1:deck:')===0}))document.querySelector('[data-resume]').hidden=false})()}catch(e){}</script>
 </section>${ticker}`;
 
   // ── 2 Card of the day (filled by assets/daily.js) ───────────────────────
@@ -152,7 +154,7 @@ export function homePage(cfg, allDecks, { roadmap = 0, today = new Date().toISOS
   const famId = (t) => `fam-${slugify(t)}`;
   const deckBand = `
 <div class="bg bg-box"><section class="band wrap" id="decks" aria-labelledby="decks-h">
-  <div class="band-h"><div><h2 id="decks-h">The decks</h2><p class="kicker">${plural(decks.length, 'deck')} in ${plural(families.length, 'subject')}${roadmap ? ` · ${n0(roadmap)} more on the build list` : ''}</p></div><a class="btn btn-ghost" href="${cfg.base}browse/">${icon('layers')} Search and filter all</a></div>
+  <div class="band-h"><div><h2 id="decks-h">The decks</h2><p class="kicker">${plural(decks.length, 'deck')} in ${plural(families.length, 'subject')}${roadmap ? ` · ${n0(roadmap)} more on the build list` : ''}</p></div><div class="band-acts"><a class="link" href="${cfg.base}which-deck/">Not sure which? Find your deck →</a><a class="btn btn-ghost" href="${cfg.base}browse/">${icon('layers')} Search and filter all</a></div></div>
   ${newBand}
   <ul class="fams" role="list">${families.map((f) => {
     const hub = f.decks.some((d) => d.meta.status === 'released') ? `${cfg.base}${esc(familyPath(f.title))}` : ''; // a hub exists once a deck is released
