@@ -195,7 +195,7 @@ ${markdown && !/noindex/.test(robots) ? `${markdownLink(markdown === true ? `${u
 <link rel="preload" href="${asset('fonts/fraunces-latin-wght-normal.woff2')}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="${asset('fonts/jetbrains-mono-latin-400-normal.woff2')}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="${asset('site.css')}">
-<script>try{var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
+<script>document.documentElement.classList.add('js');try{var s=localStorage.getItem('theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 ${jsonLd([siteOrg(cfg), conysoOrg(), founderNode(), ...(graph.some((n) => n['@type'] === 'WebSite') ? [] : [{ '@type': 'WebSite', '@id': `${cfg.origin}${cfg.base}#website`, name: cfg.brand, url: `${cfg.origin}${cfg.base}`, inLanguage: 'en', publisher: { '@id': `${cfg.origin}${cfg.base}#organization` } }]), ...graph])}
 </head>
 <body>

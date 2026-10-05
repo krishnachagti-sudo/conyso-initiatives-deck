@@ -108,9 +108,9 @@ ${crumbs(cfg, [...(famHub ? [[family, familyPath(family)]] : []), [short, `${m.s
   <div class="meta-row"><span>Deck № ${String(m.number || 1).padStart(3, '0')}</span><span class="badge ${released ? 'b-released' : 'b-draft'}">${released ? 'Released' : 'Draft'}</span>${famHub ? `<a href="${cfg.base}${esc(familyPath(family))}">${esc(family)}</a>` : family ? `<span>${esc(family)}</span>` : ''}<span>v${esc(m.version)}${m.updated ? ` · updated ${esc(m.updated)}` : ''}</span><span>${esc(m.licence)}</span></div>
   <h1>${esc(m.title)}</h1>
   <p class="entry-stmt">${esc(m.description || '')}</p>
-  <div class="answer" id="answer">
+  <div class="answer taped" id="answer">
     <div class="q">${esc(answerQ)}</div>
-    <div class="v">${esc(answerV)}</div>
+    <div class="v">${esc(answerV).replace(/^Yes\b/, '<span class="hl">Yes</span>')}</div>
     <p>${answerP}</p>
     ${kindBar(s.kinds, s.cards)}
     <div class="dl">${apkg ? `<a class="btn btn-primary" href="${esc(apkg.file)}" download>${icon('download')} Download for Anki <small>.apkg · ${kb(apkg.bytes)}</small></a>` : ''}<a class="btn" href="#try">${icon('browser')} Try it here</a><a class="dl-more" href="#download">${others} →</a></div>

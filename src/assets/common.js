@@ -114,6 +114,52 @@
     if (foot) watch.observe(foot);
   }
 
+  // Motion (all of it optional): highlighter marks draw in, below-the-fold
+  // blocks rise into place, and numbers count up, each once, as they come into
+  // view. Nothing in view at load is ever hidden, and with reduced motion or no
+  // IntersectionObserver every element simply stays as the HTML has it.
+  var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var marks = document.querySelectorAll('.hl,.hl-u');
+  if (still || !('IntersectionObserver' in window)) {
+    Array.prototype.forEach.call(marks, function (m) { m.classList.add('on'); });
+  } else {
+    var fmt = function (n) { return n.toLocaleString('en-GB'); };
+    var count = function (el) {
+      var end = parseInt(el.textContent.replace(/\D/g, ''), 10);
+      if (!(end > 9)) return;
+      el.style.display = 'inline-block'; el.style.minWidth = el.getBoundingClientRect().width + 'px'; el.style.textAlign = 'right';
+      var t0 = null, dur = 900;
+      var step = function (t) {
+        if (t0 === null) t0 = t;
+        var k = Math.min(1, (t - t0) / dur);
+        el.textContent = fmt(Math.round(end * (1 - Math.pow(1 - k, 3))));
+        if (k < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    };
+    var seen = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var el = en.target;
+        seen.unobserve(el);
+        if (el.hasAttribute('data-count')) count(el);
+        el.classList.add('on');
+        if (el.classList.contains('rv')) setTimeout(function () { el.classList.remove('rv', 'on'); el.style.removeProperty('--rv'); }, 1200); // hand the transform back to :hover
+      });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    var vh = window.innerHeight;
+    var rise = '.band-h,.fam,.sci-c,.trio>li,.ask,.ways-grid>a,.trust>div,.new-list li,.sec,.pcard,.dx-item,.dx-fams>li,.gl-term';
+    Array.prototype.forEach.call(document.querySelectorAll(rise), function (el) {
+      if (el.getBoundingClientRect().top < vh) return; // in view at load: never hidden
+      var i = 0, s = el; while ((s = s.previousElementSibling) && i < 5) i += 1;
+      el.style.setProperty('--rv', i);
+      el.classList.add('rv');
+      seen.observe(el);
+    });
+    Array.prototype.forEach.call(marks, function (m) { seen.observe(m); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-count]'), function (n) { seen.observe(n); });
+  }
+
   // Back to top.
   var top = document.querySelector('.totop');
   if (top) {
