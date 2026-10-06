@@ -184,8 +184,11 @@
     var list = function (key) { var v = get(key, []); return Array.isArray(v) ? v : []; };
     var touchDeck = function (slug, title) {
       if (!slug) return;
-      var l = list('recent').filter(function (d) { return d && d.slug !== slug; });
-      l.unshift({ slug: slug, title: String(title || slug), at: now() });
+      var all = list('recent'), prev = all.filter(function (d) { return d && d.slug === slug; })[0];
+      var l = all.filter(function (d) { return d && d.slug !== slug; });
+      // Keep a known title: a call without one must not replace it with the slug.
+      var t = title && String(title) !== slug ? String(title) : (prev && prev.title && prev.title !== slug ? prev.title : String(title || slug));
+      l.unshift({ slug: slug, title: t, at: now() });
       set('recent', l.slice(0, 12));
     };
     var recentDecks = function () { return list('recent').slice(0, 12); };

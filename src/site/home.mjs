@@ -91,13 +91,25 @@ export function homePage(cfg, allDecks, { roadmap = 0, today = new Date().toISOS
   const ticker = decks.length > 6 ? `
 <nav class="ticker" aria-label="Every deck" style="--dur:${Math.round(decks.length * 2.6)}s"><div class="ticker-track">${tickList(false)}${tickList(true)}</div></nav>` : '';
 
+  // The moat first: when compare.json supports it, the headline is the claim
+  // in its own words, and the counted runners-up sit right under it.
+  const hb = scaleBars(compare, ps);
+  const runners = hb ? hb.rows.filter((r) => !r.us).slice(0, 3) : [];
+  const heroMoat = claim ? `<h1 id="hero-h" class="h-moat"><span>The largest openly licensed</span><span class="l2"><span class="hl">collection of certification flashcards.</span></span></h1>
+      <div class="hero-scale" aria-label="Cards in each collection, counted ${esc(hb.counted)}">
+        <div class="hs-row hs-us"><span class="hs-n">The Exam Primer</span><span class="hs-bar"><i style="width:100%"></i></span><b class="hs-v"><span data-count>${n0(ps.cards)}</span></b></div>
+        ${runners.map((r) => `<div class="hs-row"><a class="hs-n" href="${esc(r.evidenceUrl || r.url)}" rel="nofollow noopener">${esc(r.name)}</a><span class="hs-bar"><i style="width:${Math.max(2, Math.round((r.value / ps.cards) * 100))}%"></i></span><span class="hs-v">${n0(r.value)}</span></div>`).join('')}
+        <p class="hs-foot">Cards, counted ${esc(hb.counted)} · <a href="${cfg.base}numbers/">how it compares →</a></p>
+      </div>
+      <p class="hero-hook">${n0(decks.length)} decks, every idea explained before it is tested and every card citing its source. Free, for Anki and 14 other formats.</p>` : '';
   // ── 1 Hero ──────────────────────────────────────────────────────────────
   const heroBand = `
 <section class="hero wrap" aria-labelledby="hero-h">
   <div class="hero-grid">
     <div class="hero-main">
-      <p class="eyebrow"><span data-count>${n0(decks.length)}</span> ${decks.length === 1 ? 'deck' : 'decks'} · <span data-count>${n0(cards)}</span> cards · ${ps.families > 1 && !claim ? `${n0(ps.families)} subjects · ` : ''}${claim && claimHead(claim).length <= 72 ? esc(claimHead(claim).replace(/^The /, 'the ')) : 'free'}</p>
-      <h1 id="hero-h"><span>Most exam flashcards are someone’s notes.</span><span class="l2"><span class="hl">Few name a source.</span></span><span class="l3">Ours explain each idea before they test it, and every card names its source.</span></h1>
+      <p class="eyebrow"><span data-count>${n0(decks.length)}</span> ${decks.length === 1 ? 'deck' : 'decks'} · <span data-count>${n0(cards)}</span> cards · ${ps.families > 1 ? `${n0(ps.families)} subjects · ` : ''}free and open</p>
+      ${claim ? heroMoat : `<h1 id="hero-h"><span>Most exam flashcards are someone’s notes.</span><span class="l2"><span class="hl">Few name a source.</span></span></h1>
+      <p class="hero-hook">Ours explain each idea before they test it, and every card names its source.</p>`}
       <form class="site-search" data-site-search action="${cfg.base}browse/" method="get" role="search">
         <label for="home-q" class="sr-only">Search the decks</label>
         <input id="home-q" name="q" type="search" placeholder="Find your exam, e.g. AZ-104 or pilot" autocomplete="off" spellcheck="false">
@@ -107,7 +119,7 @@ export function homePage(cfg, allDecks, { roadmap = 0, today = new Date().toISOS
     </div>
     ${heroCard ? `<div class="hero-card"><p class="note-hand">A real card from the ${esc(short(lead.deck))} deck${ARROW}</p><div class="stack tilt-r taped">${icard({ ...heroCard, why: '', sourceURL: '' }, { top: `${short(lead.deck)} · ${heroCard.topic}` })}</div></div>` : ''}
   </div>
-  <section class="resume" data-resume hidden aria-labelledby="resume-h"></section>
+  <section class="resume" data-resume data-titles="${esc(JSON.stringify(Object.fromEntries(decks.map((d) => [d.meta.slug, d.meta.shortTitle || d.meta.title]))))}" hidden aria-labelledby="resume-h"></section>
   <script>try{(function(){var k=Object.keys(localStorage);if(k.some(function(x){return x==='primer:v1:recent'||x.indexOf('primer:v1:deck:')===0}))document.querySelector('[data-resume]').hidden=false})()}catch(e){}</script>
 </section>${ticker}`;
 

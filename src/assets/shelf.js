@@ -138,7 +138,8 @@
     if (lastOpen && (!pick || (lastOpen.at || 0) > (prog[pick].lastAt || 0) + 864e5)) pick = lastOpen.slug;
     if (!pick) { resume.hidden = true; resume.innerHTML = ''; return; }
     var p = S.progress(pick);
-    var title = (recent.filter(function (r) { return r.slug === pick; })[0] || S.shelfItems().filter(function (r) { return r.slug === pick; })[0] || { title: pick }).title;
+    var known = {}; try { known = JSON.parse(resume.getAttribute('data-titles') || '{}'); } catch (e) {}
+    var title = known[pick] || (recent.filter(function (r) { return r.slug === pick; })[0] || S.shelfItems().filter(function (r) { return r.slug === pick; })[0] || { title: pick }).title;
     var pct = p.total ? Math.min(100, Math.round((p.seen / p.total) * 100)) : 0;
     var others = recent.filter(function (r) { return r.slug !== pick; }).slice(0, 3);
     var started = p.seen > 0;
@@ -154,7 +155,7 @@
         '<div class="rs-act"><a class="btn btn-primary" href="' + resumeURL(pick, p) + '">' + icon('play') + (started ? ' Resume' : ' Start') + '</a>' +
           '<a class="link" href="' + base + 'shelf/">Your shelf →</a></div>' +
       '</div>' +
-      (others.length ? '<p class="rs-more"><span>Also open lately:</span> ' + others.map(function (r) { return '<a href="' + deckURL(r.slug) + '">' + esc(r.title) + '</a>'; }).join('') + '</p>' : '');
+      (others.length ? '<p class="rs-more"><span>Also open lately:</span> ' + others.map(function (r) { return '<a href="' + deckURL(r.slug) + '">' + esc(known[r.slug] || r.title) + '</a>'; }).join('') + '</p>' : '');
     resume.hidden = false;
     requestAnimationFrame(function () { resume.classList.add('in'); });
   };
