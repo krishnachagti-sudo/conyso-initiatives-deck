@@ -50,6 +50,9 @@ export const siteOrg = (cfg) => ({
   '@id': siteOrgId(cfg),
   name: cfg.brand,
   url: `${cfg.origin}${cfg.base}`,
+  description: 'Free, openly licensed flashcard decks for certification exams, each idea explained before it is tested and each card citing its source.',
+  logo: { '@type': 'ImageObject', url: `${cfg.origin}${cfg.base}icon-512.png`, width: 512, height: 512 },
+  sameAs: ['https://github.com/krishnachagti-sudo/conyso-initiatives-deck'],
   parentOrganization: { '@id': CONYSO_ID },
   founder: { '@id': FOUNDER_ID },
 });

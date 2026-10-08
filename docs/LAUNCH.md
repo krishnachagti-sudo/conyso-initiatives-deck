@@ -79,6 +79,27 @@ A page's date moves only when its hash does.
 - **conyso.com.** Add the Primer to the organisation's `subOrganization`
   list in the conyso-site repository, and link it from the Conyso home page.
 
+## Identity (who makes the Primer)
+
+Every page states, in its structured data, the same Person node as
+conyso.com, the Law Tome and the Bias Atlas (`src/site/identity.mjs`, pinned
+by `test/site.test.mjs`): `@id` `https://conyso.com/founder/#person`, the same
+nine `sameAs` links, `worksFor` and `founderOf` Conyso. The Primer is an
+Organization parented by Conyso, with its logo and its GitHub repository.
+Every page's head names the author (`<meta name="author">`,
+`<link rel="author">` to conyso.com/founder/), and `/about/` says the same in
+words. Change the Person node only together with the other properties.
+
+What only the owner can do, off this site (the Law Tome's `docs/ENTITY.md`
+explains why, ranked by leverage):
+
+1. ORCID: add an Employment entry, "Founder & CEO, Conyso".
+2. conyso.com: list the Primer in Conyso's `subOrganization`, beside the Tome
+   and the Atlas, and link it from the home page and from /founder/.
+3. A founder registry with a structured founder field, such as Crunchbase.
+4. The same job title string on every profile.
+5. Wikidata, only once there is independent coverage to cite.
+
 ## Adding certifications each week
 
 1. Research, write and audit the deck as in `docs/PIPELINE-V3.md`.

@@ -3,7 +3,7 @@
 // page skeletons (§2), forked from the Law Tome's partials: same structure,
 // this site's words and look.
 
-import { siteOrg, conysoOrg, founderNode } from './identity.mjs';
+import { siteOrg, conysoOrg, founderNode, FOUNDER } from './identity.mjs';
 import { slugify } from '../decks.mjs';
 
 export const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -218,7 +218,9 @@ export function page(cfg, { title, description, path, body, graph = [], scripts 
 <meta name="description" content="${d}">
 <meta name="robots" content="${robots}">
 <link rel="canonical" href="${esc(url)}">
-${markdown && !/noindex/.test(robots) ? `${markdownLink(markdown === true ? `${url}index.md` : markdown)}\n` : ''}<meta property="og:site_name" content="${esc(cfg.brand)}">
+${markdown && !/noindex/.test(robots) ? `${markdownLink(markdown === true ? `${url}index.md` : markdown)}\n` : ''}<meta name="author" content="${esc(FOUNDER.name)}">
+<link rel="author" href="${FOUNDER.url}">
+<meta property="og:site_name" content="${esc(cfg.brand)}">
 <meta property="og:locale" content="en_GB">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${esc(url)}">
@@ -272,7 +274,7 @@ ${body}
       <p class="foot-motto">One standard. Every certification.</p>
     </div>
     ${foot('Subjects', [['browse/', 'All decks'], ['which-deck/', 'Which deck should I start with?'], ...fams.map((f) => [f.path, f.title])], fams.length > 6 ? ' foot-fams' : '')}
-    ${foot('About', [['method/', 'The science'], ['method/#checks', 'How cards are checked'], ['numbers/', 'The Primer in numbers'], ['formats/', 'Which file for my app?'], ['roadmap/', 'Roadmap: ask for an exam'], ['feed.xml', 'New decks (Atom feed)'], ['daily/archive/', 'Daily ten archive'], ['daily/feed.xml', 'Daily ten (Atom feed)'], ['llms.txt', 'llms.txt'], ['https://github.com/krishnachagti-sudo/conyso-initiatives-deck/issues/new?labels=card-report', 'Report a card']])}
+    ${foot('About', [['about/', 'About the Primer'], ['method/', 'The science'], ['method/#checks', 'How cards are checked'], ['numbers/', 'The Primer in numbers'], ['formats/', 'Which file for my app?'], ['roadmap/', 'Roadmap: ask for an exam'], ['feed.xml', 'New decks (Atom feed)'], ['daily/archive/', 'Daily ten archive'], ['daily/feed.xml', 'Daily ten (Atom feed)'], ['llms.txt', 'llms.txt'], ['https://github.com/krishnachagti-sudo/conyso-initiatives-deck/issues/new?labels=card-report', 'Report a card']])}
   </div>
   <div class="wrap foot-share"><span class="fs-lab">Know someone studying for an exam?</span>${shareRow({ live: true })}</div>
   <div class="wrap foot-rule"><button class="kbd-hint" type="button" data-kbd-open>Press <kbd>?</kbd> for keyboard shortcuts</button><span>Decks licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">CC BY-SA 4.0</a>. Independent: not affiliated with any exam body.</span><span>An initiative by <a href="https://conyso.com/">Conyso</a>.</span></div>

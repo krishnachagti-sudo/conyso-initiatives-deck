@@ -131,7 +131,7 @@ test('preflight: passes a clean build, catches broken links, bad canonicals and 
   for (const [p, f] of [['method', methodPage], ['formats', formatsPage]]) { mkdirSync(join(dist, p)); writeFileSync(join(dist, p, 'index.html'), f(cfg, [deck()])); }
   cpSync('src/assets', join(dist, 'assets'), { recursive: true });
   // Pages and files that page modules and the build write (not under test here).
-  for (const p of ['browse/', 'daily/', 'daily/archive/', 'new/', 'numbers/', 'roadmap/', 'shelf/', 'which-deck/', ...familiesOf([deck()]).map((f) => f.path)]) { mkdirSync(join(dist, p), { recursive: true }); writeFileSync(join(dist, p, 'index.html'), '<link rel="canonical" href="https://conyso.com/decks/">'); }
+  for (const p of ['about/', 'browse/', 'daily/', 'daily/archive/', 'new/', 'numbers/', 'roadmap/', 'shelf/', 'which-deck/', ...familiesOf([deck()]).map((f) => f.path)]) { mkdirSync(join(dist, p), { recursive: true }); writeFileSync(join(dist, p, 'index.html'), '<link rel="canonical" href="https://conyso.com/decks/">'); }
   for (const f of ['feed.xml', 'daily/feed.xml', 'llms.txt', 'site.webmanifest', 'apple-touch-icon.png', 'assets/daily.js', 'assets/search.js']) writeFileSync(join(dist, f), '');
   assert.deepEqual(preflight(dist, cfg), []);
   rmSync(join(dist, 'assets', 'study.js'));
@@ -190,4 +190,21 @@ test('colour tokens: text clears AA on every ground, and surfaces separate, in b
     sep('line', 'surface', 1.4);
     sep('on-accent', 'accent', 5.5);
   }
+});
+
+test('about page names the creator and publisher, and every page carries the author', async () => {
+  const { build } = await import('../src/site/pages/about.mjs');
+  const { pages, urls } = await build({ cfg, decks: [{ ...deck(), meta: { ...deck().meta, status: 'released' } }] });
+  assert.deepEqual(urls, ['about/']);
+  const html = pages['about/'];
+  const g = graph(html);
+  const ap = g.find((n) => n['@type'] === 'AboutPage');
+  assert.equal(ap.author['@id'], FOUNDER_ID);
+  assert.equal(ap.publisher['@id'], CONYSO_ID);
+  assert.equal(ap.mainEntity['@id'], 'https://conyso.com/decks/#organization');
+  assert.ok(html.includes('<meta name="author" content="Krishna Chagti">'));
+  assert.ok(html.includes('<link rel="author" href="https://conyso.com/founder/">'));
+  const org = g.find((n) => n['@id'] === 'https://conyso.com/decks/#organization');
+  assert.ok(org.logo.url.endsWith('/decks/icon-512.png'));
+  assert.equal(g.find((n) => n['@type'] === 'Person').sameAs.length, 9);
 });
